@@ -1,11 +1,14 @@
 build: clean
-  node build/build.js
+	node build/build.js
 
 dev:
-  node build/dev-server.js
+	node build/dev-server.js
 
 clean:
-  rm -rf dist
+	rm -rf dist
 
 dep:
-  npm install
+	npm install
+
+database:
+	firebase deploy --only database
