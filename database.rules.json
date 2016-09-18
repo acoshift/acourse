@@ -1,10 +1,46 @@
 {
   "rules": {
-    ".read": "auth != null",
-    ".write": "auth != null",
-    "user": {
+    ".read": false,
+    ".write": false,
+    "user": { // global user data
+      ".read": true,
       "$user_id": {
+        ".write": "auth.uid === $user_id",
+        "name": {
+          ".validate": "newData.isString()"
+        },
+        "photo": {
+          ".validate": "newData.isString()"
+        },
+        "email": {
+          ".validate": "newData.isString()"
+        }
+      }
+    },
+    "my_course": { // user's courses
+      "$user_id": { // only owner can read/write
+        ".read": "auth.uid === $user_id",
         ".write": "auth.uid === $user_id"
+      }
+    },
+    "course": { // course data
+      ".read": true, // everyone can read
+      "$course_id": { // only owner can write
+        ".write": "!data.exists() || auth.uid === data.child('owner').val() === auth.uid",
+        "title": {
+          ".validate": "newData.isString()"
+        },
+        "description": {
+          ".validate": "newData.isString()"
+        },
+        "owner": {
+          ".validate": "newData.val() === auth.uid"
+        }
+      }
+    },
+    "chat": {
+      "$course_id": {
+        ".read": true
       }
     }
   }

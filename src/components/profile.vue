@@ -3,19 +3,11 @@
     <h3 class="ui header">Profile</h3>
     <div v-if="user" class="ui grid">
       <div class="two column middle aligned row">
-        <div class="four wide right aligned column">
-          Photo:
-        </div>
-        <div class="left aligned column">
+        <div class="three wide column">
           <avatar :src="user.photo" size="small"></avatar>
         </div>
-      </div>
-      <div class="two column row">
-        <div class="four wide right aligned column">
-          Name:
-        </div>
-        <div class="left aligned column">
-          {{ user.name }}
+        <div class="column">
+          <h3>{{ user.name }} <span v-show="user.email">({{ user.email }})</span></h3>
         </div>
       </div>
     </div>

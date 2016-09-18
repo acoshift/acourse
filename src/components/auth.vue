@@ -26,7 +26,7 @@
                 <div class="ui error message">
                   {{ error }}
                 </div>
-                <div class="ui fluid right aligned basic segment">
+                <div class="ui right aligned basic segment">
                   <a href="#" @click="state = 1">Forget password ?</a>
                   /
                   <a href="#" @click="state = 2">Register</a>
@@ -46,7 +46,7 @@
                 <div class="ui fluid basic segment">
                   <a href="#" @click="state = 0"><i class="left chevron icon"></i> Sign In</a>
                 </div>
-                <button class="ui blue fluid submit button" :class="{loading}">Sign In</button>
+                <button class="ui blue fluid submit button" :class="{loading}">Reset password</button>
               </form>
             </div>
           </div>
@@ -84,11 +84,14 @@
   }
 
   .segment {
-    min-width: 600px;
+    width: 500px;
   }
 
   .basic.segment {
-    padding: 0px;
+    padding-top: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+    padding-right: 35px;
   }
 </style>
 

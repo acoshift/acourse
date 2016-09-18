@@ -5,6 +5,12 @@
     </router-link>
     <div class="right menu">
       <div class="item">
+        <router-link to="/home">Home</router-link>
+      </div>
+      <div class="item">
+        <router-link to="/course">My Courses</router-link>
+      </div>
+      <div class="item">
         <router-link to="/profile">Profile</router-link>
       </div>
       <div class="item">

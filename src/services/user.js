@@ -14,7 +14,7 @@ export default {
     return Auth.currentUser
       .first()
       .flatMap((user) =>
-        Firebase.upload(`user/${user.uid}`, file)
+        Firebase.upload(`user/${user.uid}-${Date.now()}`, file)
           // .flatMap((photo) =>
           //   Firebase.put(`user/${user.uid}/photo`, photo.downloadURL)
           //     .map(() => photo.downloadURL)

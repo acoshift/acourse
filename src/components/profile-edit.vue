@@ -12,6 +12,10 @@
         <label>Name</label>
         <input v-model="user.name">
       </div>
+      <div class="field">
+        <label>Email</label>
+        <input v-model="user.email">
+      </div>
       <button class="ui blue submit button" :class="{loading: saving}">Save</button>
       <router-link to="/profile" class="ui red button">Cancel</router-link>
     </form>
@@ -36,7 +40,8 @@
       return {
         user: {
           photo: '',
-          name: ''
+          name: '',
+          email: ''
         },
         uploading: false,
         saving: false
@@ -55,7 +60,6 @@
     },
     methods: {
       submit () {
-        console.log('saving')
         if (this.saving) return
         this.saving = true
         User.updateMe(this.user)

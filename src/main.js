@@ -17,7 +17,9 @@ import {
   Layout,
   Home,
   Profile,
-  ProfileEdit
+  ProfileEdit,
+  Course,
+  CourseEditor
 } from './components'
 
 Vue.use(VueRouter)
@@ -37,7 +39,9 @@ const router = new VueRouter({
       children: [
         { path: '', component: Home },
         { path: '/profile', component: Profile },
-        { path: '/profile/edit', component: ProfileEdit }
+        { path: '/profile/edit', component: ProfileEdit },
+        { path: '/course', component: Course },
+        { path: '/course/:id', component: CourseEditor }
       ],
       beforeEnter: redirectIfNotAuth
     },

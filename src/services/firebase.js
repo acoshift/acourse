@@ -29,6 +29,17 @@ export default {
     return Observable.bindCallback(ref.on.bind(ref))('value')
       .map((snapshot) => snapshot.val())
   },
+  onArrayValue (path) {
+    const ref = firebase.database().ref(path)
+    return Observable.bindCallback(ref.on.bind(ref))('value')
+      .map((snapshot) => {
+        const result = []
+        snapshot.forEach((x) => {
+          result.push(x.val())
+        })
+        return result
+      })
+  },
   upload (path, file) {
     const ref = firebase.storage().ref(path)
     return Observable.fromPromise(ref.put(file))
