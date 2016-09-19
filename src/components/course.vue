@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="ui basic segment" :class="{loading}">
     <div class="ui massive breadcrumb">
       <div class="active section">My Courses</div>
     </div>
@@ -25,10 +25,12 @@
     },
     data () {
       return {
-        courses: null
+        courses: null,
+        loading: false
       }
     },
     created () {
+      this.loading = true
       User.me()
         .map((user) => user.course)
         .flatMap((course) => _.keys(course))
@@ -37,7 +39,11 @@
         .toArray()
         .subscribe(
           (courses) => {
+            this.loading = false
             this.courses = courses
+          },
+          () => {
+            this.loading = false
           }
         )
     }

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="ui basic segment" :class="{loading}">
     <div class="ui massive breadcrumb">
       <router-link v-if="!isMyCourse" class="section" to="/home">Courses</router-link>
       <router-link v-else class="section" to="/course">My Courses</router-link>
@@ -43,7 +43,8 @@
       return {
         courseId: '',
         course: null,
-        isMyCourse: false
+        isMyCourse: false,
+        loading: false
       }
     },
     created () {
@@ -56,6 +57,7 @@
     },
     methods: {
       init () {
+        this.loading = true
         this.courseId = this.$route.params.id
         Observable.forkJoin(
           User.me(),
@@ -63,10 +65,12 @@
         )
           .subscribe(
             ([user, course]) => {
+              this.loading = false
               this.course = course
               if (_.get(user.course, this.courseId)) this.isMyCourse = true
             },
             () => {
+              this.loading = false
               // not found
               this.$router.replace('/home')
             }

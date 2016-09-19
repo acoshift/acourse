@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="ui basic segment" :class="{loading}">
     <div class="ui massive breadcrumb">
       <router-link class="section" to="/course">My Courses</router-link>
       <i class="right chevron icon divider"></i>
@@ -29,7 +29,7 @@
           <label>Description</label>
           <textarea v-model="course.description"></textarea>
         </div>
-        <button class="ui blue button" :class="{loading}">
+        <button class="ui blue button" :class="{loading: saving}">
           <span v-if="isNew">Create</span>
           <span v-else>Save</span>
         </button>
@@ -60,6 +60,7 @@
         },
         courseId: '',
         uploading: false,
+        saving: false,
         loading: false
       }
     },
@@ -73,6 +74,7 @@
             }
           )
       } else {
+        this.loading = true
         this.courseId = this.$route.params.id
         Observable.forkJoin(
           Auth.currentUser.first(),
@@ -80,6 +82,7 @@
         )
           .subscribe(
             ([user, course]) => {
+              this.loading = false
               this.course = course
             }
           )
@@ -103,28 +106,28 @@
           )
       },
       submit () {
-        if (this.loading) return
-        this.loading = true
+        if (this.saving) return
+        this.saving = true
         if (this.isNew) {
           Course.create(this.course)
             .subscribe(
               (courseId) => {
-                this.loading = false
+                this.saving = false
                 this.$router.push(`/course/${courseId}`)
               },
               () => {
-                this.loading = false
+                this.saving = false
               }
             )
         } else {
           Course.save(this.courseId, this.course)
             .subscribe(
               () => {
-                this.loading = false
+                this.saving = false
                 this.$router.push(`/course/${this.courseId}`)
               },
               () => {
-                this.loading = false
+                this.saving = false
               }
             )
         }
