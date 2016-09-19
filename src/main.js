@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import App from './app'
+import moment from 'moment'
 
 import '!style!css!semantic-ui-css/semantic.min.css'
 import '!script!jquery/dist/jquery.min.js'
@@ -19,12 +20,24 @@ import {
   Profile,
   ProfileEdit,
   Course,
-  CourseEditor
+  CourseEditor,
+  CourseView
 } from './components'
 
 Vue.use(VueRouter)
 
 Firebase.init()
+
+Vue.filter('date', (value, input) => {
+  if (!value) return '-'
+  return moment(value).format(input)
+})
+
+Vue.filter('trim', (value, input) => {
+  value = value || ''
+  if (value.length <= input) return value
+  return value.substr(0, input) + '...'
+})
 
 const router = new VueRouter({
   mode: 'history',
@@ -41,7 +54,9 @@ const router = new VueRouter({
         { path: '/profile', component: Profile },
         { path: '/profile/edit', component: ProfileEdit },
         { path: '/course', component: Course },
-        { path: '/course/:id', component: CourseEditor }
+        { path: '/course/new', component: CourseEditor },
+        { path: '/course/:id', component: CourseView },
+        { path: '/course/:id/edit', component: CourseEditor }
       ],
       beforeEnter: redirectIfNotAuth
     },

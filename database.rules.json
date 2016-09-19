@@ -12,7 +12,7 @@
         "photo": {
           ".validate": "newData.isString()"
         },
-        "email": {
+        "aboutMe": {
           ".validate": "newData.isString()"
         }
       }
@@ -33,8 +33,14 @@
         "description": {
           ".validate": "newData.isString()"
         },
+        "photo": {
+          ".validate": "newData.isString()"
+        },
         "owner": {
           ".validate": "newData.val() === auth.uid"
+        },
+        "timestamp": {
+          ".validate": "newData.val() <= now"
         }
       }
     },

@@ -12,6 +12,11 @@
     width: 120px;
     height: 120px;
   }
+
+  img.a-medium {
+    width: 200px;
+    height: 200px;
+  }
 </style>
 
 <script>

@@ -1,7 +1,7 @@
 <template>
   <div class="ui borderless top fixed menu">
     <router-link class="item" to="/home">
-      Acourse
+      <img src="../assets/acourse.svg">
     </router-link>
     <div class="right menu">
       <div class="item">

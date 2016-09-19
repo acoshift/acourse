@@ -1,20 +1,20 @@
 <template>
   <div class="ui segment">
-    <h3 class="ui header">Profile</h3>
-    <div v-if="user" class="ui grid">
-      <div class="two column middle aligned row">
-        <div class="three wide column">
-          <avatar :src="user.photo" size="small"></avatar>
-        </div>
-        <div class="column">
-          <h3>{{ user.name }} <span v-show="user.email">({{ user.email }})</span></h3>
-        </div>
+    <div v-if="user" class="ui center aligned grid" id="profile">
+      <div class="row" style="padding-bottom: 0;">
+        <avatar :src="user.photo" size="medium"></avatar>
+      </div>
+      <div class="row" style="padding-bottom: 0;">
+        <h1>{{ user.name }}</h1>
+      </div>
+      <div class="row">
+        <h3>{{ user.aboutMe }}</h3>
       </div>
     </div>
     <div v-else>
       <div class="ui yellow message">No Profile Data</div>
     </div>
-    <div class="ui basic fluid segment">
+    <div class="ui right aligned basic segment">
       <router-link class="ui green button" to="/profile/edit">Edit</router-link>
     </div>
   </div>

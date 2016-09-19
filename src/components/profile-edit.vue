@@ -13,8 +13,8 @@
         <input v-model="user.name">
       </div>
       <div class="field">
-        <label>Email</label>
-        <input v-model="user.email">
+        <label>About me</label>
+        <input v-model="user.aboutMe" maxlength="40">
       </div>
       <button class="ui blue submit button" :class="{loading: saving}">Save</button>
       <router-link to="/profile" class="ui red button">Cancel</router-link>
@@ -41,7 +41,7 @@
         user: {
           photo: '',
           name: '',
-          email: ''
+          aboutMe: ''
         },
         uploading: false,
         saving: false

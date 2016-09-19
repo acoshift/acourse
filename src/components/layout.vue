@@ -11,7 +11,7 @@
 
 <style scoped>
   #view {
-    padding-top: 58px;
+    padding-top: 80px;
   }
 </style>
 

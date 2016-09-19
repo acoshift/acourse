@@ -3,7 +3,7 @@
     <div class="ui center aligned grid">
       <div class="row">
         <div class="column">
-          Logo
+          <img src="../assets/acourse.svg" class="ui centered image" style="width: 220px; height: 220px">
         </div>
       </div>
       <div class="row">
@@ -12,7 +12,6 @@
       <div class="row">
         <div class="ui center aligned stacked segment">
           <div v-show="state === 0">
-            <h3>Sign In</h3>
             <div class="ui fluid left aligned container">
               <form class="ui form" :class="{error}" @submit.prevent="signIn">
                 <div class="field">
@@ -106,7 +105,7 @@
 
 <style scoped>
   #auth {
-    padding-top: 100px;
+    padding-top: 80px;
   }
 
   .segment {

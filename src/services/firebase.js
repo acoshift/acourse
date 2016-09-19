@@ -53,5 +53,12 @@ export default {
   set (path, data) {
     const ref = firebase.database().ref(path)
     return Observable.fromPromise(ref.set(data))
+  },
+  push (path, data) {
+    const ref = firebase.database().ref(path)
+    return Observable.fromPromise(ref.push(data))
+  },
+  get timestamp () {
+    return firebase.database.ServerValue.TIMESTAMP
   }
 }
