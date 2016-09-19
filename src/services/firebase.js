@@ -18,8 +18,14 @@ export default {
   signInWithEmailAndPassword (email, password) {
     return Observable.fromPromise(firebase.auth().signInWithEmailAndPassword(email, password))
   },
+  signInWithFacebook () {
+    return Observable.fromPromise(firebase.auth().signInWithPopup(new firebase.auth.FacebookAuthProvider()))
+  },
   createUserWithEmailAndPassword (email, password) {
     return Observable.fromPromise(firebase.auth().createUserWithEmailAndPassword(email, password))
+  },
+  sendPasswordResetEmail (email) {
+    return Observable.fromPromise(firebase.auth().sendPasswordResetEmail(email))
   },
   signOut () {
     return Observable.fromPromise(firebase.auth().signOut())

@@ -36,7 +36,7 @@
             </div>
           </div>
           <div v-show="state === 1">
-            <h3>Forgot Password</h3>
+            <h3>Reset Password</h3>
             <div class="ui fluid left aligned container">
               <form class="ui form" :class="{error}" @submit.prevent="forgot">
                 <div class="field">
@@ -46,7 +46,7 @@
                 <div class="ui fluid basic segment">
                   <a href="#" @click="state = 0"><i class="left chevron icon"></i> Sign In</a>
                 </div>
-                <button class="ui blue fluid submit button" :class="{loading}">Reset password</button>
+                <button class="ui blue fluid submit button" :class="{loading}">Reset</button>
               </form>
             </div>
           </div>
@@ -74,6 +74,32 @@
           </div>
         </div>
       </div>
+      <div class="ui horizontal divider">
+        Or
+      </div>
+      <div class="row">
+        <div class="ui center aligned segment">
+          <div class="ui facebook fluid button" @click="facebookSignIn" :class="{loading: facebookLoading}"><i class="facebook f icon"></i>Sign In with Facebook</div>
+          <div class="ui error message" v-if="facebookError">
+            {{ facebookError }}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="ui small modal" ref="successModal">
+      <div class="image content">
+        <div class="ui centered image">
+          <i class="huge icons">
+            <i class="green big thin circle icon"></i>
+            <i class="green check icon"></i>
+          </i>
+        </div>
+      </div>
+      <div class="description" style="text-align: center;">
+        <div class="ui header">Success</div>
+        <p>Please check you email to reset password.</p>
+        <div ref="closeButton" class="ui close button">OK</div>
+      </div>
     </div>
   </div>
 </template>
@@ -93,6 +119,15 @@
     padding-left: 0;
     padding-right: 35px;
   }
+
+  .modal {
+    padding-bottom: 30px;
+  }
+
+  .modal .close.button {
+    width: 180px;
+    margin-top: 10px;
+  }
 </style>
 
 <script>
@@ -106,7 +141,9 @@
         password: '',
         state: 0,
         error: '',
-        loading: false
+        loading: false,
+        facebookError: '',
+        facebookLoading: false
       }
     },
     methods: {
@@ -130,6 +167,20 @@
         if (this.loading) return
         this.loading = true
         this.error = ''
+        Auth.resetPassword(this.email)
+          .subscribe(
+            () => {
+              this.loading = false
+              this.email = ''
+              window.$(this.$refs.successModal)
+                .modal('attach events', this.$refs.closeButton, 'hide')
+                .modal('show')
+            },
+            (err) => {
+              this.loading = false
+              this.error = err.message
+            }
+          )
       },
       signUp () {
         if (this.loading) return
@@ -144,6 +195,22 @@
             (err) => {
               this.loading = false
               this.error = err.message
+            }
+          )
+      },
+      facebookSignIn () {
+        if (this.facebookLoading) return
+        this.facebookLoading = true
+        this.facebookError = ''
+        Auth.signInWithFacebook()
+          .subscribe(
+            () => {
+              this.facebookLoading = false
+              this.gotoHome()
+            },
+            (err) => {
+              this.facebookLoading = false
+              this.facebookError = err.message
             }
           )
       },

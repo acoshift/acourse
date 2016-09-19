@@ -4,11 +4,17 @@ export default {
   signIn (email, password) {
     return Firebase.signInWithEmailAndPassword(email, password)
   },
+  signInWithFacebook () {
+    return Firebase.signInWithFacebook()
+  },
   signUp (email, password) {
     return Firebase.createUserWithEmailAndPassword(email, password)
   },
   signOut () {
     return Firebase.signOut()
+  },
+  resetPassword (email) {
+    return Firebase.sendPasswordResetEmail(email)
   },
   get currentUser () {
     return Firebase.currentUser.filter((x) => x !== undefined)
