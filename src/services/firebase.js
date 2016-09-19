@@ -41,7 +41,9 @@ export default {
       .map((snapshot) => {
         const result = []
         snapshot.forEach((x) => {
-          result.push(x.val())
+          const v = x.val()
+          v.id = x.key
+          result.push(v)
         })
         return result
       })

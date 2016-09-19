@@ -1,9 +1,10 @@
 <template>
   <div>
     <div class="ui massive breadcrumb">
-      <router-link class="section" to="/course">My Courses</router-link>
+      <router-link v-if="!isMyCourse" class="section" to="/home">Courses</router-link>
+      <router-link v-else class="section" to="/course">My Courses</router-link>
       <i class="right chevron icon divider"></i>
-      <div class="active section">{{ courseId }}</div>
+      <div class="active section">{{ course && course.title || courseId }}</div>
     </div>
     <div class="ui segment" v-if="course">
       <div class="ui center aligned grid">
@@ -22,19 +23,27 @@
             <p>{{ course.description }}</p>
           </div>
         </div>
+        <div v-if="isMyCourse" class="right aligned row">
+          <div class="column">
+            <router-link class="ui green button" :to="`/course/${courseId}/edit`">Edit</router-link>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-  import { Course } from '../services'
+  import { User, Course } from '../services'
+  import { Observable } from 'rxjs'
+  import _ from 'lodash'
 
   export default {
     data () {
       return {
         courseId: '',
-        course: null
+        course: null,
+        isMyCourse: false
       }
     },
     created () {
@@ -48,10 +57,14 @@
     methods: {
       init () {
         this.courseId = this.$route.params.id
-        Course.get(this.courseId)
+        Observable.forkJoin(
+          User.me(),
+          Course.get(this.courseId)
+        )
           .subscribe(
-            (course) => {
+            ([user, course]) => {
               this.course = course
+              if (_.get(user.course, this.courseId)) this.isMyCourse = true
             },
             () => {
               // not found

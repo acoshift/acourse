@@ -1,13 +1,22 @@
 <template>
   <div class="ui basic segment">
-    <div v-if="courses" class="ui five stackable cards">
-      <course-card v-for="x in courses"></course-card>
+    <div v-if="courses">
+      <h1 class="text-center">All Courses</h1>
+      <div class="ui four stackable cards">
+        <course-card v-for="x in courses" :course="x"></course-card>
+      </div>
     </div>
     <div v-else>
       <div class="ui message">No course available yet!</div>
     </div>
   </div>
 </template>
+
+<style>
+  h1 {
+    padding-bottom: 20px;
+  }
+</style>
 
 <script>
   import CourseCard from './course-card'
