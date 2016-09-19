@@ -9,6 +9,7 @@ export default {
     return Auth.currentUser
       .first()
       .flatMap((user) => this.get(user.uid))
+      .map((x) => x || {})
   },
   uploadMePhoto (file) {
     return Auth.currentUser

@@ -12,3 +12,6 @@ dep:
 
 database:
 	firebase deploy --only database
+
+deploy: build
+	firebase deploy
