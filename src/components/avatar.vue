@@ -9,6 +9,11 @@
     display: inline-block !important;
   }
 
+  img.a-tiny {
+    width: 32px;
+    height: 32px;
+  }
+
   img.a-mini {
     width: 64px;
     height: 64px;

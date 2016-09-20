@@ -49,6 +49,13 @@
         </div>
       </div>
     </div>
+    <div class="ui segment">
+      <h3 class="ui header">Students</h3>
+      <div v-for="x in students">
+        <avatar :src="x.photo" size="tiny"></avatar>
+        {{ x.name }}
+      </div>
+    </div>
   </div>
 </template>
 
@@ -84,7 +91,8 @@
         isOwn: false,
         loading: false,
         isApply: false,
-        applying: false
+        applying: false,
+        students: null
       }
     },
     created () {
@@ -111,6 +119,20 @@
               this.course = course
               if (course.owner.id === user.uid) this.isOwn = true
               this.isApply = !!_.get(course.student, user.uid)
+
+              Observable.of(course.student)
+                .map(_.keys)
+                .flatMap(Observable.from)
+                .flatMap((id) => User.get(id).first(), (id, user) => ({id, ...user}))
+                .toArray()
+                .subscribe(
+                  (students) => {
+                    this.students = students
+                  },
+                  () => {
+                    this.students = null
+                  }
+                )
             },
             () => {
               this.loading = false

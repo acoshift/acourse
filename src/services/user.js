@@ -13,18 +13,15 @@ export default {
   uploadMePhoto (file) {
     return Auth.currentUser
       .first()
-      .flatMap((user) =>
-        Firebase.upload(`user/${user.uid}-${Date.now()}`, file)
-          // .flatMap((photo) =>
-          //   Firebase.put(`user/${user.uid}/photo`, photo.downloadURL)
-          //     .map(() => photo.downloadURL)
-          // )
-      )
+      .flatMap((user) => Firebase.upload(`user/${user.uid}-${Date.now()}`, file))
+  },
+  update (id, data) {
+    return Firebase.update(`user/${id}`, data)
   },
   updateMe (data) {
     return Auth.currentUser
       .first()
-      .flatMap((user) => Firebase.update(`user/${user.uid}`, data))
+      .flatMap((user) => this.update(user.uid, data))
   },
   addCourseMe (courseId) {
     return Auth.currentUser
