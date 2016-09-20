@@ -52,8 +52,10 @@
     <div class="ui segment">
       <h3 class="ui header">Students</h3>
       <div v-for="x in students">
-        <avatar :src="x.photo" size="tiny"></avatar>
-        {{ x.name }}
+        <router-link :to="`/user/${x.id}`">
+          <avatar :src="x.photo" size="tiny"></avatar>
+          {{ x.name }}
+        </router-link>
       </div>
     </div>
   </div>
