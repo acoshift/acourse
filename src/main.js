@@ -19,7 +19,6 @@ import {
   Home,
   Profile,
   ProfileEdit,
-  Course,
   CourseEditor,
   CourseView,
   UserView
@@ -54,7 +53,6 @@ const router = new VueRouter({
         { path: '', component: Home },
         { path: '/profile', component: Profile },
         { path: '/profile/edit', component: ProfileEdit },
-        { path: '/course', component: Course },
         { path: '/course/new', component: CourseEditor },
         { path: '/course/:id', component: CourseView },
         { path: '/course/:id/edit', component: CourseEditor },

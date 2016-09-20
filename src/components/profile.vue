@@ -1,33 +1,38 @@
 <template>
-  <div class="ui segment" :class="{loading}">
-    <div v-if="user" class="ui center aligned grid" id="profile">
-      <div class="row" style="padding-bottom: 0;">
-        <avatar :src="user.photo" size="medium"></avatar>
-      </div>
-      <div class="row" style="padding-bottom: 0;">
-        <h1>{{ user.name }}</h1>
-      </div>
-      <div class="row">
-        <h3>{{ user.aboutMe }}</h3>
+  <div>
+    <div class="ui segment" :class="{loading}">
+      <user-profile :user="user" v-show="!loading"></user-profile>
+      <div class="ui right aligned basic segment">
+        <router-link class="ui green button" to="/profile/edit">Edit</router-link>
       </div>
     </div>
-    <div v-if="!user && !loading">
-      <div class="ui yellow message">No Profile Data</div>
-    </div>
-    <div class="ui right aligned basic segment">
-      <router-link class="ui green button" to="/profile/edit">Edit</router-link>
+    <div class="ui segment">
+      <h3 class="ui header">My Courses</h3>
+      <router-link class="ui blue button" to="/course/new">Create new course</router-link>
+      <div class="four stackable cards" v-if="user && user.courses">
+        <course-card v-for="x in user.courses" :course="x"></course-card>
+      </div>
     </div>
   </div>
 </template>
 
+<style>
+  .cards {
+    padding-top: 30px;
+  }
+</style>
+
 <script>
-  import { User } from '../services'
-  import Avatar from './avatar'
+  import { User, Course } from '../services'
+  import UserProfile from './user-profile'
+  import CourseCard from './course-card'
   import _ from 'lodash'
+  import { Observable } from 'rxjs'
 
   export default {
     components: {
-      Avatar
+      UserProfile,
+      CourseCard
     },
     data () {
       return {
@@ -38,6 +43,15 @@
     created () {
       this.loading = true
       User.me()
+        .flatMap((user) =>
+          Observable.of(user.course)
+            .map(_.keys)
+            .flatMap(Observable.from)
+            .flatMap(Course.get, (id, course) => ({id, ...course}))
+            .first()
+            .toArray(),
+          (user, courses) => ({...user, courses})
+        )
         .subscribe(
           (user) => {
             this.loading = false

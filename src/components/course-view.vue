@@ -1,8 +1,7 @@
 <template>
   <div class="ui basic segment" :class="{loading}">
     <div class="ui massive breadcrumb">
-      <router-link v-if="!isMyCourse" class="section" to="/home">Courses</router-link>
-      <router-link v-else class="section" to="/course">My Courses</router-link>
+      <router-link class="section" to="/home">Courses</router-link>
       <i class="right chevron icon divider"></i>
       <div class="active section">{{ course && course.title || courseId }}</div>
     </div>
@@ -30,12 +29,17 @@
             </router-link>
           </div>
         </div>
+        <div class="row" v-if="!isApply && !isOwn">
+          <div class="column">
+            <div class="ui green join button" :class="{loading: applying}" @click="apply">Apply</div>
+          </div>
+        </div>
         <div class="row">
           <div class="column">
             <p class="description">{{ course.description }}</p>
           </div>
         </div>
-        <div v-if="isMyCourse" class="right aligned row">
+        <div v-if="isOwn" class="right aligned row">
           <div class="column">
             <router-link class="ui green button" :to="`/course/${courseId}/edit`">Edit</router-link>
           </div>
@@ -49,6 +53,10 @@
   p.description {
     text-align: left;
     white-space: pre-line;
+  }
+
+  .join.button {
+    width: 180px;
   }
 </style>
 
@@ -66,8 +74,10 @@
       return {
         courseId: '',
         course: null,
-        isMyCourse: false,
-        loading: false
+        isOwn: false,
+        loading: false,
+        isApply: false,
+        applying: false
       }
     },
     created () {
@@ -92,7 +102,7 @@
             ([user, course]) => {
               this.loading = false
               this.course = course
-              if (_.get(user.course, this.courseId)) this.isMyCourse = true
+              if (_.get(user.course, this.courseId)) this.isOwn = true
             },
             () => {
               this.loading = false
@@ -100,6 +110,10 @@
               this.$router.replace('/home')
             }
           )
+      },
+      apply () {
+        if (this.applying) return
+        this.applying = true
       }
     }
   }
