@@ -77,8 +77,7 @@
         .map((user) => user.course)
         .map(_.keys)
         .flatMap(Observable.from)
-        .flatMap(Course.get, (id, course) => ({id, ...course}))
-        .first()
+        .flatMap((id) => Course.get(id).first(), (id, course) => ({id, ...course}))
         .toArray()
         .subscribe(
           (courses) => {
