@@ -18,6 +18,18 @@
             <h1>{{ course.title }}</h1>
           </div>
         </div>
+        <div class="two column middle aligned row">
+          <div class="right aligned column">
+            <router-link :to="`/user/${course.owner.id}`">
+              <avatar :src="course.owner.photo" size="mini"></avatar>
+            </router-link>
+          </div>
+          <div class="left aligned column">
+            <router-link :to="`/user/${course.owner.id}`">
+              <h3>{{ course.owner.name }}</h3>
+            </router-link>
+          </div>
+        </div>
         <div class="row">
           <div class="column">
             <p class="description">{{ course.description }}</p>
@@ -44,8 +56,12 @@
   import { User, Course } from '../services'
   import { Observable } from 'rxjs'
   import _ from 'lodash'
+  import Avatar from './avatar'
 
   export default {
+    components: {
+      Avatar
+    },
     data () {
       return {
         courseId: '',
@@ -70,6 +86,7 @@
         Observable.combineLatest(
           User.me().first(),
           Course.get(this.courseId)
+            .flatMap((course) => User.get(course.owner), (course, owner) => ({...course, owner: {id: course.owner, ...owner}}))
         )
           .subscribe(
             ([user, course]) => {

@@ -6,6 +6,12 @@
   img {
     object-fit: cover;
     object-position: top;
+    display: inline-block !important;
+  }
+
+  img.a-mini {
+    width: 64px;
+    height: 64px;
   }
 
   img.a-small {
