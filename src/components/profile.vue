@@ -9,13 +9,13 @@
     <div class="ui segment">
       <h3 class="ui header">My Own Courses</h3>
       <router-link class="ui blue button" to="/course/new">Create new course</router-link>
-      <div class="four stackable cards" v-if="ownCourses">
+      <div class="ui four stackable cards" v-if="ownCourses">
         <course-card v-for="x in ownCourses" :course="x"></course-card>
       </div>
     </div>
     <div class="ui segment" v-if="courses">
       <h3 class="ui header">My Courses</h3>
-      <div class="four stackable cards">
+      <div class="ui four stackable cards">
         <course-card v-for="x in courses" :course="x"></course-card>
       </div>
     </div>
