@@ -9,6 +9,7 @@ export default {
   },
   get (id) {
     return Firebase.onValue(`course/${id}`)
+      .map((course) => ({id, ...course}))
   },
   create (data) {
     data.timestamp = Firebase.timestamp

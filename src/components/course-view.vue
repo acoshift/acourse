@@ -113,7 +113,7 @@
         Observable.combineLatest(
           Auth.currentUser.first(),
           Course.get(this.courseId)
-            .flatMap((course) => User.get(course.owner), (course, owner) => ({...course, owner: {id: course.owner, ...owner}}))
+            .flatMap((course) => User.get(course.owner), (course, owner) => ({...course, owner}))
         )
           .subscribe(
             ([user, course]) => {
@@ -125,7 +125,7 @@
               Observable.of(course.student)
                 .map(_.keys)
                 .flatMap(Observable.from)
-                .flatMap((id) => User.get(id).first(), (id, user) => ({id, ...user}))
+                .flatMap((id) => User.get(id).first())
                 .toArray()
                 .subscribe(
                   (students) => {

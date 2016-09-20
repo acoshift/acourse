@@ -22,6 +22,10 @@
         }
       }
     },
+    "instructor": {
+      ".read": true,
+      ".write": false
+    },
     "course": { // course data
       ".read": true, // everyone can read
       ".indexOn": ["owner", "timestamp"],
