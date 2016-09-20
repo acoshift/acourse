@@ -1,5 +1,6 @@
 import firebase from 'firebase'
 import { Observable, BehaviorSubject } from 'rxjs'
+import _ from 'lodash'
 
 export default {
   init () {
@@ -33,16 +34,18 @@ export default {
   signOut () {
     return Observable.fromPromise(firebase.auth().signOut())
   },
-  onValue (path) {
+  onValue (ref) {
     return Observable.create((o) => {
-      firebase.database().ref(path).on('value', (snapshot) => {
+      ref = _.isString(ref) ? this.ref(ref) : ref
+      ref.on('value', (snapshot) => {
         o.next(snapshot.val())
       })
     })
   },
-  onArrayValue (path) {
+  onArrayValue (ref) {
     return Observable.create((o) => {
-      firebase.database().ref(path).on('value', (snapshots) => {
+      ref = _.isString(ref) ? this.ref(ref) : ref
+      ref.on('value', (snapshots) => {
         const result = []
         snapshots.forEach((snapshot) => {
           result.push({
@@ -76,5 +79,8 @@ export default {
   },
   get timestamp () {
     return firebase.database.ServerValue.TIMESTAMP
+  },
+  ref (path) {
+    return firebase.database().ref(path)
   }
 }

@@ -34,6 +34,9 @@
             <div class="ui green join button" :class="{loading: applying}" @click="apply">Apply</div>
           </div>
         </div>
+        <div class="row" v-if="isApply">
+          <div class="ui green message">You already apply this course</div>
+        </div>
         <div class="row">
           <div class="column">
             <p class="description">{{ course.description }}</p>
@@ -61,7 +64,7 @@
 </style>
 
 <script>
-  import { User, Course } from '../services'
+  import { Auth, User, Course } from '../services'
   import { Observable } from 'rxjs'
   import _ from 'lodash'
   import Avatar from './avatar'
@@ -94,7 +97,7 @@
         this.courseId = this.$route.params.id
 
         Observable.combineLatest(
-          User.me().first(),
+          Auth.currentUser.first(),
           Course.get(this.courseId)
             .flatMap((course) => User.get(course.owner), (course, owner) => ({...course, owner: {id: course.owner, ...owner}}))
         )
@@ -102,7 +105,8 @@
             ([user, course]) => {
               this.loading = false
               this.course = course
-              if (_.get(user.course, this.courseId)) this.isOwn = true
+              if (course.owner.id === user.uid) this.isOwn = true
+              this.isApply = !!_.get(course.student, user.uid)
             },
             () => {
               this.loading = false
@@ -114,6 +118,14 @@
       apply () {
         if (this.applying) return
         this.applying = true
+        Course.join(this.courseId).subscribe(
+          () => {
+            this.applying = false
+          },
+          () => {
+            this.applying = false
+          }
+        )
       }
     }
   }

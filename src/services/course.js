@@ -1,5 +1,5 @@
 import Firebase from './firebase'
-import User from './user'
+// import User from './user'
 import Auth from './auth'
 
 export default {
@@ -13,20 +13,20 @@ export default {
     data.timestamp = Firebase.timestamp
     return Firebase.push('course', data)
       .map((snapshot) => snapshot.key)
-      .flatMap((key) =>
-        User.me()
-          .first()
-          .flatMap((user) =>
-            User.updateMe({
-              ...user,
-              course: {
-                ...user.course,
-                [key]: true
-              }
-            })
-          )
-          .map(() => key)
-      )
+      // .flatMap((key) =>
+      //   User.me()
+      //     .first()
+      //     .flatMap((user) =>
+      //       User.updateMe({
+      //         ...user,
+      //         course: {
+      //           ...user.course,
+      //           [key]: true
+      //         }
+      //       })
+      //     )
+      //     .map(() => key)
+      // )
   },
   save (id, data) {
     return Firebase.update(`course/${id}`, data)
@@ -45,5 +45,13 @@ export default {
     return Auth.currentUser
       .first()
       .flatMap((user) => Firebase.set(`course/${id}/student/${user.uid}`, true))
+  },
+  ownBy (userId) {
+    const ref = Firebase.ref('course').orderByChild('owner').equalTo(userId)
+    return Firebase.onArrayValue(ref)
+  },
+  joinedBy (userId) {
+    const ref = Firebase.ref('course').orderByChild(`student/${userId}`).equalTo(true)
+    return Firebase.onArrayValue(ref)
   }
 }

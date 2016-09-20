@@ -17,14 +17,9 @@
         }
       }
     },
-    "my_course": { // user's courses
-      "$user_id": { // only owner can read/write
-        ".read": "auth.uid === $user_id",
-        ".write": "auth.uid === $user_id"
-      }
-    },
     "course": { // course data
       ".read": true, // everyone can read
+      ".indexOn": ["owner", "student", "timestamp"],
       "$course_id": { // only owner can write
         ".write": "!data.exists() || auth.uid === data.child('owner').val()",
         "title": {
