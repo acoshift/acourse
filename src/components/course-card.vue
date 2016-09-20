@@ -19,8 +19,8 @@
           0
         </span>
         <span>
-          <i class="heart outline link icon"></i>
-          0
+          <i class="heart link icon" @click="fav" :class="{red: isFav, outline: !isFav}"></i>
+          {{ favorites }}
         </span>
       </div>
     </div>
@@ -36,7 +36,46 @@
 </style>
 
 <script>
+  import { Auth, Course } from '../services'
+  import _ from 'lodash'
+
   export default {
-    props: ['course']
+    props: ['course'],
+    data () {
+      return {
+        isFav: false
+      }
+    },
+    created () {
+      this.init()
+    },
+    computed: {
+      favorites () {
+        return _.keys(this.course.favorite).length
+      }
+    },
+    watch: {
+      course () {
+        this.init()
+      }
+    },
+    methods: {
+      init () {
+        Auth.currentUser
+          .first()
+          .subscribe(
+            (user) => {
+              this.isFav = !!_.get(this.course.favorite, user.uid)
+            }
+          )
+      },
+      fav () {
+        if (this.isFav) {
+          Course.unfavorite(this.course.id).subscribe()
+        } else {
+          Course.favorite(this.course.id).subscribe()
+        }
+      }
+    }
   }
 </script>

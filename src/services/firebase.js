@@ -70,6 +70,10 @@ export default {
     const ref = firebase.database().ref(path)
     return Observable.fromPromise(ref.push(data))
   },
+  remove (path) {
+    const ref = firebase.database().ref(path)
+    return Observable.fromPromise(ref.remove())
+  },
   get timestamp () {
     return firebase.database.ServerValue.TIMESTAMP
   }

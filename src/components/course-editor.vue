@@ -47,6 +47,7 @@
 <script>
   import { Auth, User, Course } from '../services'
   import { Observable } from 'rxjs'
+  import _ from 'lodash'
 
   export default {
     data () {
@@ -83,7 +84,7 @@
           .subscribe(
             ([user, course]) => {
               this.loading = false
-              this.course = course
+              this.course = _.pick(course, _.keys(this.course))
             }
           )
       }

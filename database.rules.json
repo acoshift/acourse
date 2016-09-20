@@ -41,6 +41,11 @@
         },
         "timestamp": {
           ".validate": "newData.val() <= now"
+        },
+        "favorite": {
+          "$user_id": {
+            ".write": "auth.uid === $user_id"
+          }
         }
       }
     },

@@ -1,5 +1,6 @@
 import Firebase from './firebase'
 import User from './user'
+import Auth from './auth'
 
 export default {
   list () {
@@ -28,6 +29,16 @@ export default {
       )
   },
   save (id, data) {
-    return Firebase.set(`course/${id}`, data)
+    return Firebase.update(`course/${id}`, data)
+  },
+  favorite (id) {
+    return Auth.currentUser
+      .first()
+      .flatMap((user) => Firebase.set(`course/${id}/favorite/${user.uid}`, true))
+  },
+  unfavorite (id) {
+    return Auth.currentUser
+      .first()
+      .flatMap((user) => Firebase.remove(`course/${id}/favorite/${user.uid}`))
   }
 }
