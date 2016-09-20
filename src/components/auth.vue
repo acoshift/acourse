@@ -107,11 +107,21 @@
 
 <style scoped>
   #auth {
-    padding-top: 80px;
+    padding-top: 10px;
   }
 
   .segment {
-    width: 500px;
+    min-width: 320px;
+  }
+
+  @media only screen and (min-width: 500px) {
+    #auth {
+      padding-top: 80px;
+    }
+
+    .segment {
+      min-width: 500px;
+    }
   }
 
   .basic.segment {
