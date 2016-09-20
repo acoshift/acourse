@@ -9,11 +9,11 @@ export default {
   },
   signInWithFacebook () {
     return Firebase.signInWithFacebook()
-      .flatMap((auth) => this.saveUserProfile(auth), (x) => x)
+      .flatMap((res) => this.saveUserProfile(res.user), (x) => x)
   },
   signInWithGoogle () {
     return Firebase.signInWithGoogle()
-      .flatMap((auth) => this.saveUserProfile(auth), (x) => x)
+      .flatMap((res) => this.saveUserProfile(res.user), (x) => x)
   },
   signUp (email, password) {
     return Firebase.createUserWithEmailAndPassword(email, password)
