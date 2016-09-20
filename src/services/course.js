@@ -40,5 +40,10 @@ export default {
     return Auth.currentUser
       .first()
       .flatMap((user) => Firebase.remove(`course/${id}/favorite/${user.uid}`))
+  },
+  join (id) {
+    return Auth.currentUser
+      .first()
+      .flatMap((user) => Firebase.set(`course/${id}/student/${user.uid}`, true))
   }
 }

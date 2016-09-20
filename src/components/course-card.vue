@@ -16,7 +16,7 @@
       <div>
         <span class="right floated">
           <i class="user icon"></i>
-          0
+          {{ students }}
         </span>
         <span>
           <i class="heart link icon" @click="fav" :class="{red: isFav, outline: !isFav}"></i>
@@ -52,6 +52,9 @@
     computed: {
       favorites () {
         return _.keys(this.course.favorite).length
+      },
+      students () {
+        return _.keys(this.course.student).length
       }
     },
     watch: {
