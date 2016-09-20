@@ -1,6 +1,20 @@
 <template>
-  <div class="ui segment" :class="{loading}">
-    <user-profile :user="user" v-show="!loading"></user-profile>
+  <div>
+    <div class="ui segment" :class="{loading}">
+      <user-profile :user="user" v-show="!loading"></user-profile>
+    </div>
+    <div class="ui segment" v-if="user && ownCourses">
+      <h3 class="ui header">Courses own by {{ user.name }}</h3>
+      <div class="four stackable cards" v-if="ownCourses">
+        <course-card v-for="x in ownCourses" :course="x"></course-card>
+      </div>
+    </div>
+    <div class="ui segment" v-if="user && courses">
+      <h3 class="ui header">My Courses</h3>
+      <div class="four stackable cards">
+        <course-card v-for="x in courses" :course="x"></course-card>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -16,7 +30,9 @@
     data () {
       return {
         user: null,
-        loading: false
+        loading: false,
+        ownCourses: null,
+        courses: null
       }
     },
     created () {

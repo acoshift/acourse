@@ -25,5 +25,10 @@ export default {
     return Auth.currentUser
       .first()
       .flatMap((user) => Firebase.update(`user/${user.uid}`, data))
+  },
+  addCourseMe (courseId) {
+    return Auth.currentUser
+      .first()
+      .flatMap((user) => Firebase.set(`user/${user.uid}/course/${courseId}`, true))
   }
 }

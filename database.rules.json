@@ -14,12 +14,17 @@
         },
         "aboutMe": {
           ".validate": "newData.isString()"
+        },
+        "course": {
+          "$course_id": {
+            ".validate": "newData.val() === true"
+          }
         }
       }
     },
     "course": { // course data
       ".read": true, // everyone can read
-      ".indexOn": ["owner", "student", "timestamp"],
+      ".indexOn": ["owner", "timestamp"],
       "$course_id": { // only owner can write
         ".write": "!data.exists() || auth.uid === data.child('owner').val()",
         "title": {

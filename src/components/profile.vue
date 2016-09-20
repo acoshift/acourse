@@ -55,19 +55,10 @@
     created () {
       this.loading = true
       User.me()
-        .flatMap((user) =>
-          Observable.of(user.course)
-            .map(_.keys)
-            .flatMap(Observable.from)
-            .flatMap(Course.get, (id, course) => ({id, ...course}))
-            .first()
-            .toArray(),
-          (user, courses) => ({...user, courses})
-        )
         .subscribe(
           (user) => {
             this.loading = false
-            this.user = !_.isEmpty(user) ? user : null
+            this.user = user.name && user.photor ? user : null
           },
           () => {
             this.loading = false
@@ -81,16 +72,19 @@
             this.ownCourses = _.isEmpty(courses) ? null : courses
           }
         )
-      Auth.currentUser
+      User.me()
         .first()
-        .flatMap((user) => Course.joinedBy(user.uid))
+        .map((user) => user.course)
+        .map(_.keys)
+        .flatMap(Observable.from)
+        .flatMap(Course.get, (id, course) => ({id, ...course}))
+        .first()
+        .toArray()
         .subscribe(
           (courses) => {
             this.courses = courses
           }
         )
-    },
-    methods: {
     }
   }
 </script>

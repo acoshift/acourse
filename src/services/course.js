@@ -1,6 +1,7 @@
 import Firebase from './firebase'
-// import User from './user'
+import User from './user'
 import Auth from './auth'
+import { Observable } from 'rxjs'
 
 export default {
   list () {
@@ -44,14 +45,15 @@ export default {
   join (id) {
     return Auth.currentUser
       .first()
-      .flatMap((user) => Firebase.set(`course/${id}/student/${user.uid}`, true))
+      .flatMap((user) =>
+        Observable.forkJoin(
+          Firebase.set(`course/${id}/student/${user.uid}`, true),
+          User.addCourseMe(id)
+        )
+      )
   },
   ownBy (userId) {
     const ref = Firebase.ref('course').orderByChild('owner').equalTo(userId)
-    return Firebase.onArrayValue(ref)
-  },
-  joinedBy (userId) {
-    const ref = Firebase.ref('course').orderByChild('student').startAt(userId)
     return Firebase.onArrayValue(ref)
   }
 }
