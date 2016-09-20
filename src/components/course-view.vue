@@ -12,12 +12,12 @@
             <img :src="course.photo" class="ui centered big image">
           </div>
         </div>
-        <div class="row">
+        <div class="row" style="padding-top: 0;">
           <div class="column">
             <h1>{{ course.title }}</h1>
           </div>
         </div>
-        <div class="two column middle aligned row">
+        <div class="two column middle aligned row" style="margin-top: -30px !important;">
           <div class="right aligned column" style="padding-right: 2px;">
             <router-link :to="`/user/${course.owner.id}`">
               <avatar :src="course.owner.photo" size="mini"></avatar>
