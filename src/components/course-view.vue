@@ -44,7 +44,7 @@
         </div>
         <div v-if="isOwn" class="right aligned row">
           <div class="column">
-            <router-link class="ui green button" :to="`/course/${courseId}/edit`">Edit</router-link>
+            <router-link class="ui green edit button" :to="`/course/${courseId}/edit`">Edit</router-link>
           </div>
         </div>
       </div>
@@ -60,6 +60,10 @@
 
   .join.button {
     width: 180px;
+  }
+
+  .edit.button {
+    width: 150px;
   }
 </style>
 
