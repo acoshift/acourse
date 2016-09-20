@@ -35,7 +35,10 @@
           </div>
         </div>
         <div class="row" v-if="isApply">
-          <div class="ui green message">You already apply this course</div>
+          <div class="ui green message">You already apply this course.</div>
+        </div>
+        <div v-if="isApply || isOwn">
+          <router-link class="ui yellow button" :to="`/course/${courseId}/chat`">Chat room</router-link>
         </div>
         <div class="row">
           <div class="column">

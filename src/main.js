@@ -21,7 +21,8 @@ import {
   ProfileEdit,
   CourseEditor,
   CourseView,
-  UserView
+  UserView,
+  CourseChat
 } from './components'
 
 Vue.use(VueRouter)
@@ -31,6 +32,11 @@ Firebase.init()
 Vue.filter('date', (value, input) => {
   if (!value) return '-'
   return moment(value).format(input)
+})
+
+Vue.filter('fromNow', (value) => {
+  if (!value) return '-'
+  return moment(value).fromNow()
 })
 
 Vue.filter('trim', (value, input) => {
@@ -55,6 +61,7 @@ const router = new VueRouter({
         { path: '/profile/edit', component: ProfileEdit },
         { path: '/course/new', component: CourseEditor },
         { path: '/course/:id', component: CourseView },
+        { path: '/course/:id/chat', component: CourseChat },
         { path: '/course/:id/edit', component: CourseEditor },
         { path: '/user/:id', component: UserView }
       ],

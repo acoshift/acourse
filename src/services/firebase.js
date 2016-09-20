@@ -42,6 +42,14 @@ export default {
       })
     })
   },
+  onChildAdded (ref) {
+    return Observable.create((o) => {
+      ref = _.isString(ref) ? this.ref(ref) : ref
+      ref.on('child_added', (snapshot) => {
+        o.next(snapshot.val())
+      })
+    })
+  },
   onArrayValue (ref) {
     return Observable.create((o) => {
       ref = _.isString(ref) ? this.ref(ref) : ref
