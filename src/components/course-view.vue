@@ -20,7 +20,7 @@
         </div>
         <div class="row">
           <div class="column">
-            <p>{{ course.description }}</p>
+            <p class="description">{{ course.description }}</p>
           </div>
         </div>
         <div v-if="isMyCourse" class="right aligned row">
@@ -32,6 +32,13 @@
     </div>
   </div>
 </template>
+
+<style>
+  p.description {
+    text-align: left;
+    white-space: pre-line;
+  }
+</style>
 
 <script>
   import { User, Course } from '../services'

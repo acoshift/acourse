@@ -28,6 +28,5 @@ export default {
   },
   save (id, data) {
     return Firebase.set(`course/${id}`, data)
-      .map((snapshot) => snapshot.key)
   }
 }

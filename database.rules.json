@@ -26,7 +26,7 @@
     "course": { // course data
       ".read": true, // everyone can read
       "$course_id": { // only owner can write
-        ".write": "!data.exists() || auth.uid === data.child('owner').val() === auth.uid",
+        ".write": "!data.exists() || auth.uid === data.child('owner').val()",
         "title": {
           ".validate": "newData.isString()"
         },
