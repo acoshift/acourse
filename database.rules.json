@@ -30,7 +30,7 @@
       ".read": true, // everyone can read
       ".indexOn": ["owner", "timestamp"],
       "$course_id": { // only owner can write
-        ".write": "!data.exists() || auth.uid === data.child('owner').val()",
+        ".write": "(!data.exists() || auth.uid === data.child('owner').val()) && (root.child('instructor/' + auth.uid).val() === true)",
         "title": {
           ".validate": "newData.isString()"
         },

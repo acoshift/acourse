@@ -6,7 +6,7 @@
         <router-link class="ui green edit button" to="/profile/edit">Edit</router-link>
       </div>
     </div>
-    <div class="ui segment">
+    <div class="ui segment" v-if="user && user.instructor">
       <h3 class="ui header">My Own Courses</h3>
       <router-link class="ui blue button" to="/course/new">Create new course</router-link>
       <div class="ui four stackable cards" v-if="ownCourses">
