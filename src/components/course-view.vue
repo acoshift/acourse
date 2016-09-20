@@ -66,7 +66,8 @@
       init () {
         this.loading = true
         this.courseId = this.$route.params.id
-        Observable.forkJoin(
+
+        Observable.combineLatest(
           User.me(),
           Course.get(this.courseId)
         )

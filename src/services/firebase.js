@@ -31,22 +31,25 @@ export default {
     return Observable.fromPromise(firebase.auth().signOut())
   },
   onValue (path) {
-    const ref = firebase.database().ref(path)
-    return Observable.bindCallback(ref.on.bind(ref))('value')
-      .map((snapshot) => snapshot.val())
+    return Observable.create((o) => {
+      firebase.database().ref(path).on('value', (snapshot) => {
+        o.next(snapshot.val())
+      })
+    })
   },
   onArrayValue (path) {
-    const ref = firebase.database().ref(path)
-    return Observable.bindCallback(ref.on.bind(ref))('value')
-      .map((snapshot) => {
+    return Observable.create((o) => {
+      firebase.database().ref(path).on('value', (snapshots) => {
         const result = []
-        snapshot.forEach((x) => {
-          const v = x.val()
-          v.id = x.key
-          result.push(v)
+        snapshots.forEach((snapshot) => {
+          result.push({
+            id: snapshot.key,
+            ...snapshot.val()
+          })
         })
-        return result
+        o.next(result)
       })
+    })
   },
   upload (path, file) {
     const ref = firebase.storage().ref(path)

@@ -78,7 +78,7 @@
         this.courseId = this.$route.params.id
         Observable.forkJoin(
           Auth.currentUser.first(),
-          Course.get(this.$route.params.id)
+          Course.get(this.$route.params.id).first()
         )
           .subscribe(
             ([user, course]) => {
