@@ -68,7 +68,7 @@
         this.courseId = this.$route.params.id
 
         Observable.combineLatest(
-          User.me(),
+          User.me().first(),
           Course.get(this.courseId)
         )
           .subscribe(

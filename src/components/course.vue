@@ -32,10 +32,12 @@
     created () {
       this.loading = true
       User.me()
+        .first()
         .map((user) => user.course)
         .flatMap((course) => _.keys(course))
         .flatMap((courses) => _.isArray(courses) ? Observable.from(courses) : Observable.of(courses))
         .flatMap(Course.get, (id, course) => ({id, ...course}))
+        .first()
         .toArray()
         .subscribe(
           (courses) => {

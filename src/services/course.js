@@ -14,6 +14,7 @@ export default {
       .map((snapshot) => snapshot.key)
       .flatMap((key) =>
         User.me()
+          .first()
           .flatMap((user) =>
             User.updateMe({
               ...user,

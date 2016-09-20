@@ -7,7 +7,6 @@ export default {
   },
   me () {
     return Auth.currentUser
-      .first()
       .flatMap((user) => this.get(user.uid))
       .map((x) => x || {})
   },

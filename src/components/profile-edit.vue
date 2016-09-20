@@ -49,6 +49,7 @@
     },
     created () {
       User.me()
+        .first()
         .subscribe(
           (user) => {
             this.user = {

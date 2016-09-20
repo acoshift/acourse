@@ -1,5 +1,5 @@
 <template>
-  <div class="ui segment">
+  <div class="ui segment" :class="{loading}">
     <div v-if="user" class="ui center aligned grid" id="profile">
       <div class="row" style="padding-bottom: 0;">
         <avatar :src="user.photo" size="medium"></avatar>
@@ -11,7 +11,7 @@
         <h3>{{ user.aboutMe }}</h3>
       </div>
     </div>
-    <div v-else>
+    <div v-if="!user && !loading">
       <div class="ui yellow message">No Profile Data</div>
     </div>
     <div class="ui right aligned basic segment">
@@ -23,6 +23,7 @@
 <script>
   import { User } from '../services'
   import Avatar from './avatar'
+  import _ from 'lodash'
 
   export default {
     components: {
@@ -30,14 +31,20 @@
     },
     data () {
       return {
-        user: null
+        user: null,
+        loading: false
       }
     },
     created () {
+      this.loading = true
       User.me()
         .subscribe(
           (user) => {
-            this.user = user
+            this.loading = false
+            this.user = !_.isEmpty(user) ? user : null
+          },
+          () => {
+            this.loading = false
           }
         )
     },
