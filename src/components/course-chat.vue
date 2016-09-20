@@ -128,6 +128,7 @@
       },
       send () {
         const input = this.input
+        if (!input || !input.trim()) return
         this.input = ''
         Course.sendMessage(this.courseId, input).subscribe()
       }
