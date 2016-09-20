@@ -2,7 +2,7 @@
   <div class="ui basic segment" :class="{loading}">
     <div v-if="courses">
       <h1 class="text-center">All Courses</h1>
-      <div class="ui four stackable cards">
+      <div class="ui three stackable cards">
         <course-card v-for="x in courses" :course="x"></course-card>
       </div>
     </div>

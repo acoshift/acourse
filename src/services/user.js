@@ -24,6 +24,6 @@ export default {
   updateMe (data) {
     return Auth.currentUser
       .first()
-      .flatMap((user) => Firebase.set(`user/${user.uid}`, data))
+      .flatMap((user) => Firebase.update(`user/${user.uid}`, data))
   }
 }

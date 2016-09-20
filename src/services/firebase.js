@@ -62,6 +62,10 @@ export default {
     const ref = firebase.database().ref(path)
     return Observable.fromPromise(ref.set(data))
   },
+  update (path, data) {
+    const ref = firebase.database().ref(path)
+    return Observable.fromPromise(ref.update(data))
+  },
   push (path, data) {
     const ref = firebase.database().ref(path)
     return Observable.fromPromise(ref.push(data))

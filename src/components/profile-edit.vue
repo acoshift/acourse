@@ -31,6 +31,7 @@
 <script>
   import { User } from '../services'
   import Avatar from './avatar'
+  import _ from 'lodash'
 
   export default {
     components: {
@@ -52,10 +53,7 @@
         .first()
         .subscribe(
           (user) => {
-            this.user = {
-              ...this.user,
-              ...user
-            }
+            this.user = _.pick(user, _.keys(this.user))
           }
         )
     },

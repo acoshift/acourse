@@ -27,6 +27,14 @@
   </div>
 </template>
 
+<style scoped>
+  .card img {
+    object-fit: cover;
+    object-position: center center;
+    height: 180px !important;
+  }
+</style>
+
 <script>
   export default {
     props: ['course']
