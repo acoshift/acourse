@@ -7,6 +7,9 @@ export default {
   signInWithFacebook () {
     return Firebase.signInWithFacebook()
   },
+  signInWithGoogle () {
+    return Firebase.signInWithGoogle()
+  },
   signUp (email, password) {
     return Firebase.createUserWithEmailAndPassword(email, password)
   },

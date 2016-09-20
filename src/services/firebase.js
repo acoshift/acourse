@@ -21,6 +21,9 @@ export default {
   signInWithFacebook () {
     return Observable.fromPromise(firebase.auth().signInWithPopup(new firebase.auth.FacebookAuthProvider()))
   },
+  signInWithGoogle () {
+    return Observable.fromPromise(firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider()))
+  },
   createUserWithEmailAndPassword (email, password) {
     return Observable.fromPromise(firebase.auth().createUserWithEmailAndPassword(email, password))
   },

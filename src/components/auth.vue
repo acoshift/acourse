@@ -79,8 +79,10 @@
       <div class="row">
         <div class="ui center aligned segment">
           <div class="ui facebook fluid button" @click="facebookSignIn" :class="{loading: facebookLoading}"><i class="facebook f icon"></i>Sign In with Facebook</div>
-          <div class="ui error message" v-if="facebookError">
-            {{ facebookError }}
+          <br>
+          <div class="ui google plus fluid button" :class="{loading: googleLoading}" @click="googleSignIn"><i class="google plus icon"></i>Sign In with Google+</div>
+          <div class="ui error message" v-if="providerError">
+            {{ providerError }}
           </div>
         </div>
       </div>
@@ -141,8 +143,9 @@
         state: 0,
         error: '',
         loading: false,
-        facebookError: '',
-        facebookLoading: false
+        providerError: '',
+        facebookLoading: false,
+        googleLoading: false
       }
     },
     methods: {
@@ -200,7 +203,7 @@
       facebookSignIn () {
         if (this.facebookLoading) return
         this.facebookLoading = true
-        this.facebookError = ''
+        this.providerError = ''
         Auth.signInWithFacebook()
           .subscribe(
             () => {
@@ -209,7 +212,23 @@
             },
             (err) => {
               this.facebookLoading = false
-              this.facebookError = err.message
+              this.providerError = err.message
+            }
+          )
+      },
+      googleSignIn () {
+        if (this.googleLoading) return
+        this.googleLoading = true
+        this.providerError = ''
+        Auth.signInWithGoogle()
+          .subscribe(
+            () => {
+              this.googleLoading = false
+              this.gotoHome()
+            },
+            (err) => {
+              this.googleLoading = false
+              this.providerError = err.message
             }
           )
       },
