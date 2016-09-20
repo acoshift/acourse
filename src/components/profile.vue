@@ -3,7 +3,7 @@
     <div class="ui segment" :class="{loading}">
       <user-profile :user="user" v-show="!loading"></user-profile>
       <div class="ui right aligned basic segment">
-        <router-link class="ui green button" to="/profile/edit">Edit</router-link>
+        <router-link class="ui green edit button" to="/profile/edit">Edit</router-link>
       </div>
     </div>
     <div class="ui segment">
@@ -19,6 +19,10 @@
 <style>
   .cards {
     padding-top: 30px;
+  }
+
+  .edit.button {
+    width: 140px;
   }
 </style>
 
