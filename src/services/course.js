@@ -51,7 +51,7 @@ export default {
     return Firebase.onArrayValue(ref)
   },
   joinedBy (userId) {
-    const ref = Firebase.ref('course').orderByChild(`student/${userId}`).equalTo(true)
+    const ref = Firebase.ref('course').orderByChild('student').startAt(userId)
     return Firebase.onArrayValue(ref)
   }
 }

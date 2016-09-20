@@ -81,6 +81,14 @@
             this.ownCourses = _.isEmpty(courses) ? null : courses
           }
         )
+      Auth.currentUser
+        .first()
+        .flatMap((user) => Course.joinedBy(user.uid))
+        .subscribe(
+          (courses) => {
+            this.courses = courses
+          }
+        )
     },
     methods: {
     }
