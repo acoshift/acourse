@@ -6,6 +6,7 @@ import ProfileEdit from './profile-edit'
 import Course from './course'
 import CourseEditor from './course-editor'
 import CourseView from './course-view'
+import UserView from './user-view'
 
 export {
   Auth,
@@ -15,5 +16,6 @@ export {
   ProfileEdit,
   Course,
   CourseEditor,
-  CourseView
+  CourseView,
+  UserView
 }

@@ -19,12 +19,12 @@
           </div>
         </div>
         <div class="two column middle aligned row">
-          <div class="right aligned column">
+          <div class="right aligned column" style="padding-right: 2px;">
             <router-link :to="`/user/${course.owner.id}`">
               <avatar :src="course.owner.photo" size="mini"></avatar>
             </router-link>
           </div>
-          <div class="left aligned column">
+          <div class="left aligned column" style="padding-left: 2px;">
             <router-link :to="`/user/${course.owner.id}`">
               <h3>{{ course.owner.name }}</h3>
             </router-link>

@@ -21,7 +21,8 @@ import {
   ProfileEdit,
   Course,
   CourseEditor,
-  CourseView
+  CourseView,
+  UserView
 } from './components'
 
 Vue.use(VueRouter)
@@ -56,7 +57,8 @@ const router = new VueRouter({
         { path: '/course', component: Course },
         { path: '/course/new', component: CourseEditor },
         { path: '/course/:id', component: CourseView },
-        { path: '/course/:id/edit', component: CourseEditor }
+        { path: '/course/:id/edit', component: CourseEditor },
+        { path: '/user/:id', component: UserView }
       ],
       beforeEnter: redirectIfNotAuth
     },
