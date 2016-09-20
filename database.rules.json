@@ -44,7 +44,14 @@
         },
         "favorite": {
           "$user_id": {
-            ".write": "auth.uid === $user_id"
+            ".write": "auth.uid === $user_id",
+            ".validate": "newData.val() === true"
+          }
+        },
+        "student": {
+          "$user_id": {
+            ".write": "auth.uid === $user_id",
+            ".validate": "newData.val() === true"
           }
         }
       }
