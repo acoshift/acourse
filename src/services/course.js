@@ -67,6 +67,7 @@ export default {
       }))
   },
   messages (id) {
-    return Firebase.onChildAdded(`chat/${id}`)
+    const ref = Firebase.ref(`chat/${id}`).orderByKey()
+    return Firebase.onChildAdded(ref)
   }
 }

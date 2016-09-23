@@ -101,7 +101,7 @@
           }
         )
       Course.messages(this.courseId)
-        .flatMap((message) => User.get(message.u), (message, user) => ({...message, user}))
+        .concatMap((message) => User.get(message.u).first(), (message, user) => ({...message, user}))
         .subscribe(
           (message) => {
             this.messages.push(message)
