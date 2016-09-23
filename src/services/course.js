@@ -2,6 +2,7 @@ import Firebase from './firebase'
 import User from './user'
 import Auth from './auth'
 import { Observable } from 'rxjs'
+import _ from 'lodash'
 
 export default {
   list () {
@@ -56,7 +57,11 @@ export default {
   },
   ownBy (userId) {
     const ref = Firebase.ref('course').orderByChild('owner').equalTo(userId)
-    return Firebase.onArrayValue(ref)
+    return Observable.combineLatest(
+      Auth.currentUser.first(),
+      Firebase.onArrayValue(ref)
+    )
+      .map(([auth, courses]) => auth.uid === userId ? courses : _.filter(courses, (course) => course.open))
   },
   sendMessage (id, text) {
     return Auth.currentUser
