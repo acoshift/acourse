@@ -17,6 +17,11 @@
             <h1>{{ course.title }}</h1>
           </div>
         </div>
+        <div class="row" style="margin-top: -2rem; margin-bottom: 1rem;">
+          <div class="column">
+            <i>{{ course.start | date('DD/MM/YYYY') }}</i>
+          </div>
+        </div>
         <div class="two column middle aligned row" style="margin-top: -30px !important;">
           <div class="right aligned column" style="padding-right: 2px;">
             <router-link :to="`/user/${course.owner.id}`">

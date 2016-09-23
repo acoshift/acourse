@@ -27,12 +27,23 @@
         </div>
         <div class="field">
           <label>Description</label>
-          <textarea v-model="course.description"></textarea>
+          <textarea v-model="course.description" rows="30"></textarea>
         </div>
-        <button class="ui blue button" :class="{loading: saving}">
+        <div class="field">
+          <label>Start Date</label>
+          <input type="date" v-model="course.start">
+        </div>
+        <div class="field">
+          <div class="ui toggle checkbox">
+            <input type="checkbox" class="hidden" v-model="course.open">
+            <label>Open public</label>
+          </div>
+        </div>
+        <button class="ui blue save button" :class="{loading: saving}">
           <span v-if="isNew">Create</span>
           <span v-else>Save</span>
         </button>
+        <router-link class="ui red cancel button" :to="`/course/${courseId}`">Cancel</router-link>
       </form>
     </div>
   </div>
@@ -41,6 +52,10 @@
 <style>
   img.image {
     margin: 10px;
+  }
+
+  .save.button {
+    width: 160px;
   }
 </style>
 
@@ -57,7 +72,9 @@
           title: '',
           description: '',
           photo: '',
-          owner: ''
+          owner: '',
+          start: '',
+          open: false
         },
         courseId: '',
         uploading: false,
@@ -84,10 +101,13 @@
           .subscribe(
             ([user, course]) => {
               this.loading = false
-              this.course = _.pick(course, _.keys(this.course))
+              this.course = _.defaults(_.pick(course, _.keys(this.course)), this.course)
             }
           )
       }
+    },
+    mounted () {
+      window.$('.checkbox').checkbox()
     },
     methods: {
       uploadPhoto () {

@@ -28,7 +28,7 @@
     },
     "course": { // course data
       ".read": "auth != null", // everyone can read
-      ".indexOn": ["owner", "timestamp", "closed"],
+      ".indexOn": ["owner", "timestamp", "open", "start"],
       "$course_id": { // only owner can write
         ".write": "(!data.exists() || auth.uid === data.child('owner').val()) && (root.child('instructor/' + auth.uid).val() === true)",
         "title": {
@@ -58,8 +58,11 @@
             ".validate": "newData.val() === true"
           }
         },
-        "closed": {
+        "open": {
           ".validate": "newData.isBoolean()"
+        },
+        "start": {
+          ".validate": "newData.isString()"
         }
       }
     },

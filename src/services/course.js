@@ -5,7 +5,8 @@ import { Observable } from 'rxjs'
 
 export default {
   list () {
-    return Firebase.onArrayValue('course')
+    const ref = Firebase.ref('course').orderByChild('open').equalTo(true)
+    return Firebase.onArrayValue(ref)
   },
   get (id) {
     return Firebase.onValue(`course/${id}`)
