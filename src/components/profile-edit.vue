@@ -2,6 +2,7 @@
   <div class="ui segment">
     <h3 class="ui header">Edit Profile</h3>
     <form class="ui form" @submit.prevent="submit">
+      <div class="ui red message" v-if="error">{{ error }}</div>
       <div class="field">
         <label>Photo</label>
         <avatar v-show="user.photo" :src="user.photo" size="small"></avatar>
@@ -45,7 +46,8 @@
           aboutMe: ''
         },
         uploading: false,
-        saving: false
+        saving: false,
+        error: ''
       }
     },
     created () {
@@ -59,6 +61,7 @@
     },
     methods: {
       submit () {
+        this.error = ''
         if (this.saving) return
         this.saving = true
         User.updateMe(this.user)
@@ -73,6 +76,7 @@
           )
       },
       uploadPhoto () {
+        this.error = ''
         if (this.uploading) return
         const file = this.$refs.photo.files[0]
         if (!file) return
@@ -85,6 +89,7 @@
             },
             () => {
               this.uploading = false
+              this.error = 'Please check file type should be image and file size should not exceed 1MB'
             }
           )
       }
