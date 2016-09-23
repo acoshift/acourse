@@ -65,8 +65,8 @@
     },
     "chat": {
       "$course_id": {
+        ".read": "root.child('course/' + $course_id + '/student/' + auth.uid).val() === true || root.child('course/' + $course_id + '/owner').val() === auth.uid",
         "$message_id": {
-          ".read": "root.child('course/' + $course_id + '/student/' + auth.uid).val() === true || root.child('course/' + $course_id + '/owner').val() === auth.uid",
           ".write": "root.child('course/' + $course_id + '/student/' + auth.uid).val() === true || root.child('course/' + $course_id + '/owner').val() === auth.uid",
           "u": {
             ".validate": "newData.val() === auth.uid"
