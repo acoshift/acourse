@@ -72,7 +72,7 @@
 <style>
   p.description {
     text-align: left;
-    white-space: pre-line;
+    white-space: pre;
   }
 
   .join.button {
