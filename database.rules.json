@@ -19,6 +19,9 @@
           "$course_id": {
             ".validate": "newData.val() === true"
           }
+        },
+        "$other": {
+          ".validate": false
         }
       }
     },
@@ -26,10 +29,10 @@
       ".read": "auth != null",
       ".write": false
     },
-    "course": { // course data
-      ".read": "auth != null", // everyone can read
+    "course": {
+      ".read": "auth != null",
       ".indexOn": ["owner", "timestamp", "open", "start"],
-      "$course_id": { // only owner can write
+      "$course_id": {
         ".write": "(!data.exists() || auth.uid === data.child('owner').val()) && (root.child('instructor/' + auth.uid).val() === true)",
         "title": {
           ".validate": "newData.isString()"
@@ -63,6 +66,9 @@
         },
         "start": {
           ".validate": "newData.isString()"
+        },
+        "$other": {
+          ".validate": false
         }
       }
     },
@@ -70,7 +76,7 @@
       "$course_id": {
         ".read": "root.child('course/' + $course_id + '/student/' + auth.uid).val() === true || root.child('course/' + $course_id + '/owner').val() === auth.uid",
         "$message_id": {
-          ".write": "root.child('course/' + $course_id + '/student/' + auth.uid).val() === true || root.child('course/' + $course_id + '/owner').val() === auth.uid",
+          ".write": "(root.child('course/' + $course_id + '/student/' + auth.uid).val() === true || root.child('course/' + $course_id + '/owner').val() === auth.uid) && !data.exists()",
           "u": {
             ".validate": "newData.val() === auth.uid"
           },
