@@ -75,5 +75,13 @@ export default {
   messages (id) {
     const ref = Firebase.ref(`chat/${id}`).orderByKey()
     return Firebase.onChildAdded(ref)
+  },
+  attend (id, code) {
+    return Auth.currentUser
+      .first()
+      .flatMap((auth) => Firebase.set(`attend/${id}/user/${auth.uid}/${code.trim()}`, Firebase.timestamp))
+  },
+  setAttendCode (id, code) {
+    return Firebase.set(`attend/${id}/code`, code)
   }
 }

@@ -9,11 +9,11 @@
       <div v-if="!isNew" class="active section">Edit</div>
     </div>
     <div class="ui segment">
-      <h3>
+      <h2>
         <span v-if="isNew">New</span>
         <span v-else>Edit</span>
         Course
-      </h3>
+      </h2>
       <form class="ui form" @submit.prevent="submit">
         <div class="field">
           <label>Cover Photo</label>

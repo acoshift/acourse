@@ -42,7 +42,13 @@
         <div class="row" v-if="isApply">
           <div class="ui green message">You already apply this course.</div>
         </div>
-        <div v-if="isApply || isOwn">
+        <div class="row" v-if="isApply || isOwn">
+          <div class="ui green button" @click="openAttendModal">
+            <span v-if="isApply">Attend</span>
+            <span v-if="isOwn">Set Attend Code</span>
+          </div>
+        </div>
+        <div class="row" v-if="isApply || isOwn" style="padding-top: 0;">
           <router-link class="ui yellow button" :to="`/course/${courseId}/chat`">Chat room</router-link>
         </div>
         <div class="row">
@@ -58,12 +64,28 @@
       </div>
     </div>
     <div class="ui segment">
-      <h3 class="ui header">Students</h3>
+      <h3 class="ui header">Students <span v-if="students">({{ students.length }})</span></h3>
       <div v-for="x in students">
         <router-link :to="`/user/${x.id}`">
           <avatar :src="x.photo" size="tiny"></avatar>
           {{ x.name }}
         </router-link>
+      </div>
+    </div>
+    <div class="ui small modal" ref="attendModal">
+      <div class="header">
+        <span v-if="isOwn">Set Attend Code</span>
+        <span v-else>Attend</span>
+      </div>
+      <div class="content">
+        <div class="ui form">
+          <div class="field">
+            <label>Enter Code</label>
+            <input v-model="attendCode">
+          </div>
+          <div v-if="attendError" class="ui red message">{{ attendError }}</div>
+          <div class="ui fluid blue button" @click="submitAttend" :class="{loading: attending}">OK</div>
+        </div>
       </div>
     </div>
   </div>
@@ -103,7 +125,10 @@
         loading: false,
         isApply: false,
         applying: false,
-        students: null
+        students: null,
+        attendCode: '',
+        attending: false,
+        attendError: ''
       }
     },
     created () {
@@ -161,6 +186,29 @@
           },
           () => {
             this.applying = false
+          }
+        )
+      },
+      openAttendModal () {
+        this.attendError = ''
+        this.attendCode = ''
+        window.$(this.$refs.attendModal).modal('show')
+      },
+      submitAttend () {
+        this.attendError = ''
+        this.attending = true
+        const ob = this.isOwn
+          ? Course.setAttendCode(this.courseId, this.attendCode)
+          : Course.attend(this.courseId, this.attendCode)
+        ob.subscribe(
+          () => {
+            this.attending = false
+            this.attendCode = ''
+            window.$(this.$refs.attendModal).modal('hide')
+          },
+          (err) => {
+            this.attending = false
+            this.attendError = err.message
           }
         )
       }

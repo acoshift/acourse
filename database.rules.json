@@ -91,6 +91,23 @@
           }
         }
       }
+    },
+    "attend": {
+      "$course_id": {
+        ".read": "root.child('course/' + $course_id + '/owner').val() === auth.uid",
+        "code": {
+          ".write": "root.child('course/' + $course_id + '/owner').val() === auth.uid",
+          ".validate": "newData.isString()"
+        },
+        "user": {
+          "$user_id": {
+            "$code": {
+              ".write": "auth.uid === $user_id && $code === root.child('attend/' + $course_id + '/code').val()",
+              ".validate": "newData.val() <= now"
+            }
+          }
+        }
+      }
     }
   }
 }
