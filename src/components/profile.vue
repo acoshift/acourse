@@ -58,7 +58,7 @@
         .subscribe(
           (user) => {
             this.loading = false
-            this.user = (user.name && user.photo) ? user : null
+            this.user = user
           },
           () => {
             this.loading = false

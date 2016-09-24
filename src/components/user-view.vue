@@ -53,7 +53,7 @@
           .subscribe(
             (user) => {
               this.loading = false
-              this.user = (user.name && user.photo) ? user : null
+              this.user = user
               Observable.of(user.course)
                 .map(_.keys)
                 .flatMap(Observable.from)
