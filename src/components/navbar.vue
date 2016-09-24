@@ -7,8 +7,11 @@
       <div class="item">
         <router-link to="/home">Home</router-link>
       </div>
-      <div class="item">
-        <router-link to="/profile">Profile</router-link>
+      <div class="item" style="padding: 0 0.5rem;">
+        <router-link to="/profile">
+          <avatar :src="user && user.photo" size="tiny"></avatar>
+          {{ user && user.name || 'Anonymous' }}
+        </router-link>
       </div>
       <div class="item">
         <a href="#" @click="signOut">Sign Out</a>
@@ -18,10 +21,27 @@
 </template>
 
 <script>
-  import { Auth } from '../services'
+  import { Auth, User } from '../services'
   import Vue from 'vue'
+  import Avatar from './avatar'
 
   export default {
+    components: {
+      Avatar
+    },
+    data () {
+      return {
+        user: null
+      }
+    },
+    created () {
+      User.me()
+        .subscribe(
+          (user) => {
+            this.user = user
+          }
+        )
+    },
     methods: {
       signOut () {
         Auth.signOut()
