@@ -12,7 +12,7 @@
         <div class="ui comments">
           <div v-for="x in messages" class="comment">
             <span class="avatar">
-              <img :src="x.user.photo">
+              <img :src="x.user.photo || '/static/icons/ic_face_black_48px.svg'">
             </span>
             <div class="content">
               <span class="author">{{ x.user.name || 'Anonymous' }}</span>
