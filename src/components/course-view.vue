@@ -72,7 +72,8 @@
 <style>
   p.description {
     text-align: left;
-    white-space: pre;
+    white-space: pre-wrap;
+    word-break: break-word;
   }
 
   .join.button {
