@@ -83,5 +83,15 @@ export default {
   },
   setAttendCode (id, code) {
     return Firebase.set(`attend/${id}/code`, code)
+  },
+  attendUsers (id) {
+    return Firebase.onValue(`attend/${id}/user`)
+      .map((users) => _.mapValues(users, (x, id) => ({id, count: _.keys(x).length})))
+      .map(_.values)
+      .flatMap((users) =>
+        Observable.from(users)
+          .flatMap((user) => User.get(user.id).first(), (user, data) => ({...user, ...data}))
+          .toArray()
+      )
   }
 }

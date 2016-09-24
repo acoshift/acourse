@@ -58,6 +58,7 @@
         </div>
         <div v-if="isOwn" class="right aligned row">
           <div class="column">
+            <router-link class="ui blue button" :to="`/course/${courseId}/attend`">Attendants</router-link>
             <router-link class="ui green edit button" :to="`/course/${courseId}/edit`">Edit</router-link>
           </div>
         </div>

@@ -7,6 +7,7 @@ import CourseEditor from './course-editor'
 import CourseView from './course-view'
 import UserView from './user-view'
 import CourseChat from './course-chat'
+import CourseAttend from './course-attend'
 
 export {
   Auth,
@@ -17,5 +18,6 @@ export {
   CourseEditor,
   CourseView,
   UserView,
-  CourseChat
+  CourseChat,
+  CourseAttend
 }
