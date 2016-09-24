@@ -30,7 +30,7 @@
           </div>
           <div class="left aligned column" style="padding-left: 2px;">
             <router-link :to="`/user/${course.owner.id}`">
-              <h3>{{ course.owner.name }}</h3>
+              <h3>{{ course.owner.name || 'Anonymous' }}</h3>
             </router-link>
           </div>
         </div>
@@ -69,7 +69,7 @@
       <div v-for="x in students">
         <router-link :to="`/user/${x.id}`">
           <avatar :src="x.photo" size="tiny"></avatar>
-          {{ x.name }}
+          {{ x.name || 'Anonymous' }}
         </router-link>
       </div>
     </div>

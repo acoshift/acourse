@@ -15,7 +15,7 @@
               <img :src="x.user.photo">
             </span>
             <div class="content">
-              <span class="author">{{ x.user.name }}</span>
+              <span class="author">{{ x.user.name || 'Anonymous' }}</span>
               <div class="metadata">
                 <span class="date">{{ x.t | fromNow }}</span>
               </div>

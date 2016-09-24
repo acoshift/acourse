@@ -12,7 +12,7 @@
       <div v-for="x in students">
         <router-link :to="`/user/${x.id}`">
           <avatar :src="x.photo" size="tiny"></avatar>
-          {{ x.name }} ({{ x.count }})
+          {{ x.name || 'Anonymous' }} ({{ x.count }})
         </router-link>
       </div>
     </div>

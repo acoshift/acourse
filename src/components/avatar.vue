@@ -1,5 +1,5 @@
 <template>
-  <img class="ui circular image" :class="`a-${size}`" :src="src">
+  <img class="ui circular image" :class="`a-${size}`" :src="src || '/static/icons/ic_face_black_48px.svg'">
 </template>
 
 <style scoped>
