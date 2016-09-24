@@ -35,7 +35,8 @@
         user: null,
         loading: false,
         ownCourses: null,
-        courses: null
+        courses: null,
+        ob: []
       }
     },
     created () {
@@ -49,7 +50,7 @@
     methods: {
       init () {
         this.loading = true
-        User.get(this.$route.params.id)
+        this.ob.push(User.get(this.$route.params.id)
           .subscribe(
             (user) => {
               this.loading = false
@@ -72,13 +73,18 @@
               this.loading = false
             }
           )
-        Course.ownBy(this.$route.params.id)
+        )
+        this.ob.push(Course.ownBy(this.$route.params.id)
           .subscribe(
             (courses) => {
               this.ownCourses = _.isEmpty(courses) ? null : courses
             }
           )
+        )
       }
+    },
+    destroyed () {
+      _.forEach(this.ob, (x) => x.unsubscribe())
     }
   }
 </script>

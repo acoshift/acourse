@@ -73,6 +73,7 @@
   import { Course, User } from '../services'
   import Avatar from './avatar'
   import Vue from 'vue'
+  import _ from 'lodash'
 
   export default {
     components: {
@@ -84,12 +85,13 @@
         course: null,
         courseId: null,
         input: '',
-        messages: []
+        messages: [],
+        ob: []
       }
     },
     created () {
       this.courseId = this.$route.params.id
-      Course.get(this.courseId)
+      this.ob.push(Course.get(this.courseId)
         .subscribe(
           (course) => {
             this.loading = false
@@ -100,7 +102,8 @@
             this.$router.replace('/home')
           }
         )
-      Course.messages(this.courseId)
+      )
+      this.ob.push(Course.messages(this.courseId)
         .concatMap((message) => User.get(message.u).first(), (message, user) => ({...message, user}))
         .subscribe(
           (message) => {
@@ -110,6 +113,10 @@
             })
           }
         )
+      )
+    },
+    destroyed () {
+      _.forEach(this.ob, (x) => x.unsubscribe())
     },
     mounted () {
       this.adjust()

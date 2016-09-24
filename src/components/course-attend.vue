@@ -23,6 +23,7 @@
   import { Course } from '../services'
   import { Observable } from 'rxjs'
   import Avatar from './avatar'
+  import _ from 'lodash'
 
   export default {
     components: {
@@ -33,14 +34,15 @@
         course: null,
         courseId: null,
         loading: false,
-        students: null
+        students: null,
+        ob: []
       }
     },
     created () {
       this.loading = true
       this.courseId = this.$route.params.id
 
-      Observable.combineLatest(
+      this.ob.push(Observable.combineLatest(
         Course.get(this.courseId),
         Course.attendUsers(this.courseId)
       )
@@ -55,6 +57,10 @@
             this.$router.replace('/home')
           }
         )
+      )
+    },
+    destroyed () {
+      _.forEach(this.ob, (x) => x.unsubscribe())
     }
   }
 </script>

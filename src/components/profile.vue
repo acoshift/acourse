@@ -49,12 +49,13 @@
         user: null,
         loading: false,
         ownCourses: null,
-        courses: null
+        courses: null,
+        ob: []
       }
     },
     created () {
       this.loading = true
-      User.me()
+      this.ob.push(User.me()
         .subscribe(
           (user) => {
             this.loading = false
@@ -64,6 +65,7 @@
             this.loading = false
           }
         )
+      )
       Auth.currentUser
         .first()
         .flatMap((user) => Course.ownBy(user.uid))
@@ -87,6 +89,9 @@
             this.courses = null
           }
         )
+    },
+    destroyed () {
+      _.forEach(this.ob, (x) => x.unsubscribe())
     }
   }
 </script>

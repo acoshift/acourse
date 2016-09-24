@@ -21,6 +21,7 @@
 <script>
   import CourseCard from './course-card'
   import { Course } from '../services'
+  import _ from 'lodash'
 
   export default {
     components: {
@@ -29,12 +30,13 @@
     data () {
       return {
         courses: null,
-        loading: false
+        loading: false,
+        ob: []
       }
     },
     created () {
       this.loading = true
-      Course.list()
+      this.ob.push(Course.list()
         .subscribe(
           (courses) => {
             this.loading = false
@@ -45,6 +47,10 @@
             }
           }
         )
+      )
+    },
+    destroyed () {
+      _.forEach(this.ob, (x) => x.unsubscribe())
     }
   }
 </script>

@@ -86,6 +86,7 @@
       if (!this.$route.params.id) {
         this.isNew = true
         Auth.currentUser
+          .first()
           .subscribe(
             (user) => {
               this.course.owner = user.uid

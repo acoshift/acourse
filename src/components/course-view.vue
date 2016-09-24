@@ -129,55 +129,53 @@
         students: null,
         attendCode: '',
         attending: false,
-        attendError: ''
+        attendError: '',
+        ob: []
       }
     },
     created () {
-      this.init()
+      this.loading = true
+      this.courseId = this.$route.params.id
+
+      this.ob.push(Observable.combineLatest(
+        Auth.currentUser.first(),
+        Course.get(this.courseId)
+          .flatMap((course) => User.get(course.owner), (course, owner) => ({...course, owner}))
+      )
+        .subscribe(
+          ([user, course]) => {
+            this.loading = false
+            this.course = course
+            if (course.owner.id === user.uid) this.isOwn = true
+            this.isApply = !!_.get(course.student, user.uid)
+
+            this.ob.push(Observable.of(course.student)
+              .map(_.keys)
+              .flatMap((users) => Observable.from(users))
+              .flatMap((id) => User.get(id).first())
+              .toArray()
+              .subscribe(
+                (students) => {
+                  this.students = students
+                },
+                () => {
+                  this.students = null
+                }
+              )
+            )
+          },
+          () => {
+            this.loading = false
+            // not found
+            this.$router.replace('/home')
+          }
+        )
+      )
     },
-    watch: {
-      $route () {
-        this.init()
-      }
+    destroyed () {
+      _.forEach(this.ob, (x) => x.unsubscribe())
     },
     methods: {
-      init () {
-        this.loading = true
-        this.courseId = this.$route.params.id
-
-        Observable.combineLatest(
-          Auth.currentUser.first(),
-          Course.get(this.courseId)
-            .flatMap((course) => User.get(course.owner), (course, owner) => ({...course, owner}))
-        )
-          .subscribe(
-            ([user, course]) => {
-              this.loading = false
-              this.course = course
-              if (course.owner.id === user.uid) this.isOwn = true
-              this.isApply = !!_.get(course.student, user.uid)
-
-              Observable.of(course.student)
-                .map(_.keys)
-                .flatMap(Observable.from)
-                .flatMap((id) => User.get(id).first())
-                .toArray()
-                .subscribe(
-                  (students) => {
-                    this.students = students
-                  },
-                  () => {
-                    this.students = null
-                  }
-                )
-            },
-            () => {
-              this.loading = false
-              // not found
-              this.$router.replace('/home')
-            }
-          )
-      },
       apply () {
         if (this.applying) return
         this.applying = true
