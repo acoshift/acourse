@@ -4,13 +4,13 @@
       <user-profile :user="user" v-show="!loading"></user-profile>
     </div>
     <div class="ui segment" v-if="ownCourses">
-      <h3 class="ui header">Courses own by <span v-if="user">{{ user.name }}</span><span v-else>this user</span></h3>
+      <h3 class="ui header">Courses own by {{ user && user.name || 'Anonymous' }}</h3>
       <div class="ui four stackable cards" v-if="ownCourses">
         <course-card v-for="x in ownCourses" :course="x"></course-card>
       </div>
     </div>
     <div class="ui segment" v-if="courses">
-      <h3 class="ui header"><span v-if="user">{{ user.name }}'s</span><span v-else>This user's</span> Courses</h3>
+      <h3 class="ui header">{{ user && user.name || 'Anonymous' }}'s Courses</h3>
       <div class="ui four stackable cards">
         <course-card v-for="x in courses" :course="x"></course-card>
       </div>
