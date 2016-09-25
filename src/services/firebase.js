@@ -12,8 +12,15 @@ export default {
       messagingSenderId: '582047384847'
     })
     this.currentUser = new BehaviorSubject()
+    const ref = this.ref(`online`).push()
+    ref.onDisconnect().remove()
     firebase.auth().onAuthStateChanged((user) => {
       this.currentUser.next(user)
+      if (user) {
+        ref.set(user.uid)
+      } else {
+        ref.set(true)
+      }
     })
   },
   signInWithEmailAndPassword (email, password) {

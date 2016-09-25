@@ -108,6 +108,12 @@
           }
         }
       }
+    },
+    "online": {
+      ".write": true,
+      "$online_id": {
+        ".validate": "newData.val() === true || newData.isString()"
+      }
     }
   }
 }
