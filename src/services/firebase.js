@@ -12,17 +12,18 @@ export default {
       messagingSenderId: '582047384847'
     })
     this.currentUser = new BehaviorSubject()
-    const ref = this.ref('online').push()
+    let ref
     this.ref('.info/connected').on('value', (snapshot) => {
       if (snapshot.val()) {
+        ref = this.ref('online').push()
         ref.onDisconnect().remove()
       }
     })
     firebase.auth().onAuthStateChanged((user) => {
       if (user) {
-        ref.set(user.uid)
+        ref && ref.set(user.uid)
       } else {
-        ref.set(true)
+        ref && ref.set(true)
       }
       this.currentUser.next(user)
     })
