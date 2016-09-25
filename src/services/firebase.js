@@ -13,14 +13,18 @@ export default {
     })
     this.currentUser = new BehaviorSubject()
     const ref = this.ref(`online`).push()
-    ref.onDisconnect().remove()
+    this.ref('.info/connected').on('value', (snapshot) => {
+      if (snapshot.val()) {
+        ref.onDisconnect().remove()
+      }
+    })
     firebase.auth().onAuthStateChanged((user) => {
-      this.currentUser.next(user)
       if (user) {
         ref.set(user.uid)
       } else {
         ref.set(true)
       }
+      this.currentUser.next(user)
     })
   },
   signInWithEmailAndPassword (email, password) {
