@@ -59,6 +59,7 @@
                 .map(_.keys)
                 .flatMap(Observable.from)
                 .flatMap((id) => Course.get(id).first())
+                .filter((course) => course.open)
                 .toArray()
                 .subscribe(
                   (courses) => {
