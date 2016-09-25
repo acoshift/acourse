@@ -12,19 +12,25 @@ export default {
       messagingSenderId: '582047384847'
     })
     this.currentUser = new BehaviorSubject()
-    let ref
-    this.ref('.info/connected').on('value', (snapshot) => {
-      if (snapshot.val()) {
-        ref = this.ref('online').push()
-        ref.onDisconnect().remove()
-      }
-    })
+
+    Observable.combineLatest(
+      Observable.create((o) => {
+        this.ref('.info/connected').on('value', (snapshot) => {
+          if (snapshot.val()) {
+            const ref = this.ref('online').push()
+            ref.onDisconnect().remove()
+            o.next(ref)
+          }
+        })
+      }),
+      this.currentUser
+    )
+      .subscribe(
+        ([ref, auth]) => {
+          ref.set(auth ? auth.uid : true)
+        }
+      )
     firebase.auth().onAuthStateChanged((user) => {
-      if (user) {
-        ref && ref.set(user.uid)
-      } else {
-        ref && ref.set(true)
-      }
       this.currentUser.next(user)
     })
   },
