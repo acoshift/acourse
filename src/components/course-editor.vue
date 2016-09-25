@@ -102,6 +102,7 @@
           .subscribe(
             ([user, course]) => {
               this.loading = false
+              if (course.owner !== user.uid) return this.$router.replace(`/course/${this.courseId}`)
               this.course = _.defaults(_.pick(course, _.keys(this.course)), this.course)
             }
           )
