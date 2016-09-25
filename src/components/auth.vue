@@ -51,7 +51,7 @@
           </div>
           <div v-show="state === 2">
             <h3>Register</h3>
-            <div class="ui fuild left aligned container">
+            <div class="ui fluid left aligned container">
               <form class="ui form" :class="{error}" @submit.prevent="signUp">
                 <div class="field">
                   <label>Email</label>

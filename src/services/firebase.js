@@ -12,7 +12,7 @@ export default {
       messagingSenderId: '582047384847'
     })
     this.currentUser = new BehaviorSubject()
-    const ref = this.ref(`online`).push()
+    const ref = this.ref('online').push()
     this.ref('.info/connected').on('value', (snapshot) => {
       if (snapshot.val()) {
         ref.onDisconnect().remove()
