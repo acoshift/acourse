@@ -66,11 +66,13 @@
     </div>
     <div class="ui segment">
       <h3 class="ui header">Students <span v-if="students">({{ students.length }})</span></h3>
-      <div v-for="x in students">
-        <router-link :to="`/user/${x.id}`">
-          <avatar :src="x.photo" size="tiny"></avatar>
-          {{ x.name || 'Anonymous' }}
-        </router-link>
+      <div class="ui stackable three column grid">
+        <div class="column" v-for="x in students">
+          <router-link :to="`/user/${x.id}`">
+            <avatar :src="x.photo" size="tiny"></avatar>
+            {{ x.name || 'Anonymous' }}
+          </router-link>
+        </div>
       </div>
     </div>
     <div class="ui small modal" ref="attendModal">
