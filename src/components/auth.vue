@@ -25,7 +25,7 @@
                 <div class="ui error message">
                   {{ error }}
                 </div>
-                <div class="ui right aligned basic segment">
+                <div class="ui right aligned basic fluid container" style="padding-bottom: 1rem;">
                   <a href="#" @click="state = 1">Forget password ?</a>
                   /
                   <a href="#" @click="state = 2">Register</a>
