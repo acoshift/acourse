@@ -7,13 +7,15 @@
       <i class="right chevron icon divider"></i>
       <div class="active section">Attendants</div>
     </div>
-    <div class="ui segment">
+    <div class="ui segment" style="padding-bottom: 2rem;">
       <h3 class="ui header">Attendants <span v-if="students">({{ students.length }})</span></h3>
-      <div v-for="x in students">
-        <router-link :to="`/user/${x.id}`">
-          <avatar :src="x.photo" size="tiny"></avatar>
-          {{ x.name || 'Anonymous' }} ({{ x.count }})
-        </router-link>
+      <div class="ui stackable three column grid">
+        <div class="column" v-for="x in students">
+          <router-link :to="`/user/${x.id}`">
+            <avatar :src="x.photo" size="tiny"></avatar>
+            {{ x.name || 'Anonymous' }} ({{ x.count }})
+          </router-link>
+        </div>
       </div>
     </div>
   </div>
