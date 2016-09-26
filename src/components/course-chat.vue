@@ -92,10 +92,11 @@
     },
     created () {
       this.courseId = this.$route.params.id
+      this.loading = 2
       this.ob.push(Course.get(this.courseId)
         .subscribe(
           (course) => {
-            this.loading = false
+            --this.loading
             this.course = course
           },
           () => {
@@ -126,6 +127,7 @@
         .debounceTime(200)
         .subscribe(
           () => {
+            if (this.loading > 0) --this.loading
             this.messages = messages
             if (this.$refs.chatBox.scrollHeight - this.$refs.chatBox.scrollTop <= this.$refs.chatBox.clientHeight + 100 || this.$refs.chatBox.scrollTop <= 100) {
               Vue.nextTick(() => {
