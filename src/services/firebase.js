@@ -13,25 +13,6 @@ export default {
     })
     this.currentUser = new BehaviorSubject()
 
-    Observable.combineLatest(
-      Observable.create((o) => {
-        this.ref('.info/connected').on('value', (snapshot) => {
-          if (snapshot.val()) {
-            const ref = this.ref('online').push()
-            ref.onDisconnect().remove()
-            o.next(ref)
-          } else {
-            o.next(null)
-          }
-        })
-      }),
-      this.currentUser
-    )
-      .subscribe(
-        ([ref, auth]) => {
-          ref && ref.set(auth ? auth.uid : true)
-        }
-      )
     firebase.auth().onAuthStateChanged((user) => {
       this.currentUser.next(user)
       if (user) {

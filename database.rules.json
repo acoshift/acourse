@@ -105,24 +105,6 @@
             ".validate": "newData.val() <= now"
           }
         }
-        // "code": {
-        //   ".write": "root.child('course/' + $course_id + '/owner').val() === auth.uid",
-        //   ".validate": "newData.isString()"
-        // },
-        // "user": {
-        //   "$user_id": {
-        //     "$code": {
-        //       ".write": "auth.uid === $user_id && $code === root.child('attend/' + $course_id + '/code').val()",
-        //       ".validate": "newData.val() <= now"
-        //     }
-        //   }
-        // }
-      }
-    },
-    "online": {
-      ".write": true,
-      "$online_id": {
-        ".validate": "newData.val() === true || newData.isString()"
       }
     }
   }
