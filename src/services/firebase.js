@@ -20,6 +20,8 @@ export default {
             const ref = this.ref('online').push()
             ref.onDisconnect().remove()
             o.next(ref)
+          } else {
+            o.next(null)
           }
         })
       }),
@@ -27,7 +29,7 @@ export default {
     )
       .subscribe(
         ([ref, auth]) => {
-          ref.set(auth ? auth.uid : true)
+          ref && ref.set(auth ? auth.uid : true)
         }
       )
     firebase.auth().onAuthStateChanged((user) => {
