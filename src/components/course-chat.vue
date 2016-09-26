@@ -12,10 +12,10 @@
         <div class="ui comments">
           <div v-for="x in messages" class="comment">
             <span class="avatar">
-              <img :src="x.user.photo || '/static/icons/ic_face_black_48px.svg'">
+              <img :src="x.user && x.user.photo || '/static/icons/ic_face_black_48px.svg'">
             </span>
             <div class="content">
-              <span class="author">{{ x.user.name || 'Anonymous' }}</span>
+              <span class="author">{{ x.user && x.user.name || 'Anonymous' }}</span>
               <div class="metadata">
                 <span class="date">{{ x.t | fromNow }}</span>
               </div>
@@ -74,6 +74,7 @@
   import Avatar from './avatar'
   import Vue from 'vue'
   import _ from 'lodash'
+  // import { Observable } from 'rxjs'
 
   export default {
     components: {
@@ -103,14 +104,34 @@
           }
         )
       )
-      this.ob.push(Course.messages(this.courseId)
-        .concatMap((message) => User.get(message.u).first(), (message, user) => ({...message, user}))
+
+      const messagesObservable = Course.messages(this.courseId)
+        .do((message) => {
+          User.getOnce(message.u).subscribe((user) => {
+            message.user = user
+          })
+        })
+
+      const messages = []
+
+      this.ob.push(messagesObservable
         .subscribe(
           (message) => {
-            this.messages.push(message)
-            Vue.nextTick(() => {
-              window.$(this.$refs.chatBox).scrollTop(99999)
-            })
+            messages.push(message)
+          }
+        )
+      )
+
+      this.ob.push(messagesObservable
+        .debounceTime(200)
+        .subscribe(
+          () => {
+            this.messages = messages
+            if (this.$refs.chatBox.scrollHeight - this.$refs.chatBox.scrollTop <= this.$refs.chatBox.clientHeight + 100 || this.$refs.chatBox.scrollTop <= 100) {
+              Vue.nextTick(() => {
+                window.$(this.$refs.chatBox).scrollTop(99999)
+              })
+            }
           }
         )
       )

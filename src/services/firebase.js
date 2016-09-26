@@ -34,6 +34,9 @@ export default {
       )
     firebase.auth().onAuthStateChanged((user) => {
       this.currentUser.next(user)
+      if (user) {
+        this.ref('user').on('value', () => {})
+      }
     })
   },
   signInWithEmailAndPassword (email, password) {
@@ -59,6 +62,15 @@ export default {
       ref = _.isString(ref) ? this.ref(ref) : ref
       ref.on('value', (snapshot) => {
         o.next(snapshot.val())
+      })
+    })
+  },
+  onceValue (ref) {
+    return Observable.create((o) => {
+      ref = _.isString(ref) ? this.ref(ref) : ref
+      ref.once('value', (snapshot) => {
+        o.next(snapshot.val())
+        o.complete()
       })
     })
   },

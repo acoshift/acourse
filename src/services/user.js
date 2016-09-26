@@ -7,6 +7,10 @@ export default {
     return Firebase.onValue(`user/${id}`)
       .map((user) => ({id, ...user}))
   },
+  getOnce (id) {
+    return Firebase.onceValue(`user/${id}`)
+      .map((user) => ({id, ...user}))
+  },
   isInstructor (id) {
     return Firebase.onValue(`instructor/${id}`)
       .map((x) => !!x)
