@@ -87,7 +87,9 @@
         courseId: null,
         input: '',
         messages: [],
-        ob: []
+        ob: [],
+        limit: 50,
+        loadingTop: false
       }
     },
     created () {
@@ -106,37 +108,7 @@
         )
       )
 
-      const messagesObservable = Course.messages(this.courseId)
-        .do((message) => {
-          User.getOnce(message.u).subscribe((user) => {
-            message.user = user
-          })
-        })
-
-      const messages = []
-
-      this.ob.push(messagesObservable
-        .subscribe(
-          (message) => {
-            messages.push(message)
-          }
-        )
-      )
-
-      this.ob.push(messagesObservable
-        .debounceTime(200)
-        .subscribe(
-          () => {
-            if (this.loading > 0) --this.loading
-            this.messages = messages
-            if (this.$refs.chatBox.scrollHeight - this.$refs.chatBox.scrollTop <= this.$refs.chatBox.clientHeight + 100 || this.$refs.chatBox.scrollTop <= 100) {
-              Vue.nextTick(() => {
-                window.$(this.$refs.chatBox).scrollTop(99999)
-              })
-            }
-          }
-        )
-      )
+      this.initMessages()
     },
     destroyed () {
       _.forEach(this.ob, (x) => x.unsubscribe())
@@ -144,8 +116,58 @@
     mounted () {
       this.adjust()
       window.$(window).resize(this.adjust)
+      window.$(this.$refs.chatBox)
+        .off()
+        .on('scroll', () => {
+          let pos = window.$(this.$refs.chatBox).scrollTop()
+          if (pos === 0) {
+            this.limit += 50
+            this.loadingTop = true
+            this.initMessages()
+            Vue.nextTick(() => {
+              window.$(this.$refs.chatBox).scrollTop(250)
+              setTimeout(() => {
+                this.loadingTop = false
+              }, 400)
+            })
+          }
+        })
     },
     methods: {
+      initMessages () {
+        const messagesObservable = Course.messages(this.courseId, this.limit)
+          .do((message) => {
+            User.getOnce(message.u).subscribe((user) => {
+              message.user = user
+            })
+          })
+
+        const messages = []
+
+        this.ob.push(messagesObservable
+          .subscribe(
+            (message) => {
+              messages.push(message)
+            }
+          )
+        )
+
+        this.ob.push(messagesObservable
+          .debounceTime(200)
+          .subscribe(
+            () => {
+              if (this.loading > 0) --this.loading
+              this.messages = messages
+              if (this.loadingTop) return
+              if (this.$refs.chatBox.scrollHeight - this.$refs.chatBox.scrollTop <= this.$refs.chatBox.clientHeight + 100 || this.$refs.chatBox.scrollTop <= 100) {
+                Vue.nextTick(() => {
+                  window.$(this.$refs.chatBox).scrollTop(99999)
+                })
+              }
+            }
+          )
+        )
+      },
       adjust () {
         let container = window.$(this.$refs.container)
         let box = window.$(this.$refs.chatBox)

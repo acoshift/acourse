@@ -72,8 +72,11 @@ export default {
         t: Firebase.timestamp
       }))
   },
-  messages (id) {
-    const ref = Firebase.ref(`chat/${id}`).orderByKey()
+  messages (id, limit) {
+    let ref = Firebase.ref(`chat/${id}`).orderByKey()
+    if (limit) {
+      ref = ref.limitToLast(limit)
+    }
     return Firebase.onChildAdded(ref)
   },
   attend (id, code) {
