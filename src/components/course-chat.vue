@@ -120,15 +120,13 @@
         .off()
         .on('scroll', () => {
           let pos = window.$(this.$refs.chatBox).scrollTop()
-          if (pos === 0) {
-            this.limit += 50
-            this.loadingTop = true
+          if (pos <= 5) {
+            if (this.limit > this.messages.length) return
+            this.limit += 30
+            this.loading = 1
             this.initMessages()
             Vue.nextTick(() => {
-              window.$(this.$refs.chatBox).scrollTop(250)
-              setTimeout(() => {
-                this.loadingTop = false
-              }, 400)
+              window.$(this.$refs.chatBox).scrollTop(700)
             })
           }
         })
@@ -158,7 +156,6 @@
             () => {
               if (this.loading > 0) --this.loading
               this.messages = messages
-              if (this.loadingTop) return
               if (this.$refs.chatBox.scrollHeight - this.$refs.chatBox.scrollTop <= this.$refs.chatBox.clientHeight + 100 || this.$refs.chatBox.scrollTop <= 100) {
                 Vue.nextTick(() => {
                   window.$(this.$refs.chatBox).scrollTop(99999)
