@@ -67,6 +67,9 @@
         "start": {
           ".validate": "newData.isString()"
         },
+        "attend": {
+          ".validate": "newData.isString()"
+        },
         "$other": {
           ".validate": false
         }
@@ -95,18 +98,25 @@
     "attend": {
       "$course_id": {
         ".read": "root.child('course/' + $course_id + '/owner').val() === auth.uid",
-        "code": {
-          ".write": "root.child('course/' + $course_id + '/owner').val() === auth.uid",
-          ".validate": "newData.isString()"
-        },
-        "user": {
+        "$code": {
           "$user_id": {
-            "$code": {
-              ".write": "auth.uid === $user_id && $code === root.child('attend/' + $course_id + '/code').val()",
-              ".validate": "newData.val() <= now"
-            }
+            ".write": "auth.uid === $user_id && $code === root.child('course/' + $course_id + '/attend').val()",
+            ".read": "auth.uid === $user_id",
+            ".validate": "newData.val() <= now"
           }
         }
+        // "code": {
+        //   ".write": "root.child('course/' + $course_id + '/owner').val() === auth.uid",
+        //   ".validate": "newData.isString()"
+        // },
+        // "user": {
+        //   "$user_id": {
+        //     "$code": {
+        //       ".write": "auth.uid === $user_id && $code === root.child('attend/' + $course_id + '/code').val()",
+        //       ".validate": "newData.val() <= now"
+        //     }
+        //   }
+        // }
       }
     },
     "online": {

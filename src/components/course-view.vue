@@ -42,10 +42,14 @@
         <div class="row" v-if="isApply">
           <div class="ui green message">You already apply this course.</div>
         </div>
-        <div class="row" v-if="isApply || isOwn">
+        <div class="row" v-if="isApply && !isAttended && course.attend">
+          <div class="ui green button" @click="attend">
+            Attend
+          </div>
+        </div>
+        <div class="row" v-if="isOwn">
           <div class="ui green button" @click="openAttendModal">
-            <span v-if="isApply">Attend</span>
-            <span v-if="isOwn">Set Attend Code</span>
+            Open Attend
           </div>
         </div>
         <div class="row" v-if="isApply || isOwn" style="padding-top: 0;">
@@ -132,7 +136,8 @@
         attendCode: '',
         attending: false,
         attendError: '',
-        ob: []
+        ob: [],
+        isAttended: true
       }
     },
     created () {
@@ -165,6 +170,13 @@
                 }
               )
             )
+
+            Course.isAttended(this.courseId)
+              .subscribe(
+                (isAttended) => {
+                  this.isAttended = isAttended
+                }
+              )
           },
           () => {
             this.loading = false
@@ -190,6 +202,17 @@
           }
         )
       },
+      attend () {
+        Course.attend(this.courseId, this.course.attend)
+          .subscribe(
+            () => {
+              window.alert('OK')
+            },
+            () => {
+              window.alert('Error')
+            }
+          )
+      },
       openAttendModal () {
         this.attendError = ''
         this.attendCode = ''
@@ -198,20 +221,18 @@
       submitAttend () {
         this.attendError = ''
         this.attending = true
-        const ob = this.isOwn
-          ? Course.setAttendCode(this.courseId, this.attendCode)
-          : Course.attend(this.courseId, this.attendCode)
-        ob.subscribe(
-          () => {
-            this.attending = false
-            this.attendCode = ''
-            window.$(this.$refs.attendModal).modal('hide')
-          },
-          (err) => {
-            this.attending = false
-            this.attendError = err.message
-          }
-        )
+        Course.setAttendCode(this.courseId, this.attendCode)
+          .subscribe(
+            () => {
+              this.attending = false
+              this.attendCode = ''
+              window.$(this.$refs.attendModal).modal('hide')
+            },
+            (err) => {
+              this.attending = false
+              this.attendError = err.message
+            }
+          )
       }
     }
   }

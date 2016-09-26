@@ -79,10 +79,13 @@ export default {
   attend (id, code) {
     return Auth.currentUser
       .first()
-      .flatMap((auth) => Firebase.set(`attend/${id}/user/${auth.uid}/${code.trim()}`, Firebase.timestamp))
+      .flatMap((auth) => Firebase.set(`attend/${id}/${code}/${auth.uid}`, Firebase.timestamp))
   },
   setAttendCode (id, code) {
-    return Firebase.set(`attend/${id}/code`, code)
+    return Firebase.set(`course/${id}/attend`, code)
+  },
+  removeAttendCode (id) {
+    return Firebase.set(`course/${id}/attend`, null)
   },
   attendUsers (id) {
     return Firebase.onValue(`attend/${id}/user`)
@@ -93,5 +96,13 @@ export default {
           .flatMap((user) => User.get(user.id).first(), (user, data) => ({...user, ...data}))
           .toArray()
       )
+  },
+  isAttended (id) {
+    return Observable.forkJoin(
+      Auth.currentUser.first(),
+      this.get(id).first().map((course) => course.attend)
+    )
+      .flatMap(([auth, code]) => Firebase.onValue(`attend/${id}/${code}/${auth.uid}`))
+      .map((x) => !!x)
   }
 }
