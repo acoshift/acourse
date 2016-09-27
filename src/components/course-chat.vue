@@ -1,5 +1,5 @@
 <template>
-  <div class="ui basic segment" :class="{loading: loading <= 0}">
+  <div class="ui basic segment" :class="{loading: loading > 0}">
     <div class="ui massive breadcrumb">
       <router-link class="section" to="/home">Courses</router-link>
       <i class="right chevron icon divider"></i>
