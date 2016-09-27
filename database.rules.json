@@ -106,6 +106,28 @@
           }
         }
       }
+    },
+    "assignment": {
+      "$course_id": {
+        ".read": "root.child('course/' + $course_id + '/owner').val() === auth.uid",
+        "$user_id": {
+          ".read": "auth.uid === $user_id && root.child('course/' + $course_id + '/student/' + auth.uid).val() === true",
+          ".write": "auth.uid === $user_id && root.child('course/' + $course_id + '/student/' + auth.uid).val() === true",
+          "$assignment_id": {
+            "$file_id": {
+              "timestamp": {
+                ".validate": "newData.val() <= now"
+              },
+              "url": {
+                ".validate": "newData.isString()"
+              },
+              "$other": {
+                ".validate": false
+              }
+            }
+          }
+        }
+      }
     }
   }
 }
