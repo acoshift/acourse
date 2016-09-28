@@ -107,5 +107,24 @@ export default {
     )
       .flatMap(([auth, code]) => Firebase.onValue(`attend/${id}/${code}/${auth.uid}`))
       .map((x) => !!x)
+  },
+  addAssignment (id, { title }) {
+    return Firebase.push(`assignment/${id}/code`, { title, open: true })
+  },
+  getAssignments (id) {
+    return Firebase.onArrayValue(`assignment/${id}/code`)
+  },
+  getAssignmentUser (id) {
+    return Auth.currentUser
+      .first()
+      .flatMap((auth) => Firebase.onValue(`assignment/${id}/user/${auth.uid}`))
+  },
+  addAssignmentFile (id, assignmentId, url) {
+    return Auth.currentUser
+      .first()
+      .flatMap((auth) => Firebase.push(`assignment/${id}/user/${auth.uid}/${assignmentId}`, {
+        url,
+        timestamp: Firebase.timestamp
+      }))
   }
 }

@@ -8,6 +8,7 @@ import CourseView from './course-view'
 import UserView from './user-view'
 import CourseChat from './course-chat'
 import CourseAttend from './course-attend'
+import CourseAssignment from './course-assignment'
 
 export {
   Auth,
@@ -19,5 +20,6 @@ export {
   CourseView,
   UserView,
   CourseChat,
-  CourseAttend
+  CourseAttend,
+  CourseAssignment
 }

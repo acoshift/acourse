@@ -28,6 +28,11 @@ export default {
       .first()
       .flatMap((user) => Firebase.upload(`user/${user.uid}/${Date.now()}`, file))
   },
+  upload (file) {
+    return Auth.currentUser
+      .first()
+      .flatMap((user) => Firebase.upload(`user/${user.uid}/${Date.now()}`, file))
+  },
   update (id, data) {
     return Firebase.update(`user/${id}`, data)
   },

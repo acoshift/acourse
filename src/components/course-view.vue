@@ -55,6 +55,9 @@
         <div class="row" v-if="isApply || isOwn" style="padding-top: 0;">
           <router-link class="ui yellow button" :to="`/course/${courseId}/chat`">Chat room</router-link>
         </div>
+        <div class="row" v-if="isApply">
+          <router-link class="ui blue button" :to="`/course/${courseId}/assignment`">Assignments</router-link>
+        </div>
         <div class="row">
           <div class="column">
             <p class="description">{{ course.description }}</p>
@@ -62,6 +65,7 @@
         </div>
         <div v-if="isOwn" class="right aligned row">
           <div class="column">
+            <div class="ui blue button" @click="openAssignmentModal">Add Assignment</div>
             <router-link class="ui blue button" :to="`/course/${courseId}/attend`">Attendants</router-link>
             <router-link class="ui green edit button" :to="`/course/${courseId}/edit`">Edit</router-link>
           </div>
@@ -92,6 +96,18 @@
           </div>
           <div v-if="attendError" class="ui red message">{{ attendError }}</div>
           <div class="ui fluid blue button" @click="submitAttend" :class="{loading: attending}">OK</div>
+        </div>
+      </div>
+    </div>
+    <div class="ui small modal" ref="assignmentModal">
+      <div class="header">Add Assignment</div>
+      <div class="content">
+        <div class="ui form">
+          <div class="field">
+            <label>Title</label>
+            <input v-model="assignmentCode">
+          </div>
+          <div class="ui fluid blue button" @click="submitAssignmentCode">OK</div>
         </div>
       </div>
     </div>
@@ -137,7 +153,8 @@
         attending: false,
         attendError: '',
         ob: [],
-        isAttended: true
+        isAttended: true,
+        assignmentCode: ''
       }
     },
     created () {
@@ -231,6 +248,21 @@
             (err) => {
               this.attending = false
               this.attendError = err.message
+            }
+          )
+      },
+      openAssignmentModal () {
+        window.$(this.$refs.assignmentModal).modal('show')
+      },
+      submitAssignmentCode () {
+        Course.addAssignment(this.courseId, { title: this.assignmentCode })
+          .subscribe(
+            () => {
+              window.alert('ok')
+              window.$(this.$refs.assignmentModal).modal('hide')
+            },
+            () => {
+              window.alert('error')
             }
           )
       }

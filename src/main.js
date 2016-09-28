@@ -23,7 +23,8 @@ import {
   CourseView,
   UserView,
   CourseChat,
-  CourseAttend
+  CourseAttend,
+  CourseAssignment
 } from './components'
 
 Vue.use(VueRouter)
@@ -80,6 +81,7 @@ const router = new VueRouter({
         { path: '/course/:id/chat', component: CourseChat },
         { path: '/course/:id/edit', component: CourseEditor },
         { path: '/course/:id/attend', component: CourseAttend },
+        { path: '/course/:id/assignment', component: CourseAssignment },
         { path: '/user/:id', component: UserView }
       ],
       beforeEnter: redirectIfNotAuth
