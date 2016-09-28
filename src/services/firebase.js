@@ -16,6 +16,7 @@ export default {
     firebase.auth().onAuthStateChanged((user) => {
       this.currentUser.next(user)
       if (user) {
+        window.ga('set', 'userId', user.uid)
         this.ref('user').on('value', () => {})
       }
     })
