@@ -90,19 +90,19 @@ const router = new VueRouter({
   ]
 })
 
-router.beforeEach((route, redirect, next) => {
-  window.ga('set', 'page', route.path)
+router.beforeEach((to, from, next) => {
+  window.ga('set', 'page', to.path)
   window.ga('send', 'pageview')
   next()
 })
 
-function redirectIfAuth (to, redirect, next) {
+function redirectIfAuth (to, from, next) {
   AuthService.currentUser
     .first()
     .subscribe(
       (user) => {
         if (user) {
-          redirect('/home')
+          next('/home')
         } else {
           next()
         }
@@ -110,7 +110,7 @@ function redirectIfAuth (to, redirect, next) {
     )
 }
 
-function redirectIfNotAuth (to, redirect, next) {
+function redirectIfNotAuth (to, from, next) {
   AuthService.currentUser
     .first()
     .subscribe(
@@ -118,7 +118,7 @@ function redirectIfNotAuth (to, redirect, next) {
         if (user) {
           next()
         } else {
-          redirect('/')
+          next('/')
         }
       }
     )
