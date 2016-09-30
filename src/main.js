@@ -7,6 +7,15 @@ import '!style!css!semantic-ui-css/semantic.min.css'
 import '!script!jquery/dist/jquery.min.js'
 import '!script!semantic-ui-css/semantic.min.js'
 import '!style!css!./style.css'
+import serviceWorker from 'serviceworker!./sw.js'
+
+serviceWorker({ scope: '/' }).then((reg) => {
+  reg.pushManager.subscribe({
+    userVisibleOnly: true
+  }).then((sub) => {
+    console.log('endpoint:', sub.endpoint)
+  })
+})
 
 import {
   Firebase,
