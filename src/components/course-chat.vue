@@ -107,8 +107,6 @@
           }
         )
       )
-
-      this.initMessages()
     },
     destroyed () {
       _.forEach(this.ob, (x) => x.unsubscribe())
@@ -130,6 +128,8 @@
             })
           }
         })
+
+      this.initMessages()
     },
     methods: {
       initMessages () {
