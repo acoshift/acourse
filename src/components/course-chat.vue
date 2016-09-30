@@ -150,13 +150,21 @@
           )
         )
 
+        let shouldScroll = false
+
         this.ob.push(messagesObservable
+          .do(() => {
+            if (this.$refs.chatBox.scrollHeight - this.$refs.chatBox.scrollTop <= this.$refs.chatBox.clientHeight + 200) {
+              shouldScroll = true
+            }
+          })
           .debounceTime(200)
           .subscribe(
             () => {
               if (this.loading > 0) --this.loading
               this.messages = messages
-              if (this.$refs.chatBox.scrollHeight - this.$refs.chatBox.scrollTop <= this.$refs.chatBox.clientHeight + 100 || this.$refs.chatBox.scrollTop <= 100) {
+              if (shouldScroll) {
+                shouldScroll = false
                 Vue.nextTick(() => {
                   window.$(this.$refs.chatBox).scrollTop(99999)
                 })
