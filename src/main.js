@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+import VueRx from 'vue-rx'
 import App from './app'
 import moment from 'moment'
 
@@ -36,6 +37,7 @@ import {
   CourseAssignment
 } from './components'
 
+Vue.use(VueRx)
 Vue.use(VueRouter)
 
 Firebase.init()
