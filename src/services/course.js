@@ -91,14 +91,17 @@ export default {
     return Firebase.set(`course/${id}/attend`, null)
   },
   attendUsers (id) {
-    return Firebase.onValue(`attend/${id}/user`)
-      .map((users) => _.mapValues(users, (x, id) => ({id, count: _.keys(x).length})))
-      .map(_.values)
-      .flatMap((users) =>
-        Observable.from(users)
-          .flatMap((user) => User.get(user.id).first(), (user, data) => ({...user, ...data}))
-          .toArray()
+    return Firebase.onValue(`attend/${id}`)
+      .map((codes) => _(codes)
+        .map((users, code) => ({ code, users: _.map(users, (timestamp, id) => ({ id })) }))
+        .flatMap((x) => x.users)
+        .groupBy((x) => x.id)
+        .map((attend, id) => ({ id, count: attend.length }))
+        .value()
       )
+      .flatMap((users) => Observable.from(users)
+        .concatMap((user) => User.getOnce(user.id), (user, result) => ({ ...user, ...result }))
+        .toArray())
   },
   isAttended (id) {
     return Observable.forkJoin(

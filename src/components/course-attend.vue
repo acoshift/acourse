@@ -54,9 +54,10 @@
             this.course = course
             this.students = students
           },
-          () => {
+          (err) => {
+            console.log(err)
             this.loading = false
-            this.$router.replace('/home')
+            // this.$router.replace('/home')
           }
         )
       )
