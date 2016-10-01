@@ -4,10 +4,19 @@ import VueRxJS from './vue-rxjs'
 import App from './app'
 import './filters'
 
-import '!style!css!semantic-ui-css/semantic.min.css'
-import '!script!jquery/dist/jquery.min.js'
-import '!script!semantic-ui-css/semantic.min.js'
+// import '!style!css!semantic-ui-css/semantic.min.css'
+
 import '!style!css!./style.css'
+
+import '!script!jquery/dist/jquery.min.js'
+
+import '!script!semantic-ui-css/components/checkbox.min.js'
+import '!script!semantic-ui-css/components/dimmer.min.js'
+import '!script!semantic-ui-css/components/modal.min.js'
+import '!script!semantic-ui-css/components/transition.min.js'
+
+// import '!script!semantic-ui-css/components/semantic.min.js'
+
 // import serviceWorker from 'serviceworker!./sw.js'
 
 // serviceWorker({ scope: '/' }).then((reg) => {
