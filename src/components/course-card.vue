@@ -43,11 +43,8 @@
     props: ['course'],
     data () {
       return {
-        isFav: false
+        uid: Auth.currentUser().first().map(({ uid }) => uid)
       }
-    },
-    created () {
-      this.init()
     },
     computed: {
       favorites () {
@@ -55,23 +52,12 @@
       },
       students () {
         return _.keys(this.course.student).length
-      }
-    },
-    watch: {
-      course () {
-        this.init()
+      },
+      isFav () {
+        return !!_.get(this.course.favorite, this.uid)
       }
     },
     methods: {
-      init () {
-        Auth.currentUser()
-          .first()
-          .subscribe(
-            (user) => {
-              this.isFav = !!_.get(this.course.favorite, user.uid)
-            }
-          )
-      },
       fav () {
         if (this.isFav) {
           Course.unfavorite(this.course.id).subscribe()

@@ -34,12 +34,12 @@ export default {
   uploadMePhoto (file) {
     return Auth.currentUser()
       .first()
-      .flatMap((user) => Firebase.upload(`user/${user.uid}/${Date.now()}`, file))
+      .flatMap(({ uid }) => Firebase.upload(`user/${uid}/${Date.now()}`, file))
   },
   upload (file) {
     return Auth.currentUser()
       .first()
-      .flatMap((user) => Firebase.upload(`user/${user.uid}/${Date.now()}`, file))
+      .flatMap(({ uid }) => Firebase.upload(`user/${uid}/${Date.now()}`, file))
   },
   update (id, data) {
     return Firebase.update(`user/${id}`, data)
@@ -54,18 +54,18 @@ export default {
       .first()
       .flatMap((user) => Firebase.set(`user/${user.uid}/course/${courseId}`, true))
   },
-  saveAuthProfile (auth) {
-    return this.get(auth.uid)
+  saveAuthProfile ({ uid, displayName, photoURL }) {
+    return this.get(uid)
       .flatMap((user) => {
         const data = _.pick(user, ['name', 'photo'])
         if (!data.name || !data.photo) {
           if (!data.name) {
-            data.name = auth.displayName
+            data.name = displayName
           }
           if (!data.photo) {
-            data.photo = auth.photoURL
+            data.photo = photoURL
           }
-          return this.update(auth.uid, data)
+          return this.update(uid, data)
         }
         return Observable.of({})
       })
