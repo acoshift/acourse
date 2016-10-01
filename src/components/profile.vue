@@ -1,7 +1,7 @@
 <template>
   <div>
-    <div class="ui segment" :class="{loading}">
-      <user-profile :user="user" v-show="!loading"></user-profile>
+    <div class="ui segment" :class="{loading: !user}">
+      <user-profile :user="user" v-show="user"></user-profile>
       <div class="ui right aligned basic segment">
         <router-link class="ui green edit button" to="/profile/edit">Edit</router-link>
       </div>
@@ -46,52 +46,19 @@
     },
     data () {
       return {
-        user: null,
-        loading: false,
-        ownCourses: null,
-        courses: null,
-        ob: []
+        user: Auth.currentUser()
+          .flatMap(({ uid }) => User.getProfile(uid)),
+        ownCourses: Auth.currentUser()
+          .flatMap(({ uid }) => Course.ownBy(uid)),
+        courses: Auth.currentUser()
+          .flatMap(({ uid }) => User.get(uid))
+          .map((x) => x.course)
+          .map(_.keys)
+          .flatMap((courseIds) =>
+            Observable.from(courseIds)
+              .flatMap((id) => Course.get(id).first())
+              .toArray())
       }
-    },
-    created () {
-      this.loading = true
-      this.ob.push(User.me()
-        .subscribe(
-          (user) => {
-            this.loading = false
-            this.user = user
-          },
-          () => {
-            this.loading = false
-          }
-        )
-      )
-      Auth.currentUser()
-        .first()
-        .flatMap((user) => Course.ownBy(user.uid))
-        .subscribe(
-          (courses) => {
-            this.ownCourses = _.isEmpty(courses) ? null : courses
-          }
-        )
-      User.me()
-        .first()
-        .map((user) => user.course)
-        .map(_.keys)
-        .flatMap(Observable.from)
-        .flatMap((id) => Course.get(id).first())
-        .toArray()
-        .subscribe(
-          (courses) => {
-            this.courses = courses
-          },
-          () => {
-            this.courses = null
-          }
-        )
-    },
-    destroyed () {
-      _.forEach(this.ob, (x) => x.unsubscribe())
     }
   }
 </script>

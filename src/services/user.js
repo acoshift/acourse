@@ -24,7 +24,7 @@ export default {
           this.isInstructor(auth.uid)
         ), (auth, [user, instructor]) => ({id: auth.uid, ...user, instructor}))
   },
-  getProfileAndInstructor (id) {
+  getProfile (id) {
     return Observable.combineLatest(
       this.get(id),
       this.isInstructor(id)

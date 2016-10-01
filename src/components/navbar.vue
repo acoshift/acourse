@@ -7,10 +7,9 @@
       <div class="item">
         <router-link to="/home">Home</router-link>
       </div>
-      <div class="item" style="padding: 0 0.5rem;">
+      <div v-if="user" class="item" style="padding: 0 0.5rem;">
         <router-link to="/profile">
-          <avatar :src="user && user.photo" size="tiny"></avatar>
-          {{ user && user.name || 'Anonymous' }}
+          <user-avatar :user="user"></user-avatar>
         </router-link>
       </div>
       <div class="item">
@@ -23,15 +22,16 @@
 <script>
   import { Auth, User } from '../services'
   import Vue from 'vue'
-  import Avatar from './avatar'
+  import UserAvatar from './user-avatar'
 
   export default {
     components: {
-      Avatar
+      UserAvatar
     },
     data () {
       return {
-        user: Auth.currentUser().flatMap((auth) => User.getProfileAndInstructor(auth.uid))
+        user: Auth.currentUser()
+          .flatMap(({ uid }) => User.getProfile(uid))
       }
     },
     methods: {
