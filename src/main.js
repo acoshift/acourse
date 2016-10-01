@@ -70,10 +70,9 @@ const router = new VueRouter({
   ]
 })
 
-router.beforeEach((to, from, next) => {
+router.afterEach((to) => {
   window.ga('set', 'page', to.path)
   window.ga('send', 'pageview')
-  next()
 })
 
 function redirectIfAuth (to, from, next) {
