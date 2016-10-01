@@ -1,3 +1,4 @@
+var webpack = require('webpack')
 var path = require('path')
 var config = require('../config')
 var utils = require('./utils')
@@ -13,33 +14,34 @@ module.exports = {
     filename: '[name].js'
   },
   resolve: {
-    extensions: ['', '.js', '.vue'],
-    fallback: [path.join(__dirname, '../node_modules'), path.join(__dirname, '../bower_components')],
+    modules: [path.join(__dirname, '../node_modules')],
+    extensions: ['.js', '.vue'],
     alias: {
+      'vue': 'vue/dist/vue.common.js',
       'src': path.resolve(__dirname, '../src'),
       'assets': path.resolve(__dirname, '../src/assets'),
       'components': path.resolve(__dirname, '../src/components')
     }
   },
   resolveLoader: {
-    fallback: [path.join(__dirname, '../node_modules')]
+    modules: [path.join(__dirname, '../node_modules')]
   },
   module: {
-    preLoaders: [
+    loaders: [
       {
+        enforce: 'pre',
         test: /\.vue$/,
         loader: 'eslint',
         include: projectRoot,
         exclude: /node_modules/
       },
       {
+        enforce: 'pre',
         test: /\.js$/,
         loader: 'eslint',
         include: projectRoot,
         exclude: /node_modules/
-      }
-    ],
-    loaders: [
+      },
       {
         test: /\.vue$/,
         loader: 'vue'
@@ -53,10 +55,6 @@ module.exports = {
       {
         test: /\.json$/,
         loader: 'json'
-      },
-      {
-        test: /\.html$/,
-        loader: 'vue-html'
       },
       {
         test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
@@ -76,10 +74,19 @@ module.exports = {
       }
     ]
   },
-  eslint: {
-    formatter: require('eslint-friendly-formatter')
-  },
-  vue: {
-    loaders: utils.cssLoaders()
-  }
+  plugins: [
+    new webpack.LoaderOptionsPlugin({
+      eslint: {
+        formatter: require('eslint-friendly-formatter')
+      },
+      vue: {
+        loaders: utils.cssLoaders(),
+        postcss: [
+          require('autoprefixer')({
+            browsers: ['last 2 versions']
+          })
+        ]
+      }
+    })
+  ]
 }

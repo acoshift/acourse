@@ -20,46 +20,25 @@ var webpackConfig = merge(baseWebpackConfig, {
     filename: utils.assetsPath('js/[name].[chunkhash].js'),
     chunkFilename: utils.assetsPath('js/[id].[chunkhash].js')
   },
-  vue: {
-    loaders: utils.cssLoaders({
-      sourceMap: config.build.productionSourceMap,
-      extract: true
-    })
-  },
   plugins: [
+    new webpack.LoaderOptionsPlugin({
+      vue: {
+        loaders: utils.cssLoaders({
+          sourceMap: config.build.productionSourceMap,
+          extract: true
+        })
+      }
+    }),
     // http://vuejs.github.io/vue-loader/workflow/production.html
     new webpack.DefinePlugin({
       'process.env': env
     }),
     new webpack.optimize.UglifyJsPlugin({
       compress: {
-        sequences: true,
-        properties: true,
-        dead_code: true,
-        drop_debugger: true,
-        unsafe: false,
-        conditionals: true,
-        comparisons: true,
-        evaluate: true,
-        booleans: true,
-        loops: true,
-        unused: true,
-        hoist_funs: true,
-        hoist_vars: false,
-        if_return: true,
-        join_vars: true,
-        cascade: true,
-        side_effects: true,
-        warnings: false,
-        screw_ie8: true,
-        drop_console: true
-      },
-      output: {
-        screw_ie8: true,
-        comments: function () { return false }
+        warnings: false
       }
     }),
-    new webpack.optimize.OccurenceOrderPlugin(),
+    new webpack.optimize.OccurrenceOrderPlugin(),
     // extract css into its own file
     new ExtractTextPlugin(utils.assetsPath('css/[name].[contenthash].css')),
     // generate dist index.html with correct asset hash for caching.
