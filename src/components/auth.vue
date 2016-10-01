@@ -142,7 +142,7 @@
 </style>
 
 <script>
-  import { Auth } from '../services'
+  import { Auth, User } from '../services'
   import Vue from 'vue'
 
   export default {
@@ -215,6 +215,7 @@
         this.facebookLoading = true
         this.providerError = ''
         Auth.signInWithFacebook()
+          .flatMap((res) => User.saveAuthProfile(res.user), (x) => x)
           .subscribe(
             () => {
               this.facebookLoading = false
@@ -231,6 +232,7 @@
         this.googleLoading = true
         this.providerError = ''
         Auth.signInWithGoogle()
+          .flatMap((res) => User.saveAuthProfile(res.user), (x) => x)
           .subscribe(
             () => {
               this.googleLoading = false

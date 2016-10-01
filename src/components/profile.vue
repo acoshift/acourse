@@ -66,7 +66,7 @@
           }
         )
       )
-      Auth.currentUser
+      Auth.currentUser()
         .first()
         .flatMap((user) => Course.ownBy(user.uid))
         .subscribe(

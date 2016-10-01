@@ -64,7 +64,7 @@
     },
     methods: {
       init () {
-        Auth.currentUser
+        Auth.currentUser()
           .first()
           .subscribe(
             (user) => {

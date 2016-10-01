@@ -1,11 +1,12 @@
 /* eslint-env serviceworker */
 
-console.log(self)
-
 self.addEventListener('install', (event) => {
   self.skipWaiting()
 })
 
-self.addEventListener('push', (event) => {
-  console.log(event)
+self.addEventListener('push', (event, a) => {
+  console.log(a)
+  event.waitUntil(
+    self.registration.showNotification('Acourse')
+  )
 })

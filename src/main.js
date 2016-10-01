@@ -1,8 +1,8 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import VueRx from 'vue-rx'
+import VueRxJS from './vue-rxjs'
 import App from './app'
-import moment from 'moment'
+import './filters'
 
 import '!style!css!semantic-ui-css/semantic.min.css'
 import '!script!jquery/dist/jquery.min.js'
@@ -37,41 +37,10 @@ import {
   CourseAssignment
 } from './components'
 
-Vue.use(VueRx)
+Vue.use(VueRxJS)
 Vue.use(VueRouter)
 
 Firebase.init()
-
-const time = new Vue({
-  data () {
-    return {
-      now: null
-    }
-  },
-  created () {
-    setInterval(() => {
-      this.now = Date.now()
-    }, 60000)
-  }
-})
-
-Vue.filter('date', (value, input) => {
-  time.now
-  if (!value) return '-'
-  return moment(value).format(input)
-})
-
-Vue.filter('fromNow', (value) => {
-  time.now
-  if (!value) return '-'
-  return moment(value).fromNow()
-})
-
-Vue.filter('trim', (value, input) => {
-  value = value || ''
-  if (value.length <= input) return value
-  return value.substr(0, input) + '...'
-})
 
 const router = new VueRouter({
   mode: 'history',
@@ -108,7 +77,7 @@ router.beforeEach((to, from, next) => {
 })
 
 function redirectIfAuth (to, from, next) {
-  AuthService.currentUser
+  AuthService.currentUser()
     .first()
     .subscribe(
       (user) => {
@@ -122,7 +91,7 @@ function redirectIfAuth (to, from, next) {
 }
 
 function redirectIfNotAuth (to, from, next) {
-  AuthService.currentUser
+  AuthService.currentUser()
     .first()
     .subscribe(
       (user) => {

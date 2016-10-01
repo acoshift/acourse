@@ -164,7 +164,7 @@
         this.courseId = this.$route.params.id
 
         this.ob.push(Observable.combineLatest(
-          Auth.currentUser.first(),
+          Auth.currentUser().first(),
           Course.get(this.courseId)
             .flatMap((course) => User.getOnce(course.owner), (course, owner) => ({...course, owner}))
         )

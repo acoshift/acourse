@@ -31,16 +31,8 @@
     },
     data () {
       return {
-        user: null
+        user: Auth.currentUser().flatMap((auth) => User.getProfileAndInstructor(auth.uid))
       }
-    },
-    created () {
-      User.me()
-        .subscribe(
-          (user) => {
-            this.user = user
-          }
-        )
     },
     methods: {
       signOut () {

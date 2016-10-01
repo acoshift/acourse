@@ -36,17 +36,17 @@ export default {
     return Firebase.update(`course/${id}`, data)
   },
   favorite (id) {
-    return Auth.currentUser
+    return Auth.currentUser()
       .first()
       .flatMap((user) => Firebase.set(`course/${id}/favorite/${user.uid}`, true))
   },
   unfavorite (id) {
-    return Auth.currentUser
+    return Auth.currentUser()
       .first()
       .flatMap((user) => Firebase.remove(`course/${id}/favorite/${user.uid}`))
   },
   join (id) {
-    return Auth.currentUser
+    return Auth.currentUser()
       .first()
       .flatMap((user) =>
         Observable.forkJoin(
@@ -58,13 +58,13 @@ export default {
   ownBy (userId) {
     const ref = Firebase.ref('course').orderByChild('owner').equalTo(userId)
     return Observable.combineLatest(
-      Auth.currentUser.first(),
+      Auth.currentUser().first(),
       Firebase.onArrayValue(ref)
     )
       .map(([auth, courses]) => auth.uid === userId ? courses : _.filter(courses, (course) => course.open))
   },
   sendMessage (id, text) {
-    return Auth.currentUser
+    return Auth.currentUser()
       .first()
       .flatMap((auth) => Firebase.push(`chat/${id}`, {
         u: auth.uid,
@@ -80,7 +80,7 @@ export default {
     return Firebase.onChildAdded(ref)
   },
   attend (id, code) {
-    return Auth.currentUser
+    return Auth.currentUser()
       .first()
       .flatMap((auth) => Firebase.set(`attend/${id}/${code}/${auth.uid}`, Firebase.timestamp))
   },
@@ -105,7 +105,7 @@ export default {
   },
   isAttended (id) {
     return Observable.forkJoin(
-      Auth.currentUser.first(),
+      Auth.currentUser().first(),
       this.get(id).first().map((course) => course.attend)
     )
       .flatMap(([auth, code]) => Firebase.onValue(`attend/${id}/${code}/${auth.uid}`))
@@ -118,12 +118,12 @@ export default {
     return Firebase.onArrayValue(`assignment/${id}/code`)
   },
   getAssignmentUser (id) {
-    return Auth.currentUser
+    return Auth.currentUser()
       .first()
       .flatMap((auth) => Firebase.onValue(`assignment/${id}/user/${auth.uid}`))
   },
   addAssignmentFile (id, assignmentId, url) {
-    return Auth.currentUser
+    return Auth.currentUser()
       .first()
       .flatMap((auth) => Firebase.push(`assignment/${id}/user/${auth.uid}/${assignmentId}`, {
         url,

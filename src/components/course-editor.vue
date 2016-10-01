@@ -85,7 +85,7 @@
     created () {
       if (!this.$route.params.id) {
         this.isNew = true
-        Auth.currentUser
+        Auth.currentUser()
           .first()
           .subscribe(
             (user) => {
@@ -96,7 +96,7 @@
         this.loading = true
         this.courseId = this.$route.params.id
         Observable.forkJoin(
-          Auth.currentUser.first(),
+          Auth.currentUser().first(),
           Course.get(this.$route.params.id).first()
         )
           .subscribe(
