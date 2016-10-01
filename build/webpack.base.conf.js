@@ -75,6 +75,10 @@ module.exports = {
     ]
   },
   plugins: [
+    new webpack.ProvidePlugin({
+      $: 'jquery',
+      jQuery: 'jquery'
+    }),
     new webpack.LoaderOptionsPlugin({
       eslint: {
         formatter: require('eslint-friendly-formatter')

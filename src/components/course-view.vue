@@ -133,7 +133,7 @@
 <script>
   import { Auth, User, Course } from '../services'
   import { Observable } from 'rxjs'
-  import _ from 'lodash'
+  import { get, keys } from 'lodash'
   import Avatar from './avatar'
 
   export default {
@@ -172,10 +172,10 @@
               this.loading = false
               this.course = course
               if (course.owner.id === user.uid) this.isOwn = true
-              this.isApply = !!_.get(course.student, user.uid)
+              this.isApply = !!get(course.student, user.uid)
 
               this.ob.push(Observable.of(course.student)
-                .map(_.keys)
+                .map(keys)
                 .flatMap((users) => Observable.from(users))
                 .flatMap((id) => User.get(id).first())
                 .toArray()
@@ -206,7 +206,7 @@
       })
     },
     destroyed () {
-      _.forEach(this.ob, (x) => x.unsubscribe())
+      this.ob.forEach((x) => x.unsubscribe())
     },
     methods: {
       apply () {
@@ -235,7 +235,7 @@
       openAttendModal () {
         this.attendError = ''
         this.attendCode = ''
-        window.$(this.$refs.attendModal).modal('show')
+        $(this.$refs.attendModal).modal('show')
       },
       submitAttend () {
         this.attendError = ''
@@ -245,7 +245,7 @@
             () => {
               this.attending = false
               this.attendCode = ''
-              window.$(this.$refs.attendModal).modal('hide')
+              $(this.$refs.attendModal).modal('hide')
             },
             (err) => {
               this.attending = false
@@ -254,14 +254,14 @@
           )
       },
       openAssignmentModal () {
-        window.$(this.$refs.assignmentModal).modal('show')
+        $(this.$refs.assignmentModal).modal('show')
       },
       submitAssignmentCode () {
         Course.addAssignment(this.courseId, { title: this.assignmentCode })
           .subscribe(
             () => {
               window.alert('ok')
-              window.$(this.$refs.assignmentModal).modal('hide')
+              $(this.$refs.assignmentModal).modal('hide')
             },
             () => {
               window.alert('error')

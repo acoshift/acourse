@@ -72,7 +72,6 @@
 <script>
   import { Course, User } from '../services'
   import Avatar from './avatar'
-  import _ from 'lodash'
 
   export default {
     components: {
@@ -107,22 +106,22 @@
       )
     },
     destroyed () {
-      _.forEach(this.ob, (x) => x.unsubscribe())
+      this.ob.forEach((x) => x.unsubscribe())
     },
     mounted () {
       this.adjust()
-      window.$(window).resize(this.adjust)
-      window.$(this.$refs.chatBox)
+      $(window).resize(this.adjust)
+      $(this.$refs.chatBox)
         .off()
         .on('scroll', () => {
-          let pos = window.$(this.$refs.chatBox).scrollTop()
+          let pos = $(this.$refs.chatBox).scrollTop()
           if (pos <= 5) {
             if (this.limit > this.messages.length) return
             this.limit += 30
             this.loading = 1
             this.initMessages()
             this.$nextTick(() => {
-              window.$(this.$refs.chatBox).scrollTop(700)
+              $(this.$refs.chatBox).scrollTop(700)
             })
           }
         })
@@ -164,7 +163,7 @@
               if (shouldScroll) {
                 shouldScroll = false
                 this.$nextTick(() => {
-                  window.$(this.$refs.chatBox).scrollTop(99999)
+                  $(this.$refs.chatBox).scrollTop(99999)
                 })
               }
             }
@@ -172,10 +171,10 @@
         )
       },
       adjust () {
-        let container = window.$(this.$refs.container)
-        let box = window.$(this.$refs.chatBox)
+        let container = $(this.$refs.container)
+        let box = $(this.$refs.chatBox)
         let h = window.innerHeight
-        let input = window.$(this.$refs.input)
+        let input = $(this.$refs.input)
         container.height(() => h - container.offset().top - 20)
         box.height(() => h - box.offset().top - 80)
         box.scrollTop(99999)

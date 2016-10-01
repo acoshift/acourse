@@ -22,6 +22,8 @@ var webpackConfig = merge(baseWebpackConfig, {
   },
   plugins: [
     new webpack.LoaderOptionsPlugin({
+      minimize: true,
+      debug: false,
       vue: {
         loaders: utils.cssLoaders({
           sourceMap: config.build.productionSourceMap,
@@ -35,7 +37,25 @@ var webpackConfig = merge(baseWebpackConfig, {
     }),
     new webpack.optimize.UglifyJsPlugin({
       compress: {
-        warnings: false
+        warnings: false,
+        drop_console: true,
+        join_vars: true,
+        if_return: true,
+        unused: true,
+        booleans: true,
+        conditionals: true,
+        comparisons: true,
+        evaluate: true,
+        drop_debugger: true,
+        dead_code: true,
+        properties: true,
+        cascade: true,
+        negate_iife: true,
+        keep_fargs: false,
+        passes: 5
+      },
+      output: {
+        comments: function () { return false }
       }
     }),
     new webpack.optimize.OccurrenceOrderPlugin(),

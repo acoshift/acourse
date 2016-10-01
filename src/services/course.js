@@ -2,7 +2,7 @@ import Firebase from './firebase'
 import User from './user'
 import Auth from './auth'
 import { Observable } from 'rxjs'
-import _ from 'lodash'
+import { chain, filter, map } from 'lodash'
 
 export default {
   list () {
@@ -61,7 +61,7 @@ export default {
       Auth.currentUser().first(),
       Firebase.onArrayValue(ref)
     )
-      .map(([auth, courses]) => auth.uid === userId ? courses : _.filter(courses, (course) => course.open))
+      .map(([auth, courses]) => auth.uid === userId ? courses : filter(courses, (course) => course.open))
   },
   sendMessage (id, text) {
     return Auth.currentUser()
@@ -92,8 +92,8 @@ export default {
   },
   attendUsers (id) {
     return Firebase.onValue(`attend/${id}`)
-      .map((codes) => _(codes)
-        .map((users, code) => ({ code, users: _.map(users, (timestamp, id) => ({ id })) }))
+      .map((codes) => chain(codes)
+        .map((users, code) => ({ code, users: map(users, (timestamp, id) => ({ id })) }))
         .flatMap((x) => x.users)
         .groupBy((x) => x.id)
         .map((attend, id) => ({ id, count: attend.length }))

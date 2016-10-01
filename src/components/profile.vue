@@ -36,7 +36,7 @@
   import { Auth, User, Course } from '../services'
   import UserProfile from './user-profile'
   import CourseCard from './course-card'
-  import _ from 'lodash'
+  import { keys } from 'lodash'
   import { Observable } from 'rxjs'
 
   export default {
@@ -53,7 +53,7 @@
         courses: Auth.currentUser()
           .flatMap(({ uid }) => User.get(uid))
           .map((x) => x.course)
-          .map(_.keys)
+          .map(keys)
           .flatMap((courseIds) =>
             Observable.from(courseIds)
               .flatMap((id) => Course.get(id).first())

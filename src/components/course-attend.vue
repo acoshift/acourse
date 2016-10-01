@@ -25,7 +25,6 @@
   import { Course } from '../services'
   import { Observable } from 'rxjs'
   import Avatar from './avatar'
-  import _ from 'lodash'
 
   export default {
     components: {
@@ -63,7 +62,7 @@
       )
     },
     destroyed () {
-      _.forEach(this.ob, (x) => x.unsubscribe())
+      this.ob.forEach((x) => x.unsubscribe())
     }
   }
 </script>

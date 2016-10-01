@@ -22,7 +22,7 @@
   import { User, Course } from '../services'
   import UserProfile from './user-profile'
   import CourseCard from './course-card'
-  import _ from 'lodash'
+  import { keys, isEmpty } from 'lodash'
   import { Observable } from 'rxjs'
 
   export default {
@@ -52,7 +52,7 @@
             (user) => {
               this.user = user
               Observable.of(user.course)
-                .map(_.keys)
+                .map(keys)
                 .flatMap(Observable.from)
                 .flatMap((id) => Course.get(id).first())
                 .filter((course) => course.open)
@@ -70,7 +70,7 @@
         Course.ownBy(this.$route.params.id)
           .subscribe(
             (courses) => {
-              this.ownCourses = _.isEmpty(courses) ? null : courses
+              this.ownCourses = isEmpty(courses) ? null : courses
             }
           )
       }

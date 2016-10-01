@@ -37,7 +37,7 @@
 
 <script>
   import { Auth, Course } from '../services'
-  import _ from 'lodash'
+  import { keys, get } from 'lodash'
 
   export default {
     props: ['course'],
@@ -48,13 +48,13 @@
     },
     computed: {
       favorites () {
-        return _.keys(this.course.favorite).length
+        return keys(this.course.favorite).length
       },
       students () {
-        return _.keys(this.course.student).length
+        return keys(this.course.student).length
       },
       isFav () {
-        return !!_.get(this.course.favorite, this.uid)
+        return !!get(this.course.favorite, this.uid)
       }
     },
     methods: {

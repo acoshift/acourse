@@ -1,6 +1,6 @@
 import firebase from 'firebase'
 import { Observable, BehaviorSubject } from 'rxjs'
-import _ from 'lodash'
+import { isString } from 'lodash'
 
 export default {
   init () {
@@ -41,7 +41,7 @@ export default {
   },
   onValue (ref) {
     return Observable.create((o) => {
-      ref = _.isString(ref) ? this.ref(ref) : ref
+      ref = isString(ref) ? this.ref(ref) : ref
       ref.on('value', (snapshot) => {
         o.next(snapshot.val())
       })
@@ -49,7 +49,7 @@ export default {
   },
   onceValue (ref) {
     return Observable.create((o) => {
-      ref = _.isString(ref) ? this.ref(ref) : ref
+      ref = isString(ref) ? this.ref(ref) : ref
       ref.once('value', (snapshot) => {
         o.next(snapshot.val())
         o.complete()
@@ -58,7 +58,7 @@ export default {
   },
   onChildAdded (ref) {
     return Observable.create((o) => {
-      ref = _.isString(ref) ? this.ref(ref) : ref
+      ref = isString(ref) ? this.ref(ref) : ref
       ref.on('child_added', (snapshot) => {
         o.next(snapshot.val())
       })
@@ -66,7 +66,7 @@ export default {
   },
   onArrayValue (ref) {
     return Observable.create((o) => {
-      ref = _.isString(ref) ? this.ref(ref) : ref
+      ref = isString(ref) ? this.ref(ref) : ref
       ref.on('value', (snapshots) => {
         const result = []
         snapshots.forEach((snapshot) => {

@@ -183,7 +183,7 @@
             () => {
               this.loading = false
               this.email = ''
-              window.$(this.$refs.successModal)
+              $(this.$refs.successModal)
                 .modal('attach events', this.$refs.closeButton, 'hide')
                 .modal('show')
             },

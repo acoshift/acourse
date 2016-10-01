@@ -62,7 +62,7 @@
 <script>
   import { Auth, User, Course } from '../services'
   import { Observable } from 'rxjs'
-  import _ from 'lodash'
+  import { defaults, pick, keys } from 'lodash'
 
   export default {
     data () {
@@ -103,13 +103,13 @@
             ([user, course]) => {
               this.loading = false
               if (course.owner !== user.uid) return this.$router.replace(`/course/${this.courseId}`)
-              this.course = _.defaults(_.pick(course, _.keys(this.course)), this.course)
+              this.course = defaults(pick(course, keys(this.course)), this.course)
             }
           )
       }
     },
     mounted () {
-      window.$('.checkbox').checkbox()
+      $('.checkbox').checkbox()
     },
     methods: {
       uploadPhoto () {
