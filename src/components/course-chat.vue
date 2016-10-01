@@ -72,9 +72,7 @@
 <script>
   import { Course, User } from '../services'
   import Avatar from './avatar'
-  import Vue from 'vue'
   import _ from 'lodash'
-  // import { Observable } from 'rxjs'
 
   export default {
     components: {
@@ -123,7 +121,7 @@
             this.limit += 30
             this.loading = 1
             this.initMessages()
-            Vue.nextTick(() => {
+            this.$nextTick(() => {
               window.$(this.$refs.chatBox).scrollTop(700)
             })
           }
@@ -165,7 +163,7 @@
               this.messages = messages
               if (shouldScroll) {
                 shouldScroll = false
-                Vue.nextTick(() => {
+                this.$nextTick(() => {
                   window.$(this.$refs.chatBox).scrollTop(99999)
                 })
               }

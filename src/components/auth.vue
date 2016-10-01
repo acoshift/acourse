@@ -143,7 +143,6 @@
 
 <script>
   import { Auth, User } from '../services'
-  import Vue from 'vue'
 
   export default {
     data () {
@@ -248,7 +247,7 @@
         this.error = ''
       },
       gotoHome () {
-        Vue.nextTick(() => {
+        this.$nextTick(() => {
           this.$router.push('/home')
         })
       }

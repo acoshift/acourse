@@ -1,7 +1,7 @@
 <template>
   <div>
-    <div class="ui segment" :class="{loading}">
-      <user-profile :user="user" v-show="!loading"></user-profile>
+    <div class="ui segment" :class="{loading: !user}">
+      <user-profile :user="user" v-show="user"></user-profile>
     </div>
     <div class="ui segment" v-if="ownCourses">
       <h3 class="ui header">Courses own by {{ user && user.name || 'Anonymous' }}</h3>
@@ -33,10 +33,8 @@
     data () {
       return {
         user: null,
-        loading: false,
         ownCourses: null,
-        courses: null,
-        ob: []
+        courses: null
       }
     },
     created () {
@@ -49,11 +47,9 @@
     },
     methods: {
       init () {
-        this.loading = true
-        this.ob.push(User.get(this.$route.params.id)
+        User.get(this.$route.params.id)
           .subscribe(
             (user) => {
-              this.loading = false
               this.user = user
               Observable.of(user.course)
                 .map(_.keys)
@@ -69,23 +65,15 @@
                     this.courses = null
                   }
                 )
-            },
-            () => {
-              this.loading = false
             }
           )
-        )
-        this.ob.push(Course.ownBy(this.$route.params.id)
+        Course.ownBy(this.$route.params.id)
           .subscribe(
             (courses) => {
               this.ownCourses = _.isEmpty(courses) ? null : courses
             }
           )
-        )
       }
-    },
-    destroyed () {
-      _.forEach(this.ob, (x) => x.unsubscribe())
     }
   }
 </script>

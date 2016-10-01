@@ -21,7 +21,6 @@
 
 <script>
   import { Auth, User } from '../services'
-  import Vue from 'vue'
   import UserAvatar from './user-avatar'
 
   export default {
@@ -39,7 +38,7 @@
         Auth.signOut()
           .subscribe(
             () => {
-              Vue.nextTick(() => {
+              this.$nextTick(() => {
                 this.$router.push('/')
               })
             }

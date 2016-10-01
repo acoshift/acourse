@@ -135,7 +135,6 @@
   import { Observable } from 'rxjs'
   import _ from 'lodash'
   import Avatar from './avatar'
-  import Vue from 'vue'
 
   export default {
     components: {
@@ -159,7 +158,7 @@
       }
     },
     mounted () {
-      Vue.nextTick(() => {
+      this.$nextTick(() => {
         this.loading = true
         this.courseId = this.$route.params.id
 
