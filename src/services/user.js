@@ -2,11 +2,17 @@ import Firebase from './firebase'
 import Auth from './auth'
 import { Observable } from 'rxjs'
 import pick from 'lodash/fp/pick'
+import assign from 'lodash/extend'
 
 export default {
   get (id) {
     return Firebase.onValue(`user/${id}`)
       .map((user) => ({id, ...user}))
+  },
+  inject (obj) {
+    this.get(obj.id)
+      .first()
+      .subscribe((user) => assign(obj, user))
   },
   getOnce (id) {
     return Firebase.onceValue(`user/${id}`)

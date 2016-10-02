@@ -12,6 +12,8 @@ import keys from 'lodash/fp/keys'
 import flatMap from 'lodash/fp/flatMap'
 import countBy from 'lodash/fp/countBy'
 import toPairs from 'lodash/fp/toPairs'
+import forEach from 'lodash/fp/forEach'
+import orderBy from 'lodash/fp/orderBy'
 
 export default {
   list () {
@@ -93,12 +95,11 @@ export default {
           flatMap(keys),
           countBy(identity),
           toPairs,
-          map((x) => ({ id: x[0], count: x[1] }))
+          map((x) => ({ id: x[0], count: x[1] })),
+          orderBy('count', 'desc'),
+          forEach(User.inject.bind(User))
         )
       )
-      .flatMap((users) => Observable.from(users)
-        .concatMap((user) => User.getOnce(user.id), (user, result) => ({ ...user, ...result }))
-        .toArray())
   },
   isAttended (id) {
     return Observable.forkJoin(

@@ -5,6 +5,12 @@
       <i class="right chevron icon divider"></i>
       <div class="active section">{{ course && course.title || courseId }}</div>
     </div>
+    <div v-if="isOwn" class="ui segment">
+      <router-link class="ui green button" :to="`/course/${courseId}/edit`">Edit</router-link>
+      <div class="ui teal button" @click="openAttendModal">Open Attend</div>
+      <div class="ui teal button" @click="openAssignmentModal">Add Assignment</div>
+      <router-link class="ui blue button" :to="`/course/${courseId}/attend`">Attendants</router-link>
+    </div>
     <div class="ui segment" v-if="course">
       <div class="ui center aligned grid">
         <div class="row">
@@ -47,11 +53,6 @@
             Attend
           </div>
         </div>
-        <div class="row" v-if="isOwn">
-          <div class="ui green button" @click="openAttendModal">
-            Open Attend
-          </div>
-        </div>
         <div class="row" v-if="isApply || isOwn" style="padding-top: 0;">
           <router-link class="ui yellow button" :to="`/course/${courseId}/chat`">Chat room</router-link>
         </div>
@@ -61,13 +62,6 @@
         <div class="row">
           <div class="column">
             <p class="description">{{ course.description }}</p>
-          </div>
-        </div>
-        <div v-if="isOwn" class="right aligned row">
-          <div class="column">
-            <div class="ui blue button" @click="openAssignmentModal">Add Assignment</div>
-            <router-link class="ui blue button" :to="`/course/${courseId}/attend`">Attendants</router-link>
-            <router-link class="ui green edit button" :to="`/course/${courseId}/edit`">Edit</router-link>
           </div>
         </div>
       </div>
@@ -123,10 +117,6 @@
 
   .join.button {
     width: 180px;
-  }
-
-  .edit.button {
-    width: 150px;
   }
 
   #student.segment {

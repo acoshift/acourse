@@ -32,7 +32,7 @@
           </div>
         </div>
       </div>
-      <div class="ui segment">
+      <div id="input" class="ui segment">
         <div class="ui grid">
           <div class="row">
             <div class="column">
@@ -50,7 +50,7 @@
   </div>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
   .chat.segment {
     padding: 0;
     overflow: hidden;
@@ -65,6 +65,12 @@
     padding: 10px;
     overflow-y: scroll;
     overflow-x: hidden;
+  }
+
+  #input.segment {
+    & input {
+      border: none !important;
+    }
   }
 
   .chat.segment .button {
@@ -83,6 +89,7 @@
   import { Course, User } from '../services'
   import Avatar from './avatar'
   import startsWith from 'lodash/fp/startsWith'
+  import debounce from 'lodash/debounce'
 
   export default {
     components: {
@@ -98,13 +105,14 @@
         ob: [],
         limit: 50,
         loadingTop: false,
-        uploading: false
+        uploading: false,
+        $message: null
       }
     },
     created () {
       this.courseId = this.$route.params.id
       this.loading = 2
-      this.ob.push(Course.get(this.courseId)
+      const $course = Course.get(this.courseId)
         .subscribe(
           (course) => {
             --this.loading
@@ -115,14 +123,15 @@
             this.$router.replace('/home')
           }
         )
-      )
+
+      this.ob.push($course)
     },
     destroyed () {
       this.ob.forEach((x) => x.unsubscribe())
     },
     mounted () {
       this.adjust()
-      $(window).resize(this.adjust)
+      $(window).resize(debounce(this.adjust, 150))
       $(this.$refs.chatBox)
         .off()
         .on('scroll', () => {
@@ -151,32 +160,19 @@
         return 0
       },
       initMessages () {
-        const messagesObservable = Course.messages(this.courseId, this.limit)
-          .do((message) => {
-            User.getOnce(message.u).subscribe((user) => {
-              message.user = user
-            })
-          })
-
         const messages = []
-
-        this.ob.push(messagesObservable
-          .subscribe(
-            (message) => {
-              message.h = this.isUrl(message.m)
-              messages.push(message)
-            }
-          )
-        )
-
         let shouldScroll = false
 
-        this.ob.push(messagesObservable
-          .do(() => {
-            if (this.$refs.chatBox.scrollHeight - this.$refs.chatBox.scrollTop <= this.$refs.chatBox.clientHeight + 500) {
-              shouldScroll = true
-            }
+        if (this.$message) this.$message.unsubscribe()
+
+        this.$message = Course.messages(this.courseId, this.limit)
+          .do((message) => {
+            message.user = { id: message.u }
+            message.h = this.isUrl(message.m)
           })
+          .do((message) => User.inject(message.user))
+          .do(messages.push.bind(messages))
+          .do(() => { shouldScroll = shouldScroll || this.shouldScroll() })
           .debounceTime(200)
           .subscribe(
             () => {
@@ -190,17 +186,20 @@
               }
             }
           )
-        )
+
+        this.ob.push(this.$message)
+      },
+      shouldScroll () {
+        return this.$refs.chatBox.scrollHeight - this.$refs.chatBox.scrollTop <= this.$refs.chatBox.clientHeight + 500
       },
       adjust () {
-        let container = $(this.$refs.container)
-        let box = $(this.$refs.chatBox)
-        let h = window.innerHeight
-        let input = $(this.$refs.input)
-        container.height(() => h - container.offset().top - 20)
-        box.height(() => h - box.offset().top - 80)
+        const container = $(this.$refs.container)
+        const box = $(this.$refs.chatBox)
+        const h = window.innerHeight
+        // container.height(() => h - container.offset().top - 20)
+        container.height(() => h - container.offset().top - 60)
+        box.height(() => h - box.offset().top - 119)
         box.scrollTop(99999)
-        input.focus()
       },
       send () {
         const input = this.input
