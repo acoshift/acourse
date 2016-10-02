@@ -196,7 +196,6 @@
         const container = $(this.$refs.container)
         const box = $(this.$refs.chatBox)
         const h = window.innerHeight
-        // container.height(() => h - container.offset().top - 20)
         container.height(() => h - container.offset().top - 60)
         box.height(() => h - box.offset().top - 119)
         box.scrollTop(99999)
