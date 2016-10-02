@@ -19,7 +19,7 @@
           <label>Cover Photo</label>
           <img v-show="course.photo" class="ui medium image" :src="course.photo">
           <div class="ui green button" @click="$refs.photo.click()" :class="{loading: uploading}">Select Photo</div>
-          <input ref="photo" type="file" class="hidden" @change="uploadPhoto">
+          <input ref="photo" type="file" class="hidden" @change="uploadPhoto" accept="image/*">
         </div>
         <div class="field">
           <label>Title</label>

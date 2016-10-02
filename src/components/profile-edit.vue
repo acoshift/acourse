@@ -7,7 +7,7 @@
         <label>Photo</label>
         <avatar v-show="user.photo" :src="user.photo" size="small"></avatar>
         <div class="ui green button" :class="{loading: uploading}" @click="$refs.photo.click()">Select Photo</div>
-        <input ref="photo" type="file" class="hidden" @change="uploadPhoto">
+        <input ref="photo" type="file" class="hidden" @change="uploadPhoto" accept="image/*">
       </div>
       <div class="field">
         <label>Name</label>
