@@ -19,7 +19,15 @@
               <div class="metadata">
                 <span class="date">{{ x.t | fromNow }}</span>
               </div>
-              <div class="text">{{ x.m }}</div>
+              <div class="text">
+                <a v-if="x.h" target="_blank" :href="x.m">
+                  <div v-if="x.h === 1" class="ui small image">
+                    <img :src="x.m" onerror="this.src = '/static/icons/ic_insert_drive_file_black_48px.svg'">
+                  </div>
+                  <span v-else>{{ x.m }}</span>
+                </a>
+                <span v-else>{{ x.m }}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -30,6 +38,7 @@
             <div class="column">
               <div class="ui fluid input">
                 <input ref="input" v-model="input" @keyup.13="send"></input>
+                <div class="ui basic icon button" @click="$refs.file.click()" :class="{loading: uploading}"><i class="upload icon"></i></div>
                 <div class="ui basic icon button" @click="send"><i class="send icon"></i></div>
               </div>
             </div>
@@ -37,6 +46,7 @@
         </div>
       </div>
     </div>
+    <input type="file" class="hidden" ref="file" @change="upload">
   </div>
 </template>
 
@@ -72,6 +82,7 @@
 <script>
   import { Course, User } from '../services'
   import Avatar from './avatar'
+  import startsWith from 'lodash/fp/startsWith'
 
   export default {
     components: {
@@ -86,7 +97,8 @@
         messages: [],
         ob: [],
         limit: 50,
-        loadingTop: false
+        loadingTop: false,
+        uploading: false
       }
     },
     created () {
@@ -129,6 +141,15 @@
       this.initMessages()
     },
     methods: {
+      isUrl (text) {
+        if (/^https?:\/\/?[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]$/.test(text)) {
+          if (startsWith('https://firebasestorage.googleapis.com/v0/b/acourse-d9d0a.appspot.com')(text)) {
+            return 1
+          }
+          return 2
+        }
+        return 0
+      },
       initMessages () {
         const messagesObservable = Course.messages(this.courseId, this.limit)
           .do((message) => {
@@ -142,6 +163,7 @@
         this.ob.push(messagesObservable
           .subscribe(
             (message) => {
+              message.h = this.isUrl(message.m)
               messages.push(message)
             }
           )
@@ -185,6 +207,24 @@
         if (!input || !input.trim()) return
         this.input = ''
         Course.sendMessage(this.courseId, input).subscribe()
+      },
+      upload () {
+        if (this.uploading) return
+        const f = this.$refs.file.files[0]
+        if (!f) return
+        this.uploading = true
+        this.$refs.file.value = ''
+        User.upload(f)
+          .flatMap((file) => Course.sendMessage(this.courseId, file.downloadURL))
+          .subscribe(
+            () => {
+              this.uploading = false
+            },
+            (err) => {
+              window.alert(err.message)
+              this.uploading = false
+            }
+          )
       }
     }
   }
