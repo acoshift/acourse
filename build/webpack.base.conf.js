@@ -6,7 +6,8 @@ var projectRoot = path.resolve(__dirname, '../')
 
 module.exports = {
   entry: {
-    app: './src/main.js'
+    app: './src/main.js',
+    vendor: './src/vendor.js'
   },
   output: {
     path: config.build.assetsRoot,
@@ -88,8 +89,9 @@ module.exports = {
         loaders: utils.cssLoaders(),
         postcss: [
           require('autoprefixer')({
-            browsers: ['last 2 versions']
-          })
+            browsers: ['last 2 versions', 'ie > 8']
+          }),
+          require('postcss-nested')
         ]
       }
     })

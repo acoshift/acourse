@@ -6,8 +6,6 @@ import RavenVue from 'raven-js/plugins/vue'
 import App from './app'
 import './filters'
 
-import '!style!css!./style.css'
-
 import 'semantic-ui-css/components/checkbox.min.js'
 import 'semantic-ui-css/components/dimmer.min.js'
 import 'semantic-ui-css/components/modal.min.js'
