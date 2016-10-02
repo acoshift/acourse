@@ -1,6 +1,7 @@
 import firebase from 'firebase'
 import { Observable, BehaviorSubject } from 'rxjs'
 import { isString } from 'lodash'
+import Raven from 'raven-js'
 
 export default {
   init () {
@@ -17,7 +18,14 @@ export default {
       this.currentUser.next(user)
       if (user) {
         window.ga('set', 'userId', user.uid)
+        Raven.setUserContext({
+          id: user.uid,
+          email: user.email
+        })
         this.ref('user').on('value', () => {})
+      } else {
+        window.ga('set', 'userId', null)
+        Raven.setUserContext(null)
       }
     })
   },
