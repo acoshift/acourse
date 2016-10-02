@@ -3,6 +3,13 @@ import { Observable, BehaviorSubject } from 'rxjs'
 import isString from 'lodash/fp/isString'
 import Raven from 'raven-js'
 
+const off = (ref, type, fn) => {
+  // delay for reuse cached data
+  setTimeout(() => {
+    ref.off(type, fn)
+  }, 10000)
+}
+
 export default {
   init () {
     firebase.initializeApp({
@@ -53,7 +60,7 @@ export default {
       const fn = ref.on('value', (snapshot) => {
         o.next(snapshot.val())
       })
-      return () => ref.off('value', fn)
+      return () => off(ref, 'value', fn)
     })
   },
   onceValue (ref) {
@@ -71,7 +78,7 @@ export default {
       const fn = ref.on('child_added', (snapshot) => {
         o.next(snapshot.val())
       })
-      return () => ref.off('child_added', fn)
+      return () => off(ref, 'child_added', fn)
     })
   },
   onArrayValue (ref) {
@@ -87,7 +94,7 @@ export default {
         })
         o.next(result)
       })
-      return () => ref.off('value', fn)
+      return () => off(ref, 'value', fn)
     })
   },
   upload (path, file) {
