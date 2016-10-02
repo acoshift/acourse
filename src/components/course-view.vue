@@ -7,9 +7,15 @@
     </div>
     <div v-if="isOwn" class="ui segment">
       <router-link class="ui green button" :to="`/course/${courseId}/edit`">Edit</router-link>
+      <router-link class="ui yellow button" :to="`/course/${courseId}/chat`">Chat room</router-link>
       <div class="ui teal button" @click="openAttendModal">Open Attend</div>
       <div class="ui teal button" @click="openAssignmentModal">Add Assignment</div>
       <router-link class="ui blue button" :to="`/course/${courseId}/attend`">Attendants</router-link>
+    </div>
+    <div v-if="isApply" class="ui segment">
+      <div :class="{disabled: isAttended || !course.attend}" class="ui blue button" @click="attend">Attend</div>
+      <router-link class="ui yellow button" :to="`/course/${courseId}/chat`">Chat room</router-link>
+      <router-link class="ui teal button" :to="`/course/${courseId}/assignment`">Assignments</router-link>
     </div>
     <div class="ui segment" v-if="course">
       <div class="ui center aligned grid">
@@ -44,20 +50,6 @@
           <div class="column">
             <div class="ui green join button" :class="{loading: applying}" @click="apply">Apply</div>
           </div>
-        </div>
-        <div class="row" v-if="isApply">
-          <div class="ui green message">You already apply this course.</div>
-        </div>
-        <div class="row" v-if="isApply && !isAttended && course.attend">
-          <div class="ui green button" @click="attend">
-            Attend
-          </div>
-        </div>
-        <div class="row" v-if="isApply || isOwn" style="padding-top: 0;">
-          <router-link class="ui yellow button" :to="`/course/${courseId}/chat`">Chat room</router-link>
-        </div>
-        <div class="row" v-if="isApply">
-          <router-link class="ui blue button" :to="`/course/${courseId}/assignment`">Assignments</router-link>
         </div>
         <div class="row">
           <div class="column">
