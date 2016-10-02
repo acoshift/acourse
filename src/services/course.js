@@ -87,14 +87,14 @@ export default {
   },
   attendUsers (id) {
     return Firebase.onValue(`attend/${id}`)
-      .map((codes) =>
+      .map(
         flow(
           values,
           flatMap(keys),
           countBy(identity),
           toPairs,
           map((x) => ({ id: x[0], count: x[1] }))
-        )(codes)
+        )
       )
       .flatMap((users) => Observable.from(users)
         .concatMap((user) => User.getOnce(user.id), (user, result) => ({ ...user, ...result }))
