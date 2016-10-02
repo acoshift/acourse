@@ -38,7 +38,7 @@
             <div class="column">
               <div class="ui fluid input">
                 <input ref="input" v-model="input" @keyup.13="send"></input>
-                <div class="ui basic icon button" @click="$refs.file.click()" :class="{loading: uploading}"><i class="upload icon"></i></div>
+                <div class="ui basic icon button" @click="$refs.file.click()" :class="{'disabled loading': uploading}"><i class="upload icon"></i></div>
                 <div class="ui basic icon button" @click="send"><i class="send icon"></i></div>
               </div>
             </div>
@@ -173,7 +173,7 @@
 
         this.ob.push(messagesObservable
           .do(() => {
-            if (this.$refs.chatBox.scrollHeight - this.$refs.chatBox.scrollTop <= this.$refs.chatBox.clientHeight + 200) {
+            if (this.$refs.chatBox.scrollHeight - this.$refs.chatBox.scrollTop <= this.$refs.chatBox.clientHeight + 500) {
               shouldScroll = true
             }
           })
