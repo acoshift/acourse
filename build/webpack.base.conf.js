@@ -80,6 +80,7 @@ module.exports = {
       $: 'jquery',
       jQuery: 'jquery'
     }),
+    new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
     new webpack.LoaderOptionsPlugin({
       eslint: {
         formatter: require('eslint-friendly-formatter')
