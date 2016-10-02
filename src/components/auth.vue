@@ -163,14 +163,13 @@
         this.loading = true
         this.error = ''
         Auth.signIn(this.email, this.password)
+          .finally(() => { this.loading = false })
           .subscribe(
             () => {
-              this.loading = false
               this.gotoHome()
             },
             () => {
               this.error = 'Email or password wrong'
-              this.loading = false
             }
           )
       },
@@ -179,16 +178,15 @@
         this.loading = true
         this.error = ''
         Auth.resetPassword(this.email)
+          .finally(() => { this.loading = false })
           .subscribe(
             () => {
-              this.loading = false
               this.email = ''
               $(this.$refs.successModal)
                 .modal('attach events', this.$refs.closeButton, 'hide')
                 .modal('show')
             },
             (err) => {
-              this.loading = false
               this.error = err.message
             }
           )
@@ -198,13 +196,12 @@
         this.loading = true
         this.error = ''
         Auth.signUp(this.email, this.password)
+          .finally(() => { this.loading = false })
           .subscribe(
             (res) => {
-              this.loading = false
               this.gotoHome()
             },
             (err) => {
-              this.loading = false
               this.error = err.message
             }
           )
@@ -215,13 +212,12 @@
         this.providerError = ''
         Auth.signInWithFacebook()
           .flatMap((res) => User.saveAuthProfile(res.user), (x) => x)
+          .finally(() => { this.facebookLoading = false })
           .subscribe(
             () => {
-              this.facebookLoading = false
               this.gotoHome()
             },
             (err) => {
-              this.facebookLoading = false
               this.providerError = err.message
             }
           )
@@ -232,13 +228,12 @@
         this.providerError = ''
         Auth.signInWithGoogle()
           .flatMap((res) => User.saveAuthProfile(res.user), (x) => x)
+          .finally(() => { this.googleLoading = false })
           .subscribe(
             () => {
-              this.googleLoading = false
               this.gotoHome()
             },
             (err) => {
-              this.googleLoading = false
               this.providerError = err.message
             }
           )

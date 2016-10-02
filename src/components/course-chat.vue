@@ -216,13 +216,11 @@
         this.$refs.file.value = ''
         User.upload(f)
           .flatMap((file) => Course.sendMessage(this.courseId, file.downloadURL))
+          .finally(() => { this.uploading = false })
           .subscribe(
+            null,
             () => {
-              this.uploading = false
-            },
-            (err) => {
-              window.alert(err.message)
-              this.uploading = false
+              window.alert('Please check file size.')
             }
           )
       }

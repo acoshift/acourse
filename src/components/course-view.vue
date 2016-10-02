@@ -168,6 +168,7 @@
           Course.get(this.courseId)
             .flatMap((course) => User.getOnce(course.owner), (course, owner) => ({...course, owner}))
         )
+          .finally(() => { this.loading = false })
           .subscribe(
             ([user, course]) => {
               this.loading = false
@@ -198,7 +199,6 @@
                 )
             },
             () => {
-              this.loading = false
               // not found
               this.$router.replace('/home')
             }
@@ -213,14 +213,9 @@
       apply () {
         if (this.applying) return
         this.applying = true
-        Course.join(this.courseId).subscribe(
-          () => {
-            this.applying = false
-          },
-          () => {
-            this.applying = false
-          }
-        )
+        Course.join(this.courseId)
+          .finally(() => { this.applying = false })
+          .subscribe()
       },
       attend () {
         Course.attend(this.courseId, this.course.attend)
@@ -242,14 +237,13 @@
         this.attendError = ''
         this.attending = true
         Course.setAttendCode(this.courseId, this.attendCode)
+          .finally(() => { this.attending = false })
           .subscribe(
             () => {
-              this.attending = false
               this.attendCode = ''
               $(this.$refs.attendModal).modal('hide')
             },
             (err) => {
-              this.attending = false
               this.attendError = err.message
             }
           )

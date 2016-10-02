@@ -50,13 +50,13 @@
       this.courseId = this.$route.params.id
       this.loading = true
       Course.get(this.courseId)
+        .finally(() => { this.loading = false })
         .subscribe(
           (course) => {
             this.loading = false
             this.course = course
           },
           () => {
-            this.loading = false
             this.$router.replace('/home')
           }
         )
@@ -83,13 +83,11 @@
         this.uploading = true
         User.upload(file)
           .flatMap((file) => Course.addAssignmentFile(this.courseId, this.select, file.downloadURL))
+          .finally(() => { this.uploading = false })
           .subscribe(
+            null,
             () => {
-              this.uploading = false
-            },
-            () => {
-              this.uploading = false
-              window.alert('Error: Please check file size should less than 2MB')
+              window.alert('Error: Please check file size should less than 5MB')
             }
           )
       }

@@ -47,16 +47,12 @@
         Course.get(this.courseId),
         Course.attendUsers(this.courseId)
       )
+        .finally(() => { this.loading = false })
         .subscribe(
           ([course, students]) => {
             this.loading = false
             this.course = course
             this.students = students
-          },
-          (err) => {
-            console.log(err)
-            this.loading = false
-            // this.$router.replace('/home')
           }
         )
       )

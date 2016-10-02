@@ -102,9 +102,9 @@
           Auth.currentUser().first(),
           Course.get(this.$route.params.id).first()
         )
+          .finally(() => { this.loading = false })
           .subscribe(
             ([user, course]) => {
-              this.loading = false
               if (course.owner !== user.uid) return this.$router.replace(`/course/${this.courseId}`)
               this.course = flow(
                 pick(keys(this.course)),
@@ -124,13 +124,10 @@
         if (!file) return
         this.uploading = true
         User.uploadMePhoto(file)
+          .finally(() => { this.uploading = false })
           .subscribe(
             (f) => {
-              this.uploading = false
               this.course.photo = f.downloadURL
-            },
-            () => {
-              this.uploading = false
             }
           )
       },
@@ -139,24 +136,18 @@
         this.saving = true
         if (this.isNew) {
           Course.create(this.course)
+            .finally(() => { this.saving = false })
             .subscribe(
               (courseId) => {
-                this.saving = false
                 this.$router.push(`/course/${courseId}`)
-              },
-              () => {
-                this.saving = false
               }
             )
         } else {
           Course.save(this.courseId, this.course)
+            .finally(() => { this.saving = false })
             .subscribe(
               () => {
-                this.saving = false
                 this.$router.push(`/course/${this.courseId}`)
-              },
-              () => {
-                this.saving = false
               }
             )
         }

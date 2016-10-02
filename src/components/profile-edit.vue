@@ -1,5 +1,5 @@
 <template>
-  <div class="ui segment">
+  <div class="ui segment" :class="{loading}">
     <h3 class="ui header">Edit Profile</h3>
     <form class="ui form" @submit.prevent="submit">
       <div class="ui red message" v-if="error">{{ error }}</div>
@@ -41,6 +41,7 @@
     },
     data () {
       return {
+        loading: false,
         user: {
           photo: '',
           name: '',
@@ -52,8 +53,10 @@
       }
     },
     created () {
+      this.loading = true
       User.me()
         .first()
+        .finally(() => { this.loading = false })
         .subscribe(
           (user) => {
             this.user = pick(keys(this.user))(user)
@@ -66,13 +69,10 @@
         if (this.saving) return
         this.saving = true
         User.updateMe(this.user)
+          .finally(() => { this.saving = false })
           .subscribe(
             () => {
-              this.saving = false
               this.$router.push('/profile')
-            },
-            () => {
-              this.saving = false
             }
           )
       },
@@ -83,13 +83,12 @@
         if (!file) return
         this.uploading = true
         User.uploadMePhoto(file)
+          .finally(() => { this.uploading = false })
           .subscribe(
             (f) => {
-              this.uploading = false
               this.user.photo = f.downloadURL
             },
             () => {
-              this.uploading = false
               this.error = 'Please check file type should be image and file size should not exceed 1MB'
             }
           )
