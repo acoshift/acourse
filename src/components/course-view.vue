@@ -156,7 +156,8 @@
         this.ob.push(Observable.combineLatest(
           Auth.currentUser().first(),
           Course.get(this.courseId)
-            .flatMap((course) => User.getOnce(course.owner), (course, owner) => ({...course, owner}))
+            .map((course) => ({ ...course, owner: { id: course.owner } }))
+            .do((course) => User.inject(course.owner))
         )
           .finally(() => { this.loading = false })
           .subscribe(

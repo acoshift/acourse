@@ -14,10 +14,6 @@ export default {
       .first()
       .subscribe((user) => assign(obj, user))
   },
-  getOnce (id) {
-    return Firebase.onceValue(`user/${id}`)
-      .map((user) => ({id, ...user}))
-  },
   isInstructor (id) {
     return Firebase.onValue(`instructor/${id}`)
       .map((x) => !!x)
