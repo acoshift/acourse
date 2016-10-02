@@ -50,9 +50,10 @@ export default {
   onValue (ref) {
     return Observable.create((o) => {
       ref = isString(ref) ? this.ref(ref) : ref
-      ref.on('value', (snapshot) => {
+      const fn = ref.on('value', (snapshot) => {
         o.next(snapshot.val())
       })
+      return () => ref.off('value', fn)
     })
   },
   onceValue (ref) {
@@ -67,15 +68,16 @@ export default {
   onChildAdded (ref) {
     return Observable.create((o) => {
       ref = isString(ref) ? this.ref(ref) : ref
-      ref.on('child_added', (snapshot) => {
+      const fn = ref.on('child_added', (snapshot) => {
         o.next(snapshot.val())
       })
+      return () => ref.off('child_added', fn)
     })
   },
   onArrayValue (ref) {
     return Observable.create((o) => {
       ref = isString(ref) ? this.ref(ref) : ref
-      ref.on('value', (snapshots) => {
+      const fn = ref.on('value', (snapshots) => {
         const result = []
         snapshots.forEach((snapshot) => {
           result.push({
@@ -85,6 +87,7 @@ export default {
         })
         o.next(result)
       })
+      return () => ref.off('value', fn)
     })
   },
   upload (path, file) {
