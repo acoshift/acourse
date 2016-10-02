@@ -72,7 +72,7 @@
         </div>
       </div>
     </div>
-    <div class="ui segment">
+    <div id="student" class="ui segment">
       <h3 class="ui header">Students <span v-if="students">({{ students.length }})</span></h3>
       <div class="ui stackable three column grid">
         <div class="column" v-for="x in students">
@@ -114,7 +114,7 @@
   </div>
 </template>
 
-<style>
+<style lang="scss" scoped>
   p.description {
     text-align: left;
     white-space: pre-wrap;
@@ -127,6 +127,14 @@
 
   .edit.button {
     width: 150px;
+  }
+
+  #student.segment {
+    .ui.grid {
+      .column {
+        padding: .6rem;
+      }
+    }
   }
 </style>
 

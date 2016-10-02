@@ -7,6 +7,8 @@
     object-fit: cover;
     object-position: top;
     display: inline-block !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
   }
 
   img.a-tiny {
