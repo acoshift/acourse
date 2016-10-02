@@ -22,7 +22,8 @@
   import { User, Course } from '../services'
   import UserProfile from './user-profile'
   import CourseCard from './course-card'
-  import { keys, isEmpty } from 'lodash'
+  import isEmpty from 'lodash/fp/isEmpty'
+  import keys from 'lodash/fp/keys'
   import { Observable } from 'rxjs'
 
   export default {

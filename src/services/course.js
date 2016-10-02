@@ -2,7 +2,16 @@ import Firebase from './firebase'
 import User from './user'
 import Auth from './auth'
 import { Observable } from 'rxjs'
-import { chain, filter, map } from 'lodash'
+
+import flow from 'lodash/fp/flow'
+import filter from 'lodash/fp/filter'
+import map from 'lodash/fp/map'
+import values from 'lodash/fp/values'
+import identity from 'lodash/fp/identity'
+import keys from 'lodash/fp/keys'
+import flatMap from 'lodash/fp/flatMap'
+import countBy from 'lodash/fp/countBy'
+import toPairs from 'lodash/fp/toPairs'
 
 export default {
   list () {
@@ -17,20 +26,6 @@ export default {
     data.timestamp = Firebase.timestamp
     return Firebase.push('course', data)
       .map((snapshot) => snapshot.key)
-      // .flatMap((key) =>
-      //   User.me()
-      //     .first()
-      //     .flatMap((user) =>
-      //       User.updateMe({
-      //         ...user,
-      //         course: {
-      //           ...user.course,
-      //           [key]: true
-      //         }
-      //       })
-      //     )
-      //     .map(() => key)
-      // )
   },
   save (id, data) {
     return Firebase.update(`course/${id}`, data)
@@ -61,7 +56,7 @@ export default {
       Auth.currentUser().first(),
       Firebase.onArrayValue(ref)
     )
-      .map(([auth, courses]) => auth.uid === userId ? courses : filter(courses, (course) => course.open))
+      .map(([auth, courses]) => auth.uid === userId ? courses : filter((course) => course.open)(courses))
   },
   sendMessage (id, text) {
     return Auth.currentUser()
@@ -92,12 +87,14 @@ export default {
   },
   attendUsers (id) {
     return Firebase.onValue(`attend/${id}`)
-      .map((codes) => chain(codes)
-        .map((users, code) => ({ code, users: map(users, (timestamp, id) => ({ id })) }))
-        .flatMap((x) => x.users)
-        .groupBy((x) => x.id)
-        .map((attend, id) => ({ id, count: attend.length }))
-        .value()
+      .map((codes) =>
+        flow(
+          values,
+          flatMap(keys),
+          countBy(identity),
+          toPairs,
+          map((x) => ({ id: x[0], count: x[1] }))
+        )(codes)
       )
       .flatMap((users) => Observable.from(users)
         .concatMap((user) => User.getOnce(user.id), (user, result) => ({ ...user, ...result }))

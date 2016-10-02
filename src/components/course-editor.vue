@@ -62,7 +62,10 @@
 <script>
   import { Auth, User, Course } from '../services'
   import { Observable } from 'rxjs'
-  import { defaults, pick, keys } from 'lodash'
+  import flow from 'lodash/fp/flow'
+  import defaults from 'lodash/fp/defaults'
+  import pick from 'lodash/fp/pick'
+  import keys from 'lodash/fp/keys'
 
   export default {
     data () {
@@ -103,7 +106,10 @@
             ([user, course]) => {
               this.loading = false
               if (course.owner !== user.uid) return this.$router.replace(`/course/${this.courseId}`)
-              this.course = defaults(pick(course, keys(this.course)), this.course)
+              this.course = flow(
+                pick(keys(this.course)),
+                defaults(this.course)
+              )(course)
             }
           )
       }

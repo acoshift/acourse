@@ -32,7 +32,8 @@
 <script>
   import { User } from '../services'
   import Avatar from './avatar'
-  import { pick, keys } from 'lodash'
+  import pick from 'lodash/fp/pick'
+  import keys from 'lodash/fp/keys'
 
   export default {
     components: {
@@ -55,7 +56,7 @@
         .first()
         .subscribe(
           (user) => {
-            this.user = pick(user, keys(this.user))
+            this.user = pick(keys(this.user))(user)
           }
         )
     },

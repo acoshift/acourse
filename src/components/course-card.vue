@@ -37,7 +37,8 @@
 
 <script>
   import { Auth, Course } from '../services'
-  import { keys, get } from 'lodash'
+  import keys from 'lodash/fp/keys'
+  import get from 'lodash/fp/get'
 
   export default {
     props: ['course'],
@@ -54,7 +55,7 @@
         return keys(this.course.student).length
       },
       isFav () {
-        return !!get(this.course.favorite, this.uid)
+        return !!get(this.uid)(this.course.favorite)
       }
     },
     methods: {

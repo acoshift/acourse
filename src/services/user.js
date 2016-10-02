@@ -1,7 +1,7 @@
 import Firebase from './firebase'
 import Auth from './auth'
 import { Observable } from 'rxjs'
-import { pick } from 'lodash'
+import pick from 'lodash/fp/pick'
 
 export default {
   get (id) {
@@ -57,7 +57,7 @@ export default {
   saveAuthProfile ({ uid, displayName, photoURL }) {
     return this.get(uid)
       .flatMap((user) => {
-        const data = pick(user, ['name', 'photo'])
+        const data = pick(['name', 'photo'])(user)
         if (!data.name || !data.photo) {
           if (!data.name) {
             data.name = displayName

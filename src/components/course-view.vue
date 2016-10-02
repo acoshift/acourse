@@ -133,7 +133,8 @@
 <script>
   import { Auth, User, Course } from '../services'
   import { Observable } from 'rxjs'
-  import { get, keys } from 'lodash'
+  import get from 'lodash/fp/get'
+  import keys from 'lodash/fp/keys'
   import Avatar from './avatar'
 
   export default {
@@ -172,7 +173,7 @@
               this.loading = false
               this.course = course
               if (course.owner.id === user.uid) this.isOwn = true
-              this.isApply = !!get(course.student, user.uid)
+              this.isApply = !!get(user.uid)(course.student)
 
               this.ob.push(Observable.of(course.student)
                 .map(keys)
