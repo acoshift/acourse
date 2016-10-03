@@ -2,7 +2,6 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import VueRxJS from './vue-rxjs'
 import Raven from 'raven-js'
-import RavenVue from 'raven-js/plugins/vue'
 import App from './app'
 import './filters'
 
@@ -32,7 +31,6 @@ import {
 
 Raven
   .config('https://fda9f1b21cd04a4585b9f9051b37a466@sentry.io/103020')
-  .addPlugin(RavenVue, Vue)
   .install()
 
 Vue.use(VueRxJS)
