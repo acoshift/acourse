@@ -127,6 +127,7 @@
       this.ob.push($course)
     },
     destroyed () {
+      if (this.$message) this.$message.unsubscribe()
       this.ob.forEach((x) => x.unsubscribe())
     },
     mounted () {
@@ -171,7 +172,7 @@
             message.h = this.isUrl(message.m)
           })
           .do((message) => User.inject(message.user))
-          .do(messages.push.bind(messages))
+          .do((message) => messages.push(message))
           .do(() => { shouldScroll = shouldScroll || this.shouldScroll() })
           .debounceTime(200)
           .subscribe(
@@ -186,8 +187,6 @@
               }
             }
           )
-
-        this.ob.push(this.$message)
       },
       shouldScroll () {
         return this.$refs.chatBox.scrollHeight - this.$refs.chatBox.scrollTop <= this.$refs.chatBox.clientHeight + 500
