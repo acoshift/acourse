@@ -1,12 +1,5 @@
 <template>
-  <div class="ui basic segment" :class="{loading}">
-    <div class="ui massive breadcrumb">
-      <router-link class="section" to="/home">Courses</router-link>
-      <i class="right chevron icon divider"></i>
-      <router-link class="section" :to="`/course/${courseId}`">{{ course && course.title || courseId }}</router-link>
-      <i class="right chevron icon divider"></i>
-      <div class="active section">Assignments</div>
-    </div>
+  <div>
     <div class="ui segment" v-if="course" :class="{loading: uploading}">
       <input type="file" style="display: none" ref="file" @change="selectedFile">
       <div class="ui grid">

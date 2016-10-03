@@ -6,6 +6,7 @@ import ProfileEdit from './profile-edit'
 import CourseEditor from './course-editor'
 import CourseView from './course-view'
 import UserView from './user-view'
+import Course from './course'
 import CourseChat from './course-chat'
 import CourseAttend from './course-attend'
 import CourseAssignment from './course-assignment'
@@ -16,6 +17,7 @@ export {
   Home,
   Profile,
   ProfileEdit,
+  Course,
   CourseEditor,
   CourseView,
   UserView,

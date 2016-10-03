@@ -1,9 +1,7 @@
 <template>
-  <div class="ui basic segment" :class="{loading}">
-    <div class="ui massive breadcrumb">
-      <router-link class="section" to="/home">Courses</router-link>
-      <i class="right chevron icon divider"></i>
-      <div class="active section">{{ course && course.title || courseId }}</div>
+  <div>
+    <div v-if="!isApply && !isOwn" class="ui segment">
+      <div class="ui blue button" style="width: 180px;" :class="{loading: applying}" @click="apply">Apply</div>
     </div>
     <div v-if="isOwn" class="ui segment">
       <router-link class="ui green button" :to="`/course/${courseId}/edit`">Edit</router-link>
@@ -17,48 +15,8 @@
       <router-link class="ui yellow button" :to="`/course/${courseId}/chat`">Chat room</router-link>
       <router-link class="ui teal button" :to="`/course/${courseId}/assignment`">Assignments</router-link>
     </div>
-    <div class="ui segment" v-if="course">
-      <div class="ui center aligned grid">
-        <div class="row">
-          <div class="column">
-            <img :src="course.photo" class="ui centered big image">
-          </div>
-        </div>
-        <div class="row" style="padding-top: 0;">
-          <div class="column">
-            <h1>{{ course.title }}</h1>
-          </div>
-        </div>
-        <div class="row" style="margin-top: -2rem; margin-bottom: 1rem;">
-          <div class="column">
-            <i>{{ course.start | date('DD/MM/YYYY') }}</i>
-          </div>
-        </div>
-        <div class="two column middle aligned row" style="margin-top: -30px !important;">
-          <div class="right aligned column" style="padding-right: 2px;">
-            <router-link :to="`/user/${course.owner.id}`">
-              <avatar :src="course.owner.photo" size="mini"></avatar>
-            </router-link>
-          </div>
-          <div class="left aligned column" style="padding-left: 2px;">
-            <router-link :to="`/user/${course.owner.id}`">
-              <h3>{{ course.owner.name || 'Anonymous' }}</h3>
-            </router-link>
-          </div>
-        </div>
-        <div class="row" v-if="!isApply && !isOwn">
-          <div class="column">
-            <div class="ui green join button" :class="{loading: applying}" @click="apply">Apply</div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="column">
-            <p class="description">{{ course.description }}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-    <students :users="students"></students>
+    <course-detail :course="course" v-if="course"></course-detail>
+    <students :users="students" v-if="students"></students>
     <div class="ui small modal" ref="attendModal">
       <div class="header">
         <span v-if="isOwn">Set Attend Code</span>
@@ -90,29 +48,17 @@
   </div>
 </template>
 
-<style lang="scss" scoped>
-  p.description {
-    text-align: left;
-    white-space: pre-wrap;
-    word-break: break-word;
-  }
-
-  .join.button {
-    width: 180px;
-  }
-</style>
-
 <script>
   import { Auth, User, Course } from '../services'
   import { Observable } from 'rxjs'
   import get from 'lodash/fp/get'
   import keys from 'lodash/fp/keys'
-  import Avatar from './avatar'
+  import CourseDetail from './course-detail'
   import Students from './students'
 
   export default {
     components: {
-      Avatar,
+      CourseDetail,
       Students
     },
     data () {
@@ -172,10 +118,6 @@
                     this.isAttended = isAttended
                   }
                 )
-            },
-            () => {
-              // not found
-              this.$router.replace('/home')
             }
           )
         )

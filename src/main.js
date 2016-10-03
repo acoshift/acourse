@@ -22,6 +22,7 @@ import {
   Home,
   Profile,
   ProfileEdit,
+  Course,
   CourseEditor,
   CourseView,
   UserView,
@@ -53,12 +54,18 @@ const router = new VueRouter({
         { path: '', component: Home },
         { path: '/profile', component: Profile },
         { path: '/profile/edit', component: ProfileEdit },
-        { path: '/course/new', component: CourseEditor },
-        { path: '/course/:id', component: CourseView },
-        { path: '/course/:id/chat', component: CourseChat },
-        { path: '/course/:id/edit', component: CourseEditor },
-        { path: '/course/:id/attend', component: CourseAttend },
-        { path: '/course/:id/assignment', component: CourseAssignment },
+        { path: '/course/new', component: CourseEditor, name: 'courseNew' },
+        {
+          path: '/course/:id',
+          component: Course,
+          children: [
+            { path: '', component: CourseView, name: 'courseView' },
+            { path: 'chat', component: CourseChat, name: 'courseChat' },
+            { path: 'edit', component: CourseEditor, name: 'courseEdit' },
+            { path: 'attend', component: CourseAttend, name: 'courseAttend' },
+            { path: 'assignment', component: CourseAssignment, name: 'courseAssignment' }
+          ]
+        },
         { path: '/user/:id', component: UserView }
       ],
       beforeEnter: redirectIfNotAuth

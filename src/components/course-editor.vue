@@ -1,13 +1,5 @@
 <template>
-  <div class="ui basic segment" :class="{loading}">
-    <div class="ui massive breadcrumb">
-      <router-link class="section" to="/home">Courses</router-link>
-      <i class="right chevron icon divider"></i>
-      <div v-if="isNew" class="active section">Create New Course</div>
-      <router-link v-if="courseId" class="section" :to="`/course/${courseId}`">{{ courseId }}</router-link>
-      <i v-if="!isNew" class="right chevron icon divider"></i>
-      <div v-if="!isNew" class="active section">Edit</div>
-    </div>
+  <div>
     <div class="ui segment">
       <h2>
         <span v-if="isNew">New</span>

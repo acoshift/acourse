@@ -1,13 +1,6 @@
 <template>
-  <div class="ui basic segment" :class="{loading: loading > 0}">
-    <div class="ui massive breadcrumb">
-      <router-link class="section" to="/home">Courses</router-link>
-      <i class="right chevron icon divider"></i>
-      <router-link class="section" :to="`/course/${courseId}`">{{ course && course.title || courseId }}</router-link>
-      <i class="right chevron icon divider"></i>
-      <div class="active section">Chat</div>
-    </div>
-    <div class="ui chat segment" ref="container">
+  <div>
+    <div class="ui chat segment" :class="{loading: loading > 0}" ref="container">
       <div class="ui segment" id="chatBox" ref="chatBox">
         <div class="ui comments">
           <div v-for="x in messages" class="comment">

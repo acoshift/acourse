@@ -1,12 +1,5 @@
 <template>
-  <div class="ui basic segment" :class="{loading}">
-    <div class="ui massive breadcrumb">
-      <router-link class="section" to="/home">Courses</router-link>
-      <i class="right chevron icon divider"></i>
-      <router-link class="section" :to="`/course/${courseId}`">{{ course && course.title || courseId }}</router-link>
-      <i class="right chevron icon divider"></i>
-      <div class="active section">Attendants</div>
-    </div>
+  <div>
     <div class="ui segment" style="padding-bottom: 2rem;">
       <h3 class="ui header">Attendants <span v-if="students">({{ students.length }})</span></h3>
       <div class="ui stackable three column grid">
