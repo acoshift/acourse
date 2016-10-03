@@ -5,6 +5,7 @@ import Raven from 'raven-js'
 import App from './app'
 import './filters'
 
+import 'semantic-ui-css/components/accordion.min.js'
 import 'semantic-ui-css/components/checkbox.min.js'
 import 'semantic-ui-css/components/dimmer.min.js'
 import 'semantic-ui-css/components/modal.min.js'

@@ -58,17 +58,7 @@
         </div>
       </div>
     </div>
-    <div id="student" class="ui segment">
-      <h3 class="ui header">Students <span v-if="students">({{ students.length }})</span></h3>
-      <div class="ui stackable three column grid">
-        <div class="column" v-for="x in students">
-          <router-link :to="`/user/${x.id}`">
-            <avatar :src="x.photo" size="tiny"></avatar>
-            {{ x.name || 'Anonymous' }}
-          </router-link>
-        </div>
-      </div>
-    </div>
+    <students :users="students"></students>
     <div class="ui small modal" ref="attendModal">
       <div class="header">
         <span v-if="isOwn">Set Attend Code</span>
@@ -110,14 +100,6 @@
   .join.button {
     width: 180px;
   }
-
-  #student.segment {
-    .ui.grid {
-      .column {
-        padding: .6rem;
-      }
-    }
-  }
 </style>
 
 <script>
@@ -126,10 +108,12 @@
   import get from 'lodash/fp/get'
   import keys from 'lodash/fp/keys'
   import Avatar from './avatar'
+  import Students from './students'
 
   export default {
     components: {
-      Avatar
+      Avatar,
+      Students
     },
     data () {
       return {
