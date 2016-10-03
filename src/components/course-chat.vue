@@ -152,13 +152,9 @@
     },
     methods: {
       isUrl (text) {
-        if (/^https?:\/\/?[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]$/.test(text)) {
-          if (startsWith('https://firebasestorage.googleapis.com/v0/b/acourse-d9d0a.appspot.com')(text)) {
-            return 1
-          }
-          return 2
-        }
-        return 0
+        return /^https?:\/\/?[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]$/.test(text)
+          ? (startsWith('https://firebasestorage.googleapis.com/v0/b/acourse-d9d0a.appspot.com')(text) ? 1 : 2)
+          : 0
       },
       initMessages () {
         const messages = []
