@@ -115,7 +115,7 @@
         const file = this.$refs.photo.files[0]
         if (!file) return
         this.uploading = true
-        User.uploadMePhoto(file)
+        User.upload(file)
           .finally(() => { this.uploading = false })
           .subscribe(
             (f) => {

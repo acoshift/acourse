@@ -33,11 +33,6 @@ export default {
     )
       .map(([user, instructor]) => ({id, ...user, instructor}))
   },
-  uploadMePhoto (file) {
-    return Auth.currentUser()
-      .first()
-      .flatMap(({ uid }) => Firebase.upload(`user/${uid}/${Date.now()}`, file))
-  },
   upload (file) {
     return Auth.currentUser()
       .first()
