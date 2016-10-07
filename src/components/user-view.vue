@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="ui segment" :class="{loading: !user}">
+    <div class="ui segment">
       <user-profile :user="user" v-show="user"></user-profile>
     </div>
     <div class="ui segment" v-if="ownCourses">
@@ -19,7 +19,7 @@
 </template>
 
 <script>
-  import { User, Course } from '../services'
+  import { User, Course, Loader } from '../services'
   import UserProfile from './user-profile'
   import CourseCard from './course-card'
   import isEmpty from 'lodash/fp/isEmpty'
@@ -35,11 +35,16 @@
       return {
         user: null,
         ownCourses: null,
-        courses: null
+        courses: null,
+        $user: null,
+        $ownCourse: null
       }
     },
     created () {
       this.init()
+    },
+    destroyed () {
+      this.cleanup()
     },
     watch: {
       $route () {
@@ -48,32 +53,34 @@
     },
     methods: {
       init () {
-        User.get(this.$route.params.id)
+        this.cleanup()
+        Loader.start('user')
+        this.$user = User.get(this.$route.params.id)
+          .flatMap((user) =>
+            Observable.of(user.course)
+              .map(keys)
+              .flatMap((courseIds) =>
+                Observable.combineLatest(...courseIds.map((id) => Course.get(id).filter((course) => course.open)))
+              ),
+            (user, courses) => ([user, courses])
+          )
           .subscribe(
-            (user) => {
+            ([user, courses]) => {
+              Loader.stop('user')
               this.user = user
-              Observable.of(user.course)
-                .map(keys)
-                .flatMap(Observable.from)
-                .flatMap((id) => Course.get(id).first())
-                .filter((course) => course.open)
-                .toArray()
-                .subscribe(
-                  (courses) => {
-                    this.courses = courses
-                  },
-                  () => {
-                    this.courses = null
-                  }
-                )
+              this.courses = courses
             }
           )
-        Course.ownBy(this.$route.params.id)
+        this.$ownCourse = Course.ownBy(this.$route.params.id)
           .subscribe(
             (courses) => {
               this.ownCourses = isEmpty(courses) ? null : courses
             }
           )
+      },
+      cleanup () {
+        if (this.$user) this.$user.unsubscribe()
+        if (this.$ownCourse) this.$ownCourse.unsubscribe()
       }
     }
   }

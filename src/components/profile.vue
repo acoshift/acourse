@@ -50,20 +50,16 @@
           .flatMap(({ uid }) => User.getProfile(uid))
           .do(() => Loader.stop('user')),
         ownCourses: Auth.currentUser()
-          .flatMap(({ uid }) => Course.ownBy(uid))
-          .do(() => Loader.stop('ownCourses')),
+          .flatMap(({ uid }) => Course.ownBy(uid)),
         courses: Auth.currentUser()
           .flatMap(({ uid }) => User.get(uid))
           .map((x) => x.course)
           .map(keys)
           .flatMap((courseIds) => Observable.combineLatest(...courseIds.map((id) => Course.get(id))))
-          .do(() => Loader.stop('courses'))
       }
     },
     beforeCreate () {
       Loader.start('user')
-      Loader.start('ownCourses')
-      Loader.start('courses')
     }
   }
 </script>
