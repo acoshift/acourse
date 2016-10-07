@@ -6,7 +6,8 @@
     <div v-if="isOwn" class="ui segment">
       <router-link class="ui green button" :to="`/course/${courseId}/edit`">Edit</router-link>
       <router-link class="ui yellow button" :to="`/course/${courseId}/chat`">Chat room</router-link>
-      <div class="ui teal button" @click="openAttendModal">Open Attend</div>
+      <div v-if="!course.attend" class="ui teal button" @click="openAttendModal">Open Attend</div>
+      <div v-else class="ui red button" @click="closeAttend" :class="{loading: removingCode}">Close Attend</div>
       <div class="ui teal button" @click="openAssignmentModal">Add Assignment</div>
       <router-link class="ui blue button" :to="`/course/${courseId}/attend`">Attendants</router-link>
     </div>
@@ -19,8 +20,7 @@
     <students :users="students" v-if="students"></students>
     <div class="ui small modal" ref="attendModal">
       <div class="header">
-        <span v-if="isOwn">Set Attend Code</span>
-        <span v-else>Attend</span>
+        Set Attend Code
       </div>
       <div class="content">
         <div class="ui form">
@@ -57,6 +57,7 @@
   import CourseDetail from './course-detail'
   import Students from './students'
   import SuccessModal from './success-modal'
+  import moment from 'moment'
 
   export default {
     components: {
@@ -77,7 +78,8 @@
         attendError: '',
         ob: [],
         isAttended: true,
-        assignmentCode: ''
+        assignmentCode: '',
+        removingCode: false
       }
     },
     beforeCreate () {
@@ -150,7 +152,7 @@
       },
       openAttendModal () {
         this.attendError = ''
-        this.attendCode = ''
+        this.attendCode = moment().format('DDMMYYYY')
         $(this.$refs.attendModal).modal('show')
       },
       submitAttend () {
@@ -167,6 +169,12 @@
               this.attendError = err.message
             }
           )
+      },
+      closeAttend () {
+        this.removingCode = true
+        Course.removeAttendCode(this.courseId)
+          .finally(() => { this.removingCode = false })
+          .subscribe()
       },
       openAssignmentModal () {
         $(this.$refs.assignmentModal).modal('show')
