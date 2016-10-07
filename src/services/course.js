@@ -25,24 +25,29 @@ export default {
       .map((course) => ({id, ...course}))
   },
   create (data) {
+    window.ga('send', 'event', 'course', 'create')
     data.timestamp = Firebase.timestamp
     return Firebase.push('course', data)
       .map((snapshot) => snapshot.key)
   },
   save (id, data) {
+    window.ga('send', 'event', 'course', 'save', id)
     return Firebase.update(`course/${id}`, data)
   },
   favorite (id) {
+    window.ga('send', 'event', 'course', 'favorite', id)
     return Auth.currentUser()
       .first()
       .flatMap((user) => Firebase.set(`course/${id}/favorite/${user.uid}`, true))
   },
   unfavorite (id) {
+    window.ga('send', 'event', 'course', 'unfavorite', id)
     return Auth.currentUser()
       .first()
       .flatMap((user) => Firebase.remove(`course/${id}/favorite/${user.uid}`))
   },
   join (id) {
+    window.ga('send', 'event', 'course', 'apply', id)
     return Auth.currentUser()
       .first()
       .flatMap((user) =>
@@ -61,6 +66,7 @@ export default {
       .map(([auth, courses]) => auth.uid === userId ? courses : filter((course) => course.open)(courses))
   },
   sendMessage (id, text) {
+    window.ga('send', 'event', 'course', 'sendMessage', id)
     return Auth.currentUser()
       .first()
       .flatMap((auth) => Firebase.push(`chat/${id}`, {
@@ -77,6 +83,7 @@ export default {
     return Firebase.onChildAdded(ref)
   },
   attend (id, code) {
+    window.ga('send', 'event', 'course', 'attend', id, code)
     return Auth.currentUser()
       .first()
       .flatMap((auth) => Firebase.set(`attend/${id}/${code}/${auth.uid}`, Firebase.timestamp))
@@ -121,6 +128,7 @@ export default {
       .flatMap((auth) => Firebase.onValue(`assignment/${id}/user/${auth.uid}`))
   },
   addAssignmentFile (id, assignmentId, url) {
+    window.ga('send', 'event', 'course', 'uploadAssignment', id, assignmentId)
     return Auth.currentUser()
       .first()
       .flatMap((auth) => Firebase.push(`assignment/${id}/user/${auth.uid}/${assignmentId}`, {

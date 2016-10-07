@@ -56,10 +56,7 @@
           .flatMap(({ uid }) => User.get(uid))
           .map((x) => x.course)
           .map(keys)
-          .flatMap((courseIds) =>
-            Observable.from(courseIds)
-              .flatMap((id) => Course.get(id).first())
-              .toArray())
+          .flatMap((courseIds) => Observable.combineLatest(...courseIds.map((id) => Course.get(id))))
           .do(() => Loader.stop('courses'))
       }
     },
