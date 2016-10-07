@@ -24,14 +24,13 @@
 </template>
 
 <script>
-  import { Course, User } from '../services'
+  import { Course, User, Loader } from '../services'
   import { Observable } from 'rxjs'
 
   export default {
     data () {
       return {
         courseId: '',
-        loading: false,
         course: null,
         select: 0,
         assignments: null,
@@ -40,13 +39,12 @@
       }
     },
     created () {
+      Loader.start('course')
       this.courseId = this.$route.params.id
-      this.loading = true
       Course.get(this.courseId)
-        .finally(() => { this.loading = false })
         .subscribe(
           (course) => {
-            this.loading = false
+            Loader.stop('course')
             this.course = course
           },
           () => {
@@ -54,12 +52,14 @@
           }
         )
 
+      Loader.start('assignment')
       Observable.combineLatest(
         Course.getAssignments(this.courseId),
         Course.getAssignmentUser(this.courseId)
       )
         .subscribe(
           ([assignments, userAssignments]) => {
+            if (Loader.has('assignment')) Loader.stop('assignment')
             this.assignments = assignments
             this.userAssignments = userAssignments
           }

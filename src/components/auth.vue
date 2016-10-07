@@ -89,21 +89,7 @@
         </div>
       </div>
     </div>
-    <div class="ui small modal" ref="successModal">
-      <div class="image content">
-        <div class="ui centered image">
-          <i class="huge icons">
-            <i class="green big thin circle icon"></i>
-            <i class="green check icon"></i>
-          </i>
-        </div>
-      </div>
-      <div class="description" style="text-align: center;">
-        <div class="ui header">Success</div>
-        <p>Please check you email to reset password.</p>
-        <div ref="closeButton" class="ui close button">OK</div>
-      </div>
-    </div>
+    <success-modal ref="successModal" title="Success" description="Please check email to reset password."></success-modal>
   </div>
 </template>
 
@@ -132,21 +118,16 @@
     padding-left: 0;
     padding-right: 35px;
   }
-
-  .modal {
-    padding-bottom: 30px;
-  }
-
-  .modal .close.button {
-    width: 180px;
-    margin-top: 10px;
-  }
 </style>
 
 <script>
   import { Auth, User } from '../services'
+  import SuccessModal from './success-modal'
 
   export default {
+    components: {
+      SuccessModal
+    },
     data () {
       return {
         email: '',
@@ -184,9 +165,7 @@
           .subscribe(
             () => {
               this.email = ''
-              $(this.$refs.successModal)
-                .modal('attach events', this.$refs.closeButton, 'hide')
-                .modal('show')
+              this.$refs.successModal.show()
             },
             (err) => {
               this.error = err.message

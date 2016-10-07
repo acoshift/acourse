@@ -45,6 +45,7 @@
         </div>
       </div>
     </div>
+    <success-modal ref="successModal" title="Success" description="You have attended to this section."></success-modal>
   </div>
 </template>
 
@@ -55,11 +56,13 @@
   import keys from 'lodash/fp/keys'
   import CourseDetail from './course-detail'
   import Students from './students'
+  import SuccessModal from './success-modal'
 
   export default {
     components: {
       CourseDetail,
-      Students
+      Students,
+      SuccessModal
     },
     data () {
       return {
@@ -138,7 +141,7 @@
         Course.attend(this.courseId, this.course.attend)
           .subscribe(
             () => {
-              window.alert('OK')
+              this.$refs.successModal.show()
             },
             () => {
               window.alert('Error')
