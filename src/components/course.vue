@@ -1,5 +1,5 @@
 <template>
-  <div class="ui basic segment" :class="{loading}">
+  <div class="ui basic segment">
     <div class="ui huge breadcrumb" style="padding-bottom: 1.5rem;">
       <router-link class="section" to="/home">Courses</router-link>
       <i class="right chevron icon divider"></i>
@@ -16,24 +16,26 @@
 </template>
 
 <script>
-  import { Course } from '../services'
+  import { Course, Loader } from '../services'
 
   export default {
     data () {
       return {
         courseId: null,
-        loading: false,
         course: null,
         $course: null
       }
+    },
+    beforeCreate () {
+      Loader.start('course')
     },
     created () {
       this.loading = true
       this.courseId = this.$route.params.id
       this.$course = Course.get(this.courseId)
+        .do(() => Loader.stop('course'))
         .subscribe(
           (course) => {
-            this.loading = false
             this.course = course
           },
           () => {

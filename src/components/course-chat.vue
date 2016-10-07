@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="ui chat segment" :class="{loading: loading > 0}" ref="container">
+    <div class="ui chat segment" ref="container">
       <div class="ui segment" id="chatBox" ref="chatBox">
         <div class="ui comments">
           <div v-for="x in messages" class="comment">
@@ -79,7 +79,7 @@
 </style>
 
 <script>
-  import { Course, User } from '../services'
+  import { Course, User, Loader } from '../services'
   import Avatar from './avatar'
   import startsWith from 'lodash/fp/startsWith'
   import debounce from 'lodash/debounce'
@@ -90,38 +90,37 @@
     },
     data () {
       return {
-        loading: false,
         course: null,
         courseId: null,
         input: '',
         messages: [],
-        ob: [],
         limit: 50,
         loadingTop: false,
         uploading: false,
+        $course: null,
         $message: null
       }
     },
+    beforeCreate () {
+      Loader.start('course')
+      Loader.start('message')
+    },
     created () {
       this.courseId = this.$route.params.id
-      this.loading = 2
-      const $course = Course.get(this.courseId)
+      this.$course = Course.get(this.courseId)
         .subscribe(
           (course) => {
-            --this.loading
+            Loader.stop('course')
             this.course = course
           },
           () => {
-            this.loading = 0
             this.$router.replace('/home')
           }
         )
-
-      this.ob.push($course)
     },
     destroyed () {
       if (this.$message) this.$message.unsubscribe()
-      this.ob.forEach((x) => x.unsubscribe())
+      this.$course.unsubscribe()
     },
     mounted () {
       this.adjust()
@@ -133,7 +132,7 @@
           if (pos <= 5) {
             if (this.limit > this.messages.length) return
             this.limit += 30
-            this.loading = 1
+            Loader.start('message')
             this.initMessages()
             this.$nextTick(() => {
               $(this.$refs.chatBox).scrollTop(700)
@@ -166,7 +165,7 @@
           .debounceTime(200)
           .subscribe(
             () => {
-              if (this.loading > 0) --this.loading
+              if (Loader.has('message')) Loader.stop('message')
               this.messages = messages
               if (shouldScroll) {
                 shouldScroll = false

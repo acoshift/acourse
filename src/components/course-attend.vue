@@ -15,7 +15,7 @@
 </template>
 
 <script>
-  import { Course } from '../services'
+  import { Course, Loader } from '../services'
   import { Observable } from 'rxjs'
   import Avatar from './avatar'
 
@@ -27,31 +27,30 @@
       return {
         course: null,
         courseId: null,
-        loading: false,
         students: null,
-        ob: []
+        $attend: null
       }
     },
+    beforeCreate () {
+      Loader.start('attend')
+    },
     created () {
-      this.loading = true
       this.courseId = this.$route.params.id
 
-      this.ob.push(Observable.combineLatest(
+      this.$attend = Observable.combineLatest(
         Course.get(this.courseId),
         Course.attendUsers(this.courseId)
       )
-        .finally(() => { this.loading = false })
+        .do(() => { Loader.stop('attend') })
         .subscribe(
           ([course, students]) => {
-            this.loading = false
             this.course = course
             this.students = students
           }
         )
-      )
     },
     destroyed () {
-      this.ob.forEach((x) => x.unsubscribe())
+      this.$attend.unsubscribe()
     }
   }
 </script>

@@ -49,7 +49,7 @@
 </template>
 
 <script>
-  import { Auth, User, Course } from '../services'
+  import { Auth, User, Course, Loader } from '../services'
   import { Observable } from 'rxjs'
   import get from 'lodash/fp/get'
   import keys from 'lodash/fp/keys'
@@ -66,7 +66,6 @@
         courseId: '',
         course: null,
         isOwn: false,
-        loading: false,
         isApply: false,
         applying: false,
         students: null,
@@ -78,9 +77,11 @@
         assignmentCode: ''
       }
     },
+    beforeCreate () {
+      Loader.start('course')
+    },
     mounted () {
       this.$nextTick(() => {
-        this.loading = true
         this.courseId = this.$route.params.id
 
         this.ob.push(Observable.combineLatest(
@@ -89,10 +90,9 @@
             .map((course) => ({ ...course, owner: { id: course.owner } }))
             .do((course) => User.inject(course.owner))
         )
-          .finally(() => { this.loading = false })
+          .do(() => Loader.stop('course'))
           .subscribe(
             ([user, course]) => {
-              this.loading = false
               this.course = course
               if (course.owner.id === user.uid) this.isOwn = true
               this.isApply = !!get(user.uid)(course.student)

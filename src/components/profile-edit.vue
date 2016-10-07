@@ -1,5 +1,5 @@
 <template>
-  <div class="ui segment" :class="{loading}">
+  <div class="ui segment">
     <h3 class="ui header">Edit Profile</h3>
     <form class="ui form" @submit.prevent="submit">
       <div class="ui red message" v-if="error">{{ error }}</div>
@@ -30,7 +30,7 @@
 </style>
 
 <script>
-  import { User } from '../services'
+  import { User, Loader } from '../services'
   import Avatar from './avatar'
   import pick from 'lodash/fp/pick'
   import keys from 'lodash/fp/keys'
@@ -41,7 +41,6 @@
     },
     data () {
       return {
-        loading: false,
         user: {
           photo: '',
           name: '',
@@ -52,11 +51,13 @@
         error: ''
       }
     },
+    beforeCreate () {
+      Loader.start('user')
+    },
     created () {
-      this.loading = true
       User.me()
         .first()
-        .finally(() => { this.loading = false })
+        .finally(() => { Loader.stop('user') })
         .subscribe(
           (user) => {
             this.user = pick(keys(this.user))(user)

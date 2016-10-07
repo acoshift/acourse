@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import VueRxJS from './vue-rxjs'
+import VueRx from 'vue-rx'
 import Raven from 'raven-js'
 import App from './app'
 import './filters'
@@ -13,7 +13,8 @@ import 'semantic-ui-css/components/transition.min.js'
 
 import {
   Firebase,
-  Auth as AuthService
+  Auth as AuthService,
+  Loader
 } from './services'
 
 import {
@@ -35,7 +36,7 @@ Raven
   .config('https://fda9f1b21cd04a4585b9f9051b37a466@sentry.io/103020')
   .install()
 
-Vue.use(VueRxJS)
+Vue.use(VueRx)
 Vue.use(VueRouter)
 
 Firebase.init()
@@ -75,15 +76,18 @@ const router = new VueRouter({
 })
 
 router.afterEach((to) => {
+  Loader.reset()
   window.ga('set', 'page', to.path)
   window.ga('send', 'pageview')
 })
 
 function redirectIfAuth (to, from, next) {
+  Loader.start('router')
   AuthService.currentUser()
     .first()
     .subscribe(
       (user) => {
+        Loader.stop('router')
         if (user) {
           next('/home')
         } else {
@@ -94,10 +98,12 @@ function redirectIfAuth (to, from, next) {
 }
 
 function redirectIfNotAuth (to, from, next) {
+  Loader.start('router')
   AuthService.currentUser()
     .first()
     .subscribe(
       (user) => {
+        Loader.stop('router')
         if (user) {
           next()
         } else {

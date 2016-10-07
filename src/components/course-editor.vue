@@ -52,7 +52,7 @@
 </style>
 
 <script>
-  import { Auth, User, Course } from '../services'
+  import { Auth, User, Course, Loader } from '../services'
   import { Observable } from 'rxjs'
   import flow from 'lodash/fp/flow'
   import defaults from 'lodash/fp/defaults'
@@ -73,9 +73,11 @@
         },
         courseId: '',
         uploading: false,
-        saving: false,
-        loading: false
+        saving: false
       }
+    },
+    beforeCreate () {
+      Loader.start('course')
     },
     created () {
       if (!this.$route.params.id) {
@@ -94,7 +96,7 @@
           Auth.currentUser().first(),
           Course.get(this.$route.params.id).first()
         )
-          .finally(() => { this.loading = false })
+          .finally(() => { Loader.stop('course') })
           .subscribe(
             ([user, course]) => {
               if (course.owner !== user.uid) return this.$router.replace(`/course/${this.courseId}`)

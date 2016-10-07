@@ -1,5 +1,6 @@
 <template>
-  <div class="ui basic segment" :class="{loading: !courses}">
+  <div class="ui basic segment">
+    <div class="ui container"></div>
     <div v-if="courses">
       <div v-if="courses.length">
         <h1 class="text-center">All Courses</h1>
@@ -26,7 +27,7 @@
 
 <script>
   import CourseCard from './course-card'
-  import { Course } from '../services'
+  import { Course, Loader } from '../services'
 
   export default {
     components: {
@@ -35,7 +36,11 @@
     data () {
       return {
         courses: Course.list()
+          .do(() => Loader.stop('courses'))
       }
+    },
+    beforeCreate () {
+      Loader.start('courses')
     }
   }
 </script>

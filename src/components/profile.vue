@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="ui segment" :class="{loading: !user}">
+    <div class="ui segment">
       <user-profile :user="user" v-show="user"></user-profile>
       <div class="ui right aligned basic segment">
         <router-link class="ui green edit button" to="/profile/edit">Edit</router-link>
@@ -33,7 +33,7 @@
 </style>
 
 <script>
-  import { Auth, User, Course } from '../services'
+  import { Auth, User, Course, Loader } from '../services'
   import UserProfile from './user-profile'
   import CourseCard from './course-card'
   import keys from 'lodash/fp/keys'
@@ -47,9 +47,11 @@
     data () {
       return {
         user: Auth.currentUser()
-          .flatMap(({ uid }) => User.getProfile(uid)),
+          .flatMap(({ uid }) => User.getProfile(uid))
+          .do(() => Loader.stop('user')),
         ownCourses: Auth.currentUser()
-          .flatMap(({ uid }) => Course.ownBy(uid)),
+          .flatMap(({ uid }) => Course.ownBy(uid))
+          .do(() => Loader.stop('ownCourses')),
         courses: Auth.currentUser()
           .flatMap(({ uid }) => User.get(uid))
           .map((x) => x.course)
@@ -58,7 +60,13 @@
             Observable.from(courseIds)
               .flatMap((id) => Course.get(id).first())
               .toArray())
+          .do(() => Loader.stop('courses'))
       }
+    },
+    beforeCreate () {
+      Loader.start('user')
+      Loader.start('ownCourses')
+      Loader.start('courses')
     }
   }
 </script>
