@@ -41,11 +41,14 @@
         Course.get(this.courseId),
         Course.attendUsers(this.courseId)
       )
-        .do(() => { Loader.stop('attend') })
         .subscribe(
           ([course, students]) => {
+            Loader.stop('attend')
             this.course = course
             this.students = students
+          },
+          () => {
+            this.$router.replace(`/course/${this.courseId}`)
           }
         )
     },

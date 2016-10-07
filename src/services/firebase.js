@@ -59,7 +59,7 @@ export default {
       ref = isString(ref) ? this.ref(ref) : ref
       const fn = ref.on('value', (snapshot) => {
         o.next(snapshot.val())
-      })
+      }, (err) => { o.error(err) })
       return () => off(ref, 'value', fn)
     })
   },
@@ -69,7 +69,7 @@ export default {
       ref.once('value', (snapshot) => {
         o.next(snapshot.val())
         o.complete()
-      })
+      }, (err) => { o.error(err) })
     })
   },
   onChildAdded (ref) {
@@ -77,7 +77,7 @@ export default {
       ref = isString(ref) ? this.ref(ref) : ref
       const fn = ref.on('child_added', (snapshot) => {
         o.next(snapshot.val())
-      })
+      }, (err) => { o.error(err) })
       return () => off(ref, 'child_added', fn)
     })
   },
