@@ -73,8 +73,10 @@
           </div>
         </div>
       </div>
-      <div class="ui horizontal divider">
-        Or
+      <div class="row">
+        <div class="ui basic segment" style="width: 60%; margin: 0; padding: 0">
+          <div class="ui horizontal divider">Or</div>
+        </div>
       </div>
       <div class="row">
         <div class="ui center aligned segment">
