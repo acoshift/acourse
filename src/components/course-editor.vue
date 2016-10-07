@@ -76,9 +76,6 @@
         saving: false
       }
     },
-    beforeCreate () {
-      Loader.start('course')
-    },
     created () {
       if (!this.$route.params.id) {
         this.isNew = true
@@ -90,15 +87,15 @@
             }
           )
       } else {
-        this.loading = true
+        Loader.start('course')
         this.courseId = this.$route.params.id
         Observable.forkJoin(
           Auth.currentUser().first(),
           Course.get(this.$route.params.id).first()
         )
-          .finally(() => { Loader.stop('course') })
           .subscribe(
             ([user, course]) => {
+              Loader.stop('course')
               if (course.owner !== user.uid) return this.$router.replace(`/course/${this.courseId}`)
               this.course = flow(
                 pick(keys(this.course)),
