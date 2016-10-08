@@ -8,7 +8,7 @@
       <router-link class="ui yellow button" :to="`/course/${courseId}/chat`">Chat room</router-link>
       <div v-if="!course.attend" class="ui teal button" @click="openAttendModal">Open Attend</div>
       <div v-else class="ui red button" @click="closeAttend" :class="{loading: removingCode}">Close Attend</div>
-      <div class="ui teal button" @click="openAssignmentModal">Add Assignment</div>
+      <router-link :to="`/course/${courseId}/assignment/edit`" class="ui blue button">Assignments</router-link>
       <router-link class="ui blue button" :to="`/course/${courseId}/attend`">Attendants</router-link>
     </div>
     <div v-if="isApply" class="ui segment">
@@ -30,18 +30,6 @@
           </div>
           <div v-if="attendError" class="ui red message">{{ attendError }}</div>
           <div class="ui fluid blue button" @click="submitAttend" :class="{loading: attending}">OK</div>
-        </div>
-      </div>
-    </div>
-    <div class="ui small modal" ref="assignmentModal">
-      <div class="header">Add Assignment</div>
-      <div class="content">
-        <div class="ui form">
-          <div class="field">
-            <label>Title</label>
-            <input v-model="assignmentCode">
-          </div>
-          <div class="ui fluid blue button" @click="submitAssignmentCode">OK</div>
         </div>
       </div>
     </div>
@@ -175,21 +163,6 @@
         Course.removeAttendCode(this.courseId)
           .finally(() => { this.removingCode = false })
           .subscribe()
-      },
-      openAssignmentModal () {
-        $(this.$refs.assignmentModal).modal('show')
-      },
-      submitAssignmentCode () {
-        Course.addAssignment(this.courseId, { title: this.assignmentCode })
-          .subscribe(
-            () => {
-              window.alert('ok')
-              $(this.$refs.assignmentModal).modal('hide')
-            },
-            () => {
-              window.alert('error')
-            }
-          )
       }
     }
   }

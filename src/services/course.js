@@ -119,6 +119,9 @@ export default {
   addAssignment (id, { title }) {
     return Firebase.push(`assignment/${id}/code`, { title, open: true })
   },
+  openAssignment (id, assignmentId, value) {
+    return Firebase.set(`assignment/${id}/code/${assignmentId}/open`, value)
+  },
   getAssignments (id) {
     return Firebase.onArrayValue(`assignment/${id}/code`)
   },

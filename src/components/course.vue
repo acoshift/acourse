@@ -10,6 +10,7 @@
       <div v-show="$route.name === 'courseChat'" class="active section">Chat</div>
       <div v-show="$route.name === 'courseAssignment'" class="active section">Assignments</div>
       <div v-show="$route.name === 'courseAttend'" class="active section">Attendants</div>
+      <div v-show="$route.name === 'courseAssignmentEdit'" class="active section">Edit Assignment</div>
     </div>
     <router-view></router-view>
   </div>

@@ -29,7 +29,8 @@ import {
   UserView,
   CourseChat,
   CourseAttend,
-  CourseAssignment
+  CourseAssignment,
+  CourseAssignmentEdit
 } from './components'
 
 Raven
@@ -64,7 +65,8 @@ const router = new VueRouter({
             { path: 'chat', component: CourseChat, name: 'courseChat' },
             { path: 'edit', component: CourseEditor, name: 'courseEdit' },
             { path: 'attend', component: CourseAttend, name: 'courseAttend' },
-            { path: 'assignment', component: CourseAssignment, name: 'courseAssignment' }
+            { path: 'assignment', component: CourseAssignment, name: 'courseAssignment' },
+            { path: 'assignment/edit', component: CourseAssignmentEdit, name: 'courseAssignmentEdit' }
           ]
         },
         { path: '/user/:id', component: UserView }
