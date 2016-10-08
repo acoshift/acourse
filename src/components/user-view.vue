@@ -60,7 +60,9 @@
             Observable.of(user.course)
               .map(keys)
               .flatMap((courseIds) =>
-                Observable.combineLatest(...courseIds.map((id) => Course.get(id).filter((course) => course.open)))
+                isEmpty(courseIds)
+                  ? Observable.of([])
+                  : Observable.combineLatest(...courseIds.map((id) => Course.get(id).filter((course) => course.open)))
               ),
             (user, courses) => ([user, courses])
           )
