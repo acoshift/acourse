@@ -6,7 +6,7 @@
       <div class="ui stackable grid">
         <div class="two column row" v-for="x in assignments">
           <div class="column">
-            {{ x.title }}
+            {{ x.title }} <span>({{ x.users.length }})</span>
           </div>
           <div class="action column">
             <div v-if="x.open" class="ui red button" @click="closeAssignment(x)">Close</div>
@@ -28,6 +28,29 @@
         </div>
       </div>
     </div>
+    <div class="ui segment">
+      <div class="ui styled fluid accordion" v-for="x in assignments">
+        <div class="title">
+          <div class="dropdown icon"></div>
+          {{ x.title }} <span>({{ x.users.length }})</span>
+          <div class="ui content">
+            <div class="ui stackable grid">
+              <div class="two column row" v-for="u in x.users">
+                <div class="column">
+                  <user-avatar :user="u"></user-avatar>
+                </div>
+                <div class="column">
+                  <div v-for="(a, f) in u.files">
+                    <span>{{ a.timestamp | date('YYYY/MM/DD HH:mm') }}</span>
+                    <a :href="a.url" target="_blank">{{ f }}</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -38,9 +61,19 @@
 </style>
 
 <script>
-  import { Course, Loader } from '../services'
+  import { Course, Loader, User } from '../services'
+  import UserAvatar from './user-avatar'
+  import flow from 'lodash/fp/flow'
+  import map from 'lodash/fp/map'
+  import keys from 'lodash/fp/keys'
+  import forEach from 'lodash/fp/forEach'
+  import isEmpty from 'lodash/fp/isEmpty'
+  import filter from 'lodash/fp/filter'
 
   export default {
+    components: {
+      UserAvatar
+    },
     data () {
       return {
         courseId: null,
@@ -48,16 +81,41 @@
         assignments: null
       }
     },
-    created () {
+    mounted () {
       this.courseId = this.$route.params.id
       Loader.start('assignment')
-      Course.getAssignments(this.courseId)
+      Course.assignments(this.courseId)
         .subscribe(
           (assignments) => {
             Loader.stop('assignment')
-            this.assignments = assignments
+            this.assignments = flow(
+              keys,
+              map((id) => ({
+                id,
+                ...assignments.code[id],
+                users: flow(
+                  keys,
+                  map((x) => ({
+                    id: x,
+                    files: assignments.user[x][id]
+                  })),
+                  filter((x) => !isEmpty(x.files)),
+                  forEach((x) => User.inject(x))
+                )(assignments.user)
+              }))
+            )(assignments.code)
+            setTimeout(() => {
+              this.$nextTick(() => {
+                $('.accordion').accordion()
+              })
+            }, 500)
           }
         )
+    },
+    updated () {
+      this.$nextTick(() => {
+        $('.accordion').accordion()
+      })
     },
     methods: {
       openAssignmentModal () {
