@@ -79,7 +79,7 @@
 </style>
 
 <script>
-  import { Course, User, Loader } from '../services'
+  import { Course, User, Loader, Document } from '../services'
   import Avatar from './avatar'
   import startsWith from 'lodash/fp/startsWith'
   import debounce from 'lodash/debounce'
@@ -98,7 +98,9 @@
         loadingTop: false,
         uploading: false,
         $course: null,
-        $message: null
+        $message: null,
+        unread: 0,
+        hidden: false
       }
     },
     beforeCreate () {
@@ -117,10 +119,22 @@
             this.$router.replace('/home')
           }
         )
+
+      this.$visibilityChanged = Document.visibilityChanged()
+        .subscribe(
+          (hidden) => {
+            this.hidden = hidden
+            if (!hidden) {
+              this.unread = 0
+              Document.setTitle()
+            }
+          }
+        )
     },
     destroyed () {
       if (this.$message) this.$message.unsubscribe()
       this.$course.unsubscribe()
+      this.$visibilityChanged.unsubscribe()
     },
     mounted () {
       this.adjust()
@@ -162,6 +176,12 @@
           .do((message) => User.inject(message.user))
           .do((message) => messages.push(message))
           .do(() => { shouldScroll = shouldScroll || this.shouldScroll() })
+          .do(() => {
+            if (this.hidden && !Loader.has('message')) {
+              ++this.unread
+              Document.setTitle(`(${this.unread})`)
+            }
+          })
           .debounceTime(200)
           .subscribe(
             () => {
