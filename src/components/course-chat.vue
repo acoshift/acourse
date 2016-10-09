@@ -224,8 +224,8 @@
           .finally(() => { this.uploading = false })
           .subscribe(
             null,
-            () => {
-              window.alert('Please check file size.')
+            (err) => {
+              Document.openErrorModal('Upload Error', (err && err.message || err) + ' Please check file size should less than 5MiB.')
             }
           )
       }

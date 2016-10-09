@@ -24,7 +24,7 @@
 </template>
 
 <script>
-  import { Course, User, Loader } from '../services'
+  import { Course, User, Loader, Document } from '../services'
   import { Observable } from 'rxjs'
 
   export default {
@@ -79,8 +79,8 @@
           .finally(() => { this.uploading = false })
           .subscribe(
             null,
-            () => {
-              window.alert('Error: Please check file size should less than 5MB')
+            (err) => {
+              Document.openErrorModal('Upload Error', (err && err.message || err) + ' Please check file size should less than 5MiB.')
             }
           )
       }

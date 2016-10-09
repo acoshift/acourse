@@ -3,8 +3,8 @@
     <div class="image content">
       <div class="ui centered image">
         <i class="huge icons">
-          <i class="green big thin circle icon"></i>
-          <i class="green check icon"></i>
+          <i class="red big thin circle icon"></i>
+          <i class="red cancel icon"></i>
         </i>
       </div>
     </div>

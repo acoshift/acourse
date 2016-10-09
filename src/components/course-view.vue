@@ -3,11 +3,12 @@
     <course-header :course="course" v-if="course"></course-header>
     <course-apply-panel v-if="!isApply && !isOwn" :course="course"></course-apply-panel>
     <course-owner-panel v-if="course && isOwn" :course="course"></course-owner-panel>
-    <div v-if="isApply" class="ui segment">
+    <course-student-panel v-if="course && isApply" :course="course"></course-student-panel>
+    <!--<div v-if="isApply" class="ui segment">
       <div :class="{disabled: isAttended || !course.attend, loading: attending}" class="ui blue button" @click="attend">Attend</div>
       <router-link class="ui yellow button" :to="`/course/${courseId}/chat`">Chat room</router-link>
       <router-link class="ui teal button" :to="`/course/${courseId}/assignment`">Assignments</router-link>
-    </div>
+    </div>-->
     <course-detail :course="course" v-if="course"></course-detail>
     <course-content :contents="contents" v-if="contents"></course-content>
     <students :users="students" v-if="students"></students>
@@ -15,7 +16,7 @@
 </template>
 
 <script>
-  import { Auth, User, Course, Loader, Document } from '../services'
+  import { Auth, User, Course, Loader } from '../services'
   import { Observable } from 'rxjs'
   import get from 'lodash/fp/get'
   import keys from 'lodash/fp/keys'
@@ -25,6 +26,7 @@
   import CourseContent from './course-content'
   import CourseOwnerPanel from './course-owner-panel'
   import CourseApplyPanel from './course-apply-panel'
+  import CourseStudentPanel from './course-student-panel'
   import Students from './students'
 
   export default {
@@ -34,6 +36,7 @@
       CourseContent,
       CourseOwnerPanel,
       CourseApplyPanel,
+      CourseStudentPanel,
       Students
     },
     data () {
@@ -46,8 +49,7 @@
         applying: false,
         students: null,
         attending: false,
-        ob: [],
-        isAttended: true
+        $course: null
       }
     },
     beforeCreate () {
@@ -57,7 +59,7 @@
       this.$nextTick(() => {
         this.courseId = this.$route.params.id
 
-        this.ob.push(Observable.combineLatest(
+        this.$course = Observable.combineLatest(
           Auth.currentUser().first(),
           Course.get(this.courseId)
             .map((course) => ({ ...course, owner: { id: course.owner } }))
@@ -66,59 +68,30 @@
           .flatMap(([user, course]) =>
             Course.content(this.courseId)
               .catch(() => Observable.of(null)),
-            ([user, course], contents) => [user, course, contents]
+            (p, contents) => [...p, contents]
+          )
+          .flatMap(([user, course, contents]) =>
+            Observable.of(course.student)
+              .map(keys)
+              .flatMap((users) => Observable.from(users))
+              .flatMap((id) => User.get(id).first())
+              .toArray(),
+            (p, students) => [...p, students]
           )
           .do(() => Loader.stop('course'))
           .subscribe(
-            ([user, course, contents]) => {
+            ([user, course, contents, students]) => {
               this.course = course
               this.contents = !isEmpty(contents) && contents || null
               if (course.owner.id === user.uid) this.isOwn = true
               this.isApply = !!get(user.uid)(course.student)
-
-              this.ob.push(Observable.of(course.student)
-                .map(keys)
-                .flatMap((users) => Observable.from(users))
-                .flatMap((id) => User.get(id).first())
-                .toArray()
-                .subscribe(
-                  (students) => {
-                    this.students = students
-                  },
-                  () => {
-                    this.students = null
-                  }
-                )
-              )
-
-              Course.isAttended(this.courseId)
-                .subscribe(
-                  (isAttended) => {
-                    this.isAttended = isAttended
-                  }
-                )
+              this.students = students
             }
           )
-        )
       })
     },
     destroyed () {
-      this.ob.forEach((x) => x.unsubscribe())
-    },
-    methods: {
-      attend () {
-        this.attending = true
-        Course.attend(this.courseId, this.course.attend)
-          .finally(() => { this.attending = false })
-          .subscribe(
-            () => {
-              Document.openSuccessModal('Success', 'You have attended to this section.')
-            },
-            () => {
-              window.alert('Error')
-            }
-          )
-      }
+      this.$course.unsubscribe()
     }
   }
 </script>
