@@ -7,11 +7,12 @@ dev:
 clean:
 	rm -rf dist
 
-dep:
+prepare:
 	npm install
+	npm update
 
 database:
 	firebase deploy --only database
 
-deploy: build
+deploy: prepare build
 	firebase deploy
