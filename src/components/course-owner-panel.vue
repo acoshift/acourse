@@ -1,11 +1,25 @@
 <template>
   <div class="ui segment">
-    <router-link class="ui green button" :to="`/course/${course.id}/edit`">Edit</router-link>
-    <router-link class="ui yellow button" :to="`/course/${course.id}/chat`">Chat room</router-link>
-    <div v-if="!course.attend" class="ui teal button" @click="openAttendModal">Open Attend</div>
-    <div v-else class="ui red button" @click="closeAttend" :class="{loading: removingCode}">Close Attend</div>
-    <router-link :to="`/course/${course.id}/assignment/edit`" class="ui blue button">Assignments</router-link>
-    <router-link class="ui blue button" :to="`/course/${course.id}/attend`">Attendants</router-link>
+    <div class="ui stackable equal width grid">
+      <div class="column">
+        <router-link class="ui green fluid button" :to="`/course/${course.id}/edit`">Edit</router-link>
+      </div>
+      <div class="column">
+        <router-link class="ui yellow fluid button" :to="`/course/${course.id}/chat`">Chat room</router-link>
+      </div>
+      <div v-if="!course.attend" class="column">
+        <div class="ui teal fluid button" @click="openAttendModal">Open Attend</div>
+      </div>
+      <div v-else class="column">
+        <div class="ui red fluid button" @click="closeAttend" :class="{loading: removingCode}">Close Attend</div>
+      </div>
+      <div class="column">
+        <router-link :to="`/course/${course.id}/assignment/edit`" class="ui blue fluid button">Assignments</router-link>
+      </div>
+      <div class="column">
+        <router-link class="ui blue fluid button" :to="`/course/${course.id}/attend`">Attendants</router-link>
+      </div>
+    </div>
     <div class="ui small modal" ref="attendModal">
       <div class="header">
         Set Attend Code
