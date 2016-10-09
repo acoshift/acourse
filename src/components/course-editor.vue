@@ -19,7 +19,7 @@
         </div>
         <div class="field">
           <label>Description</label>
-          <textarea v-model="course.description" rows="30"></textarea>
+          <textarea v-model="course.description" rows="15"></textarea>
         </div>
         <div class="field">
           <label>Start Date</label>
@@ -29,6 +29,15 @@
           <div class="ui toggle checkbox">
             <input type="checkbox" class="hidden" v-model="course.open">
             <label>Open public</label>
+          </div>
+        </div>
+        <div class="ui divider"></div>
+        <div style="padding-bottom: 1rem;">
+          <h3>Contents</h3>
+          <div class="ui green button" @click="addContent">Add Content</div>
+          <div class="ui segment" v-for="(x, i) in contents">
+            <h4 class="ui header">Content {{ i + 1 }} <i class="red remove link icon" @click="removeContent(i)"></i></h4>
+            <textarea v-model="x.content" rows="5"></textarea>
           </div>
         </div>
         <button class="ui blue save button" :class="{loading: saving}">
@@ -58,6 +67,7 @@
   import defaults from 'lodash/fp/defaults'
   import pick from 'lodash/fp/pick'
   import keys from 'lodash/fp/keys'
+  import map from 'lodash/fp/map'
 
   export default {
     data () {
@@ -71,6 +81,7 @@
           start: '',
           open: false
         },
+        contents: [],
         courseId: '',
         uploading: false,
         saving: false
@@ -91,16 +102,18 @@
         this.courseId = this.$route.params.id
         Observable.forkJoin(
           Auth.currentUser().first(),
-          Course.get(this.$route.params.id).first()
+          Course.get(this.courseId).first(),
+          Course.content(this.courseId).first()
         )
           .subscribe(
-            ([user, course]) => {
+            ([user, course, contents]) => {
               Loader.stop('course')
               if (course.owner !== user.uid) return this.$router.replace(`/course/${this.courseId}`)
               this.course = flow(
                 pick(keys(this.course)),
                 defaults(this.course)
               )(course)
+              this.contents = contents && map(pick('content'))(contents) || []
             }
           )
       }
@@ -127,6 +140,7 @@
         this.saving = true
         if (this.isNew) {
           Course.create(this.course)
+            .flatMap((courseId) => Course.saveContent(courseId, this.contents), (courseId) => courseId)
             .finally(() => { this.saving = false })
             .subscribe(
               (courseId) => {
@@ -135,6 +149,7 @@
             )
         } else {
           Course.save(this.courseId, this.course)
+            .flatMap(() => Course.saveContent(this.courseId, this.contents))
             .finally(() => { this.saving = false })
             .subscribe(
               () => {
@@ -142,6 +157,14 @@
               }
             )
         }
+      },
+      addContent () {
+        this.contents.push({
+          content: ''
+        })
+      },
+      removeContent (position) {
+        this.contents.splice(position, 1)
       }
     }
   }

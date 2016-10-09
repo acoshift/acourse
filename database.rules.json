@@ -75,6 +75,21 @@
         }
       }
     },
+    "content": {
+      // course contents
+      "$course_id": {
+        ".write": "root.child('course/' + $course_id + '/owner').val() === auth.uid",
+        ".read": "root.child('course/' + $course_id + '/student/' + auth.uid).val() === true || root.child('course/' + $course_id + '/owner').val() === auth.uid",
+        "$content_id": {
+          "content": {
+            ".validate": "newData.isString()"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
+    },
     "chat": {
       "$course_id": {
         ".read": "root.child('course/' + $course_id + '/student/' + auth.uid).val() === true || root.child('course/' + $course_id + '/owner').val() === auth.uid",

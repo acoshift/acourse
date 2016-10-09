@@ -1,6 +1,6 @@
 <template>
   <div>
-    <course-header v-if="course" :course="course"></course-header>
+    <course-header :course="course" v-if="course"></course-header>
     <div v-if="!isApply && !isOwn" class="ui segment">
       <div class="ui blue button" style="width: 180px;" :class="{loading: applying}" @click="apply">Apply</div>
     </div>
@@ -11,8 +11,9 @@
       <router-link class="ui teal button" :to="`/course/${courseId}/assignment`">Assignments</router-link>
     </div>
     <course-detail :course="course" v-if="course"></course-detail>
+    <course-content :contents="contents" v-if="contents"></course-content>
     <students :users="students" v-if="students"></students>
-    <success-modal ref="successModal" title="Success" description="You have attended to this section."></success-modal>
+    <success-modal ref="successModal"></success-modal>
   </div>
 </template>
 
@@ -23,6 +24,7 @@
   import keys from 'lodash/fp/keys'
   import CourseHeader from './course-header'
   import CourseDetail from './course-detail'
+  import CourseContent from './course-content'
   import CourseOwnerPanel from './course-owner-panel'
   import Students from './students'
   import SuccessModal from './success-modal'
@@ -31,6 +33,7 @@
     components: {
       CourseHeader,
       CourseDetail,
+      CourseContent,
       CourseOwnerPanel,
       Students,
       SuccessModal
@@ -39,6 +42,7 @@
       return {
         courseId: '',
         course: null,
+        contents: null,
         isOwn: false,
         isApply: false,
         applying: false,
@@ -61,10 +65,16 @@
             .map((course) => ({ ...course, owner: { id: course.owner } }))
             .do((course) => User.inject(course.owner))
         )
+          .flatMap(([user, course]) =>
+            Course.content(this.courseId)
+              .catch(() => Observable.of(null)),
+            ([user, course], contents) => [user, course, contents]
+          )
           .do(() => Loader.stop('course'))
           .subscribe(
-            ([user, course]) => {
+            ([user, course, contents]) => {
               this.course = course
+              this.contents = contents
               if (course.owner.id === user.uid) this.isOwn = true
               this.isApply = !!get(user.uid)(course.student)
 
@@ -103,7 +113,11 @@
         this.applying = true
         Course.join(this.courseId)
           .finally(() => { this.applying = false })
-          .subscribe()
+          .subscribe(
+            () => {
+              this.$refs.successModal.show('Success', 'You have applied to this course.')
+            }
+          )
       },
       attend () {
         this.attending = true
@@ -112,6 +126,7 @@
           .subscribe(
             () => {
               this.$refs.successModal.show()
+              this.$refs.successModal.show('Success', 'You have attended to this section.')
             },
             () => {
               window.alert('Error')

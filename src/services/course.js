@@ -34,6 +34,12 @@ export default {
     window.ga('send', 'event', 'course', 'save', id)
     return Firebase.update(`course/${id}`, data)
   },
+  content (id) {
+    return Firebase.onArrayValue(`content/${id}`)
+  },
+  saveContent (id, data) {
+    return Firebase.set(`content/${id}`, data)
+  },
   favorite (id) {
     window.ga('send', 'event', 'course', 'favorite', id)
     return Auth.currentUser()

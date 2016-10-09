@@ -93,7 +93,7 @@ export default {
           })
         })
         o.next(result)
-      })
+      }, (err) => { o.error(err) })
       return () => off(ref, 'value', fn)
     })
   },

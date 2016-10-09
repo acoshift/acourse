@@ -89,7 +89,7 @@
         </div>
       </div>
     </div>
-    <success-modal ref="successModal" title="Success" description="Please check email to reset password."></success-modal>
+    <success-modal ref="successModal"></success-modal>
   </div>
 </template>
 
@@ -165,7 +165,7 @@
           .subscribe(
             () => {
               this.email = ''
-              this.$refs.successModal.show()
+              this.$refs.successModal.show('Success', 'Please check email to reset password.')
             },
             (err) => {
               this.error = err.message

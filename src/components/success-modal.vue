@@ -30,9 +30,16 @@
 
 <script>
   export default {
-    props: ['title', 'description'],
+    data () {
+      return {
+        title: '',
+        description: ''
+      }
+    },
     methods: {
-      show () {
+      show (title, description) {
+        this.title = title
+        this.description = description
         $(this.$el)
           .modal('attach events', this.$refs.closeButton, 'hide')
           .modal('show')

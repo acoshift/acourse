@@ -7,14 +7,6 @@
   </div>
 </template>
 
-<style scoped>
-  p.description {
-    text-align: left;
-    white-space: pre-wrap;
-    word-break: break-word;
-  }
-</style>
-
 <script>
   export default {
     props: ['course']
