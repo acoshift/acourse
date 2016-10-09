@@ -125,7 +125,6 @@
           .finally(() => { this.attending = false })
           .subscribe(
             () => {
-              this.$refs.successModal.show()
               this.$refs.successModal.show('Success', 'You have attended to this section.')
             },
             () => {
