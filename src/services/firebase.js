@@ -29,7 +29,9 @@ export default {
           id: user.uid,
           email: user.email
         })
-        this.ref('user').on('value', () => {})
+        setTimeout(() => {
+          this.ref('user').on('value', () => {})
+        }, 1000)
       } else {
         window.ga('set', 'userId', null)
         Raven.setUserContext(null)
