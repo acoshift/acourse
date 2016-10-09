@@ -4,7 +4,7 @@
       <i class="dropdown icon"></i>
       Students <span v-if="users">({{ users.length }})</span>
     </div>
-    <div class="ui content">
+    <div class="content">
       <div class="ui stackable three column grid">
         <div class="column" v-for="x in users">
           <router-link :to="`/user/${x.id}`">
@@ -36,7 +36,9 @@
       Avatar
     },
     mounted () {
-      $(this.$el).accordion()
+      this.$nextTick(() => {
+        $(this.$el).accordion()
+      })
     }
   }
 </script>
