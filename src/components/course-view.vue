@@ -4,36 +4,14 @@
     <div v-if="!isApply && !isOwn" class="ui segment">
       <div class="ui blue button" style="width: 180px;" :class="{loading: applying}" @click="apply">Apply</div>
     </div>
-    <div v-if="isOwn" class="ui segment">
-      <router-link class="ui green button" :to="`/course/${courseId}/edit`">Edit</router-link>
-      <router-link class="ui yellow button" :to="`/course/${courseId}/chat`">Chat room</router-link>
-      <div v-if="!course.attend" class="ui teal button" @click="openAttendModal">Open Attend</div>
-      <div v-else class="ui red button" @click="closeAttend" :class="{loading: removingCode}">Close Attend</div>
-      <router-link :to="`/course/${courseId}/assignment/edit`" class="ui blue button">Assignments</router-link>
-      <router-link class="ui blue button" :to="`/course/${courseId}/attend`">Attendants</router-link>
-    </div>
+    <course-owner-panel v-if="course && isOwn" :course="course"></course-owner-panel>
     <div v-if="isApply" class="ui segment">
-      <div :class="{disabled: isAttended || !course.attend}" class="ui blue button" @click="attend">Attend</div>
+      <div :class="{disabled: isAttended || !course.attend, loading: attending}" class="ui blue button" @click="attend">Attend</div>
       <router-link class="ui yellow button" :to="`/course/${courseId}/chat`">Chat room</router-link>
       <router-link class="ui teal button" :to="`/course/${courseId}/assignment`">Assignments</router-link>
     </div>
     <course-detail :course="course" v-if="course"></course-detail>
     <students :users="students" v-if="students"></students>
-    <div class="ui small modal" ref="attendModal">
-      <div class="header">
-        Set Attend Code
-      </div>
-      <div class="content">
-        <div class="ui form">
-          <div class="field">
-            <label>Enter Code</label>
-            <input v-model="attendCode">
-          </div>
-          <div v-if="attendError" class="ui red message">{{ attendError }}</div>
-          <div class="ui fluid blue button" @click="submitAttend" :class="{loading: attending}">OK</div>
-        </div>
-      </div>
-    </div>
     <success-modal ref="successModal" title="Success" description="You have attended to this section."></success-modal>
   </div>
 </template>
@@ -45,14 +23,15 @@
   import keys from 'lodash/fp/keys'
   import CourseHeader from './course-header'
   import CourseDetail from './course-detail'
+  import CourseOwnerPanel from './course-owner-panel'
   import Students from './students'
   import SuccessModal from './success-modal'
-  import moment from 'moment'
 
   export default {
     components: {
       CourseHeader,
       CourseDetail,
+      CourseOwnerPanel,
       Students,
       SuccessModal
     },
@@ -64,13 +43,9 @@
         isApply: false,
         applying: false,
         students: null,
-        attendCode: '',
         attending: false,
-        attendError: '',
         ob: [],
-        isAttended: true,
-        assignmentCode: '',
-        removingCode: false
+        isAttended: true
       }
     },
     beforeCreate () {
@@ -131,7 +106,9 @@
           .subscribe()
       },
       attend () {
+        this.attending = true
         Course.attend(this.courseId, this.course.attend)
+          .finally(() => { this.attending = false })
           .subscribe(
             () => {
               this.$refs.successModal.show()
@@ -140,32 +117,6 @@
               window.alert('Error')
             }
           )
-      },
-      openAttendModal () {
-        this.attendError = ''
-        this.attendCode = moment().format('DDMMYYYY')
-        $(this.$refs.attendModal).modal('show')
-      },
-      submitAttend () {
-        this.attendError = ''
-        this.attending = true
-        Course.setAttendCode(this.courseId, this.attendCode)
-          .finally(() => { this.attending = false })
-          .subscribe(
-            () => {
-              this.attendCode = ''
-              $(this.$refs.attendModal).modal('hide')
-            },
-            (err) => {
-              this.attendError = err.message
-            }
-          )
-      },
-      closeAttend () {
-        this.removingCode = true
-        Course.removeAttendCode(this.courseId)
-          .finally(() => { this.removingCode = false })
-          .subscribe()
       }
     }
   }
