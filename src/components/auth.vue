@@ -42,6 +42,9 @@
                   <label>Email</label>
                   <input v-model="email" @focus="resetError">
                 </div>
+                <div class="ui error message">
+                  {{ error }}
+                </div>
                 <div class="ui fluid basic segment">
                   <a href="#" @click="state = 0"><i class="left chevron icon"></i> Sign In</a>
                 </div>
