@@ -24,6 +24,7 @@
   import CourseCard from './course-card'
   import isEmpty from 'lodash/fp/isEmpty'
   import keys from 'lodash/fp/keys'
+  import filter from 'lodash/fp/filter'
   import { Observable } from 'rxjs'
 
   export default {
@@ -62,7 +63,8 @@
               .flatMap((courseIds) =>
                 isEmpty(courseIds)
                   ? Observable.of([])
-                  : Observable.combineLatest(...courseIds.map((id) => Course.get(id).filter((course) => course.open)))
+                  : Observable.combineLatest(...courseIds.map((id) => Course.get(id)))
+                    .map(filter((course) => !!course.open))
               ),
             (user, courses) => ([user, courses])
           )
@@ -71,6 +73,9 @@
               Loader.stop('user')
               this.user = user
               this.courses = courses
+            },
+            () => {
+              this.$router.replace('/home')
             }
           )
         this.$ownCourse = Course.ownBy(this.$route.params.id)
