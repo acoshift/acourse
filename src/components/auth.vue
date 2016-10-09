@@ -102,12 +102,14 @@
   }
 
   @media only screen and (min-width: 500px) {
-    #auth {
-      padding-top: 80px;
-    }
-
     .segment {
       min-width: 500px;
+    }
+  }
+
+  @media only screen and (min-height: 850px) {
+    #auth {
+      padding-top: 5vh;
     }
   }
 
