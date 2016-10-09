@@ -13,12 +13,7 @@
 </template>
 
 <script>
-  import CourseSection from './course-section'
-
   export default {
-    components: {
-      CourseSection
-    },
     props: ['contents'],
     mounted () {
       this.$nextTick(() => {
