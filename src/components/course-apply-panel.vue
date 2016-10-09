@@ -1,6 +1,10 @@
 <template>
   <div class="ui segment">
-    <div class="ui blue button" style="width: 180px;" :class="{loading: applying}" @click="apply">Apply</div>
+    <div class="ui stackable equal width grid">
+      <div class="center aligned column">
+        <div class="ui blue button" style="width: 200px;" :class="{loading: applying}" @click="apply">Apply</div>
+      </div>
+    </div>
   </div>
 </template>
 
