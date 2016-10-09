@@ -1,5 +1,6 @@
 <template>
   <div>
+    <course-header v-if="course" :course="course"></course-header>
     <div v-if="!isApply && !isOwn" class="ui segment">
       <div class="ui blue button" style="width: 180px;" :class="{loading: applying}" @click="apply">Apply</div>
     </div>
@@ -42,6 +43,7 @@
   import { Observable } from 'rxjs'
   import get from 'lodash/fp/get'
   import keys from 'lodash/fp/keys'
+  import CourseHeader from './course-header'
   import CourseDetail from './course-detail'
   import Students from './students'
   import SuccessModal from './success-modal'
@@ -49,6 +51,7 @@
 
   export default {
     components: {
+      CourseHeader,
       CourseDetail,
       Students,
       SuccessModal
