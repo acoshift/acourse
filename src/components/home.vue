@@ -19,10 +19,6 @@
   .basic.segment {
     min-height: 200px;
   }
-
-  h1 {
-    padding-bottom: 20px;
-  }
 </style>
 
 <script>
