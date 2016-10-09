@@ -89,7 +89,6 @@
         </div>
       </div>
     </div>
-    <success-modal ref="successModal"></success-modal>
   </div>
 </template>
 
@@ -121,13 +120,9 @@
 </style>
 
 <script>
-  import { Auth, User } from '../services'
-  import SuccessModal from './success-modal'
+  import { Auth, User, Document } from '../services'
 
   export default {
-    components: {
-      SuccessModal
-    },
     data () {
       return {
         email: '',
@@ -165,7 +160,7 @@
           .subscribe(
             () => {
               this.email = ''
-              this.$refs.successModal.show('Success', 'Please check email to reset password.')
+              Document.openSuccessModal('Success', 'Please check email to reset password.')
             },
             (err) => {
               this.error = err.message

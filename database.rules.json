@@ -57,7 +57,7 @@
         },
         "student": {
           "$user_id": {
-            ".write": "auth.uid === $user_id",
+            ".write": "auth.uid === $user_id && data.parent().exists()",
             ".validate": "newData.val() === true"
           }
         },

@@ -40,9 +40,11 @@
       show (title, description) {
         this.title = title
         this.description = description
-        $(this.$el)
-          .modal('attach events', this.$refs.closeButton, 'hide')
-          .modal('show')
+        this.$nextTick(() => {
+          $(this.$el)
+            .modal('attach events', this.$refs.closeButton, 'hide')
+            .modal('show')
+        })
       },
       close () {
         $(this.$el).modal('hide')

@@ -1,9 +1,7 @@
 <template>
   <div>
     <course-header :course="course" v-if="course"></course-header>
-    <div v-if="!isApply && !isOwn" class="ui segment">
-      <div class="ui blue button" style="width: 180px;" :class="{loading: applying}" @click="apply">Apply</div>
-    </div>
+    <course-apply-panel v-if="!isApply && !isOwn" :course="course"></course-apply-panel>
     <course-owner-panel v-if="course && isOwn" :course="course"></course-owner-panel>
     <div v-if="isApply" class="ui segment">
       <div :class="{disabled: isAttended || !course.attend, loading: attending}" class="ui blue button" @click="attend">Attend</div>
@@ -13,12 +11,11 @@
     <course-detail :course="course" v-if="course"></course-detail>
     <course-content :contents="contents" v-if="contents"></course-content>
     <students :users="students" v-if="students"></students>
-    <success-modal ref="successModal"></success-modal>
   </div>
 </template>
 
 <script>
-  import { Auth, User, Course, Loader } from '../services'
+  import { Auth, User, Course, Loader, Document } from '../services'
   import { Observable } from 'rxjs'
   import get from 'lodash/fp/get'
   import keys from 'lodash/fp/keys'
@@ -27,8 +24,8 @@
   import CourseDetail from './course-detail'
   import CourseContent from './course-content'
   import CourseOwnerPanel from './course-owner-panel'
+  import CourseApplyPanel from './course-apply-panel'
   import Students from './students'
-  import SuccessModal from './success-modal'
 
   export default {
     components: {
@@ -36,8 +33,8 @@
       CourseDetail,
       CourseContent,
       CourseOwnerPanel,
-      Students,
-      SuccessModal
+      CourseApplyPanel,
+      Students
     },
     data () {
       return {
@@ -109,24 +106,13 @@
       this.ob.forEach((x) => x.unsubscribe())
     },
     methods: {
-      apply () {
-        if (this.applying) return
-        this.applying = true
-        Course.join(this.courseId)
-          .finally(() => { this.applying = false })
-          .subscribe(
-            () => {
-              this.$refs.successModal.show('Success', 'You have applied to this course.')
-            }
-          )
-      },
       attend () {
         this.attending = true
         Course.attend(this.courseId, this.course.attend)
           .finally(() => { this.attending = false })
           .subscribe(
             () => {
-              this.$refs.successModal.show('Success', 'You have attended to this section.')
+              Document.openSuccessModal('Success', 'You have attended to this section.')
             },
             () => {
               window.alert('Error')
