@@ -88,6 +88,10 @@ export default {
     }
     return Firebase.onChildAdded(ref)
   },
+  lastMessage (id) {
+    const ref = Firebase.ref(`chat/${id}`).orderByKey().limitToLast(1)
+    return Firebase.onValue(ref)
+  },
   attend (id, code) {
     window.ga('send', 'event', 'course', 'attend', id, code)
     return Auth.currentUser()

@@ -103,11 +103,10 @@
         hidden: false
       }
     },
-    beforeCreate () {
+    created () {
       Loader.start('course')
       Loader.start('message')
-    },
-    created () {
+
       this.courseId = this.$route.params.id
       this.$course = Course.get(this.courseId)
         .subscribe(
@@ -128,6 +127,14 @@
               this.unread = 0
               Document.setTitle()
             }
+          }
+        )
+
+      Course.lastMessage(this.courseId)
+        .first()
+        .subscribe(
+          (message) => {
+            if (!message) Loader.stop('message')
           }
         )
     },

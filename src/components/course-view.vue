@@ -1,14 +1,9 @@
 <template>
   <div>
     <course-header :course="course" v-if="course"></course-header>
-    <course-apply-panel v-if="!isApply && !isOwn" :course="course"></course-apply-panel>
+    <course-apply-panel v-if="course && !isApply && !isOwn" :course="course"></course-apply-panel>
     <course-owner-panel v-if="course && isOwn" :course="course"></course-owner-panel>
     <course-student-panel v-if="course && isApply" :course="course"></course-student-panel>
-    <!--<div v-if="isApply" class="ui segment">
-      <div :class="{disabled: isAttended || !course.attend, loading: attending}" class="ui blue button" @click="attend">Attend</div>
-      <router-link class="ui yellow button" :to="`/course/${courseId}/chat`">Chat room</router-link>
-      <router-link class="ui teal button" :to="`/course/${courseId}/assignment`">Assignments</router-link>
-    </div>-->
     <course-detail :course="course" v-if="course"></course-detail>
     <course-content :contents="contents" v-if="contents"></course-content>
     <students :users="students" v-if="students"></students>

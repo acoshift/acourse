@@ -14,7 +14,8 @@ import 'semantic-ui-css/components/transition.min.js'
 import {
   Firebase,
   Auth as AuthService,
-  Loader
+  Loader,
+  Document
 } from './services'
 
 import {
@@ -78,6 +79,7 @@ const router = new VueRouter({
 })
 
 router.afterEach((to) => {
+  Document.setTitle()
   Loader.reset()
   window.ga('set', 'page', to.path)
   window.ga('send', 'pageview')
