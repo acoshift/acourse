@@ -22,6 +22,7 @@
   import { Observable } from 'rxjs'
   import get from 'lodash/fp/get'
   import keys from 'lodash/fp/keys'
+  import isEmpty from 'lodash/fp/isEmpty'
   import CourseHeader from './course-header'
   import CourseDetail from './course-detail'
   import CourseContent from './course-content'
@@ -74,7 +75,7 @@
           .subscribe(
             ([user, course, contents]) => {
               this.course = course
-              this.contents = contents
+              this.contents = !isEmpty(contents) && contents || null
               if (course.owner.id === user.uid) this.isOwn = true
               this.isApply = !!get(user.uid)(course.student)
 
