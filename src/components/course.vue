@@ -16,6 +16,14 @@
   </div>
 </template>
 
+<style scoped>
+  @media only screen and (max-width: 500px) {
+    .breadcrumb {
+      font-size: 1.05rem !important;
+    }
+  }
+</style>
+
 <script>
   import { Course, Loader } from '../services'
 
