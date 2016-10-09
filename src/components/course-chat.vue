@@ -186,7 +186,7 @@
           .do(() => {
             if (this.hidden && !Loader.has('message')) {
               ++this.unread
-              Document.setTitle(`(${this.unread})`)
+              Document.setTitle(null, `(${this.unread})`)
             }
           })
           .debounceTime(200)

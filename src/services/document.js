@@ -7,8 +7,10 @@ export default {
     return Observable.fromEvent(document, 'visibilitychange')
       .map(() => document.hidden)
   },
-  setTitle (title) {
-    document.title = 'Acourse' + (title ? ` ${title}` : '')
+  setTitle (after, before) {
+    before = before ? `${before} ` : ''
+    after = after ? ` ${after}` : ''
+    document.title = `${before}Acourse${after}`
   },
   openSuccessModal (title, description) {
     this.$successModal.next({title, description})
