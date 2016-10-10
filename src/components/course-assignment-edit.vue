@@ -29,10 +29,12 @@
       </div>
     </div>
     <div class="ui segment">
-      <div class="ui styled fluid accordion" v-for="x in assignments">
-        <div class="title">
-          <div class="dropdown icon"></div>
-          {{ x.title }} <span>({{ x.users.length }})</span>
+      <div class="ui styled fluid accordion">
+        <div v-for="x in assignments">
+          <div class="title">
+            <div class="dropdown icon"></div>
+            {{ x.title }} <span>({{ x.users.length }})</span>
+          </div>
           <div class="ui content">
             <div class="ui stackable grid">
               <div class="two column row" v-for="u in x.users">
