@@ -4,7 +4,7 @@
       <img src="../assets/acourse.svg">
     </router-link>
     <div class="right menu">
-      <div v-if="user" class="ui simple dropdown item" style="padding-top: 0.5rem; padding-bottom: 0.5rem;">
+      <div ref="dropdownUser" v-if="user" class="ui dropdown item" style="padding-top: 0.5rem; padding-bottom: 0.5rem;">
         <user-avatar :user="user"></user-avatar>
         <i class="dropdown icon"></i>
         <div class="menu">
@@ -26,9 +26,24 @@
     },
     data () {
       return {
-        user: Auth.currentUser()
-          .flatMap(({ uid }) => User.getProfile(uid))
+        user: null,
+        $user: null
       }
+    },
+    mounted () {
+      this.$user = Auth.currentUser()
+        .flatMap(({ uid }) => User.getProfile(uid))
+        .subscribe(
+          (user) => {
+            this.user = user
+            this.$nextTick(() => {
+              $(this.$refs.dropdownUser).dropdown({ action: 'hide' })
+            })
+          }
+        )
+    },
+    destroyed () {
+      this.$user.unsubscribe()
     },
     methods: {
       signOut () {
