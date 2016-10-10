@@ -9,6 +9,7 @@ import 'semantic-ui-css/components/accordion.min.js'
 import 'semantic-ui-css/components/checkbox.min.js'
 import 'semantic-ui-css/components/dimmer.min.js'
 import 'semantic-ui-css/components/dropdown.min.js'
+import 'semantic-ui-css/components/embed.min.js'
 import 'semantic-ui-css/components/modal.min.js'
 import 'semantic-ui-css/components/transition.min.js'
 

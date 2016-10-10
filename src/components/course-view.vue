@@ -4,6 +4,7 @@
     <course-apply-panel v-if="course && !isApply && !isOwn" :course="course"></course-apply-panel>
     <course-owner-panel v-if="course && isOwn" :course="course"></course-owner-panel>
     <course-student-panel v-if="course && isApply" :course="course"></course-student-panel>
+    <course-video v-if="course && course.video" :src="course.video"></course-video>
     <course-detail :course="course" v-if="course"></course-detail>
     <course-content :contents="contents" v-if="contents"></course-content>
     <students :users="students" v-if="students"></students>
@@ -17,6 +18,7 @@
   import keys from 'lodash/fp/keys'
   import isEmpty from 'lodash/fp/isEmpty'
   import CourseHeader from './course-header'
+  import CourseVideo from './course-video'
   import CourseDetail from './course-detail'
   import CourseContent from './course-content'
   import CourseOwnerPanel from './course-owner-panel'
@@ -27,6 +29,7 @@
   export default {
     components: {
       CourseHeader,
+      CourseVideo,
       CourseDetail,
       CourseContent,
       CourseOwnerPanel,

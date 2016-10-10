@@ -18,6 +18,7 @@
     mounted () {
       this.$nextTick(() => {
         $(this.$refs.accordion).accordion()
+        $(this.$el).find('.ui.embed').embed()
       })
     }
   }

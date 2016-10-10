@@ -70,6 +70,9 @@
         "attend": {
           ".validate": "newData.isString()"
         },
+        "video": {
+          ".validate": "newData.isString()"
+        },
         "$other": {
           ".validate": false
         }

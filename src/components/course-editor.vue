@@ -31,6 +31,10 @@
             <label>Open public</label>
           </div>
         </div>
+        <div class="field">
+          <label>Video</label>
+          <input v-model="course.video">
+        </div>
         <div class="ui divider"></div>
         <div style="padding-bottom: 1rem;">
           <h3>Contents</h3>
@@ -79,7 +83,8 @@
           photo: '',
           owner: '',
           start: '',
-          open: false
+          open: false,
+          video: ''
         },
         contents: [],
         courseId: '',
