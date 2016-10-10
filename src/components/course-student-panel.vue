@@ -26,18 +26,18 @@
         $isAttended: null
       }
     },
+    created () {
+      this.$isAttended = Course.isAttended(this.course.id)
+        .subscribe(
+          (isAttended) => {
+            this.isAttended = isAttended
+          }
+        )
+    },
+    destroyed () {
+      this.$isAttended.unsubscribe()
+    },
     methods: {
-      created () {
-        this.$isAttended = Course.isAttended(this.course.id)
-          .subscribe(
-            (isAttended) => {
-              this.isAttended = isAttended
-            }
-          )
-      },
-      destroyed () {
-        this.$isAttended.unsubscribe()
-      },
       attend () {
         this.attending = true
         Course.attend(this.course.id, this.course.attend)
