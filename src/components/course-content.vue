@@ -5,7 +5,7 @@
       <div v-for="(x, i) in contents">
         <div class="title"><i class="dropdown icon"></i>Section {{ i + 1 }}</div>
         <div class="content">
-          <p class="description">{{ x.content }}</p>
+          <p class="description" v-html="x.content"></p>
         </div>
       </div>
     </div>
