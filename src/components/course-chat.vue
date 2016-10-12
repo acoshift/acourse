@@ -58,6 +58,7 @@
     padding: 10px;
     overflow-y: scroll;
     overflow-x: hidden;
+    height: calc(100vh - 17rem);
   }
 
   #input.segment {
@@ -82,7 +83,6 @@
   import { Course, User, Loader, Document } from '../services'
   import Avatar from './avatar'
   import startsWith from 'lodash/fp/startsWith'
-  import debounce from 'lodash/debounce'
 
   export default {
     components: {
@@ -144,8 +144,6 @@
       this.$visibilityChanged.unsubscribe()
     },
     mounted () {
-      this.adjust()
-      $(window).resize(debounce(this.adjust, 150))
       $(this.$refs.chatBox)
         .off()
         .on('scroll', () => {
@@ -205,14 +203,6 @@
       },
       shouldScroll () {
         return this.$refs.chatBox.scrollHeight - this.$refs.chatBox.scrollTop <= this.$refs.chatBox.clientHeight + 500
-      },
-      adjust () {
-        const container = $(this.$refs.container)
-        const box = $(this.$refs.chatBox)
-        const h = window.innerHeight
-        container.height(() => h - container.offset().top - 60)
-        box.height(() => h - box.offset().top - 119)
-        box.scrollTop(99999)
       },
       send () {
         const input = this.input
