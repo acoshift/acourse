@@ -17,6 +17,7 @@
         },
         "course": {
           "$course_id": {
+            // ".write": "root.child('course/' + $course_id + '/student/' + $user_id).val() === true",
             ".validate": "newData.val() === true"
           }
         },
@@ -58,7 +59,7 @@
         },
         "student": {
           "$user_id": {
-            ".write": "auth.uid === $user_id && data.parent().exists()",
+            ".write": "auth.uid === $user_id && data.parent().exists() && data.parent().child('open').val() === true",
             ".validate": "newData.val() === true"
           }
         },
