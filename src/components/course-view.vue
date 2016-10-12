@@ -17,6 +17,7 @@
   import get from 'lodash/fp/get'
   import keys from 'lodash/fp/keys'
   import isEmpty from 'lodash/fp/isEmpty'
+  import orderBy from 'lodash/fp/orderBy'
   import CourseHeader from './course-header'
   import CourseVideo from './course-video'
   import CourseDetail from './course-detail'
@@ -73,7 +74,8 @@
               .map(keys)
               .flatMap((users) => Observable.from(users))
               .flatMap((id) => User.get(id).first())
-              .toArray(),
+              .toArray()
+              .map(orderBy(['name'], ['asc'])),
             (p, students) => [...p, students]
           )
           .do(() => Loader.stop('course'))
