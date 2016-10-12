@@ -41,7 +41,16 @@
           <div class="ui green button" @click="addContent">Add Content</div>
           <div class="ui segment" v-for="(x, i) in contents">
             <h4 class="ui header">Content {{ i + 1 }} <i class="red remove link icon" @click="removeContent(i)"></i></h4>
-            <textarea v-model="x.content" rows="5"></textarea>
+            <div class="ui form">
+              <div class="field">
+                <label>Title</label>
+                <input v-model="x.title">
+              </div>
+              <div class="field">
+                <label>Content</label>
+                <textarea v-model="x.content" rows="5"></textarea>
+              </div>
+            </div>
           </div>
         </div>
         <button class="ui blue save button" :class="{loading: saving}">
@@ -54,7 +63,7 @@
   </div>
 </template>
 
-<style>
+<style scoped>
   img.image {
     margin: 10px;
   }
@@ -118,7 +127,7 @@
                 pick(keys(this.course)),
                 defaults(this.course)
               )(course)
-              this.contents = contents && map(pick('content'))(contents) || []
+              this.contents = contents && map(pick(['content', 'title']))(contents) || []
             }
           )
       }

@@ -34,6 +34,7 @@
       ".indexOn": ["owner", "timestamp", "open", "start"],
       "$course_id": {
         ".write": "(!data.exists() || auth.uid === data.child('owner').val()) && (root.child('instructor/' + auth.uid).val() === true)",
+        ".validate": "data.exists() || newData.hasChildren(['title', 'description', 'photo', 'owner', 'timestamp'])",
         "title": {
           ".validate": "newData.isString()"
         },
@@ -84,6 +85,9 @@
         ".write": "root.child('course/' + $course_id + '/owner').val() === auth.uid",
         ".read": "root.child('course/' + $course_id + '/student/' + auth.uid).val() === true || root.child('course/' + $course_id + '/owner').val() === auth.uid",
         "$content_id": {
+          "title": {
+            ".validate": "newData.isString()"
+          },
           "content": {
             ".validate": "newData.isString()"
           },
