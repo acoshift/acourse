@@ -11,6 +11,8 @@ const off = (ref, type, fn) => {
 }
 
 export default {
+  currentUser: new BehaviorSubject(),
+
   init () {
     firebase.initializeApp({
       apiKey: 'AIzaSyBa6jPVcSPbLzjuei9-d0u9q7M-9rGjmb8',
@@ -19,7 +21,6 @@ export default {
       storageBucket: 'acourse-d9d0a.appspot.com',
       messagingSenderId: '582047384847'
     })
-    this.currentUser = new BehaviorSubject()
 
     firebase.auth().onAuthStateChanged((user) => {
       this.currentUser.next(user)
