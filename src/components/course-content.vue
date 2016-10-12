@@ -17,8 +17,11 @@
     props: ['contents'],
     mounted () {
       this.$nextTick(() => {
-        $(this.$refs.accordion).accordion()
-        $(this.$el).find('.ui.embed').embed()
+        $(this.$refs.accordion).accordion({
+          onOpening () {
+            $(this).find('.ui.embed').embed()
+          }
+        })
       })
     }
   }
