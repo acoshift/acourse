@@ -52,16 +52,9 @@ export default {
       .first()
       .flatMap((user) => Firebase.remove(`course/${id}/favorite/${user.uid}`))
   },
-  join (id) {
+  addStudent (id, userId) {
     window.ga('send', 'event', 'course', 'apply', id)
-    return Auth.currentUser()
-      .first()
-      .flatMap((user) =>
-        Observable.forkJoin(
-          Firebase.set(`course/${id}/student/${user.uid}`, true),
-          User.addCourseMe(id)
-        )
-      )
+    return Firebase.set(`course/${id}/student/${userId}`, true)
   },
   ownBy (userId) {
     const ref = Firebase.ref('course').orderByChild('owner').equalTo(userId)

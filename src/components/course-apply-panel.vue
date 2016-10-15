@@ -9,7 +9,7 @@
 </template>
 
 <script>
-  import { Course, Document } from '../services'
+  import { Me, Document } from '../services'
 
   export default {
     props: ['course'],
@@ -22,11 +22,15 @@
       apply () {
         if (this.applying) return
         this.applying = true
-        Course.join(this.course.id)
+
+        Me.applyCourse(this.course.id)
           .finally(() => { this.applying = false })
           .subscribe(
             () => {
               Document.openSuccessModal('Success', 'You have applied to this course.')
+            },
+            (err) => {
+              Document.openErrorModal('Error', 'Can not apply to this course. ' + err.message)
             }
           )
       }

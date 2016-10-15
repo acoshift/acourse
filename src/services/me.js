@@ -34,5 +34,19 @@ export default {
     return Auth.currentUser()
       .first()
       .flatMap(({ uid }) => User.update(uid, data))
+  },
+  addCourse (id) {
+    return Auth.currentUser()
+      .first()
+      .flatMap(({ uid }) => User.addCourse(uid, id))
+  },
+  applyCourse (id) {
+    return Auth.currentUser()
+      .first()
+      .flatMap(({ uid }) =>
+        Observable.forkJoin(
+          Course.addStudent(id, uid),
+          this.addCourse(id)
+        ))
   }
 }

@@ -1,5 +1,4 @@
 import Firebase from './firebase'
-import Auth from './auth'
 import { Observable } from 'rxjs'
 import pick from 'lodash/fp/pick'
 import assign from 'lodash/extend'
@@ -36,10 +35,8 @@ export default {
   update (id, data) {
     return Firebase.update(`user/${id}`, data)
   },
-  addCourseMe (courseId) {
-    return Auth.currentUser()
-      .first()
-      .flatMap((user) => Firebase.set(`user-course/${user.uid}/${courseId}`, true))
+  addCourse (id, courseId) {
+    return Firebase.set(`user-course/${id}/${courseId}`, true)
   },
   saveAuthProfile ({ uid, displayName, photoURL }) {
     return this.get(uid)
