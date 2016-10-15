@@ -9,6 +9,8 @@ firebase.initializeApp({
 
 const userRef = firebase.database().ref('user')
 
-userRef.on('child_added', (snapshot) => {
-  snapshot.child('course').remove()
+userRef.once('value', (snapshots) => {
+  snapshots.forEach((snapshot) => {
+    snapshot.ref.child('course').remove()
+  })
 })
