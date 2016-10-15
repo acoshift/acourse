@@ -25,7 +25,9 @@ export default {
 
     const messaging = firebase.messaging()
 
-    messaging.requestPermission()
+    if (window.Notification && window.Notification.requestPermission) {
+      messaging.requestPermission()
+    }
 
     messaging.getToken().then((token) => {
       this.notificationToken.next(token)
