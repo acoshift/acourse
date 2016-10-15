@@ -1,5 +1,5 @@
 import firebase from 'firebase'
-import { Observable, BehaviorSubject } from 'rxjs'
+import { Observable, BehaviorSubject, Subject } from 'rxjs'
 import isString from 'lodash/fp/isString'
 import Raven from 'raven-js'
 
@@ -12,6 +12,8 @@ const off = (ref, type, fn) => {
 
 export default {
   currentUser: new BehaviorSubject(),
+  notificationToken: new BehaviorSubject(),
+  notification: new Subject(),
   provider: {
     google: new firebase.auth.GoogleAuthProvider(),
     facebook: new firebase.auth.FacebookAuthProvider(),
@@ -20,6 +22,24 @@ export default {
 
   init () {
     firebase.initializeApp(process.env.FIREBASE)
+
+    const messaging = firebase.messaging()
+
+    messaging.requestPermission()
+
+    messaging.getToken().then((token) => {
+      this.notificationToken.next(token)
+    })
+
+    messaging.onTokenRefresh(() => {
+      messaging.getToken().then((token) => {
+        this.notificationToken.next(token)
+      })
+    })
+
+    messaging.onMessage((payload) => {
+      this.notification.next(payload)
+    })
 
     firebase.auth().onAuthStateChanged((user) => {
       this.currentUser.next(user)
@@ -35,6 +55,22 @@ export default {
         Raven.setUserContext(null)
       }
     })
+
+    Observable.combineLatest(
+      this.currentUser,
+      this.notificationToken
+    )
+      .subscribe(
+        ([user, token]) => {
+          if (token) {
+            if (user) {
+              firebase.database().ref(`notification/${token}`).set({ user: user.uid })
+            } else {
+              firebase.database().ref(`notification/${token}`).remove()
+            }
+          }
+        }
+      )
   },
   signInWithEmailAndPassword (email, password) {
     return Observable.fromPromise(firebase.auth().signInWithEmailAndPassword(email, password))

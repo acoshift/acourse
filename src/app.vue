@@ -4,6 +4,7 @@
     <success-modal ref="successModal"></success-modal>
     <error-modal ref="errorModal"></error-modal>
     <upload-modal ref="uploadModal"></upload-modal>
+    <notification></notification>
   </div>
 </template>
 
@@ -57,12 +58,14 @@
   import SuccessModal from './components/success-modal'
   import ErrorModal from './components/error-modal'
   import UploadModal from './components/upload-modal'
+  import Notification from './components/notification'
 
   export default {
     components: {
       SuccessModal,
       ErrorModal,
-      UploadModal
+      UploadModal,
+      Notification
     },
     data () {
       return {

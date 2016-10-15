@@ -168,6 +168,12 @@
           }
         }
       }
+    },
+    "notification": {
+      ".indexOn": ["user"],
+      "$token": {
+        ".write": true
+      }
     }
   }
 }
