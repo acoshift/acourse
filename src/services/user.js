@@ -3,6 +3,7 @@ import Auth from './auth'
 import { Observable } from 'rxjs'
 import pick from 'lodash/fp/pick'
 import assign from 'lodash/extend'
+import keys from 'lodash/fp/keys'
 
 export default {
   get (id) {
@@ -17,6 +18,10 @@ export default {
   isInstructor (id) {
     return Firebase.onValue(`instructor/${id}`)
       .map((x) => !!x)
+  },
+  courses (id) {
+    return Firebase.onValue(`user-course/${id}`)
+      .map(keys)
   },
   me () {
     return Auth.currentUser()
@@ -49,7 +54,7 @@ export default {
   addCourseMe (courseId) {
     return Auth.currentUser()
       .first()
-      .flatMap((user) => Firebase.set(`user/${user.uid}/course/${courseId}`, true))
+      .flatMap((user) => Firebase.set(`user-course/${user.uid}/${courseId}`, true))
   },
   saveAuthProfile ({ uid, displayName, photoURL }) {
     return this.get(uid)

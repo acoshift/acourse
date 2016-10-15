@@ -23,7 +23,6 @@
   import UserProfile from './user-profile'
   import CourseCard from './course-card'
   import isEmpty from 'lodash/fp/isEmpty'
-  import keys from 'lodash/fp/keys'
   import filter from 'lodash/fp/filter'
   import { Observable } from 'rxjs'
 
@@ -58,8 +57,7 @@
         Loader.start('user')
         this.$user = User.get(this.$route.params.id)
           .flatMap((user) =>
-            Observable.of(user.course)
-              .map(keys)
+            User.courses(this.$route.params.id)
               .flatMap((courseIds) =>
                 isEmpty(courseIds)
                   ? Observable.of([])

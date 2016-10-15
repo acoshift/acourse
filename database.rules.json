@@ -26,6 +26,15 @@
         }
       }
     },
+    "user-course": {
+      ".read": "auth != null",
+      "$user_id": {
+        ".write": "auth.uid === $user_id",
+        "$course_id": {
+          ".validate": "newData.val() === true"
+        }
+      }
+    },
     "instructor": {
       ".read": "auth != null",
       ".write": false

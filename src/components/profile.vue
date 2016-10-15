@@ -36,7 +36,6 @@
   import { Auth, User, Course, Loader } from '../services'
   import UserProfile from './user-profile'
   import CourseCard from './course-card'
-  import keys from 'lodash/fp/keys'
   import { Observable } from 'rxjs'
 
   export default {
@@ -52,9 +51,7 @@
         ownCourses: Auth.currentUser()
           .flatMap(({ uid }) => Course.ownBy(uid)),
         courses: Auth.currentUser()
-          .flatMap(({ uid }) => User.get(uid))
-          .map((x) => x.course)
-          .map(keys)
+          .flatMap(({ uid }) => User.courses(uid))
           .flatMap((courseIds) => Observable.combineLatest(...courseIds.map((id) => Course.get(id))))
       }
     },
