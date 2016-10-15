@@ -1,45 +1,42 @@
 <template>
-  <div>
-    <div class="ui chat segment" ref="container">
-      <div class="ui segment" id="chatBox" ref="chatBox">
-        <div class="ui comments">
-          <div v-for="x in messages" class="comment">
-            <span class="avatar">
-              <img :src="x.user && x.user.photo || '/static/icons/ic_face_black_48px.svg'">
-            </span>
-            <div class="content">
-              <span class="author">{{ x.user && x.user.name || 'Anonymous' }}</span>
-              <div class="metadata">
-                <span class="date">{{ x.t | fromNow }}</span>
-              </div>
-              <div class="text">
-                <a v-if="x.h" target="_blank" :href="x.m">
-                  <div v-if="x.h === 1" class="ui small image">
-                    <img :src="x.m" onerror="this.src = '/static/icons/ic_insert_drive_file_black_48px.svg'">
-                  </div>
-                  <span v-else>{{ x.m }}</span>
-                </a>
-                <span v-else>{{ x.m }}</span>
-              </div>
+  <div class="ui chat segment" ref="container">
+    <div class="ui segment" id="chatBox" ref="chatBox">
+      <div class="ui comments">
+        <div v-for="x in messages" class="comment">
+          <span class="avatar">
+            <img :src="x.user && x.user.photo || '/static/icons/ic_face_black_48px.svg'">
+          </span>
+          <div class="content">
+            <span class="author">{{ x.user && x.user.name || 'Anonymous' }}</span>
+            <div class="metadata">
+              <span class="date">{{ x.t | fromNow }}</span>
             </div>
-          </div>
-        </div>
-      </div>
-      <div id="input" class="ui segment">
-        <div class="ui grid">
-          <div class="row">
-            <div class="column">
-              <div class="ui fluid input">
-                <input ref="input" v-model="input" @keyup.13="send"></input>
-                <div class="ui basic icon button" @click="$refs.file.click()" :class="{'disabled loading': uploading}"><i class="upload icon"></i></div>
-                <div class="ui basic icon button" @click="send"><i class="send icon"></i></div>
-              </div>
+            <div class="text">
+              <a v-if="x.h" target="_blank" :href="x.m">
+                <div v-if="x.h === 1" class="ui small image">
+                  <img :src="x.m" onerror="this.src = '/static/icons/ic_insert_drive_file_black_48px.svg'">
+                </div>
+                <span v-else>{{ x.m }}</span>
+              </a>
+              <span v-else>{{ x.m }}</span>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <input type="file" class="hidden" ref="file" @change="upload">
+    <div id="input" class="ui segment">
+      <div class="ui grid">
+        <div class="row">
+          <div class="column">
+            <div class="ui fluid input">
+              <input ref="input" v-model="input" @keyup.13="send"></input>
+              <div class="ui basic icon button" @click="upload"><i class="upload icon"></i></div>
+              <div class="ui basic icon button" @click="send"><i class="send icon"></i></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -96,7 +93,6 @@
         messages: [],
         limit: 50,
         loadingTop: false,
-        uploading: false,
         $course: null,
         $message: null,
         unread: 0,
@@ -211,18 +207,12 @@
         Me.sendMessage(this.courseId, input).subscribe()
       },
       upload () {
-        if (this.uploading) return
-        const f = this.$refs.file.files[0]
-        if (!f) return
-        this.uploading = true
-        this.$refs.file.value = ''
-        Me.upload(f)
+        Document.uploadModal.open()
           .flatMap((file) => Me.sendMessage(this.courseId, file.downloadURL))
-          .finally(() => { this.uploading = false })
           .subscribe(
             null,
             (err) => {
-              Document.openErrorModal('Upload Error', (err && err.message || err) + ' Please check file size should less than 5MiB.')
+              Document.openErrorModal('Upload Error', err && err.message || err)
             }
           )
       }

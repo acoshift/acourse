@@ -3,6 +3,7 @@ import { Observable, Subject } from 'rxjs'
 export default {
   $successModal: new Subject(),
   $errorModal: new Subject(),
+  uploadModal: null,
   visibilityChanged () {
     return Observable.fromEvent(document, 'visibilitychange')
       .map(() => document.hidden)

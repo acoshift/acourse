@@ -10,8 +10,7 @@
         <div class="field">
           <label>Cover Photo</label>
           <img v-show="course.photo" class="ui medium image" :src="course.photo">
-          <div class="ui green button" @click="$refs.photo.click()" :class="{loading: uploading}">Select Photo</div>
-          <input ref="photo" type="file" class="hidden" @change="uploadPhoto" accept="image/*">
+          <div class="ui green button" @click="uploadPhoto">Select Photo</div>
         </div>
         <div class="field">
           <label>Title</label>
@@ -74,7 +73,7 @@
 </style>
 
 <script>
-  import { Auth, Me, Course, Loader } from '../services'
+  import { Auth, Document, Course, Loader } from '../services'
   import { Observable } from 'rxjs'
   import flow from 'lodash/fp/flow'
   import defaults from 'lodash/fp/defaults'
@@ -97,7 +96,6 @@
         },
         contents: [],
         courseId: '',
-        uploading: false,
         saving: false
       }
     },
@@ -137,15 +135,13 @@
     },
     methods: {
       uploadPhoto () {
-        if (this.uploading) return
-        const file = this.$refs.photo.files[0]
-        if (!file) return
-        this.uploading = true
-        Me.upload(file)
-          .finally(() => { this.uploading = false })
+        Document.uploadModal.open('image/*')
           .subscribe(
             (f) => {
               this.course.photo = f.downloadURL
+            },
+            (err) => {
+              Document.openErrorModal('Upload Error', err.message)
             }
           )
       },

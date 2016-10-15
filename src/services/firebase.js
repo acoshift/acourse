@@ -108,7 +108,7 @@ export default {
   },
   upload (path, file) {
     const ref = firebase.storage().ref(path)
-    return Observable.fromPromise(ref.put(file))
+    return Observable.of(ref.put(file))
   },
   set (path, data) {
     const ref = firebase.database().ref(path)

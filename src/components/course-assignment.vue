@@ -1,7 +1,6 @@
 <template>
   <div>
-    <div class="ui segment" v-if="course" :class="{loading: uploading}">
-      <input type="file" style="display: none" ref="file" @change="selectedFile">
+    <div class="ui segment" v-if="course">
       <div class="ui grid">
         <div class="three column row" v-for="x in assignments">
           <div class="five wide column">
@@ -34,8 +33,7 @@
         course: null,
         select: 0,
         assignments: null,
-        userAssignments: null,
-        uploading: false
+        userAssignments: null
       }
     },
     created () {
@@ -68,19 +66,12 @@
     methods: {
       selectFile (select) {
         this.select = select
-        this.$refs.file.click()
-      },
-      selectedFile () {
-        const file = this.$refs.file.files[0]
-        if (!file) return
-        this.uploading = true
-        Me.upload(file)
+        Document.uploadModal.open('image/*')
           .flatMap((file) => Me.submitCourseAssignment(this.courseId, this.select, file.downloadURL))
-          .finally(() => { this.uploading = false })
           .subscribe(
             null,
             (err) => {
-              Document.openErrorModal('Upload Error', (err && err.message || err) + ' Please check file size should less than 5MiB.')
+              Document.openErrorModal('Upload Error', err && err.message || err)
             }
           )
       }

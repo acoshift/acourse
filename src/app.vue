@@ -3,6 +3,7 @@
     <router-view></router-view>
     <success-modal ref="successModal"></success-modal>
     <error-modal ref="errorModal"></error-modal>
+    <upload-modal ref="uploadModal"></upload-modal>
   </div>
 </template>
 
@@ -34,6 +35,7 @@
   @import '../node_modules/semantic-ui-css/components/modal.min.css';
   @import '../node_modules/semantic-ui-css/components/segment.min.css';
   @import '../node_modules/semantic-ui-css/components/transition.min.css';
+  @import '../node_modules/semantic-ui-css/components/progress.min.css';
 
   .hidden {
     display: none;
@@ -54,11 +56,13 @@
   import { Loader, Document } from './services'
   import SuccessModal from './components/success-modal'
   import ErrorModal from './components/error-modal'
+  import UploadModal from './components/upload-modal'
 
   export default {
     components: {
       SuccessModal,
-      ErrorModal
+      ErrorModal,
+      UploadModal
     },
     data () {
       return {
@@ -83,6 +87,9 @@
             this.$refs.errorModal.show(title, description)
           }
         )
+    },
+    mounted () {
+      Document.uploadModal = this.$refs.uploadModal
     }
   }
 </script>

@@ -11,6 +11,7 @@ import 'semantic-ui-css/components/dropdown.min.js'
 import 'semantic-ui-css/components/embed.min.js'
 import 'semantic-ui-css/components/modal.min.js'
 import 'semantic-ui-css/components/transition.min.js'
+import 'semantic-ui-css/components/progress.min.js'
 
 import { Firebase } from './services'
 import router from './router'

@@ -6,8 +6,7 @@
       <div class="field">
         <label>Photo</label>
         <avatar v-show="user.photo" :src="user.photo" size="small"></avatar>
-        <div class="ui green button" :class="{loading: uploading}" @click="$refs.photo.click()">Select Photo</div>
-        <input ref="photo" type="file" class="hidden" @change="uploadPhoto" accept="image/*">
+        <div class="ui green button" @click="selectPhoto">Select Photo</div>
       </div>
       <div class="field">
         <label>Name</label>
@@ -30,7 +29,7 @@
 </style>
 
 <script>
-  import { Loader, Me } from '../services'
+  import { Loader, Me, Document } from '../services'
   import Avatar from './avatar'
   import pick from 'lodash/fp/pick'
   import keys from 'lodash/fp/keys'
@@ -46,7 +45,6 @@
           name: '',
           aboutMe: ''
         },
-        uploading: false,
         saving: false,
         error: ''
       }
@@ -77,20 +75,14 @@
             }
           )
       },
-      uploadPhoto () {
-        this.error = ''
-        if (this.uploading) return
-        const file = this.$refs.photo.files[0]
-        if (!file) return
-        this.uploading = true
-        Me.upload(file)
-          .finally(() => { this.uploading = false })
+      selectPhoto () {
+        Document.uploadModal.open('image/*')
           .subscribe(
             (f) => {
               this.user.photo = f.downloadURL
             },
-            () => {
-              this.error = 'Please check file type should be image and file size should not exceed 1MB'
+            (err) => {
+              Document.openErrorModal('Upload Error', err.message)
             }
           )
       }
