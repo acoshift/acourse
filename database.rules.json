@@ -2,7 +2,7 @@
   "rules": {
     ".read": false,
     ".write": false,
-    "user": { // global user data
+    "user": {
       ".read": "auth != null",
       "$user_id": {
         ".write": "auth.uid === $user_id",
@@ -84,7 +84,6 @@
       }
     },
     "content": {
-      // course contents
       "$course_id": {
         ".write": "root.child('course/' + $course_id + '/owner').val() === auth.uid",
         ".read": "root.child('course/' + $course_id + '/student/' + auth.uid).val() === true || root.child('course/' + $course_id + '/owner').val() === auth.uid",
