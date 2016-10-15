@@ -15,7 +15,7 @@
 </template>
 
 <script>
-  import { Course, Document } from '../services'
+  import { Me, Document } from '../services'
 
   export default {
     props: ['course'],
@@ -27,7 +27,7 @@
       }
     },
     created () {
-      this.$isAttended = Course.isAttended(this.course.id)
+      this.$isAttended = Me.isAttendedCourse(this.course.id)
         .subscribe(
           (isAttended) => {
             this.isAttended = isAttended
@@ -40,7 +40,7 @@
     methods: {
       attend () {
         this.attending = true
-        Course.attend(this.course.id, this.course.attend)
+        Me.attendCourse(this.course.id)
           .finally(() => { this.attending = false })
           .subscribe(
             () => {

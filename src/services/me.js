@@ -58,5 +58,15 @@ export default {
     return Auth.currentUser()
       .first()
       .flatMap(({ uid }) => Course.unfavorite(id, uid))
+  },
+  isAttendedCourse (id) {
+    return Auth.currentUser()
+      .first()
+      .flatMap(({ uid }) => Course.isAttended(id, uid))
+  },
+  attendCourse (id) {
+    return Auth.currentUser()
+      .first()
+      .flatMap(({ uid }) => Course.attend(id, uid))
   }
 }

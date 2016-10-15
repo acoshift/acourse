@@ -81,11 +81,12 @@ export default {
     const ref = Firebase.ref(`chat/${id}`).orderByKey().limitToLast(1)
     return Firebase.onValue(ref)
   },
-  attend (id, code) {
-    window.ga('send', 'event', 'course', 'attend', id, code)
-    return Auth.currentUser()
+  attend (id, userId) {
+    return this.get(id)
       .first()
-      .flatMap((auth) => Firebase.set(`attend/${id}/${code}/${auth.uid}`, Firebase.timestamp))
+      .map((course) => course.attend)
+      .do((code) => window.ga('send', 'event', 'course', 'attend', id, code))
+      .flatMap((code) => Firebase.set(`attend/${id}/${code}/${userId}`, Firebase.timestamp))
   },
   setAttendCode (id, code) {
     return Firebase.set(`course/${id}/attend`, code)
@@ -107,12 +108,10 @@ export default {
         )
       )
   },
-  isAttended (id) {
-    return Observable.forkJoin(
-      Auth.currentUser().first(),
-      this.get(id).first().map((course) => course.attend)
-    )
-      .flatMap(([auth, code]) => Firebase.onValue(`attend/${id}/${code}/${auth.uid}`))
+  isAttended (id, userId) {
+    return this.get(id)
+      .map((course) => course.attend)
+      .flatMap((code) => Firebase.onValue(`attend/${id}/${code}/${userId}`))
       .map((x) => !!x)
   },
   addAssignment (id, { title }) {
