@@ -88,9 +88,6 @@
           <div class="ui google plus fluid button" :class="{loading: googleLoading}" @click="googleSignIn"><i class="google plus icon"></i>Sign In with Google+</div>
           <br>
           <div class="ui black fluid button" :class="{loading: githubLoading}" @click="githubSignIn"><i class="github icon"></i>Sign In with Github</div>
-          <div class="ui error message" v-if="providerError">
-            {{ providerError }}
-          </div>
         </div>
       </div>
     </div>
@@ -137,7 +134,6 @@
         state: 0,
         error: '',
         loading: false,
-        providerError: '',
         facebookLoading: false,
         googleLoading: false,
         githubLoading: false
@@ -193,7 +189,6 @@
       facebookSignIn () {
         if (this.facebookLoading) return
         this.facebookLoading = true
-        this.providerError = ''
         Auth.signInWithFacebook()
           .flatMap((res) => User.saveAuthProfile(res.user), (x) => x)
           .finally(() => { this.facebookLoading = false })
@@ -202,14 +197,13 @@
               this.gotoHome()
             },
             (err) => {
-              this.providerError = err.message
+              Document.openErrorModal('Error', err.message)
             }
           )
       },
       googleSignIn () {
         if (this.googleLoading) return
         this.googleLoading = true
-        this.providerError = ''
         Auth.signInWithGoogle()
           .flatMap((res) => User.saveAuthProfile(res.user), (x) => x)
           .finally(() => { this.googleLoading = false })
@@ -218,14 +212,13 @@
               this.gotoHome()
             },
             (err) => {
-              this.providerError = err.message
+              Document.openErrorModal('Error', err.message)
             }
           )
       },
       githubSignIn () {
         if (this.githubLoading) return
         this.githubLoading = true
-        this.providerError = ''
         Auth.signInWithGithub()
           .flatMap((res) => User.saveAuthProfile(res.user), (x) => x)
           .finally(() => { this.githubLoading = false })
@@ -234,7 +227,7 @@
               this.gotoHome()
             },
             (err) => {
-              this.providerError = err.message
+              Document.openErrorModal('Error', err.message)
             }
           )
       },
