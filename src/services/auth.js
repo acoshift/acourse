@@ -7,15 +7,15 @@ export default {
   },
   signInWithFacebook () {
     window.ga('send', 'event', 'auth', 'facebook')
-    return Firebase.signInWithFacebook()
+    return Firebase.signInWithProvider(Firebase.provider.facebook)
   },
   signInWithGoogle () {
     window.ga('send', 'event', 'auth', 'google')
-    return Firebase.signInWithGoogle()
+    return Firebase.signInWithProvider(Firebase.provider.google)
   },
   signInWithGithub () {
     window.ga('send', 'event', 'auth', 'github')
-    return Firebase.signInWithGithub()
+    return Firebase.signInWithProvider(Firebase.provider.github)
   },
   signUp (email, password) {
     window.ga('send', 'event', 'auth', 'signup')
@@ -31,5 +31,29 @@ export default {
   },
   currentUser () {
     return Firebase.currentUser.filter((x) => x !== undefined)
+  },
+  linkFacebook () {
+    window.ga('send', 'event', 'auth', 'link', 'facebook')
+    return Firebase.linkProvider(Firebase.provider.facebook)
+  },
+  linkGoogle () {
+    window.ga('send', 'event', 'auth', 'link', 'google')
+    return Firebase.linkProvider(Firebase.provider.google)
+  },
+  linkGithub () {
+    window.ga('send', 'event', 'auth', 'link', 'github')
+    return Firebase.linkProvider(Firebase.provider.github)
+  },
+  unlinkFacebook () {
+    window.ga('send', 'event', 'auth', 'unlink', 'facebook')
+    return Firebase.unlinkProvider(Firebase.provider.facebook)
+  },
+  unlinkGoogle () {
+    window.ga('send', 'event', 'auth', 'unlink', 'google')
+    return Firebase.unlinkProvider(Firebase.provider.google)
+  },
+  unlinkGithub () {
+    window.ga('send', 'event', 'auth', 'unlink', 'github')
+    return Firebase.unlinkProvider(Firebase.provider.github)
   }
 }

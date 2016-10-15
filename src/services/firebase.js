@@ -12,6 +12,11 @@ const off = (ref, type, fn) => {
 
 export default {
   currentUser: new BehaviorSubject(),
+  provider: {
+    google: new firebase.auth.GoogleAuthProvider(),
+    facebook: new firebase.auth.FacebookAuthProvider(),
+    github: new firebase.auth.GithubAuthProvider()
+  },
 
   init () {
     firebase.initializeApp(process.env.FIREBASE)
@@ -34,14 +39,20 @@ export default {
   signInWithEmailAndPassword (email, password) {
     return Observable.fromPromise(firebase.auth().signInWithEmailAndPassword(email, password))
   },
-  signInWithFacebook () {
-    return Observable.fromPromise(firebase.auth().signInWithPopup(new firebase.auth.FacebookAuthProvider()))
+  signInWithProvider (provider) {
+    return Observable.fromPromise(firebase.auth().signInWithPopup(provider))
   },
-  signInWithGoogle () {
-    return Observable.fromPromise(firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider()))
+  linkProvider (provider) {
+    return Observable.fromPromise(firebase.auth().currentUser.linkWithPopup(provider))
+      .do(() => {
+        this.currentUser.next(firebase.auth().currentUser)
+      })
   },
-  signInWithGithub () {
-    return Observable.fromPromise(firebase.auth().signInWithPopup(new firebase.auth.GithubAuthProvider()))
+  unlinkProvider (provider) {
+    return Observable.fromPromise(firebase.auth().currentUser.unlink(provider.providerId))
+      .do(() => {
+        this.currentUser.next(firebase.auth().currentUser)
+      })
   },
   createUserWithEmailAndPassword (email, password) {
     return Observable.fromPromise(firebase.auth().createUserWithEmailAndPassword(email, password))

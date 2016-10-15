@@ -83,11 +83,11 @@
       </div>
       <div class="row">
         <div class="ui center aligned segment">
-          <div class="ui facebook fluid button" @click="facebookSignIn" :class="{loading: facebookLoading}"><i class="facebook f icon"></i>Sign In with Facebook</div>
+          <div class="ui facebook fluid button" @click="facebookSignIn" :class="{loading: facebookLoading}"><i class="facebook f icon"></i> Sign In with Facebook</div>
           <br>
-          <div class="ui google plus fluid button" :class="{loading: googleLoading}" @click="googleSignIn"><i class="google plus icon"></i>Sign In with Google+</div>
+          <div class="ui google plus fluid button" :class="{loading: googleLoading}" @click="googleSignIn"><i class="google plus icon"></i> Sign In with Google+</div>
           <br>
-          <div class="ui black fluid button" :class="{loading: githubLoading}" @click="githubSignIn"><i class="github icon"></i>Sign In with Github</div>
+          <div class="ui black fluid button" :class="{loading: githubLoading}" @click="githubSignIn"><i class="github icon"></i> Sign In with Github</div>
         </div>
       </div>
     </div>
