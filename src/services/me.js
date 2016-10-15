@@ -73,5 +73,10 @@ export default {
     return Auth.currentUser()
       .first()
       .flatMap(({ uid }) => Course.sendMessage(id, uid, text))
+  },
+  submitCourseAssignment (id, assignmentId, url) {
+    return Auth.currentUser()
+      .first()
+      .flatMap(({ uid }) => Course.submitAssignment(id, uid, assignmentId, url))
   }
 }

@@ -216,7 +216,7 @@
         if (!f) return
         this.uploading = true
         this.$refs.file.value = ''
-        User.upload(f)
+        Me.upload(f)
           .flatMap((file) => Me.sendMessage(this.courseId, file.downloadURL))
           .finally(() => { this.uploading = false })
           .subscribe(

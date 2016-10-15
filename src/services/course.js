@@ -123,13 +123,11 @@ export default {
       .first()
       .flatMap((auth) => Firebase.onValue(`assignment/${id}/user/${auth.uid}`))
   },
-  addAssignmentFile (id, assignmentId, url) {
+  submitAssignment (id, userId, assignmentId, url) {
     window.ga('send', 'event', 'course', 'uploadAssignment', id, assignmentId)
-    return Auth.currentUser()
-      .first()
-      .flatMap((auth) => Firebase.push(`assignment/${id}/user/${auth.uid}/${assignmentId}`, {
-        url,
-        timestamp: Firebase.timestamp
-      }))
+    return Firebase.push(`assignment/${id}/user/${userId}/${assignmentId}`, {
+      url,
+      timestamp: Firebase.timestamp
+    })
   }
 }

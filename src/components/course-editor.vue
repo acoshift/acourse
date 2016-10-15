@@ -74,7 +74,7 @@
 </style>
 
 <script>
-  import { Auth, User, Course, Loader } from '../services'
+  import { Auth, Me, Course, Loader } from '../services'
   import { Observable } from 'rxjs'
   import flow from 'lodash/fp/flow'
   import defaults from 'lodash/fp/defaults'
@@ -141,7 +141,7 @@
         const file = this.$refs.photo.files[0]
         if (!file) return
         this.uploading = true
-        User.upload(file)
+        Me.upload(file)
           .finally(() => { this.uploading = false })
           .subscribe(
             (f) => {

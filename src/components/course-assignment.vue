@@ -24,7 +24,7 @@
 </template>
 
 <script>
-  import { Course, User, Loader, Document } from '../services'
+  import { Course, Me, Loader, Document } from '../services'
   import { Observable } from 'rxjs'
 
   export default {
@@ -74,8 +74,8 @@
         const file = this.$refs.file.files[0]
         if (!file) return
         this.uploading = true
-        User.upload(file)
-          .flatMap((file) => Course.addAssignmentFile(this.courseId, this.select, file.downloadURL))
+        Me.upload(file)
+          .flatMap((file) => Me.submitAssignment(this.courseId, this.select, file.downloadURL))
           .finally(() => { this.uploading = false })
           .subscribe(
             null,
