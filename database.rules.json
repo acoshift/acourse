@@ -15,12 +15,6 @@
         "aboutMe": {
           ".validate": "newData.isString()"
         },
-        "course": {
-          "$course_id": {
-            // ".write": "root.child('course/' + $course_id + '/student/' + $user_id).val() === true",
-            ".validate": "newData.val() === true"
-          }
-        },
         "$other": {
           ".validate": false
         }
