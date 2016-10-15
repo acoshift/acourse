@@ -36,9 +36,13 @@
         .subscribe(
           (user) => {
             this.user = user
-            this.$nextTick(() => {
-              $(this.$refs.dropdownUser).dropdown({ action: 'hide' })
-            })
+            if (user) {
+              this.$nextTick(() => {
+                $(this.$refs.dropdownUser).dropdown({ action: 'hide' })
+              })
+            } else {
+              $(this.$refs.dropdownUser).dropdown('unbind intent')
+            }
           }
         )
     },

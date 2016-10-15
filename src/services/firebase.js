@@ -40,6 +40,9 @@ export default {
   signInWithGoogle () {
     return Observable.fromPromise(firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider()))
   },
+  signInWithGithub () {
+    return Observable.fromPromise(firebase.auth().signInWithPopup(new firebase.auth.GithubAuthProvider()))
+  },
   createUserWithEmailAndPassword (email, password) {
     return Observable.fromPromise(firebase.auth().createUserWithEmailAndPassword(email, password))
   },

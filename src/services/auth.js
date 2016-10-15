@@ -13,6 +13,10 @@ export default {
     window.ga('send', 'event', 'auth', 'google')
     return Firebase.signInWithGoogle()
   },
+  signInWithGithub () {
+    window.ga('send', 'event', 'auth', 'github')
+    return Firebase.signInWithGithub()
+  },
   signUp (email, password) {
     window.ga('send', 'event', 'auth', 'signup')
     return Firebase.createUserWithEmailAndPassword(email, password)
