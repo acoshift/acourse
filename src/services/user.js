@@ -30,18 +30,11 @@ export default {
     )
       .map(([user, instructor]) => ({id, ...user, instructor}))
   },
-  upload (file) {
-    return Auth.currentUser()
-      .first()
-      .flatMap(({ uid }) => Firebase.upload(`user/${uid}/${Date.now()}`, file))
+  upload (id, file) {
+    return Firebase.upload(`user/${id}/${Date.now()}`, file)
   },
   update (id, data) {
     return Firebase.update(`user/${id}`, data)
-  },
-  updateMe (data) {
-    return Auth.currentUser()
-      .first()
-      .flatMap((user) => this.update(user.uid, data))
   },
   addCourseMe (courseId) {
     return Auth.currentUser()

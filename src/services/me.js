@@ -24,5 +24,15 @@ export default {
     return Auth.currentUser()
       .flatMap(({ uid }) => User.courses(uid))
       .flatMap((courseIds) => Observable.combineLatest(...courseIds.map((id) => Course.get(id))))
+  },
+  upload (file) {
+    return Auth.currentUser()
+      .first()
+      .flatMap(({ uid }) => User.upload(uid, file))
+  },
+  update (data) {
+    return Auth.currentUser()
+      .first()
+      .flatMap(({ uid }) => User.update(uid, data))
   }
 }

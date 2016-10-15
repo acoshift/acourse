@@ -30,7 +30,7 @@
 </style>
 
 <script>
-  import { User, Loader, Me } from '../services'
+  import { Loader, Me } from '../services'
   import Avatar from './avatar'
   import pick from 'lodash/fp/pick'
   import keys from 'lodash/fp/keys'
@@ -69,7 +69,7 @@
         this.error = ''
         if (this.saving) return
         this.saving = true
-        User.updateMe(this.user)
+        Me.update(this.user)
           .finally(() => { this.saving = false })
           .subscribe(
             () => {
@@ -83,7 +83,7 @@
         const file = this.$refs.photo.files[0]
         if (!file) return
         this.uploading = true
-        User.upload(file)
+        Me.upload(file)
           .finally(() => { this.uploading = false })
           .subscribe(
             (f) => {
