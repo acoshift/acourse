@@ -15,9 +15,10 @@
 </template>
 
 <script>
-  import { Course, Loader } from '../services'
+  import { Course, User, Loader } from '../services'
   import { Observable } from 'rxjs'
   import Avatar from './avatar'
+  import forEach from 'lodash/fp/forEach'
 
   export default {
     components: {
@@ -39,7 +40,7 @@
 
       this.$attend = Observable.combineLatest(
         Course.get(this.courseId),
-        Course.attendUsers(this.courseId)
+        Course.attendUsers(this.courseId).do(forEach(User.inject.bind(User)))
       )
         .subscribe(
           ([course, students]) => {

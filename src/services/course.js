@@ -1,5 +1,4 @@
 import Firebase from './firebase'
-import User from './user'
 
 import flow from 'lodash/fp/flow'
 import map from 'lodash/fp/map'
@@ -9,7 +8,6 @@ import keys from 'lodash/fp/keys'
 import flatMap from 'lodash/fp/flatMap'
 import countBy from 'lodash/fp/countBy'
 import toPairs from 'lodash/fp/toPairs'
-import forEach from 'lodash/fp/forEach'
 import orderBy from 'lodash/fp/orderBy'
 
 export default {
@@ -94,8 +92,7 @@ export default {
           countBy(identity),
           toPairs,
           map((x) => ({ id: x[0], count: x[1] })),
-          orderBy('count', 'desc'),
-          forEach(User.inject.bind(User))
+          orderBy('count', 'desc')
         )
       )
   },
