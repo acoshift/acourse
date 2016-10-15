@@ -60,6 +60,11 @@ export default {
     }
     return Firebase.onChildAdded(ref)
   },
+  allMessages (id) {
+    const ref = Firebase.ref(`chat/${id}`).orderByKey()
+    return Firebase.onArrayValue(ref)
+      .first()
+  },
   lastMessage (id) {
     const ref = Firebase.ref(`chat/${id}`).orderByKey().limitToLast(1)
     return Firebase.onValue(ref)
