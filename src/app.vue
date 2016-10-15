@@ -31,6 +31,7 @@
   @import '../node_modules/semantic-ui-css/components/image.min.css';
   @import '../node_modules/semantic-ui-css/components/input.min.css';
   @import '../node_modules/semantic-ui-css/components/item.min.css';
+  @import '../node_modules/semantic-ui-css/components/list.min.css';
   @import '../node_modules/semantic-ui-css/components/menu.min.css';
   @import '../node_modules/semantic-ui-css/components/message.min.css';
   @import '../node_modules/semantic-ui-css/components/modal.min.css';
