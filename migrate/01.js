@@ -17,5 +17,4 @@ userRef.on('child_added', (snapshot) => {
   _.forEach(user.course, (data, x) => {
     userCourseRef.child(`${key}/${x}`).set(data)
   })
-  snapshot.child('course').remove()
 })
