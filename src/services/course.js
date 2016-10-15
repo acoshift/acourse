@@ -20,13 +20,11 @@ export default {
       .map((course) => ({id, ...course}))
   },
   create (data) {
-    window.ga('send', 'event', 'course', 'create')
     data.timestamp = Firebase.timestamp
     return Firebase.push('course', data)
       .map((snapshot) => snapshot.key)
   },
   save (id, data) {
-    window.ga('send', 'event', 'course', 'save', id)
     return Firebase.update(`course/${id}`, data)
   },
   content (id) {
@@ -36,15 +34,12 @@ export default {
     return Firebase.set(`content/${id}`, data)
   },
   favorite (id, userId) {
-    window.ga('send', 'event', 'course', 'favorite', id)
     return Firebase.set(`course/${id}/favorite/${userId}`, true)
   },
   unfavorite (id, userId) {
-    window.ga('send', 'event', 'course', 'unfavorite', id)
     return Firebase.remove(`course/${id}/favorite/${userId}`)
   },
   addStudent (id, userId) {
-    window.ga('send', 'event', 'course', 'apply', id)
     return Firebase.set(`course/${id}/student/${userId}`, true)
   },
   ownBy (userId) {
@@ -52,7 +47,6 @@ export default {
     return Firebase.onArrayValue(ref)
   },
   sendMessage (id, userId, text) {
-    window.ga('send', 'event', 'course', 'sendMessage', id)
     return Firebase.push(`chat/${id}`, {
       u: userId,
       m: text,
@@ -74,7 +68,6 @@ export default {
     return this.get(id)
       .first()
       .map((course) => course.attend)
-      .do((code) => window.ga('send', 'event', 'course', 'attend', id, code))
       .flatMap((code) => Firebase.set(`attend/${id}/${code}/${userId}`, Firebase.timestamp))
   },
   setAttendCode (id, code) {
