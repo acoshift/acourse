@@ -30,7 +30,7 @@
 </style>
 
 <script>
-  import { User, Loader } from '../services'
+  import { User, Loader, Me } from '../services'
   import Avatar from './avatar'
   import pick from 'lodash/fp/pick'
   import keys from 'lodash/fp/keys'
@@ -55,7 +55,7 @@
       Loader.start('user')
     },
     created () {
-      User.me()
+      Me.get()
         .first()
         .finally(() => { Loader.stop('user') })
         .subscribe(

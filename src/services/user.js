@@ -23,14 +23,6 @@ export default {
     return Firebase.onValue(`user-course/${id}`)
       .map(keys)
   },
-  me () {
-    return Auth.currentUser()
-      .flatMap((auth) =>
-        Observable.combineLatest(
-          this.get(auth.uid),
-          this.isInstructor(auth.uid)
-        ), (auth, [user, instructor]) => ({id: auth.uid, ...user, instructor}))
-  },
   getProfile (id) {
     return Observable.combineLatest(
       this.get(id),
