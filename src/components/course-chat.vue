@@ -80,7 +80,7 @@
 </style>
 
 <script>
-  import { Course, User, Loader, Document } from '../services'
+  import { Course, Me, User, Loader, Document } from '../services'
   import Avatar from './avatar'
   import startsWith from 'lodash/fp/startsWith'
 
@@ -208,7 +208,7 @@
         const input = this.input
         if (!input || !input.trim()) return
         this.input = ''
-        Course.sendMessage(this.courseId, input).subscribe()
+        Me.sendMessage(this.courseId, input).subscribe()
       },
       upload () {
         if (this.uploading) return
@@ -217,7 +217,7 @@
         this.uploading = true
         this.$refs.file.value = ''
         User.upload(f)
-          .flatMap((file) => Course.sendMessage(this.courseId, file.downloadURL))
+          .flatMap((file) => Me.sendMessage(this.courseId, file.downloadURL))
           .finally(() => { this.uploading = false })
           .subscribe(
             null,

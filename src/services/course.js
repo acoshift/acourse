@@ -54,15 +54,13 @@ export default {
     const ref = Firebase.ref('course').orderByChild('owner').equalTo(userId)
     return Firebase.onArrayValue(ref)
   },
-  sendMessage (id, text) {
+  sendMessage (id, userId, text) {
     window.ga('send', 'event', 'course', 'sendMessage', id)
-    return Auth.currentUser()
-      .first()
-      .flatMap((auth) => Firebase.push(`chat/${id}`, {
-        u: auth.uid,
-        m: text,
-        t: Firebase.timestamp
-      }))
+    return Firebase.push(`chat/${id}`, {
+      u: userId,
+      m: text,
+      t: Firebase.timestamp
+    })
   },
   messages (id, limit) {
     let ref = Firebase.ref(`chat/${id}`).orderByKey()
