@@ -55,7 +55,7 @@
       Loader.start('assignment')
       Observable.combineLatest(
         Course.getAssignments(this.courseId),
-        Course.getAssignmentUser(this.courseId)
+        Me.getCourseAssignments(this.courseId)
       )
         .subscribe(
           ([assignments, userAssignments]) => {
@@ -75,7 +75,7 @@
         if (!file) return
         this.uploading = true
         Me.upload(file)
-          .flatMap((file) => Me.submitAssignment(this.courseId, this.select, file.downloadURL))
+          .flatMap((file) => Me.submitCourseAssignment(this.courseId, this.select, file.downloadURL))
           .finally(() => { this.uploading = false })
           .subscribe(
             null,

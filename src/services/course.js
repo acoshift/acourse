@@ -1,6 +1,5 @@
 import Firebase from './firebase'
 import User from './user'
-import Auth from './auth'
 
 import flow from 'lodash/fp/flow'
 import map from 'lodash/fp/map'
@@ -118,10 +117,8 @@ export default {
   getAssignments (id) {
     return Firebase.onArrayValue(`assignment/${id}/code`)
   },
-  getAssignmentUser (id) {
-    return Auth.currentUser()
-      .first()
-      .flatMap((auth) => Firebase.onValue(`assignment/${id}/user/${auth.uid}`))
+  getUserAssignments (id, userId) {
+    return Firebase.onValue(`assignment/${id}/user/${userId}`)
   },
   submitAssignment (id, userId, assignmentId, url) {
     window.ga('send', 'event', 'course', 'uploadAssignment', id, assignmentId)
