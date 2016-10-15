@@ -63,7 +63,7 @@
 </style>
 
 <script>
-  import { Course, Loader, User } from '../services'
+  import { Loader, User, Assignment } from '../services'
   import UserAvatar from './user-avatar'
   import flow from 'lodash/fp/flow'
   import map from 'lodash/fp/map'
@@ -86,7 +86,7 @@
     mounted () {
       this.courseId = this.$route.params.id
       Loader.start('assignment')
-      Course.assignments(this.courseId)
+      Assignment.get(this.courseId)
         .subscribe(
           (assignments) => {
             Loader.stop('assignment')
@@ -124,7 +124,7 @@
         $(this.$refs.assignmentModal).modal('show')
       },
       submitAssignmentCode () {
-        Course.addAssignment(this.courseId, { title: this.assignmentCode })
+        Assignment.addCode(this.courseId, { title: this.assignmentCode })
           .subscribe(
             () => {
               $(this.$refs.assignmentModal).modal('hide')
@@ -132,10 +132,10 @@
           )
       },
       openAssignment (x) {
-        Course.openAssignment(this.courseId, x.id, true).subscribe()
+        Assignment.open(this.courseId, x.id, true).subscribe()
       },
       closeAssignment (x) {
-        Course.openAssignment(this.courseId, x.id, false).subscribe()
+        Assignment.open(this.courseId, x.id, false).subscribe()
       }
     }
   }

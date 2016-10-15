@@ -101,27 +101,5 @@ export default {
       .map((course) => course.attend)
       .flatMap((code) => Firebase.onValue(`attend/${id}/${code}/${userId}`))
       .map((x) => !!x)
-  },
-  addAssignment (id, { title }) {
-    return Firebase.push(`assignment/${id}/code`, { title, open: true })
-  },
-  openAssignment (id, assignmentId, value) {
-    return Firebase.set(`assignment/${id}/code/${assignmentId}/open`, value)
-  },
-  assignments (id) {
-    return Firebase.onValue(`assignment/${id}`)
-  },
-  getAssignments (id) {
-    return Firebase.onArrayValue(`assignment/${id}/code`)
-  },
-  getUserAssignments (id, userId) {
-    return Firebase.onValue(`assignment/${id}/user/${userId}`)
-  },
-  submitAssignment (id, userId, assignmentId, url) {
-    window.ga('send', 'event', 'course', 'uploadAssignment', id, assignmentId)
-    return Firebase.push(`assignment/${id}/user/${userId}/${assignmentId}`, {
-      url,
-      timestamp: Firebase.timestamp
-    })
   }
 }

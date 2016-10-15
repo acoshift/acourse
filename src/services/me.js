@@ -1,6 +1,7 @@
 import Auth from './auth'
 import User from './user'
 import Course from './course'
+import Assignment from './assignment'
 import { Observable } from 'rxjs'
 
 export default {
@@ -77,11 +78,11 @@ export default {
   submitCourseAssignment (id, assignmentId, url) {
     return Auth.currentUser()
       .first()
-      .flatMap(({ uid }) => Course.submitAssignment(id, uid, assignmentId, url))
+      .flatMap(({ uid }) => Assignment.submit(id, uid, assignmentId, url))
   },
   getCourseAssignments (id) {
     return Auth.currentUser()
       .first()
-      .flatMap(({ uid }) => Course.getUserAssignments(id, uid))
+      .flatMap(({ uid }) => Assignment.getUser(id, uid))
   }
 }

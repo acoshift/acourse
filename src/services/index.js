@@ -5,6 +5,7 @@ import Course from './course'
 import Loader from './loader'
 import Document from './document'
 import Me from './me'
+import Assignment from './assignment'
 
 export {
   Firebase,
@@ -13,5 +14,6 @@ export {
   Course,
   Loader,
   Document,
-  Me
+  Me,
+  Assignment
 }

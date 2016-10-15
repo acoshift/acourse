@@ -24,7 +24,7 @@
 </template>
 
 <script>
-  import { Course, Me, Loader, Document } from '../services'
+  import { Course, Assignment, Me, Loader, Document } from '../services'
   import { Observable } from 'rxjs'
 
   export default {
@@ -54,7 +54,7 @@
 
       Loader.start('assignment')
       Observable.combineLatest(
-        Course.getAssignments(this.courseId),
+        Assignment.getCode(this.courseId),
         Me.getCourseAssignments(this.courseId)
       )
         .subscribe(
