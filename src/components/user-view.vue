@@ -76,7 +76,7 @@
               this.$router.replace('/home')
             }
           )
-        this.$ownCourse = Course.ownBy(this.$route.params.id)
+        this.$ownCourse = User.ownCourses(this.$route.params.id)
           .subscribe(
             (courses) => {
               this.ownCourses = isEmpty(courses) ? null : courses

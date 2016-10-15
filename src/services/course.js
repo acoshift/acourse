@@ -1,10 +1,8 @@
 import Firebase from './firebase'
 import User from './user'
 import Auth from './auth'
-import { Observable } from 'rxjs'
 
 import flow from 'lodash/fp/flow'
-import filter from 'lodash/fp/filter'
 import map from 'lodash/fp/map'
 import values from 'lodash/fp/values'
 import identity from 'lodash/fp/identity'
@@ -54,11 +52,7 @@ export default {
   },
   ownBy (userId) {
     const ref = Firebase.ref('course').orderByChild('owner').equalTo(userId)
-    return Observable.combineLatest(
-      Auth.currentUser().first(),
-      Firebase.onArrayValue(ref)
-    )
-      .map(([auth, courses]) => auth.uid === userId ? courses : filter((course) => course.open)(courses))
+    return Firebase.onArrayValue(ref)
   },
   sendMessage (id, text) {
     window.ga('send', 'event', 'course', 'sendMessage', id)

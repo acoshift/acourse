@@ -1,8 +1,10 @@
 import Firebase from './firebase'
+import Course from './course'
 import { Observable } from 'rxjs'
 import pick from 'lodash/fp/pick'
 import assign from 'lodash/extend'
 import keys from 'lodash/fp/keys'
+import filter from 'lodash/fp/filter'
 
 export default {
   get (id) {
@@ -21,6 +23,10 @@ export default {
   courses (id) {
     return Firebase.onValue(`user-course/${id}`)
       .map(keys)
+  },
+  ownCourses (id) {
+    return Course.ownBy(id)
+      .map(filter((course) => course.open))
   },
   getProfile (id) {
     return Observable.combineLatest(
