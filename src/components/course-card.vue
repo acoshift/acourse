@@ -36,7 +36,7 @@
 </style>
 
 <script>
-  import { Auth, Course } from '../services'
+  import { Auth, Me } from '../services'
   import keys from 'lodash/fp/keys'
   import get from 'lodash/fp/get'
 
@@ -61,9 +61,9 @@
     methods: {
       fav () {
         if (this.isFav) {
-          Course.unfavorite(this.course.id).subscribe()
+          Me.unfavoriteCourse(this.course.id).subscribe()
         } else {
-          Course.favorite(this.course.id).subscribe()
+          Me.favoriteCourse(this.course.id).subscribe()
         }
       }
     }

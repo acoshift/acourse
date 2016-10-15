@@ -40,17 +40,13 @@ export default {
   saveContent (id, data) {
     return Firebase.set(`content/${id}`, data)
   },
-  favorite (id) {
+  favorite (id, userId) {
     window.ga('send', 'event', 'course', 'favorite', id)
-    return Auth.currentUser()
-      .first()
-      .flatMap((user) => Firebase.set(`course/${id}/favorite/${user.uid}`, true))
+    return Firebase.set(`course/${id}/favorite/${userId}`, true)
   },
-  unfavorite (id) {
+  unfavorite (id, userId) {
     window.ga('send', 'event', 'course', 'unfavorite', id)
-    return Auth.currentUser()
-      .first()
-      .flatMap((user) => Firebase.remove(`course/${id}/favorite/${user.uid}`))
+    return Firebase.remove(`course/${id}/favorite/${userId}`)
   },
   addStudent (id, userId) {
     window.ga('send', 'event', 'course', 'apply', id)

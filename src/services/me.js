@@ -48,5 +48,15 @@ export default {
           Course.addStudent(id, uid),
           this.addCourse(id)
         ))
+  },
+  favoriteCourse (id) {
+    return Auth.currentUser()
+      .first()
+      .flatMap(({ uid }) => Course.favorite(id, uid))
+  },
+  unfavoriteCourse (id) {
+    return Auth.currentUser()
+      .first()
+      .flatMap(({ uid }) => Course.unfavorite(id, uid))
   }
 }
