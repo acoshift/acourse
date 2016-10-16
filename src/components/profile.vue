@@ -31,13 +31,19 @@
   </div>
 </template>
 
-<style>
+<style lang="scss" scoped>
   .cards {
     padding-top: 30px;
   }
 
   .edit.button {
     width: 140px;
+  }
+
+  .basic.segment {
+    & > .ui.button {
+      margin: .3rem;
+    }
   }
 </style>
 
