@@ -42,6 +42,9 @@
         "title": {
           ".validate": "newData.isString()"
         },
+        "shortDescription": {
+          ".validate": "newData.isString()"
+        },
         "description": {
           ".validate": "newData.isString()"
         },

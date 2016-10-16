@@ -14,7 +14,11 @@
         </div>
         <div class="field">
           <label>Title</label>
-          <input v-model="course.title">
+          <input v-model="course.title" maxlength="40">
+        </div>
+        <div class="field">
+          <label>Short Descrption</label>
+          <input v-model="course.shortDescription" maxlength="60">
         </div>
         <div class="field">
           <label>Description</label>
@@ -87,6 +91,7 @@
         isNew: false,
         course: {
           title: '',
+          shortDescription: '',
           description: '',
           photo: '',
           owner: '',

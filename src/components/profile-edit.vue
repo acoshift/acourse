@@ -10,7 +10,7 @@
       </div>
       <div class="field">
         <label>Name</label>
-        <input v-model="user.name" max-length="45">
+        <input v-model="user.name" maxlength="45">
       </div>
       <div class="field">
         <label>About me</label>

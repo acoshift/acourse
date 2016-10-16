@@ -4,12 +4,12 @@
       <img :src="course.photo">
     </router-link>
     <div class="content">
-      <router-link class="header" :to="`/course/${course.id}`">{{ course.title | trim(30) }}</router-link>
+      <router-link class="header" :to="`/course/${course.id}`">{{ course.title | trim(40) }}</router-link>
       <div class="meta">
         <span class="date">{{ course.start | date('DD/MM/YYYY') }}</span>
       </div>
       <div class="description">
-        {{ course.description | trim(40) }}
+        {{ course.shortDescription }}
       </div>
     </div>
     <div class="extra content">
