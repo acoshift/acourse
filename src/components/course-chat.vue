@@ -14,7 +14,7 @@
             <div class="text">
               <a v-if="x.h" target="_blank" :href="x.m">
                 <div v-if="x.h === 1" class="ui small image">
-                  <img :src="x.m" onerror="this.src = '/static/icons/ic_insert_drive_file_black_48px.svg'">
+                  <img :src="x.m" onerror="this.src = '/static/icons/ic_insert_drive_file_black_48px.svg'" @load="scroll($event.target.height)">
                 </div>
                 <span v-else>{{ x.m }}</span>
               </a>
@@ -140,18 +140,24 @@
       this.$visibilityChanged.unsubscribe()
     },
     mounted () {
+      let shouldScroll = false
+      let savedHeight
       $(this.$refs.chatBox)
         .off()
         .on('scroll', () => {
-          let pos = $(this.$refs.chatBox).scrollTop()
+          const pos = this.$refs.chatBox.scrollTop
+          if (shouldScroll) {
+            shouldScroll = false
+            $(this.$refs.chatBox).scrollTop(this.$refs.chatBox.scrollHeight - savedHeight)
+          }
+          savedHeight = this.$refs.chatBox.scrollHeight
+
           if (pos <= 5) {
             if (this.limit > this.messages.length) return
             this.limit += 30
             Loader.start('message')
             this.initMessages()
-            this.$nextTick(() => {
-              $(this.$refs.chatBox).scrollTop(700)
-            })
+            shouldScroll = true
           }
         })
 
@@ -190,9 +196,7 @@
               this.messages = messages
               if (shouldScroll) {
                 shouldScroll = false
-                this.$nextTick(() => {
-                  $(this.$refs.chatBox).scrollTop(99999)
-                })
+                this.scroll(9999)
               }
             }
           )
@@ -215,6 +219,11 @@
               Document.openErrorModal('Upload Error', err && err.message || err)
             }
           )
+      },
+      scroll (height) {
+        this.$nextTick(() => {
+          $(this.$refs.chatBox).scrollTop(this.$refs.chatBox.scrollTop + height)
+        })
       }
     }
   }
