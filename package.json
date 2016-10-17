@@ -22,6 +22,7 @@
     "jquery": "^3.1.1",
     "moment": "^2.15.1",
     "raven-js": "^3.7.0",
+    "request": "^2.75.0",
     "rxjs": "^5.0.0-beta.12",
     "semantic-ui-css": "^2.2.4",
     "vue": "^2.0.1",
