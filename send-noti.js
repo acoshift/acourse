@@ -7,9 +7,9 @@ firebase.initializeApp({
   databaseURL: 'https://acourse-d9d0a.firebaseio.com'
 })
 
-const userRef = firebase.database().ref('notification')
+const notiRef = firebase.database().ref('notification')
 
-userRef.once('value', (snapshot) => {
+notiRef.once('value', (snapshot) => {
   const val = snapshot.val()
   const keys = _.keys(val)
   request.post('https://fcm.googleapis.com/fcm/send', {
