@@ -70,7 +70,7 @@
             ([user, courses]) => {
               Loader.stop('user')
               this.user = user
-              this.courses = courses
+              this.courses = isEmpty(courses) ? null : courses
             },
             () => {
               this.$router.replace('/home')
