@@ -9,11 +9,13 @@ import flatMap from 'lodash/fp/flatMap'
 import countBy from 'lodash/fp/countBy'
 import toPairs from 'lodash/fp/toPairs'
 import orderBy from 'lodash/fp/orderBy'
+import reverse from 'lodash/fp/reverse'
 
 export default {
   list () {
     const ref = Firebase.ref('course').orderByChild('public').equalTo(true)
     return Firebase.onArrayValue(ref)
+      .map(reverse)
   },
   get (id) {
     return Firebase.onValue(`course/${id}`)
