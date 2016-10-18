@@ -4,7 +4,7 @@
     <course-apply-panel v-if="course && !isApply && !isOwn" :course="course"></course-apply-panel>
     <course-owner-panel v-if="course && isOwn" :course="course"></course-owner-panel>
     <course-student-panel v-if="course && isApply" :course="course"></course-student-panel>
-    <course-video v-if="course && course.video" :src="course.video"></course-video>
+    <course-video v-if="(course && course.video) && (isApply || isOwn)" :src="course.video"></course-video>
     <course-detail :course="course" v-if="course"></course-detail>
     <course-content :contents="contents" v-if="contents"></course-content>
     <students :users="students" v-if="students"></students>
