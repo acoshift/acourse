@@ -1,8 +1,8 @@
-<template>
-  <img class="ui circular image" :class="`a-${size}`" :src="src || '/static/icons/ic_face_black_48px.svg'">
+<template lang="pug">
+  img.ui.circular.image(:class="`a-${size}`", :src="src || '/static/icons/ic_face_black_48px.svg'")
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
   img {
     object-fit: cover;
     object-position: top;
@@ -10,31 +10,39 @@
     margin-top: 0 !important;
     margin-bottom: 0 !important;
     margin-left: 0 !important;
-  }
 
-  img.a-tiny {
-    width: 32px;
-    height: 32px;
-  }
+    &.a-tiny {
+      width: 32px;
+      height: 32px;
+    }
 
-  img.a-mini {
-    width: 64px;
-    height: 64px;
-  }
+    &.a-mini {
+      width: 64px;
+      height: 64px;
+    }
 
-  img.a-small {
-    width: 120px;
-    height: 120px;
-  }
+    &.a-small {
+      width: 120px;
+      height: 120px;
+    }
 
-  img.a-medium {
-    width: 200px;
-    height: 200px;
+    &.a-medium {
+      width: 200px;
+      height: 200px;
+    }
   }
 </style>
 
 <script>
   export default {
-    props: ['src', 'size']
+    props: {
+      src: {
+        type: String
+      },
+      size: {
+        type: String,
+        required: true
+      }
+    }
   }
 </script>
