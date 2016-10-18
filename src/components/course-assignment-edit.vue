@@ -1,59 +1,41 @@
-<template>
-  <div>
-    <div class="ui segment" style="padding-bottom: 2rem;">
-      <div class="ui teal button" @click="openAssignmentModal">Add Assignment</div>
-      <div class="ui divider"></div>
-      <div class="ui stackable grid">
-        <div class="two column row" v-for="x in assignments">
-          <div class="column">
-            {{ x.title }} <span>({{ x.users.length }})</span>
-          </div>
-          <div class="action column">
-            <div v-if="x.open" class="ui red button" @click="closeAssignment(x)">Close</div>
-            <div v-else class="ui blue button" @click="openAssignment(x)">Open</div>
-            <div class="ui green button">Edit</div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="ui small modal" ref="assignmentModal">
-      <div class="header">Add Assignment</div>
-      <div class="content">
-        <div class="ui form">
-          <div class="field">
-            <label>Title</label>
-            <input v-model="assignmentCode">
-          </div>
-          <div class="ui fluid blue button" @click="submitAssignmentCode">OK</div>
-        </div>
-      </div>
-    </div>
-    <div class="ui segment">
-      <div class="ui styled fluid accordion">
-        <div v-for="x in assignments">
-          <div class="title">
-            <div class="dropdown icon"></div>
-            {{ x.title }} <span>({{ x.users.length }})</span>
-          </div>
-          <div class="ui content">
-            <div class="ui stackable grid">
-              <div class="two column row" v-for="u in x.users">
-                <div class="column">
-                  <user-avatar :user="u"></user-avatar>
-                </div>
-                <div class="column">
-                  <div v-for="(a, f) in u.files">
-                    <span>{{ a.timestamp | date('YYYY/MM/DD HH:mm') }}</span>
-                    <a :href="a.url" target="_blank">{{ f }}</a>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+<template lang="pug">
+  div
+    .ui.segment(style="padding-bottom: 2rem;")
+      .ui.teal.button(@click="openAssignmentModal") Add Assignment
+      .ui.divider
+      .ui.stackable.grid
+        .two.column.row(v-for="x in assignments")
+          .column
+            | {{ x.title }}
+            span ({{ x.users.length }})
+          .action.column
+            .ui.red.button(v-if="x.open", @click="closeAssignment(x)") Close
+            .ui.blue.button(v-else, @click="openAssignment(x)") Open
+            .ui.green.button Edit
+    .ui.small.modal(ref="assignmentModal")
+      .header Add Assignment
+      .content
+        .ui.form
+          .field
+            label Title
+            input(v-model="assignmentCode")
+          .ui.fluid.blue.button(@click="submitAssignmentCode") OK
+    .ui.segment
+      .ui.styled.fluid.accordion
+        div(v-for="x in assignments")
+          .title
+            .dropdown.icon
+            | {{ x.title }}
+            span ({{ x.users.length }})
+          .ui.content
+            .ui.stackable.grid
+              .two.column.row(v-for="u in x.users")
+                .column
+                  user-avatar(:user="u")
+                .column
+                  div(v-for="(a, f) in u.files")
+                    span {{ a.timestamp | date('YYYY/MM/DD HH:mm') }}
+                    a(:href="a.url", target="_blank") {{ f }}
 </template>
 
 <style scoped>
