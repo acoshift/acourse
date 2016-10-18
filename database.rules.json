@@ -35,7 +35,7 @@
     },
     "course": {
       ".read": "auth != null",
-      ".indexOn": ["owner", "timestamp", "open", "start"],
+      ".indexOn": ["owner", "timestamp", "open", "start", "public"],
       "$course_id": {
         ".write": "(!data.exists() || auth.uid === data.child('owner').val()) && (root.child('instructor/' + auth.uid).val() === true)",
         ".validate": "data.exists() || newData.hasChildren(['title', 'description', 'photo', 'owner', 'timestamp'])",
@@ -70,6 +70,9 @@
           }
         },
         "open": {
+          ".validate": "newData.isBoolean()"
+        },
+        "public": {
           ".validate": "newData.isBoolean()"
         },
         "start": {

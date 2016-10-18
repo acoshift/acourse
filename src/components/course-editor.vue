@@ -31,7 +31,13 @@
         <div class="field">
           <div class="ui toggle checkbox">
             <input type="checkbox" class="hidden" v-model="course.open">
-            <label>Open public</label>
+            <label>Open</label>
+          </div>
+        </div>
+        <div class="field">
+          <div class="ui toggle checkbox">
+            <input type="checkbox" class="hidden" v-model="course.public">
+            <label>Public</label>
           </div>
         </div>
         <div class="field">
@@ -97,6 +103,7 @@
           owner: '',
           start: '',
           open: false,
+          public: false,
           video: ''
         },
         contents: [],

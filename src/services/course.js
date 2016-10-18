@@ -12,7 +12,7 @@ import orderBy from 'lodash/fp/orderBy'
 
 export default {
   list () {
-    const ref = Firebase.ref('course').orderByChild('open').equalTo(true)
+    const ref = Firebase.ref('course').orderByChild('public').equalTo(true)
     return Firebase.onArrayValue(ref)
   },
   get (id) {

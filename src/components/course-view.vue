@@ -1,7 +1,7 @@
 <template>
   <div>
     <course-header :course="course" v-if="course"></course-header>
-    <course-apply-panel v-if="course && !isApply && !isOwn" :course="course"></course-apply-panel>
+    <course-apply-panel v-if="course && !isApply && !isOwn && course.open" :course="course"></course-apply-panel>
     <course-owner-panel v-if="course && isOwn" :course="course"></course-owner-panel>
     <course-student-panel v-if="course && isApply" :course="course"></course-student-panel>
     <course-video v-if="(course && course.video) && (isApply || isOwn)" :src="course.video"></course-video>
