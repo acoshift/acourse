@@ -1,4 +1,5 @@
 import Firebase from './firebase'
+import { Observable } from 'rxjs'
 
 import flow from 'lodash/fp/flow'
 import map from 'lodash/fp/map'
@@ -19,6 +20,7 @@ export default {
   },
   get (id) {
     return Firebase.onValue(`course/${id}`)
+      .flatMap((course) => course ? Observable.of(course) : Observable.throw(new Error('Course not found')))
       .map((course) => ({id, ...course}))
   },
   create (data) {
