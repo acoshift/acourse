@@ -26,9 +26,9 @@
                   {{ error }}
                 </div>
                 <div class="ui right aligned basic fluid container" style="padding-bottom: 1rem;">
-                  <a href="#" @click="state = 1">Forget password ?</a>
+                  <a href="#" target="_self" @click="state = 1">Forget password ?</a>
                   /
-                  <a href="#" @click="state = 2">Register</a>
+                  <a href="#" target="_self" @click="state = 2">Register</a>
                 </div>
                 <button class="ui blue fluid submit button" :class="{loading}">Sign In</button>
               </form>
@@ -46,7 +46,7 @@
                   {{ error }}
                 </div>
                 <div class="ui fluid basic segment">
-                  <a href="#" @click="state = 0"><i class="left chevron icon"></i> Sign In</a>
+                  <a href="#" target="_self" @click="state = 0"><i class="left chevron icon"></i> Sign In</a>
                 </div>
                 <button class="ui blue fluid submit button" :class="{loading}">Reset</button>
               </form>
@@ -68,7 +68,7 @@
                   {{ error }}
                 </div>
                 <div class="ui fluid basic segment">
-                  <a href="#" @click="state = 0"><i class="left chevron icon"></i> Sign In</a>
+                  <a href="#" target="_self" @click="state = 0"><i class="left chevron icon"></i> Sign In</a>
                 </div>
                 <button class="ui blue fluid submit button" :class="{loading}">Sign Up</button>
               </form>
