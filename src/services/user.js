@@ -26,7 +26,7 @@ export default {
   },
   ownCourses (id) {
     return Course.ownBy(id)
-      .map(filter((course) => course.open))
+      .map(filter((course) => course.public))
   },
   getProfile (id) {
     return Observable.combineLatest(

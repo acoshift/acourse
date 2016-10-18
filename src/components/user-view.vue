@@ -62,7 +62,7 @@
                 isEmpty(courseIds)
                   ? Observable.of([])
                   : Observable.combineLatest(...courseIds.map((id) => Course.get(id)))
-                    .map(filter((course) => !!course.open))
+                    .map(filter((course) => !!course.public))
               ),
             (user, courses) => ([user, courses])
           )
