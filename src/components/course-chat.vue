@@ -96,7 +96,9 @@
         $course: null,
         $message: null,
         unread: 0,
-        hidden: false
+        hidden: false,
+        savedHeight: 0,
+        paging: false
       }
     },
     created () {
@@ -140,24 +142,17 @@
       this.$visibilityChanged.unsubscribe()
     },
     mounted () {
-      let shouldScroll = false
-      let savedHeight
       $(this.$refs.chatBox)
         .off()
         .on('scroll', () => {
           const pos = this.$refs.chatBox.scrollTop
-          if (shouldScroll) {
-            shouldScroll = false
-            $(this.$refs.chatBox).scrollTop(this.$refs.chatBox.scrollHeight - savedHeight)
-          }
-          savedHeight = this.$refs.chatBox.scrollHeight
-
-          if (pos <= 5) {
+          if (pos <= 5 && !this.paging) {
             if (this.limit > this.messages.length) return
             this.limit += 30
             Loader.start('message')
+            this.savedHeight = this.$refs.chatBox.scrollHeight
+            this.paging = true
             this.initMessages()
-            shouldScroll = true
           }
         })
 
@@ -194,7 +189,12 @@
             () => {
               if (Loader.has('message')) Loader.stop('message')
               this.messages = messages
-              if (shouldScroll) {
+              if (this.paging) {
+                this.$nextTick(() => {
+                  this.paging = false
+                  $(this.$refs.chatBox).scrollTop(this.$refs.chatBox.scrollHeight - this.savedHeight)
+                })
+              } else if (shouldScroll) {
                 shouldScroll = false
                 this.scroll(9999)
               }
