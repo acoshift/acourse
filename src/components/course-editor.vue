@@ -138,6 +138,9 @@
                 defaults(this.course)
               )(course)
               this.contents = contents && map(pick(['content', 'title']))(contents) || []
+            },
+            () => {
+              this.$router.replace('/home')
             }
           )
       }
