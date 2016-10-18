@@ -130,9 +130,9 @@
           Course.content(this.courseId).first()
         )
           .subscribe(
-            ([user, course, contents]) => {
+            ([{ uid }, course, contents]) => {
               Loader.stop('course')
-              if (course.owner !== user.uid) return this.$router.replace(`/course/${this.courseId}`)
+              if (course.owner !== uid) return this.$router.replace(`/course/${this.courseId}`)
               this.course = flow(
                 pick(keys(this.course)),
                 defaults(this.course)

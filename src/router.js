@@ -4,7 +4,8 @@ import VueRouter from 'vue-router'
 import {
   Auth as AuthService,
   Loader,
-  Document
+  Document,
+  Me
 } from './services'
 
 import {
@@ -40,7 +41,7 @@ const router = new VueRouter({
         { path: '', component: Home },
         { path: '/profile', component: Profile },
         { path: '/profile/edit', component: ProfileEdit },
-        { path: '/course/new', component: CourseEditor, name: 'courseNew' },
+        { path: '/course/new', component: CourseEditor, name: 'courseNew', beforeEnter: isInstructor },
         {
           path: '/course/:id',
           component: Course,
@@ -96,6 +97,22 @@ function redirectIfNotAuth (to, from, next) {
           next()
         } else {
           next('/')
+        }
+      }
+    )
+}
+
+function isInstructor (to, from, next) {
+  Loader.start('router')
+  Me.get()
+    .first()
+    .subscribe(
+      (user) => {
+        Loader.stop('router')
+        if (user && user.instructor) {
+          next()
+        } else {
+          next('/home')
         }
       }
     )
