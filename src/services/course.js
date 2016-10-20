@@ -49,6 +49,7 @@ export default {
   ownBy (userId) {
     const ref = Firebase.ref('course').orderByChild('owner').equalTo(userId)
     return Firebase.onArrayValue(ref)
+      .map(reverse)
   },
   sendMessage (id, userId, text) {
     return Firebase.push(`chat/${id}`, {

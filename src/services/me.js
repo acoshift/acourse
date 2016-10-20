@@ -3,6 +3,7 @@ import User from './user'
 import Course from './course'
 import Assignment from './assignment'
 import { Observable } from 'rxjs'
+import orderBy from 'lodash/fp/orderBy'
 
 export default {
   get () {
@@ -25,6 +26,7 @@ export default {
     return Auth.currentUser()
       .flatMap(({ uid }) => User.courses(uid))
       .flatMap((courseIds) => Observable.combineLatest(...courseIds.map((id) => Course.get(id))))
+      .map(orderBy(['timestamp'], ['desc']))
   },
   upload (file) {
     return Auth.currentUser()

@@ -24,6 +24,7 @@
   import CourseCard from './course-card'
   import isEmpty from 'lodash/fp/isEmpty'
   import filter from 'lodash/fp/filter'
+  import orderBy from 'lodash/fp/orderBy'
   import { Observable } from 'rxjs'
 
   export default {
@@ -63,6 +64,7 @@
                   ? Observable.of([])
                   : Observable.combineLatest(...courseIds.map((id) => Course.get(id)))
                     .map(filter((course) => !!course.public))
+                    .map(orderBy(['timestamp'], ['desc']))
               ),
             (user, courses) => ([user, courses])
           )
