@@ -1,18 +1,25 @@
-<template>
-  <div class="ui segment">
-    <div class="ui stackable equal width grid">
-      <div class="center aligned column">
-        <div class="ui blue button" style="width: 200px;" :class="{loading: applying}" @click="apply">Apply</div>
-      </div>
-    </div>
-  </div>
+<template lang="pug">
+  .ui.segment
+    .ui.stackable.equal.width.grid
+      .center.aligned.column
+        .ui.blue.button(style="width: 200px;", :class="{loading: applying}", @click="apply") Apply
+    apply-modal(ref="applyModal", @apply="applyWithCode")
 </template>
 
 <script>
   import { Me, Document } from '../services'
+  import ApplyModal from './apply-modal'
 
   export default {
-    props: ['course'],
+    components: {
+      ApplyModal
+    },
+    props: {
+      course: {
+        type: Object,
+        required: true
+      }
+    },
     data () {
       return {
         applying: false
@@ -24,6 +31,18 @@
         this.applying = true
 
         Me.applyCourse(this.course.id)
+          .subscribe(
+            () => {
+              this.applying = false
+              Document.openSuccessModal('Success', 'You have applied to this course.')
+            },
+            () => {
+              this.$refs.applyModal.show()
+            }
+          )
+      },
+      applyWithCode (code) {
+        Me.applyCourse(this.course.id, code)
           .finally(() => { this.applying = false })
           .subscribe(
             () => {
