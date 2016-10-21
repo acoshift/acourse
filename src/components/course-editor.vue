@@ -41,6 +41,12 @@
           </div>
         </div>
         <div class="field">
+          <div class="ui toggle checkbox">
+            <input type="checkbox" class="hidden" v-model="course.canAttend">
+            <label>Can Attend</label>
+          </div>
+        </div>
+        <div class="field">
           <label>Video</label>
           <input v-model="course.video">
         </div>
@@ -104,7 +110,8 @@
           start: '',
           open: false,
           public: false,
-          video: ''
+          video: '',
+          canAttend: false
         },
         contents: [],
         courseId: '',

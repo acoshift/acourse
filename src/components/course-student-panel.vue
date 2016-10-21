@@ -1,7 +1,7 @@
 <template>
   <div class="ui segment">
     <div class="ui stackable equal width grid">
-      <div class="column">
+      <div class="column" v-if="course.canAttend">
         <div :class="{disabled: isAttended || !course.attend, loading: attending}" class="ui blue fluid button" @click="attend">Attend</div>
       </div>
       <div class="column">
