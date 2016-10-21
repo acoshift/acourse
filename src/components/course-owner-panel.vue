@@ -16,7 +16,7 @@
       <div class="column">
         <router-link :to="`/course/${course.id}/assignment/edit`" class="ui blue fluid button">Assignments</router-link>
       </div>
-      <div class="column">
+      <div class="column" v-if="course.canAttend">
         <router-link class="ui blue fluid button" :to="`/course/${course.id}/attend`">Attendants</router-link>
       </div>
     </div>
