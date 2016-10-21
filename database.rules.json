@@ -87,6 +87,9 @@
         "attend": {
           ".validate": "newData.isString()"
         },
+        "canAttend": {
+          ".validate": "newData.isBoolean()"
+        },
         "video": {
           ".validate": "newData.isString()"
         },
