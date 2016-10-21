@@ -40,6 +40,11 @@
     components: {
       Avatar
     },
-    props: ['course']
+    props: {
+      course: {
+        type: Object,
+        required: true
+      }
+    }
   }
 </script>

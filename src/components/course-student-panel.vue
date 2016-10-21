@@ -21,7 +21,12 @@
   import { Me, Document } from '../services'
 
   export default {
-    props: ['course'],
+    props: {
+      course: {
+        type: Object,
+        required: true
+      }
+    },
     data () {
       return {
         attending: false,

@@ -43,7 +43,12 @@
   import moment from 'moment'
 
   export default {
-    props: ['course'],
+    props: {
+      course: {
+        type: Object,
+        required: true
+      }
+    },
     data () {
       return {
         attendCode: '',

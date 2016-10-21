@@ -9,6 +9,11 @@
 
 <script>
   export default {
-    props: ['course']
+    props: {
+      course: {
+        type: Object,
+        required: true
+      }
+    }
   }
 </script>

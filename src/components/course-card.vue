@@ -41,7 +41,12 @@
   import get from 'lodash/fp/get'
 
   export default {
-    props: ['course'],
+    props: {
+      course: {
+        type: Object,
+        required: true
+      }
+    },
     data () {
       return {
         uid: Auth.currentUser().first().map(({ uid }) => uid)
