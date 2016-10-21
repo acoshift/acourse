@@ -69,8 +69,10 @@
         },
         "student": {
           "$user_id": {
+            // check course exists and opened
             ".write": "auth.uid === $user_id && data.parent().parent().exists() && data.parent().parent().child('open').val() === true",
-            ".validate": "newData.val() === true"
+            // if code exists, value must be code, otherwise value must be true
+            ".validate": "(root.child('course-private/' + $course_id + '/code').exists() && root.child('course-private/' + $course_id + '/code/' + newData.val()).val() === true) || (!root.child('course-private/' + $course_id + '/code').exists() && newData.val() === true)"
           }
         },
         "open": {
@@ -100,7 +102,10 @@
         ".read": "root.child('course/' + $course_id + '/owner').val() === true",
         ".write": "root.child('course/' + $course_id + '/owner').val() === true",
         "code": {
-          ".validate": "newData.isString() && newData.val().length > 0"
+          // if this field exists, user must enter one of this code for enroll course
+          "$code": {
+            ".validate": "newData.val() === true"
+          }
         }
       }
     },
