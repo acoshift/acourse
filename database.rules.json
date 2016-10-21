@@ -90,6 +90,9 @@
         "canAttend": {
           ".validate": "newData.isBoolean()"
         },
+        "hasAssignment": {
+          ".validate": "newData.isBoolean()"
+        },
         "video": {
           ".validate": "newData.isString()"
         },

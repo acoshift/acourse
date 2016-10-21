@@ -10,7 +10,7 @@
       <div class="column">
         <router-link class="ui olive fluid button" :to="`/course/${course.id}/chat/history`">Chat history</router-link>
       </div>
-      <div class="column">
+      <div class="column" v-if="course.hasAssignment">
         <router-link class="ui teal fluid button" :to="`/course/${course.id}/assignment`">Assignments</router-link>
       </div>
     </div>

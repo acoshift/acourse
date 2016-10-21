@@ -13,7 +13,7 @@
       <div v-if="course.canAttend && course.attend" class="column">
         <div class="ui red fluid button" @click="closeAttend" :class="{loading: removingCode}">Close Attend</div>
       </div>
-      <div class="column">
+      <div class="column" v-if="course.hasAssignment">
         <router-link :to="`/course/${course.id}/assignment/edit`" class="ui blue fluid button">Assignments</router-link>
       </div>
       <div class="column" v-if="course.canAttend">
