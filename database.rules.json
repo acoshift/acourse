@@ -3,6 +3,7 @@
     ".read": false,
     ".write": false,
     "user": {
+      // user public data
       ".read": "auth != null",
       "$user_id": {
         ".write": "auth.uid === $user_id",
@@ -21,6 +22,7 @@
       }
     },
     "user-course": {
+      // user's course public data
       ".read": "auth != null",
       "$user_id": {
         ".write": "auth.uid === $user_id",
@@ -30,10 +32,12 @@
       }
     },
     "instructor": {
+      // instructor, none can write, can insert directly from console
       ".read": "auth != null",
       ".write": false
     },
     "course": {
+      // course public data
       ".read": "auth != null",
       ".indexOn": ["owner", "timestamp", "open", "start", "public"],
       "$course_id": {
@@ -86,6 +90,17 @@
         },
         "$other": {
           ".validate": false
+        }
+      }
+    },
+    "course-private": {
+      // private course data, only owner can read and write
+      // use for validate other user actions
+      "$course_id": {
+        ".read": "root.child('course/' + $course_id + '/owner').val() === true",
+        ".write": "root.child('course/' + $course_id + '/owner').val() === true",
+        "code": {
+          ".validate": "newData.isString() && newData.val().length > 0"
         }
       }
     },
