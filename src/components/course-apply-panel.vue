@@ -31,9 +31,9 @@
         this.applying = true
 
         Me.applyCourse(this.course.id)
+          .finally(() => { this.applying = false })
           .subscribe(
             () => {
-              this.applying = false
               Document.openSuccessModal('Success', 'You have applied to this course.')
             },
             () => {
@@ -42,6 +42,8 @@
           )
       },
       applyWithCode (code) {
+        if (this.applying) return
+        this.applying = true
         Me.applyCourse(this.course.id, code)
           .finally(() => { this.applying = false })
           .subscribe(
