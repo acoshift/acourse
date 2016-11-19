@@ -118,7 +118,7 @@
     "content": {
       "$course_id": {
         ".write": "root.child('course/' + $course_id + '/owner').val() === auth.uid",
-        ".read": "root.child('course/' + $course_id + '/student/' + auth.uid).val() === true || root.child('course/' + $course_id + '/owner').val() === auth.uid",
+        ".read": "root.child('course/' + $course_id + '/student/' + auth.uid).exists() || root.child('course/' + $course_id + '/owner').val() === auth.uid",
         "$content_id": {
           "title": {
             ".validate": "newData.isString()"
@@ -134,9 +134,9 @@
     },
     "chat": {
       "$course_id": {
-        ".read": "root.child('course/' + $course_id + '/student/' + auth.uid).val() === true || root.child('course/' + $course_id + '/owner').val() === auth.uid",
+        ".read": "root.child('course/' + $course_id + '/student/' + auth.uid).exists() || root.child('course/' + $course_id + '/owner').val() === auth.uid",
         "$message_id": {
-          ".write": "(root.child('course/' + $course_id + '/student/' + auth.uid).val() === true || root.child('course/' + $course_id + '/owner').val() === auth.uid) && !data.exists()",
+          ".write": "(root.child('course/' + $course_id + '/student/' + auth.uid).exists() || root.child('course/' + $course_id + '/owner').val() === auth.uid) && !data.exists()",
           "u": {
             ".validate": "newData.val() === auth.uid"
           },
@@ -169,7 +169,7 @@
         ".read": "root.child('course/' + $course_id + '/owner').val() === auth.uid",
         "code": {
           ".write": "root.child('course/' + $course_id + '/owner').val() === auth.uid",
-          ".read": "root.child('course/' + $course_id + '/student/' + auth.uid).val() === true",
+          ".read": "root.child('course/' + $course_id + '/student/' + auth.uid).exists()",
           "$assignment_id": {
             "title": {
               ".validate": "newData.isString()"
@@ -181,8 +181,8 @@
         },
         "user": {
           "$user_id": {
-            ".read": "auth.uid === $user_id && root.child('course/' + $course_id + '/student/' + auth.uid).val() === true",
-            ".write": "auth.uid === $user_id && root.child('course/' + $course_id + '/student/' + auth.uid).val() === true",
+            ".read": "auth.uid === $user_id && root.child('course/' + $course_id + '/student/' + auth.uid).exists()",
+            ".write": "auth.uid === $user_id && root.child('course/' + $course_id + '/student/' + auth.uid).exists()",
             "$assignment_id": {
               ".validate": "root.child('assignment/' + $course_id + '/code/' + $assignment_id + '/open').val() === true",
               "$file_id": {
