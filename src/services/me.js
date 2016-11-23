@@ -2,7 +2,7 @@ import Auth from './auth'
 import User from './user'
 import Course from './course'
 import Assignment from './assignment'
-import { Observable } from 'rxjs'
+import { Observable } from 'rxjs/Observable'
 import orderBy from 'lodash/fp/orderBy'
 
 export default {

@@ -13,7 +13,7 @@
 
 <script>
   import { Auth, User, Course, Loader } from '../services'
-  import { Observable } from 'rxjs'
+  import { Observable } from 'rxjs/Observable'
   import get from 'lodash/fp/get'
   import keys from 'lodash/fp/keys'
   import isEmpty from 'lodash/fp/isEmpty'

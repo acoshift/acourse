@@ -96,7 +96,7 @@
 
 <script>
   import { Auth, Document, Course, Loader } from '../services'
-  import { Observable } from 'rxjs'
+  import { Observable } from 'rxjs/Observable'
   import flow from 'lodash/fp/flow'
   import defaults from 'lodash/fp/defaults'
   import pick from 'lodash/fp/pick'

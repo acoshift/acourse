@@ -40,7 +40,7 @@
 </style>
 
 <script>
-  import { Subject } from 'rxjs'
+  import { Subject } from 'rxjs/Subject'
   import { Me } from '../services'
   import firebase from 'firebase'
 

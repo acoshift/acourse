@@ -1,4 +1,5 @@
-import { Observable, Subject } from 'rxjs'
+import { Observable } from 'rxjs/Observable'
+import { Subject } from 'rxjs/Subject'
 
 export default {
   $successModal: new Subject(),

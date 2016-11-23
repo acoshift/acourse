@@ -24,7 +24,7 @@
 
 <script>
   import { Course, Assignment, Me, Loader, Document } from '../services'
-  import { Observable } from 'rxjs'
+  import { Observable } from 'rxjs/Observable'
 
   export default {
     data () {

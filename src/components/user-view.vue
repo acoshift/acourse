@@ -25,7 +25,7 @@
   import isEmpty from 'lodash/fp/isEmpty'
   import filter from 'lodash/fp/filter'
   import orderBy from 'lodash/fp/orderBy'
-  import { Observable } from 'rxjs'
+  import { Observable } from 'rxjs/Observable'
 
   export default {
     components: {

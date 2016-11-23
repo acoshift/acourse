@@ -20,7 +20,7 @@
 
 <script>
   import { Course, Loader, User } from '../services'
-  import { Observable } from 'rxjs'
+  import { Observable } from 'rxjs/Observable'
   import reduce from 'lodash/fp/reduce'
   import orderBy from 'lodash/fp/orderBy'
 

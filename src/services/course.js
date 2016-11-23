@@ -1,5 +1,5 @@
 import Firebase from './firebase'
-import { Observable } from 'rxjs'
+import { Observable } from 'rxjs/Observable'
 
 import flow from 'lodash/fp/flow'
 import map from 'lodash/fp/map'

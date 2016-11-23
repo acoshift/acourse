@@ -1,6 +1,6 @@
 import Firebase from './firebase'
 import Course from './course'
-import { Observable } from 'rxjs'
+import { Observable } from 'rxjs/Observable'
 import pick from 'lodash/fp/pick'
 import assign from 'lodash/extend'
 import keys from 'lodash/fp/keys'

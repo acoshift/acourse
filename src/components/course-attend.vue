@@ -16,7 +16,7 @@
 
 <script>
   import { Course, User, Loader } from '../services'
-  import { Observable } from 'rxjs'
+  import { Observable } from 'rxjs/Observable'
   import Avatar from './avatar'
   import forEach from 'lodash/fp/forEach'
 

@@ -1,5 +1,7 @@
 import firebase from 'firebase'
-import { Observable, BehaviorSubject, Subject } from 'rxjs'
+import { Observable } from 'rxjs/Observable'
+import { Subject } from 'rxjs/Subject'
+import { BehaviorSubject } from 'rxjs/BehaviorSubject'
 import isString from 'lodash/fp/isString'
 import Raven from 'raven-js'
 
