@@ -17,33 +17,20 @@
 </template>
 
 <script>
-  import { Auth, User } from '../services'
+  import { Auth, Me } from '../services'
   import UserAvatar from './user-avatar'
 
   export default {
     components: {
       UserAvatar
     },
-    data () {
+    subscriptions () {
       return {
-        user: null,
-        $user: null
+        user: Me.get()
       }
     },
-    mounted () {
-      this.$user = Auth.currentUser()
-        .flatMap(({ uid }) => User.getProfile(uid))
-        .subscribe(
-          (user) => {
-            this.user = user
-            this.$nextTick(() => {
-              $(this.$refs.dropdownUser).dropdown({ action: 'hide' })
-            })
-          }
-        )
-    },
-    destroyed () {
-      this.$user.unsubscribe()
+    updated () {
+      $(this.$refs.dropdownUser).dropdown({ action: 'hide' })
     },
     methods: {
       signOut () {

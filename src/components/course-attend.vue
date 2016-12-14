@@ -16,7 +16,6 @@
 
 <script>
   import { Course, User, Loader } from '../services'
-  import { Observable } from 'rxjs/Observable'
   import Avatar from './avatar'
   import forEach from 'lodash/fp/forEach'
 
@@ -26,35 +25,16 @@
     },
     data () {
       return {
-        course: null,
-        courseId: null,
-        students: null,
-        $attend: null
+        courseId: this.$route.params.id
       }
     },
-    beforeCreate () {
-      Loader.start('attend')
-    },
-    created () {
-      this.courseId = this.$route.params.id
-
-      this.$attend = Observable.combineLatest(
-        Course.get(this.courseId),
-        Course.attendUsers(this.courseId).do(forEach(User.inject.bind(User)))
-      )
-        .subscribe(
-          ([course, students]) => {
-            Loader.stop('attend')
-            this.course = course
-            this.students = students
-          },
-          () => {
-            this.$router.replace(`/course/${this.courseId}`)
-          }
-        )
-    },
-    destroyed () {
-      this.$attend.unsubscribe()
+    subscriptions () {
+      Loader.start('attend-course')
+      Loader.start('attend-students')
+      return {
+        course: Course.get(this.courseId).do(() => Loader.stop('attend-course')).catch(() => { this.$router.replace(`/course/${this.courseId}`) }),
+        students: Course.attendUsers(this.courseId).do(forEach(User.inject.bind(User))).do(() => Loader.stop('attend-students'))
+      }
     }
   }
 </script>

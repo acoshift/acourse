@@ -24,44 +24,23 @@
 
 <script>
   import { Course, Assignment, Me, Loader, Document } from '../services'
-  import { Observable } from 'rxjs/Observable'
 
   export default {
     data () {
       return {
-        courseId: '',
-        course: null,
-        select: 0,
-        assignments: null,
-        userAssignments: null
+        courseId: this.$route.params.id,
+        select: 0
       }
     },
-    created () {
+    subscriptions () {
       Loader.start('course')
-      this.courseId = this.$route.params.id
-      Course.get(this.courseId)
-        .subscribe(
-          (course) => {
-            Loader.stop('course')
-            this.course = course
-          },
-          () => {
-            this.$router.replace('/home')
-          }
-        )
-
       Loader.start('assignment')
-      Observable.combineLatest(
-        Assignment.getCode(this.courseId),
-        Me.getCourseAssignments(this.courseId)
-      )
-        .subscribe(
-          ([assignments, userAssignments]) => {
-            if (Loader.has('assignment')) Loader.stop('assignment')
-            this.assignments = assignments
-            this.userAssignments = userAssignments
-          }
-        )
+      Loader.start('userAssignments')
+      return {
+        course: Course.get(this.courseId).do(() => Loader.stop('course')).catch(() => { this.$router.replace('/home') }),
+        assignments: Assignment.getCode(this.courseId).do(() => Loader.stop('assignment')),
+        userAssignments: Me.getCourseAssignments(this.courseId).do(() => Loader.stop('userAssignments'))
+      }
     },
     methods: {
       selectFile (select) {

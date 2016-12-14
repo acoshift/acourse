@@ -29,14 +29,12 @@
     components: {
       CourseCard
     },
-    data () {
+    subscriptions () {
+      Loader.start('courses')
       return {
         courses: Course.list()
           .do(() => Loader.stop('courses'))
       }
-    },
-    beforeCreate () {
-      Loader.start('courses')
     }
   }
 </script>

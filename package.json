@@ -27,7 +27,7 @@
     "semantic-ui-css": "^2.2.4",
     "vue": "^2.0.1",
     "vue-router": "^2.0.0",
-    "vue-rx": "^1.2.0"
+    "vue-rx": "^2.2.0"
   },
   "devDependencies": {
     "babel-core": "^6.17.0",

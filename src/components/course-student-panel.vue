@@ -29,21 +29,13 @@
     },
     data () {
       return {
-        attending: false,
-        isAttended: false,
-        $isAttended: null
+        attending: false
       }
     },
-    created () {
-      this.$isAttended = Me.isAttendedCourse(this.course.id)
-        .subscribe(
-          (isAttended) => {
-            this.isAttended = isAttended
-          }
-        )
-    },
-    destroyed () {
-      this.$isAttended.unsubscribe()
+    subscriptions () {
+      return {
+        isAttended: Me.isAttendedCourse(this.course.id)
+      }
     },
     methods: {
       attend () {

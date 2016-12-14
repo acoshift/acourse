@@ -47,7 +47,7 @@
         required: true
       }
     },
-    data () {
+    subscriptions () {
       return {
         uid: Auth.currentUser().first().map(({ uid }) => uid)
       }

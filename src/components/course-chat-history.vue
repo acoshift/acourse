@@ -26,25 +26,17 @@
   import moment from 'moment'
 
   export default {
-    data () {
-      return {
-        messages: ''
-      }
-    },
-    created () {
+    subscriptions () {
       Loader.start('messages')
-      Course.allMessages(this.$route.params.id)
-        .flatMap(Observable.from)
-        .flatMap((x) => User.get(x.u).first(), (x, u) => ({ ...x, user: u, ts: this.formatTimestamp(x.t) }))
-        .toArray()
-        .map(orderBy(['t'], ['asc']))
-        .map(reduce((p, v) => `${p}[${v.ts}] ${v.user.name || 'Anonymous'}: ${v.m}\n`, ''))
-        .finally(() => { Loader.stop('messages') })
-        .subscribe(
-          (messages) => {
-            this.messages = messages
-          }
-        )
+      return {
+        messages: Course.allMessages(this.$route.params.id)
+          .flatMap(Observable.from)
+          .flatMap((x) => User.get(x.u).first(), (x, u) => ({ ...x, user: u, ts: this.formatTimestamp(x.t) }))
+          .toArray()
+          .map(orderBy(['t'], ['asc']))
+          .map(reduce((p, v) => `${p}[${v.ts}] ${v.user.name || 'Anonymous'}: ${v.m}\n`, ''))
+          .finally(() => { Loader.stop('messages') })
+      }
     },
     methods: {
       formatTimestamp (ts) {

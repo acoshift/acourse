@@ -32,62 +32,20 @@
       UserProfile,
       CourseCard
     },
-    data () {
+    subscriptions () {
+      const id = this.$route.params.id
+      Loader.start('user')
       return {
-        user: null,
-        ownCourses: null,
-        courses: null,
-        $user: null,
-        $ownCourse: null
-      }
-    },
-    created () {
-      this.init()
-    },
-    destroyed () {
-      this.cleanup()
-    },
-    watch: {
-      $route () {
-        this.init()
-      }
-    },
-    methods: {
-      init () {
-        this.cleanup()
-        Loader.start('user')
-        this.$user = User.get(this.$route.params.id)
-          .flatMap((user) =>
-            User.courses(this.$route.params.id)
-              .flatMap((courseIds) =>
-                isEmpty(courseIds)
-                  ? Observable.of([])
-                  : Observable.combineLatest(...courseIds.map((id) => Course.get(id)))
-                    .map(filter((course) => !!course.public))
-                    .map(orderBy(['timestamp'], ['desc']))
-              ),
-            (user, courses) => ([user, courses])
-          )
-          .subscribe(
-            ([user, courses]) => {
-              Loader.stop('user')
-              this.user = user
-              this.courses = isEmpty(courses) ? null : courses
-            },
-            () => {
-              this.$router.replace('/home')
-            }
-          )
-        this.$ownCourse = User.ownCourses(this.$route.params.id)
-          .subscribe(
-            (courses) => {
-              this.ownCourses = isEmpty(courses) ? null : courses
-            }
-          )
-      },
-      cleanup () {
-        if (this.$user) this.$user.unsubscribe()
-        if (this.$ownCourse) this.$ownCourse.unsubscribe()
+        user: User.get(id).do(() => { Loader.stop('user') }).catch(() => { this.$router.replace('/home') }),
+        courses: User.courses(id)
+          .flatMap((courseIds) =>
+            isEmpty(courseIds)
+              ? Observable.of([])
+              : Observable.combineLatest(...courseIds.map((id) => Course.get(id)))
+                .map(filter((course) => !!course.public))
+                .map(orderBy(['timestamp'], ['desc'])))
+          .map((courses) => isEmpty(courses) ? null : courses),
+        ownCourses: User.ownCourses(id).map((courses) => isEmpty(courses) ? null : courses)
       }
     }
   }

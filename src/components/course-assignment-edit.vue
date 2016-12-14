@@ -60,41 +60,38 @@
     },
     data () {
       return {
-        courseId: null,
+        courseId: this.$route.params.id,
         assignmentCode: '',
         assignments: null
       }
     },
-    mounted () {
-      this.courseId = this.$route.params.id
+    created () {
       Loader.start('assignment')
-      Assignment.get(this.courseId)
-        .subscribe(
-          (assignments) => {
-            Loader.stop('assignment')
-            this.assignments = flow(
-              keys,
-              map((id) => ({
-                id,
-                ...assignments.code[id],
-                users: flow(
-                  keys,
-                  map((x) => ({
-                    id: x,
-                    files: assignments.user[x][id]
-                  })),
-                  filter((x) => !isEmpty(x.files)),
-                  forEach((x) => User.inject(x))
-                )(assignments.user)
-              }))
-            )(assignments.code)
-            setTimeout(() => {
-              this.$nextTick(() => {
-                $('.accordion').accordion()
-              })
-            }, 500)
-          }
-        )
+      this.$subscribeTo(Assignment.get(this.courseId),
+        (assignments) => {
+          Loader.stop('assignment')
+          this.assignments = flow(
+            keys,
+            map((id) => ({
+              id,
+              ...assignments.code[id],
+              users: flow(
+                keys,
+                map((x) => ({
+                  id: x,
+                  files: assignments.user[x][id]
+                })),
+                filter((x) => !isEmpty(x.files)),
+                forEach((x) => User.inject(x))
+              )(assignments.user)
+            }))
+          )(assignments.code)
+          setTimeout(() => {
+            this.$nextTick(() => {
+              $('.accordion').accordion()
+            })
+          }, 500)
+        })
     },
     updated () {
       this.$nextTick(() => {

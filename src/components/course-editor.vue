@@ -121,7 +121,7 @@
           hasAssignment: false
         },
         contents: [],
-        courseId: '',
+        courseId: this.$route.params.id,
         saving: false
       }
     },
@@ -137,7 +137,6 @@
           )
       } else {
         Loader.start('course')
-        this.courseId = this.$route.params.id
         Observable.forkJoin(
           Auth.currentUser().first(),
           Course.get(this.courseId).first(),

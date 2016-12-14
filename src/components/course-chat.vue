@@ -88,7 +88,7 @@
     data () {
       return {
         course: null,
-        courseId: null,
+        courseId: this.$route.params.id,
         input: '',
         messages: [],
         limit: 50,
@@ -105,7 +105,6 @@
       Loader.start('course')
       Loader.start('message')
 
-      this.courseId = this.$route.params.id
       this.$course = Course.get(this.courseId)
         .subscribe(
           (course) => {

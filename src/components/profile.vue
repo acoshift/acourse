@@ -58,7 +58,8 @@
       UserProfile,
       CourseCard
     },
-    data () {
+    subscriptions () {
+      Loader.start('user')
       return {
         user: Me.getProfile()
           .do(() => Loader.stop('user')),
@@ -67,9 +68,6 @@
         providerData: Auth.currentUser()
           .map((x) => x.providerData)
       }
-    },
-    beforeCreate () {
-      Loader.start('user')
     },
     computed: {
       isLinkedGoogle () {
