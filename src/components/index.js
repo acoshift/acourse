@@ -1,18 +1,17 @@
+import Auth from './auth'
 import Layout from './layout'
-
-const Home = () => System.import('./home.vue')
-const Auth = () => System.import('./auth.vue')
-const Profile = () => System.import('./profile.vue')
-const ProfileEdit = () => System.import('./profile-edit.vue')
-const UserView = () => System.import('./user-view.vue')
-const Course = () => System.import('./course.vue')
-const CourseView = () => System.import('./course-view.vue')
-const CourseChat = () => System.import('./course-chat.vue')
-const CourseEditor = () => System.import('./course-editor.vue')
-const CourseChatHistory = () => System.import('./course-chat-history.vue')
-const CourseAttend = () => System.import('./course-attend.vue')
-const CourseAssignment = () => System.import('./course-assignment.vue')
-const CourseAssignmentEdit = () => System.import('./course-assignment-edit.vue')
+import Home from './home'
+import Profile from './profile'
+import ProfileEdit from './profile-edit'
+import CourseEditor from './course-editor'
+import CourseView from './course-view'
+import UserView from './user-view'
+import Course from './course'
+import CourseChat from './course-chat'
+import CourseChatHistory from './course-chat-history'
+import CourseAttend from './course-attend'
+import CourseAssignment from './course-assignment'
+import CourseAssignmentEdit from './course-assignment-edit'
 
 export {
   Auth,
