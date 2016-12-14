@@ -47,7 +47,7 @@ export default {
     code = code || true
     return Auth.currentUser()
       .first()
-      .flatMap(({ uid }) => Course.addStudent(id, uid, code))
+      .flatMap(({ uid }) => Course.enroll(id, uid, code))
       .flatMap(() => this.addCourse(id))
   },
   favoriteCourse (id) {

@@ -69,10 +69,9 @@
         },
         "student": {
           "$user_id": {
-            // check course exists and opened
-            ".write": "auth.uid === $user_id && data.parent().parent().exists() && data.parent().parent().child('open').val() === true",
-            // if code exists, value must be code, otherwise value must be true
-            ".validate": "(root.child('course-private/' + $course_id + '/code').exists() && root.child('course-private/' + $course_id + '/code/' + newData.val()).val() === true) || (!root.child('course-private/' + $course_id + '/code').exists() && newData.val() === true)"
+            // if student pass enrollment
+            ".write": "auth.uid === $user_id && root.child('course-private/' + $course_id + '/enroll/' + auth.uid).exists()",
+            ".validate": "newData.val() === true"
           }
         },
         "open": {
@@ -101,6 +100,13 @@
         }
       }
     },
+    "course-student": {
+      // only students or owner can access
+      "$course_id": {
+        ".read": "root.child('course/' + $course_id + '/student/' + auth.uid).exists() || root.child('course/' + $course_id + '/owner').val() === auth.uid",
+        ".write": "root.child('course/' + $course_id + '/owner').val() === true"
+      }
+    },
     "course-private": {
       // private course data, only owner can read and write
       // use for validate other user actions
@@ -111,6 +117,14 @@
           // if this field exists, user must enter one of this code for enroll course
           "$code": {
             ".validate": "newData.val() === true"
+          }
+        },
+        "enroll": {
+          "$user_id": {
+            // check course exists and opened
+            ".write": "auth.uid === $user_id && root.child('course/' + $course_id).exists() && root.child('course/' + $course_id + '/open').val() === true",
+            // if code exists, value must be code, otherwise value must be true
+            ".validate": "(root.child('course-private/' + $course_id + '/code').exists() && root.child('course-private/' + $course_id + '/code/' + newData.val()).val() === true) || (!root.child('course-private/' + $course_id + '/code').exists() && newData.val() === true)"
           }
         }
       }

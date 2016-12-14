@@ -43,8 +43,9 @@ export default {
   unfavorite (id, userId) {
     return Firebase.remove(`course/${id}/favorite/${userId}`)
   },
-  addStudent (id, userId, code) {
-    return Firebase.set(`course/${id}/student/${userId}`, code)
+  enroll (id, userId, code) {
+    return Firebase.set(`course-private/${id}/enroll/${userId}`, code)
+      .flatMap(() => Firebase.set(`course/${id}/student/${userId}`, true))
   },
   ownBy (userId) {
     const ref = Firebase.ref('course').orderByChild('owner').equalTo(userId)

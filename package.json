@@ -50,6 +50,7 @@
     "express": "^4.14.0",
     "extract-text-webpack-plugin": "^2.0.0-beta.4",
     "file-loader": "^0.9.0",
+    "firebase-admin": "^4.0.4",
     "function-bind": "^1.1.0",
     "html-webpack-plugin": "^2.22.0",
     "http-proxy-middleware": "^0.17.1",
