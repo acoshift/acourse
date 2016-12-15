@@ -117,5 +117,11 @@ export default {
       filter((x) => !!x),
       reduce((p, v) => { p[v] = true; return p }, {})
     )(codes))
+  },
+  setQueueEnroll (id, userId, url) {
+    return Firebase.set(`queue-enroll/${id}/${userId}`, {
+      url,
+      timestamp: Firebase.timestamp
+    })
   }
 }

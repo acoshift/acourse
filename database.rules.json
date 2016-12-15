@@ -228,25 +228,16 @@
       }
     },
     "queue-enroll": {
-      "$q_id": {
-        ".write": "!data.exists() && auth.uid != null",
-        "photo": {
-          ".validate": "newData.isString()"
-        },
-        "name": {
-          ".validate": "newData.isString()"
-        },
-        "bankNo": {
-          ".validate": "newData.isString()"
-        },
-        "bankType": {
-          ".validate": "newData.isString()"
-        },
-        "phone": {
-          ".validate": "newData.isString()"
-        },
-        "timestamp": {
-          ".validate": "newData.val() <= now"
+      "$courseId": {
+        "$userId": {
+          ".write": "auth.uid === $userId",
+          ".read": "auth.uid === $userId",
+          "url": {
+            ".validate": "newData.isString()"
+          },
+          "timestamp": {
+            ".validate": "newData.val() <= now"
+          }
         }
       }
     }

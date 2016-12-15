@@ -2,8 +2,8 @@
   .ui.segment
     .ui.stackable.equal.width.grid
       .center.aligned.column
-        .ui.blue.button(style="width: 200px;", :class="{loading: applying}", @click="apply") Apply
-    apply-modal(ref="applyModal", @apply="applyWithCode")
+        .ui.blue.button(style="width: 200px;", :class="{loading: applying}", @click="apply") Enroll
+    apply-modal(ref="applyModal", :course="course")
 </template>
 
 <script>
@@ -34,24 +34,10 @@ export default {
         .finally(() => { this.applying = false })
         .subscribe(
           () => {
-            Document.openSuccessModal('Success', 'You have applied to this course.')
+            Document.openSuccessModal('Success', 'You have enrolled to this course.')
           },
           () => {
             this.$refs.applyModal.show()
-          }
-        )
-    },
-    applyWithCode (code) {
-      if (this.applying) return
-      this.applying = true
-      Me.applyCourse(this.course.id, code)
-        .finally(() => { this.applying = false })
-        .subscribe(
-          () => {
-            Document.openSuccessModal('Success', 'You have applied to this course.')
-          },
-          (err) => {
-            Document.openErrorModal('Error', 'Can not apply to this course. ' + err.message)
           }
         )
     }
