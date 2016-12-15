@@ -95,6 +95,12 @@
         "video": {
           ".validate": "newData.isString()"
         },
+        "canQueueEnroll": {
+          ".validate": "newData.isBoolean()"
+        },
+        "queueEnrollDetail": {
+          ".validate": "newData.isString()"
+        },
         "$other": {
           ".validate": false
         }

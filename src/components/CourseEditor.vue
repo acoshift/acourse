@@ -53,6 +53,16 @@
           </div>
         </div>
         <div class="field">
+          <div class="ui toggle checkbox">
+            <input type="checkbox" class="hidden" v-model="course.canQueueEnroll">
+            <label>Can Direct Transfer</label>
+          </div>
+        </div>
+        <div v-show="course.canQueueEnroll" class="field">
+          <label>Direct Transfer Detail:</label>
+          <textarea v-model="course.queueEnrollDetail" rows="5"></textarea>
+        </div>
+        <div class="field">
           <label>Video ID</label>
           <input v-model="course.video">
         </div>
@@ -122,7 +132,9 @@ export default {
         public: false,
         video: '',
         canAttend: false,
-        hasAssignment: false
+        hasAssignment: false,
+        canQueueEnroll: false,
+        queueEnrollDetail: ''
       },
       contents: [],
       courseId: this.$route.params.id,
