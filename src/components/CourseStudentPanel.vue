@@ -18,39 +18,39 @@
 </template>
 
 <script>
-  import { Me, Document } from '../services'
+import { Me, Document } from '../services'
 
-  export default {
-    props: {
-      course: {
-        type: Object,
-        required: true
-      }
-    },
-    data () {
-      return {
-        attending: false
-      }
-    },
-    subscriptions () {
-      return {
-        isAttended: Me.isAttendedCourse(this.course.id)
-      }
-    },
-    methods: {
-      attend () {
-        this.attending = true
-        Me.attendCourse(this.course.id)
-          .finally(() => { this.attending = false })
-          .subscribe(
-            () => {
-              Document.openSuccessModal('Success', 'You have attended to this section.')
-            },
-            (err) => {
-              Document.openErrorModal('Attend Error', err && err.message || err)
-            }
-          )
-      }
+export default {
+  props: {
+    course: {
+      type: Object,
+      required: true
+    }
+  },
+  data () {
+    return {
+      attending: false
+    }
+  },
+  subscriptions () {
+    return {
+      isAttended: Me.isAttendedCourse(this.course.id)
+    }
+  },
+  methods: {
+    attend () {
+      this.attending = true
+      Me.attendCourse(this.course.id)
+        .finally(() => { this.attending = false })
+        .subscribe(
+          () => {
+            Document.openSuccessModal('Success', 'You have attended to this section.')
+          },
+          (err) => {
+            Document.openErrorModal('Attend Error', err && err.message || err)
+          }
+        )
     }
   }
+}
 </script>

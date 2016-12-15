@@ -29,26 +29,26 @@
 </style>
 
 <script>
-  export default {
-    data () {
-      return {
-        title: '',
-        description: ''
-      }
+export default {
+  data () {
+    return {
+      title: '',
+      description: ''
+    }
+  },
+  methods: {
+    show (title, description) {
+      this.title = title
+      this.description = description
+      this.$nextTick(() => {
+        $(this.$el)
+          .modal('attach events', this.$refs.closeButton, 'hide')
+          .modal('show')
+      })
     },
-    methods: {
-      show (title, description) {
-        this.title = title
-        this.description = description
-        this.$nextTick(() => {
-          $(this.$el)
-            .modal('attach events', this.$refs.closeButton, 'hide')
-            .modal('show')
-        })
-      },
-      close () {
-        $(this.$el).modal('hide')
-      }
+    close () {
+      $(this.$el).modal('hide')
     }
   }
+}
 </script>

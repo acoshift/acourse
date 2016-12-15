@@ -36,41 +36,41 @@
 </style>
 
 <script>
-  import { Auth, Me } from '../services'
-  import keys from 'lodash/fp/keys'
-  import get from 'lodash/fp/get'
+import { Auth, Me } from '../services'
+import keys from 'lodash/fp/keys'
+import get from 'lodash/fp/get'
 
-  export default {
-    props: {
-      course: {
-        type: Object,
-        required: true
-      }
+export default {
+  props: {
+    course: {
+      type: Object,
+      required: true
+    }
+  },
+  subscriptions () {
+    return {
+      uid: Auth.currentUser().first().map(({ uid }) => uid)
+    }
+  },
+  computed: {
+    favorites () {
+      return keys(this.course.favorite).length
     },
-    subscriptions () {
-      return {
-        uid: Auth.currentUser().first().map(({ uid }) => uid)
-      }
+    students () {
+      return keys(this.course.student).length
     },
-    computed: {
-      favorites () {
-        return keys(this.course.favorite).length
-      },
-      students () {
-        return keys(this.course.student).length
-      },
-      isFav () {
-        return !!get(this.uid)(this.course.favorite)
-      }
-    },
-    methods: {
-      fav () {
-        if (this.isFav) {
-          Me.unfavoriteCourse(this.course.id).subscribe()
-        } else {
-          Me.favoriteCourse(this.course.id).subscribe()
-        }
+    isFav () {
+      return !!get(this.uid)(this.course.favorite)
+    }
+  },
+  methods: {
+    fav () {
+      if (this.isFav) {
+        Me.unfavoriteCourse(this.course.id).subscribe()
+      } else {
+        Me.favoriteCourse(this.course.id).subscribe()
       }
     }
   }
+}
 </script>

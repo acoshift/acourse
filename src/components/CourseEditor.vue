@@ -95,115 +95,115 @@
 </style>
 
 <script>
-  import { Auth, Document, Course, Loader } from '../services'
-  import { Observable } from 'rxjs/Observable'
-  import flow from 'lodash/fp/flow'
-  import defaults from 'lodash/fp/defaults'
-  import pick from 'lodash/fp/pick'
-  import keys from 'lodash/fp/keys'
-  import map from 'lodash/fp/map'
+import { Auth, Document, Course, Loader } from '../services'
+import { Observable } from 'rxjs/Observable'
+import flow from 'lodash/fp/flow'
+import defaults from 'lodash/fp/defaults'
+import pick from 'lodash/fp/pick'
+import keys from 'lodash/fp/keys'
+import map from 'lodash/fp/map'
 
-  export default {
-    data () {
-      return {
-        isNew: false,
-        course: {
-          title: '',
-          shortDescription: '',
-          description: '',
-          photo: '',
-          owner: '',
-          start: '',
-          open: false,
-          public: false,
-          video: '',
-          canAttend: false,
-          hasAssignment: false
-        },
-        contents: [],
-        courseId: this.$route.params.id,
-        saving: false
-      }
+export default {
+  data () {
+    return {
+      isNew: false,
+      course: {
+        title: '',
+        shortDescription: '',
+        description: '',
+        photo: '',
+        owner: '',
+        start: '',
+        open: false,
+        public: false,
+        video: '',
+        canAttend: false,
+        hasAssignment: false
+      },
+      contents: [],
+      courseId: this.$route.params.id,
+      saving: false
+    }
+  },
+  created () {
+    if (!this.$route.params.id) {
+      this.isNew = true
+      Auth.currentUser()
+        .first()
+        .subscribe(
+          (user) => {
+            this.course.owner = user.uid
+          }
+        )
+    } else {
+      Loader.start('course')
+      Observable.forkJoin(
+        Auth.currentUser().first(),
+        Course.get(this.courseId).first(),
+        Course.content(this.courseId).first()
+      )
+        .subscribe(
+          ([{ uid }, course, contents]) => {
+            Loader.stop('course')
+            if (course.owner !== uid) return this.$router.replace(`/course/${this.courseId}`)
+            this.course = flow(
+              pick(keys(this.course)),
+              defaults(this.course)
+            )(course)
+            this.contents = contents && map(pick(['content', 'title']))(contents) || []
+          },
+          () => {
+            this.$router.replace('/home')
+          }
+        )
+    }
+  },
+  mounted () {
+    $('.checkbox').checkbox()
+  },
+  methods: {
+    uploadPhoto () {
+      Document.uploadModal.open('image/*')
+        .subscribe(
+          (f) => {
+            this.course.photo = f.downloadURL
+          },
+          (err) => {
+            Document.openErrorModal('Upload Error', err.message)
+          }
+        )
     },
-    created () {
-      if (!this.$route.params.id) {
-        this.isNew = true
-        Auth.currentUser()
-          .first()
+    submit () {
+      if (this.saving) return
+      this.saving = true
+      if (this.isNew) {
+        Course.create(this.course)
+          .flatMap((courseId) => Course.saveContent(courseId, this.contents), (courseId) => courseId)
+          .finally(() => { this.saving = false })
           .subscribe(
-            (user) => {
-              this.course.owner = user.uid
+            (courseId) => {
+              this.$router.push(`/course/${courseId}`)
             }
           )
       } else {
-        Loader.start('course')
-        Observable.forkJoin(
-          Auth.currentUser().first(),
-          Course.get(this.courseId).first(),
-          Course.content(this.courseId).first()
-        )
+        Course.save(this.courseId, this.course)
+          .flatMap(() => Course.saveContent(this.courseId, this.contents))
+          .finally(() => { this.saving = false })
           .subscribe(
-            ([{ uid }, course, contents]) => {
-              Loader.stop('course')
-              if (course.owner !== uid) return this.$router.replace(`/course/${this.courseId}`)
-              this.course = flow(
-                pick(keys(this.course)),
-                defaults(this.course)
-              )(course)
-              this.contents = contents && map(pick(['content', 'title']))(contents) || []
-            },
             () => {
-              this.$router.replace('/home')
+              this.$router.push(`/course/${this.courseId}`)
             }
           )
       }
     },
-    mounted () {
-      $('.checkbox').checkbox()
+    addContent () {
+      this.contents.push({
+        content: ''
+      })
     },
-    methods: {
-      uploadPhoto () {
-        Document.uploadModal.open('image/*')
-          .subscribe(
-            (f) => {
-              this.course.photo = f.downloadURL
-            },
-            (err) => {
-              Document.openErrorModal('Upload Error', err.message)
-            }
-          )
-      },
-      submit () {
-        if (this.saving) return
-        this.saving = true
-        if (this.isNew) {
-          Course.create(this.course)
-            .flatMap((courseId) => Course.saveContent(courseId, this.contents), (courseId) => courseId)
-            .finally(() => { this.saving = false })
-            .subscribe(
-              (courseId) => {
-                this.$router.push(`/course/${courseId}`)
-              }
-            )
-        } else {
-          Course.save(this.courseId, this.course)
-            .flatMap(() => Course.saveContent(this.courseId, this.contents))
-            .finally(() => { this.saving = false })
-            .subscribe(
-              () => {
-                this.$router.push(`/course/${this.courseId}`)
-              }
-            )
-        }
-      },
-      addContent () {
-        this.contents.push({
-          content: ''
-        })
-      },
-      removeContent (position) {
-        this.contents.splice(position, 1)
-      }
+    removeContent (position) {
+      this.contents.splice(position, 1)
     }
   }
+}
 </script>

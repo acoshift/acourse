@@ -5,12 +5,12 @@
 </template>
 
 <script>
-  export default {
-    props: ['src'],
-    mounted () {
-      this.$nextTick(() => {
-        $(this.$refs.video).embed()
-      })
-    }
+export default {
+  props: ['src'],
+  mounted () {
+    this.$nextTick(() => {
+      $(this.$refs.video).embed()
+    })
   }
+}
 </script>

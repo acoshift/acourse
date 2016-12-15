@@ -22,19 +22,19 @@
 </style>
 
 <script>
-  import CourseCard from './course-card'
-  import { Course, Loader } from '../services'
+import CourseCard from './CourseCard'
+import { Course, Loader } from '../services'
 
-  export default {
-    components: {
-      CourseCard
-    },
-    subscriptions () {
-      Loader.start('courses')
-      return {
-        courses: Course.list()
-          .do(() => Loader.stop('courses'))
-      }
+export default {
+  components: {
+    CourseCard
+  },
+  subscriptions () {
+    Loader.start('courses')
+    return {
+      courses: Course.list()
+        .do(() => Loader.stop('courses'))
     }
   }
+}
 </script>

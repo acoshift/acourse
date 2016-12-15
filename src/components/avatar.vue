@@ -34,15 +34,15 @@
 </style>
 
 <script>
-  export default {
-    props: {
-      src: {
-        type: String
-      },
-      size: {
-        type: String,
-        required: true
-      }
+export default {
+  props: {
+    src: {
+      type: String
+    },
+    size: {
+      type: String,
+      required: true
     }
   }
+}
 </script>

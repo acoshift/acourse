@@ -124,126 +124,126 @@
 </style>
 
 <script>
-  import { Auth, User, Document } from '../services'
+import { Auth, User, Document } from '../services'
 
-  export default {
-    data () {
-      return {
-        email: '',
-        password: '',
-        state: 0,
-        error: '',
-        loading: false,
-        facebookLoading: false,
-        googleLoading: false,
-        githubLoading: false
-      }
+export default {
+  data () {
+    return {
+      email: '',
+      password: '',
+      state: 0,
+      error: '',
+      loading: false,
+      facebookLoading: false,
+      googleLoading: false,
+      githubLoading: false
+    }
+  },
+  methods: {
+    signIn () {
+      if (this.loading) return
+      this.loading = true
+      this.error = ''
+      Auth.signIn(this.email, this.password)
+        .finally(() => { this.loading = false })
+        .subscribe(
+          () => {
+            this.gotoHome()
+          },
+          () => {
+            this.error = 'Email or password wrong'
+          }
+        )
     },
-    methods: {
-      signIn () {
-        if (this.loading) return
-        this.loading = true
-        this.error = ''
-        Auth.signIn(this.email, this.password)
-          .finally(() => { this.loading = false })
-          .subscribe(
-            () => {
-              this.gotoHome()
-            },
-            () => {
-              this.error = 'Email or password wrong'
-            }
-          )
-      },
-      forgot () {
-        if (this.loading) return
-        this.loading = true
-        this.error = ''
-        Auth.resetPassword(this.email)
-          .finally(() => { this.loading = false })
-          .subscribe(
-            () => {
-              this.email = ''
-              Document.openSuccessModal('Success', 'Please check email to reset password.')
-            },
-            (err) => {
-              this.error = err.message
-            }
-          )
-      },
-      signUp () {
-        if (this.loading) return
-        this.loading = true
-        this.error = ''
-        Auth.signUp(this.email, this.password)
-          .finally(() => { this.loading = false })
-          .subscribe(
-            (res) => {
-              this.gotoHome()
-            },
-            (err) => {
-              this.error = err.message
-            }
-          )
-      },
-      facebookSignIn () {
-        if (this.facebookLoading) return
-        this.facebookLoading = true
-        Auth.signInWithFacebook()
-          .flatMap((res) => User.saveAuthProfile(res.user), (x) => x)
-          .finally(() => { this.facebookLoading = false })
-          .subscribe(
-            () => {
-              this.gotoHome()
-            },
-            (err) => {
-              Document.openErrorModal('Error', err.message)
-            }
-          )
-      },
-      googleSignIn () {
-        if (this.googleLoading) return
-        this.googleLoading = true
-        Auth.signInWithGoogle()
-          .flatMap((res) => User.saveAuthProfile(res.user), (x) => x)
-          .finally(() => { this.googleLoading = false })
-          .subscribe(
-            () => {
-              this.gotoHome()
-            },
-            (err) => {
-              Document.openErrorModal('Error', err.message)
-            }
-          )
-      },
-      githubSignIn () {
-        if (this.githubLoading) return
-        this.githubLoading = true
-        Auth.signInWithGithub()
-          .flatMap((res) => User.saveAuthProfile(res.user), (x) => x)
-          .finally(() => { this.githubLoading = false })
-          .subscribe(
-            () => {
-              this.gotoHome()
-            },
-            (err) => {
-              Document.openErrorModal('Error', err.message)
-            }
-          )
-      },
-      resetError () {
-        this.error = ''
-      },
-      gotoHome () {
-        this.$nextTick(() => {
-          this.$router.push('/home')
-        })
-      }
+    forgot () {
+      if (this.loading) return
+      this.loading = true
+      this.error = ''
+      Auth.resetPassword(this.email)
+        .finally(() => { this.loading = false })
+        .subscribe(
+          () => {
+            this.email = ''
+            Document.openSuccessModal('Success', 'Please check email to reset password.')
+          },
+          (err) => {
+            this.error = err.message
+          }
+        )
     },
-    watch: {
-      state () {
-        this.resetError()
-      }
+    signUp () {
+      if (this.loading) return
+      this.loading = true
+      this.error = ''
+      Auth.signUp(this.email, this.password)
+        .finally(() => { this.loading = false })
+        .subscribe(
+          (res) => {
+            this.gotoHome()
+          },
+          (err) => {
+            this.error = err.message
+          }
+        )
+    },
+    facebookSignIn () {
+      if (this.facebookLoading) return
+      this.facebookLoading = true
+      Auth.signInWithFacebook()
+        .flatMap((res) => User.saveAuthProfile(res.user), (x) => x)
+        .finally(() => { this.facebookLoading = false })
+        .subscribe(
+          () => {
+            this.gotoHome()
+          },
+          (err) => {
+            Document.openErrorModal('Error', err.message)
+          }
+        )
+    },
+    googleSignIn () {
+      if (this.googleLoading) return
+      this.googleLoading = true
+      Auth.signInWithGoogle()
+        .flatMap((res) => User.saveAuthProfile(res.user), (x) => x)
+        .finally(() => { this.googleLoading = false })
+        .subscribe(
+          () => {
+            this.gotoHome()
+          },
+          (err) => {
+            Document.openErrorModal('Error', err.message)
+          }
+        )
+    },
+    githubSignIn () {
+      if (this.githubLoading) return
+      this.githubLoading = true
+      Auth.signInWithGithub()
+        .flatMap((res) => User.saveAuthProfile(res.user), (x) => x)
+        .finally(() => { this.githubLoading = false })
+        .subscribe(
+          () => {
+            this.gotoHome()
+          },
+          (err) => {
+            Document.openErrorModal('Error', err.message)
+          }
+        )
+    },
+    resetError () {
+      this.error = ''
+    },
+    gotoHome () {
+      this.$nextTick(() => {
+        this.$router.push('/home')
+      })
+    }
+  },
+  watch: {
+    state () {
+      this.resetError()
     }
   }
+}
 </script>

@@ -10,21 +10,21 @@
 </template>
 
 <script>
-  export default {
-    data () {
-      return {
-        code: ''
-      }
+export default {
+  data () {
+    return {
+      code: ''
+    }
+  },
+  methods: {
+    show () {
+      this.code = ''
+      $(this.$el).modal('show')
     },
-    methods: {
-      show () {
-        this.code = ''
-        $(this.$el).modal('show')
-      },
-      submit () {
-        $(this.$el).modal('hide')
-        this.$emit('apply', this.code)
-      }
+    submit () {
+      $(this.$el).modal('hide')
+      this.$emit('apply', this.code)
     }
   }
+}
 </script>

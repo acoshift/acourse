@@ -28,17 +28,17 @@
 </style>
 
 <script>
-  import Avatar from './avatar'
+import Avatar from './Avatar'
 
-  export default {
-    props: ['users'],
-    components: {
-      Avatar
-    },
-    mounted () {
-      this.$nextTick(() => {
-        $(this.$el).accordion()
-      })
-    }
+export default {
+  props: ['users'],
+  components: {
+    Avatar
+  },
+  mounted () {
+    this.$nextTick(() => {
+      $(this.$el).accordion()
+    })
   }
+}
 </script>

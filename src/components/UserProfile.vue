@@ -15,12 +15,12 @@
 </template>
 
 <script>
-  import Avatar from './avatar'
+import Avatar from './Avatar'
 
-  export default {
-    components: {
-      Avatar
-    },
-    props: ['user']
-  }
+export default {
+  components: {
+    Avatar
+  },
+  props: ['user']
+}
 </script>

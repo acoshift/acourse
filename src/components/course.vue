@@ -30,19 +30,19 @@
 </style>
 
 <script>
-  import { Course, Loader } from '../services'
+import { Course, Loader } from '../services'
 
-  export default {
-    data () {
-      return {
-        courseId: this.$route.params.id
-      }
-    },
-    subscriptions () {
-      Loader.start('course')
-      return {
-        course: Course.get(this.courseId).do(() => Loader.stop('course')).catch(() => { this.$router.replace('/home') })
-      }
+export default {
+  data () {
+    return {
+      courseId: this.$route.params.id
+    }
+  },
+  subscriptions () {
+    Loader.start('course')
+    return {
+      course: Course.get(this.courseId).do(() => Loader.stop('course')).catch(() => { this.$router.replace('/home') })
     }
   }
+}
 </script>

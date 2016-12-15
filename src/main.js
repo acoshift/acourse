@@ -22,7 +22,7 @@ import 'rxjs/add/operator/debounceTime'
 import 'rxjs/add/operator/finally'
 
 import { Subscription } from 'rxjs/Subscription'
-import App from './app'
+import App from './App'
 import './filters'
 
 import 'semantic-ui-css/components/accordion.min.js'

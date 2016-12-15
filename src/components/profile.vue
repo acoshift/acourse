@@ -48,63 +48,63 @@
 </style>
 
 <script>
-  import { Loader, Me, Auth, Firebase } from '../services'
-  import UserProfile from './user-profile'
-  import CourseCard from './course-card'
-  import some from 'lodash/fp/some'
+import { Loader, Me, Auth, Firebase } from '../services'
+import UserProfile from './UserProfile'
+import CourseCard from './CourseCard'
+import some from 'lodash/fp/some'
 
-  export default {
-    components: {
-      UserProfile,
-      CourseCard
+export default {
+  components: {
+    UserProfile,
+    CourseCard
+  },
+  subscriptions () {
+    Loader.start('user')
+    return {
+      user: Me.getProfile()
+        .do(() => Loader.stop('user')),
+      ownCourses: Me.ownCourses(),
+      courses: Me.courses(),
+      providerData: Auth.currentUser()
+        .map((x) => x.providerData)
+    }
+  },
+  computed: {
+    isLinkedGoogle () {
+      return some((x) => x.providerId === Firebase.provider.google.providerId)(this.providerData)
     },
-    subscriptions () {
-      Loader.start('user')
-      return {
-        user: Me.getProfile()
-          .do(() => Loader.stop('user')),
-        ownCourses: Me.ownCourses(),
-        courses: Me.courses(),
-        providerData: Auth.currentUser()
-          .map((x) => x.providerData)
-      }
+    isLinkedFacebook () {
+      return some((x) => x.providerId === Firebase.provider.facebook.providerId)(this.providerData)
     },
-    computed: {
-      isLinkedGoogle () {
-        return some((x) => x.providerId === Firebase.provider.google.providerId)(this.providerData)
-      },
-      isLinkedFacebook () {
-        return some((x) => x.providerId === Firebase.provider.facebook.providerId)(this.providerData)
-      },
-      isLinkedGithub () {
-        return some((x) => x.providerId === Firebase.provider.github.providerId)(this.providerData)
-      },
-      canUnlink () {
-        return this.providerData && this.providerData.length > 1
-      }
+    isLinkedGithub () {
+      return some((x) => x.providerId === Firebase.provider.github.providerId)(this.providerData)
     },
-    methods: {
-      linkGoogle () {
-        Auth.linkGoogle().subscribe()
-      },
-      linkFacebook () {
-        Auth.linkFacebook().subscribe()
-      },
-      linkGithub () {
-        Auth.linkGithub().subscribe()
-      },
-      unlinkGoogle () {
-        if (!this.canUnlink) return
-        Auth.unlinkGoogle().subscribe()
-      },
-      unlinkFacebook () {
-        if (!this.canUnlink) return
-        Auth.unlinkFacebook().subscribe()
-      },
-      unlinkGithub () {
-        if (!this.canUnlink) return
-        Auth.unlinkGithub().subscribe()
-      }
+    canUnlink () {
+      return this.providerData && this.providerData.length > 1
+    }
+  },
+  methods: {
+    linkGoogle () {
+      Auth.linkGoogle().subscribe()
+    },
+    linkFacebook () {
+      Auth.linkFacebook().subscribe()
+    },
+    linkGithub () {
+      Auth.linkGithub().subscribe()
+    },
+    unlinkGoogle () {
+      if (!this.canUnlink) return
+      Auth.unlinkGoogle().subscribe()
+    },
+    unlinkFacebook () {
+      if (!this.canUnlink) return
+      Auth.unlinkFacebook().subscribe()
+    },
+    unlinkGithub () {
+      if (!this.canUnlink) return
+      Auth.unlinkGithub().subscribe()
     }
   }
+}
 </script>

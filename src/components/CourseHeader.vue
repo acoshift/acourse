@@ -34,17 +34,17 @@
 </style>
 
 <script>
-  import Avatar from './avatar'
+import Avatar from './Avatar'
 
-  export default {
-    components: {
-      Avatar
-    },
-    props: {
-      course: {
-        type: Object,
-        required: true
-      }
+export default {
+  components: {
+    Avatar
+  },
+  props: {
+    course: {
+      type: Object,
+      required: true
     }
   }
+}
 </script>

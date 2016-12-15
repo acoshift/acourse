@@ -17,32 +17,32 @@
 </template>
 
 <script>
-  import { Auth, Me } from '../services'
-  import UserAvatar from './user-avatar'
+import { Auth, Me } from '../services'
+import UserAvatar from './UserAvatar'
 
-  export default {
-    components: {
-      UserAvatar
-    },
-    subscriptions () {
-      return {
-        user: Me.get()
-      }
-    },
-    updated () {
-      $(this.$refs.dropdownUser).dropdown({ action: 'hide' })
-    },
-    methods: {
-      signOut () {
-        Auth.signOut()
-          .subscribe(
-            () => {
-              this.$nextTick(() => {
-                this.$router.push('/')
-              })
-            }
-          )
-      }
+export default {
+  components: {
+    UserAvatar
+  },
+  subscriptions () {
+    return {
+      user: Me.get()
+    }
+  },
+  updated () {
+    $(this.$refs.dropdownUser).dropdown({ action: 'hide' })
+  },
+  methods: {
+    signOut () {
+      Auth.signOut()
+        .subscribe(
+          () => {
+            this.$nextTick(() => {
+              this.$router.push('/')
+            })
+          }
+        )
     }
   }
+}
 </script>

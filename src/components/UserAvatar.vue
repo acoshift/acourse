@@ -6,12 +6,12 @@
 </template>
 
 <script>
-  import Avatar from './avatar'
+import Avatar from './Avatar'
 
-  export default {
-    props: ['user'],
-    components: {
-      Avatar
-    }
+export default {
+  props: ['user'],
+  components: {
+    Avatar
   }
+}
 </script>

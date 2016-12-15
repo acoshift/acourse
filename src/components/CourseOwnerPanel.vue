@@ -39,51 +39,51 @@
 </template>
 
 <script>
-  import { Course } from '../services'
-  import moment from 'moment'
+import { Course } from '../services'
+import moment from 'moment'
 
-  export default {
-    props: {
-      course: {
-        type: Object,
-        required: true
-      }
+export default {
+  props: {
+    course: {
+      type: Object,
+      required: true
+    }
+  },
+  data () {
+    return {
+      attendCode: '',
+      attendError: '',
+      submitingAttendCode: false,
+      removingCode: false
+    }
+  },
+  methods: {
+    openAttendModal () {
+      this.attendError = ''
+      this.attendCode = moment().format('DDMMYYYY')
+      $(this.$refs.attendModal).modal('show')
     },
-    data () {
-      return {
-        attendCode: '',
-        attendError: '',
-        submitingAttendCode: false,
-        removingCode: false
-      }
+    submitAttend () {
+      this.attendError = ''
+      this.submitingAttendCode = true
+      Course.setAttendCode(this.course.id, this.attendCode)
+        .finally(() => { this.submitingAttendCode = false })
+        .subscribe(
+          () => {
+            this.attendCode = ''
+            $(this.$refs.attendModal).modal('hide')
+          },
+          (err) => {
+            this.attendError = err.message
+          }
+        )
     },
-    methods: {
-      openAttendModal () {
-        this.attendError = ''
-        this.attendCode = moment().format('DDMMYYYY')
-        $(this.$refs.attendModal).modal('show')
-      },
-      submitAttend () {
-        this.attendError = ''
-        this.submitingAttendCode = true
-        Course.setAttendCode(this.course.id, this.attendCode)
-          .finally(() => { this.submitingAttendCode = false })
-          .subscribe(
-            () => {
-              this.attendCode = ''
-              $(this.$refs.attendModal).modal('hide')
-            },
-            (err) => {
-              this.attendError = err.message
-            }
-          )
-      },
-      closeAttend () {
-        this.removingCode = true
-        Course.removeAttendCode(this.course.id)
-          .finally(() => { this.removingCode = false })
-          .subscribe()
-      }
+    closeAttend () {
+      this.removingCode = true
+      Course.removeAttendCode(this.course.id)
+        .finally(() => { this.removingCode = false })
+        .subscribe()
     }
   }
+}
 </script>

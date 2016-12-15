@@ -8,12 +8,12 @@
 </template>
 
 <script>
-  export default {
-    props: {
-      course: {
-        type: Object,
-        required: true
-      }
+export default {
+  props: {
+    course: {
+      type: Object,
+      required: true
     }
   }
+}
 </script>

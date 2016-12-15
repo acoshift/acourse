@@ -13,16 +13,16 @@
 </template>
 
 <script>
-  export default {
-    props: ['contents'],
-    mounted () {
-      this.$nextTick(() => {
-        $(this.$refs.accordion).accordion({
-          onOpening () {
-            $(this).find('.ui.embed').embed()
-          }
-        })
+export default {
+  props: ['contents'],
+  mounted () {
+    this.$nextTick(() => {
+      $(this.$refs.accordion).accordion({
+        onOpening () {
+          $(this).find('.ui.embed').embed()
+        }
       })
-    }
+    })
   }
+}
 </script>
