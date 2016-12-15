@@ -31,13 +31,13 @@
         <div class="field">
           <div class="ui toggle checkbox">
             <input type="checkbox" class="hidden" v-model="course.open">
-            <label>Open</label>
+            <label>Can Enroll</label>
           </div>
         </div>
         <div class="field">
           <div class="ui toggle checkbox">
             <input type="checkbox" class="hidden" v-model="course.public">
-            <label>Public</label>
+            <label>Show on Home page</label>
           </div>
         </div>
         <div class="field">
@@ -53,8 +53,12 @@
           </div>
         </div>
         <div class="field">
-          <label>Video</label>
+          <label>Video ID</label>
           <input v-model="course.video">
+        </div>
+        <div class="field">
+          <label>Codes (Split by new line, Empty for enroll without code)</label>
+          <textarea v-model="codes" rows="5"></textarea>
         </div>
         <div class="ui divider"></div>
         <div style="padding-bottom: 1rem;">
@@ -122,7 +126,8 @@ export default {
       },
       contents: [],
       courseId: this.$route.params.id,
-      saving: false
+      saving: false,
+      codes: ''
     }
   },
   created () {
@@ -140,10 +145,11 @@ export default {
       Observable.forkJoin(
         Auth.currentUser().first(),
         Course.get(this.courseId).first(),
-        Course.content(this.courseId).first()
+        Course.content(this.courseId).first(),
+        Course.codes(this.courseId).first()
       )
         .subscribe(
-          ([{ uid }, course, contents]) => {
+          ([{ uid }, course, contents, codes]) => {
             Loader.stop('course')
             if (course.owner !== uid) return this.$router.replace(`/course/${this.courseId}`)
             this.course = flow(
@@ -151,6 +157,7 @@ export default {
               defaults(this.course)
             )(course)
             this.contents = contents && map(pick(['content', 'title']))(contents) || []
+            this.codes = codes.join('\n')
           },
           () => {
             this.$router.replace('/home')
@@ -179,6 +186,7 @@ export default {
       if (this.isNew) {
         Course.create(this.course)
           .flatMap((courseId) => Course.saveContent(courseId, this.contents), (courseId) => courseId)
+          .flatMap((courseId) => Course.saveCodes(courseId, this.codes.split('\n')), (courseId) => courseId)
           .finally(() => { this.saving = false })
           .subscribe(
             (courseId) => {
@@ -188,6 +196,7 @@ export default {
       } else {
         Course.save(this.courseId, this.course)
           .flatMap(() => Course.saveContent(this.courseId, this.contents))
+          .flatMap(() => Course.saveCodes(this.courseId, this.codes.split('\n')))
           .finally(() => { this.saving = false })
           .subscribe(
             () => {

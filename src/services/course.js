@@ -11,6 +11,8 @@ import countBy from 'lodash/fp/countBy'
 import toPairs from 'lodash/fp/toPairs'
 import orderBy from 'lodash/fp/orderBy'
 import reverse from 'lodash/fp/reverse'
+import reduce from 'lodash/fp/reduce'
+import filter from 'lodash/fp/filter'
 
 export default {
   list () {
@@ -105,5 +107,15 @@ export default {
       .map((course) => course.attend)
       .flatMap((code) => Firebase.onValue(`attend/${id}/${code}/${userId}`))
       .map((x) => !!x)
+  },
+  codes (id) {
+    return Firebase.onValue(`course-private/${id}/code`)
+      .map(keys)
+  },
+  saveCodes (id, codes) {
+    return Firebase.set(`course-private/${id}/code`, flow(
+      filter((x) => !!x),
+      reduce((p, v) => { p[v] = true; return p }, {})
+    )(codes))
   }
 }

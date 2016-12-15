@@ -111,8 +111,8 @@
       // private course data, only owner can read and write
       // use for validate other user actions
       "$course_id": {
-        ".read": "root.child('course/' + $course_id + '/owner').val() === true",
-        ".write": "root.child('course/' + $course_id + '/owner').val() === true",
+        ".read": "root.child('course/' + $course_id + '/owner').val() === auth.uid",
+        ".write": "root.child('course/' + $course_id + '/owner').val() === auth.uid",
         "code": {
           // if this field exists, user must enter one of this code for enroll course
           "$code": {
