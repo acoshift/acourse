@@ -12,6 +12,7 @@ import CourseChatHistory from './CourseChatHistory'
 import CourseAttend from './CourseAttend'
 import CourseAssignment from './CourseAssignment'
 import CourseAssignmentEdit from './CourseAssignmentEdit'
+import QueueEnroll from './QueueEnroll'
 
 export {
   Auth,
@@ -27,5 +28,6 @@ export {
   CourseChatHistory,
   CourseAttend,
   CourseAssignment,
-  CourseAssignmentEdit
+  CourseAssignmentEdit,
+  QueueEnroll
 }

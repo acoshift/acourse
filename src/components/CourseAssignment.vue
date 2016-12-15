@@ -45,7 +45,7 @@ export default {
   methods: {
     selectFile (select) {
       this.select = select
-      Document.uploadModal.open('image/*')
+      Document.uploadModal.open('*/*')
         .flatMap((file) => Me.submitCourseAssignment(this.courseId, this.select, file.downloadURL))
         .subscribe(
           null,

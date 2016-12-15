@@ -25,7 +25,7 @@
       // user's course public data
       ".read": "auth != null",
       "$user_id": {
-        ".write": "auth.uid === $user_id",
+        ".write": "auth.uid === $user_id || root.child('admin').child(auth.uid).val() === true",
         "$course_id": {
           ".validate": "newData.val() === true"
         }
@@ -95,6 +95,12 @@
         "video": {
           ".validate": "newData.isString()"
         },
+        "canQueueEnroll": {
+          ".validate": "newData.isBoolean()"
+        },
+        "queueEnrollDetail": {
+          ".validate": "newData.isString()"
+        },
         "$other": {
           ".validate": false
         }
@@ -111,8 +117,8 @@
       // private course data, only owner can read and write
       // use for validate other user actions
       "$course_id": {
-        ".read": "root.child('course/' + $course_id + '/owner').val() === true",
-        ".write": "root.child('course/' + $course_id + '/owner').val() === true",
+        ".read": "root.child('course/' + $course_id + '/owner').val() === auth.uid",
+        ".write": "root.child('course/' + $course_id + '/owner').val() === auth.uid",
         "code": {
           // if this field exists, user must enter one of this code for enroll course
           "$code": {
@@ -219,6 +225,21 @@
       ".indexOn": ["user"],
       "$token": {
         ".write": true
+      }
+    },
+    "queue-enroll": {
+      ".read": "root.child('admin').child(auth.uid).val() === true",
+      "$courseId": {
+        "$userId": {
+          ".write": "auth.uid === $userId || root.child('admin').child(auth.uid).val() === true",
+          ".read": "auth.uid === $userId",
+          "url": {
+            ".validate": "newData.isString()"
+          },
+          "timestamp": {
+            ".validate": "newData.val() <= now"
+          }
+        }
       }
     }
   }
