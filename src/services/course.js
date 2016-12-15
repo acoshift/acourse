@@ -13,8 +13,7 @@ import orderBy from 'lodash/fp/orderBy'
 import reverse from 'lodash/fp/reverse'
 import reduce from 'lodash/fp/reduce'
 import filter from 'lodash/fp/filter'
-
-// import User from './user'
+import isEmpty from 'lodash/fp/isEmpty'
 
 const reduceNoCap = reduce.convert({ cap: false })
 
@@ -130,15 +129,23 @@ export default {
   },
   queueEnroll () {
     return Firebase.onValue(`queue-enroll`)
-      .map(flow(
+      .map((x) => isEmpty(x) ? [] : flow(
         reduceNoCap((p, v, k) => { p.push({ course: k, users: v }); return p }, []),
         map((x) => ({
           ...x,
           users: reduceNoCap((p, v, k) => { p.push({ id: k, detail: v }); return p }, [])(x.users)
         }))
-      ))
+      )(x))
       .flatMap((xs) =>
-        Observable.combineLatest(...xs.map((x) =>
-          this.get(x.course).map((course) => ({ ...x, course })))))
+        isEmpty(xs)
+          ? Observable.of([])
+          : Observable.combineLatest(...xs.map((x) =>
+              this.get(x.course).first().map((course) => ({ ...x, course })))))
+  },
+  removeQueueEnroll (id, userId) {
+    return Firebase.remove(`queue-enroll/${id}/${userId}`)
+  },
+  addUser (id, userId) {
+    return Firebase.set(`course/${id}/student/${userId}`, true)
   }
 }

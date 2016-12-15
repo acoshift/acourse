@@ -25,7 +25,7 @@
       // user's course public data
       ".read": "auth != null",
       "$user_id": {
-        ".write": "auth.uid === $user_id",
+        ".write": "auth.uid === $user_id || root.child('admin').child(auth.uid).val() === true",
         "$course_id": {
           ".validate": "newData.val() === true"
         }
@@ -231,7 +231,7 @@
       ".read": "root.child('admin').child(auth.uid).val() === true",
       "$courseId": {
         "$userId": {
-          ".write": "auth.uid === $userId",
+          ".write": "auth.uid === $userId || root.child('admin').child(auth.uid).val() === true",
           ".read": "auth.uid === $userId",
           "url": {
             ".validate": "newData.isString()"
