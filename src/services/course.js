@@ -14,6 +14,10 @@ import reverse from 'lodash/fp/reverse'
 import reduce from 'lodash/fp/reduce'
 import filter from 'lodash/fp/filter'
 
+// import User from './user'
+
+const reduceNoCap = reduce.convert({ cap: false })
+
 export default {
   list () {
     const ref = Firebase.ref('course').orderByChild('public').equalTo(true)
@@ -123,5 +127,18 @@ export default {
       url,
       timestamp: Firebase.timestamp
     })
+  },
+  queueEnroll () {
+    return Firebase.onValue(`queue-enroll`)
+      .map(flow(
+        reduceNoCap((p, v, k) => { p.push({ course: k, users: v }); return p }, []),
+        map((x) => ({
+          ...x,
+          users: reduceNoCap((p, v, k) => { p.push({ id: k, detail: v }); return p }, [])(x.users)
+        }))
+      ))
+      .flatMap((xs) =>
+        Observable.combineLatest(...xs.map((x) =>
+          this.get(x.course).map((course) => ({ ...x, course })))))
   }
 }

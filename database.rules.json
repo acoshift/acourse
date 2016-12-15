@@ -228,6 +228,7 @@
       }
     },
     "queue-enroll": {
+      ".read": "root.child('admin').child(auth.uid).val() === true",
       "$courseId": {
         "$userId": {
           ".write": "auth.uid === $userId",

@@ -22,7 +22,8 @@ import {
   CourseChatHistory,
   CourseAttend,
   CourseAssignment,
-  CourseAssignmentEdit
+  CourseAssignmentEdit,
+  QueueEnroll
 } from './components'
 
 Vue.use(VueRouter)
@@ -55,7 +56,8 @@ const router = new VueRouter({
             { path: 'assignment/edit', component: CourseAssignmentEdit, name: 'courseAssignmentEdit' }
           ]
         },
-        { path: '/user/:id', component: UserView }
+        { path: '/user/:id', component: UserView },
+        { path: '/queue-enroll', component: QueueEnroll }
       ],
       beforeEnter: redirectIfNotAuth
     },

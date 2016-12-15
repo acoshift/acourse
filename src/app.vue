@@ -38,6 +38,7 @@
   @import '../node_modules/semantic-ui-css/components/segment.min.css';
   @import '../node_modules/semantic-ui-css/components/transition.min.css';
   @import '../node_modules/semantic-ui-css/components/progress.min.css';
+  @import '../node_modules/semantic-ui-css/components/table.min.css';
 
   .hidden {
     display: none;
