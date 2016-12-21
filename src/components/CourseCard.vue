@@ -12,18 +12,6 @@
         {{ course.shortDescription }}
       </div>
     </div>
-    <div class="extra content">
-      <div>
-        <span class="right floated">
-          <i class="user icon"></i>
-          {{ students }}
-        </span>
-        <span>
-          <i class="heart link icon" @click="fav" :class="{red: isFav, outline: !isFav}"></i>
-          {{ favorites }}
-        </span>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -36,40 +24,11 @@
 </style>
 
 <script>
-import { Auth, Me } from '../services'
-import keys from 'lodash/fp/keys'
-import get from 'lodash/fp/get'
-
 export default {
   props: {
     course: {
       type: Object,
       required: true
-    }
-  },
-  subscriptions () {
-    return {
-      uid: Auth.currentUser().first().map(({ uid }) => uid)
-    }
-  },
-  computed: {
-    favorites () {
-      return keys(this.course.favorite).length
-    },
-    students () {
-      return keys(this.course.student).length
-    },
-    isFav () {
-      return !!get(this.uid)(this.course.favorite)
-    }
-  },
-  methods: {
-    fav () {
-      if (this.isFav) {
-        Me.unfavoriteCourse(this.course.id).subscribe()
-      } else {
-        Me.favoriteCourse(this.course.id).subscribe()
-      }
     }
   }
 }
