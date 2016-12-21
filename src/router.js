@@ -18,8 +18,6 @@ import {
   CourseEditor,
   CourseView,
   UserView,
-  CourseChat,
-  CourseChatHistory,
   CourseAttend,
   CourseAssignment,
   CourseAssignmentEdit,
@@ -48,8 +46,6 @@ const router = new VueRouter({
           component: Course,
           children: [
             { path: '', component: CourseView, name: 'courseView' },
-            { path: 'chat', component: CourseChat, name: 'courseChat' },
-            { path: 'chat/history', component: CourseChatHistory, name: 'courseChatHistory' },
             { path: 'edit', component: CourseEditor, name: 'courseEdit' },
             { path: 'attend', component: CourseAttend, name: 'courseAttend' },
             { path: 'assignment', component: CourseAssignment, name: 'courseAssignment' },

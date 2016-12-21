@@ -7,12 +7,6 @@
       <i v-show="$route.name !== 'courseView'" class="right chevron icon divider"></i>
       <div v-show="$route.name === 'courseEdit'" class="active section">Edit</div>
       <div v-show="$route.name === 'courseNew'" class="active section">New</div>
-      <div v-show="$route.name === 'courseChat'" class="active section">Chat</div>
-      <span v-show="$route.name === 'courseChatHistory'">
-        <router-link class="section" :to="`/course/${courseId}/chat`">Chat</router-link>
-        <i class="right chevron icon divider"></i>
-        <div class="active section">History</div>
-      </span>
       <div v-show="$route.name === 'courseAssignment'" class="active section">Assignments</div>
       <div v-show="$route.name === 'courseAttend'" class="active section">Attendants</div>
       <div v-show="$route.name === 'courseAssignmentEdit'" class="active section">Edit Assignment</div>

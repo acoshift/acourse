@@ -4,9 +4,6 @@
       <div class="column">
         <router-link class="ui green fluid button" :to="`/course/${course.id}/edit`">Edit</router-link>
       </div>
-      <div class="column">
-        <router-link class="ui yellow fluid button" :to="`/course/${course.id}/chat`">Chat room</router-link>
-      </div>
       <div v-if="course.canAttend && !course.attend" class="column">
         <div class="ui teal fluid button" @click="openAttendModal">Open Attend</div>
       </div>

@@ -4,12 +4,6 @@
       <div class="column" v-if="course.canAttend">
         <div :class="{disabled: isAttended || !course.attend, loading: attending}" class="ui blue fluid button" @click="attend">Attend</div>
       </div>
-      <div class="column">
-        <router-link class="ui yellow fluid button" :to="`/course/${course.id}/chat`">Chat room</router-link>
-      </div>
-      <div class="column">
-        <router-link class="ui olive fluid button" :to="`/course/${course.id}/chat/history`">Chat history</router-link>
-      </div>
       <div class="column" v-if="course.hasAssignment">
         <router-link class="ui teal fluid button" :to="`/course/${course.id}/assignment`">Assignments</router-link>
       </div>

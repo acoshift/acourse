@@ -7,8 +7,6 @@ import CourseEditor from './CourseEditor'
 import CourseView from './CourseView'
 import UserView from './UserView'
 import Course from './Course'
-import CourseChat from './CourseChat'
-import CourseChatHistory from './CourseChatHistory'
 import CourseAttend from './CourseAttend'
 import CourseAssignment from './CourseAssignment'
 import CourseAssignmentEdit from './CourseAssignmentEdit'
@@ -24,8 +22,6 @@ export {
   CourseEditor,
   CourseView,
   UserView,
-  CourseChat,
-  CourseChatHistory,
   CourseAttend,
   CourseAssignment,
   CourseAssignmentEdit,
