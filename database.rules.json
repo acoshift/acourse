@@ -70,7 +70,7 @@
         "student": {
           "$user_id": {
             // if student pass enrollment
-            ".write": "auth.uid === $user_id && root.child('course-private/' + $course_id + '/enroll/' + auth.uid).exists()",
+            ".write": "(auth.uid === $user_id && root.child('course-private/' + $course_id + '/enroll/' + auth.uid).exists()) || (root.child('admin').child(auth.uid).val() === true)",
             ".validate": "newData.val() === true"
           }
         },
