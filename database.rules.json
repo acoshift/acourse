@@ -152,26 +152,26 @@
         }
       }
     },
-    "chat": {
-      "$course_id": {
-        ".read": "root.child('course/' + $course_id + '/student/' + auth.uid).exists() || root.child('course/' + $course_id + '/owner').val() === auth.uid",
-        "$message_id": {
-          ".write": "(root.child('course/' + $course_id + '/student/' + auth.uid).exists() || root.child('course/' + $course_id + '/owner').val() === auth.uid) && !data.exists()",
-          "u": {
-            ".validate": "newData.val() === auth.uid"
-          },
-          "m": {
-            ".validate": "newData.isString()"
-          },
-          "t": {
-            ".validate": "newData.val() <= now"
-          },
-          "$other": {
-            ".validate": false
-          }
-        }
-      }
-    },
+    // "chat": {
+    //   "$course_id": {
+    //     ".read": "root.child('course/' + $course_id + '/student/' + auth.uid).exists() || root.child('course/' + $course_id + '/owner').val() === auth.uid",
+    //     "$message_id": {
+    //       ".write": "(root.child('course/' + $course_id + '/student/' + auth.uid).exists() || root.child('course/' + $course_id + '/owner').val() === auth.uid) && !data.exists()",
+    //       "u": {
+    //         ".validate": "newData.val() === auth.uid"
+    //       },
+    //       "m": {
+    //         ".validate": "newData.isString()"
+    //       },
+    //       "t": {
+    //         ".validate": "newData.val() <= now"
+    //       },
+    //       "$other": {
+    //         ".validate": false
+    //       }
+    //     }
+    //   }
+    // },
     "attend": {
       "$course_id": {
         ".read": "root.child('course/' + $course_id + '/owner').val() === auth.uid",

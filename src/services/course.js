@@ -57,29 +57,29 @@ export default {
     return Firebase.onArrayValue(ref)
       .map(reverse)
   },
-  sendMessage (id, userId, text) {
-    return Firebase.push(`chat/${id}`, {
-      u: userId,
-      m: text,
-      t: Firebase.timestamp
-    })
-  },
-  messages (id, limit) {
-    let ref = Firebase.ref(`chat/${id}`).orderByKey()
-    if (limit) {
-      ref = ref.limitToLast(limit)
-    }
-    return Firebase.onChildAdded(ref)
-  },
-  allMessages (id) {
-    const ref = Firebase.ref(`chat/${id}`).orderByKey()
-    return Firebase.onArrayValue(ref)
-      .first()
-  },
-  lastMessage (id) {
-    const ref = Firebase.ref(`chat/${id}`).orderByKey().limitToLast(1)
-    return Firebase.onValue(ref)
-  },
+  // sendMessage (id, userId, text) {
+  //   return Firebase.push(`chat/${id}`, {
+  //     u: userId,
+  //     m: text,
+  //     t: Firebase.timestamp
+  //   })
+  // },
+  // messages (id, limit) {
+  //   let ref = Firebase.ref(`chat/${id}`).orderByKey()
+  //   if (limit) {
+  //     ref = ref.limitToLast(limit)
+  //   }
+  //   return Firebase.onChildAdded(ref)
+  // },
+  // allMessages (id) {
+  //   const ref = Firebase.ref(`chat/${id}`).orderByKey()
+  //   return Firebase.onArrayValue(ref)
+  //     .first()
+  // },
+  // lastMessage (id) {
+  //   const ref = Firebase.ref(`chat/${id}`).orderByKey().limitToLast(1)
+  //   return Firebase.onValue(ref)
+  // },
   attend (id, userId) {
     return this.get(id)
       .first()

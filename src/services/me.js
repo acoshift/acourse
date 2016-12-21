@@ -70,11 +70,11 @@ export default {
       .first()
       .flatMap(({ uid }) => Course.attend(id, uid))
   },
-  sendMessage (id, text) {
-    return Auth.currentUser()
-      .first()
-      .flatMap(({ uid }) => Course.sendMessage(id, uid, text))
-  },
+  // sendMessage (id, text) {
+  //   return Auth.currentUser()
+  //     .first()
+  //     .flatMap(({ uid }) => Course.sendMessage(id, uid, text))
+  // },
   submitCourseAssignment (id, assignmentId, url) {
     return Auth.currentUser()
       .first()
