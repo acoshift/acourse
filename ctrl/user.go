@@ -40,5 +40,5 @@ func (c *UserController) Show(ctx *app.UserShowContext) error {
 
 // Update runs update action
 func (c *UserController) Update(ctx *app.UserUpdateContext) error {
-	return nil
+	return ctx.NoContent()
 }

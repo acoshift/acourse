@@ -40,7 +40,7 @@ func (ctx *UserShowContext) OKMe(r *UserMeView) error {
 
 // UserUpdateContext provides the user update action context
 type UserUpdateContext struct {
-	echo.Context
+	context echo.Context
 	UserID  string
 	Payload *UserPayload
 }
@@ -48,8 +48,27 @@ type UserUpdateContext struct {
 // NewUserUpdateContext parses the incoming request and create context
 func NewUserUpdateContext(ctx echo.Context) (*UserUpdateContext, error) {
 	var err error
-	rctx := UserUpdateContext{Context: ctx}
+	rctx := UserUpdateContext{context: ctx}
 	rctx.UserID = ctx.Param("userID")
-	err = ctx.Bind(&rctx.Payload)
 	return &rctx, err
+}
+
+// NoContent sends a HTTP response
+func (ctx *UserUpdateContext) NoContent() error {
+	return ctx.context.NoContent(http.StatusNoContent)
+}
+
+// BadRequest sends a HTTP response
+func (ctx *UserUpdateContext) BadRequest(r error) error {
+	return ctx.context.String(http.StatusBadRequest, r.Error())
+}
+
+// NotFound sends a HTTP response
+func (ctx *UserUpdateContext) NotFound() error {
+	return ctx.context.NoContent(http.StatusNotFound)
+}
+
+// InternalServerError sends a HTTP response
+func (ctx *UserUpdateContext) InternalServerError() error {
+	return ctx.context.NoContent(http.StatusInternalServerError)
 }
