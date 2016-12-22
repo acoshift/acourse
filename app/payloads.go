@@ -1,0 +1,35 @@
+package app
+
+import (
+	"time"
+)
+
+// UserPayload type
+type UserPayload struct {
+	Username string
+	Name     string
+	Photo    string
+	AboutMe  string
+}
+
+// CoursePayload type
+type CoursePayload struct {
+	Title            string
+	ShortDescription string
+	Description      string
+	Photo            string
+	Start            time.Time
+	Video            string
+	Type             string
+	Price            float64
+	DiscountedPrice  *float64
+	Contents         []*CourseContentPayload
+}
+
+// CourseContentPayload type
+type CourseContentPayload struct {
+	Title       string
+	Description string
+	Video       string
+	DownloadURL string
+}
