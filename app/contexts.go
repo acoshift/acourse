@@ -9,15 +9,15 @@ func handleError(ctx echo.Context, r error) error {
 		r.ID = ctx.Response().Header().Get("X-Request-ID")
 		return ctx.JSON(r.Status, r)
 	default:
-		return handleError(ctx, createInternalError(r))
+		return handleError(ctx, createInternalError(r, http.StatusInternalServerError, "unknown"))
 	}
 }
 
 // UserShowContext provides the user show action context
 type UserShowContext struct {
 	context       echo.Context
-	UserID        string
 	CurrentUserID string
+	UserID        string
 }
 
 // NewUserShowContext parses the incoming request and create context
@@ -50,9 +50,10 @@ func (ctx *UserShowContext) OKMe(r *UserMeView) error {
 
 // UserUpdateContext provides the user update action context
 type UserUpdateContext struct {
-	context echo.Context
-	UserID  string
-	Payload *UserPayload
+	context       echo.Context
+	CurrentUserID string
+	UserID        string
+	Payload       *UserPayload
 }
 
 // NewUserUpdateContext parses the incoming request and create context
@@ -68,11 +69,6 @@ func (ctx *UserUpdateContext) NoContent() error {
 	return ctx.context.NoContent(http.StatusNoContent)
 }
 
-// BadRequest sends a HTTP response
-func (ctx *UserUpdateContext) BadRequest(r error) error {
-	return handleError(ctx.context, r)
-}
-
 // NotFound sends a HTTP response
 func (ctx *UserUpdateContext) NotFound() error {
 	return ctx.context.NoContent(http.StatusNotFound)
@@ -81,4 +77,20 @@ func (ctx *UserUpdateContext) NotFound() error {
 // InternalServerError sends a HTTP response
 func (ctx *UserUpdateContext) InternalServerError(r error) error {
 	return handleError(ctx.context, r)
+}
+
+// HealthHealthContext type
+type HealthHealthContext struct {
+	context echo.Context
+}
+
+// NewHealthHealthContext parses the incoming request and create context
+func NewHealthHealthContext(ctx echo.Context) (*HealthHealthContext, error) {
+	rctx := HealthHealthContext{context: ctx}
+	return &rctx, nil
+}
+
+// OK sends HTTP response
+func (ctx *HealthHealthContext) OK(r string) error {
+	return ctx.context.String(http.StatusOK, r)
 }

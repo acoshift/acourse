@@ -5,7 +5,7 @@ import (
 	"acourse/store"
 )
 
-// UserController type
+// UserController implements UserController interface
 type UserController struct {
 	db *store.DB
 }

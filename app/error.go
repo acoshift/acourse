@@ -1,10 +1,6 @@
 package app
 
-import (
-	"fmt"
-
-	"net/http"
-)
+import "fmt"
 
 // Error type
 type Error struct {
@@ -37,10 +33,16 @@ func CreateErrors(status int, code string) ErrorCreateFunc {
 	}
 }
 
-func createInternalError(r error) error {
+func createInternalError(r error, status int, code string) error {
+	if _, ok := r.(*Error); ok {
+		return r
+	}
+	if code == "" {
+		code = "unknown"
+	}
 	return &Error{
-		Status: http.StatusInternalServerError,
-		Code:   "unknown",
+		Status: status,
+		Code:   code,
 		Detail: r.Error(),
 	}
 }
