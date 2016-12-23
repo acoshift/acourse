@@ -15,7 +15,47 @@ func NewCourseController(db *store.DB) *CourseController {
 
 // Show runs show action
 func (c *CourseController) Show(ctx *app.CourseShowContext) error {
-	return nil
+	// try get by id first
+	x, err := c.db.CourseGet(ctx.CourseID)
+	if err != nil {
+		return err
+	}
+	// try get by url
+	if x == nil {
+		x, err = c.db.CourseFind(ctx.CourseID)
+		if err != nil {
+			return err
+		}
+	}
+	if x == nil {
+		return ctx.NotFound()
+	}
+
+	// get owner
+	owner, err := c.db.UserGet(x.Owner)
+	if err != nil {
+		return err
+	}
+	if owner == nil {
+		return app.CreateError(500, "course", "can not find owner")
+	}
+
+	// get student count
+	student, err := c.db.EnrollCourseCount(x.ID)
+	if err != nil {
+		return err
+	}
+
+	// get current user enroll
+	enroll, err := c.db.EnrollFind(ctx.CurrentUserID, x.ID)
+	if err != nil {
+		return err
+	}
+
+	if enroll != nil {
+		return ctx.OK(ToCourseView(x, ToUserTinyView(owner), student, true))
+	}
+	return ctx.OKPublic(ToCoursePublicView(x, ToUserTinyView(owner), student))
 }
 
 // Update runs update action

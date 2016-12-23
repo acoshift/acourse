@@ -46,6 +46,16 @@ func ToRoleView(m *store.Role) *app.RoleView {
 	}
 }
 
+// ToCourseView builds a CourseView from a Course model
+func ToCourseView(m *store.Course, owner *app.UserTinyView, student int, enroll bool) *app.CourseView {
+	return &app.CourseView{}
+}
+
+// ToCoursePublicView builds a CourseView from a Course model
+func ToCoursePublicView(m *store.Course, owner *app.UserTinyView, student int) *app.CoursePublicView {
+	return &app.CoursePublicView{}
+}
+
 // ToCourseTinyView builds a CourseTinyView from a Course model
 func ToCourseTinyView(m *store.Course, owner *app.UserTinyView, student int) *app.CourseTinyView {
 	return &app.CourseTinyView{

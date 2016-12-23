@@ -39,10 +39,43 @@ type RoleView struct {
 
 // CourseView type
 type CourseView struct {
+	ID               string                      `json:"id"`
+	CreatedAt        time.Time                   `json:"createdAt"`
+	UpdatedAt        time.Time                   `json:"updatedAt"`
+	Owner            *UserTinyView               `json:"owner"`
+	Title            string                      `json:"title"`
+	ShortDescription string                      `json:"shortDescription"`
+	Description      string                      `json:"description"`
+	Photo            string                      `json:"photo"`
+	Start            time.Time                   `json:"start"`
+	URL              string                      `json:"url"`
+	Video            string                      `json:"video"`
+	Type             string                      `json:"type"`
+	Price            float64                     `json:"price"`
+	DiscountedPrice  *float64                    `json:"discountedPrice,omitempty"`
+	Student          int                         `json:"student"`
+	Contents         CourseContentCollectionView `json:"contents"`
+	Enrolled         bool                        `json:"enrolled"`
 }
 
 // CoursePublicView type
 type CoursePublicView struct {
+	ID               string        `json:"id"`
+	CreatedAt        time.Time     `json:"createdAt"`
+	UpdatedAt        time.Time     `json:"updatedAt"`
+	Owner            *UserTinyView `json:"owner"`
+	Title            string        `json:"title"`
+	ShortDescription string        `json:"shortDescription"`
+	Description      string        `json:"description"`
+	Photo            string        `json:"photo"`
+	Start            time.Time     `json:"start"`
+	URL              string        `json:"url"`
+	Video            string        `json:"video"`
+	Type             string        `json:"type"`
+	Price            float64       `json:"price"`
+	DiscountedPrice  *float64      `json:"discountedPrice,omitempty"`
+	Student          int           `json:"student"`
+	Enrolled         bool          `json:"enrolled"`
 }
 
 // CourseTinyView type
@@ -62,3 +95,14 @@ type CourseTinyView struct {
 
 // CourseTinyCollectionView type
 type CourseTinyCollectionView []*CourseTinyView
+
+// CourseContentView type
+type CourseContentView struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	Video       string `json:"video"`
+	DownloadURL string `json:"downloadURL"`
+}
+
+// CourseContentCollectionView type
+type CourseContentCollectionView []*CourseContentView
