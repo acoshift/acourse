@@ -75,7 +75,6 @@ type CoursePublicView struct {
 	Price            float64       `json:"price"`
 	DiscountedPrice  *float64      `json:"discountedPrice,omitempty"`
 	Student          int           `json:"student"`
-	Enrolled         bool          `json:"enrolled"`
 }
 
 // CourseTinyView type
