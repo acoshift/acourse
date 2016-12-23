@@ -14,12 +14,26 @@ type Error struct {
 	Detail string `json:"detail"`
 }
 
+// ErrorCreateFunc is the creator function for create error
+type ErrorCreateFunc func(string) error
+
 // CreateError creates error type
 func CreateError(status int, code, detail string) error {
 	return &Error{
 		Status: status,
 		Code:   code,
 		Detail: detail,
+	}
+}
+
+// CreateErrors generate create error function used for create template error
+func CreateErrors(status int, code string) ErrorCreateFunc {
+	return func(detail string) error {
+		return &Error{
+			Status: status,
+			Code:   code,
+			Detail: detail,
+		}
 	}
 }
 
