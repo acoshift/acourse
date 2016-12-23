@@ -3,6 +3,16 @@ package app
 import "github.com/labstack/echo"
 import "net/http"
 
+func handleError(ctx echo.Context, r error) error {
+	switch r := r.(type) {
+	case *Error:
+		r.ID = ctx.Response().Header().Get("X-Request-ID")
+		return ctx.JSON(r.Status, r)
+	default:
+		return handleError(ctx, createInternalError(r))
+	}
+}
+
 // UserShowContext provides the user show action context
 type UserShowContext struct {
 	context       echo.Context
@@ -24,8 +34,8 @@ func (ctx *UserShowContext) NotFound() error {
 }
 
 // InternalServerError sends a HTTP response
-func (ctx *UserShowContext) InternalServerError() error {
-	return ctx.context.NoContent(http.StatusInternalServerError)
+func (ctx *UserShowContext) InternalServerError(r error) error {
+	return handleError(ctx.context, r)
 }
 
 // OK sends a HTTP response
@@ -60,7 +70,7 @@ func (ctx *UserUpdateContext) NoContent() error {
 
 // BadRequest sends a HTTP response
 func (ctx *UserUpdateContext) BadRequest(r error) error {
-	return ctx.context.String(http.StatusBadRequest, r.Error())
+	return handleError(ctx.context, r)
 }
 
 // NotFound sends a HTTP response
@@ -69,6 +79,6 @@ func (ctx *UserUpdateContext) NotFound() error {
 }
 
 // InternalServerError sends a HTTP response
-func (ctx *UserUpdateContext) InternalServerError() error {
-	return ctx.context.NoContent(http.StatusInternalServerError)
+func (ctx *UserUpdateContext) InternalServerError(r error) error {
+	return handleError(ctx.context, r)
 }

@@ -22,7 +22,7 @@ func MountUserController(service *echo.Echo, ctrl UserController) {
 	service.PATCH("/api/user/:userID", func(ctx echo.Context) error {
 		rctx, err := NewUserUpdateContext(ctx)
 		if err != nil {
-			return err
+			return rctx.BadRequest(err)
 		}
 		var rawPayload UserRawPayload
 		err = ctx.Bind(&rawPayload)

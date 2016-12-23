@@ -19,7 +19,7 @@ func NewUserController(db *store.DB) *UserController {
 func (c *UserController) Show(ctx *app.UserShowContext) error {
 	x, err := c.db.UserFindUsername(ctx.UserID)
 	if err != nil {
-		return ctx.InternalServerError()
+		return ctx.InternalServerError(err)
 	}
 	if x == nil {
 		return ctx.NotFound()
@@ -29,7 +29,7 @@ func (c *UserController) Show(ctx *app.UserShowContext) error {
 		// show me view
 		role, err := c.db.RoleFindByUserID(ctx.UserID)
 		if err != nil {
-			return ctx.InternalServerError()
+			return ctx.InternalServerError(err)
 		}
 
 		return ctx.OKMe(ToUserMeView(x, ToRoleView(role)))
