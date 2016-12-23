@@ -2,3 +2,5 @@ acourse
 node_modules/
 public/
 templates/
+.private/
+.DS_Store

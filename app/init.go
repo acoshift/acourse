@@ -1,9 +1,8 @@
 package app
 
 import (
-	"strings"
-
 	"net/http"
+	"strings"
 
 	"github.com/acoshift/go-firebase-admin"
 	"github.com/google/uuid"
@@ -37,16 +36,18 @@ func InitService(service *echo.Echo, projectID string) (err error) {
 func jwtMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		auth := strings.TrimSpace(ctx.Request().Header.Get("Authorization"))
-		tk := strings.Split(auth, " ")
-		if len(tk) == 2 {
-			if strings.ToLower(tk[0]) == "bearer" {
-				claims, err := firAuth.VerifyIDToken(tk[1])
-				if err != nil {
-					return handleError(ctx, tokenError(err))
-				}
-				ctx.Set(keyCurrentUserID, claims.Subject)
-			}
+		if len(auth) == 0 {
+			return h(ctx)
 		}
+		tk := strings.Split(auth, " ")
+		if len(tk) != 2 || strings.ToLower(tk[0]) != "bearer" {
+			return handleError(ctx, tokenError("invalid authorization header"))
+		}
+		claims, err := firAuth.VerifyIDToken(tk[1])
+		if err != nil {
+			return handleError(ctx, tokenError(err))
+		}
+		ctx.Set(keyCurrentUserID, claims.UserID)
 		return h(ctx)
 	}
 }
