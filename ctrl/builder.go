@@ -28,10 +28,37 @@ func ToUserMeView(m *store.User, role *app.RoleView) *app.UserMeView {
 	}
 }
 
+// ToUserTinyView builds a UserTinyView from a User model
+func ToUserTinyView(m *store.User) *app.UserTinyView {
+	return &app.UserTinyView{
+		ID:       m.ID,
+		Name:     m.Name,
+		Username: m.Username,
+		Photo:    m.Photo,
+	}
+}
+
 // ToRoleView builds a RoleView fromn a Role model
 func ToRoleView(m *store.Role) *app.RoleView {
 	return &app.RoleView{
 		Admin:      m.Admin,
 		Instructor: m.Instructor,
+	}
+}
+
+// ToCourseTinyView builds a CourseTinyView from a Course model
+func ToCourseTinyView(m *store.Course, owner *app.UserTinyView, student int) *app.CourseTinyView {
+	return &app.CourseTinyView{
+		ID:               m.ID,
+		Owner:            owner,
+		Title:            m.Title,
+		ShortDescription: m.ShortDescription,
+		Photo:            m.Photo,
+		Start:            m.Start,
+		URL:              m.URL,
+		Type:             string(m.Type),
+		Price:            m.Price,
+		DiscountedPrice:  m.DiscountedPrice,
+		Student:          student,
 	}
 }

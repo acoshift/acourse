@@ -162,3 +162,19 @@ func (ctx *CourseUpdateContext) NoContent() error {
 func (ctx *CourseUpdateContext) NotFound() error {
 	return handleNotFound(ctx.context)
 }
+
+// CourseListContext provides the course list action context
+type CourseListContext struct {
+	context echo.Context
+}
+
+// NewCourseListContext parses the incoming request and create context
+func NewCourseListContext(ctx echo.Context) (*CourseListContext, error) {
+	rctx := CourseListContext{context: ctx}
+	return &rctx, nil
+}
+
+// OKTiny sends HTTP response
+func (ctx *CourseListContext) OKTiny(r CourseTinyCollectionView) error {
+	return handleOK(ctx.context, r)
+}

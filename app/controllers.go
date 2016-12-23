@@ -64,10 +64,19 @@ func MountHealthController(service *echo.Echo, ctrl HealthController) {
 type CourseController interface {
 	Show(*CourseShowContext) error
 	Update(*CourseUpdateContext) error
+	List(*CourseListContext) error
 }
 
 // MountCourseController mounts a Course resource controller on the given service
 func MountCourseController(service *echo.Echo, ctrl CourseController) {
+	service.GET("/api/course", func(ctx echo.Context) error {
+		rctx, err := NewCourseListContext(ctx)
+		if err != nil {
+			return handleError(ctx, err)
+		}
+		return ctrl.List(rctx)
+	})
+
 	service.GET("/api/course/:courseID", func(ctx echo.Context) error {
 		rctx, err := NewCourseShowContext(ctx)
 		if err != nil {
