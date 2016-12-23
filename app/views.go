@@ -32,3 +32,11 @@ type RoleView struct {
 	Admin      bool `json:"admin"`
 	Instructor bool `json:"instructor"`
 }
+
+// CourseView type
+type CourseView struct {
+}
+
+// CoursePublicView type
+type CoursePublicView struct {
+}

@@ -13,6 +13,18 @@ func handleError(ctx echo.Context, r error) error {
 	}
 }
 
+func handleOK(ctx echo.Context, r interface{}) error {
+	return ctx.JSON(http.StatusOK, r)
+}
+
+func handleNotFound(ctx echo.Context) error {
+	return ctx.NoContent(http.StatusNotFound)
+}
+
+func handleNoContent(ctx echo.Context) error {
+	return ctx.NoContent(http.StatusNoContent)
+}
+
 // UserShowContext provides the user show action context
 type UserShowContext struct {
 	context       echo.Context
@@ -30,7 +42,7 @@ func NewUserShowContext(ctx echo.Context) (*UserShowContext, error) {
 
 // NotFound sends a HTTP response
 func (ctx *UserShowContext) NotFound() error {
-	return ctx.context.NoContent(http.StatusNotFound)
+	return handleNotFound(ctx.context)
 }
 
 // InternalServerError sends a HTTP response
@@ -40,12 +52,12 @@ func (ctx *UserShowContext) InternalServerError(r error) error {
 
 // OK sends a HTTP response
 func (ctx *UserShowContext) OK(r *UserView) error {
-	return ctx.context.JSON(http.StatusOK, r)
+	return handleOK(ctx.context, r)
 }
 
 // OKMe send a HTTP response
 func (ctx *UserShowContext) OKMe(r *UserMeView) error {
-	return ctx.context.JSON(http.StatusOK, r)
+	return handleOK(ctx.context, r)
 }
 
 // UserUpdateContext provides the user update action context
@@ -66,12 +78,12 @@ func NewUserUpdateContext(ctx echo.Context) (*UserUpdateContext, error) {
 
 // NoContent sends a HTTP response
 func (ctx *UserUpdateContext) NoContent() error {
-	return ctx.context.NoContent(http.StatusNoContent)
+	return handleNoContent(ctx.context)
 }
 
 // NotFound sends a HTTP response
 func (ctx *UserUpdateContext) NotFound() error {
-	return ctx.context.NoContent(http.StatusNotFound)
+	return handleNotFound(ctx.context)
 }
 
 // InternalServerError sends a HTTP response
@@ -79,7 +91,7 @@ func (ctx *UserUpdateContext) InternalServerError(r error) error {
 	return handleError(ctx.context, r)
 }
 
-// HealthHealthContext type
+// HealthHealthContext provides the health health action context
 type HealthHealthContext struct {
 	context echo.Context
 }
@@ -93,4 +105,60 @@ func NewHealthHealthContext(ctx echo.Context) (*HealthHealthContext, error) {
 // OK sends HTTP response
 func (ctx *HealthHealthContext) OK(r string) error {
 	return ctx.context.String(http.StatusOK, r)
+}
+
+// CourseShowContext provides the course show action context
+type CourseShowContext struct {
+	context       echo.Context
+	CurrentUserID string
+	CourseID      string
+	Own           *bool
+	Student       *string
+}
+
+// NewCourseShowContext parses the incoming request and create context
+func NewCourseShowContext(ctx echo.Context) (*CourseShowContext, error) {
+	rctx := CourseShowContext{context: ctx}
+	rctx.CourseID = ctx.Param("courseID")
+	return &rctx, nil
+}
+
+// OK sends HTTP response
+func (ctx *CourseShowContext) OK(r *CourseView) error {
+	return handleOK(ctx.context, r)
+}
+
+// OKPublic sends HTTP response
+func (ctx *CourseShowContext) OKPublic(r *CoursePublicView) error {
+	return handleOK(ctx.context, r)
+}
+
+// NotFound sends HTTP response
+func (ctx *CourseShowContext) NotFound() error {
+	return handleNotFound(ctx.context)
+}
+
+// CourseUpdateContext provides the course update action context
+type CourseUpdateContext struct {
+	context       echo.Context
+	CurrentUserID string
+	CourseID      string
+	Payload       *CoursePayload
+}
+
+// NewCourseUpdateContext parses the incoming request and create context
+func NewCourseUpdateContext(ctx echo.Context) (*CourseUpdateContext, error) {
+	rctx := CourseUpdateContext{context: ctx}
+	rctx.CourseID = ctx.Param("courseID")
+	return &rctx, nil
+}
+
+// NoContent sends HTTP response
+func (ctx *CourseUpdateContext) NoContent() error {
+	return handleNoContent(ctx.context)
+}
+
+// NotFound sends HTTP response
+func (ctx *CourseUpdateContext) NotFound() error {
+	return handleNotFound(ctx.context)
 }

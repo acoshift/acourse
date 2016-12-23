@@ -21,6 +21,7 @@ func main() {
 	// mount controllers
 	app.MountHealthController(service, ctrl.NewHealthController())
 	app.MountUserController(service, ctrl.NewUserController(db))
+	app.MountCourseController(service, ctrl.NewCourseController(db))
 
 	if err := service.Start(":8080"); err != nil {
 		service.Logger.Error(err)

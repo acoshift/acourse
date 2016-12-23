@@ -59,3 +59,37 @@ func MountHealthController(service *echo.Echo, ctrl HealthController) {
 		return ctrl.Health(rctx)
 	})
 }
+
+// CourseController is the controller interface for course actions
+type CourseController interface {
+	Show(*CourseShowContext) error
+	Update(*CourseUpdateContext) error
+}
+
+// MountCourseController mounts a Course resource controller on the given service
+func MountCourseController(service *echo.Echo, ctrl CourseController) {
+	service.GET("/api/course/:courseID", func(ctx echo.Context) error {
+		rctx, err := NewCourseShowContext(ctx)
+		if err != nil {
+			return handleError(ctx, err)
+		}
+		return ctrl.Show(rctx)
+	})
+
+	service.PATCH("/api/course/:courseID", func(ctx echo.Context) error {
+		rctx, err := NewCourseUpdateContext(ctx)
+		if err != nil {
+			return handleError(ctx, err)
+		}
+		var rawPayload CourseRawPayload
+		err = ctx.Bind(&rawPayload)
+		if err != nil {
+			return handleError(ctx, ErrPayload(err.Error()))
+		}
+		if err = rawPayload.Validate(); err != nil {
+			return handleError(ctx, ErrPayload(err.Error()))
+		}
+		rctx.Payload = rawPayload.Payload()
+		return ctrl.Update(rctx)
+	})
+}
