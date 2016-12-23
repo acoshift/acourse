@@ -10,6 +10,10 @@ import (
 	"github.com/labstack/echo"
 )
 
+const (
+	keyCurrentUserID = "CurrentUserID"
+)
+
 var (
 	firApp  *admin.FirebaseApp
 	firAuth *admin.FirebaseAuth
@@ -40,7 +44,7 @@ func jwtMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 				if err != nil {
 					return handleError(ctx, tokenError(err))
 				}
-				ctx.Set("CurrentUserID", claims.Subject)
+				ctx.Set(keyCurrentUserID, claims.Subject)
 			}
 		}
 		return h(ctx)

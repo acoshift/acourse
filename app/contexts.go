@@ -120,6 +120,7 @@ type CourseShowContext struct {
 func NewCourseShowContext(ctx echo.Context) (*CourseShowContext, error) {
 	rctx := CourseShowContext{context: ctx}
 	rctx.CourseID = ctx.Param("courseID")
+	rctx.CurrentUserID, _ = ctx.Get(keyCurrentUserID).(string)
 	return &rctx, nil
 }
 
