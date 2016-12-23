@@ -6,7 +6,7 @@ import "net/http"
 func handleError(ctx echo.Context, r error) error {
 	switch r := r.(type) {
 	case *Error:
-		r.ID = ctx.Response().Header().Get("X-Request-ID")
+		r.ID = ctx.Response().Header().Get("X-Request-Id")
 		return ctx.JSON(r.Status, r)
 	default:
 		return handleError(ctx, createInternalError(r, http.StatusInternalServerError, "unknown"))

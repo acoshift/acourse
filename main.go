@@ -9,14 +9,18 @@ import (
 	"github.com/labstack/echo/middleware"
 )
 
+const projectID = "acourse-d9d0a"
+
 func main() {
 	service := echo.New()
 
-	db := store.NewDB(store.ProjectID("acourse-d9d0a"))
+	db := store.NewDB(store.ProjectID(projectID))
 
 	// globals middlewares
 	service.Use(middleware.Recover())
 	service.Use(middleware.Logger())
+
+	app.InitService(service, projectID)
 
 	// mount controllers
 	app.MountHealthController(service, ctrl.NewHealthController())

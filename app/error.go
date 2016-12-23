@@ -11,7 +11,7 @@ type Error struct {
 }
 
 // ErrorCreateFunc is the creator function for create error
-type ErrorCreateFunc func(string) error
+type ErrorCreateFunc func(interface{}) error
 
 // CreateError creates error type
 func CreateError(status int, code, detail string) error {
@@ -24,11 +24,20 @@ func CreateError(status int, code, detail string) error {
 
 // CreateErrors generate create error function used for create template error
 func CreateErrors(status int, code string) ErrorCreateFunc {
-	return func(detail string) error {
+	return func(detail interface{}) error {
+		d := ""
+		switch p := detail.(type) {
+		case error:
+			d = p.Error()
+		case string:
+			d = p
+		default:
+			d = "unknown"
+		}
 		return &Error{
 			Status: status,
 			Code:   code,
-			Detail: detail,
+			Detail: d,
 		}
 	}
 }

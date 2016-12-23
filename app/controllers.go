@@ -33,10 +33,10 @@ func MountUserController(service *echo.Echo, ctrl UserController) {
 		var rawPayload UserRawPayload
 		err = ctx.Bind(&rawPayload)
 		if err != nil {
-			return handleError(ctx, ErrPayload(err.Error()))
+			return handleError(ctx, ErrPayload(err))
 		}
 		if err = rawPayload.Validate(); err != nil {
-			return handleError(ctx, ErrPayload(err.Error()))
+			return handleError(ctx, ErrPayload(err))
 		}
 		rctx.Payload = rawPayload.Payload()
 		return ctrl.Update(rctx)
@@ -93,10 +93,10 @@ func MountCourseController(service *echo.Echo, ctrl CourseController) {
 		var rawPayload CourseRawPayload
 		err = ctx.Bind(&rawPayload)
 		if err != nil {
-			return handleError(ctx, ErrPayload(err.Error()))
+			return handleError(ctx, ErrPayload(err))
 		}
 		if err = rawPayload.Validate(); err != nil {
-			return handleError(ctx, ErrPayload(err.Error()))
+			return handleError(ctx, ErrPayload(err))
 		}
 		rctx.Payload = rawPayload.Payload()
 		return ctrl.Update(rctx)
