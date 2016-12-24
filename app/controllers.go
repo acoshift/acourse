@@ -126,3 +126,34 @@ func MountCourseController(service *echo.Echo, ctrl CourseController) {
 		return ctrl.Enroll(rctx)
 	})
 }
+
+// PaymentController is the controller interface for payment actions
+type PaymentController interface {
+	List(*PaymentListContext) error
+}
+
+// MountPaymentController mount a Payment resource controller on the given service
+func MountPaymentController(service *echo.Echo, ctrl PaymentController) {
+	service.GET("/api/payment", func(ctx echo.Context) error {
+		rctx, err := NewPaymentListContext(ctx)
+		if err != nil {
+			return handleError(ctx, err)
+		}
+		if rctx.CurrentUserID == "" {
+			return handleUnauthorized(ctx)
+		}
+		return ctrl.List(rctx)
+	})
+}
+
+// UserIsAdminMiddleware is the middleware for autorization only admin user
+// func UserIsAdminMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
+// 	return func(ctx echo.Context) error {
+// 		userID, _ := ctx.Get(keyCurrentUserID).(string)
+// 		if userID == "" {
+// 			return handleForbidden(ctx)
+// 		}
+
+// 		return h(ctx)
+// 	}
+// }

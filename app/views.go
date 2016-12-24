@@ -103,6 +103,12 @@ type CourseTinyView struct {
 	Discount         bool          `json:"discount"`
 }
 
+// CourseMiniView type
+type CourseMiniView struct {
+	ID    string `json:"id"`
+	Title string `json:"title"`
+}
+
 // CourseTinyCollectionView type
 type CourseTinyCollectionView []*CourseTinyView
 
@@ -116,3 +122,18 @@ type CourseContentView struct {
 
 // CourseContentCollectionView type
 type CourseContentCollectionView []*CourseContentView
+
+// PaymentView type
+type PaymentView struct {
+	ID            string          `json:"id"`
+	User          *UserTinyView   `json:"user"`
+	Course        *CourseMiniView `json:"course"`
+	OriginalPrice float64         `json:"originalPrice"`
+	Price         float64         `json:"price"`
+	Code          string          `json:"code"`
+	URL           string          `json:"url"`
+	Status        string          `json:"status"`
+}
+
+// PaymentCollectionView type
+type PaymentCollectionView []*PaymentView

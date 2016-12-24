@@ -215,3 +215,26 @@ func NewCourseEnrollContext(ctx echo.Context) (*CourseEnrollContext, error) {
 	rctx.CourseID = ctx.Param("courseID")
 	return &rctx, nil
 }
+
+// PaymentListContext provides the payment list action context
+type PaymentListContext struct {
+	context       echo.Context
+	CurrentUserID string
+}
+
+// NewPaymentListContext parses the incoming request and create context
+func NewPaymentListContext(ctx echo.Context) (*PaymentListContext, error) {
+	rctx := PaymentListContext{context: ctx}
+	rctx.CurrentUserID, _ = ctx.Get(keyCurrentUserID).(string)
+	return &rctx, nil
+}
+
+// OK sends HTTP response
+func (ctx *PaymentListContext) OK(r PaymentCollectionView) error {
+	return ctx.context.JSON(http.StatusOK, r)
+}
+
+// Forbidded sends HTTP response
+func (ctx *PaymentListContext) Forbidded() error {
+	return handleForbidden(ctx.context)
+}

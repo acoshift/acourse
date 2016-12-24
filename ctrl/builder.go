@@ -155,3 +155,25 @@ func ToCourseContents(ps []*app.CourseContentPayload) []store.CourseContent {
 	}
 	return r
 }
+
+// ToPaymentView builds Payment view from a Payment model
+func ToPaymentView(m *store.Payment, user *app.UserTinyView, course *app.CourseMiniView) *app.PaymentView {
+	return &app.PaymentView{
+		ID:            m.ID,
+		OriginalPrice: m.OriginalPrice,
+		Price:         m.Price,
+		Code:          m.Code,
+		Status:        string(m.Status),
+		URL:           m.URL,
+		User:          user,
+		Course:        course,
+	}
+}
+
+// ToCourseMiniView builds Course mini view from a course model
+func ToCourseMiniView(m *store.Course) *app.CourseMiniView {
+	return &app.CourseMiniView{
+		ID:    m.ID,
+		Title: m.Title,
+	}
+}
