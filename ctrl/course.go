@@ -170,3 +170,8 @@ func (c *CourseController) List(ctx *app.CourseListContext) error {
 	}
 	return ctx.OKTiny(res)
 }
+
+// Enroll runs enroll action
+func (c *CourseController) Enroll(ctx *app.CourseEnrollContext) error {
+	return nil
+}

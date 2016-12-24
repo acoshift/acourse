@@ -134,3 +134,26 @@ func (x *CourseContentRawPayload) Payload() *CourseContentPayload {
 	}
 	return &r
 }
+
+// CourseEnrollRawPayload type
+type CourseEnrollRawPayload struct {
+	Code *string `json:"code"`
+	URL  *string `json:"url"`
+}
+
+// Validate validates CourseEnrollRawPayload
+func (x *CourseEnrollRawPayload) Validate() error {
+	return nil
+}
+
+// Payload builds CourseEnrollPayload from CourseEnrollRawPayload
+func (x *CourseEnrollRawPayload) Payload() *CourseEnrollPayload {
+	r := CourseEnrollPayload{}
+	if x.Code != nil {
+		r.Code = *x.Code
+	}
+	if x.URL != nil {
+		r.URL = *x.URL
+	}
+	return &r
+}

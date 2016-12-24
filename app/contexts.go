@@ -199,3 +199,19 @@ func NewCourseListContext(ctx echo.Context) (*CourseListContext, error) {
 func (ctx *CourseListContext) OKTiny(r CourseTinyCollectionView) error {
 	return handleOK(ctx.context, r)
 }
+
+// CourseEnrollContext provides the course enroll action context
+type CourseEnrollContext struct {
+	context       echo.Context
+	CurrentUserID string
+	CourseID      string
+	Payload       *CourseEnrollPayload
+}
+
+// NewCourseEnrollContext parses the incoming request and create context
+func NewCourseEnrollContext(ctx echo.Context) (*CourseEnrollContext, error) {
+	rctx := CourseEnrollContext{context: ctx}
+	rctx.CurrentUserID, _ = ctx.Get(keyCurrentUserID).(string)
+	rctx.CourseID = ctx.Param("courseID")
+	return &rctx, nil
+}

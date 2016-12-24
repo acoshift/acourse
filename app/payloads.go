@@ -36,3 +36,9 @@ type CourseContentPayload struct {
 	Video       string
 	DownloadURL string
 }
+
+// CourseEnrollPayload type
+type CourseEnrollPayload struct {
+	Code string
+	URL  string
+}

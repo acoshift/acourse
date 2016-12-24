@@ -65,6 +65,7 @@ type CourseController interface {
 	Show(*CourseShowContext) error
 	Update(*CourseUpdateContext) error
 	List(*CourseListContext) error
+	Enroll(*CourseEnrollContext) error
 }
 
 // MountCourseController mounts a Course resource controller on the given service
@@ -103,5 +104,25 @@ func MountCourseController(service *echo.Echo, ctrl CourseController) {
 		}
 		rctx.Payload = rawPayload.Payload()
 		return ctrl.Update(rctx)
+	})
+
+	service.PUT("/api/course/:courseID/enroll", func(ctx echo.Context) error {
+		rctx, err := NewCourseEnrollContext(ctx)
+		if err != nil {
+			return handleError(ctx, err)
+		}
+		if rctx.CurrentUserID == "" {
+			return handleUnauthorized(ctx)
+		}
+		var rawPayload CourseEnrollRawPayload
+		err = ctx.Bind(&rawPayload)
+		if err != nil {
+			return handleError(ctx, ErrPayload(err))
+		}
+		if err = rawPayload.Validate(); err != nil {
+			return handleError(ctx, ErrPayload(err))
+		}
+		rctx.Payload = rawPayload.Payload()
+		return ctrl.Enroll(rctx)
 	})
 }
