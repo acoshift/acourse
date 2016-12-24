@@ -47,4 +47,5 @@ deploy: clean-build pre-build build-server
 	curl http://52.77.156.5:8080/acourse.sh?key=XfwU58kx4Re5TGjck99CWV7DXrz27hYy
 
 gae: clean-build pre-build build-server project
+	cp app.yaml build/
 	cd build && gcloud app deploy
