@@ -1,7 +1,7 @@
 <template>
   <div>
     <course-header :course="course" v-if="course"></course-header>
-    <course-apply-panel v-if="course && !course.enrolled && !course.owned && course.enroll" :course="course"></course-apply-panel>
+    <course-apply-panel v-if="course && !course.enrolled && !course.owned && course.enroll" :course="course" @refresh="refresh++"></course-apply-panel>
     <course-owner-panel v-if="course && course.owned" :course="course"></course-owner-panel>
     <!-- <course-student-panel v-if="course && course.enrolled" :course="course"></course-student-panel> -->
     <course-video v-if="(course && course.video) && (course.enrolled || course.owned)" :src="course.video"></course-video>
@@ -30,12 +30,21 @@ export default {
     CourseApplyPanel,
     CourseStudentPanel
   },
-  subscriptions () {
-    Loader.start('course')
+  data () {
     return {
-      course: Course.get(this.$route.params.id)
-        .finally(() => { Loader.stop('course') })
+      refresh: 0
     }
+  },
+  subscriptions () {
+    return {
+      course: this.$watchAsObservable('refresh')
+        .do(() => { Loader.start('course') })
+        .flatMap(() => Course.get(this.$route.params.id))
+        .do(() => { Loader.stop('course') })
+    }
+  },
+  created () {
+    this.refresh++
   }
 }
 </script>

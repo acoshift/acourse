@@ -11,7 +11,7 @@
         .center.aligned.column
           .ui.blue.button(style="width: 200px;", :class="{loading: applying}", @click="apply", v-if="!purchased") Enroll
           .ui.blue.disabled.button(v-else) Wait for Approve
-    apply-modal(ref="applyModal", :course="course")
+    apply-modal(ref="applyModal", :course="course", @refresh="$emit('refresh')")
 </template>
 
 <script>
@@ -44,7 +44,7 @@ export default {
           .subscribe(
             () => {
               Document.openSuccessModal('Success', 'You have enrolled to this course.')
-              // TODO: need reload course
+              this.$emit('refresh')
             }
           )
       } else {

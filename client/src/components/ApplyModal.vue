@@ -55,6 +55,7 @@ export default {
         .subscribe(
           () => {
             Document.openSuccessModal('Success', 'Your enroll request success!.')
+            this.$emit('refresh')
           },
           (err) => {
             Document.openErrorModal('Upload Error', err && err.message || err)

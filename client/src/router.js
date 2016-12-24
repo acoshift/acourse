@@ -57,7 +57,7 @@ const router = new VueRouter({
 })
 
 router.afterEach((to) => {
-  Document.setTitle()
+  Document.reset()
   Loader.reset()
   window.ga('set', 'page', to.path)
   window.ga('send', 'pageview')

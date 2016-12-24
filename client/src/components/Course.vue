@@ -24,7 +24,7 @@
 </style>
 
 <script>
-import { Course, Loader } from '../services'
+import { Course, Loader, Document } from 'services'
 
 export default {
   data () {
@@ -36,6 +36,7 @@ export default {
     Loader.start('course')
     return {
       course: Course.get(this.courseId).do(() => Loader.stop('course')).catch(() => { this.$router.replace('/home') })
+        .do((course) => Document.setCourse(course))
     }
   }
 }
