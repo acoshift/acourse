@@ -214,6 +214,19 @@ func (c *CourseController) Enroll(ctx *app.CourseEnrollContext) error {
 	}
 	// TODO: calculate code
 
+	// auto enroll if course free
+	if originalPrice == 0.0 {
+		enroll = &store.Enroll{
+			UserID:   ctx.CurrentUserID,
+			CourseID: ctx.CourseID,
+		}
+		err = c.db.EnrollSave(enroll)
+		if err != nil {
+			return err
+		}
+		return ctx.NoContent()
+	}
+
 	// create payment
 	payment = &store.Payment{
 		CourseID:      ctx.CourseID,
