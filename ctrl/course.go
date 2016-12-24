@@ -62,7 +62,42 @@ func (c *CourseController) Show(ctx *app.CourseShowContext) error {
 
 // Update runs update action
 func (c *CourseController) Update(ctx *app.CourseUpdateContext) error {
-	return nil
+	role, err := c.db.RoleFindByUserID(ctx.CurrentUserID)
+	if err != nil {
+		return err
+	}
+	course, err := c.db.CourseGet(ctx.CourseID)
+	if err != nil {
+		return err
+	}
+	if course == nil {
+		return ctx.NotFound()
+	}
+	if course.Owner != ctx.CurrentUserID || !role.Admin {
+		return ctx.Forbidded()
+	}
+
+	// merge course with payload
+	course.Title = ctx.Payload.Title
+	course.ShortDescription = ctx.Payload.ShortDescription
+	course.Description = ctx.Payload.Description
+	course.Photo = ctx.Payload.Photo
+	course.Start = ctx.Payload.Start
+	course.Video = ctx.Payload.Video
+	course.Type = store.CourseType(ctx.Payload.Type)
+	course.Contents = ToCourseContents(ctx.Payload.Contents)
+	course.Options.Enroll = ctx.Payload.Enroll
+	course.Options.Public = ctx.Payload.Public
+	course.Options.Attend = ctx.Payload.Attend
+	course.Options.Assignment = ctx.Payload.Assignment
+	course.Options.Purchase = ctx.Payload.Purchase
+
+	err = c.db.CourseSave(course)
+	if err != nil {
+		return err
+	}
+
+	return ctx.NoContent()
 }
 
 // List runs list action

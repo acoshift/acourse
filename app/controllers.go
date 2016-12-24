@@ -90,6 +90,9 @@ func MountCourseController(service *echo.Echo, ctrl CourseController) {
 		if err != nil {
 			return handleError(ctx, err)
 		}
+		if rctx.CurrentUserID == "" {
+			return handleUnauthorized(ctx)
+		}
 		var rawPayload CourseRawPayload
 		err = ctx.Bind(&rawPayload)
 		if err != nil {

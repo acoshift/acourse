@@ -20,13 +20,14 @@ type Course struct {
 	Type             CourseType
 	Video            string `datastore:",noindex"` // Cover Video
 	Price            float64
-	DiscountedPrice  *float64
+	DiscountedPrice  float64
 	Options          struct {
 		Public     bool
 		Enroll     bool `datastore:",noindex"`
 		Attend     bool `datastore:",noindex"`
 		Assignment bool `datastore:",noindex"`
 		Purchase   bool
+		Discount   bool
 	}
 	Contents    []CourseContent `datastore:",noindex"`
 	Assignments []struct {

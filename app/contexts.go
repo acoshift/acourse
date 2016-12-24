@@ -25,6 +25,14 @@ func handleNoContent(ctx echo.Context) error {
 	return ctx.NoContent(http.StatusNoContent)
 }
 
+func handleUnauthorized(ctx echo.Context) error {
+	return ctx.NoContent(http.StatusUnauthorized)
+}
+
+func handleForbidden(ctx echo.Context) error {
+	return ctx.NoContent(http.StatusForbidden)
+}
+
 // UserShowContext provides the user show action context
 type UserShowContext struct {
 	context       echo.Context
@@ -163,6 +171,11 @@ func (ctx *CourseUpdateContext) NoContent() error {
 // NotFound sends HTTP response
 func (ctx *CourseUpdateContext) NotFound() error {
 	return handleNotFound(ctx.context)
+}
+
+// Forbidded sends HTTP response
+func (ctx *CourseUpdateContext) Forbidded() error {
+	return handleForbidden(ctx.context)
 }
 
 // CourseListContext provides the course list action context

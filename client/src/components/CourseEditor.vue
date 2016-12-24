@@ -84,7 +84,7 @@
           <span v-if="isNew">Create</span>
           <span v-else>Save</span>
         </button>
-        <router-link class="ui red cancel button" :to="`/course/${course.url || course.id}`">Cancel</router-link>
+        <router-link class="ui red cancel button" :to="`/course/${courseURL}`">Cancel</router-link>
       </form>
     </div>
   </div>
@@ -126,7 +126,8 @@ export default {
         assignment: false,
         purchase: false
       },
-      courseId: this.$route.params.id,
+      courseId: '',
+      courseURL: this.$route.params.id,
       saving: false
     }
   },
@@ -135,11 +136,12 @@ export default {
       this.isNew = true
     } else {
       Loader.start('course')
-      Course.get(this.courseId).first()
+      Course.get(this.courseURL).first()
         .subscribe(
           (course) => {
             Loader.stop('course')
-            if (!course.owned) return this.$router.replace(`/course/${course.url || course.id}`)
+            this.courseId = course.id
+            if (!course.owned) return this.$router.replace(`/course/${this.courseURL}`)
             this.course = flow(
               pick(keys(this.course)),
               defaults(this.course)
@@ -186,7 +188,7 @@ export default {
           .finally(() => { this.saving = false })
           .subscribe(
             () => {
-              this.$router.push(`/course/${this.courseId}`)
+              this.$router.push(`/course/${this.courseURL}`)
             }
           )
       }

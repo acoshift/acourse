@@ -52,7 +52,7 @@ type CourseView struct {
 	Video            string                      `json:"video"`
 	Type             string                      `json:"type"`
 	Price            float64                     `json:"price"`
-	DiscountedPrice  *float64                    `json:"discountedPrice,omitempty"`
+	DiscountedPrice  float64                     `json:"discountedPrice"`
 	Student          int                         `json:"student"`
 	Contents         CourseContentCollectionView `json:"contents"`
 	Enrolled         bool                        `json:"enrolled"`
@@ -62,6 +62,7 @@ type CourseView struct {
 	Attend           bool                        `json:"attend"`
 	Assignment       bool                        `json:"assignment"`
 	Purchase         bool                        `json:"purchase"`
+	Discount         bool                        `json:"discount"`
 }
 
 // CoursePublicView type
@@ -79,10 +80,11 @@ type CoursePublicView struct {
 	Video            string        `json:"video"`
 	Type             string        `json:"type"`
 	Price            float64       `json:"price"`
-	DiscountedPrice  *float64      `json:"discountedPrice,omitempty"`
+	DiscountedPrice  float64       `json:"discountedPrice"`
 	Student          int           `json:"student"`
 	Enroll           bool          `json:"enroll"`
 	Purchase         bool          `json:"purchase"`
+	Discount         bool          `json:"discount"`
 }
 
 // CourseTinyView type
@@ -96,8 +98,9 @@ type CourseTinyView struct {
 	URL              string        `json:"url"`
 	Type             string        `json:"type"`
 	Price            float64       `json:"price"`
-	DiscountedPrice  *float64      `json:"discountedPrice,omitempty"`
+	DiscountedPrice  float64       `json:"discountedPrice"`
 	Student          int           `json:"student"`
+	Discount         bool          `json:"discount"`
 }
 
 // CourseTinyCollectionView type

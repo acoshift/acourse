@@ -72,6 +72,7 @@ func ToCourseView(m *store.Course, owner *app.UserTinyView, student int, enrolle
 		Attend:           m.Options.Attend,
 		Assignment:       m.Options.Assignment,
 		Purchase:         m.Options.Purchase,
+		Discount:         m.Options.Discount,
 	}
 }
 
@@ -95,6 +96,7 @@ func ToCoursePublicView(m *store.Course, owner *app.UserTinyView, student int) *
 		Student:          student,
 		Enroll:           m.Options.Enroll,
 		Purchase:         m.Options.Purchase,
+		Discount:         m.Options.Discount,
 	}
 }
 
@@ -112,6 +114,7 @@ func ToCourseTinyView(m *store.Course, owner *app.UserTinyView, student int) *ap
 		Price:            m.Price,
 		DiscountedPrice:  m.DiscountedPrice,
 		Student:          student,
+		Discount:         m.Options.Discount,
 	}
 }
 
@@ -130,6 +133,25 @@ func ToCourseContentCollectionView(ms []store.CourseContent) app.CourseContentCo
 	r := make(app.CourseContentCollectionView, len(ms))
 	for i, m := range ms {
 		r[i] = ToCourseContentView(&m)
+	}
+	return r
+}
+
+// ToCourseContent builds a CourseContent model from CourseContent payload
+func ToCourseContent(p *app.CourseContentPayload) *store.CourseContent {
+	return &store.CourseContent{
+		Title:       p.Title,
+		Description: p.Description,
+		Video:       p.Video,
+		DownloadURL: p.DownloadURL,
+	}
+}
+
+// ToCourseContents builds CourseContents model from CourseContents payload
+func ToCourseContents(ps []*app.CourseContentPayload) []store.CourseContent {
+	r := make([]store.CourseContent, len(ps))
+	for i, p := range ps {
+		r[i] = *ToCourseContent(p)
 	}
 	return r
 }

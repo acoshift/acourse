@@ -21,7 +21,7 @@ func main() {
 	service.Use(middleware.Logger())
 	service.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowCredentials: false,
-		AllowHeaders:     []string{echo.HeaderAuthorization},
+		AllowHeaders:     []string{echo.HeaderAuthorization, echo.HeaderContentType},
 		AllowMethods:     []string{echo.GET, echo.POST, echo.PATCH, echo.PUT, echo.DELETE},
 		AllowOrigins:     []string{"http://localhost:9000", "https://acourse.io"},
 		MaxAge:           3600,
