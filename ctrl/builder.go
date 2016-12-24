@@ -77,7 +77,7 @@ func ToCourseView(m *store.Course, owner *app.UserTinyView, student int, enrolle
 }
 
 // ToCoursePublicView builds a CourseView from a Course model
-func ToCoursePublicView(m *store.Course, owner *app.UserTinyView, student int) *app.CoursePublicView {
+func ToCoursePublicView(m *store.Course, owner *app.UserTinyView, student int, purchaseStatus string) *app.CoursePublicView {
 	return &app.CoursePublicView{
 		ID:               m.ID,
 		CreatedAt:        m.CreatedAt,
@@ -97,6 +97,7 @@ func ToCoursePublicView(m *store.Course, owner *app.UserTinyView, student int) *
 		Enroll:           m.Options.Enroll,
 		Purchase:         m.Options.Purchase,
 		Discount:         m.Options.Discount,
+		PurchaseStatus:   purchaseStatus,
 	}
 }
 

@@ -1,6 +1,5 @@
 import Firebase from './firebase'
 import API from './api'
-import { Observable } from 'rxjs/Observable'
 
 import flow from 'lodash/fp/flow'
 import map from 'lodash/fp/map'
@@ -12,10 +11,6 @@ import countBy from 'lodash/fp/countBy'
 import toPairs from 'lodash/fp/toPairs'
 import orderBy from 'lodash/fp/orderBy'
 import reverse from 'lodash/fp/reverse'
-import reduce from 'lodash/fp/reduce'
-import isEmpty from 'lodash/fp/isEmpty'
-
-const reduceNoCap = reduce.convert({ cap: false })
 
 export default {
   list () {
@@ -30,9 +25,8 @@ export default {
   save (id, data) {
     return API.patch(`/course/${id}`, data)
   },
-  enroll (id, userId, code) {
-    return Firebase.set(`course-private/${id}/enroll/${userId}`, code)
-      .flatMap(() => Firebase.set(`course/${id}/student/${userId}`, true))
+  enroll (id, { code, url }) {
+    return API.put(`/course/${id}/enroll`, { code, url }, true)
   },
   ownBy (userId) {
     const ref = Firebase.ref('course').orderByChild('owner').equalTo(userId)
@@ -69,32 +63,5 @@ export default {
       .map((course) => course.attend)
       .flatMap((code) => Firebase.onValue(`attend/${id}/${code}/${userId}`))
       .map((x) => !!x)
-  },
-  setQueueEnroll (id, userId, url) {
-    return Firebase.set(`queue-enroll/${id}/${userId}`, {
-      url,
-      timestamp: Firebase.timestamp
-    })
-  },
-  queueEnroll () {
-    return Firebase.onValue(`queue-enroll`)
-      .map((x) => isEmpty(x) ? [] : flow(
-        reduceNoCap((p, v, k) => { p.push({ course: k, users: v }); return p }, []),
-        map((x) => ({
-          ...x,
-          users: reduceNoCap((p, v, k) => { p.push({ id: k, detail: v }); return p }, [])(x.users)
-        }))
-      )(x))
-      .flatMap((xs) =>
-        isEmpty(xs)
-          ? Observable.of([])
-          : Observable.combineLatest(...xs.map((x) =>
-              this.get(x.course).first().map((course) => ({ ...x, course })))))
-  },
-  removeQueueEnroll (id, userId) {
-    return Firebase.remove(`queue-enroll/${id}/${userId}`)
-  },
-  addUser (id, userId) {
-    return Firebase.set(`course/${id}/student/${userId}`, true)
   }
 }

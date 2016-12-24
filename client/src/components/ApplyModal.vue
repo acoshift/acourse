@@ -2,20 +2,33 @@
   .ui.small.modal
     .header Enroll
     .content
-      div(v-if="course.canQueueEnroll")
-        h4 Direct Transfer
-        p.description {{ course.queueEnrollDetail }}
-        .ui.fluid.green.button(@click="upload") Upload Slip
-      h4.ui.horizontal.divider.header OR
-      form.ui.form(@submit.prevent="apply")
-        .field
-          label Enter Code
-          input(v-model="code")
-        button.ui.fluid.submit.blue.button(:class="{loading: applying}") Enroll
+      div
+        h4 Upload
+        p.description
+          | วิธีการลงทะเบียน Course English for Programmer
+          br
+          br
+          | 1. โอนเงินจำนวน #[b {{ price }}] บาท ไปที่
+          br
+          br
+          | กฤษฎา เฉลิมสุข (Krissada Chalermsook)
+          | 470-2-46894-4
+          | ธนาคาร กสิกรไทย
+          | สาขา ถนนแจ้งวัฒนะ
+          br
+          br
+          | 2. ถ่ายรูป หรือ Capture screen หลักฐานการโอนเงินไว้
+          | 3. Upload มาที่ระบบ
+          | 4. รอการ approve จากเราภายในไม่เกิน 1 วันทำการ แล้วจากนั้นจะสามารถใช้งานระบบได้เลย
+          br
+          b *** สามารถติดต่อ admin ได้ที่ line : hideoaki กรณีที่ท่านไม่ได้รับการยืนยันภายใน 1 วันทำการ
+          br
+          b *** สมัครจากที่อื่นสามารถ Upload หลักฐานมาได้เหมือนกัน
+        .ui.fluid.green.button(@click="upload") Upload
 </template>
 
 <script>
-import { Document, Me } from '../services'
+import { Document, Course } from '../services'
 
 export default {
   props: {
@@ -24,35 +37,21 @@ export default {
       required: true
     }
   },
-  data () {
-    return {
-      code: '',
-      applying: false
+  computed: {
+    price () {
+      if (this.course.discount) {
+        return this.course.discountedPrice
+      }
+      return this.course.price
     }
   },
   methods: {
     show () {
-      this.code = ''
       $(this.$el).modal('show')
-    },
-    apply () {
-      $(this.$el).modal('hide')
-      if (this.applying) return
-      this.applying = true
-      Me.applyCourse(this.course.id, this.code)
-        .finally(() => { this.applying = false })
-        .subscribe(
-          () => {
-            Document.openSuccessModal('Success', 'You have enrolled to this course.')
-          },
-          (err) => {
-            Document.openErrorModal('Error', 'Can not enroll to this course. ' + err.message)
-          }
-        )
     },
     upload () {
       Document.uploadModal.open('image/*')
-        .flatMap((file) => Me.submitCourseQueueEnroll(this.course.id, file.downloadURL))
+        .flatMap((file) => Course.enroll(this.course.id, { url: file.downloadURL }))
         .subscribe(
           () => {
             Document.openSuccessModal('Success', 'Your enroll request success!.')

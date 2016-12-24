@@ -53,12 +53,6 @@
           </div>
         </div>
         <div class="field">
-          <div class="ui toggle checkbox">
-            <input type="checkbox" class="hidden" v-model="course.purchase">
-            <label>Can Purchase</label>
-          </div>
-        </div>
-        <div class="field">
           <label>Video ID</label>
           <input v-model="course.video">
         </div>
@@ -123,8 +117,7 @@ export default {
         enroll: false,
         public: false,
         attend: false,
-        assignment: false,
-        purchase: false
+        assignment: false
       },
       courseId: '',
       courseURL: this.$route.params.id,

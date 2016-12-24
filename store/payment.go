@@ -98,7 +98,7 @@ func (c *DB) PaymentFind(userID, courseID string, status PaymentStatus) (*Paymen
 		NewQuery(kindPayment).
 		Filter("UserID =", userID).
 		Filter("CourseID =", courseID).
-		Filter("Status =", status).
+		Filter("Status =", string(status)).
 		Limit(1)
 
 	var x Payment

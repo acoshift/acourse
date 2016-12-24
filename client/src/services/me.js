@@ -64,10 +64,5 @@ export default {
     return Auth.currentUser()
       .first()
       .flatMap(({ uid }) => Assignment.getUser(id, uid))
-  },
-  submitCourseQueueEnroll (id, url) {
-    return Auth.currentUser()
-      .first()
-      .flatMap(({ uid }) => Course.setQueueEnroll(id, uid, url))
   }
 }

@@ -57,7 +57,19 @@ func (c *CourseController) Show(ctx *app.CourseShowContext) error {
 	if enroll != nil || ctx.CurrentUserID == x.Owner {
 		return ctx.OK(ToCourseView(x, ToUserTinyView(owner), student, enroll != nil, ctx.CurrentUserID == x.Owner))
 	}
-	return ctx.OKPublic(ToCoursePublicView(x, ToUserTinyView(owner), student))
+
+	// check is user already purchase
+	payment, err := c.db.PaymentFind(ctx.CurrentUserID, ctx.CourseID, store.PaymentStatusWaiting)
+	if err != nil {
+		return err
+	}
+
+	purchaseStatus := ""
+	if payment != nil {
+		purchaseStatus = string(payment.Status)
+	}
+
+	return ctx.OKPublic(ToCoursePublicView(x, ToUserTinyView(owner), student, purchaseStatus))
 }
 
 // Update runs update action
@@ -235,6 +247,7 @@ func (c *CourseController) Enroll(ctx *app.CourseEnrollContext) error {
 		Price:         originalPrice,
 		Code:          ctx.Payload.Code,
 		URL:           ctx.Payload.URL,
+		Status:        store.PaymentStatusWaiting,
 	}
 
 	err = c.db.PaymentSave(payment)

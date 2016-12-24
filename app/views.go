@@ -85,6 +85,7 @@ type CoursePublicView struct {
 	Enroll           bool          `json:"enroll"`
 	Purchase         bool          `json:"purchase"`
 	Discount         bool          `json:"discount"`
+	PurchaseStatus   string        `json:"purchaseStatus"`
 }
 
 // CourseTinyView type

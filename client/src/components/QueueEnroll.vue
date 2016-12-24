@@ -22,35 +22,35 @@
 </template>
 
 <script>
-import { Course, User, Loader } from '../services'
-import forEach from 'lodash/fp/forEach'
+// import { Course, User, Loader } from '../services'
+// import forEach from 'lodash/fp/forEach'
 import UserAvatar from './UserAvatar'
 
 export default {
   components: {
     UserAvatar
-  },
-  subscriptions: {
-    list: Course.queueEnroll()
-      .do(forEach((x) => forEach((u) => User.inject(u))(x.users)))
-  },
-  methods: {
-    approve (x, y, btn) {
-      if (!window.confirm(`Approve ${y.name} to ${x.course.title} ?`)) return
-      Loader.start('approve')
-      Course.addUser(x.course.id, y.id)
-        .flatMap(() => User.addCourse(y.id, x.course.id))
-        .flatMap(() => Course.removeQueueEnroll(x.course.id, y.id))
-        .finally(() => { Loader.stop('approve') })
-        .subscribe()
-    },
-    reject (x, y) {
-      if (!window.confirm(`Reject ${y.name} from ${x.course.title} ?`)) return
-      Loader.start('reject')
-      Course.removeQueueEnroll(x.course.id, y.id)
-        .finally(() => { Loader.stop('reject') })
-        .subscribe()
-    }
   }
+  // subscriptions: {
+  //   list: Course.queueEnroll()
+  //     .do(forEach((x) => forEach((u) => User.inject(u))(x.users)))
+  // },
+  // methods: {
+  //   approve (x, y, btn) {
+  //     if (!window.confirm(`Approve ${y.name} to ${x.course.title} ?`)) return
+  //     Loader.start('approve')
+  //     Course.addUser(x.course.id, y.id)
+  //       .flatMap(() => User.addCourse(y.id, x.course.id))
+  //       .flatMap(() => Course.removeQueueEnroll(x.course.id, y.id))
+  //       .finally(() => { Loader.stop('approve') })
+  //       .subscribe()
+  //   },
+  //   reject (x, y) {
+  //     if (!window.confirm(`Reject ${y.name} from ${x.course.title} ?`)) return
+  //     Loader.start('reject')
+  //     Course.removeQueueEnroll(x.course.id, y.id)
+  //       .finally(() => { Loader.stop('reject') })
+  //       .subscribe()
+  //   }
+  // }
 }
 </script>
