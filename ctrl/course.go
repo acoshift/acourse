@@ -54,8 +54,8 @@ func (c *CourseController) Show(ctx *app.CourseShowContext) error {
 		return err
 	}
 
-	if enroll != nil {
-		return ctx.OK(ToCourseView(x, ToUserTinyView(owner), student, true))
+	if enroll != nil || ctx.CurrentUserID == x.Owner {
+		return ctx.OK(ToCourseView(x, ToUserTinyView(owner), student, enroll != nil, ctx.CurrentUserID == x.Owner))
 	}
 	return ctx.OKPublic(ToCoursePublicView(x, ToUserTinyView(owner), student))
 }

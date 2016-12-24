@@ -56,6 +56,7 @@ type CourseView struct {
 	Student          int                         `json:"student"`
 	Contents         CourseContentCollectionView `json:"contents"`
 	Enrolled         bool                        `json:"enrolled"`
+	Owned            bool                        `json:"owned"`
 }
 
 // CoursePublicView type

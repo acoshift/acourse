@@ -47,7 +47,7 @@ func ToRoleView(m *store.Role) *app.RoleView {
 }
 
 // ToCourseView builds a CourseView from a Course model
-func ToCourseView(m *store.Course, owner *app.UserTinyView, student int, enrolled bool) *app.CourseView {
+func ToCourseView(m *store.Course, owner *app.UserTinyView, student int, enrolled bool, owned bool) *app.CourseView {
 	return &app.CourseView{
 		ID:               m.ID,
 		CreatedAt:        m.CreatedAt,
@@ -66,6 +66,7 @@ func ToCourseView(m *store.Course, owner *app.UserTinyView, student int, enrolle
 		Student:          student,
 		Contents:         ToCourseContentCollectionView(m.Contents),
 		Enrolled:         enrolled,
+		Owned:            owned,
 	}
 }
 
