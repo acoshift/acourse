@@ -173,8 +173,8 @@ func (ctx *CourseUpdateContext) NotFound() error {
 	return handleNotFound(ctx.context)
 }
 
-// Forbidded sends HTTP response
-func (ctx *CourseUpdateContext) Forbidded() error {
+// Forbidden sends HTTP response
+func (ctx *CourseUpdateContext) Forbidden() error {
 	return handleForbidden(ctx.context)
 }
 
@@ -252,4 +252,64 @@ func (ctx *PaymentListContext) OK(r PaymentCollectionView) error {
 // Forbidden sends HTTP response
 func (ctx *PaymentListContext) Forbidden() error {
 	return handleForbidden(ctx.context)
+}
+
+// PaymentApproveContext provides the payment approve action context
+type PaymentApproveContext struct {
+	context       echo.Context
+	CurrentUserID string
+	PaymentID     string
+}
+
+// NewPaymentApproveContext parses the incoming request and create context
+func NewPaymentApproveContext(ctx echo.Context) (*PaymentApproveContext, error) {
+	rctx := PaymentApproveContext{context: ctx}
+	rctx.CurrentUserID, _ = ctx.Get(keyCurrentUserID).(string)
+	rctx.PaymentID = ctx.Param("paymentID")
+	return &rctx, nil
+}
+
+// Forbidden sends HTTP response
+func (ctx *PaymentApproveContext) Forbidden() error {
+	return handleForbidden(ctx.context)
+}
+
+// NotFound sends HTTP response
+func (ctx *PaymentApproveContext) NotFound() error {
+	return handleNotFound(ctx.context)
+}
+
+// NoContent sends HTTP response
+func (ctx *PaymentApproveContext) NoContent() error {
+	return handleNoContent(ctx.context)
+}
+
+// PaymentRejectContext provides the payment reject action context
+type PaymentRejectContext struct {
+	context       echo.Context
+	CurrentUserID string
+	PaymentID     string
+}
+
+// NewPaymentRejectContext parses the incoming request and create context
+func NewPaymentRejectContext(ctx echo.Context) (*PaymentRejectContext, error) {
+	rctx := PaymentRejectContext{context: ctx}
+	rctx.CurrentUserID, _ = ctx.Get(keyCurrentUserID).(string)
+	rctx.PaymentID = ctx.Param("paymentID")
+	return &rctx, nil
+}
+
+// Forbidden sends HTTP response
+func (ctx *PaymentRejectContext) Forbidden() error {
+	return handleForbidden(ctx.context)
+}
+
+// NotFound sends HTTP response
+func (ctx *PaymentRejectContext) NotFound() error {
+	return handleNotFound(ctx.context)
+}
+
+// NoContent sends HTTP response
+func (ctx *PaymentRejectContext) NoContent() error {
+	return handleNoContent(ctx.context)
 }

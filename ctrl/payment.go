@@ -47,3 +47,67 @@ func (c *PaymentController) List(ctx *app.PaymentListContext) error {
 
 	return ctx.OK(res)
 }
+
+// Approve runs approve action
+func (c *PaymentController) Approve(ctx *app.PaymentApproveContext) error {
+	role, err := c.db.RoleFindByUserID(ctx.CurrentUserID)
+	if err != nil {
+		return err
+	}
+	if !role.Admin {
+		return ctx.Forbidden()
+	}
+
+	payment, err := c.db.PaymentGet(ctx.PaymentID)
+	if err != nil {
+		return err
+	}
+	if payment == nil {
+		return ctx.NotFound()
+	}
+	payment.Status = store.PaymentStatusApproved
+
+	// Add user to enroll
+	enroll := &store.Enroll{
+		UserID:   payment.UserID,
+		CourseID: payment.CourseID,
+	}
+	err = c.db.EnrollSave(enroll)
+	if err != nil {
+		return err
+	}
+
+	err = c.db.PaymentSave(payment)
+	if err != nil {
+		return err
+	}
+
+	return ctx.NoContent()
+}
+
+// Reject runs reject action
+func (c *PaymentController) Reject(ctx *app.PaymentRejectContext) error {
+	role, err := c.db.RoleFindByUserID(ctx.CurrentUserID)
+	if err != nil {
+		return err
+	}
+	if !role.Admin {
+		return ctx.Forbidden()
+	}
+
+	payment, err := c.db.PaymentGet(ctx.PaymentID)
+	if err != nil {
+		return err
+	}
+	if payment == nil {
+		return ctx.NotFound()
+	}
+	payment.Status = store.PaymentStatusRejected
+
+	err = c.db.PaymentSave(payment)
+	if err != nil {
+		return err
+	}
+
+	return ctx.NoContent()
+}

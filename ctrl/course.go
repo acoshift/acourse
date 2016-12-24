@@ -74,7 +74,7 @@ func (c *CourseController) Update(ctx *app.CourseUpdateContext) error {
 		return ctx.NotFound()
 	}
 	if course.Owner != ctx.CurrentUserID || !role.Admin {
-		return ctx.Forbidded()
+		return ctx.Forbidden()
 	}
 
 	// merge course with payload

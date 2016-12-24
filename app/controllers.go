@@ -130,6 +130,8 @@ func MountCourseController(service *echo.Echo, ctrl CourseController) {
 // PaymentController is the controller interface for payment actions
 type PaymentController interface {
 	List(*PaymentListContext) error
+	Approve(*PaymentApproveContext) error
+	Reject(*PaymentRejectContext) error
 }
 
 // MountPaymentController mount a Payment resource controller on the given service
@@ -143,6 +145,28 @@ func MountPaymentController(service *echo.Echo, ctrl PaymentController) {
 			return handleUnauthorized(ctx)
 		}
 		return ctrl.List(rctx)
+	})
+
+	service.PUT("/api/payment/approve", func(ctx echo.Context) error {
+		rctx, err := NewPaymentApproveContext(ctx)
+		if err != nil {
+			return handleError(ctx, err)
+		}
+		if rctx.CurrentUserID == "" {
+			return handleUnauthorized(ctx)
+		}
+		return ctrl.Approve(rctx)
+	})
+
+	service.PUT("/api/payment/reject", func(ctx echo.Context) error {
+		rctx, err := NewPaymentRejectContext(ctx)
+		if err != nil {
+			return handleError(ctx, err)
+		}
+		if rctx.CurrentUserID == "" {
+			return handleUnauthorized(ctx)
+		}
+		return ctrl.Reject(rctx)
 	})
 }
 
