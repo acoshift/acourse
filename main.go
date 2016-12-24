@@ -23,7 +23,7 @@ func main() {
 		AllowCredentials: false,
 		AllowHeaders:     []string{echo.HeaderAuthorization, echo.HeaderContentType},
 		AllowMethods:     []string{echo.GET, echo.POST, echo.PATCH, echo.PUT, echo.DELETE},
-		AllowOrigins:     []string{"http://localhost:9000", "https://acourse.io"},
+		AllowOrigins:     []string{"http://localhost:9000", "https://acourse.io", "http://localhost:8080"},
 		MaxAge:           3600,
 	}))
 
@@ -36,6 +36,7 @@ func main() {
 	app.MountUserController(service, ctrl.NewUserController(db))
 	app.MountCourseController(service, ctrl.NewCourseController(db))
 	app.MountPaymentController(service, ctrl.NewPaymentController(db))
+	app.MountRenderController(service, ctrl.NewRenderController(db))
 
 	if err := service.Start(":8080"); err != nil {
 		service.Logger.Fatal(err)

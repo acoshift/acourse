@@ -138,3 +138,10 @@ type PaymentView struct {
 
 // PaymentCollectionView type
 type PaymentCollectionView []*PaymentView
+
+// RenderIndexView type
+type RenderIndexView struct {
+	Title       string
+	Description string
+	Image       string
+}

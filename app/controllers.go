@@ -1,7 +1,12 @@
 package app
 
-import "github.com/labstack/echo"
-import "net/http"
+import (
+	"io"
+	"net/http"
+
+	"github.com/labstack/echo"
+	"github.com/unrolled/render"
+)
 
 // Errors
 var (
@@ -167,6 +172,45 @@ func MountPaymentController(service *echo.Echo, ctrl PaymentController) {
 			return handleUnauthorized(ctx)
 		}
 		return ctrl.Reject(rctx)
+	})
+}
+
+// RenderController is the controller interface for render actions
+type RenderController interface {
+	Index(*RenderIndexContext) error
+	Course(*RenderCourseContext) error
+}
+
+// Render wraps render.Render
+type Render struct {
+	r *render.Render
+}
+
+// Render implements echo.Renderer
+func (r *Render) Render(w io.Writer, name string, data interface{}, ctx echo.Context) error {
+	return r.r.HTML(w, http.StatusOK, name, data)
+}
+
+// MountRenderController mount a Render template controller on the given resource
+func MountRenderController(service *echo.Echo, ctrl RenderController) {
+	service.Renderer = &Render{r: render.New()}
+
+	service.Static("/static", "public")
+
+	service.GET("/course/:courseID", func(ctx echo.Context) error {
+		rctx, err := NewRenderCourseContext(ctx)
+		if err != nil {
+			return err
+		}
+		return ctrl.Course(rctx)
+	})
+
+	service.GET("*", func(ctx echo.Context) error {
+		rctx, err := NewRenderIndexContext(ctx)
+		if err != nil {
+			return err
+		}
+		return ctrl.Index(rctx)
 	})
 }
 

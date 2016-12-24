@@ -313,3 +313,43 @@ func (ctx *PaymentRejectContext) NotFound() error {
 func (ctx *PaymentRejectContext) NoContent() error {
 	return handleNoContent(ctx.context)
 }
+
+// RenderIndexContext provides the render index action context
+// use for render static file
+type RenderIndexContext struct {
+	context echo.Context
+}
+
+// NewRenderIndexContext parses the incoming request and create context
+func NewRenderIndexContext(ctx echo.Context) (*RenderIndexContext, error) {
+	rctx := RenderIndexContext{context: ctx}
+	return &rctx, nil
+}
+
+// OK sends HTTP response
+func (ctx *RenderIndexContext) OK(r *RenderIndexView) error {
+	return ctx.context.Render(http.StatusOK, "index", r)
+}
+
+// RenderCourseContext provides the render course action context
+type RenderCourseContext struct {
+	context  echo.Context
+	CourseID string
+}
+
+// NewRenderCourseContext parses the incoming request and create context
+func NewRenderCourseContext(ctx echo.Context) (*RenderCourseContext, error) {
+	rctx := RenderCourseContext{context: ctx}
+	rctx.CourseID = ctx.Param("courseID")
+	return &rctx, nil
+}
+
+// OK sends HTTP response
+func (ctx *RenderCourseContext) OK(r *RenderIndexView) error {
+	return ctx.context.Render(http.StatusOK, "index", r)
+}
+
+// NotFound redirect to home page
+func (ctx *RenderCourseContext) NotFound() error {
+	return ctx.context.Redirect(http.StatusTemporaryRedirect, "/")
+}
