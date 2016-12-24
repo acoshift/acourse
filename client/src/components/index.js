@@ -9,7 +9,7 @@ import Course from './Course'
 import CourseAttend from './CourseAttend'
 import CourseAssignment from './CourseAssignment'
 import CourseAssignmentEdit from './CourseAssignmentEdit'
-import QueueEnroll from './QueueEnroll'
+import AdminPayment from './AdminPayment'
 
 export {
   Layout,
@@ -23,5 +23,5 @@ export {
   CourseAttend,
   CourseAssignment,
   CourseAssignmentEdit,
-  QueueEnroll
+  AdminPayment
 }

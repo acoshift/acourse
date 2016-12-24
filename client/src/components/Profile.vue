@@ -19,13 +19,13 @@
       <h3 class="ui header">My Own Courses</h3>
       <router-link class="ui blue button" to="/course/new">Create new course</router-link>
       <div class="ui four stackable cards" v-if="ownCourses">
-        <course-card v-for="x in ownCourses" :course="x"></course-card>
+        <course-card v-for="x in ownCourses" :course="x" :hidePrice="true"></course-card>
       </div>
     </div>
     <div class="ui segment" :class="{loading: !courses}">
       <h3 class="ui header">My Courses</h3>
       <div class="ui four stackable cards">
-        <course-card v-for="x in courses" :course="x"></course-card>
+        <course-card v-for="x in courses" :course="x" :hidePrice="true"></course-card>
       </div>
     </div>
   </div>

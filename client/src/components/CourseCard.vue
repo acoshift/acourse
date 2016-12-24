@@ -17,7 +17,8 @@
       <div class="right floated">
         <i class="user icon"></i> {{ course.student }}
       </div>
-      <span v-if="course.price" class="price">฿ {{ course.price | money }}</span>
+      <span v-if="!hidePrice && !course.discount && course.price" class="price" :class="{line: course.discount}">฿ {{ course.price | money }}</span>
+      <span v-if="!hidePrice && course.discount" class="discount price">&nbsp;฿ {{ course.discountedPrice | money }}</span>
     </div>
   </router-link>
 </template>
@@ -36,6 +37,15 @@
   .price {
     font-size: 1.3em;
   }
+
+  .discount.price {
+    color: red;
+  }
+
+  .price.line {
+    text-decoration: line-through;
+    font-size: 1.0em !important;
+  }
 </style>
 
 <script>
@@ -44,6 +54,10 @@ export default {
     course: {
       type: Object,
       required: true
+    },
+    hidePrice: {
+      type: Boolean,
+      required: false
     }
   },
   computed: {

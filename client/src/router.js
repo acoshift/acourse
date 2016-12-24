@@ -19,7 +19,7 @@ import {
   CourseAttend,
   CourseAssignment,
   CourseAssignmentEdit,
-  QueueEnroll
+  AdminPayment
 } from './components'
 
 Vue.use(VueRouter)
@@ -49,7 +49,7 @@ const router = new VueRouter({
             { path: 'assignment/edit', component: CourseAssignmentEdit, name: 'courseAssignmentEdit', beforeEnter: redirectIfNotAuth }
           ]
         },
-        { path: '/queue-enroll', component: QueueEnroll, beforeEnter: redirectIfNotAuth }
+        { path: '/admin/payment', component: AdminPayment, beforeEnter: redirectIfNotAuth }
       ]
     },
     { path: '*', redirect: '/' }

@@ -3,7 +3,7 @@
     <course-header :course="course" v-if="course"></course-header>
     <course-apply-panel v-if="course && !course.enrolled && !course.owned && course.enroll" :course="course"></course-apply-panel>
     <course-owner-panel v-if="course && course.owned" :course="course"></course-owner-panel>
-    <course-student-panel v-if="course && course.enrolled" :course="course"></course-student-panel>
+    <!-- <course-student-panel v-if="course && course.enrolled" :course="course"></course-student-panel> -->
     <course-video v-if="(course && course.video) && (course.enrolled || course.owned)" :src="course.video"></course-video>
     <course-detail :course="course" v-if="course"></course-detail>
     <course-content :contents="course.contents" v-if="course && course.contents"></course-content>

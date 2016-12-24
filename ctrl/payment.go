@@ -17,7 +17,7 @@ func NewPaymentController(db *store.DB) *PaymentController {
 
 // List runs list action
 func (c *PaymentController) List(ctx *app.PaymentListContext) error {
-	role, err := c.db.RoleGet(ctx.CurrentUserID)
+	role, err := c.db.RoleFindByUserID(ctx.CurrentUserID)
 	if err != nil {
 		return err
 	}

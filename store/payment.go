@@ -37,7 +37,7 @@ func (c *DB) PaymentList(status PaymentStatus) ([]*Payment, error) {
 	var xs []*Payment
 	q := datastore.
 		NewQuery(kindPayment).
-		Filter("Status =", status)
+		Filter("Status =", string(status))
 
 	keys, err := c.getAll(ctx, q, &xs)
 	if err != nil {

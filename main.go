@@ -35,6 +35,7 @@ func main() {
 	app.MountHealthController(service, ctrl.NewHealthController())
 	app.MountUserController(service, ctrl.NewUserController(db))
 	app.MountCourseController(service, ctrl.NewCourseController(db))
+	app.MountPaymentController(service, ctrl.NewPaymentController(db))
 
 	if err := service.Start(":8080"); err != nil {
 		service.Logger.Fatal(err)

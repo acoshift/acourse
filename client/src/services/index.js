@@ -7,6 +7,7 @@ import Loader from './loader'
 import Document from './document'
 import Me from './me'
 import Assignment from './assignment'
+import Payment from './payment'
 
 export {
   Firebase,
@@ -17,5 +18,6 @@ export {
   Loader,
   Document,
   Me,
-  Assignment
+  Assignment,
+  Payment
 }

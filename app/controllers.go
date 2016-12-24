@@ -147,7 +147,7 @@ func MountPaymentController(service *echo.Echo, ctrl PaymentController) {
 		return ctrl.List(rctx)
 	})
 
-	service.PUT("/api/payment/approve", func(ctx echo.Context) error {
+	service.PUT("/api/payment/:paymentID/approve", func(ctx echo.Context) error {
 		rctx, err := NewPaymentApproveContext(ctx)
 		if err != nil {
 			return handleError(ctx, err)
@@ -158,7 +158,7 @@ func MountPaymentController(service *echo.Echo, ctrl PaymentController) {
 		return ctrl.Approve(rctx)
 	})
 
-	service.PUT("/api/payment/reject", func(ctx echo.Context) error {
+	service.PUT("/api/payment/:paymentID/reject", func(ctx echo.Context) error {
 		rctx, err := NewPaymentRejectContext(ctx)
 		if err != nil {
 			return handleError(ctx, err)
