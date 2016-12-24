@@ -1,10 +1,10 @@
 <template>
-  <div class="ui card">
-    <router-link class="image" :to="`/course/${url}`">
+  <router-link class="ui card" :to="`/course/${url}`">
+    <div class="image" :to="`/course/${url}`">
       <img :src="course.photo">
-    </router-link>
+    </div>
     <div class="content">
-      <router-link class="header" :to="`/course/${url}`">{{ course.title | trim(45) }}</router-link>
+      <div class="header" :to="`/course/${url}`">{{ course.title | trim(45) }}</div>
       <div class="meta">
         <span v-if="course.type === 'video'">Video</span>
         <span v-if="course.type === 'live'" class="date">Live start at {{ course.start | date('DD/MM/YYYY') }}</span>
@@ -17,9 +17,9 @@
       <div class="right floated">
         <i class="user icon"></i> {{ course.student }}
       </div>
-      <span v-if="course.price">฿ {{ course.price | money }}</span>
+      <span v-if="course.price" class="price">฿ {{ course.price | money }}</span>
     </div>
-  </div>
+  </router-link>
 </template>
 
 <style scoped>
@@ -31,6 +31,10 @@
 
   .card > .content > .header {
     font-size: 1.2em !important;
+  }
+
+  .price {
+    font-size: 1.3em;
   }
 </style>
 

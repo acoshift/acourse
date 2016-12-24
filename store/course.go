@@ -29,12 +29,7 @@ type Course struct {
 		Purchase   bool
 		Discount   bool
 	}
-	Contents    []CourseContent `datastore:",noindex"`
-	Assignments []struct {
-		Title       string `datastore:",noindex"`
-		Description string `datastore:",noindex"`
-		Open        bool   `datastore:",noindex"`
-	} `datastore:",noindex"`
+	Contents []CourseContent `datastore:",noindex"`
 }
 
 // CourseContent type
