@@ -67,6 +67,11 @@ func ToCourseView(m *store.Course, owner *app.UserTinyView, student int, enrolle
 		Contents:         ToCourseContentCollectionView(m.Contents),
 		Enrolled:         enrolled,
 		Owned:            owned,
+		Enroll:           m.Options.Enroll,
+		Public:           m.Options.Public,
+		Attend:           m.Options.Attend,
+		Assignment:       m.Options.Assignment,
+		Purchase:         m.Options.Purchase,
 	}
 }
 
@@ -88,6 +93,8 @@ func ToCoursePublicView(m *store.Course, owner *app.UserTinyView, student int) *
 		Price:            m.Price,
 		DiscountedPrice:  m.DiscountedPrice,
 		Student:          student,
+		Enroll:           m.Options.Enroll,
+		Purchase:         m.Options.Purchase,
 	}
 }
 

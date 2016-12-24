@@ -21,9 +21,12 @@ type CoursePayload struct {
 	Start            time.Time
 	Video            string
 	Type             string
-	Price            float64
-	DiscountedPrice  *float64
 	Contents         []*CourseContentPayload
+	Enroll           bool
+	Public           bool
+	Attend           bool
+	Assignment       bool
+	Purchase         bool
 }
 
 // CourseContentPayload type

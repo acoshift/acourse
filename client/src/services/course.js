@@ -13,7 +13,6 @@ import toPairs from 'lodash/fp/toPairs'
 import orderBy from 'lodash/fp/orderBy'
 import reverse from 'lodash/fp/reverse'
 import reduce from 'lodash/fp/reduce'
-import filter from 'lodash/fp/filter'
 import isEmpty from 'lodash/fp/isEmpty'
 
 const reduceNoCap = reduce.convert({ cap: false })
@@ -24,21 +23,12 @@ export default {
   },
   get (url) {
     return API.get(`/course/${url}`)
-      .flatMap((course) => course ? Observable.of(course) : Observable.throw(new Error('Course not found')))
   },
   create (data) {
-    data.timestamp = Firebase.timestamp
-    return Firebase.push('course', data)
-      .map((snapshot) => snapshot.key)
+    return API.post('/course', data, true)
   },
   save (id, data) {
-    return Firebase.update(`course/${id}`, data)
-  },
-  content (id) {
-    return Firebase.onArrayValue(`content/${id}`)
-  },
-  saveContent (id, data) {
-    return Firebase.set(`content/${id}`, data)
+    return API.patch(`/course/${id}`, data)
   },
   enroll (id, userId, code) {
     return Firebase.set(`course-private/${id}/enroll/${userId}`, code)
@@ -79,16 +69,6 @@ export default {
       .map((course) => course.attend)
       .flatMap((code) => Firebase.onValue(`attend/${id}/${code}/${userId}`))
       .map((x) => !!x)
-  },
-  codes (id) {
-    return Firebase.onValue(`course-private/${id}/code`)
-      .map(keys)
-  },
-  saveCodes (id, codes) {
-    return Firebase.set(`course-private/${id}/code`, flow(
-      filter((x) => !!x),
-      reduce((p, v) => { p[v] = true; return p }, {})
-    )(codes))
   },
   setQueueEnroll (id, userId, url) {
     return Firebase.set(`queue-enroll/${id}/${userId}`, {

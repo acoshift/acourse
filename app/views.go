@@ -56,7 +56,12 @@ type CourseView struct {
 	Student          int                         `json:"student"`
 	Contents         CourseContentCollectionView `json:"contents"`
 	Enrolled         bool                        `json:"enrolled"`
+	Enroll           bool                        `json:"enroll"`
+	Public           bool                        `json:"public"`
 	Owned            bool                        `json:"owned"`
+	Attend           bool                        `json:"attend"`
+	Assignment       bool                        `json:"assignment"`
+	Purchase         bool                        `json:"purchase"`
 }
 
 // CoursePublicView type
@@ -76,6 +81,8 @@ type CoursePublicView struct {
 	Price            float64       `json:"price"`
 	DiscountedPrice  *float64      `json:"discountedPrice,omitempty"`
 	Student          int           `json:"student"`
+	Enroll           bool          `json:"enroll"`
+	Purchase         bool          `json:"purchase"`
 }
 
 // CourseTinyView type
