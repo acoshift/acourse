@@ -24,7 +24,7 @@ func (c *PaymentController) List(ctx *app.PaymentListContext) error {
 
 	// only admin can access
 	if !role.Admin {
-		return ctx.Forbidded()
+		return ctx.Forbidden()
 	}
 
 	xs, err := c.db.PaymentList(store.PaymentStatusWaiting)

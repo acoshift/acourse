@@ -88,3 +88,26 @@ func (c *DB) PaymentGet(paymentID string) (*Payment, error) {
 
 	return &x, nil
 }
+
+// PaymentFind finds a payment with user id and course id
+func (c *DB) PaymentFind(userID, courseID string, status PaymentStatus) (*Payment, error) {
+	ctx, cancel := getContext()
+	defer cancel()
+
+	q := datastore.
+		NewQuery(kindPayment).
+		Filter("UserID =", userID).
+		Filter("CourseID =", courseID).
+		Filter("Status =", status).
+		Limit(1)
+
+	var x Payment
+	err := c.findFirst(ctx, q, &x)
+	if notFound(err) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &x, nil
+}

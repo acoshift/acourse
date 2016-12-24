@@ -216,6 +216,21 @@ func NewCourseEnrollContext(ctx echo.Context) (*CourseEnrollContext, error) {
 	return &rctx, nil
 }
 
+// NoContent sends HTTP response
+func (ctx *CourseEnrollContext) NoContent() error {
+	return handleNoContent(ctx.context)
+}
+
+// Forbidden sends HTTP response
+func (ctx *CourseEnrollContext) Forbidden() error {
+	return handleForbidden(ctx.context)
+}
+
+// NotFound sends HTTP response
+func (ctx *CourseEnrollContext) NotFound() error {
+	return handleNotFound(ctx.context)
+}
+
 // PaymentListContext provides the payment list action context
 type PaymentListContext struct {
 	context       echo.Context
@@ -234,7 +249,7 @@ func (ctx *PaymentListContext) OK(r PaymentCollectionView) error {
 	return ctx.context.JSON(http.StatusOK, r)
 }
 
-// Forbidded sends HTTP response
-func (ctx *PaymentListContext) Forbidded() error {
+// Forbidden sends HTTP response
+func (ctx *PaymentListContext) Forbidden() error {
 	return handleForbidden(ctx.context)
 }

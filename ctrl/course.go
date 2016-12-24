@@ -173,5 +173,61 @@ func (c *CourseController) List(ctx *app.CourseListContext) error {
 
 // Enroll runs enroll action
 func (c *CourseController) Enroll(ctx *app.CourseEnrollContext) error {
-	return nil
+	course, err := c.db.CourseGet(ctx.CourseID)
+	if err != nil {
+		return err
+	}
+	if course == nil {
+		return ctx.NotFound()
+	}
+
+	// owner can not enroll
+	if course.Owner == ctx.CurrentUserID {
+		return ctx.Forbidden()
+	}
+
+	// check is user already enrolled
+	enroll, err := c.db.EnrollFind(ctx.CurrentUserID, ctx.CourseID)
+	if err != nil {
+		return err
+	}
+	if enroll != nil {
+		// user already enroll
+		return ctx.Forbidden()
+	}
+
+	// check is user already send waiting payment
+	payment, err := c.db.PaymentFind(ctx.CurrentUserID, ctx.CourseID, store.PaymentStatusWaiting)
+	if err != nil {
+		return err
+	}
+	if payment != nil {
+		// user already send payment
+		// wait admin to accept or reject to send another payment for this course
+		return ctx.Forbidden()
+	}
+
+	// calculate price
+	originalPrice := course.Price
+	if course.Options.Discount {
+		originalPrice = course.DiscountedPrice
+	}
+	// TODO: calculate code
+
+	// create payment
+	payment = &store.Payment{
+		CourseID:      ctx.CourseID,
+		UserID:        ctx.CurrentUserID,
+		OriginalPrice: originalPrice,
+		Price:         originalPrice,
+		Code:          ctx.Payload.Code,
+		URL:           ctx.Payload.URL,
+	}
+
+	err = c.db.PaymentSave(payment)
+	if err != nil {
+		return err
+	}
+
+	return ctx.NoContent()
 }
