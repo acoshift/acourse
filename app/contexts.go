@@ -34,10 +34,10 @@ type UserShowContext struct {
 
 // NewUserShowContext parses the incoming request and create context
 func NewUserShowContext(ctx echo.Context) (*UserShowContext, error) {
-	var err error
 	rctx := UserShowContext{context: ctx}
+	rctx.CurrentUserID, _ = ctx.Get(keyCurrentUserID).(string)
 	rctx.UserID = ctx.Param("userID")
-	return &rctx, err
+	return &rctx, nil
 }
 
 // NotFound sends a HTTP response
@@ -70,10 +70,10 @@ type UserUpdateContext struct {
 
 // NewUserUpdateContext parses the incoming request and create context
 func NewUserUpdateContext(ctx echo.Context) (*UserUpdateContext, error) {
-	var err error
 	rctx := UserUpdateContext{context: ctx}
+	rctx.CurrentUserID, _ = ctx.Get(keyCurrentUserID).(string)
 	rctx.UserID = ctx.Param("userID")
-	return &rctx, err
+	return &rctx, nil
 }
 
 // NoContent sends a HTTP response
@@ -119,8 +119,8 @@ type CourseShowContext struct {
 // NewCourseShowContext parses the incoming request and create context
 func NewCourseShowContext(ctx echo.Context) (*CourseShowContext, error) {
 	rctx := CourseShowContext{context: ctx}
-	rctx.CourseID = ctx.Param("courseID")
 	rctx.CurrentUserID, _ = ctx.Get(keyCurrentUserID).(string)
+	rctx.CourseID = ctx.Param("courseID")
 	return &rctx, nil
 }
 
@@ -150,6 +150,7 @@ type CourseUpdateContext struct {
 // NewCourseUpdateContext parses the incoming request and create context
 func NewCourseUpdateContext(ctx echo.Context) (*CourseUpdateContext, error) {
 	rctx := CourseUpdateContext{context: ctx}
+	rctx.CurrentUserID, _ = ctx.Get(keyCurrentUserID).(string)
 	rctx.CourseID = ctx.Param("courseID")
 	return &rctx, nil
 }
@@ -166,12 +167,18 @@ func (ctx *CourseUpdateContext) NotFound() error {
 
 // CourseListContext provides the course list action context
 type CourseListContext struct {
-	context echo.Context
+	context       echo.Context
+	CurrentUserID string
+	Owner         string
+	Student       string
 }
 
 // NewCourseListContext parses the incoming request and create context
 func NewCourseListContext(ctx echo.Context) (*CourseListContext, error) {
 	rctx := CourseListContext{context: ctx}
+	rctx.CurrentUserID, _ = ctx.Get(keyCurrentUserID).(string)
+	rctx.Owner = ctx.QueryParam("owner")
+	rctx.Student = ctx.QueryParam("student")
 	return &rctx, nil
 }
 

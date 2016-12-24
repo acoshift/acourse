@@ -1,0 +1,16 @@
+{
+  "name": "Acourse",
+  "short_name": "Acourse",
+  "display": "standalone",
+  "icons": [
+    {
+      "src": "/static/acourse-120.png",
+      "type": "image/png",
+      "sizes": "120x120"
+    }
+  ],
+  "theme_color": "#336b87",
+  "background_color": "#336b87",
+  "start_url": "/?utm_source=homescreen",
+  "gcm_sender_id": "103953800507"
+}

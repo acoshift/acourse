@@ -1,7 +1,9 @@
 package ctrl
 
-import "acourse/store"
-import "acourse/app"
+import (
+	"acourse/app"
+	"acourse/store"
+)
 
 // CourseController implements CourseController interface
 type CourseController struct {
@@ -65,7 +67,53 @@ func (c *CourseController) Update(ctx *app.CourseUpdateContext) error {
 
 // List runs list action
 func (c *CourseController) List(ctx *app.CourseListContext) error {
-	xs, err := c.db.CourseList(store.CourseListOptionPublic(true))
+	var xs []*store.Course
+	var err error
+
+	// query with owner
+	if ctx.Owner != "" {
+		if ctx.Owner == ctx.CurrentUserID {
+			xs, err = c.db.CourseList(store.CourseListOptionOwner(ctx.Owner))
+		} else {
+			xs, err = c.db.CourseList(store.CourseListOptionOwner(ctx.Owner), store.CourseListOptionPublic(true))
+		}
+	} else if ctx.Student != "" {
+		if ctx.Student == ctx.CurrentUserID {
+			var enrolls []*store.Enroll
+			enrolls, err = c.db.EnrollListByUserID(ctx.Student)
+			if err != nil {
+				return err
+			}
+			ids := make([]string, len(enrolls))
+			for i, e := range enrolls {
+				ids[i] = e.CourseID
+			}
+			xs, err = c.db.CourseGetAllByIDs(ids)
+		} else {
+			var enrolls []*store.Enroll
+			enrolls, err = c.db.EnrollListByUserID(ctx.Student)
+			if err != nil {
+				return err
+			}
+			ids := make([]string, len(enrolls))
+			for i, e := range enrolls {
+				ids[i] = e.CourseID
+			}
+			var ts []*store.Course
+			ts, err = c.db.CourseGetAllByIDs(ids)
+			if err != nil {
+				return err
+			}
+			for _, t := range ts {
+				if t.Options.Public {
+					xs = append(xs, t)
+				}
+			}
+		}
+	} else {
+		xs, err = c.db.CourseList(store.CourseListOptionPublic(true))
+	}
+
 	if err != nil {
 		return err
 	}

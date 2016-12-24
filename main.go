@@ -19,8 +19,17 @@ func main() {
 	// globals middlewares
 	service.Use(middleware.Recover())
 	service.Use(middleware.Logger())
+	service.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowCredentials: false,
+		AllowHeaders:     []string{echo.HeaderAuthorization},
+		AllowMethods:     []string{echo.GET, echo.POST, echo.PATCH, echo.PUT, echo.DELETE},
+		AllowOrigins:     []string{"http://localhost:9000", "https://acourse.io"},
+		MaxAge:           3600,
+	}))
 
-	app.InitService(service, projectID)
+	if err := app.InitService(service, projectID); err != nil {
+		service.Logger.Fatal(err)
+	}
 
 	// mount controllers
 	app.MountHealthController(service, ctrl.NewHealthController())
@@ -28,6 +37,6 @@ func main() {
 	app.MountCourseController(service, ctrl.NewCourseController(db))
 
 	if err := service.Start(":8080"); err != nil {
-		service.Logger.Error(err)
+		service.Logger.Fatal(err)
 	}
 }
