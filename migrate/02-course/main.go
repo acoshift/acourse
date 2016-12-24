@@ -100,7 +100,9 @@ func main() {
 	}
 	log.Println("Migrated Courses")
 
-	db.EnrollCreateAll(es)
+	db.EnrollCreateAll(es[:400])
+	db.EnrollCreateAll(es[401:])
+	log.Println(len(es))
 	log.Println("Migrated Enrolls")
 
 	log.Println("Completed")

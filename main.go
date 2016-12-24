@@ -14,7 +14,7 @@ const projectID = "acourse-d9d0a"
 func main() {
 	service := echo.New()
 
-	db := store.NewDB(store.ProjectID(projectID))
+	db := store.NewDB(store.ProjectID(projectID), store.ServiceAccount("private/service_account.json"))
 
 	// globals middlewares
 	service.Use(middleware.Recover())
@@ -23,10 +23,10 @@ func main() {
 		AllowCredentials: false,
 		AllowHeaders:     []string{echo.HeaderAuthorization, echo.HeaderContentType},
 		AllowMethods:     []string{echo.GET, echo.POST, echo.PATCH, echo.PUT, echo.DELETE},
-		AllowOrigins:     []string{"https://acourse.io", "https://acourse-d9d0a.appspot.com"},
+		AllowOrigins:     []string{"https://acourse.io"},
 		MaxAge:           3600,
 	}))
-	service.Use(middleware.Gzip())
+	// service.Use(middleware.Gzip())
 
 	if err := app.InitService(service, projectID); err != nil {
 		service.Logger.Fatal(err)

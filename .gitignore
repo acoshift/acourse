@@ -2,6 +2,6 @@ acourse
 node_modules/
 public/
 templates/
-.private/
+private/
 .DS_Store
 build/

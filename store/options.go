@@ -1,5 +1,9 @@
 package store
 
+import (
+	"io/ioutil"
+)
+
 // Options type
 type Options struct {
 	ProjectID string
@@ -20,5 +24,16 @@ func ProjectID(projectID string) Option {
 func JSONKey(jsonKey []byte) Option {
 	return func(args *Options) {
 		args.JSONKey = jsonKey
+	}
+}
+
+// ServiceAccount sets jsonKey to options
+func ServiceAccount(fileName string) Option {
+	b, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		panic(err)
+	}
+	return func(args *Options) {
+		args.JSONKey = b
 	}
 }

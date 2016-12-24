@@ -35,12 +35,16 @@ build-server:
 pre-build: dep
 	mkdir -p build
 	curl https://curl.haxx.se/ca/cacert.pem > build/cacert.pem
-
-deploy: clean-build pre-build build-server project
-	cp -rf .private build/private
+	cp -rf private build/
 	cp -rf public build/
 	cp -rf templates build/
 	cp Dockerfile build/
-	cp app.yaml build/
-	# cd build && docker build -t acourse .
+
+deploy: clean-build pre-build build-server
+	cd build && docker build -t acourse .
+	docker tag acourse b.gcr.io/acoshift/acourse
+	gcloud docker -- push b.gcr.io/acoshift/acourse
+	curl http://52.77.156.5:8080/acourse.sh?key=XfwU58kx4Re5TGjck99CWV7DXrz27hYy
+
+gae: clean-build pre-build build-server project
 	cd build && gcloud app deploy
