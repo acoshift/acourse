@@ -4,3 +4,4 @@ public/
 templates/
 .private/
 .DS_Store
+build/

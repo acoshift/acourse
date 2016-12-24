@@ -23,9 +23,10 @@ func main() {
 		AllowCredentials: false,
 		AllowHeaders:     []string{echo.HeaderAuthorization, echo.HeaderContentType},
 		AllowMethods:     []string{echo.GET, echo.POST, echo.PATCH, echo.PUT, echo.DELETE},
-		AllowOrigins:     []string{"http://localhost:9000", "https://acourse.io", "http://localhost:8080"},
+		AllowOrigins:     []string{"https://acourse.io", "https://acourse-d9d0a.appspot.com"},
 		MaxAge:           3600,
 	}))
+	service.Use(middleware.Gzip())
 
 	if err := app.InitService(service, projectID); err != nil {
 		service.Logger.Fatal(err)

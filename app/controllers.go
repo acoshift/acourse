@@ -197,6 +197,8 @@ func MountRenderController(service *echo.Echo, ctrl RenderController) {
 
 	service.Static("/static", "public")
 
+	service.File("/favicon.ico", "public/acourse-120.png")
+
 	service.GET("/course/:courseID", func(ctx echo.Context) error {
 		rctx, err := NewRenderCourseContext(ctx)
 		if err != nil {
