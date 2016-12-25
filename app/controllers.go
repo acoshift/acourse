@@ -228,13 +228,16 @@ func MountRenderController(service *echo.Echo, ctrl RenderController) {
 		return ctrl.Course(rctx)
 	})
 
-	service.GET("*", func(ctx echo.Context) error {
+	h := func(ctx echo.Context) error {
 		rctx, err := NewRenderIndexContext(ctx)
 		if err != nil {
 			return err
 		}
 		return ctrl.Index(rctx)
-	})
+	}
+
+	service.GET("*", h)
+	service.GET("/course/:courseID/edit", h)
 }
 
 // UserIsAdminMiddleware is the middleware for autorization only admin user

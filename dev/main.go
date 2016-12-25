@@ -23,7 +23,7 @@ func main() {
 		AllowCredentials: false,
 		AllowHeaders:     []string{echo.HeaderAuthorization, echo.HeaderContentType},
 		AllowMethods:     []string{echo.GET, echo.POST, echo.PATCH, echo.PUT, echo.DELETE},
-		AllowOrigins:     []string{"http://localhost:9000"},
+		AllowOrigins:     []string{"http://localhost:9000", "http://localhost:8080"},
 		MaxAge:           3600,
 	}))
 
