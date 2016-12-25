@@ -1,4 +1,4 @@
-.PHONY: build client
+.PHONY: build client dev
 
 all: clean dep client build
 
@@ -19,7 +19,7 @@ run:
 	go run main.go
 
 dev:
-	go run maindev.go
+	go run dev/main.go
 
 client: clean-client
 	$(MAKE) -C client build

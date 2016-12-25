@@ -37,7 +37,7 @@ const router = new VueRouter({
         { path: '', component: Home },
         { path: '/profile', component: Profile, beforeEnter: redirectIfNotAuth },
         { path: '/profile/edit', component: ProfileEdit, beforeEnter: redirectIfNotAuth },
-        { path: '/course/new', component: CourseEditor, name: 'courseNew', beforeEnter: isInstructor },
+        { path: '/course/new', component: CourseEditor, name: 'courseNew', beforeEnter: isRole('instructor') },
         {
           path: '/course/:id',
           component: Course,
@@ -49,7 +49,7 @@ const router = new VueRouter({
             { path: 'assignment/edit', component: CourseAssignmentEdit, name: 'courseAssignmentEdit', beforeEnter: redirectIfNotAuth }
           ]
         },
-        { path: '/admin/payment', component: AdminPayment, beforeEnter: redirectIfNotAuth }
+        { path: '/admin/payment', component: AdminPayment, beforeEnter: isRole('admin') }
       ]
     },
     { path: '*', redirect: '/' }
@@ -95,19 +95,21 @@ function redirectIfNotAuth (to, from, next) {
     )
 }
 
-function isInstructor (to, from, next) {
-  Loader.start('router')
-  Me.get()
-    .subscribe(
-      (user) => {
-        Loader.stop('router')
-        if (user && user.instructor) {
-          next()
-        } else {
-          next('/')
+function isRole (role) {
+  return (to, from, next) => {
+    Loader.start('router')
+    Me.get()
+      .subscribe(
+        (user) => {
+          Loader.stop('router')
+          if (user && user.role[role]) {
+            next()
+          } else {
+            next('/')
+          }
         }
-      }
-    )
+      )
+  }
 }
 
 export default router
