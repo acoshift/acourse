@@ -216,7 +216,14 @@ func (r *Render) Render(w io.Writer, name string, data interface{}, ctx echo.Con
 func MountRenderController(service *echo.Echo, ctrl RenderController) {
 	service.Renderer = &Render{r: render.New()}
 
-	service.Static("/static", "public")
+	cc := func(h echo.HandlerFunc) echo.HandlerFunc {
+		return func(ctx echo.Context) error {
+			ctx.Response().Header().Set("Cache-Control", "public, max-age=31536000")
+			return h(ctx)
+		}
+	}
+
+	service.Group("/static", cc).Static("", "public")
 
 	service.File("/favicon.ico", "public/acourse-120.png")
 
