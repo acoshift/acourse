@@ -7,15 +7,18 @@
             h2 FREE
           span(v-else)
             h2 ฿ {{ price }}
-      .row
+      .row(v-if="isAuth")
         .center.aligned.column
           .ui.blue.button(style="width: 200px;", :class="{loading: applying}", @click="apply", v-if="!purchased") Enroll
           .ui.blue.disabled.button(v-else) Wait for Approve
+      .row(v-else)
+        .center.aligned.column
+          .ui.red.disabled.button Sign In to Enroll
     apply-modal(ref="applyModal", :course="course", @refresh="$emit('refresh')")
 </template>
 
 <script>
-import { Course, Document } from '../services'
+import { Course, Document, Auth } from '../services'
 import ApplyModal from './ApplyModal'
 
 export default {
@@ -31,6 +34,11 @@ export default {
   data () {
     return {
       applying: false
+    }
+  },
+  subscriptions () {
+    return {
+      isAuth: Auth.currentUser().map((x) => !!x)
     }
   },
   methods: {
