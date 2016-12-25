@@ -72,6 +72,47 @@ func (c *CourseController) Show(ctx *app.CourseShowContext) error {
 	return ctx.OKPublic(ToCoursePublicView(x, ToUserTinyView(owner), student, purchaseStatus))
 }
 
+// Create runs create action
+func (c *CourseController) Create(ctx *app.CourseCreateContext) error {
+	role, err := c.db.RoleFindByUserID(ctx.CurrentUserID)
+	if err != nil {
+		return err
+	}
+	if !role.Instructor || !role.Admin {
+		return ctx.Forbidden()
+	}
+
+	user, err := c.db.UserGet(ctx.CurrentUserID)
+	if err != nil {
+		return err
+	}
+
+	course := &store.Course{
+		Title:            ctx.Payload.Title,
+		ShortDescription: ctx.Payload.ShortDescription,
+		Description:      ctx.Payload.Description,
+		Photo:            ctx.Payload.Photo,
+		Start:            ctx.Payload.Start,
+		Video:            ctx.Payload.Video,
+		Type:             store.CourseType(ctx.Payload.Type),
+		Contents:         ToCourseContents(ctx.Payload.Contents),
+		Options: store.CourseOption{
+			Enroll:     ctx.Payload.Enroll,
+			Public:     ctx.Payload.Public,
+			Attend:     ctx.Payload.Attend,
+			Assignment: ctx.Payload.Assignment,
+			Purchase:   ctx.Payload.Purchase,
+		},
+	}
+
+	err = c.db.CourseSave(course)
+	if err != nil {
+		return err
+	}
+
+	return ctx.OK(ToCourseView(course, ToUserTinyView(user), 0, false, true))
+}
+
 // Update runs update action
 func (c *CourseController) Update(ctx *app.CourseUpdateContext) error {
 	role, err := c.db.RoleFindByUserID(ctx.CurrentUserID)

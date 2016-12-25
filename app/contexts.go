@@ -147,6 +147,30 @@ func (ctx *CourseShowContext) NotFound() error {
 	return handleNotFound(ctx.context)
 }
 
+// CourseCreateContext provides the course create action context
+type CourseCreateContext struct {
+	context       echo.Context
+	CurrentUserID string
+	Payload       *CoursePayload
+}
+
+// NewCourseCreateContext parses the incoming request and create context
+func NewCourseCreateContext(ctx echo.Context) (*CourseCreateContext, error) {
+	rctx := CourseCreateContext{context: ctx}
+	rctx.CurrentUserID, _ = ctx.Get(keyCurrentUserID).(string)
+	return &rctx, nil
+}
+
+// OK sends HTTP response
+func (ctx *CourseCreateContext) OK(r *CourseView) error {
+	return handleOK(ctx.context, r)
+}
+
+// Forbidden sends HTTP response
+func (ctx *CourseCreateContext) Forbidden() error {
+	return handleForbidden(ctx.context)
+}
+
 // CourseUpdateContext provides the course update action context
 type CourseUpdateContext struct {
 	context       echo.Context

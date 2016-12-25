@@ -68,6 +68,7 @@ func MountHealthController(service *echo.Echo, ctrl HealthController) {
 // CourseController is the controller interface for course actions
 type CourseController interface {
 	Show(*CourseShowContext) error
+	Create(*CourseCreateContext) error
 	Update(*CourseUpdateContext) error
 	List(*CourseListContext) error
 	Enroll(*CourseEnrollContext) error
@@ -81,6 +82,26 @@ func MountCourseController(service *echo.Echo, ctrl CourseController) {
 			return handleError(ctx, err)
 		}
 		return ctrl.List(rctx)
+	})
+
+	service.POST("/api/course", func(ctx echo.Context) error {
+		rctx, err := NewCourseCreateContext(ctx)
+		if err != nil {
+			return handleError(ctx, err)
+		}
+		if rctx.CurrentUserID == "" {
+			return handleUnauthorized(ctx)
+		}
+		var rawPayload CourseRawPayload
+		err = ctx.Bind(&rawPayload)
+		if err != nil {
+			return handleError(ctx, ErrPayload(err))
+		}
+		if err = rawPayload.Validate(); err != nil {
+			return handleError(ctx, ErrPayload(err))
+		}
+		rctx.Payload = rawPayload.Payload()
+		return ctrl.Create(rctx)
 	})
 
 	service.GET("/api/course/:courseID", func(ctx echo.Context) error {
