@@ -21,6 +21,7 @@ export default {
   },
   create (data) {
     return API.post('/course', data, true)
+      .map(({ id }) => id)
   },
   save (id, data) {
     return API.patch(`/course/${id}`, data)

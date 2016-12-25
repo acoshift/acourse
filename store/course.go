@@ -69,6 +69,8 @@ type CourseListOption func(*CourseListOptions)
 
 const kindCourse = "Course"
 
+var cacheCourse = NewCache(time.Second * 10)
+
 /* CourseListOptions */
 
 // CourseListOptionOffset sets offset to options
@@ -120,6 +122,10 @@ func (c *DB) CourseGet(courseID string) (*Course, error) {
 		return nil, nil
 	}
 
+	if cache := cacheCourse.Get(courseID); cache != nil {
+		return cache.(*Course), nil
+	}
+
 	ctx, cancel := getContext()
 	defer cancel()
 
@@ -164,6 +170,8 @@ func (c *DB) CourseSave(x *Course) error {
 		return err
 	}
 	x.setKey(key)
+
+	cacheCourse.Del(x.ID)
 	return nil
 }
 
@@ -222,7 +230,12 @@ func (c *DB) CourseDelete(courseID string) error {
 	ctx, cancel := getContext()
 	defer cancel()
 
-	return c.client.Delete(ctx, datastore.IDKey(kindCourse, id, nil))
+	err := c.client.Delete(ctx, datastore.IDKey(kindCourse, id, nil))
+	if err != nil {
+		return err
+	}
+	cacheCourse.Del(courseID)
+	return nil
 }
 
 // CourseFind retrieves course from URL
