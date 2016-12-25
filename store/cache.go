@@ -27,7 +27,7 @@ func NewCache(ttl time.Duration) *Cache {
 func (c *Cache) Get(index string) interface{} {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
-	if c.ts[index] > 0 && c.ts[index]+c.ttl < time.Now().Unix() {
+	if c.ts[index] > 0 && c.ts[index]+c.ttl < time.Now().UnixNano() {
 		delete(c.data, index)
 		delete(c.ts, index)
 	}
@@ -39,7 +39,7 @@ func (c *Cache) Set(index string, value interface{}) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 	c.data[index] = value
-	c.ts[index] = time.Now().Unix()
+	c.ts[index] = time.Now().UnixNano()
 }
 
 // Del deletes cache data
