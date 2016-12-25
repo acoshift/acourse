@@ -18,6 +18,9 @@ clean-client:
 run:
 	go run main.go
 
+dev:
+	go run maindev.go
+
 client: clean-client
 	$(MAKE) -C client build
 	mv public/static/* public/

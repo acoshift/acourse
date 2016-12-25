@@ -23,7 +23,8 @@
 </template>
 
 <script>
-import { Auth, Me } from '../services'
+import { Auth, Me } from 'services'
+import { Observable } from 'rxjs/Observable'
 import UserAvatar from './UserAvatar'
 import AuthModal from './AuthModal'
 
@@ -34,7 +35,8 @@ export default {
   },
   subscriptions () {
     return {
-      user: Me.get()
+      user: Auth.currentUser()
+        .flatMap((user) => user ? Me.get() : Observable.of(null))
     }
   },
   updated () {
