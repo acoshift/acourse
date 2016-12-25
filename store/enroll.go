@@ -1,6 +1,8 @@
 package store
 
 import (
+	"time"
+
 	"cloud.google.com/go/datastore"
 )
 
@@ -13,6 +15,8 @@ type Enroll struct {
 }
 
 const kindEnroll = "Enroll"
+
+var cacheEnrollCount = NewCache(time.Hour)
 
 // EnrollFind finds enroll for given user id and course id
 func (c *DB) EnrollFind(userID, courseID string) (*Enroll, error) {
@@ -86,6 +90,7 @@ func (c *DB) EnrollSave(x *Enroll) error {
 		return err
 	}
 	x.setKey(commit.Key(pKey))
+	cacheEnrollCount.Del(x.CourseID)
 	return nil
 }
 
@@ -117,6 +122,10 @@ func (c *DB) EnrollPurge() error {
 
 // EnrollCourseCount counts enroll from course id
 func (c *DB) EnrollCourseCount(courseID string) (int, error) {
+	if cache := cacheEnrollCount.Get(courseID); cache != nil {
+		return cache.(int), nil
+	}
+
 	ctx, cancel := getContext()
 	defer cancel()
 
@@ -129,5 +138,8 @@ func (c *DB) EnrollCourseCount(courseID string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	return len(keys), nil
+	r := len(keys)
+
+	cacheEnrollCount.Set(courseID, r)
+	return r, nil
 }
