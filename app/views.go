@@ -61,7 +61,6 @@ type CourseView struct {
 	Owned            bool                        `json:"owned"`
 	Attend           bool                        `json:"attend"`
 	Assignment       bool                        `json:"assignment"`
-	Purchase         bool                        `json:"purchase"`
 	Discount         bool                        `json:"discount"`
 }
 
@@ -83,7 +82,6 @@ type CoursePublicView struct {
 	DiscountedPrice  float64       `json:"discountedPrice"`
 	Student          int           `json:"student"`
 	Enroll           bool          `json:"enroll"`
-	Purchase         bool          `json:"purchase"`
 	Discount         bool          `json:"discount"`
 	PurchaseStatus   string        `json:"purchaseStatus"`
 }

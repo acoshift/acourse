@@ -31,7 +31,6 @@ type CourseOption struct {
 	Enroll     bool `datastore:",noindex"`
 	Attend     bool `datastore:",noindex"`
 	Assignment bool `datastore:",noindex"`
-	Purchase   bool
 	Discount   bool
 }
 
