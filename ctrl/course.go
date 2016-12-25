@@ -95,6 +95,7 @@ func (c *CourseController) Create(ctx *app.CourseCreateContext) error {
 		Start:            ctx.Payload.Start,
 		Video:            ctx.Payload.Video,
 		Contents:         ToCourseContents(ctx.Payload.Contents),
+		Owner:            ctx.CurrentUserID,
 		Options: store.CourseOption{
 			Attend:     ctx.Payload.Attend,
 			Assignment: ctx.Payload.Assignment,
