@@ -96,13 +96,9 @@ func (c *CourseController) Update(ctx *app.CourseUpdateContext) error {
 	course.Photo = ctx.Payload.Photo
 	course.Start = ctx.Payload.Start
 	course.Video = ctx.Payload.Video
-	course.Type = store.CourseType(ctx.Payload.Type)
 	course.Contents = ToCourseContents(ctx.Payload.Contents)
-	course.Options.Enroll = ctx.Payload.Enroll
-	course.Options.Public = ctx.Payload.Public
 	course.Options.Attend = ctx.Payload.Attend
 	course.Options.Assignment = ctx.Payload.Assignment
-	course.Options.Purchase = ctx.Payload.Purchase
 
 	err = c.db.CourseSave(course)
 	if err != nil {

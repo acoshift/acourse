@@ -20,13 +20,9 @@ type CoursePayload struct {
 	Photo            string
 	Start            time.Time
 	Video            string
-	Type             string
 	Contents         []*CourseContentPayload
-	Enroll           bool
-	Public           bool
 	Attend           bool
 	Assignment       bool
-	Purchase         bool
 }
 
 // CourseContentPayload type
