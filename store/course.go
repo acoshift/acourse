@@ -70,6 +70,7 @@ type CourseListOption func(*CourseListOptions)
 const kindCourse = "Course"
 
 var cacheCourse = NewCache(time.Second * 10)
+var cacheCourseURL = NewCache(time.Minute)
 
 /* CourseListOptions */
 
@@ -141,6 +142,7 @@ func (c *DB) CourseGet(courseID string) (*Course, error) {
 		return nil, err
 	}
 	x.setKey(key)
+	cacheCourse.Set(courseID, &x)
 	return &x, nil
 }
 
@@ -240,6 +242,10 @@ func (c *DB) CourseDelete(courseID string) error {
 
 // CourseFind retrieves course from URL
 func (c *DB) CourseFind(courseURL string) (*Course, error) {
+	if cache := cacheCourseURL.Get(courseURL); cache != nil {
+		return c.CourseGet(cache.(string))
+	}
+
 	ctx, cancel := getContext()
 	defer cancel()
 
@@ -256,6 +262,7 @@ func (c *DB) CourseFind(courseURL string) (*Course, error) {
 	if err != nil {
 		return nil, err
 	}
+	cacheCourseURL.Set(courseURL, x.ID)
 	return &x, nil
 }
 
