@@ -35,7 +35,7 @@ clean-build:
 build-server:
 	env GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o build/acourse -a -ldflags '-s' main.go
 
-pre-build: dep
+pre-build: dep client
 	mkdir -p build
 	curl https://curl.haxx.se/ca/cacert.pem > build/cacert.pem
 	cp -rf private build/

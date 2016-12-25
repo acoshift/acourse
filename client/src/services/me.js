@@ -26,7 +26,8 @@ export default {
       .flatMap(({ uid }) => User.upload(uid, file))
   },
   update (data) {
-    return API.patch('/me', data)
+    return Auth.requireUser()
+      .flatMap(({ uid }) => API.patch(`/user/${uid}`, data))
   },
   addCourse (id) {
     return Auth.currentUser()

@@ -4,6 +4,12 @@ resources:
   cpu: .5
   memory_gb: .5
   disk_size_gb: 10
+health_check:
+  enable_health_check: true
+  check_interval_sec: 5
+  timeout_sec: 5
+  unhealthy_threshold: 2
+  healthy_threshold: 2
 automatic_scaling:
   min_num_instances: 1
-  max_num_instances: 1
+  max_num_instances: 2

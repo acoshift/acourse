@@ -94,9 +94,9 @@ func (ctx *UserUpdateContext) NotFound() error {
 	return handleNotFound(ctx.context)
 }
 
-// InternalServerError sends a HTTP response
-func (ctx *UserUpdateContext) InternalServerError(r error) error {
-	return handleError(ctx.context, r)
+// Forbidden sends a HTTP response
+func (ctx *UserUpdateContext) Forbidden() error {
+	return handleForbidden(ctx.context)
 }
 
 // HealthHealthContext provides the health health action context
