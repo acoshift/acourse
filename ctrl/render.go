@@ -21,6 +21,7 @@ func (c *RenderController) Index(ctx *app.RenderIndexContext) error {
 		Title:       "Acourse",
 		Description: "Online courses for everyone",
 		Image:       "https://acourse.io/static/acourse-og.jpg",
+		URL:         "https://acourse.io",
 	})
 }
 
@@ -37,6 +38,12 @@ func (c *RenderController) Course(ctx *app.RenderCourseContext) error {
 		Title:       course.Title,
 		Description: course.ShortDescription,
 		Image:       course.Photo,
+		URL:         "https://acourse.io/course/",
+	}
+	if course.URL != "" {
+		r.URL += course.URL
+	} else {
+		r.URL += course.ID
 	}
 
 	if r.Title == "" {

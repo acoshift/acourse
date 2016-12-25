@@ -142,4 +142,5 @@ type RenderIndexView struct {
 	Title       string
 	Description string
 	Image       string
+	URL         string
 }

@@ -285,7 +285,7 @@ func (c *DB) CourseGetAllByIDs(courseIDs []string) ([]*Course, error) {
 
 	xs := make([]*Course, len(keys))
 	err := c.client.GetMulti(ctx, keys, xs)
-	if err != nil {
+	if datastoreError(err) {
 		return nil, err
 	}
 	for i, x := range xs {

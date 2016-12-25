@@ -17,7 +17,7 @@ func NewUserController(db *store.DB) *UserController {
 
 // Show runs show action
 func (c *UserController) Show(ctx *app.UserShowContext) error {
-	x, err := c.db.UserFindUsername(ctx.UserID)
+	x, err := c.db.UserGet(ctx.UserID)
 	if err != nil {
 		return ctx.InternalServerError(err)
 	}

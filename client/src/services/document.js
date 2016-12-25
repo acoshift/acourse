@@ -2,7 +2,7 @@ import { Observable } from 'rxjs/Observable'
 import { Subject } from 'rxjs/Subject'
 
 const getOgElement = (property) => $(`meta[property="og\\:${property}"]`)
-const getContent = ($meta) => $meta.attr('content')
+// const getContent = ($meta) => $meta.attr('content')
 const setContent = ($meta, value) => $meta.attr('content', value)
 
 let $description = $('meta[name="description"]')
@@ -12,11 +12,11 @@ let $ogDescription = getOgElement('description')
 let $ogImage = getOgElement('image')
 
 let _title = 'Acourse'
-let _description = getContent($description)
-let _ogTitle = getContent($ogTitle)
-let _ogUrl = getContent($ogUrl)
-let _ogDescription = getContent($ogDescription)
-let _ogImage = getContent($ogImage)
+let _description = 'Online courses for everyone'
+let _ogTitle = 'Acourse'
+let _ogUrl = 'https://acourse.io'
+let _ogDescription = 'Online courses for everyone'
+let _ogImage = 'https://acourse.io/static/acourse-og.jpg'
 
 const title = (value) => { document.title = value ? `${value} | ${_title}` : `${_title}` }
 const description = (value) => { setContent($description, value || _description) }
