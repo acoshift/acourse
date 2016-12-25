@@ -53,11 +53,6 @@ func (ctx *UserShowContext) NotFound() error {
 	return handleNotFound(ctx.context)
 }
 
-// InternalServerError sends a HTTP response
-func (ctx *UserShowContext) InternalServerError(r error) error {
-	return handleError(ctx.context, r)
-}
-
 // OK sends a HTTP response
 func (ctx *UserShowContext) OK(r *UserView) error {
 	return handleOK(ctx.context, r)

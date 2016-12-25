@@ -17,22 +17,23 @@ func NewUserController(db *store.DB) *UserController {
 
 // Show runs show action
 func (c *UserController) Show(ctx *app.UserShowContext) error {
-	x, err := c.db.UserGet(ctx.UserID)
-	if err != nil {
-		return ctx.InternalServerError(err)
-	}
-	if x == nil {
-		return ctx.NotFound()
-	}
-
 	if ctx.CurrentUserID == ctx.UserID {
 		// show me view
 		role, err := c.db.RoleFindByUserID(ctx.UserID)
 		if err != nil {
-			return ctx.InternalServerError(err)
+			return err
 		}
+		x, err := c.db.UserMustGet(ctx.UserID)
 
 		return ctx.OKMe(ToUserMeView(x, ToRoleView(role)))
+	}
+
+	x, err := c.db.UserGet(ctx.UserID)
+	if err != nil {
+		return err
+	}
+	if x == nil {
+		return ctx.NotFound()
 	}
 
 	return ctx.OK(ToUserView(x))
@@ -49,7 +50,13 @@ func (c *UserController) Update(ctx *app.UserUpdateContext) error {
 		return ctx.Forbidden()
 	}
 
-	user, err := c.db.UserGet(ctx.UserID)
+	var user *store.User
+
+	if ctx.CurrentUserID == ctx.UserID {
+		user, err = c.db.UserMustGet(ctx.UserID)
+	} else {
+		user, err = c.db.UserGet(ctx.UserID)
+	}
 	if err != nil {
 		return err
 	}

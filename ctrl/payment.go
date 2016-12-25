@@ -34,7 +34,7 @@ func (c *PaymentController) List(ctx *app.PaymentListContext) error {
 
 	res := make(app.PaymentCollectionView, len(xs))
 	for i, x := range xs {
-		user, err := c.db.UserGet(x.UserID)
+		user, err := c.db.UserMustGet(x.UserID)
 		if err != nil {
 			return err
 		}

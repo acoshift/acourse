@@ -43,6 +43,20 @@ func (c *DB) UserGet(userID string) (*User, error) {
 	return &x, nil
 }
 
+// UserMustGet retrieves user from database
+// if not exists return empty user with given id
+func (c *DB) UserMustGet(userID string) (*User, error) {
+	x, err := c.UserGet(userID)
+	if err != nil {
+		return nil, err
+	}
+	if x == nil {
+		x = &User{}
+		x.setKey(datastore.NameKey(kindUser, userID, nil))
+	}
+	return x, nil
+}
+
 // UserFindUsername retrieves user from username from database
 func (c *DB) UserFindUsername(username string) (*User, error) {
 	ctx, cancel := getContext()
