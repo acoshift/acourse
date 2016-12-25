@@ -145,7 +145,7 @@ func (c *DB) CourseSave(x *Course) error {
 
 	// Check duplicate URL
 	if x.URL != "" {
-		if t, err := c.CourseFind(x.URL); t != nil || err != nil {
+		if t, err := c.CourseFind(x.URL); (t != nil && t.ID != x.ID) || err != nil {
 			if err != nil {
 				return err
 			}

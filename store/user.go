@@ -1,6 +1,7 @@
 package store
 
 import "cloud.google.com/go/datastore"
+import "time"
 
 // User model
 type User struct {
@@ -14,8 +15,14 @@ type User struct {
 
 const kindUser = "User"
 
+var cacheUser = NewCache(time.Hour)
+
 // UserGet retrieves user from database
 func (c *DB) UserGet(userID string) (*User, error) {
+	if cache := cacheUser.Get(userID); cache != nil {
+		return cache.(*User), nil
+	}
+
 	ctx, cancel := getContext()
 	defer cancel()
 
@@ -31,6 +38,8 @@ func (c *DB) UserGet(userID string) (*User, error) {
 		return nil, err
 	}
 	x.setKey(key)
+
+	cacheUser.Set(userID, &x)
 	return &x, nil
 }
 
@@ -77,6 +86,7 @@ func (c *DB) UserSave(x *User) error {
 	defer cancel()
 	x.Stamp()
 	_, err := c.client.Put(ctx, x.key, x)
+	cacheUser.Del(x.ID)
 	return err
 }
 

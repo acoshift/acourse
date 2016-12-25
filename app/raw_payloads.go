@@ -41,16 +41,12 @@ type CourseRawPayload struct {
 	Photo            *string                    `json:"photo"`
 	Start            *time.Time                 `json:"start"`
 	Video            *string                    `json:"video"`
-	Type             *string                    `json:"type"`
 	Price            *float64                   `json:"price"`
 	DiscountedPrice  *float64                   `json:"discountedPrice"`
 	URL              *string                    `json:"url"`
 	Contents         []*CourseContentRawPayload `json:"contents"`
-	Enroll           *bool                      `json:"enroll"`
-	Public           *bool                      `json:"public"`
 	Attend           *bool                      `json:"attend"`
 	Assignment       *bool                      `json:"assignment"`
-	Purchase         *bool                      `json:"purchase"`
 }
 
 // Validate validates CourseRawPayload
@@ -79,27 +75,15 @@ func (x *CourseRawPayload) Payload() *CoursePayload {
 	if x.Video != nil {
 		r.Video = *x.Video
 	}
-	if x.Type != nil {
-		r.Type = *x.Type
-	}
 	r.Contents = make([]*CourseContentPayload, len(x.Contents))
 	for i := range x.Contents {
 		r.Contents[i] = x.Contents[i].Payload()
-	}
-	if x.Enroll != nil {
-		r.Enroll = *x.Enroll
-	}
-	if x.Public != nil {
-		r.Public = *x.Public
 	}
 	if x.Attend != nil {
 		r.Attend = *x.Attend
 	}
 	if x.Assignment != nil {
 		r.Assignment = *x.Assignment
-	}
-	if x.Purchase != nil {
-		r.Purchase = *x.Purchase
 	}
 	return &r
 }

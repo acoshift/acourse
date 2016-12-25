@@ -30,18 +30,6 @@
         </div>
         <div class="field">
           <div class="ui toggle checkbox">
-            <input type="checkbox" class="hidden" v-model="course.enroll">
-            <label>Can Enroll</label>
-          </div>
-        </div>
-        <div class="field">
-          <div class="ui toggle checkbox">
-            <input type="checkbox" class="hidden" v-model="course.public">
-            <label>Show on Home page</label>
-          </div>
-        </div>
-        <div class="field">
-          <div class="ui toggle checkbox">
             <input type="checkbox" class="hidden" v-model="course.attend">
             <label>Can Attend</label>
           </div>
@@ -114,8 +102,6 @@ export default {
         start: '',
         video: '',
         contents: [],
-        enroll: false,
-        public: false,
         attend: false,
         assignment: false
       },
