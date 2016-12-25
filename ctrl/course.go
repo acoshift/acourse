@@ -94,14 +94,10 @@ func (c *CourseController) Create(ctx *app.CourseCreateContext) error {
 		Photo:            ctx.Payload.Photo,
 		Start:            ctx.Payload.Start,
 		Video:            ctx.Payload.Video,
-		Type:             store.CourseType(ctx.Payload.Type),
 		Contents:         ToCourseContents(ctx.Payload.Contents),
 		Options: store.CourseOption{
-			Enroll:     ctx.Payload.Enroll,
-			Public:     ctx.Payload.Public,
 			Attend:     ctx.Payload.Attend,
 			Assignment: ctx.Payload.Assignment,
-			Purchase:   ctx.Payload.Purchase,
 		},
 	}
 
