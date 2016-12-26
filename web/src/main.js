@@ -8,17 +8,13 @@ import 'rxjs/add/observable/combineLatest'
 import 'rxjs/add/observable/from'
 import 'rxjs/add/observable/fromEvent'
 import 'rxjs/add/observable/fromPromise'
-import 'rxjs/add/observable/forkJoin'
 import 'rxjs/add/observable/of'
-import 'rxjs/add/observable/throw'
 import 'rxjs/add/operator/filter'
 import 'rxjs/add/operator/first'
 import 'rxjs/add/operator/map'
+import 'rxjs/add/operator/mergeMap' // flatMap
 import 'rxjs/add/operator/do'
-import 'rxjs/add/operator/mergeMap'
-import 'rxjs/add/operator/toArray'
 import 'rxjs/add/operator/catch'
-import 'rxjs/add/operator/debounceTime'
 import 'rxjs/add/operator/finally'
 
 import { Subscription } from 'rxjs/Subscription'
@@ -34,7 +30,7 @@ import 'semantic-ui-css/components/modal.min.js'
 import 'semantic-ui-css/components/transition.min.js'
 import 'semantic-ui-css/components/progress.min.js'
 
-import { Firebase } from './services'
+import { Firebase } from 'services'
 import router from './router'
 
 Raven

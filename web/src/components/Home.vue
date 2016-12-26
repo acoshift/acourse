@@ -21,7 +21,6 @@
 <script>
 import CourseCard from './CourseCard'
 import { Course, Loader } from 'services'
-import { Observable } from 'rxjs/Observable'
 
 export default {
   components: {

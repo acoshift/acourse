@@ -6,9 +6,9 @@ import CourseEditor from './CourseEditor'
 import CourseView from './CourseView'
 // import UserView from './UserView'
 import Course from './Course'
-import CourseAttend from './CourseAttend'
-import CourseAssignment from './CourseAssignment'
-import CourseAssignmentEdit from './CourseAssignmentEdit'
+// import CourseAttend from './CourseAttend'
+// import CourseAssignment from './CourseAssignment'
+// import CourseAssignmentEdit from './CourseAssignmentEdit'
 import AdminPayment from './AdminPayment'
 
 export {
@@ -20,8 +20,8 @@ export {
   CourseEditor,
   CourseView,
   // UserView,
-  CourseAttend,
-  CourseAssignment,
-  CourseAssignmentEdit,
+  // CourseAttend,
+  // CourseAssignment,
+  // CourseAssignmentEdit,
   AdminPayment
 }

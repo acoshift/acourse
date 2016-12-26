@@ -87,7 +87,7 @@
 </template>
 
 <script>
-import { Auth, User, Document } from 'services'
+import { Auth, Document } from 'services'
 
 export default {
   data () {
@@ -163,7 +163,6 @@ export default {
       if (this.facebookLoading) return
       this.facebookLoading = true
       Auth.signInWithFacebook()
-        .flatMap((res) => User.saveAuthProfile(res.user), (x) => x)
         .finally(() => { this.facebookLoading = false })
         .subscribe(
           () => {
@@ -178,7 +177,6 @@ export default {
       if (this.googleLoading) return
       this.googleLoading = true
       Auth.signInWithGoogle()
-        .flatMap((res) => User.saveAuthProfile(res.user), (x) => x)
         .finally(() => { this.googleLoading = false })
         .subscribe(
           () => {
@@ -193,7 +191,6 @@ export default {
       if (this.githubLoading) return
       this.githubLoading = true
       Auth.signInWithGithub()
-        .flatMap((res) => User.saveAuthProfile(res.user), (x) => x)
         .finally(() => { this.githubLoading = false })
         .subscribe(
           () => {
