@@ -5,7 +5,7 @@
       div
         h4 Upload
         p.description
-          | วิธีการลงทะเบียน Course English for Programmer
+          | วิธีการลงทะเบียน {{ course.title }}
           br
           br
           | 1. โอนเงินจำนวน #[b {{ price }}] บาท ไปที่
