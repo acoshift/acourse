@@ -3,6 +3,7 @@ package ctrl
 import (
 	"acourse/app"
 	"acourse/store"
+	"time"
 )
 
 // RenderController implements RenderController interface
@@ -15,15 +16,35 @@ func NewRenderController(db *store.DB) *RenderController {
 	return &RenderController{db}
 }
 
+var cacheRender = store.NewCache(time.Second * 15)
+
 // Index runs index action
 func (c *RenderController) Index(ctx *app.RenderIndexContext) error {
-	// prerender course list
+	var res app.CourseTinyCollectionView
+	if cache := cacheRender.Get("index"); cache != nil {
+		res = cache.(app.CourseTinyCollectionView)
+	} else {
+		// do not wait for api call
+		go func() {
+			xs, _ := c.db.CourseList(store.CourseListOptionPublic(true))
+			res := make(app.CourseTinyCollectionView, len(xs))
+			for i, x := range xs {
+				u, _ := c.db.UserMustGet(x.Owner)
+				student, _ := c.db.EnrollCourseCount(x.ID)
+				res[i] = ToCourseTinyView(x, ToUserTinyView(u), student)
+			}
+			cacheRender.Set("index", res)
+		}()
+	}
 
 	return ctx.OK(&app.RenderIndexView{
 		Title:       "Acourse",
 		Description: "Online courses for everyone",
 		Image:       "https://acourse.io/static/acourse-og.jpg",
 		URL:         "https://acourse.io",
+		State: map[string]interface{}{
+			"courses": res,
+		},
 	})
 }
 

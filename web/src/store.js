@@ -50,6 +50,11 @@ export default new Vuex.Store({
     }
   },
   actions: {
+    patch (ctx, s) {
+      if (!s) return
+      if (s.courses) ctx.commit('updateCourses', s.courses)
+      if (s.course) ctx.commit('updateCourse', s.course)
+    },
     authStateChanged (ctx, user) {
       ctx.commit('updateAuthUser', user)
       ctx.dispatch('fetchMe')
