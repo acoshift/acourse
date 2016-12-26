@@ -36,9 +36,7 @@
 <script>
 export default {
   props: {
-    src: {
-      type: String
-    },
+    src: {},
     size: {
       type: String,
       required: true

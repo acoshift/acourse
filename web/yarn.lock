@@ -4920,6 +4920,10 @@ vue@^2.0.1:
   version "2.1.7"
   resolved "https://registry.yarnpkg.com/vue/-/vue-2.1.7.tgz#747880cb70a50c66cb8791aacfee7a6dab7fc842"
 
+vuex-router-sync@^4.0.2:
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/vuex-router-sync/-/vuex-router-sync-4.0.2.tgz#46e949f28a5d7275385a8300495752c34da0aeef"
+
 vuex@^2.1.1:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/vuex/-/vuex-2.1.1.tgz#78463ee45fae4871c5d05177b4e8cedd9e2cbccc"

@@ -4,15 +4,15 @@
       <img src="../assets/acourse.svg">
     </router-link>
     <div class="right menu">
-      <div ref="dropdownUser" v-if="user" class="ui dropdown item" style="padding-top: 0.5rem; padding-bottom: 0.5rem;">
-        <user-avatar :user="user"></user-avatar>
+      <div ref="dropdownUser" v-if="currentUser" class="ui dropdown item" style="padding-top: 0.5rem; padding-bottom: 0.5rem;">
+        <user-avatar :user="currentUser"></user-avatar>
         <i class="dropdown icon"></i>
         <div class="menu">
           <router-link class="item" to="/profile">Profile</router-link>
           <a class="item" @click="signOut">Sign Out</a>
         </div>
       </div>
-      <div v-if="user === null" style="padding-top: 0.5rem; padding-bottom: 0.5rem;">
+      <div v-if="currentUser === null" style="padding-top: 0.5rem; padding-bottom: 0.5rem;">
         <div class="item">
           <div class="ui blue button" @click="openAuth">Sign In</div>
         </div>
@@ -23,8 +23,7 @@
 </template>
 
 <script>
-import { Auth, Me } from 'services'
-import { Observable } from 'rxjs/Observable'
+import { mapState, mapActions } from 'vuex'
 import UserAvatar from './UserAvatar'
 import AuthModal from './AuthModal'
 
@@ -33,28 +32,16 @@ export default {
     UserAvatar,
     AuthModal
   },
-  subscriptions () {
-    return {
-      user: Auth.currentUser()
-        .flatMap((user) => user ? Me.get() : Observable.of(null))
-    }
+  computed: {
+    ...mapState(['currentUser'])
   },
   updated () {
     $(this.$refs.dropdownUser).dropdown({ action: 'hide' })
   },
   methods: {
+    ...mapActions(['signOut']),
     openAuth () {
       this.$refs.auth.open()
-    },
-    signOut () {
-      Auth.signOut()
-        .subscribe(
-          () => {
-            this.$nextTick(() => {
-              this.$router.push('/')
-            })
-          }
-        )
     }
   }
 }

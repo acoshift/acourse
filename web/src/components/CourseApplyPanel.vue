@@ -14,10 +14,11 @@
       .row(v-else)
         .center.aligned.column
           .ui.red.disabled.button Sign In to Enroll
-    apply-modal(ref="applyModal", :course="course", @refresh="$emit('refresh')")
+    apply-modal(ref="applyModal", :course="course")
 </template>
 
 <script>
+import { mapActions } from 'vuex'
 import { Course, Document, Auth } from 'services'
 import ApplyModal from './ApplyModal'
 
@@ -42,6 +43,7 @@ export default {
     }
   },
   methods: {
+    ...mapActions(['fetchCurrentCourse']),
     apply () {
       if (this.applying) return
 
@@ -52,7 +54,7 @@ export default {
           .subscribe(
             () => {
               Document.openSuccessModal('Success', 'You have enrolled to this course.')
-              this.$emit('refresh')
+              this.fetchCurrentCourse()
             }
           )
       } else {

@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="ui segment">
-      <user-profile :user="user" v-show="user"></user-profile>
+      <user-profile :user="currentUser" v-show="currentUser"></user-profile>
       <div class="ui right aligned basic segment">
         <router-link class="ui green edit button" to="/profile/edit">Edit</router-link>
       </div>
@@ -15,17 +15,17 @@
         <div class="ui black basic button" v-else @click="unlinkGithub" :class="{disabled: !canUnlink}"><i class="github icon"></i> Unlink Github</div>
       </div>
     </div>
-    <div class="ui segment" v-if="user && user.role && user.role.instructor" :class="{loading: !ownCourses}">
+    <div class="ui segment" v-if="currentUser && currentUser.role && currentUser.role.instructor" :class="{loading: !ownCourses}">
       <h3 class="ui header">My Own Courses</h3>
       <router-link class="ui blue button" to="/course/new">Create new course</router-link>
       <div class="ui four stackable cards" v-if="ownCourses">
         <course-card v-for="x in ownCourses" :course="x" :hidePrice="true"></course-card>
       </div>
     </div>
-    <div class="ui segment" :class="{loading: !courses}">
+    <div class="ui segment" :class="{loading: !myCourses}">
       <h3 class="ui header">My Courses</h3>
       <div class="ui four stackable cards">
-        <course-card v-for="x in courses" :course="x" :hidePrice="true"></course-card>
+        <course-card v-for="x in myCourses" :course="x" :hidePrice="true"></course-card>
       </div>
     </div>
   </div>
@@ -48,7 +48,8 @@
 </style>
 
 <script>
-import { Loader, Me, Auth, Firebase } from 'services'
+import { mapState, mapActions } from 'vuex'
+import { Auth, Firebase } from 'services'
 import UserProfile from './UserProfile'
 import CourseCard from './CourseCard'
 import some from 'lodash/fp/some'
@@ -58,18 +59,11 @@ export default {
     UserProfile,
     CourseCard
   },
-  subscriptions () {
-    Loader.start('user')
-    return {
-      user: Me.get()
-        .do(() => Loader.stop('user')),
-      ownCourses: Me.ownCourses(),
-      courses: Me.courses(),
-      providerData: Auth.requireUser()
-        .map((x) => x.providerData)
-    }
-  },
   computed: {
+    ...mapState(['currentUser', 'authUser', 'ownCourses', 'myCourses']),
+    providerData () {
+      return this.authUser && this.authUser.providerData
+    },
     isLinkedGoogle () {
       return some((x) => x.providerId === Firebase.provider.google.providerId)(this.providerData)
     },
@@ -83,7 +77,12 @@ export default {
       return this.providerData && this.providerData.length > 1
     }
   },
+  created () {
+    this.fetchMeOwnCourses()
+    this.fetchMeMyCourses()
+  },
   methods: {
+    ...mapActions(['fetchMe', 'fetchMeOwnCourses', 'fetchMeMyCourses']),
     linkGoogle () {
       Auth.linkGoogle().subscribe()
     },

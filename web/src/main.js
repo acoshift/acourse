@@ -30,19 +30,24 @@ import 'semantic-ui-css/components/modal.min.js'
 import 'semantic-ui-css/components/transition.min.js'
 import 'semantic-ui-css/components/progress.min.js'
 
+import { sync } from 'vuex-router-sync'
 import { Firebase } from 'services'
 import router from './router'
+import store from './store'
+
+sync(store, router)
 
 Raven
   .config('https://fda9f1b21cd04a4585b9f9051b37a466@sentry.io/103020')
   .install()
 
 Vue.use(VueRx, { Observable, Subscription })
-Firebase.init()
+Firebase.init(store)
 
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
   router,
+  store,
   ...App
 })

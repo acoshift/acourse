@@ -28,6 +28,7 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex'
 import { Document, Course } from 'services'
 
 export default {
@@ -46,6 +47,7 @@ export default {
     }
   },
   methods: {
+    ...mapActions(['fetchCurrentCourse']),
     show () {
       $(this.$el).modal('show')
     },
@@ -55,7 +57,7 @@ export default {
         .subscribe(
           () => {
             Document.openSuccessModal('Success', 'Your enroll request success!.')
-            this.$emit('refresh')
+            this.fetchCurrentCourse()
           },
           (err) => {
             Document.openErrorModal('Upload Error', err && err.message || err)
