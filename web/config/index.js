@@ -28,5 +28,12 @@ module.exports = {
     // In our experience, they generally work as expected,
     // just be aware of this issue when enabling this option.
     cssSourceMap: false
+  },
+  local: {
+    env: require('./dev.env'),
+    index: path.resolve(__dirname, '../../templates/index.tmpl'),
+    assetsRoot: path.resolve(__dirname, '../../public/'),
+    assetsSubDirectory: 'static',
+    assetsPublicPath: '/'
   }
 }

@@ -143,4 +143,5 @@ type RenderIndexView struct {
 	Description string
 	Image       string
 	URL         string
+	State       map[string]interface{}
 }

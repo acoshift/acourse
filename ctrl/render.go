@@ -17,6 +17,8 @@ func NewRenderController(db *store.DB) *RenderController {
 
 // Index runs index action
 func (c *RenderController) Index(ctx *app.RenderIndexContext) error {
+	// prerender course list
+
 	return ctx.OK(&app.RenderIndexView{
 		Title:       "Acourse",
 		Description: "Online courses for everyone",
