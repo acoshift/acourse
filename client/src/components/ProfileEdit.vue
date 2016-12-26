@@ -33,7 +33,7 @@
 </style>
 
 <script>
-import { Loader, Me, Document } from '../services'
+import { Loader, Me, Document } from 'services'
 import Avatar from './Avatar'
 import pick from 'lodash/fp/pick'
 import keys from 'lodash/fp/keys'

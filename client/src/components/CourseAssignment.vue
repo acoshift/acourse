@@ -23,7 +23,7 @@
 </template>
 
 <script>
-import { Course, Assignment, Me, Loader, Document } from '../services'
+import { Course, Assignment, Me, Loader, Document } from 'services'
 
 export default {
   data () {

@@ -36,7 +36,7 @@
 </template>
 
 <script>
-import { Course } from '../services'
+import { Course } from 'services'
 import moment from 'moment'
 
 export default {

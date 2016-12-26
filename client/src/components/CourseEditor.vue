@@ -83,7 +83,7 @@
 </style>
 
 <script>
-import { Document, Course, Loader } from '../services'
+import { Document, Course, Loader } from 'services'
 import moment from 'moment'
 import flow from 'lodash/fp/flow'
 import defaults from 'lodash/fp/defaults'

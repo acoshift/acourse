@@ -11,7 +11,7 @@
 </template>
 
 <script>
-import { Course, Loader } from '../services'
+import { Course, Loader } from 'services'
 import CourseHeader from './CourseHeader'
 import CourseVideo from './CourseVideo'
 import CourseDetail from './CourseDetail'

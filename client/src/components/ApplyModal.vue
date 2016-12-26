@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import { Document, Course } from '../services'
+import { Document, Course } from 'services'
 
 export default {
   props: {

@@ -41,7 +41,7 @@
 
 <script>
 import { Subject } from 'rxjs/Subject'
-import { Me } from '../services'
+import { Me } from 'services'
 import firebase from 'firebase'
 
 export default {

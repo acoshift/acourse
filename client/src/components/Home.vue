@@ -20,7 +20,7 @@
 
 <script>
 import CourseCard from './CourseCard'
-import { Course, Loader } from '../services'
+import { Course, Loader } from 'services'
 
 export default {
   components: {

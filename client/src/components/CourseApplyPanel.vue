@@ -18,7 +18,7 @@
 </template>
 
 <script>
-import { Course, Document, Auth } from '../services'
+import { Course, Document, Auth } from 'services'
 import ApplyModal from './ApplyModal'
 
 export default {

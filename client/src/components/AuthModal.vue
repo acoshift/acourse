@@ -87,7 +87,7 @@
 </template>
 
 <script>
-import { Auth, User, Document } from '../services'
+import { Auth, User, Document } from 'services'
 
 export default {
   data () {

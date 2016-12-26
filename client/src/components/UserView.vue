@@ -19,7 +19,7 @@
 </template>
 
 <script>
-import { User, Course, Loader } from '../services'
+import { User, Course, Loader } from 'services'
 import UserProfile from './UserProfile'
 import CourseCard from './CourseCard'
 import isEmpty from 'lodash/fp/isEmpty'

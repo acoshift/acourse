@@ -24,7 +24,7 @@
 </style>
 
 <script>
-import { Firebase } from '../services'
+import { Firebase } from 'services'
 import uniqueId from 'lodash/uniqueId'
 import findIndex from 'lodash/fp/findIndex'
 

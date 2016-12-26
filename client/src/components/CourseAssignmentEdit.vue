@@ -45,7 +45,7 @@
 </style>
 
 <script>
-import { Loader, User, Assignment } from '../services'
+import { Loader, User, Assignment } from 'services'
 import UserAvatar from './UserAvatar'
 import flow from 'lodash/fp/flow'
 import map from 'lodash/fp/map'

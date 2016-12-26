@@ -15,7 +15,7 @@
 </template>
 
 <script>
-import { Course, User, Loader } from '../services'
+import { Course, User, Loader } from 'services'
 import Avatar from './Avatar'
 import forEach from 'lodash/fp/forEach'
 

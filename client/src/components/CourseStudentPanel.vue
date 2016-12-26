@@ -12,7 +12,7 @@
 </template>
 
 <script>
-import { Me, Document } from '../services'
+import { Me, Document } from 'services'
 
 export default {
   props: {
