@@ -1,6 +1,7 @@
 package app
 
 import (
+	"acourse/payload"
 	"io"
 	"net/http"
 
@@ -35,7 +36,7 @@ func MountUserController(service *echo.Echo, ctrl UserController) {
 		if err != nil {
 			return handleError(ctx, err)
 		}
-		var rawPayload UserRawPayload
+		var rawPayload payload.UserRawPayload
 		err = ctx.Bind(&rawPayload)
 		if err != nil {
 			return handleError(ctx, ErrPayload(err))
@@ -92,7 +93,7 @@ func MountCourseController(service *echo.Echo, ctrl CourseController) {
 		if rctx.CurrentUserID == "" {
 			return handleUnauthorized(ctx)
 		}
-		var rawPayload CourseRawPayload
+		var rawPayload payload.CourseRawPayload
 		err = ctx.Bind(&rawPayload)
 		if err != nil {
 			return handleError(ctx, ErrPayload(err))
@@ -120,7 +121,7 @@ func MountCourseController(service *echo.Echo, ctrl CourseController) {
 		if rctx.CurrentUserID == "" {
 			return handleUnauthorized(ctx)
 		}
-		var rawPayload CourseRawPayload
+		var rawPayload payload.CourseRawPayload
 		err = ctx.Bind(&rawPayload)
 		if err != nil {
 			return handleError(ctx, ErrPayload(err))
@@ -140,7 +141,7 @@ func MountCourseController(service *echo.Echo, ctrl CourseController) {
 		if rctx.CurrentUserID == "" {
 			return handleUnauthorized(ctx)
 		}
-		var rawPayload CourseEnrollRawPayload
+		var rawPayload payload.CourseEnrollRawPayload
 		err = ctx.Bind(&rawPayload)
 		if err != nil {
 			return handleError(ctx, ErrPayload(err))

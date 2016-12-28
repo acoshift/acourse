@@ -1,6 +1,7 @@
 package app
 
 import (
+	"acourse/payload"
 	"acourse/view"
 	"net/http"
 
@@ -72,7 +73,7 @@ type UserUpdateContext struct {
 	context       echo.Context
 	CurrentUserID string
 	UserID        string
-	Payload       *UserPayload
+	Payload       *payload.UserPayload
 }
 
 // NewUserUpdateContext parses the incoming request and create context
@@ -150,7 +151,7 @@ func (ctx *CourseShowContext) NotFound() error {
 type CourseCreateContext struct {
 	context       echo.Context
 	CurrentUserID string
-	Payload       *CoursePayload
+	Payload       *payload.CoursePayload
 }
 
 // NewCourseCreateContext parses the incoming request and create context
@@ -175,7 +176,7 @@ type CourseUpdateContext struct {
 	context       echo.Context
 	CurrentUserID string
 	CourseID      string
-	Payload       *CoursePayload
+	Payload       *payload.CoursePayload
 }
 
 // NewCourseUpdateContext parses the incoming request and create context
@@ -228,7 +229,7 @@ type CourseEnrollContext struct {
 	context       echo.Context
 	CurrentUserID string
 	CourseID      string
-	Payload       *CourseEnrollPayload
+	Payload       *payload.CourseEnrollPayload
 }
 
 // NewCourseEnrollContext parses the incoming request and create context

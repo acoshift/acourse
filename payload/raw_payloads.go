@@ -1,6 +1,8 @@
-package app
+package payload
 
-import "time"
+import (
+	"time"
+)
 
 // UserRawPayload type
 type UserRawPayload struct {
