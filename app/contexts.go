@@ -1,7 +1,11 @@
 package app
 
-import "github.com/labstack/echo"
-import "net/http"
+import (
+	"acourse/view"
+	"net/http"
+
+	"github.com/labstack/echo"
+)
 
 func handleError(ctx echo.Context, r error) error {
 	switch r := r.(type) {
@@ -54,12 +58,12 @@ func (ctx *UserShowContext) NotFound() error {
 }
 
 // OK sends a HTTP response
-func (ctx *UserShowContext) OK(r *UserView) error {
+func (ctx *UserShowContext) OK(r *view.UserView) error {
 	return handleOK(ctx.context, r)
 }
 
 // OKMe send a HTTP response
-func (ctx *UserShowContext) OKMe(r *UserMeView) error {
+func (ctx *UserShowContext) OKMe(r *view.UserMeView) error {
 	return handleOK(ctx.context, r)
 }
 
@@ -128,12 +132,12 @@ func NewCourseShowContext(ctx echo.Context) (*CourseShowContext, error) {
 }
 
 // OK sends HTTP response
-func (ctx *CourseShowContext) OK(r *CourseView) error {
+func (ctx *CourseShowContext) OK(r *view.CourseView) error {
 	return handleOK(ctx.context, r)
 }
 
 // OKPublic sends HTTP response
-func (ctx *CourseShowContext) OKPublic(r *CoursePublicView) error {
+func (ctx *CourseShowContext) OKPublic(r *view.CoursePublicView) error {
 	return handleOK(ctx.context, r)
 }
 
@@ -157,7 +161,7 @@ func NewCourseCreateContext(ctx echo.Context) (*CourseCreateContext, error) {
 }
 
 // OK sends HTTP response
-func (ctx *CourseCreateContext) OK(r *CourseView) error {
+func (ctx *CourseCreateContext) OK(r *view.CourseView) error {
 	return handleOK(ctx.context, r)
 }
 
@@ -215,7 +219,7 @@ func NewCourseListContext(ctx echo.Context) (*CourseListContext, error) {
 }
 
 // OKTiny sends HTTP response
-func (ctx *CourseListContext) OKTiny(r CourseTinyCollectionView) error {
+func (ctx *CourseListContext) OKTiny(r view.CourseTinyCollectionView) error {
 	return handleOK(ctx.context, r)
 }
 
@@ -264,7 +268,7 @@ func NewPaymentListContext(ctx echo.Context) (*PaymentListContext, error) {
 }
 
 // OK sends HTTP response
-func (ctx *PaymentListContext) OK(r PaymentCollectionView) error {
+func (ctx *PaymentListContext) OK(r view.PaymentCollectionView) error {
 	return ctx.context.JSON(http.StatusOK, r)
 }
 
@@ -346,7 +350,7 @@ func NewRenderIndexContext(ctx echo.Context) (*RenderIndexContext, error) {
 }
 
 // OK sends HTTP response
-func (ctx *RenderIndexContext) OK(r *RenderIndexView) error {
+func (ctx *RenderIndexContext) OK(r *view.RenderIndexView) error {
 	return ctx.context.Render(http.StatusOK, "index", r)
 }
 
@@ -364,7 +368,7 @@ func NewRenderCourseContext(ctx echo.Context) (*RenderCourseContext, error) {
 }
 
 // OK sends HTTP response
-func (ctx *RenderCourseContext) OK(r *RenderIndexView) error {
+func (ctx *RenderCourseContext) OK(r *view.RenderIndexView) error {
 	return ctx.context.Render(http.StatusOK, "index", r)
 }
 

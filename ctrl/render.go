@@ -3,6 +3,7 @@ package ctrl
 import (
 	"acourse/app"
 	"acourse/store"
+	"acourse/view"
 	"time"
 )
 
@@ -20,14 +21,14 @@ var cacheRender = store.NewCache(time.Second * 15)
 
 // Index runs index action
 func (c *RenderController) Index(ctx *app.RenderIndexContext) error {
-	var res app.CourseTinyCollectionView
+	var res view.CourseTinyCollectionView
 	if cache := cacheRender.Get("index"); cache != nil {
-		res = cache.(app.CourseTinyCollectionView)
+		res = cache.(view.CourseTinyCollectionView)
 	} else {
 		// do not wait for api call
 		go func() {
 			xs, _ := c.db.CourseList(store.CourseListOptionPublic(true))
-			rs := make(app.CourseTinyCollectionView, len(xs))
+			rs := make(view.CourseTinyCollectionView, len(xs))
 			for i, x := range xs {
 				u, _ := c.db.UserMustGet(x.Owner)
 				student, _ := c.db.EnrollCourseCount(x.ID)
@@ -37,7 +38,7 @@ func (c *RenderController) Index(ctx *app.RenderIndexContext) error {
 		}()
 	}
 
-	return ctx.OK(&app.RenderIndexView{
+	return ctx.OK(&view.RenderIndexView{
 		Title:       "Acourse",
 		Description: "Online courses for everyone",
 		Image:       "https://acourse.io/static/acourse-og.jpg",
@@ -57,7 +58,7 @@ func (c *RenderController) Course(ctx *app.RenderCourseContext) error {
 	if err != nil || course == nil {
 		return ctx.NotFound()
 	}
-	r := &app.RenderIndexView{
+	r := &view.RenderIndexView{
 		Title:       course.Title,
 		Description: course.ShortDescription,
 		Image:       course.Photo,

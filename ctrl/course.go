@@ -4,6 +4,7 @@ import (
 	"acourse/app"
 	"acourse/model"
 	"acourse/store"
+	"acourse/view"
 )
 
 // CourseController implements CourseController interface
@@ -200,7 +201,7 @@ func (c *CourseController) List(ctx *app.CourseListContext) error {
 		return err
 	}
 
-	res := make(app.CourseTinyCollectionView, len(xs))
+	res := make(view.CourseTinyCollectionView, len(xs))
 	for i, x := range xs {
 		u, err := c.db.UserGet(x.Owner)
 		if err != nil {

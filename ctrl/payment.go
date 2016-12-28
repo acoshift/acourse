@@ -4,6 +4,7 @@ import (
 	"acourse/app"
 	"acourse/model"
 	"acourse/store"
+	"acourse/view"
 )
 
 // PaymentController implements PaymentController interface
@@ -33,7 +34,7 @@ func (c *PaymentController) List(ctx *app.PaymentListContext) error {
 		return err
 	}
 
-	res := make(app.PaymentCollectionView, len(xs))
+	res := make(view.PaymentCollectionView, len(xs))
 	for i, x := range xs {
 		user, err := c.db.UserMustGet(x.UserID)
 		if err != nil {
