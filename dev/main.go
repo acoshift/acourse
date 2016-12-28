@@ -4,41 +4,42 @@ import (
 	"acourse/app"
 	"acourse/ctrl"
 	"acourse/store"
+	"log"
 
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
+	"github.com/gin-gonic/contrib/cors"
+	"github.com/gin-gonic/gin"
 )
 
 const projectID = "acourse-d9d0a"
 
 func main() {
-	service := echo.New()
+	service := gin.New()
 
 	db := store.NewDB(store.ProjectID(projectID), store.ServiceAccount("private/service_account.json"))
 
 	// globals middlewares
-	service.Use(middleware.Recover())
-	service.Use(middleware.Logger())
-	service.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+	service.Use(gin.Logger())
+	service.Use(gin.Recovery())
+	service.Use(cors.New(cors.Config{
 		AllowCredentials: false,
-		AllowHeaders:     []string{echo.HeaderAuthorization, echo.HeaderContentType},
-		AllowMethods:     []string{echo.GET, echo.POST, echo.PATCH, echo.PUT, echo.DELETE},
-		AllowOrigins:     []string{"http://localhost:9000", "http://localhost:8080"},
+		AllowedHeaders:   []string{"Authorization", "Content-Type"},
+		AllowedMethods:   []string{"GET", "POST", "PATCH", "PUT", "DELETE"},
+		AllowedOrigins:   []string{"http://localhost:9000", "http://localhost:8080"},
 		MaxAge:           3600,
 	}))
 
 	if err := app.InitService(service, projectID); err != nil {
-		service.Logger.Fatal(err)
+		log.Fatal(err)
 	}
 
 	// mount controllers
-	app.MountHealthController(service, ctrl.NewHealthController())
-	app.MountUserController(service, ctrl.NewUserController(db))
-	app.MountCourseController(service, ctrl.NewCourseController(db))
-	app.MountPaymentController(service, ctrl.NewPaymentController(db))
-	app.MountRenderController(service, ctrl.NewRenderController(db))
+	app.MountHealthController(service.Group("/_ah"), ctrl.NewHealthController())
+	app.MountUserController(service.Group("/api/user"), ctrl.NewUserController(db))
+	app.MountCourseController(service.Group("/api/course"), ctrl.NewCourseController(db))
+	app.MountPaymentController(service.Group("/api/payment"), ctrl.NewPaymentController(db))
+	app.MountRenderController(service.Group(""), ctrl.NewRenderController(db))
 
-	if err := service.Start(":8080"); err != nil {
-		service.Logger.Fatal(err)
+	if err := service.Run(":8080"); err != nil {
+		log.Fatal(err)
 	}
 }

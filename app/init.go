@@ -4,13 +4,16 @@ import (
 	"net/http"
 	"strings"
 
+	"errors"
+
 	"github.com/acoshift/go-firebase-admin"
+	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/labstack/echo"
 )
 
 const (
 	keyCurrentUserID = "CurrentUserID"
+	keyRequestID     = "RequestID"
 )
 
 var (
@@ -21,7 +24,7 @@ var (
 )
 
 // InitService inits service
-func InitService(service *echo.Echo, projectID string) (err error) {
+func InitService(service *gin.Engine, projectID string) (err error) {
 	firApp, err = admin.InitializeApp(admin.ProjectID(projectID))
 	if err != nil {
 		return
@@ -33,28 +36,29 @@ func InitService(service *echo.Echo, projectID string) (err error) {
 	return
 }
 
-func jwtMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
-	return func(ctx echo.Context) error {
-		auth := strings.TrimSpace(ctx.Request().Header.Get("Authorization"))
-		if len(auth) == 0 {
-			return h(ctx)
-		}
-		tk := strings.Split(auth, " ")
-		if len(tk) != 2 || strings.ToLower(tk[0]) != "bearer" {
-			return handleError(ctx, tokenError("invalid authorization header"))
-		}
-		claims, err := firAuth.VerifyIDToken(tk[1])
-		if err != nil {
-			return handleError(ctx, tokenError(err))
-		}
-		ctx.Set(keyCurrentUserID, claims.UserID)
-		return h(ctx)
+func jwtMiddleware(ctx *gin.Context) {
+	auth := strings.TrimSpace(ctx.Request.Header.Get("Authorization"))
+	if len(auth) == 0 {
+		ctx.Next()
+		return
 	}
+	tk := strings.Split(auth, " ")
+	if len(tk) != 2 || strings.ToLower(tk[0]) != "bearer" {
+		handleError(ctx, tokenError(errors.New("invalid authorization header")))
+		return
+	}
+	claims, err := firAuth.VerifyIDToken(tk[1])
+	if err != nil {
+		handleError(ctx, tokenError(err))
+		return
+	}
+	ctx.Set(keyCurrentUserID, claims.UserID)
+	ctx.Next()
 }
 
-func requestIDMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
-	return func(ctx echo.Context) error {
-		ctx.Response().Header().Set("X-Request-Id", uuid.New().String())
-		return h(ctx)
-	}
+func requestIDMiddleware(ctx *gin.Context) {
+	rid := uuid.New().String()
+	ctx.Header("X-Request-Id", rid)
+	ctx.Set(keyRequestID, rid)
+	ctx.Next()
 }

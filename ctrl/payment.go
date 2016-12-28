@@ -84,7 +84,7 @@ func (c *PaymentController) Approve(ctx *app.PaymentApproveContext) error {
 		return err
 	}
 
-	return ctx.NoContent()
+	return ctx.OK()
 }
 
 // Reject runs reject action
@@ -111,5 +111,5 @@ func (c *PaymentController) Reject(ctx *app.PaymentRejectContext) error {
 		return err
 	}
 
-	return ctx.NoContent()
+	return ctx.OK()
 }

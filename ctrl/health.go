@@ -15,5 +15,5 @@ func NewHealthController() *HealthController {
 
 // Health runs health action
 func (c *HealthController) Health(ctx *app.HealthHealthContext) error {
-	return ctx.OK("OK")
+	return ctx.OK()
 }

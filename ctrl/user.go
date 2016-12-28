@@ -75,5 +75,5 @@ func (c *UserController) Update(ctx *app.UserUpdateContext) error {
 		return err
 	}
 
-	return ctx.NoContent()
+	return ctx.OK()
 }

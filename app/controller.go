@@ -2,16 +2,8 @@ package app
 
 import (
 	"acourse/payload"
-	"io"
-	"net/http"
 
-	"github.com/labstack/echo"
-	"github.com/unrolled/render"
-)
-
-// Errors
-var (
-	ErrPayload = CreateErrors(http.StatusBadRequest, "payload")
+	"github.com/gin-gonic/gin"
 )
 
 // UserController is the controller interface for the User actions
@@ -21,33 +13,29 @@ type UserController interface {
 }
 
 // MountUserController mounts a User resource controller on the given service
-func MountUserController(service *echo.Echo, ctrl UserController) {
-	service.GET("/api/user/:userID", func(ctx echo.Context) error {
-		rctx, err := NewUserShowContext(ctx)
-		if err != nil {
-			return err
-		}
-		return ctrl.Show(rctx)
+func MountUserController(service *gin.RouterGroup, ctrl UserController) {
+	service.GET("/:userID", func(ctx *gin.Context) {
+		rctx := NewUserShowContext(ctx)
+		ctrl.Show(rctx)
 	})
-	service.Logger.Info("Mount ctrl User action Show")
 
-	service.PATCH("/api/user/:userID", func(ctx echo.Context) error {
-		rctx, err := NewUserUpdateContext(ctx)
-		if err != nil {
-			return handleError(ctx, err)
-		}
+	service.PATCH("/:userID", func(ctx *gin.Context) {
+		rctx := NewUserUpdateContext(ctx)
 		var rawPayload payload.RawUser
-		err = ctx.Bind(&rawPayload)
+		err := ctx.BindJSON(&rawPayload)
 		if err != nil {
-			return handleError(ctx, ErrPayload(err))
+			handleBadRequest(ctx, err)
+			return
 		}
 		if err = rawPayload.Validate(); err != nil {
-			return handleError(ctx, ErrPayload(err))
+			handleBadRequest(ctx, err)
+			return
 		}
 		rctx.Payload = rawPayload.Payload()
-		return ctrl.Update(rctx)
+		if err = ctrl.Update(rctx); err != nil {
+			handleError(ctx, err)
+		}
 	})
-	service.Logger.Info("Mount ctrl User action Update")
 }
 
 // HealthController is the controller interface for the Health actions
@@ -56,13 +44,12 @@ type HealthController interface {
 }
 
 // MountHealthController mounts a Health resource controller on the given service
-func MountHealthController(service *echo.Echo, ctrl HealthController) {
-	service.GET("/_ah/health", func(ctx echo.Context) error {
-		rctx, err := NewHealthHealthContext(ctx)
-		if err != nil {
-			return handleError(ctx, err)
+func MountHealthController(service *gin.RouterGroup, ctrl HealthController) {
+	service.GET("/health", func(ctx *gin.Context) {
+		rctx := NewHealthHealthContext(ctx)
+		if err := ctrl.Health(rctx); err != nil {
+			handleError(ctx, err)
 		}
-		return ctrl.Health(rctx)
 	})
 }
 
@@ -76,81 +63,85 @@ type CourseController interface {
 }
 
 // MountCourseController mounts a Course resource controller on the given service
-func MountCourseController(service *echo.Echo, ctrl CourseController) {
-	service.GET("/api/course", func(ctx echo.Context) error {
-		rctx, err := NewCourseListContext(ctx)
-		if err != nil {
-			return handleError(ctx, err)
+func MountCourseController(service *gin.RouterGroup, ctrl CourseController) {
+	service.GET("", func(ctx *gin.Context) {
+		rctx := NewCourseListContext(ctx)
+		if err := ctrl.List(rctx); err != nil {
+			handleError(ctx, err)
 		}
-		return ctrl.List(rctx)
 	})
 
-	service.POST("/api/course", func(ctx echo.Context) error {
-		rctx, err := NewCourseCreateContext(ctx)
-		if err != nil {
-			return handleError(ctx, err)
-		}
+	service.POST("", func(ctx *gin.Context) {
+		rctx := NewCourseCreateContext(ctx)
 		if rctx.CurrentUserID == "" {
-			return handleUnauthorized(ctx)
+			handleUnauthorized(ctx)
+			return
 		}
 		var rawPayload payload.RawCourse
-		err = ctx.Bind(&rawPayload)
+		err := ctx.Bind(&rawPayload)
 		if err != nil {
-			return handleError(ctx, ErrPayload(err))
+			handleBadRequest(ctx, err)
+			return
 		}
 		if err = rawPayload.Validate(); err != nil {
-			return handleError(ctx, ErrPayload(err))
+			handleBadRequest(ctx, err)
+			return
 		}
 		rctx.Payload = rawPayload.Payload()
-		return ctrl.Create(rctx)
+		if err = ctrl.Create(rctx); err != nil {
+			handleError(ctx, err)
+		}
 	})
 
-	service.GET("/api/course/:courseID", func(ctx echo.Context) error {
-		rctx, err := NewCourseShowContext(ctx)
-		if err != nil {
-			return handleError(ctx, err)
+	service.GET("/:courseID", func(ctx *gin.Context) {
+		rctx := NewCourseShowContext(ctx)
+		if err := ctrl.Show(rctx); err != nil {
+			handleError(ctx, err)
 		}
-		return ctrl.Show(rctx)
 	})
 
-	service.PATCH("/api/course/:courseID", func(ctx echo.Context) error {
-		rctx, err := NewCourseUpdateContext(ctx)
-		if err != nil {
-			return handleError(ctx, err)
-		}
+	service.PATCH("/:courseID", func(ctx *gin.Context) {
+		rctx := NewCourseUpdateContext(ctx)
 		if rctx.CurrentUserID == "" {
-			return handleUnauthorized(ctx)
+			handleUnauthorized(ctx)
+			return
 		}
 		var rawPayload payload.RawCourse
-		err = ctx.Bind(&rawPayload)
+		err := ctx.Bind(&rawPayload)
 		if err != nil {
-			return handleError(ctx, ErrPayload(err))
+			handleBadRequest(ctx, err)
+			return
 		}
 		if err = rawPayload.Validate(); err != nil {
-			return handleError(ctx, ErrPayload(err))
+			handleBadRequest(ctx, err)
+			return
 		}
 		rctx.Payload = rawPayload.Payload()
-		return ctrl.Update(rctx)
+		if err = ctrl.Update(rctx); err != nil {
+			handleError(ctx, nil)
+		}
 	})
 
-	service.PUT("/api/course/:courseID/enroll", func(ctx echo.Context) error {
-		rctx, err := NewCourseEnrollContext(ctx)
-		if err != nil {
-			return handleError(ctx, err)
-		}
+	service.PUT("/:courseID/enroll", func(ctx *gin.Context) {
+		rctx := NewCourseEnrollContext(ctx)
 		if rctx.CurrentUserID == "" {
-			return handleUnauthorized(ctx)
+			handleUnauthorized(ctx)
+			return
 		}
 		var rawPayload payload.RawCourseEnroll
-		err = ctx.Bind(&rawPayload)
+		err := ctx.Bind(&rawPayload)
 		if err != nil {
-			return handleError(ctx, ErrPayload(err))
+			handleBadRequest(ctx, err)
+			return
 		}
 		if err = rawPayload.Validate(); err != nil {
-			return handleError(ctx, ErrPayload(err))
+			handleBadRequest(ctx, err)
+			return
 		}
 		rctx.Payload = rawPayload.Payload()
-		return ctrl.Enroll(rctx)
+		if err = ctrl.Enroll(rctx); err != nil {
+			handleError(ctx, nil)
+		}
 	})
 }
 
@@ -162,38 +153,38 @@ type PaymentController interface {
 }
 
 // MountPaymentController mount a Payment resource controller on the given service
-func MountPaymentController(service *echo.Echo, ctrl PaymentController) {
-	service.GET("/api/payment", func(ctx echo.Context) error {
-		rctx, err := NewPaymentListContext(ctx)
-		if err != nil {
-			return handleError(ctx, err)
-		}
+func MountPaymentController(service *gin.RouterGroup, ctrl PaymentController) {
+	service.GET("", func(ctx *gin.Context) {
+		rctx := NewPaymentListContext(ctx)
 		if rctx.CurrentUserID == "" {
-			return handleUnauthorized(ctx)
+			handleUnauthorized(ctx)
+			return
 		}
-		return ctrl.List(rctx)
+		if err := ctrl.List(rctx); err != nil {
+			handleError(ctx, err)
+		}
 	})
 
-	service.PUT("/api/payment/:paymentID/approve", func(ctx echo.Context) error {
-		rctx, err := NewPaymentApproveContext(ctx)
-		if err != nil {
-			return handleError(ctx, err)
-		}
+	service.PUT("/:paymentID/approve", func(ctx *gin.Context) {
+		rctx := NewPaymentApproveContext(ctx)
 		if rctx.CurrentUserID == "" {
-			return handleUnauthorized(ctx)
+			handleUnauthorized(ctx)
+			return
 		}
-		return ctrl.Approve(rctx)
+		if err := ctrl.Approve(rctx); err != nil {
+			handleError(ctx, err)
+		}
 	})
 
-	service.PUT("/api/payment/:paymentID/reject", func(ctx echo.Context) error {
-		rctx, err := NewPaymentRejectContext(ctx)
-		if err != nil {
-			return handleError(ctx, err)
-		}
+	service.PUT("/:paymentID/reject", func(ctx *gin.Context) {
+		rctx := NewPaymentRejectContext(ctx)
 		if rctx.CurrentUserID == "" {
-			return handleUnauthorized(ctx)
+			handleUnauthorized(ctx)
+			return
 		}
-		return ctrl.Reject(rctx)
+		if err := ctrl.Reject(rctx); err != nil {
+			handleError(ctx, err)
+		}
 	})
 }
 
@@ -203,59 +194,31 @@ type RenderController interface {
 	Course(*RenderCourseContext) error
 }
 
-// Render wraps render.Render
-type Render struct {
-	r *render.Render
-}
-
-// Render implements echo.Renderer
-func (r *Render) Render(w io.Writer, name string, data interface{}, ctx echo.Context) error {
-	return r.r.HTML(w, http.StatusOK, name, data)
-}
-
 // MountRenderController mount a Render template controller on the given resource
-func MountRenderController(service *echo.Echo, ctrl RenderController) {
-	service.Renderer = &Render{r: render.New()}
-
-	cc := func(h echo.HandlerFunc) echo.HandlerFunc {
-		return func(ctx echo.Context) error {
-			ctx.Response().Header().Set("Cache-Control", "public, max-age=31536000")
-			return h(ctx)
-		}
+func MountRenderController(service *gin.RouterGroup, ctrl RenderController) {
+	cc := func(ctx *gin.Context) {
+		ctx.Header("Cache-Control", "public, max-age=31536000")
+		ctx.Next()
 	}
 
 	service.Group("/static", cc).Static("", "public")
 
-	service.File("/favicon.ico", "public/acourse-120.png")
+	service.StaticFile("/favicon.ico", "public/acourse-120.png")
 
-	service.GET("/course/:courseID", func(ctx echo.Context) error {
-		rctx, err := NewRenderCourseContext(ctx)
-		if err != nil {
-			return err
+	service.GET("/course/:courseID", func(ctx *gin.Context) {
+		rctx := NewRenderCourseContext(ctx)
+		if err := ctrl.Course(rctx); err != nil {
+			handleError(ctx, err)
 		}
-		return ctrl.Course(rctx)
 	})
 
-	h := func(ctx echo.Context) error {
-		rctx, err := NewRenderIndexContext(ctx)
-		if err != nil {
-			return err
+	h := func(ctx *gin.Context) {
+		rctx := NewRenderIndexContext(ctx)
+		if err := ctrl.Index(rctx); err != nil {
+			handleError(ctx, err)
 		}
-		return ctrl.Index(rctx)
 	}
 
-	service.GET("*", h)
+	service.GET("/", h)
 	service.GET("/course/:courseID/edit", h)
 }
-
-// UserIsAdminMiddleware is the middleware for autorization only admin user
-// func UserIsAdminMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
-// 	return func(ctx echo.Context) error {
-// 		userID, _ := ctx.Get(keyCurrentUserID).(string)
-// 		if userID == "" {
-// 			return handleForbidden(ctx)
-// 		}
-
-// 		return h(ctx)
-// 	}
-// }

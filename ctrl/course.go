@@ -5,6 +5,7 @@ import (
 	"acourse/model"
 	"acourse/store"
 	"acourse/view"
+	"errors"
 )
 
 // CourseController implements CourseController interface
@@ -41,7 +42,7 @@ func (c *CourseController) Show(ctx *app.CourseShowContext) error {
 		return err
 	}
 	if owner == nil {
-		return app.CreateError(500, "course", "can not find owner")
+		return errors.New("can not find owner")
 	}
 
 	// get student count
@@ -145,7 +146,7 @@ func (c *CourseController) Update(ctx *app.CourseUpdateContext) error {
 		return err
 	}
 
-	return ctx.NoContent()
+	return ctx.OK()
 }
 
 // List runs list action
@@ -208,7 +209,7 @@ func (c *CourseController) List(ctx *app.CourseListContext) error {
 			return err
 		}
 		if u == nil {
-			return app.CreateError(500, "course", "can not find owner")
+			return errors.New("can not find owner")
 		}
 		student, err := c.db.EnrollCourseCount(x.ID)
 		if err != nil {
@@ -272,7 +273,7 @@ func (c *CourseController) Enroll(ctx *app.CourseEnrollContext) error {
 		if err != nil {
 			return err
 		}
-		return ctx.NoContent()
+		return ctx.OK()
 	}
 
 	// create payment
@@ -291,5 +292,5 @@ func (c *CourseController) Enroll(ctx *app.CourseEnrollContext) error {
 		return err
 	}
 
-	return ctx.NoContent()
+	return ctx.OK()
 }

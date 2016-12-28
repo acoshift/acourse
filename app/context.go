@@ -5,52 +5,24 @@ import (
 	"acourse/view"
 	"net/http"
 
-	"github.com/labstack/echo"
+	"github.com/gin-gonic/gin"
 )
-
-func handleError(ctx echo.Context, r error) error {
-	switch r := r.(type) {
-	case *Error:
-		r.ID = ctx.Response().Header().Get("X-Request-Id")
-		return ctx.JSON(r.Status, r)
-	default:
-		return handleError(ctx, createInternalError(r, http.StatusInternalServerError, "unknown"))
-	}
-}
-
-func handleOK(ctx echo.Context, r interface{}) error {
-	return ctx.JSON(http.StatusOK, r)
-}
-
-func handleNotFound(ctx echo.Context) error {
-	return ctx.NoContent(http.StatusNotFound)
-}
-
-func handleNoContent(ctx echo.Context) error {
-	return ctx.NoContent(http.StatusNoContent)
-}
-
-func handleUnauthorized(ctx echo.Context) error {
-	return ctx.NoContent(http.StatusUnauthorized)
-}
-
-func handleForbidden(ctx echo.Context) error {
-	return ctx.NoContent(http.StatusForbidden)
-}
 
 // UserShowContext provides the user show action context
 type UserShowContext struct {
-	context       echo.Context
+	context       *gin.Context
 	CurrentUserID string
 	UserID        string
 }
 
 // NewUserShowContext parses the incoming request and create context
-func NewUserShowContext(ctx echo.Context) (*UserShowContext, error) {
+func NewUserShowContext(ctx *gin.Context) *UserShowContext {
 	rctx := UserShowContext{context: ctx}
-	rctx.CurrentUserID, _ = ctx.Get(keyCurrentUserID).(string)
+	if v, ok := ctx.Get(keyCurrentUserID); ok {
+		rctx.CurrentUserID, _ = v.(string)
+	}
 	rctx.UserID = ctx.Param("userID")
-	return &rctx, nil
+	return &rctx
 }
 
 // NotFound sends a HTTP response
@@ -70,23 +42,25 @@ func (ctx *UserShowContext) OKMe(r *view.UserMe) error {
 
 // UserUpdateContext provides the user update action context
 type UserUpdateContext struct {
-	context       echo.Context
+	context       *gin.Context
 	CurrentUserID string
 	UserID        string
 	Payload       *payload.User
 }
 
 // NewUserUpdateContext parses the incoming request and create context
-func NewUserUpdateContext(ctx echo.Context) (*UserUpdateContext, error) {
+func NewUserUpdateContext(ctx *gin.Context) *UserUpdateContext {
 	rctx := UserUpdateContext{context: ctx}
-	rctx.CurrentUserID, _ = ctx.Get(keyCurrentUserID).(string)
+	if v, ok := ctx.Get(keyCurrentUserID); ok {
+		rctx.CurrentUserID, _ = v.(string)
+	}
 	rctx.UserID = ctx.Param("userID")
-	return &rctx, nil
+	return &rctx
 }
 
-// NoContent sends a HTTP response
-func (ctx *UserUpdateContext) NoContent() error {
-	return handleNoContent(ctx.context)
+// OK sends a HTTP response
+func (ctx *UserUpdateContext) OK() error {
+	return handleSuccess(ctx.context)
 }
 
 // NotFound sends a HTTP response
@@ -101,23 +75,22 @@ func (ctx *UserUpdateContext) Forbidden() error {
 
 // HealthHealthContext provides the health health action context
 type HealthHealthContext struct {
-	context echo.Context
+	context *gin.Context
 }
 
 // NewHealthHealthContext parses the incoming request and create context
-func NewHealthHealthContext(ctx echo.Context) (*HealthHealthContext, error) {
-	rctx := HealthHealthContext{context: ctx}
-	return &rctx, nil
+func NewHealthHealthContext(ctx *gin.Context) *HealthHealthContext {
+	return &HealthHealthContext{ctx}
 }
 
 // OK sends HTTP response
-func (ctx *HealthHealthContext) OK(r string) error {
-	return ctx.context.String(http.StatusOK, r)
+func (ctx *HealthHealthContext) OK() error {
+	return handleSuccess(ctx.context)
 }
 
 // CourseShowContext provides the course show action context
 type CourseShowContext struct {
-	context       echo.Context
+	context       *gin.Context
 	CurrentUserID string
 	CourseID      string
 	Own           *bool
@@ -125,11 +98,13 @@ type CourseShowContext struct {
 }
 
 // NewCourseShowContext parses the incoming request and create context
-func NewCourseShowContext(ctx echo.Context) (*CourseShowContext, error) {
+func NewCourseShowContext(ctx *gin.Context) *CourseShowContext {
 	rctx := CourseShowContext{context: ctx}
-	rctx.CurrentUserID, _ = ctx.Get(keyCurrentUserID).(string)
+	if v, ok := ctx.Get(keyCurrentUserID); ok {
+		rctx.CurrentUserID, _ = v.(string)
+	}
 	rctx.CourseID = ctx.Param("courseID")
-	return &rctx, nil
+	return &rctx
 }
 
 // OK sends HTTP response
@@ -149,16 +124,18 @@ func (ctx *CourseShowContext) NotFound() error {
 
 // CourseCreateContext provides the course create action context
 type CourseCreateContext struct {
-	context       echo.Context
+	context       *gin.Context
 	CurrentUserID string
 	Payload       *payload.Course
 }
 
 // NewCourseCreateContext parses the incoming request and create context
-func NewCourseCreateContext(ctx echo.Context) (*CourseCreateContext, error) {
+func NewCourseCreateContext(ctx *gin.Context) *CourseCreateContext {
 	rctx := CourseCreateContext{context: ctx}
-	rctx.CurrentUserID, _ = ctx.Get(keyCurrentUserID).(string)
-	return &rctx, nil
+	if v, ok := ctx.Get(keyCurrentUserID); ok {
+		rctx.CurrentUserID, _ = v.(string)
+	}
+	return &rctx
 }
 
 // OK sends HTTP response
@@ -173,23 +150,25 @@ func (ctx *CourseCreateContext) Forbidden() error {
 
 // CourseUpdateContext provides the course update action context
 type CourseUpdateContext struct {
-	context       echo.Context
+	context       *gin.Context
 	CurrentUserID string
 	CourseID      string
 	Payload       *payload.Course
 }
 
 // NewCourseUpdateContext parses the incoming request and create context
-func NewCourseUpdateContext(ctx echo.Context) (*CourseUpdateContext, error) {
+func NewCourseUpdateContext(ctx *gin.Context) *CourseUpdateContext {
 	rctx := CourseUpdateContext{context: ctx}
-	rctx.CurrentUserID, _ = ctx.Get(keyCurrentUserID).(string)
+	if v, ok := ctx.Get(keyCurrentUserID); ok {
+		rctx.CurrentUserID, _ = v.(string)
+	}
 	rctx.CourseID = ctx.Param("courseID")
-	return &rctx, nil
+	return &rctx
 }
 
-// NoContent sends HTTP response
-func (ctx *CourseUpdateContext) NoContent() error {
-	return handleNoContent(ctx.context)
+// OK sends HTTP response
+func (ctx *CourseUpdateContext) OK() error {
+	return handleSuccess(ctx.context)
 }
 
 // NotFound sends HTTP response
@@ -204,19 +183,21 @@ func (ctx *CourseUpdateContext) Forbidden() error {
 
 // CourseListContext provides the course list action context
 type CourseListContext struct {
-	context       echo.Context
+	context       *gin.Context
 	CurrentUserID string
 	Owner         string
 	Student       string
 }
 
 // NewCourseListContext parses the incoming request and create context
-func NewCourseListContext(ctx echo.Context) (*CourseListContext, error) {
+func NewCourseListContext(ctx *gin.Context) *CourseListContext {
 	rctx := CourseListContext{context: ctx}
-	rctx.CurrentUserID, _ = ctx.Get(keyCurrentUserID).(string)
-	rctx.Owner = ctx.QueryParam("owner")
-	rctx.Student = ctx.QueryParam("student")
-	return &rctx, nil
+	if v, ok := ctx.Get(keyCurrentUserID); ok {
+		rctx.CurrentUserID, _ = v.(string)
+	}
+	rctx.Owner = ctx.Query("owner")
+	rctx.Student = ctx.Query("student")
+	return &rctx
 }
 
 // OKTiny sends HTTP response
@@ -226,23 +207,25 @@ func (ctx *CourseListContext) OKTiny(r view.CourseTinyCollection) error {
 
 // CourseEnrollContext provides the course enroll action context
 type CourseEnrollContext struct {
-	context       echo.Context
+	context       *gin.Context
 	CurrentUserID string
 	CourseID      string
 	Payload       *payload.CourseEnroll
 }
 
 // NewCourseEnrollContext parses the incoming request and create context
-func NewCourseEnrollContext(ctx echo.Context) (*CourseEnrollContext, error) {
+func NewCourseEnrollContext(ctx *gin.Context) *CourseEnrollContext {
 	rctx := CourseEnrollContext{context: ctx}
-	rctx.CurrentUserID, _ = ctx.Get(keyCurrentUserID).(string)
+	if v, ok := ctx.Get(keyCurrentUserID); ok {
+		rctx.CurrentUserID, _ = v.(string)
+	}
 	rctx.CourseID = ctx.Param("courseID")
-	return &rctx, nil
+	return &rctx
 }
 
-// NoContent sends HTTP response
-func (ctx *CourseEnrollContext) NoContent() error {
-	return handleNoContent(ctx.context)
+// OK sends HTTP response
+func (ctx *CourseEnrollContext) OK() error {
+	return handleSuccess(ctx.context)
 }
 
 // Forbidden sends HTTP response
@@ -257,20 +240,22 @@ func (ctx *CourseEnrollContext) NotFound() error {
 
 // PaymentListContext provides the payment list action context
 type PaymentListContext struct {
-	context       echo.Context
+	context       *gin.Context
 	CurrentUserID string
 }
 
 // NewPaymentListContext parses the incoming request and create context
-func NewPaymentListContext(ctx echo.Context) (*PaymentListContext, error) {
+func NewPaymentListContext(ctx *gin.Context) *PaymentListContext {
 	rctx := PaymentListContext{context: ctx}
-	rctx.CurrentUserID, _ = ctx.Get(keyCurrentUserID).(string)
-	return &rctx, nil
+	if v, ok := ctx.Get(keyCurrentUserID); ok {
+		rctx.CurrentUserID, _ = v.(string)
+	}
+	return &rctx
 }
 
 // OK sends HTTP response
 func (ctx *PaymentListContext) OK(r view.PaymentCollection) error {
-	return ctx.context.JSON(http.StatusOK, r)
+	return handleOK(ctx.context, r)
 }
 
 // Forbidden sends HTTP response
@@ -280,17 +265,19 @@ func (ctx *PaymentListContext) Forbidden() error {
 
 // PaymentApproveContext provides the payment approve action context
 type PaymentApproveContext struct {
-	context       echo.Context
+	context       *gin.Context
 	CurrentUserID string
 	PaymentID     string
 }
 
 // NewPaymentApproveContext parses the incoming request and create context
-func NewPaymentApproveContext(ctx echo.Context) (*PaymentApproveContext, error) {
+func NewPaymentApproveContext(ctx *gin.Context) *PaymentApproveContext {
 	rctx := PaymentApproveContext{context: ctx}
-	rctx.CurrentUserID, _ = ctx.Get(keyCurrentUserID).(string)
+	if v, ok := ctx.Get(keyCurrentUserID); ok {
+		rctx.CurrentUserID, _ = v.(string)
+	}
 	rctx.PaymentID = ctx.Param("paymentID")
-	return &rctx, nil
+	return &rctx
 }
 
 // Forbidden sends HTTP response
@@ -303,24 +290,26 @@ func (ctx *PaymentApproveContext) NotFound() error {
 	return handleNotFound(ctx.context)
 }
 
-// NoContent sends HTTP response
-func (ctx *PaymentApproveContext) NoContent() error {
-	return handleNoContent(ctx.context)
+// OK sends HTTP response
+func (ctx *PaymentApproveContext) OK() error {
+	return handleSuccess(ctx.context)
 }
 
 // PaymentRejectContext provides the payment reject action context
 type PaymentRejectContext struct {
-	context       echo.Context
+	context       *gin.Context
 	CurrentUserID string
 	PaymentID     string
 }
 
 // NewPaymentRejectContext parses the incoming request and create context
-func NewPaymentRejectContext(ctx echo.Context) (*PaymentRejectContext, error) {
+func NewPaymentRejectContext(ctx *gin.Context) *PaymentRejectContext {
 	rctx := PaymentRejectContext{context: ctx}
-	rctx.CurrentUserID, _ = ctx.Get(keyCurrentUserID).(string)
+	if v, ok := ctx.Get(keyCurrentUserID); ok {
+		rctx.CurrentUserID, _ = v.(string)
+	}
 	rctx.PaymentID = ctx.Param("paymentID")
-	return &rctx, nil
+	return &rctx
 }
 
 // Forbidden sends HTTP response
@@ -333,47 +322,47 @@ func (ctx *PaymentRejectContext) NotFound() error {
 	return handleNotFound(ctx.context)
 }
 
-// NoContent sends HTTP response
-func (ctx *PaymentRejectContext) NoContent() error {
-	return handleNoContent(ctx.context)
+// OK sends HTTP response
+func (ctx *PaymentRejectContext) OK() error {
+	return handleSuccess(ctx.context)
 }
 
 // RenderIndexContext provides the render index action context
 // use for render static file
 type RenderIndexContext struct {
-	context echo.Context
+	context *gin.Context
 }
 
 // NewRenderIndexContext parses the incoming request and create context
-func NewRenderIndexContext(ctx echo.Context) (*RenderIndexContext, error) {
-	rctx := RenderIndexContext{context: ctx}
-	return &rctx, nil
+func NewRenderIndexContext(ctx *gin.Context) *RenderIndexContext {
+	return &RenderIndexContext{ctx}
 }
 
 // OK sends HTTP response
 func (ctx *RenderIndexContext) OK(r *view.RenderIndex) error {
-	return ctx.context.Render(http.StatusOK, "index", r)
+	return handleHTML(ctx.context, "index", r)
 }
 
 // RenderCourseContext provides the render course action context
 type RenderCourseContext struct {
-	context  echo.Context
+	context  *gin.Context
 	CourseID string
 }
 
 // NewRenderCourseContext parses the incoming request and create context
-func NewRenderCourseContext(ctx echo.Context) (*RenderCourseContext, error) {
+func NewRenderCourseContext(ctx *gin.Context) *RenderCourseContext {
 	rctx := RenderCourseContext{context: ctx}
 	rctx.CourseID = ctx.Param("courseID")
-	return &rctx, nil
+	return &rctx
 }
 
 // OK sends HTTP response
 func (ctx *RenderCourseContext) OK(r *view.RenderIndex) error {
-	return ctx.context.Render(http.StatusOK, "index", r)
+	return handleHTML(ctx.context, "index", r)
 }
 
 // NotFound redirect to home page
 func (ctx *RenderCourseContext) NotFound() error {
-	return ctx.context.Redirect(http.StatusTemporaryRedirect, "/")
+	ctx.context.Redirect(http.StatusTemporaryRedirect, "/")
+	return nil
 }
