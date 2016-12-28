@@ -49,7 +49,7 @@ func CreateErrors(status int, code string) ErrorFunc {
 
 var success = &SuccessReply{1}
 
-var rr = render.New()
+var rr = render.New(render.Options{DisableHTTPErrorRendering: true})
 
 func handleOK(ctx *gin.Context, r interface{}) error {
 	ctx.JSON(http.StatusOK, r)
