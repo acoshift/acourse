@@ -25,8 +25,7 @@ func main() {
 		AllowCredentials: false,
 		AllowHeaders:     []string{"Authorization", "Content-Type"},
 		AllowMethods:     []string{"GET", "POST", "PATCH", "PUT", "DELETE"},
-		AllowOrigins:     []string{"http://localhost:9000", "http://localhost:8080"},
-		MaxAge:           3600,
+		AllowAllOrigins:  true,
 	}))
 
 	if err := app.InitService(service, projectID); err != nil {

@@ -5,6 +5,7 @@ import (
 	"acourse/ctrl"
 	"acourse/store"
 	"log"
+	"time"
 
 	"gopkg.in/gin-contrib/cors.v1"
 	"gopkg.in/gin-gonic/gin.v1"
@@ -26,7 +27,7 @@ func main() {
 		AllowHeaders:     []string{"Authorization", "Content-Type"},
 		AllowMethods:     []string{"GET", "POST", "PATCH", "PUT", "DELETE"},
 		AllowOrigins:     []string{"https://acourse.io"},
-		MaxAge:           3600,
+		MaxAge:           12 * time.Hour,
 	}))
 
 	if err := app.InitService(service, projectID); err != nil {
