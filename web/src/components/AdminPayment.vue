@@ -19,7 +19,7 @@
             a(:href="x.url")
               img.ui.tiny.image(:src="x.url")
           td
-            span {{ x.createdAt | date }}
+            span {{ x.createdAt | date('YYYY/MM/DD, HH:mm') }}
           td
             .ui.green.button(@click="approve(x)") Approve
             .ui.red.button(@click="reject(x)") Reject
