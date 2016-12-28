@@ -4,35 +4,31 @@ import (
 	"time"
 )
 
-// RawUser type
-type RawUser struct {
-	Username *string `json:"username"`
-	Name     *string `json:"name"`
-	Photo    *string `json:"photo"`
-	AboutMe  *string `json:"aboutMe"`
+// Course type
+type Course struct {
+	Title            string
+	ShortDescription string
+	Description      string
+	Photo            string
+	Start            time.Time
+	Video            string
+	Contents         []*CourseContent
+	Attend           bool
+	Assignment       bool
 }
 
-// Validate validates model
-func (x *RawUser) Validate() error {
-	return nil
+// CourseContent type
+type CourseContent struct {
+	Title       string
+	Description string
+	Video       string
+	DownloadURL string
 }
 
-// Payload builds UserPayload from model
-func (x *RawUser) Payload() *User {
-	r := User{}
-	if x.Username != nil {
-		r.Username = *x.Username
-	}
-	if x.Name != nil {
-		r.Name = *x.Name
-	}
-	if x.Photo != nil {
-		r.Photo = *x.Photo
-	}
-	if x.AboutMe != nil {
-		r.AboutMe = *x.AboutMe
-	}
-	return &r
+// CourseEnroll type
+type CourseEnroll struct {
+	Code string
+	URL  string
 }
 
 // RawCourse type
