@@ -1,33 +1,27 @@
 package store
 
-import "cloud.google.com/go/datastore"
-import "time"
+import (
+	"acourse/model"
+	"time"
 
-// User model
-type User struct {
-	Base
-	Timestampable
-	Username string
-	Name     string `datastore:",noindex"`
-	Photo    string `datastore:",noindex"`
-	AboutMe  string `datastore:",noindex"`
-}
+	"cloud.google.com/go/datastore"
+)
 
 const kindUser = "User"
 
 var cacheUser = NewCache(time.Hour)
 
 // UserGet retrieves user from database
-func (c *DB) UserGet(userID string) (*User, error) {
+func (c *DB) UserGet(userID string) (*model.User, error) {
 	if cache := cacheUser.Get(userID); cache != nil {
-		return cache.(*User), nil
+		return cache.(*model.User), nil
 	}
 
 	ctx, cancel := getContext()
 	defer cancel()
 
 	var err error
-	var x User
+	var x model.User
 
 	key := datastore.NameKey(kindUser, userID, nil)
 	err = c.client.Get(ctx, key, &x)
@@ -37,7 +31,7 @@ func (c *DB) UserGet(userID string) (*User, error) {
 	if datastoreError(err) {
 		return nil, err
 	}
-	x.setKey(key)
+	x.SetKey(key)
 
 	cacheUser.Set(userID, &x)
 	return &x, nil
@@ -45,24 +39,24 @@ func (c *DB) UserGet(userID string) (*User, error) {
 
 // UserMustGet retrieves user from database
 // if not exists return empty user with given id
-func (c *DB) UserMustGet(userID string) (*User, error) {
+func (c *DB) UserMustGet(userID string) (*model.User, error) {
 	x, err := c.UserGet(userID)
 	if err != nil {
 		return nil, err
 	}
 	if x == nil {
-		x = &User{}
-		x.setKey(datastore.NameKey(kindUser, userID, nil))
+		x = &model.User{}
+		x.SetKey(datastore.NameKey(kindUser, userID, nil))
 	}
 	return x, nil
 }
 
 // UserFindUsername retrieves user from username from database
-func (c *DB) UserFindUsername(username string) (*User, error) {
+func (c *DB) UserFindUsername(username string) (*model.User, error) {
 	ctx, cancel := getContext()
 	defer cancel()
 
-	var x User
+	var x model.User
 
 	q := datastore.
 		NewQuery(kindUser).
@@ -80,8 +74,8 @@ func (c *DB) UserFindUsername(username string) (*User, error) {
 }
 
 // UserSave saves user to database
-func (c *DB) UserSave(x *User) error {
-	if x.key == nil {
+func (c *DB) UserSave(x *model.User) error {
+	if x.Key() == nil {
 		return ErrInvalidID
 	}
 
@@ -99,13 +93,13 @@ func (c *DB) UserSave(x *User) error {
 	ctx, cancel := getContext()
 	defer cancel()
 	x.Stamp()
-	_, err := c.client.Put(ctx, x.key, x)
+	_, err := c.client.Put(ctx, x.Key(), x)
 	cacheUser.Del(x.ID)
 	return err
 }
 
 // UserCreateAll creates new users to database
-func (c *DB) UserCreateAll(userIDs []string, xs []*User) error {
+func (c *DB) UserCreateAll(userIDs []string, xs []*model.User) error {
 	if len(userIDs) != len(xs) {
 		return ErrConflict("user id count not match user count")
 	}
@@ -119,7 +113,7 @@ func (c *DB) UserCreateAll(userIDs []string, xs []*User) error {
 		x.Stamp()
 		k := datastore.NameKey(kindUser, userIDs[i], nil)
 		keys[i] = k
-		x.setKey(k)
+		x.SetKey(k)
 	}
 
 	// TODO: check duplicated username
@@ -131,11 +125,11 @@ func (c *DB) UserCreateAll(userIDs []string, xs []*User) error {
 }
 
 // UserCreate creates new user
-func (c *DB) UserCreate(userID string, x *User) error {
+func (c *DB) UserCreate(userID string, x *model.User) error {
 	if userID == "" {
 		return ErrInvalidID
 	}
-	x.setKey(datastore.NameKey(kindUser, userID, nil))
+	x.SetKey(datastore.NameKey(kindUser, userID, nil))
 	return c.UserSave(x)
 }
 

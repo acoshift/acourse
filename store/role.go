@@ -1,23 +1,15 @@
 package store
 
 import (
+	"acourse/model"
+
 	"cloud.google.com/go/datastore"
 )
-
-// Role model store user's role
-type Role struct {
-	Base
-	Timestampable
-
-	// roles
-	Admin      bool
-	Instructor bool
-}
 
 const kindRole = "Role"
 
 // RoleGet retrieves role by id
-func (c *DB) RoleGet(roleID string) (*Role, error) {
+func (c *DB) RoleGet(roleID string) (*model.Role, error) {
 	id := idInt(roleID)
 	if id == 0 {
 		return nil, ErrInvalidID
@@ -26,7 +18,7 @@ func (c *DB) RoleGet(roleID string) (*Role, error) {
 	ctx, cancel := getContext()
 	defer cancel()
 
-	var x Role
+	var x model.Role
 	err := c.get(ctx, datastore.IDKey(kindRole, id, nil), &x)
 	if notFound(err) {
 		return nil, nil
@@ -38,7 +30,7 @@ func (c *DB) RoleGet(roleID string) (*Role, error) {
 }
 
 // RoleFindByUserID retrieves role by user id
-func (c *DB) RoleFindByUserID(userID string) (*Role, error) {
+func (c *DB) RoleFindByUserID(userID string) (*model.Role, error) {
 	if userID == "" {
 		return nil, ErrInvalidID
 	}
@@ -48,7 +40,7 @@ func (c *DB) RoleFindByUserID(userID string) (*Role, error) {
 
 	pID := datastore.NameKey(kindUser, userID, nil)
 
-	var x Role
+	var x model.Role
 	q := datastore.
 		NewQuery(kindRole).
 		Ancestor(pID).
@@ -56,7 +48,7 @@ func (c *DB) RoleFindByUserID(userID string) (*Role, error) {
 
 	err := c.findFirst(ctx, q, &x)
 	if notFound(err) {
-		x.setKey(datastore.IncompleteKey(kindRole, pID))
+		x.SetKey(datastore.IncompleteKey(kindRole, pID))
 		return &x, nil
 	}
 	if err != nil {
@@ -66,15 +58,15 @@ func (c *DB) RoleFindByUserID(userID string) (*Role, error) {
 }
 
 // RoleSave saves role for a user
-func (c *DB) RoleSave(x *Role) error {
-	if x.key == nil {
+func (c *DB) RoleSave(x *model.Role) error {
+	if x.Key() == nil {
 		return ErrInvalidID
 	}
 	ctx, cancel := getContext()
 	defer cancel()
 
 	x.Stamp()
-	_, err := c.client.Put(ctx, x.key, x)
+	_, err := c.client.Put(ctx, x.Key(), x)
 	return err
 }
 

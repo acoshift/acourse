@@ -2,6 +2,7 @@ package ctrl
 
 import (
 	"acourse/app"
+	"acourse/model"
 	"acourse/store"
 )
 
@@ -27,7 +28,7 @@ func (c *PaymentController) List(ctx *app.PaymentListContext) error {
 		return ctx.Forbidden()
 	}
 
-	xs, err := c.db.PaymentList(store.PaymentStatusWaiting)
+	xs, err := c.db.PaymentList(model.PaymentStatusWaiting)
 	if err != nil {
 		return err
 	}
@@ -65,10 +66,10 @@ func (c *PaymentController) Approve(ctx *app.PaymentApproveContext) error {
 	if payment == nil {
 		return ctx.NotFound()
 	}
-	payment.Status = store.PaymentStatusApproved
+	payment.Status = model.PaymentStatusApproved
 
 	// Add user to enroll
-	enroll := &store.Enroll{
+	enroll := &model.Enroll{
 		UserID:   payment.UserID,
 		CourseID: payment.CourseID,
 	}
@@ -102,7 +103,7 @@ func (c *PaymentController) Reject(ctx *app.PaymentRejectContext) error {
 	if payment == nil {
 		return ctx.NotFound()
 	}
-	payment.Status = store.PaymentStatusRejected
+	payment.Status = model.PaymentStatusRejected
 
 	err = c.db.PaymentSave(payment)
 	if err != nil {

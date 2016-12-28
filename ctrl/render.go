@@ -27,13 +27,13 @@ func (c *RenderController) Index(ctx *app.RenderIndexContext) error {
 		// do not wait for api call
 		go func() {
 			xs, _ := c.db.CourseList(store.CourseListOptionPublic(true))
-			res := make(app.CourseTinyCollectionView, len(xs))
+			rs := make(app.CourseTinyCollectionView, len(xs))
 			for i, x := range xs {
 				u, _ := c.db.UserMustGet(x.Owner)
 				student, _ := c.db.EnrollCourseCount(x.ID)
-				res[i] = ToCourseTinyView(x, ToUserTinyView(u), student)
+				rs[i] = ToCourseTinyView(x, ToUserTinyView(u), student)
 			}
-			cacheRender.Set("index", res)
+			cacheRender.Set("index", rs)
 		}()
 	}
 

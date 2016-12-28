@@ -2,6 +2,7 @@ package ctrl
 
 import (
 	"acourse/app"
+	"acourse/model"
 	"acourse/store"
 )
 
@@ -59,7 +60,7 @@ func (c *CourseController) Show(ctx *app.CourseShowContext) error {
 	}
 
 	// check is user already purchase
-	payment, err := c.db.PaymentFind(ctx.CurrentUserID, ctx.CourseID, store.PaymentStatusWaiting)
+	payment, err := c.db.PaymentFind(ctx.CurrentUserID, ctx.CourseID, model.PaymentStatusWaiting)
 	if err != nil {
 		return err
 	}
@@ -87,7 +88,7 @@ func (c *CourseController) Create(ctx *app.CourseCreateContext) error {
 		return err
 	}
 
-	course := &store.Course{
+	course := &model.Course{
 		Title:            ctx.Payload.Title,
 		ShortDescription: ctx.Payload.ShortDescription,
 		Description:      ctx.Payload.Description,
@@ -96,7 +97,7 @@ func (c *CourseController) Create(ctx *app.CourseCreateContext) error {
 		Video:            ctx.Payload.Video,
 		Contents:         ToCourseContents(ctx.Payload.Contents),
 		Owner:            ctx.CurrentUserID,
-		Options: store.CourseOption{
+		Options: model.CourseOption{
 			Attend:     ctx.Payload.Attend,
 			Assignment: ctx.Payload.Assignment,
 		},
@@ -148,7 +149,7 @@ func (c *CourseController) Update(ctx *app.CourseUpdateContext) error {
 
 // List runs list action
 func (c *CourseController) List(ctx *app.CourseListContext) error {
-	var xs []*store.Course
+	var xs []*model.Course
 	var err error
 
 	// query with owner
@@ -160,7 +161,7 @@ func (c *CourseController) List(ctx *app.CourseListContext) error {
 		}
 	} else if ctx.Student != "" {
 		if ctx.Student == ctx.CurrentUserID {
-			var enrolls []*store.Enroll
+			var enrolls []*model.Enroll
 			enrolls, err = c.db.EnrollListByUserID(ctx.Student)
 			if err != nil {
 				return err
@@ -171,7 +172,7 @@ func (c *CourseController) List(ctx *app.CourseListContext) error {
 			}
 			xs, err = c.db.CourseGetAllByIDs(ids)
 		} else {
-			var enrolls []*store.Enroll
+			var enrolls []*model.Enroll
 			enrolls, err = c.db.EnrollListByUserID(ctx.Student)
 			if err != nil {
 				return err
@@ -180,7 +181,7 @@ func (c *CourseController) List(ctx *app.CourseListContext) error {
 			for i, e := range enrolls {
 				ids[i] = e.CourseID
 			}
-			var ts []*store.Course
+			var ts []*model.Course
 			ts, err = c.db.CourseGetAllByIDs(ids)
 			if err != nil {
 				return err
@@ -243,7 +244,7 @@ func (c *CourseController) Enroll(ctx *app.CourseEnrollContext) error {
 	}
 
 	// check is user already send waiting payment
-	payment, err := c.db.PaymentFind(ctx.CurrentUserID, ctx.CourseID, store.PaymentStatusWaiting)
+	payment, err := c.db.PaymentFind(ctx.CurrentUserID, ctx.CourseID, model.PaymentStatusWaiting)
 	if err != nil {
 		return err
 	}
@@ -262,7 +263,7 @@ func (c *CourseController) Enroll(ctx *app.CourseEnrollContext) error {
 
 	// auto enroll if course free
 	if originalPrice == 0.0 {
-		enroll = &store.Enroll{
+		enroll = &model.Enroll{
 			UserID:   ctx.CurrentUserID,
 			CourseID: ctx.CourseID,
 		}
@@ -274,14 +275,14 @@ func (c *CourseController) Enroll(ctx *app.CourseEnrollContext) error {
 	}
 
 	// create payment
-	payment = &store.Payment{
+	payment = &model.Payment{
 		CourseID:      ctx.CourseID,
 		UserID:        ctx.CurrentUserID,
 		OriginalPrice: originalPrice,
 		Price:         originalPrice,
 		Code:          ctx.Payload.Code,
 		URL:           ctx.Payload.URL,
-		Status:        store.PaymentStatusWaiting,
+		Status:        model.PaymentStatusWaiting,
 	}
 
 	err = c.db.PaymentSave(payment)

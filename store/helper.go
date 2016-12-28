@@ -1,6 +1,7 @@
 package store
 
 import (
+	"acourse/model"
 	"context"
 	"strconv"
 	"time"
@@ -36,21 +37,21 @@ func (c *DB) getAll(ctx context.Context, q *datastore.Query, dst interface{}) ([
 	return keys, nil
 }
 
-func (c *DB) get(ctx context.Context, key *datastore.Key, dst isBase) error {
+func (c *DB) get(ctx context.Context, key *datastore.Key, dst model.IsBase) error {
 	err := c.client.Get(ctx, key, dst)
 	if datastoreError(err) {
 		return err
 	}
-	dst.setKey(key)
+	dst.SetKey(key)
 	return nil
 }
 
-func (c *DB) findFirst(ctx context.Context, q *datastore.Query, dst isBase) error {
+func (c *DB) findFirst(ctx context.Context, q *datastore.Query, dst model.IsBase) error {
 	key, err := c.client.Run(ctx, q).Next(dst)
 	if datastoreError(err) {
 		return err
 	}
-	dst.setKey(key)
+	dst.SetKey(key)
 	return nil
 }
 

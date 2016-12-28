@@ -1,25 +1,19 @@
 package store
 
 import (
+	"acourse/model"
+
 	"cloud.google.com/go/datastore"
 )
-
-// Favorite model
-type Favorite struct {
-	Base
-	Timestampable
-	UserID   string
-	CourseID string
-}
 
 const kindFavorite = "Favorite"
 
 // FavoriteFind finds favorite
-func (c *DB) FavoriteFind(userID, courseID string) (*Favorite, error) {
+func (c *DB) FavoriteFind(userID, courseID string) (*model.Favorite, error) {
 	ctx, cancel := getContext()
 	defer cancel()
 
-	var x Favorite
+	var x model.Favorite
 	q := datastore.
 		NewQuery(kindFavorite).
 		Filter("UserID =", userID).
@@ -67,17 +61,17 @@ func (c *DB) FavoriteAdd(userID, courseID string) error {
 	ctx, cancel := getContext()
 	defer cancel()
 
-	x = &Favorite{
+	x = &model.Favorite{
 		UserID:   userID,
 		CourseID: courseID,
 	}
 	x.Stamp()
-	x.setKey(datastore.IncompleteKey(kindFavorite, nil))
-	key, err := c.client.Put(ctx, x.key, x)
+	x.SetKey(datastore.IncompleteKey(kindFavorite, nil))
+	key, err := c.client.Put(ctx, x.Key(), x)
 	if err != nil {
 		return err
 	}
-	x.setKey(key)
+	x.SetKey(key)
 	return nil
 }
 
@@ -95,11 +89,11 @@ func (c *DB) FavoriteRemove(userID, courseID string) error {
 	ctx, cancel := getContext()
 	defer cancel()
 
-	return c.client.Delete(ctx, x.key)
+	return c.client.Delete(ctx, x.Key())
 }
 
 // FavoriteCreateAll creates all favorites
-func (c *DB) FavoriteCreateAll(xs []*Favorite) error {
+func (c *DB) FavoriteCreateAll(xs []*model.Favorite) error {
 	ctx, cancel := getContext()
 	defer cancel()
 
@@ -114,7 +108,7 @@ func (c *DB) FavoriteCreateAll(xs []*Favorite) error {
 		return err
 	}
 	for i, x := range xs {
-		x.setKey(keys[i])
+		x.SetKey(keys[i])
 	}
 	return nil
 }

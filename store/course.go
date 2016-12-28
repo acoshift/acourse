@@ -1,54 +1,10 @@
 package store
 
 import (
+	"acourse/model"
 	"time"
 
 	"cloud.google.com/go/datastore"
-)
-
-// Course model
-type Course struct {
-	Base
-	Timestampable
-	Title            string `datastore:",noindex"`
-	ShortDescription string `datastore:",noindex"`
-	Description      string `datastore:",noindex"` // Markdown
-	Photo            string `datastore:",noindex"` // URL
-	Owner            string
-	Start            time.Time
-	URL              string
-	Type             CourseType
-	Video            string `datastore:",noindex"` // Cover Video
-	Price            float64
-	DiscountedPrice  float64
-	Options          CourseOption
-	Contents         []CourseContent `datastore:",noindex"`
-}
-
-// CourseOption type
-type CourseOption struct {
-	Public     bool
-	Enroll     bool `datastore:",noindex"`
-	Attend     bool `datastore:",noindex"`
-	Assignment bool `datastore:",noindex"`
-	Discount   bool
-}
-
-// CourseContent type
-type CourseContent struct {
-	Title       string `datastore:",noindex"`
-	Description string `datastore:",noindex"` // Markdown
-	Video       string `datastore:",noindex"` // Youtube ID
-	DownloadURL string `datastore:",noindex"` // Video download link
-}
-
-// CourseType type
-type CourseType string
-
-// CourseType
-const (
-	CourseTypeLive  = string("live")
-	CourseTypeVideo = string("video")
 )
 
 // CourseListOptions type
@@ -116,21 +72,21 @@ func CourseListOptionStartTo(to time.Time) CourseListOption {
 }
 
 // CourseGet retrieves course from database
-func (c *DB) CourseGet(courseID string) (*Course, error) {
+func (c *DB) CourseGet(courseID string) (*model.Course, error) {
 	id := idInt(courseID)
 	if id == 0 {
 		return nil, nil
 	}
 
 	if cache := cacheCourse.Get(courseID); cache != nil {
-		return cache.(*Course), nil
+		return cache.(*model.Course), nil
 	}
 
 	ctx, cancel := getContext()
 	defer cancel()
 
 	var err error
-	var x Course
+	var x model.Course
 
 	key := datastore.IDKey(kindCourse, id, nil)
 	err = c.client.Get(ctx, key, &x)
@@ -140,13 +96,13 @@ func (c *DB) CourseGet(courseID string) (*Course, error) {
 	if datastoreError(err) {
 		return nil, err
 	}
-	x.setKey(key)
+	x.SetKey(key)
 	cacheCourse.Set(courseID, &x)
 	return &x, nil
 }
 
 // CourseSave saves course to database
-func (c *DB) CourseSave(x *Course) error {
+func (c *DB) CourseSave(x *model.Course) error {
 	ctx, cancel := getContext()
 	defer cancel()
 
@@ -162,26 +118,26 @@ func (c *DB) CourseSave(x *Course) error {
 
 	var err error
 	x.Stamp()
-	if x.key == nil {
-		x.setKey(datastore.IncompleteKey(kindCourse, nil))
+	if x.Key() == nil {
+		x.SetKey(datastore.IncompleteKey(kindCourse, nil))
 	}
 
-	key, err := c.client.Put(ctx, x.key, x)
+	key, err := c.client.Put(ctx, x.Key(), x)
 	if err != nil {
 		return err
 	}
-	x.setKey(key)
+	x.SetKey(key)
 
 	cacheCourse.Del(x.ID)
 	return nil
 }
 
 // CourseList retrieves courses from database
-func (c *DB) CourseList(opts ...CourseListOption) ([]*Course, error) {
+func (c *DB) CourseList(opts ...CourseListOption) ([]*model.Course, error) {
 	ctx, cancel := getContext()
 	defer cancel()
 
-	var xs []*Course
+	var xs []*model.Course
 
 	q := datastore.NewQuery(kindCourse)
 
@@ -215,7 +171,7 @@ func (c *DB) CourseList(opts ...CourseListOption) ([]*Course, error) {
 	}
 
 	for i := range keys {
-		xs[i].setKey(keys[i])
+		xs[i].SetKey(keys[i])
 	}
 
 	return xs, nil
@@ -240,7 +196,7 @@ func (c *DB) CourseDelete(courseID string) error {
 }
 
 // CourseFind retrieves course from URL
-func (c *DB) CourseFind(courseURL string) (*Course, error) {
+func (c *DB) CourseFind(courseURL string) (*model.Course, error) {
 	if cache := cacheCourseURL.Get(courseURL); cache != nil {
 		return c.CourseGet(cache.(string))
 	}
@@ -248,7 +204,7 @@ func (c *DB) CourseFind(courseURL string) (*Course, error) {
 	ctx, cancel := getContext()
 	defer cancel()
 
-	var x Course
+	var x model.Course
 	q := datastore.
 		NewQuery(kindCourse).
 		Filter("URL =", courseURL).
@@ -266,9 +222,9 @@ func (c *DB) CourseFind(courseURL string) (*Course, error) {
 }
 
 // CourseGetAllByIDs retrieves courses by given course ids
-func (c *DB) CourseGetAllByIDs(courseIDs []string) ([]*Course, error) {
+func (c *DB) CourseGetAllByIDs(courseIDs []string) ([]*model.Course, error) {
 	if len(courseIDs) == 0 {
-		return []*Course{}, nil
+		return []*model.Course{}, nil
 	}
 
 	keys := make([]*datastore.Key, len(courseIDs))
@@ -283,13 +239,13 @@ func (c *DB) CourseGetAllByIDs(courseIDs []string) ([]*Course, error) {
 	ctx, cancel := getContext()
 	defer cancel()
 
-	xs := make([]*Course, len(keys))
+	xs := make([]*model.Course, len(keys))
 	err := c.client.GetMulti(ctx, keys, xs)
 	if datastoreError(err) {
 		return nil, err
 	}
 	for i, x := range xs {
-		x.setKey(keys[i])
+		x.SetKey(keys[i])
 	}
 	return xs, nil
 }

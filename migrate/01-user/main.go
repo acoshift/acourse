@@ -32,11 +32,11 @@ func main() {
 	defer resp.Body.Close()
 	users := map[string]firUser{}
 	json.NewDecoder(resp.Body).Decode(&users)
-	xs := make([]*store.User, len(users))
+	xs := make([]*model.User, len(users))
 	uids := make([]string, len(users))
 	i := 0
 	for uid, u := range users {
-		x := store.User{
+		x := model.User{
 			Name:     u.Name,
 			Username: uid,
 			Photo:    u.Photo,

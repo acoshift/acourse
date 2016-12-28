@@ -2,6 +2,7 @@ package ctrl
 
 import (
 	"acourse/app"
+	"acourse/model"
 	"acourse/store"
 )
 
@@ -50,7 +51,7 @@ func (c *UserController) Update(ctx *app.UserUpdateContext) error {
 		return ctx.Forbidden()
 	}
 
-	var user *store.User
+	var user *model.User
 
 	if ctx.CurrentUserID == ctx.UserID {
 		user, err = c.db.UserMustGet(ctx.UserID)

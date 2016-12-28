@@ -1,29 +1,22 @@
 package store
 
 import (
+	"acourse/model"
 	"time"
 
 	"cloud.google.com/go/datastore"
 )
-
-// Enroll model
-type Enroll struct {
-	Base
-	Timestampable
-	UserID   string
-	CourseID string
-}
 
 const kindEnroll = "Enroll"
 
 var cacheEnrollCount = NewCache(time.Hour)
 
 // EnrollFind finds enroll for given user id and course id
-func (c *DB) EnrollFind(userID, courseID string) (*Enroll, error) {
+func (c *DB) EnrollFind(userID, courseID string) (*model.Enroll, error) {
 	ctx, cancel := getContext()
 	defer cancel()
 
-	var x Enroll
+	var x model.Enroll
 	q := datastore.
 		NewQuery(kindEnroll).
 		Filter("UserID =", userID).
@@ -41,11 +34,11 @@ func (c *DB) EnrollFind(userID, courseID string) (*Enroll, error) {
 }
 
 // EnrollListByUserID list all enroll by given user id
-func (c *DB) EnrollListByUserID(userID string) ([]*Enroll, error) {
+func (c *DB) EnrollListByUserID(userID string) ([]*model.Enroll, error) {
 	ctx, cancel := getContext()
 	defer cancel()
 
-	var xs []*Enroll
+	var xs []*model.Enroll
 	q := datastore.
 		NewQuery(kindEnroll).
 		Filter("UserID =", userID)
@@ -55,13 +48,13 @@ func (c *DB) EnrollListByUserID(userID string) ([]*Enroll, error) {
 		return nil, err
 	}
 	for i, x := range xs {
-		x.setKey(keys[i])
+		x.SetKey(keys[i])
 	}
 	return xs, nil
 }
 
 // EnrollSave saves enroll to database
-func (c *DB) EnrollSave(x *Enroll) error {
+func (c *DB) EnrollSave(x *model.Enroll) error {
 	ctx, cancel := getContext()
 	defer cancel()
 
@@ -69,7 +62,7 @@ func (c *DB) EnrollSave(x *Enroll) error {
 	x.Stamp()
 
 	commit, err := c.client.RunInTransaction(ctx, func(tx *datastore.Transaction) error {
-		var t Enroll
+		var t model.Enroll
 
 		q := datastore.
 			NewQuery(kindEnroll).
@@ -89,13 +82,13 @@ func (c *DB) EnrollSave(x *Enroll) error {
 	if err != nil {
 		return err
 	}
-	x.setKey(commit.Key(pKey))
+	x.SetKey(commit.Key(pKey))
 	cacheEnrollCount.Del(x.CourseID)
 	return nil
 }
 
 // EnrollCreateAll creates all enrolls
-func (c *DB) EnrollCreateAll(xs []*Enroll) error {
+func (c *DB) EnrollCreateAll(xs []*model.Enroll) error {
 	ctx, cancel := getContext()
 	defer cancel()
 
@@ -110,7 +103,7 @@ func (c *DB) EnrollCreateAll(xs []*Enroll) error {
 		return err
 	}
 	for i, x := range xs {
-		x.setKey(keys[i])
+		x.SetKey(keys[i])
 	}
 	return nil
 }

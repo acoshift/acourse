@@ -40,10 +40,10 @@ type firContent struct {
 func main() {
 	db := store.NewDB(store.ProjectID("acourse-d9d0a"))
 
-	db.CoursePurge()
-	log.Println("Purged Courses")
-	db.EnrollPurge()
-	log.Println("Purged Enrolls")
+	// db.CoursePurge()
+	// log.Println("Purged Courses")
+	// db.EnrollPurge()
+	// log.Println("Purged Enrolls")
 
 	client, _ := google.DefaultClient(context.Background())
 	resp, _ := client.Get("https://acourse-d9d0a.firebaseio.com/course.json")
@@ -72,7 +72,6 @@ func main() {
 		x.Options.Enroll = v.Open
 		x.Options.Attend = v.CanAttend
 		x.Options.Assignment = v.HasAssignment
-		x.Options.Purchase = v.CanQueueEnroll
 
 		// contents
 		cs := contents[k]
@@ -86,24 +85,47 @@ func main() {
 			}
 		}
 
-		err := db.CourseSave(&x)
-		log.Println("Migrated Course:", x.Title)
-		if err != nil {
-			log.Println(err)
-		}
+		// err := db.CourseSave(&x)
+		// log.Println("Migrated Course:", x.Title)
+		// if err != nil {
+		// 	log.Println(err)
+		// }
 
 		for uid, s := range v.Student {
 			if s {
-				es = append(es, &store.Enroll{UserID: uid, CourseID: x.ID})
+				es = append(es, &store.Enroll{UserID: uid, CourseID: mapCourseID(k)})
 			}
 		}
 	}
 	log.Println("Migrated Courses")
 
-	db.EnrollCreateAll(es[:400])
-	db.EnrollCreateAll(es[401:])
+	// db.EnrollCreateAll(es[:400])
+	// db.EnrollCreateAll(es[400:])
 	log.Println(len(es))
+	for _, e := range es {
+		x, _ := db.EnrollFind(e.UserID, e.CourseID)
+		if x == nil {
+			log.Println("Not found, " + e.UserID + " " + e.CourseID)
+		}
+	}
 	log.Println("Migrated Enrolls")
 
 	log.Println("Completed")
+}
+
+func mapCourseID(id string) string {
+	switch id {
+	case "-KS2ivTwZpPIQiV3Sqm-":
+		return "5751646390845440"
+	case "-KS6g5qpLq8I0MPdF7oc":
+		return "5701751084679168"
+	case "-KUNcswtqfZHIAzWHccQ":
+		return "5644101080842240"
+	case "-KYnk-y_6KoFDSsOVJex":
+		return "5671617594130432"
+	case "-KZf-Y5eG97WlFmv87g1":
+		return "5766596232478720"
+	default:
+		return ""
+	}
 }

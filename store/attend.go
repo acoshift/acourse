@@ -1,28 +1,19 @@
 package store
 
 import (
-	"time"
+	"acourse/model"
 
 	"cloud.google.com/go/datastore"
 )
 
-// Attend model
-type Attend struct {
-	Base
-	Timestampable
-	UserID   string
-	CourseID string
-	At       time.Time `datastore:",noindex"`
-}
-
 const kindAttend = "Attend"
 
 // AttendFind finds attend for given user id and course id
-func (c *DB) AttendFind(userID, courseID string) (*Attend, error) {
+func (c *DB) AttendFind(userID, courseID string) (*model.Attend, error) {
 	ctx, cancel := getContext()
 	defer cancel()
 
-	var x Attend
+	var x model.Attend
 	q := datastore.
 		NewQuery(kindAttend).
 		Filter("UserID =", userID).
@@ -40,7 +31,7 @@ func (c *DB) AttendFind(userID, courseID string) (*Attend, error) {
 }
 
 // AttendCreateAll creates all attend
-func (c *DB) AttendCreateAll(xs []*Attend) error {
+func (c *DB) AttendCreateAll(xs []*model.Attend) error {
 	ctx, cancel := getContext()
 	defer cancel()
 
@@ -55,7 +46,7 @@ func (c *DB) AttendCreateAll(xs []*Attend) error {
 		return err
 	}
 	for i, x := range xs {
-		x.setKey(keys[i])
+		x.SetKey(keys[i])
 	}
 	return nil
 }

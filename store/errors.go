@@ -2,13 +2,16 @@ package store
 
 import (
 	"errors"
-
-	"github.com/goadesign/goa"
+	"fmt"
 )
 
 // Errors
 var (
 	ErrInvalidID  = errors.New("invalid id")
 	ErrInvalidUID = errors.New("invalid uid")
-	ErrConflict   = goa.NewErrorClass("conflict", 409)
 )
+
+// ErrConflict creates conflict error
+func ErrConflict(detail string) error {
+	return fmt.Errorf("conflict: %s", detail)
+}

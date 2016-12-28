@@ -2,11 +2,11 @@ package ctrl
 
 import (
 	"acourse/app"
-	"acourse/store"
+	"acourse/model"
 )
 
 // ToUserView builds a UserView from a User model
-func ToUserView(m *store.User) *app.UserView {
+func ToUserView(m *model.User) *app.UserView {
 	return &app.UserView{
 		ID:       m.ID,
 		Name:     m.Name,
@@ -17,7 +17,7 @@ func ToUserView(m *store.User) *app.UserView {
 }
 
 // ToUserMeView builds a UserMeView from a User model
-func ToUserMeView(m *store.User, role *app.RoleView) *app.UserMeView {
+func ToUserMeView(m *model.User, role *app.RoleView) *app.UserMeView {
 	return &app.UserMeView{
 		ID:       m.ID,
 		Name:     m.Name,
@@ -29,7 +29,7 @@ func ToUserMeView(m *store.User, role *app.RoleView) *app.UserMeView {
 }
 
 // ToUserTinyView builds a UserTinyView from a User model
-func ToUserTinyView(m *store.User) *app.UserTinyView {
+func ToUserTinyView(m *model.User) *app.UserTinyView {
 	return &app.UserTinyView{
 		ID:       m.ID,
 		Name:     m.Name,
@@ -39,7 +39,7 @@ func ToUserTinyView(m *store.User) *app.UserTinyView {
 }
 
 // ToRoleView builds a RoleView fromn a Role model
-func ToRoleView(m *store.Role) *app.RoleView {
+func ToRoleView(m *model.Role) *app.RoleView {
 	return &app.RoleView{
 		Admin:      m.Admin,
 		Instructor: m.Instructor,
@@ -47,7 +47,7 @@ func ToRoleView(m *store.Role) *app.RoleView {
 }
 
 // ToCourseView builds a CourseView from a Course model
-func ToCourseView(m *store.Course, owner *app.UserTinyView, student int, enrolled bool, owned bool) *app.CourseView {
+func ToCourseView(m *model.Course, owner *app.UserTinyView, student int, enrolled bool, owned bool) *app.CourseView {
 	return &app.CourseView{
 		ID:               m.ID,
 		CreatedAt:        m.CreatedAt,
@@ -76,7 +76,7 @@ func ToCourseView(m *store.Course, owner *app.UserTinyView, student int, enrolle
 }
 
 // ToCoursePublicView builds a CourseView from a Course model
-func ToCoursePublicView(m *store.Course, owner *app.UserTinyView, student int, purchaseStatus string) *app.CoursePublicView {
+func ToCoursePublicView(m *model.Course, owner *app.UserTinyView, student int, purchaseStatus string) *app.CoursePublicView {
 	return &app.CoursePublicView{
 		ID:               m.ID,
 		CreatedAt:        m.CreatedAt,
@@ -100,7 +100,7 @@ func ToCoursePublicView(m *store.Course, owner *app.UserTinyView, student int, p
 }
 
 // ToCourseTinyView builds a CourseTinyView from a Course model
-func ToCourseTinyView(m *store.Course, owner *app.UserTinyView, student int) *app.CourseTinyView {
+func ToCourseTinyView(m *model.Course, owner *app.UserTinyView, student int) *app.CourseTinyView {
 	return &app.CourseTinyView{
 		ID:               m.ID,
 		Owner:            owner,
@@ -118,7 +118,7 @@ func ToCourseTinyView(m *store.Course, owner *app.UserTinyView, student int) *ap
 }
 
 // ToCourseContentView builds a CourseContentView from a CourseContent model
-func ToCourseContentView(m *store.CourseContent) *app.CourseContentView {
+func ToCourseContentView(m *model.CourseContent) *app.CourseContentView {
 	return &app.CourseContentView{
 		Title:       m.Title,
 		Description: m.Description,
@@ -128,7 +128,7 @@ func ToCourseContentView(m *store.CourseContent) *app.CourseContentView {
 }
 
 // ToCourseContentCollectionView builds a CourseContentCollectionView from CourseContent models
-func ToCourseContentCollectionView(ms []store.CourseContent) app.CourseContentCollectionView {
+func ToCourseContentCollectionView(ms []model.CourseContent) app.CourseContentCollectionView {
 	r := make(app.CourseContentCollectionView, len(ms))
 	for i, m := range ms {
 		r[i] = ToCourseContentView(&m)
@@ -137,8 +137,8 @@ func ToCourseContentCollectionView(ms []store.CourseContent) app.CourseContentCo
 }
 
 // ToCourseContent builds a CourseContent model from CourseContent payload
-func ToCourseContent(p *app.CourseContentPayload) *store.CourseContent {
-	return &store.CourseContent{
+func ToCourseContent(p *app.CourseContentPayload) *model.CourseContent {
+	return &model.CourseContent{
 		Title:       p.Title,
 		Description: p.Description,
 		Video:       p.Video,
@@ -147,8 +147,8 @@ func ToCourseContent(p *app.CourseContentPayload) *store.CourseContent {
 }
 
 // ToCourseContents builds CourseContents model from CourseContents payload
-func ToCourseContents(ps []*app.CourseContentPayload) []store.CourseContent {
-	r := make([]store.CourseContent, len(ps))
+func ToCourseContents(ps []*app.CourseContentPayload) []model.CourseContent {
+	r := make([]model.CourseContent, len(ps))
 	for i, p := range ps {
 		r[i] = *ToCourseContent(p)
 	}
@@ -156,7 +156,7 @@ func ToCourseContents(ps []*app.CourseContentPayload) []store.CourseContent {
 }
 
 // ToPaymentView builds Payment view from a Payment model
-func ToPaymentView(m *store.Payment, user *app.UserTinyView, course *app.CourseMiniView) *app.PaymentView {
+func ToPaymentView(m *model.Payment, user *app.UserTinyView, course *app.CourseMiniView) *app.PaymentView {
 	return &app.PaymentView{
 		ID:            m.ID,
 		OriginalPrice: m.OriginalPrice,
@@ -170,7 +170,7 @@ func ToPaymentView(m *store.Payment, user *app.UserTinyView, course *app.CourseM
 }
 
 // ToCourseMiniView builds Course mini view from a course model
-func ToCourseMiniView(m *store.Course) *app.CourseMiniView {
+func ToCourseMiniView(m *model.Course) *app.CourseMiniView {
 	return &app.CourseMiniView{
 		ID:    m.ID,
 		Title: m.Title,
