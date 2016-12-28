@@ -5,3 +5,4 @@ templates/
 private/
 .DS_Store
 build/
+!web/build/
