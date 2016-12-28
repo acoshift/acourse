@@ -13,6 +13,7 @@ import (
 const projectID = "acourse-d9d0a"
 
 func main() {
+	gin.SetMode(gin.DebugMode)
 	service := gin.New()
 
 	db := store.NewDB(store.ProjectID(projectID), store.ServiceAccount("private/service_account.json"))
@@ -37,7 +38,7 @@ func main() {
 	app.MountUserController(service.Group("/api/user"), ctrl.NewUserController(db))
 	app.MountCourseController(service.Group("/api/course"), ctrl.NewCourseController(db))
 	app.MountPaymentController(service.Group("/api/payment"), ctrl.NewPaymentController(db))
-	app.MountRenderController(service.Group(""), ctrl.NewRenderController(db))
+	app.MountRenderController(service, ctrl.NewRenderController(db))
 
 	if err := service.Run(":8080"); err != nil {
 		log.Fatal(err)

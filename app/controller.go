@@ -195,7 +195,7 @@ type RenderController interface {
 }
 
 // MountRenderController mount a Render template controller on the given resource
-func MountRenderController(service *gin.RouterGroup, ctrl RenderController) {
+func MountRenderController(service *gin.Engine, ctrl RenderController) {
 	cc := func(ctx *gin.Context) {
 		ctx.Header("Cache-Control", "public, max-age=31536000")
 		ctx.Next()
@@ -219,6 +219,5 @@ func MountRenderController(service *gin.RouterGroup, ctrl RenderController) {
 		}
 	}
 
-	service.GET("/", h)
-	service.GET("/course/:courseID/edit", h)
+	service.Use(h)
 }
