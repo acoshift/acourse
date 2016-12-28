@@ -7,8 +7,8 @@ import (
 )
 
 // ToUserView builds a UserView from a User model
-func ToUserView(m *model.User) *view.UserView {
-	return &view.UserView{
+func ToUserView(m *model.User) *view.User {
+	return &view.User{
 		ID:       m.ID,
 		Name:     m.Name,
 		Username: m.Username,
@@ -18,8 +18,8 @@ func ToUserView(m *model.User) *view.UserView {
 }
 
 // ToUserMeView builds a UserMeView from a User model
-func ToUserMeView(m *model.User, role *view.RoleView) *view.UserMeView {
-	return &view.UserMeView{
+func ToUserMeView(m *model.User, role *view.Role) *view.UserMe {
+	return &view.UserMe{
 		ID:       m.ID,
 		Name:     m.Name,
 		Username: m.Username,
@@ -30,8 +30,8 @@ func ToUserMeView(m *model.User, role *view.RoleView) *view.UserMeView {
 }
 
 // ToUserTinyView builds a UserTinyView from a User model
-func ToUserTinyView(m *model.User) *view.UserTinyView {
-	return &view.UserTinyView{
+func ToUserTinyView(m *model.User) *view.UserTiny {
+	return &view.UserTiny{
 		ID:       m.ID,
 		Name:     m.Name,
 		Username: m.Username,
@@ -40,16 +40,16 @@ func ToUserTinyView(m *model.User) *view.UserTinyView {
 }
 
 // ToRoleView builds a RoleView fromn a Role model
-func ToRoleView(m *model.Role) *view.RoleView {
-	return &view.RoleView{
+func ToRoleView(m *model.Role) *view.Role {
+	return &view.Role{
 		Admin:      m.Admin,
 		Instructor: m.Instructor,
 	}
 }
 
 // ToCourseView builds a CourseView from a Course model
-func ToCourseView(m *model.Course, owner *view.UserTinyView, student int, enrolled bool, owned bool) *view.CourseView {
-	return &view.CourseView{
+func ToCourseView(m *model.Course, owner *view.UserTiny, student int, enrolled bool, owned bool) *view.Course {
+	return &view.Course{
 		ID:               m.ID,
 		CreatedAt:        m.CreatedAt,
 		UpdatedAt:        m.UpdatedAt,
@@ -77,8 +77,8 @@ func ToCourseView(m *model.Course, owner *view.UserTinyView, student int, enroll
 }
 
 // ToCoursePublicView builds a CourseView from a Course model
-func ToCoursePublicView(m *model.Course, owner *view.UserTinyView, student int, purchaseStatus string) *view.CoursePublicView {
-	return &view.CoursePublicView{
+func ToCoursePublicView(m *model.Course, owner *view.UserTiny, student int, purchaseStatus string) *view.CoursePublic {
+	return &view.CoursePublic{
 		ID:               m.ID,
 		CreatedAt:        m.CreatedAt,
 		UpdatedAt:        m.UpdatedAt,
@@ -101,8 +101,8 @@ func ToCoursePublicView(m *model.Course, owner *view.UserTinyView, student int, 
 }
 
 // ToCourseTinyView builds a CourseTinyView from a Course model
-func ToCourseTinyView(m *model.Course, owner *view.UserTinyView, student int) *view.CourseTinyView {
-	return &view.CourseTinyView{
+func ToCourseTinyView(m *model.Course, owner *view.UserTiny, student int) *view.CourseTiny {
+	return &view.CourseTiny{
 		ID:               m.ID,
 		Owner:            owner,
 		Title:            m.Title,
@@ -119,8 +119,8 @@ func ToCourseTinyView(m *model.Course, owner *view.UserTinyView, student int) *v
 }
 
 // ToCourseContentView builds a CourseContentView from a CourseContent model
-func ToCourseContentView(m *model.CourseContent) *view.CourseContentView {
-	return &view.CourseContentView{
+func ToCourseContentView(m *model.CourseContent) *view.CourseContent {
+	return &view.CourseContent{
 		Title:       m.Title,
 		Description: m.Description,
 		Video:       m.Video,
@@ -129,8 +129,8 @@ func ToCourseContentView(m *model.CourseContent) *view.CourseContentView {
 }
 
 // ToCourseContentCollectionView builds a CourseContentCollectionView from CourseContent models
-func ToCourseContentCollectionView(ms []model.CourseContent) view.CourseContentCollectionView {
-	r := make(view.CourseContentCollectionView, len(ms))
+func ToCourseContentCollectionView(ms []model.CourseContent) view.CourseContentCollection {
+	r := make(view.CourseContentCollection, len(ms))
 	for i, m := range ms {
 		r[i] = ToCourseContentView(&m)
 	}
@@ -157,8 +157,8 @@ func ToCourseContents(ps []*app.CourseContentPayload) []model.CourseContent {
 }
 
 // ToPaymentView builds Payment view from a Payment model
-func ToPaymentView(m *model.Payment, user *view.UserTinyView, course *view.CourseMiniView) *view.PaymentView {
-	return &view.PaymentView{
+func ToPaymentView(m *model.Payment, user *view.UserTiny, course *view.CourseMini) *view.Payment {
+	return &view.Payment{
 		ID:            m.ID,
 		OriginalPrice: m.OriginalPrice,
 		Price:         m.Price,
@@ -171,8 +171,8 @@ func ToPaymentView(m *model.Payment, user *view.UserTinyView, course *view.Cours
 }
 
 // ToCourseMiniView builds Course mini view from a course model
-func ToCourseMiniView(m *model.Course) *view.CourseMiniView {
-	return &view.CourseMiniView{
+func ToCourseMiniView(m *model.Course) *view.CourseMini {
+	return &view.CourseMini{
 		ID:    m.ID,
 		Title: m.Title,
 	}

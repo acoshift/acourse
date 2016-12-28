@@ -201,7 +201,7 @@ func (c *CourseController) List(ctx *app.CourseListContext) error {
 		return err
 	}
 
-	res := make(view.CourseTinyCollectionView, len(xs))
+	res := make(view.CourseTinyCollection, len(xs))
 	for i, x := range xs {
 		u, err := c.db.UserGet(x.Owner)
 		if err != nil {

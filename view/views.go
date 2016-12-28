@@ -4,8 +4,8 @@ import (
 	"time"
 )
 
-// UserView type
-type UserView struct {
+// User type
+type User struct {
 	ID       string `json:"id"`
 	Username string `json:"username"`
 	Name     string `json:"name"`
@@ -13,132 +13,132 @@ type UserView struct {
 	AboutMe  string `json:"aboutMe"`
 }
 
-// UserTinyView type
-type UserTinyView struct {
+// UserTiny type
+type UserTiny struct {
 	ID       string `json:"id"`
 	Username string `json:"username"`
 	Name     string `json:"name"`
 	Photo    string `json:"photo"`
 }
 
-// UserMeView type
-type UserMeView struct {
-	ID       string    `json:"id"`
-	Username string    `json:"username"`
-	Name     string    `json:"name"`
-	Photo    string    `json:"photo"`
-	AboutMe  string    `json:"aboutMe"`
-	Role     *RoleView `json:"role"`
+// UserMe type
+type UserMe struct {
+	ID       string `json:"id"`
+	Username string `json:"username"`
+	Name     string `json:"name"`
+	Photo    string `json:"photo"`
+	AboutMe  string `json:"aboutMe"`
+	Role     *Role  `json:"role"`
 }
 
-// RoleView type
-type RoleView struct {
+// Role type
+type Role struct {
 	Admin      bool `json:"admin"`
 	Instructor bool `json:"instructor"`
 }
 
-// CourseView type
-type CourseView struct {
-	ID               string                      `json:"id"`
-	CreatedAt        time.Time                   `json:"createdAt"`
-	UpdatedAt        time.Time                   `json:"updatedAt"`
-	Owner            *UserTinyView               `json:"owner"`
-	Title            string                      `json:"title"`
-	ShortDescription string                      `json:"shortDescription"`
-	Description      string                      `json:"description"`
-	Photo            string                      `json:"photo"`
-	Start            time.Time                   `json:"start"`
-	URL              string                      `json:"url"`
-	Video            string                      `json:"video"`
-	Type             string                      `json:"type"`
-	Price            float64                     `json:"price"`
-	DiscountedPrice  float64                     `json:"discountedPrice"`
-	Student          int                         `json:"student"`
-	Contents         CourseContentCollectionView `json:"contents"`
-	Enrolled         bool                        `json:"enrolled"`
-	Enroll           bool                        `json:"enroll"`
-	Public           bool                        `json:"public"`
-	Owned            bool                        `json:"owned"`
-	Attend           bool                        `json:"attend"`
-	Assignment       bool                        `json:"assignment"`
-	Discount         bool                        `json:"discount"`
+// Course type
+type Course struct {
+	ID               string                  `json:"id"`
+	CreatedAt        time.Time               `json:"createdAt"`
+	UpdatedAt        time.Time               `json:"updatedAt"`
+	Owner            *UserTiny               `json:"owner"`
+	Title            string                  `json:"title"`
+	ShortDescription string                  `json:"shortDescription"`
+	Description      string                  `json:"description"`
+	Photo            string                  `json:"photo"`
+	Start            time.Time               `json:"start"`
+	URL              string                  `json:"url"`
+	Video            string                  `json:"video"`
+	Type             string                  `json:"type"`
+	Price            float64                 `json:"price"`
+	DiscountedPrice  float64                 `json:"discountedPrice"`
+	Student          int                     `json:"student"`
+	Contents         CourseContentCollection `json:"contents"`
+	Enrolled         bool                    `json:"enrolled"`
+	Enroll           bool                    `json:"enroll"`
+	Public           bool                    `json:"public"`
+	Owned            bool                    `json:"owned"`
+	Attend           bool                    `json:"attend"`
+	Assignment       bool                    `json:"assignment"`
+	Discount         bool                    `json:"discount"`
 }
 
-// CoursePublicView type
-type CoursePublicView struct {
-	ID               string        `json:"id"`
-	CreatedAt        time.Time     `json:"createdAt"`
-	UpdatedAt        time.Time     `json:"updatedAt"`
-	Owner            *UserTinyView `json:"owner"`
-	Title            string        `json:"title"`
-	ShortDescription string        `json:"shortDescription"`
-	Description      string        `json:"description"`
-	Photo            string        `json:"photo"`
-	Start            time.Time     `json:"start"`
-	URL              string        `json:"url"`
-	Video            string        `json:"video"`
-	Type             string        `json:"type"`
-	Price            float64       `json:"price"`
-	DiscountedPrice  float64       `json:"discountedPrice"`
-	Student          int           `json:"student"`
-	Enroll           bool          `json:"enroll"`
-	Discount         bool          `json:"discount"`
-	PurchaseStatus   string        `json:"purchaseStatus"`
+// CoursePublic type
+type CoursePublic struct {
+	ID               string    `json:"id"`
+	CreatedAt        time.Time `json:"createdAt"`
+	UpdatedAt        time.Time `json:"updatedAt"`
+	Owner            *UserTiny `json:"owner"`
+	Title            string    `json:"title"`
+	ShortDescription string    `json:"shortDescription"`
+	Description      string    `json:"description"`
+	Photo            string    `json:"photo"`
+	Start            time.Time `json:"start"`
+	URL              string    `json:"url"`
+	Video            string    `json:"video"`
+	Type             string    `json:"type"`
+	Price            float64   `json:"price"`
+	DiscountedPrice  float64   `json:"discountedPrice"`
+	Student          int       `json:"student"`
+	Enroll           bool      `json:"enroll"`
+	Discount         bool      `json:"discount"`
+	PurchaseStatus   string    `json:"purchaseStatus"`
 }
 
-// CourseTinyView type
-type CourseTinyView struct {
-	ID               string        `json:"id"`
-	Owner            *UserTinyView `json:"owner"`
-	Title            string        `json:"title"`
-	ShortDescription string        `json:"shortDescription"`
-	Photo            string        `json:"photo"`
-	Start            time.Time     `json:"start"`
-	URL              string        `json:"url"`
-	Type             string        `json:"type"`
-	Price            float64       `json:"price"`
-	DiscountedPrice  float64       `json:"discountedPrice"`
-	Student          int           `json:"student"`
-	Discount         bool          `json:"discount"`
+// CourseTiny type
+type CourseTiny struct {
+	ID               string    `json:"id"`
+	Owner            *UserTiny `json:"owner"`
+	Title            string    `json:"title"`
+	ShortDescription string    `json:"shortDescription"`
+	Photo            string    `json:"photo"`
+	Start            time.Time `json:"start"`
+	URL              string    `json:"url"`
+	Type             string    `json:"type"`
+	Price            float64   `json:"price"`
+	DiscountedPrice  float64   `json:"discountedPrice"`
+	Student          int       `json:"student"`
+	Discount         bool      `json:"discount"`
 }
 
-// CourseMiniView type
-type CourseMiniView struct {
+// CourseMini type
+type CourseMini struct {
 	ID    string `json:"id"`
 	Title string `json:"title"`
 }
 
-// CourseTinyCollectionView type
-type CourseTinyCollectionView []*CourseTinyView
+// CourseTinyCollection type
+type CourseTinyCollection []*CourseTiny
 
-// CourseContentView type
-type CourseContentView struct {
+// CourseContent type
+type CourseContent struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
 	Video       string `json:"video"`
 	DownloadURL string `json:"downloadURL"`
 }
 
-// CourseContentCollectionView type
-type CourseContentCollectionView []*CourseContentView
+// CourseContentCollection type
+type CourseContentCollection []*CourseContent
 
-// PaymentView type
-type PaymentView struct {
-	ID            string          `json:"id"`
-	User          *UserTinyView   `json:"user"`
-	Course        *CourseMiniView `json:"course"`
-	OriginalPrice float64         `json:"originalPrice"`
-	Price         float64         `json:"price"`
-	Code          string          `json:"code"`
-	URL           string          `json:"url"`
-	Status        string          `json:"status"`
+// Payment type
+type Payment struct {
+	ID            string      `json:"id"`
+	User          *UserTiny   `json:"user"`
+	Course        *CourseMini `json:"course"`
+	OriginalPrice float64     `json:"originalPrice"`
+	Price         float64     `json:"price"`
+	Code          string      `json:"code"`
+	URL           string      `json:"url"`
+	Status        string      `json:"status"`
 }
 
-// PaymentCollectionView type
-type PaymentCollectionView []*PaymentView
+// PaymentCollection type
+type PaymentCollection []*Payment
 
-// RenderIndexView type
-type RenderIndexView struct {
+// RenderIndex type
+type RenderIndex struct {
 	Title       string
 	Description string
 	Image       string

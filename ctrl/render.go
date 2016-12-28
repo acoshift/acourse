@@ -21,14 +21,14 @@ var cacheRender = store.NewCache(time.Second * 15)
 
 // Index runs index action
 func (c *RenderController) Index(ctx *app.RenderIndexContext) error {
-	var res view.CourseTinyCollectionView
+	var res view.CourseTinyCollection
 	if cache := cacheRender.Get("index"); cache != nil {
-		res = cache.(view.CourseTinyCollectionView)
+		res = cache.(view.CourseTinyCollection)
 	} else {
 		// do not wait for api call
 		go func() {
 			xs, _ := c.db.CourseList(store.CourseListOptionPublic(true))
-			rs := make(view.CourseTinyCollectionView, len(xs))
+			rs := make(view.CourseTinyCollection, len(xs))
 			for i, x := range xs {
 				u, _ := c.db.UserMustGet(x.Owner)
 				student, _ := c.db.EnrollCourseCount(x.ID)
@@ -38,7 +38,7 @@ func (c *RenderController) Index(ctx *app.RenderIndexContext) error {
 		}()
 	}
 
-	return ctx.OK(&view.RenderIndexView{
+	return ctx.OK(&view.RenderIndex{
 		Title:       "Acourse",
 		Description: "Online courses for everyone",
 		Image:       "https://acourse.io/static/acourse-og.jpg",
@@ -58,7 +58,7 @@ func (c *RenderController) Course(ctx *app.RenderCourseContext) error {
 	if err != nil || course == nil {
 		return ctx.NotFound()
 	}
-	r := &view.RenderIndexView{
+	r := &view.RenderIndex{
 		Title:       course.Title,
 		Description: course.ShortDescription,
 		Image:       course.Photo,
