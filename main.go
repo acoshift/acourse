@@ -6,7 +6,7 @@ import (
 	"acourse/store"
 	"log"
 
-	"github.com/gin-gonic/contrib/cors"
+	"gopkg.in/gin-contrib/cors.v1"
 	"gopkg.in/gin-gonic/gin.v1"
 )
 
@@ -23,9 +23,9 @@ func main() {
 	service.Use(gin.Recovery())
 	service.Use(cors.New(cors.Config{
 		AllowCredentials: false,
-		AllowedHeaders:   []string{"Authorization", "Content-Type"},
-		AllowedMethods:   []string{"GET", "POST", "PATCH", "PUT", "DELETE"},
-		AllowedOrigins:   []string{"https://acourse.io"},
+		AllowHeaders:     []string{"Authorization", "Content-Type"},
+		AllowMethods:     []string{"GET", "POST", "PATCH", "PUT", "DELETE"},
+		AllowOrigins:     []string{"https://acourse.io"},
 		MaxAge:           3600,
 	}))
 
