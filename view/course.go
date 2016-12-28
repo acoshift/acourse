@@ -4,39 +4,6 @@ import (
 	"time"
 )
 
-// User type
-type User struct {
-	ID       string `json:"id"`
-	Username string `json:"username"`
-	Name     string `json:"name"`
-	Photo    string `json:"photo"`
-	AboutMe  string `json:"aboutMe"`
-}
-
-// UserTiny type
-type UserTiny struct {
-	ID       string `json:"id"`
-	Username string `json:"username"`
-	Name     string `json:"name"`
-	Photo    string `json:"photo"`
-}
-
-// UserMe type
-type UserMe struct {
-	ID       string `json:"id"`
-	Username string `json:"username"`
-	Name     string `json:"name"`
-	Photo    string `json:"photo"`
-	AboutMe  string `json:"aboutMe"`
-	Role     *Role  `json:"role"`
-}
-
-// Role type
-type Role struct {
-	Admin      bool `json:"admin"`
-	Instructor bool `json:"instructor"`
-}
-
 // Course type
 type Course struct {
 	ID               string                  `json:"id"`
@@ -121,27 +88,3 @@ type CourseContent struct {
 
 // CourseContentCollection type
 type CourseContentCollection []*CourseContent
-
-// Payment type
-type Payment struct {
-	ID            string      `json:"id"`
-	User          *UserTiny   `json:"user"`
-	Course        *CourseMini `json:"course"`
-	OriginalPrice float64     `json:"originalPrice"`
-	Price         float64     `json:"price"`
-	Code          string      `json:"code"`
-	URL           string      `json:"url"`
-	Status        string      `json:"status"`
-}
-
-// PaymentCollection type
-type PaymentCollection []*Payment
-
-// RenderIndex type
-type RenderIndex struct {
-	Title       string
-	Description string
-	Image       string
-	URL         string
-	State       map[string]interface{}
-}
