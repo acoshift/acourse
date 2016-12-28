@@ -1,5 +1,7 @@
 package view
 
+import "time"
+
 // Payment type
 type Payment struct {
 	ID            string      `json:"id"`
@@ -10,6 +12,8 @@ type Payment struct {
 	Code          string      `json:"code"`
 	URL           string      `json:"url"`
 	Status        string      `json:"status"`
+	CreatedAt     time.Time   `json:"createdAt"`
+	UpdatedAt     time.Time   `json:"updatedAt"`
 }
 
 // PaymentCollection type

@@ -16,6 +16,7 @@ const time = new Vue({
 
 Vue.filter('date', (value, input) => {
   if (!value) return '-'
+  if (!input) input = 'YYYY/MM/DD'
   const m = moment(value)
   // check isZero
   if (m.format('YYYY-MM-DD') === '0001-01-01') {

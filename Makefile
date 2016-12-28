@@ -53,3 +53,9 @@ deploy: clean-build pre-build build-server
 	docker tag acourse b.gcr.io/acoshift/acourse
 	gcloud docker -- push b.gcr.io/acoshift/acourse
 	./private/hook.sh
+
+indexes: project
+	gcloud preview datastore create-indexes index.yaml
+
+cleanup-indexes: project
+	gcloud preview datastore cleanup-indexes index.yaml

@@ -7,6 +7,7 @@
           th Course
           th User
           th Image
+          th Created At
           th.four.wide Actions
       tbody
         tr(v-for="x in list")
@@ -17,6 +18,8 @@
           td
             a(:href="x.url")
               img.ui.tiny.image(:src="x.url")
+          td
+            span {{ x.createdAt | date }}
           td
             .ui.green.button(@click="approve(x)") Approve
             .ui.red.button(@click="reject(x)") Reject
