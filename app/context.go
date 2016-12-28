@@ -73,7 +73,7 @@ type UserUpdateContext struct {
 	context       echo.Context
 	CurrentUserID string
 	UserID        string
-	Payload       *payload.UserPayload
+	Payload       *payload.User
 }
 
 // NewUserUpdateContext parses the incoming request and create context
@@ -151,7 +151,7 @@ func (ctx *CourseShowContext) NotFound() error {
 type CourseCreateContext struct {
 	context       echo.Context
 	CurrentUserID string
-	Payload       *payload.CoursePayload
+	Payload       *payload.Course
 }
 
 // NewCourseCreateContext parses the incoming request and create context
@@ -176,7 +176,7 @@ type CourseUpdateContext struct {
 	context       echo.Context
 	CurrentUserID string
 	CourseID      string
-	Payload       *payload.CoursePayload
+	Payload       *payload.Course
 }
 
 // NewCourseUpdateContext parses the incoming request and create context
@@ -229,7 +229,7 @@ type CourseEnrollContext struct {
 	context       echo.Context
 	CurrentUserID string
 	CourseID      string
-	Payload       *payload.CourseEnrollPayload
+	Payload       *payload.CourseEnroll
 }
 
 // NewCourseEnrollContext parses the incoming request and create context

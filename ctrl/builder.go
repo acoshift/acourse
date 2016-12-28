@@ -138,7 +138,7 @@ func ToCourseContentCollectionView(ms []model.CourseContent) view.CourseContentC
 }
 
 // ToCourseContent builds a CourseContent model from CourseContent payload
-func ToCourseContent(p *payload.CourseContentPayload) *model.CourseContent {
+func ToCourseContent(p *payload.CourseContent) *model.CourseContent {
 	return &model.CourseContent{
 		Title:       p.Title,
 		Description: p.Description,
@@ -148,7 +148,7 @@ func ToCourseContent(p *payload.CourseContentPayload) *model.CourseContent {
 }
 
 // ToCourseContents builds CourseContents model from CourseContents payload
-func ToCourseContents(ps []*payload.CourseContentPayload) []model.CourseContent {
+func ToCourseContents(ps []*payload.CourseContent) []model.CourseContent {
 	r := make([]model.CourseContent, len(ps))
 	for i, p := range ps {
 		r[i] = *ToCourseContent(p)

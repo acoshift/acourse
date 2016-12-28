@@ -4,37 +4,37 @@ import (
 	"time"
 )
 
-// UserPayload type
-type UserPayload struct {
+// User type
+type User struct {
 	Username string
 	Name     string
 	Photo    string
 	AboutMe  string
 }
 
-// CoursePayload type
-type CoursePayload struct {
+// Course type
+type Course struct {
 	Title            string
 	ShortDescription string
 	Description      string
 	Photo            string
 	Start            time.Time
 	Video            string
-	Contents         []*CourseContentPayload
+	Contents         []*CourseContent
 	Attend           bool
 	Assignment       bool
 }
 
-// CourseContentPayload type
-type CourseContentPayload struct {
+// CourseContent type
+type CourseContent struct {
 	Title       string
 	Description string
 	Video       string
 	DownloadURL string
 }
 
-// CourseEnrollPayload type
-type CourseEnrollPayload struct {
+// CourseEnroll type
+type CourseEnroll struct {
 	Code string
 	URL  string
 }

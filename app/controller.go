@@ -36,7 +36,7 @@ func MountUserController(service *echo.Echo, ctrl UserController) {
 		if err != nil {
 			return handleError(ctx, err)
 		}
-		var rawPayload payload.UserRawPayload
+		var rawPayload payload.RawUser
 		err = ctx.Bind(&rawPayload)
 		if err != nil {
 			return handleError(ctx, ErrPayload(err))
@@ -93,7 +93,7 @@ func MountCourseController(service *echo.Echo, ctrl CourseController) {
 		if rctx.CurrentUserID == "" {
 			return handleUnauthorized(ctx)
 		}
-		var rawPayload payload.CourseRawPayload
+		var rawPayload payload.RawCourse
 		err = ctx.Bind(&rawPayload)
 		if err != nil {
 			return handleError(ctx, ErrPayload(err))
@@ -121,7 +121,7 @@ func MountCourseController(service *echo.Echo, ctrl CourseController) {
 		if rctx.CurrentUserID == "" {
 			return handleUnauthorized(ctx)
 		}
-		var rawPayload payload.CourseRawPayload
+		var rawPayload payload.RawCourse
 		err = ctx.Bind(&rawPayload)
 		if err != nil {
 			return handleError(ctx, ErrPayload(err))
@@ -141,7 +141,7 @@ func MountCourseController(service *echo.Echo, ctrl CourseController) {
 		if rctx.CurrentUserID == "" {
 			return handleUnauthorized(ctx)
 		}
-		var rawPayload payload.CourseEnrollRawPayload
+		var rawPayload payload.RawCourseEnroll
 		err = ctx.Bind(&rawPayload)
 		if err != nil {
 			return handleError(ctx, ErrPayload(err))
