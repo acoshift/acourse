@@ -7,7 +7,7 @@ import (
 	"log"
 
 	"github.com/gin-gonic/contrib/cors"
-	"github.com/gin-gonic/gin"
+	"gopkg.in/gin-gonic/gin.v1"
 )
 
 const projectID = "acourse-d9d0a"

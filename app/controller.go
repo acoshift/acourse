@@ -3,7 +3,7 @@ package app
 import (
 	"acourse/payload"
 
-	"github.com/gin-gonic/gin"
+	"gopkg.in/gin-gonic/gin.v1"
 )
 
 // UserController is the controller interface for the User actions

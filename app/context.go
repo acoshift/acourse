@@ -5,7 +5,7 @@ import (
 	"acourse/view"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
+	"gopkg.in/gin-gonic/gin.v1"
 )
 
 // UserShowContext provides the user show action context

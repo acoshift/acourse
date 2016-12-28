@@ -7,7 +7,7 @@ import (
 	"errors"
 
 	"github.com/acoshift/go-firebase-admin"
-	"github.com/gin-gonic/gin"
+	"gopkg.in/gin-gonic/gin.v1"
 	"github.com/google/uuid"
 )
 

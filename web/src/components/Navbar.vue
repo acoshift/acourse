@@ -4,6 +4,12 @@
       <img src="../assets/acourse.svg">
     </router-link>
     <div class="right menu">
+      <div class="ui dropdown item" ref="dropdownAdmin" v-if="currentUser && currentUser.role && currentUser.role.admin">
+        Admin <i class="dropdown icon"></i>
+        <div class="menu">
+          <router-link class="item" to="/admin/payment">Payment</router-link>
+        </div>
+      </div>
       <div ref="dropdownUser" v-if="currentUser" class="ui dropdown item" style="padding-top: 0.5rem; padding-bottom: 0.5rem;">
         <user-avatar :user="currentUser"></user-avatar>
         <i class="dropdown icon"></i>
@@ -37,6 +43,7 @@ export default {
   },
   updated () {
     $(this.$refs.dropdownUser).dropdown({ action: 'hide' })
+    $(this.$refs.dropdownAdmin).dropdown({ action: 'hide' })
   },
   methods: {
     ...mapActions(['signOut']),
