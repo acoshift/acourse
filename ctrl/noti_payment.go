@@ -4,6 +4,7 @@ import (
 	"acourse/model"
 	"acourse/store"
 	"fmt"
+	"log"
 	"time"
 )
 
@@ -13,15 +14,19 @@ func StartNotiPayment(db *store.DB) {
 	go func() {
 		for {
 			// check is payments have status waiting
+			log.Println("Run Notification Payment")
 			payments, err := db.PaymentList(model.PaymentStatusWaiting)
 			if err == nil && len(payments) > 0 {
-				SendMail(Email{
+				err = SendMail(Email{
 					To:      []string{"contact@acourse.io"},
 					Subject: "Admin Notification",
 					Body:    fmt.Sprintf("%d payments waiting for action", len(payments)),
 				})
+				if err != nil {
+					log.Println(err)
+				}
 			}
-			time.Sleep(2 * time.Hour)
+			time.Sleep(1 * time.Hour)
 		}
 	}()
 }
