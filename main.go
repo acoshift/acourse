@@ -43,6 +43,8 @@ func main() {
 		Password: cfg.Email.Password,
 	})
 
+	ctrl.StartNotiPayment(db)
+
 	// mount controllers
 	app.MountHealthController(service.Group("/_ah"), ctrl.NewHealthController())
 	app.MountUserController(service.Group("/api/user"), ctrl.NewUserController(db))
