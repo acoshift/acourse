@@ -5,16 +5,22 @@ import (
 	"acourse/model"
 	"acourse/store"
 	"acourse/view"
+	"fmt"
+	"log"
+	"time"
+
+	"github.com/acoshift/go-firebase-admin"
 )
 
 // PaymentController implements PaymentController interface
 type PaymentController struct {
-	db *store.DB
+	db   *store.DB
+	auth *admin.FirebaseAuth
 }
 
 // NewPaymentController creates new controller
-func NewPaymentController(db *store.DB) *PaymentController {
-	return &PaymentController{db}
+func NewPaymentController(db *store.DB, auth *admin.FirebaseAuth) *PaymentController {
+	return &PaymentController{db, auth}
 }
 
 // List runs list action
@@ -84,7 +90,76 @@ func (c *PaymentController) Approve(ctx *app.PaymentApproveContext) error {
 		return err
 	}
 
+	go c.approved(payment)
+
 	return ctx.OK()
+}
+
+func (c *PaymentController) approved(payment *model.Payment) {
+	course, err := c.db.CourseGet(payment.CourseID)
+	if err != nil {
+		return
+	}
+	userInfo, err := c.auth.GetAccountInfoByUID(payment.UserID)
+	if err != nil {
+		return
+	}
+	if userInfo.Email == "" {
+		log.Println("User don't have email")
+		return
+	}
+	user, err := c.db.UserMustGet(payment.UserID)
+	if err != nil {
+		return
+	}
+	if user.Name == "" {
+		user.Name = "Anonymous"
+	}
+	body := fmt.Sprintf(`สวัสดีครับคุณ %s,
+
+อีเมล์ฉบับนี้ยืนยันว่าท่านได้รับการอนุมัติการชำระเงินสำหรับหลักสูตร "%s" เสร็จสิ้น ท่านสามารถทำการ login เข้าสู่ Website Acourse แล้วเข้าเรียนหลักสูตร "%s" ได้ทันที
+
+รหัสการชำระเงิน: %s
+ชื่อหลักสูตร: %s
+จำนวนเงิน: %f บาท
+เวลาที่ทำการชำระเงิน: %s
+เวลาที่อนุมัติการชำระเงิน: %s
+ชื่อผู้ชำระเงิน: %s
+อีเมล์ผู้ชำระเงิน: %s
+`,
+		user.Name,
+		course.Title,
+		course.Title,
+		payment.ID,
+		course.Title,
+		payment.Price,
+		payment.CreatedAt.Format(time.RFC822),
+		payment.UpdatedAt.Format(time.RFC822),
+		user.Name,
+		userInfo.Email,
+	)
+
+	// 	if course.Type == model.CourseTypeVideo {
+	// 		body += `----------------------
+	// สนใจรับ Certificate หลังจบ Course <a href=''> เกี่ยวกับ ACertificate </a>
+
+	// ท่านสามารถเพิ่มเงินจำนวน 600 บาท (จำนวน ชม. x 30 บาท  ) เพื่อได้รับ ACertificate หลังจากทำการส่งการบ้านครบถ้วน เพื่อใช้เป็นหลักฐานอ้างอิงกับ <a href=''>บริษัท Partner ของเรา</a>
+
+	// ท่านสามารถสั่ง ACertificate ได้โดยโอนเงินจำนวน xxx บาท มาที่ บัญชีธนาคาร (ฝาก north เติมบัญชีตามหน้าเว็บ) แล้ว reply email นี้พร้อมแนบหลักฐานการโอนเงิน และเขียนว่า 'สั่งซื้อ certificate'
+	// `
+	// 	}
+
+	body += `----------------------
+ขอบคุณที่ร่วมเรียนกับเราครับ
+Krissada Chalermsook (Oak)
+Founder/CEO Acourse.io
+https://acourse.io`
+
+	SendMail(Email{
+		To:      []string{userInfo.Email},
+		Subject: fmt.Sprintf("ยืนยันการชำระเงิน หลักสูตร %s", course.Title),
+		Body:    body,
+	})
 }
 
 // Reject runs reject action

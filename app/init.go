@@ -7,8 +7,8 @@ import (
 	"errors"
 
 	"github.com/acoshift/go-firebase-admin"
-	"gopkg.in/gin-gonic/gin.v1"
 	"github.com/google/uuid"
+	"gopkg.in/gin-gonic/gin.v1"
 )
 
 const (
@@ -17,19 +17,14 @@ const (
 )
 
 var (
-	firApp  *admin.FirebaseApp
 	firAuth *admin.FirebaseAuth
 
 	tokenError = CreateErrors(http.StatusUnauthorized, "token")
 )
 
 // InitService inits service
-func InitService(service *gin.Engine, projectID string) (err error) {
-	firApp, err = admin.InitializeApp(admin.ProjectID(projectID))
-	if err != nil {
-		return
-	}
-	firAuth = firApp.Auth()
+func InitService(service *gin.Engine, auth *admin.FirebaseAuth) (err error) {
+	firAuth = auth
 
 	service.Use(requestIDMiddleware)
 	service.Use(jwtMiddleware)

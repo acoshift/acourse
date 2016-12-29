@@ -45,6 +45,6 @@ type CourseType string
 
 // CourseType
 const (
-	CourseTypeLive  = string("live")
-	CourseTypeVideo = string("video")
+	CourseTypeLive  CourseType = "live"
+	CourseTypeVideo CourseType = "video"
 )
