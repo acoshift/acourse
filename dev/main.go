@@ -10,13 +10,16 @@ import (
 	"gopkg.in/gin-gonic/gin.v1"
 )
 
-const projectID = "acourse-d9d0a"
-
 func main() {
+	cfg, err := app.LoadConfig("private/config.yaml")
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	gin.SetMode(gin.DebugMode)
 	service := gin.New()
 
-	db := store.NewDB(store.ProjectID(projectID), store.ServiceAccount("private/service_account.json"))
+	db := store.NewDB(store.ProjectID(cfg.ProjectID), store.ServiceAccount("private/service_account.json"))
 
 	// globals middlewares
 	service.Use(gin.Logger())
@@ -28,9 +31,16 @@ func main() {
 		AllowAllOrigins:  true,
 	}))
 
-	if err := app.InitService(service, projectID); err != nil {
+	if err := app.InitService(service, cfg.ProjectID); err != nil {
 		log.Fatal(err)
 	}
+
+	ctrl.InitMail(ctrl.EmailConfig{
+		From:     cfg.Email.From,
+		Server:   cfg.Email.Server,
+		User:     cfg.Email.User,
+		Password: cfg.Email.Password,
+	})
 
 	// mount controllers
 	app.MountHealthController(service.Group("/_ah"), ctrl.NewHealthController())
