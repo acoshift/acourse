@@ -15,7 +15,7 @@ func StartNotiPayment(db *store.DB) {
 		for {
 			// check is payments have status waiting
 			log.Println("Run Notification Payment")
-			payments, err := db.PaymentList(model.PaymentStatusWaiting)
+			payments, err := db.PaymentList(store.PaymentListOptionStatus(model.PaymentStatusWaiting))
 			if err == nil && len(payments) > 0 {
 				err = SendMail(Email{
 					To:      []string{"acoshift@gmail.com", "k.chalermsook@gmail.com"},

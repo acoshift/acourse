@@ -4,6 +4,9 @@ export default {
   list () {
     return API.get('/payment')
   },
+  history () {
+    return API.get('/payment?history=true')
+  },
   approve (id) {
     return API.put(`/payment/${id}/approve`)
   },

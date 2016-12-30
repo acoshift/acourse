@@ -8,16 +8,40 @@ import (
 
 const kindPayment = "Payment"
 
+// PaymentListOptions type
+type PaymentListOptions struct {
+	Status *model.PaymentStatus
+}
+
+// PaymentListOption type
+type PaymentListOption func(*PaymentListOptions)
+
+// PaymentListOptionStatus sets status to options
+func PaymentListOptionStatus(status model.PaymentStatus) PaymentListOption {
+	return func(args *PaymentListOptions) {
+		args.Status = &status
+	}
+}
+
 // PaymentList list all payments
-func (c *DB) PaymentList(status model.PaymentStatus) ([]*model.Payment, error) {
+func (c *DB) PaymentList(opts ...PaymentListOption) ([]*model.Payment, error) {
 	ctx, cancel := getContext()
 	defer cancel()
 
 	var xs []*model.Payment
-	q := datastore.
-		NewQuery(kindPayment).
-		Filter("Status =", string(status)).
-		Order("CreatedAt")
+
+	opt := &PaymentListOptions{}
+	for _, setter := range opts {
+		setter(opt)
+	}
+
+	q := datastore.NewQuery(kindPayment)
+
+	if opt.Status != nil {
+		q = q.Filter("Status =", string(*opt.Status))
+	}
+
+	q = q.Order("CreatedAt")
 
 	keys, err := c.getAll(ctx, q, &xs)
 	if err != nil {

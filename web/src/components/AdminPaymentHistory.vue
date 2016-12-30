@@ -11,7 +11,6 @@
           th Original Price
           th Price
           th Created At
-          th.four.wide Actions
       tbody
         tr(v-for="x in list")
           td {{ x.id }}
@@ -24,9 +23,6 @@
           td {{ x.originalPrice }}
           td {{ x.price }}
           td {{ x.createdAt | date('YYYY/MM/DD, HH:mm') }}
-          td
-            .ui.green.button(@click="approve(x)") Approve
-            .ui.red.button(@click="reject(x)") Reject
 </template>
 
 <script>
@@ -46,36 +42,12 @@ export default {
     return {
       list: this.$watchAsObservable('refresh')
         .do(() => { Loader.start('payment') })
-        .flatMap(() => Payment.list())
+        .flatMap(() => Payment.history())
         .do(() => { Loader.stop('payment') })
     }
   },
   created () {
     this.refresh++
-  },
-  methods: {
-    approve (x) {
-      if (!window.confirm(`Approve ${x.user.name} to ${x.course.title} ?`)) return
-      Loader.start('approve')
-      Payment.approve(x.id)
-        .finally(() => { Loader.stop('approve') })
-        .subscribe(
-          () => {
-            this.refresh++
-          }
-        )
-    },
-    reject (x) {
-      if (!window.confirm(`Reject ${x.user.name} from ${x.course.title} ?`)) return
-      Loader.start('reject')
-      Payment.reject(x.id)
-        .finally(() => { Loader.stop('reject') })
-        .subscribe(
-          () => {
-            this.refresh++
-          }
-        )
-    }
   }
 }
 </script>

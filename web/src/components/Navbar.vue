@@ -8,6 +8,7 @@
         Admin <i class="dropdown icon"></i>
         <div class="menu">
           <router-link class="item" to="/admin/payment">Payment</router-link>
+          <router-link class="item" to="/admin/payment/history">Payment History</router-link>
         </div>
       </div>
       <div ref="dropdownUser" v-if="currentUser" class="ui dropdown item" style="padding-top: 0.5rem; padding-bottom: 0.5rem;">

@@ -242,6 +242,7 @@ func (ctx *CourseEnrollContext) NotFound() error {
 type PaymentListContext struct {
 	context       *gin.Context
 	CurrentUserID string
+	History       bool
 }
 
 // NewPaymentListContext parses the incoming request and create context
@@ -249,6 +250,9 @@ func NewPaymentListContext(ctx *gin.Context) *PaymentListContext {
 	rctx := PaymentListContext{context: ctx}
 	if v, ok := ctx.Get(keyCurrentUserID); ok {
 		rctx.CurrentUserID, _ = v.(string)
+	}
+	if ctx.Query("history") == "true" {
+		rctx.History = true
 	}
 	return &rctx
 }

@@ -35,7 +35,13 @@ func (c *PaymentController) List(ctx *app.PaymentListContext) error {
 		return ctx.Forbidden()
 	}
 
-	xs, err := c.db.PaymentList(model.PaymentStatusWaiting)
+	var xs []*model.Payment
+
+	if ctx.History {
+		xs, err = c.db.PaymentList()
+	} else {
+		xs, err = c.db.PaymentList(store.PaymentListOptionStatus(model.PaymentStatusWaiting))
+	}
 	if err != nil {
 		return err
 	}

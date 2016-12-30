@@ -18,7 +18,7 @@ type PaymentStatus string
 
 // Payment status
 const (
-	PaymentStatusWaiting  = "waiting"
-	PaymentStatusApproved = "approved"
-	PaymentStatusRejected = "rejected"
+	PaymentStatusWaiting  PaymentStatus = "waiting"
+	PaymentStatusApproved PaymentStatus = "approved"
+	PaymentStatusRejected PaymentStatus = "rejected"
 )
