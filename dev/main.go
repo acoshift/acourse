@@ -4,6 +4,7 @@ import (
 	"acourse/app"
 	"acourse/ctrl"
 	"acourse/store"
+	"io/ioutil"
 	"log"
 
 	"github.com/acoshift/go-firebase-admin"
@@ -17,7 +18,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	firApp, err := admin.InitializeApp(admin.ProjectID(cfg.ProjectID))
+	serviceAccount, err := ioutil.ReadFile("private/service_account.json")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	firApp, err := admin.InitializeApp(admin.ProjectID(cfg.ProjectID), admin.ServiceAccount(serviceAccount))
 	if err != nil {
 		return
 	}

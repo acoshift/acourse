@@ -98,10 +98,12 @@ func (c *PaymentController) Approve(ctx *app.PaymentApproveContext) error {
 func (c *PaymentController) approved(payment *model.Payment) {
 	course, err := c.db.CourseGet(payment.CourseID)
 	if err != nil {
+		log.Println(err)
 		return
 	}
 	userInfo, err := c.auth.GetAccountInfoByUID(payment.UserID)
 	if err != nil {
+		log.Println(err)
 		return
 	}
 	if userInfo.Email == "" {
@@ -110,22 +112,23 @@ func (c *PaymentController) approved(payment *model.Payment) {
 	}
 	user, err := c.db.UserMustGet(payment.UserID)
 	if err != nil {
+		log.Println(err)
 		return
 	}
 	if user.Name == "" {
 		user.Name = "Anonymous"
 	}
-	body := fmt.Sprintf(`สวัสดีครับคุณ %s,
-
-อีเมล์ฉบับนี้ยืนยันว่าท่านได้รับการอนุมัติการชำระเงินสำหรับหลักสูตร "%s" เสร็จสิ้น ท่านสามารถทำการ login เข้าสู่ Website Acourse แล้วเข้าเรียนหลักสูตร "%s" ได้ทันที
-
-รหัสการชำระเงิน: %s
-ชื่อหลักสูตร: %s
-จำนวนเงิน: %f บาท
-เวลาที่ทำการชำระเงิน: %s
-เวลาที่อนุมัติการชำระเงิน: %s
-ชื่อผู้ชำระเงิน: %s
-อีเมล์ผู้ชำระเงิน: %s
+	body := fmt.Sprintf(`สวัสดีครับคุณ %s,<br>
+<br>
+อีเมล์ฉบับนี้ยืนยันว่าท่านได้รับการอนุมัติการชำระเงินสำหรับหลักสูตร "%s" เสร็จสิ้น ท่านสามารถทำการ login เข้าสู่ Website Acourse แล้วเข้าเรียนหลักสูตร "%s" ได้ทันที<br>
+<br>
+รหัสการชำระเงิน: %s<br>
+ชื่อหลักสูตร: %s<br>
+จำนวนเงิน: %f บาท<br>
+เวลาที่ทำการชำระเงิน: %s<br>
+เวลาที่อนุมัติการชำระเงิน: %s<br>
+ชื่อผู้ชำระเงิน: %s<br>
+อีเมล์ผู้ชำระเงิน: %s<br>
 `,
 		user.Name,
 		course.Title,
@@ -149,17 +152,20 @@ func (c *PaymentController) approved(payment *model.Payment) {
 	// `
 	// 	}
 
-	body += `----------------------
-ขอบคุณที่ร่วมเรียนกับเราครับ
-Krissada Chalermsook (Oak)
-Founder/CEO Acourse.io
+	body += `----------------------<br>
+ขอบคุณที่ร่วมเรียนกับเราครับ<br>
+Krissada Chalermsook (Oak)<br>
+Founder/CEO Acourse.io<br>
 https://acourse.io`
 
-	SendMail(Email{
+	err = SendMail(Email{
 		To:      []string{userInfo.Email},
 		Subject: fmt.Sprintf("ยืนยันการชำระเงิน หลักสูตร %s", course.Title),
 		Body:    body,
 	})
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 // Reject runs reject action
