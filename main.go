@@ -42,7 +42,7 @@ func main() {
 		AllowCredentials: false,
 		AllowHeaders:     []string{"Authorization", "Content-Type"},
 		AllowMethods:     []string{"GET", "POST", "PATCH", "PUT", "DELETE"},
-		AllowOrigins:     []string{"https://acourse.io"},
+		AllowOrigins:     []string{"https://acourse.io", "http://localhost:9000"},
 		MaxAge:           12 * time.Hour,
 	}))
 
