@@ -1,6 +1,7 @@
 package payload
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -27,8 +28,9 @@ type CourseContent struct {
 
 // CourseEnroll type
 type CourseEnroll struct {
-	Code string
-	URL  string
+	Code  string
+	URL   string
+	Price float64
 }
 
 // RawCourse type
@@ -119,12 +121,18 @@ func (x *RawCourseContent) Payload() *CourseContent {
 
 // RawCourseEnroll type
 type RawCourseEnroll struct {
-	Code *string `json:"code"`
-	URL  *string `json:"url"`
+	Code  *string  `json:"code"`
+	URL   *string  `json:"url"`
+	Price *float64 `json:"price"`
 }
 
 // Validate validates model
 func (x *RawCourseEnroll) Validate() error {
+	if x.Price != nil {
+		if *x.Price < 0 {
+			return fmt.Errorf("payload: price should be 0 or above or null")
+		}
+	}
 	return nil
 }
 
@@ -136,6 +144,9 @@ func (x *RawCourseEnroll) Payload() *CourseEnroll {
 	}
 	if x.URL != nil {
 		r.URL = *x.URL
+	}
+	if x.Price != nil {
+		r.Price = *x.Price
 	}
 	return &r
 }
