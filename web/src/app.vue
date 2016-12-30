@@ -56,11 +56,11 @@
 </style>
 
 <script>
-  import { Loader, Document } from './services'
-  import SuccessModal from './components/SuccessModal'
-  import ErrorModal from './components/ErrorModal'
-  import UploadModal from './components/UploadModal'
-  import Notification from './components/Notification'
+  import { Loader, Document } from 'services'
+  import SuccessModal from 'components/SuccessModal'
+  import ErrorModal from 'components/ErrorModal'
+  import UploadModal from 'components/UploadModal'
+  import Notification from 'components/Notification'
 
   export default {
     components: {

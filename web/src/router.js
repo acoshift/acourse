@@ -6,7 +6,7 @@ import {
   Loader,
   Document,
   Me
-} from './services'
+} from 'services'
 
 import {
   Layout,
@@ -20,7 +20,7 @@ import {
   // CourseAssignment,
   // CourseAssignmentEdit,
   AdminPayment
-} from './components'
+} from 'components'
 
 Vue.use(VueRouter)
 
