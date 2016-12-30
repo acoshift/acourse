@@ -30,7 +30,8 @@
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex'
+import { mapState } from 'vuex'
+import { Auth } from 'services'
 import UserAvatar from './UserAvatar'
 import AuthModal from './AuthModal'
 
@@ -47,7 +48,13 @@ export default {
     $(this.$refs.dropdownAdmin).dropdown({ action: 'hide' })
   },
   methods: {
-    ...mapActions(['signOut']),
+    signOut () {
+      Auth.signOut().subscribe(() => {
+        this.$nextTick(() => {
+          this.$router.push('/')
+        })
+      })
+    },
     openAuth () {
       this.$refs.auth.open()
     }

@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import find from 'lodash/find'
 
-import { Auth, Course, Document, User } from 'services'
+import { Course, Document, User } from 'services'
 
 import router from './router'
 
@@ -49,13 +49,6 @@ export default new Vuex.Store({
     authStateChanged (ctx, user) {
       ctx.commit('updateAuthUser', user)
       ctx.dispatch('fetchMe')
-    },
-    signOut () {
-      Auth.signOut().subscribe(() => {
-        Vue.nextTick(() => {
-          router.push('/')
-        })
-      })
     },
     fetchMe (ctx) {
       if (ctx.state.authUser) {
