@@ -33,6 +33,7 @@
 </style>
 
 <script>
+import { Observable } from 'rxjs/Observable'
 import { Loader, Me, Document } from 'services'
 import Avatar from './Avatar'
 import pick from 'lodash/fp/pick'
@@ -55,10 +56,11 @@ export default {
     }
   },
   created () {
-    Loader.start('user')
-    Me.get()
+    Observable.of({})
+      .do(() => Loader.start('user'))
+      .finally(() => Loader.stop('user'))
+      .flatMap(() => Me.get())
       .first()
-      .finally(() => { Loader.stop('user') })
       .subscribe(
         (user) => {
           this.user = pick(keys(this.user))(user)
@@ -74,6 +76,7 @@ export default {
         .finally(() => { this.saving = false })
         .subscribe(
           () => {
+            Me.fetch()
             this.$router.push('/profile')
           }
         )

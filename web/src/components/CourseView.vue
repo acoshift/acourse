@@ -11,7 +11,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { Course } from 'services'
 import CourseHeader from './CourseHeader'
 import CourseVideo from './CourseVideo'
 import CourseDetail from './CourseDetail'
@@ -30,10 +30,11 @@ export default {
     CourseEnrollPanel,
     CourseStudentPanel
   },
-  computed: {
-    ...mapGetters({
-      course: 'currentCourse'
-    })
+  subscriptions () {
+    return {
+      course: this.$$route
+        .flatMap((route) => Course.get(route.params.id))
+    }
   }
 }
 </script>

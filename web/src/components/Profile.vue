@@ -48,8 +48,7 @@
 </style>
 
 <script>
-import { mapState, mapActions } from 'vuex'
-import { Auth, Firebase } from 'services'
+import { Auth, Me, Firebase } from 'services'
 import UserProfile from './UserProfile'
 import CourseCard from './CourseCard'
 import some from 'lodash/fp/some'
@@ -59,11 +58,16 @@ export default {
     UserProfile,
     CourseCard
   },
+  subscriptions () {
+    return {
+      providerData: Auth.requireUser()
+        .map((user) => user.providerData),
+      currentUser: Me.get(),
+      ownCourses: Me.ownCourses(),
+      myCourses: Me.courses()
+    }
+  },
   computed: {
-    ...mapState(['currentUser', 'authUser', 'ownCourses', 'myCourses']),
-    providerData () {
-      return this.authUser && this.authUser.providerData
-    },
     isLinkedGoogle () {
       return some((x) => x.providerId === Firebase.provider.google.providerId)(this.providerData)
     },
@@ -77,12 +81,7 @@ export default {
       return this.providerData && this.providerData.length > 1
     }
   },
-  created () {
-    this.fetchMeOwnCourses()
-    this.fetchMeMyCourses()
-  },
   methods: {
-    ...mapActions(['fetchMe', 'fetchMeOwnCourses', 'fetchMeMyCourses']),
     linkGoogle () {
       Auth.linkGoogle().subscribe()
     },

@@ -18,7 +18,6 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex'
 import { Course, Document, Auth } from 'services'
 import EnrollModal from './EnrollModal'
 
@@ -43,7 +42,6 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['fetchCurrentCourse']),
     apply () {
       if (this.applying) return
 
@@ -54,7 +52,7 @@ export default {
           .subscribe(
             () => {
               Document.openSuccessModal('Success', 'You have enrolled to this course.')
-              this.fetchCurrentCourse()
+              Course.fetch(this.course.id)
             }
           )
       } else {

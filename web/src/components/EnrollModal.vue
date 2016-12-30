@@ -30,7 +30,6 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex'
 import { Document, Course } from 'services'
 
 export default {
@@ -53,7 +52,6 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['fetchCurrentCourse']),
     show () {
       this.price = this.calcPrice
       $(this.$el).modal('show')
@@ -64,7 +62,7 @@ export default {
         .flatMap(() => Course.enroll(this.course.id, { url: this.url, price: this.price, code: this.code }))
         .subscribe(
           () => {
-            this.fetchCurrentCourse()
+            Course.fetch(this.course.id)
             Document.openSuccessModal('Success', 'Your enroll request success!.')
           },
           (err) => {

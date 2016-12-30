@@ -24,7 +24,7 @@ export default {
     github: new firebase.auth.GithubAuthProvider()
   },
 
-  init (store) {
+  init () {
     firebase.initializeApp(process.env.FIREBASE)
 
     const messaging = firebase.messaging()
@@ -48,7 +48,6 @@ export default {
     // })
 
     firebase.auth().onAuthStateChanged((user) => {
-      store.dispatch('authStateChanged', user)
       $currentUser.next(user)
       if (user) {
         window.ga('set', 'userId', user.uid)
@@ -56,7 +55,6 @@ export default {
           id: user.uid,
           email: user.email
         })
-        this.ref('user').on('value', () => {})
       } else {
         window.ga('set', 'userId', null)
         Raven.setUserContext(null)
