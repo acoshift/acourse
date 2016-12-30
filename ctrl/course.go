@@ -281,7 +281,7 @@ func (c *CourseController) Enroll(ctx *app.CourseEnrollContext) error {
 		CourseID:      ctx.CourseID,
 		UserID:        ctx.CurrentUserID,
 		OriginalPrice: originalPrice,
-		Price:         originalPrice,
+		Price:         ctx.Payload.Price,
 		Code:          ctx.Payload.Code,
 		URL:           ctx.Payload.URL,
 		Status:        model.PaymentStatusWaiting,
