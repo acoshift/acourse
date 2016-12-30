@@ -7,6 +7,8 @@
           th Course
           th User
           th Image
+          th Original Price
+          th Price
           th Created At
           th.four.wide Actions
       tbody
@@ -18,8 +20,9 @@
           td
             a(:href="x.url")
               img.ui.tiny.image(:src="x.url")
-          td
-            span {{ x.createdAt | date('YYYY/MM/DD, HH:mm') }}
+          td {{ x.originalPrice }}
+          td {{ x.price }}
+          td {{ x.createdAt | date('YYYY/MM/DD, HH:mm') }}
           td
             .ui.green.button(@click="approve(x)") Approve
             .ui.red.button(@click="reject(x)") Reject
