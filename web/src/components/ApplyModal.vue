@@ -3,11 +3,8 @@
     .header Enroll
     .content
       div
-        h4 Upload
+        h4 วิธีการลงทะเบียน {{ course.title }}
         p.description
-          | วิธีการลงทะเบียน {{ course.title }}
-          br
-          br
           | 1. โอนเงินจำนวน #[b {{ calcPrice }}] บาท ไปที่
           br
           br
@@ -29,17 +26,12 @@
             label จำนวนเงิน (บาท)
             input(type="number", v-model.number="price")
         br
-        .ui.fluid.green.button(@click="upload") Upload
-        br
-        img.ui.tiny.image(v-if="url", :url="url")
-        br
-        .ui.fluid.blue.button(@click="enroll", :class="{'loading disabled': loading}") Enroll
+        .ui.fluid.green.button(@click="enroll") Upload and Enroll
 </template>
 
 <script>
 import { mapActions } from 'vuex'
 import { Document, Course } from 'services'
-import { Observable } from 'rxjs/Observable'
 
 export default {
   props: {
@@ -52,8 +44,7 @@ export default {
     return {
       price: 0,
       url: '',
-      code: '',
-      loading: false
+      code: ''
     }
   },
   computed: {
@@ -67,30 +58,17 @@ export default {
       this.price = this.calcPrice
       $(this.$el).modal('show')
     },
-    upload () {
-      Document.uploadModal.open('image/*')
-        .subscribe(
-          (file) => {
-            this.url = file.downloadURL
-            Document.openSuccessModal('Success', 'Your enroll request success!.')
-          },
-          (err) => {
-            Document.openErrorModal('Upload Error', err && err.message || err)
-          }
-        )
-    },
     enroll () {
-      Observable.of({})
-        .do(() => { this.loading = true })
-        .finally(() => { this.loading = false })
+      Document.uploadModal.open('image/*')
+        .do((file) => { this.url = file.downloadURL })
         .flatMap(() => Course.enroll(this.course.id, { url: this.url, price: this.price, code: this.code }))
         .subscribe(
           () => {
-            Document.openSuccessModal('Success', 'Your enroll request success!.')
             this.fetchCurrentCourse()
+            Document.openSuccessModal('Success', 'Your enroll request success!.')
           },
           (err) => {
-            Document.openErrorModal('Upload Error', err && err.message || err)
+            Document.openErrorModal('Error', err && err.message || err)
           }
         )
     }
