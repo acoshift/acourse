@@ -35,6 +35,11 @@
       }
     </script>
     <script>
+      if (!'Promise' in window) {
+        window.location = '/static/not-support.html'
+      }
+    </script>
+    <script>
       window.$$state = {{ .State }}
     </script>
   </head>
