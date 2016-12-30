@@ -19,21 +19,25 @@
 </style>
 
 <script>
-import { mapState, mapActions } from 'vuex'
+import { Course } from 'services'
 import CourseCard from './CourseCard'
 
 export default {
   components: {
     CourseCard
   },
-  computed: {
-    ...mapState(['courses'])
+  subscriptions () {
+    return {
+      courses: Course.list()
+    }
   },
   created () {
     this.fetchCourses()
   },
   methods: {
-    ...mapActions(['fetchCourses'])
+    fetchCourses () {
+      Course.fetchList()
+    }
   }
 }
 </script>

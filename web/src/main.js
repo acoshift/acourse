@@ -44,10 +44,6 @@ Raven
 Vue.use(VueRx, { Observable, Subscription })
 Firebase.init(store)
 
-if (window.$$state) {
-  store.dispatch('patch', window.$$state)
-}
-
 /* eslint-disable no-new */
 new Vue({
   el: '#app',

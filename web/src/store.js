@@ -10,7 +10,6 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    courses: false, // course tiny collection view
     course: {}, // course view
     authUser: false, // firebase user, uninit === false
     currentUser: false,
@@ -32,9 +31,6 @@ export default new Vuex.Store({
     updateCurrentUser (state, user) {
       state.currentUser = user
     },
-    updateCourses (state, courses) {
-      state.courses = courses
-    },
     updateOwnCourses (state, courses) {
       state.ownCourses = courses
     },
@@ -50,11 +46,6 @@ export default new Vuex.Store({
     }
   },
   actions: {
-    patch (ctx, s) {
-      if (!s) return
-      if (s.courses) ctx.commit('updateCourses', s.courses)
-      if (s.course) ctx.commit('updateCourse', s.course)
-    },
     authStateChanged (ctx, user) {
       ctx.commit('updateAuthUser', user)
       ctx.dispatch('fetchMe')
@@ -80,9 +71,6 @@ export default new Vuex.Store({
     fetchMeMyCourses (ctx) {
       if (!ctx.state.authUser) return
       User.courses(ctx.state.authUser.uid).subscribe((courses) => ctx.commit('updateMyCourses', courses))
-    },
-    fetchCourses (ctx) {
-      Course.list().subscribe((courses) => ctx.commit('updateCourses', courses))
     },
     fetchCourse (ctx, id) {
       Course.get(id)
