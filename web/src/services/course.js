@@ -1,11 +1,41 @@
+import { BehaviorSubject } from 'rxjs/BehaviorSubject'
 import API from './api'
+import find from 'lodash/find'
+
+const $courses = new BehaviorSubject(false)
+const $course = new BehaviorSubject({})
+
+if (window.$$state) {
+  if (window.$$state.courses) {
+    $courses.next(window.$$state.courses)
+  }
+}
 
 export default {
+  fetchList () {
+    API.get('/course').subscribe((courses) => {
+      $courses.next(courses)
+    })
+  },
   list () {
-    return API.get('/course')
+    return $courses.asObservable()
+  },
+  fetch (url) {
+    const ob = API.get(`/course/${url}`)
+      .share()
+    ob
+      .flatMap(() => $course.first(), (x, y) => [x, y])
+      .subscribe(([course, $$course]) => {
+        $course.next({
+          ...$$course,
+          [course.id]: course
+        })
+      }, () => {})
+    return ob
   },
   get (url) {
-    return API.get(`/course/${url}`)
+    return $course.asObservable()
+      .map((course) => course[url] || find(course, { url }))
   },
   create (data) {
     return API.post('/course', data, true)

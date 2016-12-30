@@ -30,7 +30,7 @@
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex'
+import { Auth, Me } from 'services'
 import UserAvatar from './UserAvatar'
 import AuthModal from './AuthModal'
 
@@ -39,15 +39,29 @@ export default {
     UserAvatar,
     AuthModal
   },
-  computed: {
-    ...mapState(['currentUser'])
+  subscriptions () {
+    return {
+      currentUser: Me.get()
+    }
+  },
+  mounted () {
+    this.bindDOM()
   },
   updated () {
-    $(this.$refs.dropdownUser).dropdown({ action: 'hide' })
-    $(this.$refs.dropdownAdmin).dropdown({ action: 'hide' })
+    this.bindDOM()
   },
   methods: {
-    ...mapActions(['signOut']),
+    bindDOM () {
+      $(this.$refs.dropdownUser).dropdown({ action: 'hide' })
+      $(this.$refs.dropdownAdmin).dropdown({ action: 'hide' })
+    },
+    signOut () {
+      Auth.signOut().subscribe(() => {
+        this.$nextTick(() => {
+          this.$router.push('/')
+        })
+      })
+    },
     openAuth () {
       this.$refs.auth.open()
     }
