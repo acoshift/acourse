@@ -9,8 +9,8 @@ dev:
 local:
 	node build/build-local.js
 
-testing:
-	env NODE_ENV="testing" node build/dev-server.js
+prod:
+	env NODE_ENV="production" node build/dev-server.js
 
 prepare:
 	yarn
