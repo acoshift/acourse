@@ -10,7 +10,6 @@ Acoshift's course system [Link](https://acourse.io)
 
 - Vue.js
 - Rxjs + VueRx
-- Vuex
 - Webpack
 
 ### Backend
