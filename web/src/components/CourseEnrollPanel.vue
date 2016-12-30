@@ -14,17 +14,17 @@
       .row(v-else)
         .center.aligned.column
           .ui.red.disabled.button Sign In to Enroll
-    apply-modal(ref="applyModal", :course="course")
+    enroll-modal(ref="enrollModal", :course="course")
 </template>
 
 <script>
 import { mapActions } from 'vuex'
 import { Course, Document, Auth } from 'services'
-import ApplyModal from './ApplyModal'
+import EnrollModal from './EnrollModal'
 
 export default {
   components: {
-    ApplyModal
+    EnrollModal
   },
   props: {
     course: {
@@ -58,7 +58,7 @@ export default {
             }
           )
       } else {
-        this.$refs.applyModal.show()
+        this.$refs.enrollModal.show()
       }
     }
   },

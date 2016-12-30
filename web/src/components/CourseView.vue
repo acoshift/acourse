@@ -1,7 +1,7 @@
 <template>
   <div>
     <course-header :course="course" v-if="course"></course-header>
-    <course-apply-panel v-if="course && !course.enrolled && !course.owned && course.enroll" :course="course"></course-apply-panel>
+    <course-enroll-panel v-if="course && !course.enrolled && !course.owned && course.enroll" :course="course"></course-enroll-panel>
     <course-owner-panel v-if="course && course.owned" :course="course"></course-owner-panel>
     <!-- <course-student-panel v-if="course && course.enrolled" :course="course"></course-student-panel> -->
     <course-video v-if="(course && course.video) && (course.enrolled || course.owned)" :src="course.video"></course-video>
@@ -17,7 +17,7 @@ import CourseVideo from './CourseVideo'
 import CourseDetail from './CourseDetail'
 import CourseContent from './CourseContent'
 import CourseOwnerPanel from './CourseOwnerPanel'
-import CourseApplyPanel from './CourseApplyPanel'
+import CourseEnrollPanel from './CourseEnrollPanel'
 import CourseStudentPanel from './courseStudentPanel'
 
 export default {
@@ -27,7 +27,7 @@ export default {
     CourseDetail,
     CourseContent,
     CourseOwnerPanel,
-    CourseApplyPanel,
+    CourseEnrollPanel,
     CourseStudentPanel
   },
   computed: {
