@@ -19,14 +19,14 @@ func StartNotiPayment(db *store.DB) {
 			if err == nil && len(payments) > 0 {
 				err = SendMail(Email{
 					To:      []string{"acoshift@gmail.com", "k.chalermsook@gmail.com"},
-					Subject: "Admin Notification",
-					Body:    fmt.Sprintf("%d payments waiting for action", len(payments)),
+					Subject: "Acourse - Payment Received",
+					Body:    fmt.Sprintf("%d payments pending", len(payments)),
 				})
 				if err != nil {
 					log.Println(err)
 				}
 			}
-			time.Sleep(1 * time.Hour)
+			time.Sleep(2 * time.Hour)
 		}
 	}()
 }
