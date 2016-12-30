@@ -18,7 +18,7 @@ func StartNotiPayment(db *store.DB) {
 			payments, err := db.PaymentList(model.PaymentStatusWaiting)
 			if err == nil && len(payments) > 0 {
 				err = SendMail(Email{
-					To:      []string{"contact@acourse.io"},
+					To:      []string{"acoshift@gmail.com", "k.chalermsook@gmail.com"},
 					Subject: "Admin Notification",
 					Body:    fmt.Sprintf("%d payments waiting for action", len(payments)),
 				})

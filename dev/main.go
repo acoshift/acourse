@@ -45,6 +45,7 @@ func main() {
 	ctrl.InitMail(ctrl.EmailConfig{
 		From:     cfg.Email.From,
 		Server:   cfg.Email.Server,
+		Port:     cfg.Email.Port,
 		User:     cfg.Email.User,
 		Password: cfg.Email.Password,
 	})
