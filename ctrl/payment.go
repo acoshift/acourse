@@ -130,7 +130,7 @@ func (c *PaymentController) approved(payment *model.Payment) {
 <br>
 รหัสการชำระเงิน: %s<br>
 ชื่อหลักสูตร: %s<br>
-จำนวนเงิน: %f บาท<br>
+จำนวนเงิน: %.2f บาท<br>
 เวลาที่ทำการชำระเงิน: %s<br>
 เวลาที่อนุมัติการชำระเงิน: %s<br>
 ชื่อผู้ชำระเงิน: %s<br>
@@ -143,7 +143,7 @@ func (c *PaymentController) approved(payment *model.Payment) {
 		course.Title,
 		payment.Price,
 		payment.CreatedAt.Format(time.RFC822),
-		payment.UpdatedAt.Format(time.RFC822),
+		payment.At.Format(time.RFC822),
 		user.Name,
 		userInfo.Email,
 	)
