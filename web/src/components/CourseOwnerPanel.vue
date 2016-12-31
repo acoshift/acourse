@@ -1,38 +1,26 @@
-<template>
-  <div class="ui segment">
-    <div class="ui stackable equal width grid">
-      <div class="column">
-        <router-link class="ui green fluid button" :to="`/course/${course.id}/edit`">Edit</router-link>
-      </div>
-      <div v-if="course.canAttend && !course.attend" class="column">
-        <div class="ui teal fluid button" @click="openAttendModal">Open Attend</div>
-      </div>
-      <div v-if="course.canAttend && course.attend" class="column">
-        <div class="ui red fluid button" @click="closeAttend" :class="{loading: removingCode}">Close Attend</div>
-      </div>
-      <div class="column" v-if="course.hasAssignment">
-        <router-link :to="`/course/${course.id}/assignment/edit`" class="ui blue fluid button">Assignments</router-link>
-      </div>
-      <div class="column" v-if="course.canAttend">
-        <router-link class="ui blue fluid button" :to="`/course/${course.id}/attend`">Attendants</router-link>
-      </div>
-    </div>
-    <div class="ui small modal" ref="attendModal">
-      <div class="header">
-        Set Attend Code
-      </div>
-      <div class="content">
-        <div class="ui form">
-          <div class="field">
-            <label>Enter Code</label>
-            <input v-model="attendCode">
-          </div>
-          <div v-if="attendError" class="ui red message">{{ attendError }}</div>
-          <div class="ui fluid blue button" @click="submitAttend" :class="{loading: submitingAttendCode}">OK</div>
-        </div>
-      </div>
-    </div>
-  </div>
+<template lang="pug">
+  .ui.segment
+    .ui.stackable.equal.width.grid
+      .column
+        router-link.ui.green.fluid.button(:to='`/course/${course.id}/edit`') Edit
+      .column(v-if='course.canAttend && !course.attend')
+        .ui.teal.fluid.button(@click='openAttendModal') Open Attend
+      .column(v-if='course.canAttend && course.attend')
+        .ui.red.fluid.button(@click='closeAttend', :class='{loading: removingCode}') Close Attend
+      .column(v-if='course.hasAssignment')
+        router-link.ui.blue.fluid.button(:to='`/course/${course.id}/assignment/edit`') Assignments
+      .column(v-if='course.canAttend')
+        router-link.ui.blue.fluid.button(:to='`/course/${course.id}/attend`') Attendants
+    .ui.small.modal(ref='attendModal')
+      .header
+        | Set Attend Code
+      .content
+        .ui.form
+          .field
+            label Enter Code
+            input(v-model='attendCode')
+          .ui.red.message(v-if='attendError') {{ attendError }}
+          .ui.fluid.blue.button(@click='submitAttend', :class='{loading: submitingAttendCode}') OK
 </template>
 
 <script>

@@ -24,9 +24,9 @@
         .ui.form
           .field
             label จำนวนเงิน (บาท)
-            input(type="number", v-model.number="price")
+            input(type='number', v-model.number='price')
         br
-        .ui.fluid.green.button(@click="enroll") Upload and Enroll
+        .ui.fluid.green.button(@click='enroll') Upload and Enroll
 </template>
 
 <script>

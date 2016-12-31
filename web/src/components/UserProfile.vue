@@ -1,20 +1,13 @@
-<template>
-  <div>
-    <div class="ui center aligned grid">
-      <div class="row" style="padding-bottom: 0;">
-        <avatar :src="user && user.photo" size="medium"></avatar>
-      </div>
-      <div v-if="user && user.username" class="row" style="padding-bottom: 0;">
-        <h2>@{{ user.username }}</h1>
-      </div>
-      <div class="row" style="padding-bottom: 0;">
-        <h1>{{ user && user.name || 'Anonymous' }}</h1>
-      </div>
-      <div class="row">
-        <h3>{{ user && user.aboutMe }}</h3>
-      </div>
-    </div>
-  </div>
+<template lang="pug">
+  .ui.center.aligned.grid
+    .row(style='padding-bottom: 0;')
+      Avatar(:src='user && user.photo', size='medium')
+    .row(v-if='user && user.username', style='padding-bottom: 0;')
+      h2 @{{ user.username }}
+    .row(style='padding-bottom: 0;')
+      h1 {{ user && user.name || 'Anonymous' }}
+    .row
+      h3 {{ user && user.aboutMe }}
 </template>
 
 <script>

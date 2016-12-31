@@ -1,13 +1,12 @@
-<template>
-  <div>
-    <course-header :course="course" v-if="course"></course-header>
-    <course-enroll-panel v-if="course && !course.enrolled && !course.owned && course.enroll" :course="course"></course-enroll-panel>
-    <course-owner-panel v-if="course && course.owned" :course="course"></course-owner-panel>
-    <!-- <course-student-panel v-if="course && course.enrolled" :course="course"></course-student-panel> -->
-    <course-video v-if="(course && course.video) && (course.enrolled || course.owned)" :src="course.video"></course-video>
-    <course-detail :course="course" v-if="course"></course-detail>
-    <course-content :contents="course.contents" v-if="course && course.contents"></course-content>
-  </div>
+<template lang="pug">
+  div
+    course-header(:course='course', v-if='course')
+    course-enroll-panel(v-if='course && !course.enrolled && !course.owned && course.enroll', :course='course')
+    course-owner-panel(v-if='course && course.owned', :course='course')
+    // <course-student-panel v-if="course && course.enrolled" :course="course"></course-student-panel>
+    course-video(v-if='(course && course.video) && (course.enrolled || course.owned)', :src='course.video')
+    course-detail(:course='course', v-if='course')
+    course-content(:contents='course.contents', v-if='course && course.contents')
 </template>
 
 <script>

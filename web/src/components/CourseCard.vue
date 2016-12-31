@@ -1,26 +1,20 @@
-<template>
-  <router-link class="ui card" :to="`/course/${url}`">
-    <div class="image" :to="`/course/${url}`">
-      <img :src="course.photo">
-    </div>
-    <div class="content">
-      <div class="header" :to="`/course/${url}`">{{ course.title | trim(45) }}</div>
-      <div class="meta">
-        <span v-if="course.type === 'video'">Video</span>
-        <span v-if="course.type === 'live'" class="date">Live start at {{ course.start | date('DD/MM/YYYY') }}</span>
-      </div>
-      <div class="description">
-        {{ course.shortDescription }}
-      </div>
-    </div>
-    <div class="extra content">
-      <div class="right floated">
-        <i class="user icon"></i> {{ course.student }}
-      </div>
-      <span v-if="!hidePrice && !course.discount && course.price" class="price" :class="{line: course.discount}">฿ {{ course.price | money }}</span>
-      <span v-if="!hidePrice && course.discount" class="discount price">&nbsp;฿ {{ course.discountedPrice | money }}</span>
-    </div>
-  </router-link>
+<template lang="pug">
+  router-link.ui.card(:to='`/course/${url}`')
+    .image(:to='`/course/${url}`')
+      img(:src='course.photo')
+    .content
+      .header(:to='`/course/${url}`') {{ course.title | trim(45) }}
+      .meta
+        span(v-if="course.type === 'video'") Video
+        span.date(v-if="course.type === 'live'") Live start at {{ course.start | date('DD/MM/YYYY') }}
+      .description
+        | {{ course.shortDescription }}
+    .extra.content
+      .right.floated
+        i.user.icon
+        | &nbsp;{{ course.student }}
+      span.price(v-if='!hidePrice && !course.discount && course.price', :class='{line: course.discount}') ฿ {{ course.price | money }}
+      span.discount.price(v-if='!hidePrice && course.discount') &nbsp;฿ {{ course.discountedPrice | money }}
 </template>
 
 <style scoped>

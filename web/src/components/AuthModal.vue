@@ -1,89 +1,72 @@
-<template>
-  <div id="auth" class="ui fullscreen modal">
-    <i class="close icon"></i>
-    <div class="header">Sign In to Acourse.io</div>
-    <div class="content">
-      <div class="ui stackable grid">
-        <div class="row">
-          <div class="nine wide column">
-            <div v-show="state === 0">
-              <div class="ui fluid left aligned container">
-                <form class="ui form" :class="{error}" @submit.prevent="signIn">
-                  <div class="field">
-                    <label>Email</label>
-                    <input v-model="email" @focus="resetError">
-                  </div>
-                  <div class="field">
-                    <label>Password</label>
-                    <input v-model="password" type="password" @focus="resetError">
-                  </div>
-                  <div class="ui error message">
-                    {{ error }}
-                  </div>
-                  <div class="ui right aligned fluid container" style="padding-bottom: 1rem;">
-                    <a href="#" target="_self" @click.prevent="state = 1">Forget password ?</a>
-                    /
-                    <a href="#" target="_self" @click.prevent="state = 2">Register</a>
-                  </div>
-                  <button class="ui blue fluid submit button" :class="{loading}">Sign In</button>
-                </form>
-              </div>
-            </div>
-            <div v-show="state === 1">
-              <h3>Reset Password</h3>
-              <div class="ui fluid left aligned container">
-                <form class="ui form" :class="{error}" @submit.prevent="forgot">
-                  <div class="field">
-                    <label>Email</label>
-                    <input v-model="email" @focus="resetError">
-                  </div>
-                  <div class="ui error message">
-                    {{ error }}
-                  </div>
-                  <div class="ui fluid container" style="padding-bottom: 1rem;">
-                    <a href="#" target="_self" @click.prevent="state = 0"><i class="left chevron icon"></i> Sign In</a>
-                  </div>
-                  <button class="ui blue fluid submit button" :class="{loading}">Reset</button>
-                </form>
-              </div>
-            </div>
-            <div v-show="state === 2">
-              <h3>Register</h3>
-              <div class="ui fluid left aligned container">
-                <form class="ui form" :class="{error}" @submit.prevent="signUp">
-                  <div class="field">
-                    <label>Email</label>
-                    <input v-model="email" @focus="resetError">
-                  </div>
-                  <div class="field">
-                    <label>Password</label>
-                    <input v-model="password" type="password" @focus="resetError">
-                  </div>
-                  <div class="ui error message">
-                    {{ error }}
-                  </div>
-                  <div class="ui fluid container" style="padding-bottom: 1rem;">
-                    <a href="#" target="_self" @click.prevent="state = 0"><i class="left chevron icon"></i> Sign In</a>
-                  </div>
-                  <button class="ui blue fluid submit button" :class="{loading}">Sign Up</button>
-                </form>
-              </div>
-            </div>
-          </div>
-          <div class="one wide column">
-            <div class="ui vertical divider">Or</div>
-          </div>
-          <div class="six wide middle aligned column">
-            <div class="ui facebook fluid button" @click="facebookSignIn" :class="{loading: facebookLoading}"><i class="facebook f icon"></i> Sign In with Facebook</div>
-            <br>
-            <div class="ui google plus fluid button" :class="{loading: googleLoading}" @click="googleSignIn"><i class="google plus icon"></i> Sign In with Google+</div>
-            <br>
-            <div class="ui black fluid button" :class="{loading: githubLoading}" @click="githubSignIn"><i class="github icon"></i> Sign In with Github</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+<template lang="pug">
+  #auth.ui.fullscreen.modal
+    i.close.icon
+    .header Sign In to Acourse.io
+    .content
+      .ui.stackable.grid
+        .row
+          .nine.wide.column
+            div(v-show='state === 0')
+              .ui.fluid.left.aligned.container
+                form.ui.form(:class='{error}', @submit.prevent='signIn')
+                  .field
+                    label Email
+                    input(v-model='email', @focus='resetError')
+                  .field
+                    label Password
+                    input(v-model='password', type='password', @focus='resetError')
+                  .ui.error.message
+                    | {{ error }}
+                  .ui.right.aligned.fluid.container(style='padding-bottom: 1rem;')
+                    a(href='#', target='_self', @click.prevent='state = 1') Forget password ?
+                    | &nbsp;/&nbsp;
+                    a(href='#', target='_self', @click.prevent='state = 2') Register
+                  button.ui.blue.fluid.submit.button(:class='{loading}') Sign In
+            div(v-show='state === 1')
+              h3 Reset Password
+              .ui.fluid.left.aligned.container
+                form.ui.form(:class='{error}', @submit.prevent='forgot')
+                  .field
+                    label Email
+                    input(v-model='email', @focus='resetError')
+                  .ui.error.message
+                    | {{ error }}
+                  .ui.fluid.container(style='padding-bottom: 1rem;')
+                    a(href='#', target='_self', @click.prevent='state = 0')
+                      i.left.chevron.icon
+                      | &nbsp;Sign In
+                  button.ui.blue.fluid.submit.button(:class='{loading}') Reset
+            div(v-show='state === 2')
+              h3 Register
+              .ui.fluid.left.aligned.container
+                form.ui.form(:class='{error}', @submit.prevent='signUp')
+                  .field
+                    label Email
+                    input(v-model='email', @focus='resetError')
+                  .field
+                    label Password
+                    input(v-model='password', type='password', @focus='resetError')
+                  .ui.error.message
+                    | {{ error }}
+                  .ui.fluid.container(style='padding-bottom: 1rem;')
+                    a(href='#', target='_self', @click.prevent='state = 0')
+                      i.left.chevron.icon
+                      | Sign In
+                  button.ui.blue.fluid.submit.button(:class='{loading}') Sign Up
+          .one.wide.column
+            .ui.vertical.divider Or
+          .six.wide.middle.aligned.column
+            .ui.facebook.fluid.button(@click='facebookSignIn', :class='{loading: facebookLoading}')
+              i.facebook.f.icon
+              | Sign In with Facebook
+            br
+            .ui.google.plus.fluid.button(:class='{loading: googleLoading}', @click='googleSignIn')
+              i.google.plus.icon
+              | Sign In with Google+
+            br
+            .ui.black.fluid.button(:class='{loading: githubLoading}', @click='githubSignIn')
+              i.github.icon
+              | Sign In with Github
 </template>
 
 <script>

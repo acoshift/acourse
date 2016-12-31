@@ -1,10 +1,9 @@
-<template>
-  <div class="ui segment">
-    <h4 class="ui header">Course Detail</h4>
-    <span>Start: {{ course.start | date('DD/MM/YYYY') }}</span>
-    <div class="ui divider"></div>
-    <p class="description" v-html="course.description"></p>
-  </div>
+<template lang="pug">
+  .ui.segment
+    h4.ui.header Course Detail
+    span Start: {{ course.start | date('DD/MM/YYYY') }}
+    .ui.divider
+    p.description(v-html='course.description')
 </template>
 
 <script>

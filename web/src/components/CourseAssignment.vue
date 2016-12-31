@@ -1,25 +1,15 @@
-<template>
-  <div>
-    <div class="ui segment" v-if="course">
-      <div class="ui grid">
-        <div class="three column row" v-for="x in assignments">
-          <div class="five wide column">
-            {{ x.title }}
-          </div>
-          <div class="column">
-            <div v-if="userAssignments">
-              <div v-for="(y, i) in userAssignments[x.id]">
-                <a target="_bank" :href="y.url">{{ i }}</a><br>
-              </div>
-            </div>
-          </div>
-          <div class="two wide column">
-            <div class="ui green button" v-if="x.open" @click="selectFile(x.id)">Upload</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+<template lang="pug">
+  .ui.segment(v-if="course")
+    .ui.grid
+      .three.column.row(v-for="x in assignments")
+        .five.wide.column {{ x.title }}
+        .column
+          div(v-if="userAssignments")
+            div(v-for="(y, i) in userAssignments[x.id]")
+              a(target="_bank", :href="y.url") {{ i }}
+              br
+        two.wide.column
+          .ui.green.button(v-if="x.open", @click="selectFile(x.id)") Upload
 </template>
 
 <script>

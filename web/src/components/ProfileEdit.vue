@@ -1,29 +1,23 @@
-<template>
-  <div class="ui segment">
-    <h3 class="ui header">Edit Profile</h3>
-    <form class="ui form" @submit.prevent="submit">
-      <div class="ui red message" v-if="error">{{ error }}</div>
-      <div class="field">
-        <label>Photo</label>
-        <avatar v-show="user.photo" :src="user.photo" size="small"></avatar>
-        <div class="ui green button" @click="selectPhoto">Select Photo</div>
-      </div>
-      <div class="field">
-        <label>Username</label>
-        <input v-model="user.username" maxlength="25">
-      </div>
-      <div class="field">
-        <label>Name</label>
-        <input v-model="user.name" maxlength="45">
-      </div>
-      <div class="field">
-        <label>About me</label>
-        <input v-model="user.aboutMe" maxlength="40">
-      </div>
-      <button class="ui blue submit button" :class="{loading: saving}">Save</button>
-      <router-link to="/profile" class="ui red button">Cancel</router-link>
-    </form>
-  </div>
+<template lang="pug">
+.ui.segment
+  h3.ui.header Edit Profile
+  form.ui.form(@submit.prevent='submit')
+    .ui.red.message(v-if='error') {{ error }}
+    .field
+      label Photo
+      avatar(v-show='user.photo', :src='user.photo', size='small')
+      .ui.green.button(@click='selectPhoto') Select Photo
+    .field
+      label Username
+      input(v-model='user.username', maxlength='25')
+    .field
+      label Name
+      input(v-model='user.name', maxlength='45')
+    .field
+      label About me
+      input(v-model='user.aboutMe', maxlength='40')
+    button.ui.blue.submit.button(:class='{loading: saving}') Save
+    router-link.ui.red.button(to='/profile') Cancel
 </template>
 
 <style>

@@ -1,19 +1,14 @@
-<template>
-  <div class="ui small modal">
-    <div class="image content">
-      <div class="ui centered image">
-        <i class="huge icons">
-          <i class="red big thin circle icon"></i>
-          <i class="red cancel icon"></i>
-        </i>
-      </div>
-    </div>
-    <div class="description" style="text-align: center;">
-      <div class="ui header">{{ title }}</div>
-      <p>{{ description }}</p>
-      <div ref="closeButton" class="ui close blue basic button">OK</div>
-    </div>
-  </div>
+<template lang="pug">
+  .ui.small.modal
+    .image.content
+      .ui.centered.image
+        i.huge.icons
+          i.red.big.thin.circle.icon
+          i.red.cancel.icon
+    .description(style='text-align: center;')
+      .ui.header {{ title }}
+      p {{ description }}
+      .ui.close.blue.basic.button(ref='closeButton') OK
 </template>
 
 <style scoped>

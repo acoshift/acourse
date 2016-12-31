@@ -1,10 +1,8 @@
-<template>
-  <div class="noti">
-    <div class="ui floating message" v-for="x in data" :class="x.color || ''" @click="close(x.id)">
-      <i class="close icon"></i>
-      {{ x.body }}
-    </div>
-  </div>
+<template lang="pug">
+.noti
+  .ui.floating.message(v-for='x in data', :class="x.color || ''", @click='close(x.id)')
+    i.close.icon
+    | &nbsp;{{ x.body }}
 </template>
 
 <style scoped>

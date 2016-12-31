@@ -1,7 +1,6 @@
-<template>
-  <div class="ui segment">
-    <div ref="video" class="ui embed" data-source="youtube" :data-id="src"></div>
-  </div>
+<template lang="pug">
+  .ui.segment
+    .ui.embed(ref='video', data-source='youtube', :data-id='src')
 </template>
 
 <script>

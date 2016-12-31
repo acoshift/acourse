@@ -1,23 +1,17 @@
-<template>
-  <div class="ui small modal">
-    <div class="image content">
-      <div class="ui centered image">
-        <i class="huge cloud upload icon"></i>
-      </div>
-    </div>
-    <div class="description" style="text-align: center;">
-      <h2 class="ui header">Upload</h2>
-      <div class="ui yellow message">Limit file size to 5 MiB</div>
-      <div v-show="uploading" ref="progress" class="ui indicating progress">
-        <div class="bar">
-          <div class="progress"></div>
-        </div>
-      </div>
-      <input type="file" class="hidden" ref="file" :accept="accept" @change="upload">
-      <div class="ui green button" :class="{disabled: uploading}" @click="$refs.file.click()">Select File</div>
-      <div class="ui red button" @click="cancel">Cancel</div>
-    </div>
-  </div>
+<template lang="pug">
+  .ui.small.modal
+    .image.content
+      .ui.centered.image
+        i.huge.cloud.upload.icon
+    .description(style='text-align: center;')
+      h2.ui.header Upload
+      .ui.yellow.message Limit file size to 5 MiB
+      .ui.indicating.progress(v-show='uploading', ref='progress')
+        .bar
+          .progress
+      input.hidden(type='file', ref='file', :accept='accept', @change='upload')
+      .ui.green.button(:class='{disabled: uploading}', @click='$refs.file.click()') Select File
+      .ui.red.button(@click='cancel') Cancel
 </template>
 
 <style scoped>

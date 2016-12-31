@@ -1,14 +1,10 @@
-<template>
-  <div class="ui segment" v-if="course.attend || course.assignment">
-    <div class="ui stackable equal width grid">
-      <div class="column" v-if="course.attend">
-        <div :class="{disabled: isAttended || !course.attend, loading: attending}" class="ui blue fluid button" @click="attend">Attend</div>
-      </div>
-      <div class="column" v-if="course.assignment">
-        <router-link class="ui teal fluid button" :to="`/course/${course.id}/assignment`">Assignments</router-link>
-      </div>
-    </div>
-  </div>
+<template lang="pug">
+  .ui.segment(v-if='course.attend || course.assignment')
+    .ui.stackable.equal.width.grid
+      .column(v-if='course.attend')
+        .ui.blue.fluid.button(:class='{disabled: isAttended || !course.attend, loading: attending}', @click='attend') Attend
+      .column(v-if='course.assignment')
+        router-link.ui.teal.fluid.button(:to='`/course/${course.id}/assignment`') Assignments
 </template>
 
 <script>

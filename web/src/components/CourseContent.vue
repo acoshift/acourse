@@ -1,15 +1,14 @@
-<template>
-  <div class="ui segment">
-    <h4 class="ui header">Course Content</h4>
-    <div class="ui styled fluid accordion" ref="accordion">
-      <div v-for="(x, i) in contents">
-        <div class="title"><i class="dropdown icon"></i>Section {{ i + 1 }}<span v-if="x.title">: {{ x.title }}</span></div>
-        <div class="content">
-          <p class="description" v-html="x.description"></p>
-        </div>
-      </div>
-    </div>
-  </div>
+<template lang="pug">
+  .ui.segment
+    h4.ui.header Course Content
+    .ui.styled.fluid.accordion(ref='accordion')
+      div(v-for='(x, i) in contents')
+        .title
+          i.dropdown.icon
+          | Section {{ i + 1 }}
+          span(v-if='x.title') : {{ x.title }}
+        .content
+          p.description(v-html='x.description')
 </template>
 
 <script>

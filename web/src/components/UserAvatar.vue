@@ -1,8 +1,7 @@
-<template>
-  <div>
-    <avatar :src="user.photo" size="tiny"></avatar>
-    {{ user.name || 'Anonymous' }}
-  </div>
+<template lang="pug">
+  div
+    avatar(:src='user.photo', size='tiny')
+    | &nbsp;{{ user.name || 'Anonymous' }}
 </template>
 
 <script>

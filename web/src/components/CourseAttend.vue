@@ -1,17 +1,13 @@
-<template>
-  <div>
-    <div class="ui segment" style="padding-bottom: 2rem;">
-      <h3 class="ui header">Attendants <span v-if="students">({{ students.length }})</span></h3>
-      <div class="ui stackable three column grid">
-        <div class="column" v-for="x in students">
-          <span :to="`/user/${x.id}`">
-            <avatar :src="x.photo" size="tiny"></avatar>
-            {{ x.name || 'Anonymous' }} ({{ x.count }})
-          </span>
-        </div>
-      </div>
-    </div>
-  </div>
+<template lang="pug">
+  .ui.segment(style='padding-bottom: 2rem;')
+    h3.ui.header
+      | Attendants
+      span(v-if='students') ({{ students.length }})
+    .ui.stackable.three.column.grid
+      .column(v-for='x in students')
+        span(:to='`/user/${x.id}`')
+          avatar(:src='x.photo', size='tiny')
+          | &nbsp;{{ x.name || 'Anonymous' }} ({{ x.count }})
 </template>
 
 <script>

@@ -1,32 +1,24 @@
-<template>
-  <div class="ui borderless top fixed menu">
-    <router-link class="item" to="/home">
-      <img src="../assets/acourse.svg">
-    </router-link>
-    <div class="right menu">
-      <div class="ui dropdown item" ref="dropdownAdmin" v-if="currentUser && currentUser.role && currentUser.role.admin">
-        Admin <i class="dropdown icon"></i>
-        <div class="menu">
-          <router-link class="item" to="/admin/payment">Payment</router-link>
-          <router-link class="item" to="/admin/payment/history">Payment History</router-link>
-        </div>
-      </div>
-      <div ref="dropdownUser" v-if="currentUser" class="ui dropdown item" style="padding-top: 0.5rem; padding-bottom: 0.5rem;">
-        <user-avatar :user="currentUser"></user-avatar>
-        <i class="dropdown icon"></i>
-        <div class="menu">
-          <router-link class="item" to="/profile">Profile</router-link>
-          <a class="item" @click="signOut">Sign Out</a>
-        </div>
-      </div>
-      <div v-if="currentUser === null" style="padding-top: 0.5rem; padding-bottom: 0.5rem;">
-        <div class="item">
-          <div class="ui blue button" @click="openAuth">Sign In</div>
-        </div>
-      </div>
-    </div>
-    <AuthModal ref="auth"/>
-  </div>
+<template lang="pug">
+.ui.borderless.top.fixed.menu
+  router-link.item(to='/home')
+    img(src='../assets/acourse.svg')
+  .right.menu
+    .ui.dropdown.item(ref='dropdownAdmin', v-if='currentUser && currentUser.role && currentUser.role.admin')
+      | Admin
+      i.dropdown.icon
+      .menu
+        router-link.item(to='/admin/payment') Payment
+        router-link.item(to='/admin/payment/history') Payment History
+    .ui.dropdown.item(ref='dropdownUser', v-if='currentUser', style='padding-top: 0.5rem; padding-bottom: 0.5rem;')
+      UserAvatar(:user='currentUser')
+      i.dropdown.icon
+      .menu
+        router-link.item(to='/profile') Profile
+        a.item(@click='signOut') Sign Out
+    div(v-if='currentUser === null', style='padding-top: 0.5rem; padding-bottom: 0.5rem;')
+      .item
+        .ui.blue.button(@click='openAuth') Sign In
+  AuthModal(ref='auth')
 </template>
 
 <script>
