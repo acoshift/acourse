@@ -36,6 +36,7 @@ export default {
   get (url) {
     return $course.asObservable()
       .map((course) => course[url] || find(course, { url }))
+      .filter((x) => !!x)
   },
   create (data) {
     return API.post('/course', data, true)

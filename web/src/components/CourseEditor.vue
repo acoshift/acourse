@@ -96,10 +96,11 @@ export default {
       this.isNew = true
     } else {
       Loader.start('course')
-      Course.get(this.courseURL).first()
+      Course.get(this.courseURL)
+        .first()
+        .finally(() => Loader.stop('course'))
         .subscribe(
           (course) => {
-            Loader.stop('course')
             this.courseId = course.id
             if (!course.owned) return this.$router.replace(`/course/${this.courseURL}`)
             this.course = flow(
@@ -110,9 +111,6 @@ export default {
             if (this.course.start === '0001-01-01') {
               this.course.start = ''
             }
-          },
-          () => {
-            this.$router.replace('/')
           }
         )
     }
