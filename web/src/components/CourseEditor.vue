@@ -154,12 +154,12 @@ export default {
       }
     },
     addContent () {
-      this.contents.push({
+      this.course.contents.push({
         content: ''
       })
     },
     removeContent (position) {
-      this.contents.splice(position, 1)
+      this.course.contents.splice(position, 1)
     }
   }
 }
