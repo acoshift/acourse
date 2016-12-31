@@ -1,10 +1,10 @@
-<template>
-  <div class="ui basic segment" :class="{loading}" style="padding: 0; margin: 0; min-height: 100%;">
-    <router-view></router-view>
-    <success-modal ref="successModal"></success-modal>
-    <error-modal ref="errorModal"></error-modal>
-    <upload-modal ref="uploadModal"></upload-modal>
-    <notification></notification>
+<template lang="pug">
+  .ui.basic.segment(:class='{loading}' style='padding: 0; margin: 0; min-height: 100%;')
+    router-view
+    SuccessModal(ref='successModal')
+    ErrorModal(ref='errorModal')
+    UploadModal(ref='uploadModal')
+    Notification
   </div>
 </template>
 

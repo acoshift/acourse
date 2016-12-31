@@ -1,5 +1,5 @@
 <template lang="pug">
-  img.ui.circular.image(:class="`a-${size}`", :src="src || '/static/icons/ic_face_black_48px.svg'")
+  img.ui.circular.image(:class='`a-${size}`', :src='src || `/static/icons/ic_face_black_48px.svg`')
 </template>
 
 <style lang="scss" scoped>

@@ -1,7 +1,7 @@
 <template lang="pug">
   div
     .ui.segment
-      user-profile(:user='currentUser', v-show='currentUser')
+      UserProfile(:user='currentUser', v-show='currentUser')
       .ui.right.aligned.basic.segment
         router-link.ui.green.edit.button(to='/profile/edit') Edit
       .ui.basic.segment
@@ -28,11 +28,11 @@
       h3.ui.header My Own Courses
       router-link.ui.blue.button(to='/course/new') Create new course
       .ui.four.stackable.cards(v-if='ownCourses')
-        course-card(v-for='x in ownCourses', :course='x', :hideprice='true')
+        CourseCard(v-for='x in ownCourses', :course='x', :hideprice='true')
     .ui.segment(:class='{loading: !myCourses}')
       h3.ui.header My Courses
       .ui.four.stackable.cards
-        course-card(v-for='x in myCourses', :course='x', :hideprice='true')
+        CourseCard(v-for='x in myCourses', :course='x', :hideprice='true')
 </template>
 
 <style lang="scss" scoped>

@@ -12,14 +12,14 @@
           th Price
           th Created At
       tbody
-        tr(v-for="x in list")
+        tr(v-for='x in list')
           td {{ x.id }}
           td {{ x.course.title }}
           td
-            user-avatar(:user="x.user")
+            UserAvatar(:user='x.user')
           td
-            a(:href="x.url")
-              img.ui.tiny.image(:src="x.url")
+            a(:href='x.url')
+              img.ui.tiny.image(:src='x.url')
           td {{ x.originalPrice }}
           td {{ x.price }}
           td {{ x.createdAt | date('YYYY/MM/DD, HH:mm') }}

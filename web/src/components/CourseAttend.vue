@@ -6,7 +6,7 @@
     .ui.stackable.three.column.grid
       .column(v-for='x in students')
         span(:to='`/user/${x.id}`')
-          avatar(:src='x.photo', size='tiny')
+          Avatar(:src='x.photo', size='tiny')
           | &nbsp;{{ x.name || 'Anonymous' }} ({{ x.count }})
 </template>
 

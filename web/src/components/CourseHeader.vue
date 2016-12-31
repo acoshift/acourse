@@ -10,7 +10,7 @@
       .two.column.middle.aligned.row
         .right.aligned.column(style='padding-right: 2px;')
           span(:to='`/user/${course.owner.id}`')
-            avatar(:src='course.owner.photo', size='mini')
+            Avatar(:src='course.owner.photo', size='mini')
         .left.aligned.column(style='padding-left: 2px;')
           span(:to='`/user/${course.owner.id}`')
             h3 {{ course.owner.name || 'Anonymous' }}

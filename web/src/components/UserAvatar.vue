@@ -1,6 +1,6 @@
 <template lang="pug">
   div
-    avatar(:src='user.photo', size='tiny')
+    Avatar(:src='user.photo', size='tiny')
     | &nbsp;{{ user.name || 'Anonymous' }}
 </template>
 

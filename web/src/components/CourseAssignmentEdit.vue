@@ -31,7 +31,7 @@
             .ui.stackable.grid
               .two.column.row(v-for="u in x.users")
                 .column
-                  user-avatar(:user="u")
+                  UserAvatar(:user="u")
                 .column
                   div(v-for="(a, f) in u.files")
                     span {{ a.timestamp | date('YYYY/MM/DD HH:mm') }}

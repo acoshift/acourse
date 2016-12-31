@@ -14,7 +14,7 @@
       .row(v-else)
         .center.aligned.column
           .ui.red.disabled.button Sign In to Enroll
-    enroll-modal(ref="enrollModal", :course="course")
+    EnrollModal(ref="enrollModal", :course="course")
 </template>
 
 <script>

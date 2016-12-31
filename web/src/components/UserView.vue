@@ -1,15 +1,15 @@
 <template lang="pug">
   div
     .ui.segment
-      user-profile(:user='user', v-show='user')
+      UserProfile(:user='user', v-show='user')
     .ui.segment(v-if='ownCourses')
       h3.ui.header Courses own by {{ user && user.name || 'Anonymous' }}
       .ui.four.stackable.cards(v-if='ownCourses')
-        course-card(v-for='x in ownCourses', :course='x')
+        CourseCard(v-for='x in ownCourses', :course='x')
     .ui.segment(v-if='courses')
       h3.ui.header {{ user && user.name || 'Anonymous' }}'s Courses
       .ui.four.stackable.cards
-        course-card(v-for='x in courses', :course='x')
+        CourseCard(v-for='x in courses', :course='x')
 </template>
 
 <script>

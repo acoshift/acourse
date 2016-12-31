@@ -5,7 +5,7 @@
     .ui.red.message(v-if='error') {{ error }}
     .field
       label Photo
-      avatar(v-show='user.photo', :src='user.photo', size='small')
+      Avatar(v-show='user.photo', :src='user.photo', size='small')
       .ui.green.button(@click='selectPhoto') Select Photo
     .field
       label Username
