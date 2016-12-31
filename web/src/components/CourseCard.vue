@@ -7,6 +7,7 @@
       .meta
         span(v-if="course.type === 'video'") Video
         span.date(v-if="course.type === 'live'") Live start at {{ course.start | date('DD/MM/YYYY') }}
+        span(v-if="course.type === 'ebook'") eBook
       .description
         | {{ course.shortDescription }}
     .extra.content

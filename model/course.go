@@ -47,4 +47,5 @@ type CourseType string
 const (
 	CourseTypeLive  CourseType = "live"
 	CourseTypeVideo CourseType = "video"
+	CourseTypeEbook CourseType = "ebook"
 )
