@@ -79,7 +79,7 @@ func (c *PaymentController) Approve(ctx *app.PaymentApproveContext) error {
 	if payment == nil {
 		return ctx.NotFound()
 	}
-	payment.Status = model.PaymentStatusApproved
+	payment.Approve()
 
 	// Add user to enroll
 	enroll := &model.Enroll{
@@ -191,7 +191,7 @@ func (c *PaymentController) Reject(ctx *app.PaymentRejectContext) error {
 	if payment == nil {
 		return ctx.NotFound()
 	}
-	payment.Status = model.PaymentStatusRejected
+	payment.Reject()
 
 	err = c.db.PaymentSave(payment)
 	if err != nil {

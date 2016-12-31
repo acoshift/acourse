@@ -169,6 +169,7 @@ func ToPaymentView(m *model.Payment, user *view.UserTiny, course *view.CourseMin
 		Course:        course,
 		CreatedAt:     m.CreatedAt,
 		UpdatedAt:     m.UpdatedAt,
+		At:            m.At,
 	}
 }
 

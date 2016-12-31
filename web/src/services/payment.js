@@ -1,4 +1,5 @@
 import API from './api'
+import reverse from 'lodash/fp/reverse'
 
 export default {
   list () {
@@ -6,6 +7,7 @@ export default {
   },
   history () {
     return API.get('/payment?history=true')
+      .map(reverse)
   },
   approve (id) {
     return API.put(`/payment/${id}/approve`)

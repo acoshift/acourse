@@ -11,6 +11,7 @@
           th Original Price
           th Price
           th Created At
+          th Approved/Rejected At
       tbody
         tr(v-for='x in list')
           td {{ x.id }}
@@ -23,6 +24,7 @@
           td {{ x.originalPrice }}
           td {{ x.price }}
           td {{ x.createdAt | date('YYYY/MM/DD, HH:mm') }}
+          td {{ x.at | date('YYYY/MM/DD, HH:mm') }}
 </template>
 
 <script>

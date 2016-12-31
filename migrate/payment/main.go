@@ -8,13 +8,14 @@ import (
 func main() {
 	db := store.NewDB(store.ProjectID("acourse-d9d0a"))
 
-	xs, err := db.CourseList()
+	xs, err := db.PaymentList()
 	if err != nil {
 		panic(err)
 	}
 
 	for _, x := range xs {
-		err = db.CourseSave(x)
+		log.Println(x.ID)
+		err = db.PaymentSave(x)
 		if err != nil {
 			panic(err)
 		}

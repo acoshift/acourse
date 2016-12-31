@@ -1,5 +1,7 @@
 package model
 
+import "time"
+
 // Payment model
 type Payment struct {
 	Base
@@ -11,6 +13,7 @@ type Payment struct {
 	Code          string
 	URL           string `datastore:",noindex"`
 	Status        PaymentStatus
+	At            time.Time
 }
 
 // PaymentStatus type
@@ -22,3 +25,15 @@ const (
 	PaymentStatusApproved PaymentStatus = "approved"
 	PaymentStatusRejected PaymentStatus = "rejected"
 )
+
+// Approve approves a payment
+func (x *Payment) Approve() {
+	x.Status = PaymentStatusApproved
+	x.At = time.Now()
+}
+
+// Reject rejects a payment
+func (x *Payment) Reject() {
+	x.Status = PaymentStatusRejected
+	x.At = time.Now()
+}
