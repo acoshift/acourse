@@ -1,3 +1,4 @@
+import { Observable } from 'rxjs/Observable'
 import { BehaviorSubject } from 'rxjs/BehaviorSubject'
 import API from './api'
 import Auth from './auth'
@@ -7,7 +8,7 @@ import orderBy from 'lodash/fp/orderBy'
 const $me = new BehaviorSubject(false)
 
 Auth.currentUser()
-  .flatMap((user) => user ? API.get(`/user/${user.uid}`, true) : null)
+  .flatMap((user) => user ? API.get(`/user/${user.uid}`, true) : Observable.of(null))
   .subscribe((user) => {
     $me.next(user)
   })

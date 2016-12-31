@@ -15,7 +15,7 @@ const off = (ref, type, fn) => {
 const $currentUser = new BehaviorSubject(undefined)
 
 export default {
-  currentUser: $currentUser.filter((x) => x !== undefined).asObservable(),
+  currentUser: $currentUser.asObservable().filter((x) => x !== undefined),
   notificationToken: new BehaviorSubject(),
   notification: new Subject(),
   provider: {
