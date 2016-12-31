@@ -4,14 +4,14 @@
       <img src="../assets/acourse.svg">
     </router-link>
     <div class="right menu">
-      <div class="ui dropdown item" ref="dropdownAdmin" v-if="currentUser && currentUser.role && currentUser.role.admin">
+      <div class="ui dropdown item" ref="dropdownAdmin" v-if="signedIn && currentUser && currentUser.role && currentUser.role.admin">
         Admin <i class="dropdown icon"></i>
         <div class="menu">
           <router-link class="item" to="/admin/payment">Payment</router-link>
           <router-link class="item" to="/admin/payment/history">Payment History</router-link>
         </div>
       </div>
-      <div ref="dropdownUser" v-if="currentUser" class="ui dropdown item" style="padding-top: 0.5rem; padding-bottom: 0.5rem;">
+      <div ref="dropdownUser" v-if="signedIn" class="ui dropdown item" style="padding-top: 0.5rem; padding-bottom: 0.5rem;">
         <user-avatar :user="currentUser"></user-avatar>
         <i class="dropdown icon"></i>
         <div class="menu">
@@ -19,7 +19,7 @@
           <a class="item" @click="signOut">Sign Out</a>
         </div>
       </div>
-      <div v-if="currentUser === null" style="padding-top: 0.5rem; padding-bottom: 0.5rem;">
+      <div v-if="!signedIn" style="padding-top: 0.5rem; padding-bottom: 0.5rem;">
         <div class="item">
           <div class="ui blue button" @click="openAuth">Sign In</div>
         </div>
@@ -41,7 +41,8 @@ export default {
   },
   subscriptions () {
     return {
-      currentUser: Me.get()
+      currentUser: Me.get(),
+      signedIn: Auth.currentUser().map((x) => !!x)
     }
   },
   mounted () {
