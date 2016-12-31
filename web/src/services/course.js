@@ -45,7 +45,7 @@ export default {
   save (id, data) {
     return API.patch(`/course/${id}`, data)
   },
-  enroll (id, { code, url }) {
-    return API.put(`/course/${id}/enroll`, { code, url }, true)
+  enroll (id, { code, url, price }) {
+    return API.put(`/course/${id}/enroll`, { code, url, price }, true)
   }
 }
