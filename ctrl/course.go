@@ -126,7 +126,7 @@ func (c *CourseController) Update(ctx *app.CourseUpdateContext) error {
 	if course == nil {
 		return ctx.NotFound()
 	}
-	if course.Owner != ctx.CurrentUserID || !role.Admin {
+	if course.Owner != ctx.CurrentUserID && !role.Admin {
 		return ctx.Forbidden()
 	}
 
