@@ -9,18 +9,21 @@
           span(v-if='x.title') : {{ x.title }}
         .content
           p.description(v-html='x.description')
+          div(v-if='x.video')
+            Video(:src='x.video')
 </template>
 
 <script>
+import Video from './Video'
+
 export default {
+  components: {
+    Video
+  },
   props: ['contents'],
   mounted () {
     this.$nextTick(() => {
-      $(this.$refs.accordion).accordion({
-        onOpening () {
-          $(this).find('.ui.embed').embed()
-        }
-      })
+      $(this.$refs.accordion).accordion()
     })
   }
 }
