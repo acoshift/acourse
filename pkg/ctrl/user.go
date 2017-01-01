@@ -48,7 +48,7 @@ func (c *UserController) Update(ctx *app.UserUpdateContext) error {
 	}
 
 	if !role.Admin && ctx.CurrentUserID != ctx.UserID {
-		return ctx.Forbidden()
+		return app.ErrForbidden
 	}
 
 	var user *model.User
@@ -62,7 +62,7 @@ func (c *UserController) Update(ctx *app.UserUpdateContext) error {
 		return err
 	}
 	if user == nil {
-		return ctx.NotFound()
+		return app.ErrNotFound
 	}
 
 	user.Name = ctx.Payload.Name
@@ -75,5 +75,5 @@ func (c *UserController) Update(ctx *app.UserUpdateContext) error {
 		return err
 	}
 
-	return ctx.OK()
+	return nil
 }

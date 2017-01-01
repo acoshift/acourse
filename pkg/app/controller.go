@@ -32,8 +32,11 @@ func MountUserController(service *gin.RouterGroup, ctrl UserController) {
 			return
 		}
 		rctx.Payload = rawPayload.Payload()
-		if err = ctrl.Update(rctx); err != nil {
+		err = ctrl.Update(rctx)
+		if err != nil {
 			handleError(ctx, err)
+		} else {
+			handleSuccess(ctx)
 		}
 	})
 }

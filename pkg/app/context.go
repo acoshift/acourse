@@ -40,7 +40,6 @@ func (ctx *UserShowContext) OKMe(r *view.UserMe) error {
 
 // UserUpdateContext provides the user update action context
 type UserUpdateContext struct {
-	context       *gin.Context
 	CurrentUserID string
 	UserID        string
 	Payload       *payload.User
@@ -48,27 +47,12 @@ type UserUpdateContext struct {
 
 // NewUserUpdateContext parses the incoming request and create context
 func NewUserUpdateContext(ctx *gin.Context) *UserUpdateContext {
-	rctx := UserUpdateContext{context: ctx}
+	rctx := UserUpdateContext{}
 	if v, ok := ctx.Get(keyCurrentUserID); ok {
 		rctx.CurrentUserID, _ = v.(string)
 	}
 	rctx.UserID = ctx.Param("userID")
 	return &rctx
-}
-
-// OK sends a HTTP response
-func (ctx *UserUpdateContext) OK() error {
-	return handleSuccess(ctx.context)
-}
-
-// NotFound sends a HTTP response
-func (ctx *UserUpdateContext) NotFound() error {
-	return handleNotFound(ctx.context)
-}
-
-// Forbidden sends a HTTP response
-func (ctx *UserUpdateContext) Forbidden() error {
-	return handleForbidden(ctx.context)
 }
 
 // HealthHealthContext provides the health health action context
