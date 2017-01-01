@@ -1,14 +1,14 @@
 <template lang="pug">
   .ui.segment
-    Video(:src='src')
+    EmbedVideo(:src='src')
 </template>
 
 <script>
-import Video from './Video'
+import EmbedVideo from './EmbedVideo'
 
 export default {
   components: {
-    Video
+    EmbedVideo
   },
   props: ['src']
 }

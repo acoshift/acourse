@@ -10,15 +10,15 @@
         .content
           p.description(v-html='x.description')
           div(v-if='x.video')
-            Video(:src='x.video')
+            EmbedVideo(:src='x.video')
 </template>
 
 <script>
-import Video from './Video'
+import EmbedVideo from './EmbedVideo'
 
 export default {
   components: {
-    Video
+    EmbedVideo
   },
   props: ['contents'],
   mounted () {
