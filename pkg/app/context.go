@@ -72,18 +72,11 @@ func (ctx *UserUpdateContext) Forbidden() error {
 }
 
 // HealthHealthContext provides the health health action context
-type HealthHealthContext struct {
-	context *gin.Context
-}
+type HealthHealthContext struct{}
 
 // NewHealthHealthContext parses the incoming request and create context
 func NewHealthHealthContext(ctx *gin.Context) *HealthHealthContext {
-	return &HealthHealthContext{ctx}
-}
-
-// OK sends HTTP response
-func (ctx *HealthHealthContext) OK() error {
-	return handleSuccess(ctx.context)
+	return &HealthHealthContext{}
 }
 
 // CourseShowContext provides the course show action context

@@ -47,8 +47,11 @@ type HealthController interface {
 func MountHealthController(service *gin.RouterGroup, ctrl HealthController) {
 	service.GET("/health", func(ctx *gin.Context) {
 		rctx := NewHealthHealthContext(ctx)
-		if err := ctrl.Health(rctx); err != nil {
+		err := ctrl.Health(rctx)
+		if err != nil {
 			handleError(ctx, err)
+		} else {
+			handleSuccess(ctx)
 		}
 	})
 }
