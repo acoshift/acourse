@@ -5,7 +5,6 @@ node_modules/
 private/
 
 # build
-acourse
 build/
 !ui/build/
 public/
