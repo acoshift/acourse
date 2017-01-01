@@ -1,8 +1,15 @@
-acourse
+# nodejs
 node_modules/
-public/
-templates/
+
+# credential
 private/
-.DS_Store
+
+# build
+acourse
 build/
 !web/build/
+public/
+templates/
+
+# other
+.DS_Store
