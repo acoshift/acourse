@@ -1,15 +1,15 @@
 <template lang="pug">
   .ui.segment
-    EmbedVideo(:src='src')
+    .ui.embed(ref='video', data-source='youtube', :data-id='src')
 </template>
 
 <script>
-import EmbedVideo from './EmbedVideo'
-
 export default {
-  components: {
-    EmbedVideo
-  },
-  props: ['src']
+  props: ['src'],
+  mounted () {
+    this.$nextTick(() => {
+      $(this.$refs.video).embed()
+    })
+  }
 }
 </script>

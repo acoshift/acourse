@@ -9,21 +9,23 @@
           span(v-if='x.title') : {{ x.title }}
         .content
           p.description(v-html='x.description')
-          div(v-if='x.video')
-            EmbedVideo(:src='x.video')
+          div.video(v-if='x.video')
+            .ui.embed(data-source='youtube', :data-id='x.video')
 </template>
 
 <script>
-import EmbedVideo from './EmbedVideo'
-
 export default {
-  components: {
-    EmbedVideo
-  },
   props: ['contents'],
   mounted () {
     this.$nextTick(() => {
-      $(this.$refs.accordion).accordion()
+      $(this.$refs.accordion).accordion({
+        onOpening () {
+          const video = $(this).find('.video > .ui.embed')
+          if (!video.hasClass('active')) {
+            video.embed()
+          }
+        }
+      })
     })
   }
 }
