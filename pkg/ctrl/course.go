@@ -20,57 +20,57 @@ func NewCourseController(db *store.DB) *CourseController {
 }
 
 // Show runs show action
-func (c *CourseController) Show(ctx *app.CourseShowContext) error {
+func (c *CourseController) Show(ctx *app.CourseShowContext) (interface{}, error) {
 	role, err := c.db.RoleFindByUserID(ctx.CurrentUserID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// try get by id first
 	x, err := c.db.CourseGet(ctx.CourseID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	// try get by url
 	if x == nil {
 		x, err = c.db.CourseFind(ctx.CourseID)
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
 	if x == nil {
-		return ctx.NotFound()
+		return nil, app.ErrNotFound
 	}
 
 	// get owner
 	owner, err := c.db.UserGet(x.Owner)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if owner == nil {
-		return errors.New("can not find owner")
+		return nil, errors.New("can not find owner")
 	}
 
 	// get student count
 	student, err := c.db.EnrollCourseCount(x.ID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// get current user enroll
 	enroll, err := c.db.EnrollFind(ctx.CurrentUserID, x.ID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if enroll != nil || ctx.CurrentUserID == x.Owner || role.Admin {
-		return ctx.OK(ToCourseView(x, ToUserTinyView(owner), student, enroll != nil, ctx.CurrentUserID == x.Owner))
+		return ToCourseView(x, ToUserTinyView(owner), student, enroll != nil, ctx.CurrentUserID == x.Owner), nil
 	}
 
 	// check is user already purchase
 	payment, err := c.db.PaymentFind(ctx.CurrentUserID, ctx.CourseID, model.PaymentStatusWaiting)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	purchaseStatus := ""
@@ -78,22 +78,22 @@ func (c *CourseController) Show(ctx *app.CourseShowContext) error {
 		purchaseStatus = string(payment.Status)
 	}
 
-	return ctx.OKPublic(ToCoursePublicView(x, ToUserTinyView(owner), student, purchaseStatus))
+	return ToCoursePublicView(x, ToUserTinyView(owner), student, purchaseStatus), nil
 }
 
 // Create runs create action
-func (c *CourseController) Create(ctx *app.CourseCreateContext) error {
+func (c *CourseController) Create(ctx *app.CourseCreateContext) (interface{}, error) {
 	role, err := c.db.RoleFindByUserID(ctx.CurrentUserID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if !role.Instructor || !role.Admin {
-		return ctx.Forbidden()
+		return nil, app.ErrForbidden
 	}
 
 	user, err := c.db.UserGet(ctx.CurrentUserID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	course := &model.Course{
@@ -113,10 +113,10 @@ func (c *CourseController) Create(ctx *app.CourseCreateContext) error {
 
 	err = c.db.CourseSave(course)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return ctx.OK(ToCourseView(course, ToUserTinyView(user), 0, false, true))
+	return ToCourseView(course, ToUserTinyView(user), 0, false, true), nil
 }
 
 // Update runs update action
@@ -130,10 +130,10 @@ func (c *CourseController) Update(ctx *app.CourseUpdateContext) error {
 		return err
 	}
 	if course == nil {
-		return ctx.NotFound()
+		return app.ErrNotFound
 	}
 	if course.Owner != ctx.CurrentUserID && !role.Admin {
-		return ctx.Forbidden()
+		return app.ErrForbidden
 	}
 
 	// merge course with payload
@@ -152,11 +152,11 @@ func (c *CourseController) Update(ctx *app.CourseUpdateContext) error {
 		return err
 	}
 
-	return ctx.OK()
+	return nil
 }
 
 // List runs list action
-func (c *CourseController) List(ctx *app.CourseListContext) error {
+func (c *CourseController) List(ctx *app.CourseListContext) (interface{}, error) {
 	var xs []*model.Course
 	var err error
 
@@ -172,7 +172,7 @@ func (c *CourseController) List(ctx *app.CourseListContext) error {
 			var enrolls []*model.Enroll
 			enrolls, err = c.db.EnrollListByUserID(ctx.Student)
 			if err != nil {
-				return err
+				return nil, err
 			}
 			ids := make([]string, len(enrolls))
 			for i, e := range enrolls {
@@ -183,7 +183,7 @@ func (c *CourseController) List(ctx *app.CourseListContext) error {
 			var enrolls []*model.Enroll
 			enrolls, err = c.db.EnrollListByUserID(ctx.Student)
 			if err != nil {
-				return err
+				return nil, err
 			}
 			ids := make([]string, len(enrolls))
 			for i, e := range enrolls {
@@ -192,7 +192,7 @@ func (c *CourseController) List(ctx *app.CourseListContext) error {
 			var ts []*model.Course
 			ts, err = c.db.CourseGetAllByIDs(ids)
 			if err != nil {
-				return err
+				return nil, err
 			}
 			for _, t := range ts {
 				if t.Options.Public {
@@ -205,25 +205,25 @@ func (c *CourseController) List(ctx *app.CourseListContext) error {
 	}
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	res := make(view.CourseTinyCollection, len(xs))
 	for i, x := range xs {
 		u, err := c.db.UserGet(x.Owner)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		if u == nil {
-			return errors.New("can not find owner")
+			return nil, errors.New("can not find owner")
 		}
 		student, err := c.db.EnrollCourseCount(x.ID)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		res[i] = ToCourseTinyView(x, ToUserTinyView(u), student)
 	}
-	return ctx.OKTiny(res)
+	return res, nil
 }
 
 // Enroll runs enroll action
@@ -233,12 +233,12 @@ func (c *CourseController) Enroll(ctx *app.CourseEnrollContext) error {
 		return err
 	}
 	if course == nil {
-		return ctx.NotFound()
+		return app.ErrNotFound
 	}
 
 	// owner can not enroll
 	if course.Owner == ctx.CurrentUserID {
-		return ctx.Forbidden()
+		return app.ErrForbidden
 	}
 
 	// check is user already enrolled
@@ -248,7 +248,7 @@ func (c *CourseController) Enroll(ctx *app.CourseEnrollContext) error {
 	}
 	if enroll != nil {
 		// user already enroll
-		return ctx.Forbidden()
+		return app.ErrForbidden
 	}
 
 	// check is user already send waiting payment
@@ -259,7 +259,7 @@ func (c *CourseController) Enroll(ctx *app.CourseEnrollContext) error {
 	if payment != nil {
 		// user already send payment
 		// wait admin to accept or reject to send another payment for this course
-		return ctx.Forbidden()
+		return app.ErrForbidden
 	}
 
 	// calculate price
@@ -279,7 +279,7 @@ func (c *CourseController) Enroll(ctx *app.CourseEnrollContext) error {
 		if err != nil {
 			return err
 		}
-		return ctx.OK()
+		return nil
 	}
 
 	// create payment
@@ -298,5 +298,5 @@ func (c *CourseController) Enroll(ctx *app.CourseEnrollContext) error {
 		return err
 	}
 
-	return ctx.OK()
+	return nil
 }

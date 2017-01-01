@@ -7,7 +7,7 @@ import (
 
 // UserController is the controller interface for the User actions
 type UserController interface {
-	Show(*UserShowContext) error
+	Show(*UserShowContext) (interface{}, error)
 	Update(*UserUpdateContext) error
 }
 
@@ -15,7 +15,12 @@ type UserController interface {
 func MountUserController(service *gin.RouterGroup, ctrl UserController) {
 	service.GET("/:userID", func(ctx *gin.Context) {
 		rctx := NewUserShowContext(ctx)
-		ctrl.Show(rctx)
+		res, err := ctrl.Show(rctx)
+		if err != nil {
+			handleError(ctx, err)
+		} else {
+			handleOK(ctx, res)
+		}
 	})
 
 	service.PATCH("/:userID", func(ctx *gin.Context) {
@@ -31,8 +36,11 @@ func MountUserController(service *gin.RouterGroup, ctrl UserController) {
 			return
 		}
 		rctx.Payload = rawPayload.Payload()
-		if err = ctrl.Update(rctx); err != nil {
+		err = ctrl.Update(rctx)
+		if err != nil {
 			handleError(ctx, err)
+		} else {
+			handleSuccess(ctx)
 		}
 	})
 }
@@ -46,18 +54,21 @@ type HealthController interface {
 func MountHealthController(service *gin.RouterGroup, ctrl HealthController) {
 	service.GET("/health", func(ctx *gin.Context) {
 		rctx := NewHealthHealthContext(ctx)
-		if err := ctrl.Health(rctx); err != nil {
+		err := ctrl.Health(rctx)
+		if err != nil {
 			handleError(ctx, err)
+		} else {
+			handleSuccess(ctx)
 		}
 	})
 }
 
 // CourseController is the controller interface for course actions
 type CourseController interface {
-	Show(*CourseShowContext) error
-	Create(*CourseCreateContext) error
+	Show(*CourseShowContext) (interface{}, error)
+	Create(*CourseCreateContext) (interface{}, error)
 	Update(*CourseUpdateContext) error
-	List(*CourseListContext) error
+	List(*CourseListContext) (interface{}, error)
 	Enroll(*CourseEnrollContext) error
 }
 
@@ -65,8 +76,11 @@ type CourseController interface {
 func MountCourseController(service *gin.RouterGroup, ctrl CourseController) {
 	service.GET("", func(ctx *gin.Context) {
 		rctx := NewCourseListContext(ctx)
-		if err := ctrl.List(rctx); err != nil {
+		res, err := ctrl.List(rctx)
+		if err != nil {
 			handleError(ctx, err)
+		} else {
+			handleOK(ctx, res)
 		}
 	})
 
@@ -87,15 +101,21 @@ func MountCourseController(service *gin.RouterGroup, ctrl CourseController) {
 			return
 		}
 		rctx.Payload = rawPayload.Payload()
-		if err = ctrl.Create(rctx); err != nil {
+		res, err := ctrl.Create(rctx)
+		if err != nil {
 			handleError(ctx, err)
+		} else {
+			handleOK(ctx, res)
 		}
 	})
 
 	service.GET("/:courseID", func(ctx *gin.Context) {
 		rctx := NewCourseShowContext(ctx)
-		if err := ctrl.Show(rctx); err != nil {
+		res, err := ctrl.Show(rctx)
+		if err != nil {
 			handleError(ctx, err)
+		} else {
+			handleOK(ctx, res)
 		}
 	})
 
@@ -116,8 +136,11 @@ func MountCourseController(service *gin.RouterGroup, ctrl CourseController) {
 			return
 		}
 		rctx.Payload = rawPayload.Payload()
-		if err = ctrl.Update(rctx); err != nil {
-			handleError(ctx, nil)
+		err = ctrl.Update(rctx)
+		if err != nil {
+			handleError(ctx, err)
+		} else {
+			handleSuccess(ctx)
 		}
 	})
 
@@ -138,15 +161,18 @@ func MountCourseController(service *gin.RouterGroup, ctrl CourseController) {
 			return
 		}
 		rctx.Payload = rawPayload.Payload()
-		if err = ctrl.Enroll(rctx); err != nil {
-			handleError(ctx, nil)
+		err = ctrl.Enroll(rctx)
+		if err != nil {
+			handleError(ctx, err)
+		} else {
+			handleSuccess(ctx)
 		}
 	})
 }
 
 // PaymentController is the controller interface for payment actions
 type PaymentController interface {
-	List(*PaymentListContext) error
+	List(*PaymentListContext) (interface{}, error)
 	Approve(*PaymentApproveContext) error
 	Reject(*PaymentRejectContext) error
 }
@@ -159,8 +185,11 @@ func MountPaymentController(service *gin.RouterGroup, ctrl PaymentController) {
 			handleUnauthorized(ctx)
 			return
 		}
-		if err := ctrl.List(rctx); err != nil {
+		res, err := ctrl.List(rctx)
+		if err != nil {
 			handleError(ctx, err)
+		} else {
+			handleOK(ctx, res)
 		}
 	})
 
@@ -170,8 +199,11 @@ func MountPaymentController(service *gin.RouterGroup, ctrl PaymentController) {
 			handleUnauthorized(ctx)
 			return
 		}
-		if err := ctrl.Approve(rctx); err != nil {
+		err := ctrl.Approve(rctx)
+		if err != nil {
 			handleError(ctx, err)
+		} else {
+			handleSuccess(ctx)
 		}
 	})
 
@@ -181,16 +213,19 @@ func MountPaymentController(service *gin.RouterGroup, ctrl PaymentController) {
 			handleUnauthorized(ctx)
 			return
 		}
-		if err := ctrl.Reject(rctx); err != nil {
+		err := ctrl.Reject(rctx)
+		if err != nil {
 			handleError(ctx, err)
+		} else {
+			handleSuccess(ctx)
 		}
 	})
 }
 
 // RenderController is the controller interface for render actions
 type RenderController interface {
-	Index(*RenderIndexContext) error
-	Course(*RenderCourseContext) error
+	Index(*RenderIndexContext) (interface{}, error)
+	Course(*RenderCourseContext) (interface{}, error)
 }
 
 // MountRenderController mount a Render template controller on the given resource
@@ -206,15 +241,23 @@ func MountRenderController(service *gin.Engine, ctrl RenderController) {
 
 	service.GET("/course/:courseID", func(ctx *gin.Context) {
 		rctx := NewRenderCourseContext(ctx)
-		if err := ctrl.Course(rctx); err != nil {
+		res, err := ctrl.Course(rctx)
+		if err != nil {
 			handleError(ctx, err)
+		} else if res == nil {
+			handleRedirect(ctx, "/")
+		} else {
+			handleHTML(ctx, "index", res)
 		}
 	})
 
 	h := func(ctx *gin.Context) {
 		rctx := NewRenderIndexContext(ctx)
-		if err := ctrl.Index(rctx); err != nil {
+		res, err := ctrl.Index(rctx)
+		if err != nil {
 			handleError(ctx, err)
+		} else {
+			handleHTML(ctx, "index", res)
 		}
 	}
 

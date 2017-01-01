@@ -17,27 +17,27 @@ func NewUserController(db *store.DB) *UserController {
 }
 
 // Show runs show action
-func (c *UserController) Show(ctx *app.UserShowContext) error {
+func (c *UserController) Show(ctx *app.UserShowContext) (interface{}, error) {
 	if ctx.CurrentUserID == ctx.UserID {
 		// show me view
 		role, err := c.db.RoleFindByUserID(ctx.UserID)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		x, err := c.db.UserMustGet(ctx.UserID)
 
-		return ctx.OKMe(ToUserMeView(x, ToRoleView(role)))
+		return ToUserMeView(x, ToRoleView(role)), nil
 	}
 
 	x, err := c.db.UserGet(ctx.UserID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if x == nil {
-		return ctx.NotFound()
+		return nil, app.ErrNotFound
 	}
 
-	return ctx.OK(ToUserView(x))
+	return ToUserView(x), nil
 }
 
 // Update runs update action
@@ -48,7 +48,7 @@ func (c *UserController) Update(ctx *app.UserUpdateContext) error {
 	}
 
 	if !role.Admin && ctx.CurrentUserID != ctx.UserID {
-		return ctx.Forbidden()
+		return app.ErrForbidden
 	}
 
 	var user *model.User
@@ -62,7 +62,7 @@ func (c *UserController) Update(ctx *app.UserUpdateContext) error {
 		return err
 	}
 	if user == nil {
-		return ctx.NotFound()
+		return app.ErrNotFound
 	}
 
 	user.Name = ctx.Payload.Name
@@ -75,5 +75,5 @@ func (c *UserController) Update(ctx *app.UserUpdateContext) error {
 		return err
 	}
 
-	return ctx.OK()
+	return nil
 }

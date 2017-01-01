@@ -5,8 +5,8 @@ import (
 
 	"fmt"
 
-	"gopkg.in/gin-gonic/gin.v1"
 	"github.com/unrolled/render"
+	"gopkg.in/gin-gonic/gin.v1"
 )
 
 // ErrorReply is the error response
@@ -92,4 +92,9 @@ func handleInternalServerError(ctx *gin.Context, r error) error {
 
 func handleHTML(ctx *gin.Context, name string, binding interface{}) error {
 	return rr.HTML(ctx.Writer, http.StatusOK, name, binding)
+}
+
+func handleRedirect(ctx *gin.Context, path string) error {
+	ctx.Redirect(http.StatusTemporaryRedirect, path)
+	return nil
 }
