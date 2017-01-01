@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/acoshift/acourse/store"
+	"github.com/acoshift/acourse/pkg/store"
 )
 
 func main() {

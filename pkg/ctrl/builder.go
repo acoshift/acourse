@@ -1,9 +1,9 @@
 package ctrl
 
 import (
-	"github.com/acoshift/acourse/model"
-	"github.com/acoshift/acourse/payload"
-	"github.com/acoshift/acourse/view"
+	"github.com/acoshift/acourse/pkg/model"
+	"github.com/acoshift/acourse/pkg/payload"
+	"github.com/acoshift/acourse/pkg/view"
 )
 
 // ToUserView builds a UserView from a User model

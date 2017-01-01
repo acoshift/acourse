@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/datastore"
-	"github.com/acoshift/acourse/model"
+	"github.com/acoshift/acourse/pkg/model"
 )
 
 const kindUser = "User"

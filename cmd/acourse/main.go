@@ -5,9 +5,9 @@ import (
 	"log"
 	"time"
 
-	"github.com/acoshift/acourse/app"
-	"github.com/acoshift/acourse/ctrl"
-	"github.com/acoshift/acourse/store"
+	"github.com/acoshift/acourse/pkg/app"
+	"github.com/acoshift/acourse/pkg/ctrl"
+	"github.com/acoshift/acourse/pkg/store"
 	"github.com/acoshift/go-firebase-admin"
 	"gopkg.in/gin-contrib/cors.v1"
 	"gopkg.in/gin-gonic/gin.v1"

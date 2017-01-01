@@ -3,8 +3,8 @@ package app
 import (
 	"net/http"
 
-	"github.com/acoshift/acourse/payload"
-	"github.com/acoshift/acourse/view"
+	"github.com/acoshift/acourse/pkg/payload"
+	"github.com/acoshift/acourse/pkg/view"
 	"gopkg.in/gin-gonic/gin.v1"
 )
 

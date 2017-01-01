@@ -2,7 +2,7 @@ package store
 
 import (
 	"cloud.google.com/go/datastore"
-	"github.com/acoshift/acourse/model"
+	"github.com/acoshift/acourse/pkg/model"
 )
 
 const kindFavorite = "Favorite"

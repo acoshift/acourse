@@ -1,7 +1,7 @@
 package ctrl
 
 import (
-	"github.com/acoshift/acourse/app"
+	"github.com/acoshift/acourse/pkg/app"
 )
 
 // HealthController implements HealthController interface

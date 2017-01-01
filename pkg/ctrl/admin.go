@@ -1,7 +1,7 @@
 package ctrl
 
 import (
-	"github.com/acoshift/acourse/store"
+	"github.com/acoshift/acourse/pkg/store"
 )
 
 // AdminController type

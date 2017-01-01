@@ -5,8 +5,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/acoshift/acourse/model"
-	"github.com/acoshift/acourse/store"
+	"github.com/acoshift/acourse/pkg/model"
+	"github.com/acoshift/acourse/pkg/store"
 )
 
 // StartNotiPayment runs notification payment service

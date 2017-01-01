@@ -3,10 +3,10 @@ package ctrl
 import (
 	"errors"
 
-	"github.com/acoshift/acourse/app"
-	"github.com/acoshift/acourse/model"
-	"github.com/acoshift/acourse/store"
-	"github.com/acoshift/acourse/view"
+	"github.com/acoshift/acourse/pkg/app"
+	"github.com/acoshift/acourse/pkg/model"
+	"github.com/acoshift/acourse/pkg/store"
+	"github.com/acoshift/acourse/pkg/view"
 )
 
 // CourseController implements CourseController interface

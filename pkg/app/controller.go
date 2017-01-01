@@ -1,7 +1,7 @@
 package app
 
 import (
-	"github.com/acoshift/acourse/payload"
+	"github.com/acoshift/acourse/pkg/payload"
 	"gopkg.in/gin-gonic/gin.v1"
 )
 
