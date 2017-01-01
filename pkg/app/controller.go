@@ -2,6 +2,7 @@ package app
 
 import (
 	"github.com/acoshift/acourse/pkg/payload"
+	"github.com/acoshift/acourse/pkg/view"
 	"gopkg.in/gin-gonic/gin.v1"
 )
 
@@ -189,7 +190,7 @@ func MountPaymentController(service *gin.RouterGroup, ctrl PaymentController) {
 
 // RenderController is the controller interface for render actions
 type RenderController interface {
-	Index(*RenderIndexContext) error
+	Index(*RenderIndexContext) (*view.RenderIndex, error)
 	Course(*RenderCourseContext) error
 }
 
@@ -213,9 +214,12 @@ func MountRenderController(service *gin.Engine, ctrl RenderController) {
 
 	h := func(ctx *gin.Context) {
 		rctx := NewRenderIndexContext(ctx)
-		if err := ctrl.Index(rctx); err != nil {
+		res, err := ctrl.Index(rctx)
+		if err != nil {
 			handleError(ctx, err)
+			return
 		}
+		handleHTML(ctx, "index", res)
 	}
 
 	service.Use(h)

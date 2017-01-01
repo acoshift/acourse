@@ -21,7 +21,7 @@ func NewRenderController(db *store.DB) *RenderController {
 var cacheRender = store.NewCache(time.Second * 15)
 
 // Index runs index action
-func (c *RenderController) Index(ctx *app.RenderIndexContext) error {
+func (c *RenderController) Index(ctx *app.RenderIndexContext) (*view.RenderIndex, error) {
 	var res view.CourseTinyCollection
 	if cache := cacheRender.Get("index"); cache != nil {
 		res = cache.(view.CourseTinyCollection)
@@ -39,7 +39,7 @@ func (c *RenderController) Index(ctx *app.RenderIndexContext) error {
 		}()
 	}
 
-	return ctx.OK(&view.RenderIndex{
+	return &view.RenderIndex{
 		Title:       "Acourse",
 		Description: "Online courses for everyone",
 		Image:       "https://acourse.io/static/acourse-og.jpg",
@@ -47,7 +47,7 @@ func (c *RenderController) Index(ctx *app.RenderIndexContext) error {
 		State: map[string]interface{}{
 			"courses": res,
 		},
-	})
+	}, nil
 }
 
 // Course runs course action

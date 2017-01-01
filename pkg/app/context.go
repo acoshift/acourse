@@ -333,18 +333,11 @@ func (ctx *PaymentRejectContext) OK() error {
 
 // RenderIndexContext provides the render index action context
 // use for render static file
-type RenderIndexContext struct {
-	context *gin.Context
-}
+type RenderIndexContext struct{}
 
 // NewRenderIndexContext parses the incoming request and create context
 func NewRenderIndexContext(ctx *gin.Context) *RenderIndexContext {
-	return &RenderIndexContext{ctx}
-}
-
-// OK sends HTTP response
-func (ctx *RenderIndexContext) OK(r *view.RenderIndex) error {
-	return handleHTML(ctx.context, "index", r)
+	return &RenderIndexContext{}
 }
 
 // RenderCourseContext provides the render course action context
