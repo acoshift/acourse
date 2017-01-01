@@ -49,7 +49,6 @@ func NewHealthHealthContext(ctx *gin.Context) *HealthHealthContext {
 
 // CourseShowContext provides the course show action context
 type CourseShowContext struct {
-	context       *gin.Context
 	CurrentUserID string
 	CourseID      string
 	Own           *bool
@@ -58,7 +57,7 @@ type CourseShowContext struct {
 
 // NewCourseShowContext parses the incoming request and create context
 func NewCourseShowContext(ctx *gin.Context) *CourseShowContext {
-	rctx := CourseShowContext{context: ctx}
+	rctx := CourseShowContext{}
 	if v, ok := ctx.Get(keyCurrentUserID); ok {
 		rctx.CurrentUserID, _ = v.(string)
 	}
@@ -66,50 +65,23 @@ func NewCourseShowContext(ctx *gin.Context) *CourseShowContext {
 	return &rctx
 }
 
-// OK sends HTTP response
-func (ctx *CourseShowContext) OK(r *view.Course) error {
-	return handleOK(ctx.context, r)
-}
-
-// OKPublic sends HTTP response
-func (ctx *CourseShowContext) OKPublic(r *view.CoursePublic) error {
-	return handleOK(ctx.context, r)
-}
-
-// NotFound sends HTTP response
-func (ctx *CourseShowContext) NotFound() error {
-	return handleNotFound(ctx.context)
-}
-
 // CourseCreateContext provides the course create action context
 type CourseCreateContext struct {
-	context       *gin.Context
 	CurrentUserID string
 	Payload       *payload.Course
 }
 
 // NewCourseCreateContext parses the incoming request and create context
 func NewCourseCreateContext(ctx *gin.Context) *CourseCreateContext {
-	rctx := CourseCreateContext{context: ctx}
+	rctx := CourseCreateContext{}
 	if v, ok := ctx.Get(keyCurrentUserID); ok {
 		rctx.CurrentUserID, _ = v.(string)
 	}
 	return &rctx
 }
 
-// OK sends HTTP response
-func (ctx *CourseCreateContext) OK(r *view.Course) error {
-	return handleOK(ctx.context, r)
-}
-
-// Forbidden sends HTTP response
-func (ctx *CourseCreateContext) Forbidden() error {
-	return handleForbidden(ctx.context)
-}
-
 // CourseUpdateContext provides the course update action context
 type CourseUpdateContext struct {
-	context       *gin.Context
 	CurrentUserID string
 	CourseID      string
 	Payload       *payload.Course
@@ -117,7 +89,7 @@ type CourseUpdateContext struct {
 
 // NewCourseUpdateContext parses the incoming request and create context
 func NewCourseUpdateContext(ctx *gin.Context) *CourseUpdateContext {
-	rctx := CourseUpdateContext{context: ctx}
+	rctx := CourseUpdateContext{}
 	if v, ok := ctx.Get(keyCurrentUserID); ok {
 		rctx.CurrentUserID, _ = v.(string)
 	}
@@ -125,24 +97,8 @@ func NewCourseUpdateContext(ctx *gin.Context) *CourseUpdateContext {
 	return &rctx
 }
 
-// OK sends HTTP response
-func (ctx *CourseUpdateContext) OK() error {
-	return handleSuccess(ctx.context)
-}
-
-// NotFound sends HTTP response
-func (ctx *CourseUpdateContext) NotFound() error {
-	return handleNotFound(ctx.context)
-}
-
-// Forbidden sends HTTP response
-func (ctx *CourseUpdateContext) Forbidden() error {
-	return handleForbidden(ctx.context)
-}
-
 // CourseListContext provides the course list action context
 type CourseListContext struct {
-	context       *gin.Context
 	CurrentUserID string
 	Owner         string
 	Student       string
@@ -150,7 +106,7 @@ type CourseListContext struct {
 
 // NewCourseListContext parses the incoming request and create context
 func NewCourseListContext(ctx *gin.Context) *CourseListContext {
-	rctx := CourseListContext{context: ctx}
+	rctx := CourseListContext{}
 	if v, ok := ctx.Get(keyCurrentUserID); ok {
 		rctx.CurrentUserID, _ = v.(string)
 	}
@@ -159,14 +115,8 @@ func NewCourseListContext(ctx *gin.Context) *CourseListContext {
 	return &rctx
 }
 
-// OKTiny sends HTTP response
-func (ctx *CourseListContext) OKTiny(r view.CourseTinyCollection) error {
-	return handleOK(ctx.context, r)
-}
-
 // CourseEnrollContext provides the course enroll action context
 type CourseEnrollContext struct {
-	context       *gin.Context
 	CurrentUserID string
 	CourseID      string
 	Payload       *payload.CourseEnroll
@@ -174,27 +124,12 @@ type CourseEnrollContext struct {
 
 // NewCourseEnrollContext parses the incoming request and create context
 func NewCourseEnrollContext(ctx *gin.Context) *CourseEnrollContext {
-	rctx := CourseEnrollContext{context: ctx}
+	rctx := CourseEnrollContext{}
 	if v, ok := ctx.Get(keyCurrentUserID); ok {
 		rctx.CurrentUserID, _ = v.(string)
 	}
 	rctx.CourseID = ctx.Param("courseID")
 	return &rctx
-}
-
-// OK sends HTTP response
-func (ctx *CourseEnrollContext) OK() error {
-	return handleSuccess(ctx.context)
-}
-
-// Forbidden sends HTTP response
-func (ctx *CourseEnrollContext) Forbidden() error {
-	return handleForbidden(ctx.context)
-}
-
-// NotFound sends HTTP response
-func (ctx *CourseEnrollContext) NotFound() error {
-	return handleNotFound(ctx.context)
 }
 
 // PaymentListContext provides the payment list action context

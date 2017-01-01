@@ -66,10 +66,10 @@ func MountHealthController(service *gin.RouterGroup, ctrl HealthController) {
 
 // CourseController is the controller interface for course actions
 type CourseController interface {
-	Show(*CourseShowContext) error
-	Create(*CourseCreateContext) error
+	Show(*CourseShowContext) (interface{}, error)
+	Create(*CourseCreateContext) (interface{}, error)
 	Update(*CourseUpdateContext) error
-	List(*CourseListContext) error
+	List(*CourseListContext) (interface{}, error)
 	Enroll(*CourseEnrollContext) error
 }
 
@@ -77,8 +77,11 @@ type CourseController interface {
 func MountCourseController(service *gin.RouterGroup, ctrl CourseController) {
 	service.GET("", func(ctx *gin.Context) {
 		rctx := NewCourseListContext(ctx)
-		if err := ctrl.List(rctx); err != nil {
+		res, err := ctrl.List(rctx)
+		if err != nil {
 			handleError(ctx, err)
+		} else {
+			handleOK(ctx, res)
 		}
 	})
 
@@ -99,15 +102,21 @@ func MountCourseController(service *gin.RouterGroup, ctrl CourseController) {
 			return
 		}
 		rctx.Payload = rawPayload.Payload()
-		if err = ctrl.Create(rctx); err != nil {
+		res, err := ctrl.Create(rctx)
+		if err != nil {
 			handleError(ctx, err)
+		} else {
+			handleOK(ctx, res)
 		}
 	})
 
 	service.GET("/:courseID", func(ctx *gin.Context) {
 		rctx := NewCourseShowContext(ctx)
-		if err := ctrl.Show(rctx); err != nil {
+		res, err := ctrl.Show(rctx)
+		if err != nil {
 			handleError(ctx, err)
+		} else {
+			handleOK(ctx, res)
 		}
 	})
 
@@ -128,8 +137,11 @@ func MountCourseController(service *gin.RouterGroup, ctrl CourseController) {
 			return
 		}
 		rctx.Payload = rawPayload.Payload()
-		if err = ctrl.Update(rctx); err != nil {
-			handleError(ctx, nil)
+		err = ctrl.Update(rctx)
+		if err != nil {
+			handleError(ctx, err)
+		} else {
+			handleSuccess(ctx)
 		}
 	})
 
@@ -150,8 +162,11 @@ func MountCourseController(service *gin.RouterGroup, ctrl CourseController) {
 			return
 		}
 		rctx.Payload = rawPayload.Payload()
-		if err = ctrl.Enroll(rctx); err != nil {
-			handleError(ctx, nil)
+		err = ctrl.Enroll(rctx)
+		if err != nil {
+			handleError(ctx, err)
+		} else {
+			handleSuccess(ctx)
 		}
 	})
 }
