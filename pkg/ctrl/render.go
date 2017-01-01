@@ -51,13 +51,13 @@ func (c *RenderController) Index(ctx *app.RenderIndexContext) (*view.RenderIndex
 }
 
 // Course runs course action
-func (c *RenderController) Course(ctx *app.RenderCourseContext) error {
+func (c *RenderController) Course(ctx *app.RenderCourseContext) (*view.RenderIndex, error) {
 	course, err := c.db.CourseFind(ctx.CourseID)
 	if course == nil {
 		course, err = c.db.CourseGet(ctx.CourseID)
 	}
 	if err != nil || course == nil {
-		return ctx.NotFound()
+		return nil, nil
 	}
 	r := &view.RenderIndex{
 		Title:       course.Title,
@@ -83,5 +83,5 @@ func (c *RenderController) Course(ctx *app.RenderCourseContext) error {
 		r.Image = "https://acourse.io/static/acourse-og.jpg"
 	}
 
-	return ctx.OK(r)
+	return r, nil
 }

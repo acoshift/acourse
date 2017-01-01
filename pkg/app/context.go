@@ -1,8 +1,6 @@
 package app
 
 import (
-	"net/http"
-
 	"github.com/acoshift/acourse/pkg/payload"
 	"github.com/acoshift/acourse/pkg/view"
 	"gopkg.in/gin-gonic/gin.v1"
@@ -342,24 +340,12 @@ func NewRenderIndexContext(ctx *gin.Context) *RenderIndexContext {
 
 // RenderCourseContext provides the render course action context
 type RenderCourseContext struct {
-	context  *gin.Context
 	CourseID string
 }
 
 // NewRenderCourseContext parses the incoming request and create context
 func NewRenderCourseContext(ctx *gin.Context) *RenderCourseContext {
-	rctx := RenderCourseContext{context: ctx}
+	rctx := RenderCourseContext{}
 	rctx.CourseID = ctx.Param("courseID")
 	return &rctx
-}
-
-// OK sends HTTP response
-func (ctx *RenderCourseContext) OK(r *view.RenderIndex) error {
-	return handleHTML(ctx.context, "index", r)
-}
-
-// NotFound redirect to home page
-func (ctx *RenderCourseContext) NotFound() error {
-	ctx.context.Redirect(http.StatusTemporaryRedirect, "/")
-	return nil
 }

@@ -191,7 +191,7 @@ func MountPaymentController(service *gin.RouterGroup, ctrl PaymentController) {
 // RenderController is the controller interface for render actions
 type RenderController interface {
 	Index(*RenderIndexContext) (*view.RenderIndex, error)
-	Course(*RenderCourseContext) error
+	Course(*RenderCourseContext) (*view.RenderIndex, error)
 }
 
 // MountRenderController mount a Render template controller on the given resource
@@ -207,8 +207,13 @@ func MountRenderController(service *gin.Engine, ctrl RenderController) {
 
 	service.GET("/course/:courseID", func(ctx *gin.Context) {
 		rctx := NewRenderCourseContext(ctx)
-		if err := ctrl.Course(rctx); err != nil {
+		res, err := ctrl.Course(rctx)
+		if err != nil {
 			handleError(ctx, err)
+		} else if res == nil {
+			handleRedirect(ctx, "/")
+		} else {
+			handleHTML(ctx, "index", res)
 		}
 	})
 
@@ -217,9 +222,9 @@ func MountRenderController(service *gin.Engine, ctrl RenderController) {
 		res, err := ctrl.Index(rctx)
 		if err != nil {
 			handleError(ctx, err)
-			return
+		} else {
+			handleHTML(ctx, "index", res)
 		}
-		handleHTML(ctx, "index", res)
 	}
 
 	service.Use(h)
