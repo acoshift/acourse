@@ -30,7 +30,7 @@
           input.hidden(type='checkbox', v-model='course.assignment')
           label Has Assignment
       .field
-        label Video ID
+        label Youtube Video ID (ex. 82xX0OOa_FA)
         input(v-model='course.video')
       .ui.divider
       div(style='padding-bottom: 1rem;')
@@ -44,6 +44,9 @@
             .field
               label Title
               input(v-model='x.title')
+            .field
+              label Youtube Video ID (ex. 82xX0OOa_FA)
+              input(v-model='x.video')
             .field
               label Description
               textarea(v-model='x.description', rows='5')
