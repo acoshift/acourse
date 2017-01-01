@@ -8,7 +8,7 @@ import (
 
 // UserController is the controller interface for the User actions
 type UserController interface {
-	Show(*UserShowContext) error
+	Show(*UserShowContext) (interface{}, error)
 	Update(*UserUpdateContext) error
 }
 
@@ -16,7 +16,12 @@ type UserController interface {
 func MountUserController(service *gin.RouterGroup, ctrl UserController) {
 	service.GET("/:userID", func(ctx *gin.Context) {
 		rctx := NewUserShowContext(ctx)
-		ctrl.Show(rctx)
+		res, err := ctrl.Show(rctx)
+		if err != nil {
+			handleError(ctx, err)
+		} else {
+			handleOK(ctx, res)
+		}
 	})
 
 	service.PATCH("/:userID", func(ctx *gin.Context) {

@@ -8,34 +8,18 @@ import (
 
 // UserShowContext provides the user show action context
 type UserShowContext struct {
-	context       *gin.Context
 	CurrentUserID string
 	UserID        string
 }
 
 // NewUserShowContext parses the incoming request and create context
 func NewUserShowContext(ctx *gin.Context) *UserShowContext {
-	rctx := UserShowContext{context: ctx}
+	rctx := UserShowContext{}
 	if v, ok := ctx.Get(keyCurrentUserID); ok {
 		rctx.CurrentUserID, _ = v.(string)
 	}
 	rctx.UserID = ctx.Param("userID")
 	return &rctx
-}
-
-// NotFound sends a HTTP response
-func (ctx *UserShowContext) NotFound() error {
-	return handleNotFound(ctx.context)
-}
-
-// OK sends a HTTP response
-func (ctx *UserShowContext) OK(r *view.User) error {
-	return handleOK(ctx.context, r)
-}
-
-// OKMe send a HTTP response
-func (ctx *UserShowContext) OKMe(r *view.UserMe) error {
-	return handleOK(ctx.context, r)
 }
 
 // UserUpdateContext provides the user update action context
