@@ -173,7 +173,7 @@ func MountCourseController(service *gin.RouterGroup, ctrl CourseController) {
 
 // PaymentController is the controller interface for payment actions
 type PaymentController interface {
-	List(*PaymentListContext) error
+	List(*PaymentListContext) (interface{}, error)
 	Approve(*PaymentApproveContext) error
 	Reject(*PaymentRejectContext) error
 }
@@ -186,8 +186,11 @@ func MountPaymentController(service *gin.RouterGroup, ctrl PaymentController) {
 			handleUnauthorized(ctx)
 			return
 		}
-		if err := ctrl.List(rctx); err != nil {
+		res, err := ctrl.List(rctx)
+		if err != nil {
 			handleError(ctx, err)
+		} else {
+			handleOK(ctx, res)
 		}
 	})
 
@@ -197,8 +200,11 @@ func MountPaymentController(service *gin.RouterGroup, ctrl PaymentController) {
 			handleUnauthorized(ctx)
 			return
 		}
-		if err := ctrl.Approve(rctx); err != nil {
+		err := ctrl.Approve(rctx)
+		if err != nil {
 			handleError(ctx, err)
+		} else {
+			handleSuccess(ctx)
 		}
 	})
 
@@ -208,8 +214,11 @@ func MountPaymentController(service *gin.RouterGroup, ctrl PaymentController) {
 			handleUnauthorized(ctx)
 			return
 		}
-		if err := ctrl.Reject(rctx); err != nil {
+		err := ctrl.Reject(rctx)
+		if err != nil {
 			handleError(ctx, err)
+		} else {
+			handleSuccess(ctx)
 		}
 	})
 }

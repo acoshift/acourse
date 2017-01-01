@@ -24,15 +24,15 @@ func NewPaymentController(db *store.DB, auth *admin.FirebaseAuth) *PaymentContro
 }
 
 // List runs list action
-func (c *PaymentController) List(ctx *app.PaymentListContext) error {
+func (c *PaymentController) List(ctx *app.PaymentListContext) (interface{}, error) {
 	role, err := c.db.RoleFindByUserID(ctx.CurrentUserID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// only admin can access
 	if !role.Admin {
-		return ctx.Forbidden()
+		return nil, app.ErrForbidden
 	}
 
 	var xs []*model.Payment
@@ -43,23 +43,23 @@ func (c *PaymentController) List(ctx *app.PaymentListContext) error {
 		xs, err = c.db.PaymentList(store.PaymentListOptionStatus(model.PaymentStatusWaiting))
 	}
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	res := make(view.PaymentCollection, len(xs))
 	for i, x := range xs {
 		user, err := c.db.UserMustGet(x.UserID)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		course, err := c.db.CourseGet(x.CourseID)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		res[i] = ToPaymentView(x, ToUserTinyView(user), ToCourseMiniView(course))
 	}
 
-	return ctx.OK(res)
+	return res, nil
 }
 
 // Approve runs approve action
@@ -69,7 +69,7 @@ func (c *PaymentController) Approve(ctx *app.PaymentApproveContext) error {
 		return err
 	}
 	if !role.Admin {
-		return ctx.Forbidden()
+		return app.ErrForbidden
 	}
 
 	payment, err := c.db.PaymentGet(ctx.PaymentID)
@@ -77,7 +77,7 @@ func (c *PaymentController) Approve(ctx *app.PaymentApproveContext) error {
 		return err
 	}
 	if payment == nil {
-		return ctx.NotFound()
+		return app.ErrNotFound
 	}
 	payment.Approve()
 
@@ -98,7 +98,7 @@ func (c *PaymentController) Approve(ctx *app.PaymentApproveContext) error {
 
 	go c.approved(payment)
 
-	return ctx.OK()
+	return nil
 }
 
 func (c *PaymentController) approved(payment *model.Payment) {
@@ -181,7 +181,7 @@ func (c *PaymentController) Reject(ctx *app.PaymentRejectContext) error {
 		return err
 	}
 	if !role.Admin {
-		return ctx.Forbidden()
+		return app.ErrForbidden
 	}
 
 	payment, err := c.db.PaymentGet(ctx.PaymentID)
@@ -189,7 +189,7 @@ func (c *PaymentController) Reject(ctx *app.PaymentRejectContext) error {
 		return err
 	}
 	if payment == nil {
-		return ctx.NotFound()
+		return app.ErrNotFound
 	}
 	payment.Reject()
 
@@ -198,5 +198,5 @@ func (c *PaymentController) Reject(ctx *app.PaymentRejectContext) error {
 		return err
 	}
 
-	return ctx.OK()
+	return nil
 }

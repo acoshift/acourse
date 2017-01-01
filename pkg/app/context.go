@@ -2,7 +2,6 @@ package app
 
 import (
 	"github.com/acoshift/acourse/pkg/payload"
-	"github.com/acoshift/acourse/pkg/view"
 	"gopkg.in/gin-gonic/gin.v1"
 )
 
@@ -134,14 +133,13 @@ func NewCourseEnrollContext(ctx *gin.Context) *CourseEnrollContext {
 
 // PaymentListContext provides the payment list action context
 type PaymentListContext struct {
-	context       *gin.Context
 	CurrentUserID string
 	History       bool
 }
 
 // NewPaymentListContext parses the incoming request and create context
 func NewPaymentListContext(ctx *gin.Context) *PaymentListContext {
-	rctx := PaymentListContext{context: ctx}
+	rctx := PaymentListContext{}
 	if v, ok := ctx.Get(keyCurrentUserID); ok {
 		rctx.CurrentUserID, _ = v.(string)
 	}
@@ -151,26 +149,15 @@ func NewPaymentListContext(ctx *gin.Context) *PaymentListContext {
 	return &rctx
 }
 
-// OK sends HTTP response
-func (ctx *PaymentListContext) OK(r view.PaymentCollection) error {
-	return handleOK(ctx.context, r)
-}
-
-// Forbidden sends HTTP response
-func (ctx *PaymentListContext) Forbidden() error {
-	return handleForbidden(ctx.context)
-}
-
 // PaymentApproveContext provides the payment approve action context
 type PaymentApproveContext struct {
-	context       *gin.Context
 	CurrentUserID string
 	PaymentID     string
 }
 
 // NewPaymentApproveContext parses the incoming request and create context
 func NewPaymentApproveContext(ctx *gin.Context) *PaymentApproveContext {
-	rctx := PaymentApproveContext{context: ctx}
+	rctx := PaymentApproveContext{}
 	if v, ok := ctx.Get(keyCurrentUserID); ok {
 		rctx.CurrentUserID, _ = v.(string)
 	}
@@ -178,51 +165,20 @@ func NewPaymentApproveContext(ctx *gin.Context) *PaymentApproveContext {
 	return &rctx
 }
 
-// Forbidden sends HTTP response
-func (ctx *PaymentApproveContext) Forbidden() error {
-	return handleForbidden(ctx.context)
-}
-
-// NotFound sends HTTP response
-func (ctx *PaymentApproveContext) NotFound() error {
-	return handleNotFound(ctx.context)
-}
-
-// OK sends HTTP response
-func (ctx *PaymentApproveContext) OK() error {
-	return handleSuccess(ctx.context)
-}
-
 // PaymentRejectContext provides the payment reject action context
 type PaymentRejectContext struct {
-	context       *gin.Context
 	CurrentUserID string
 	PaymentID     string
 }
 
 // NewPaymentRejectContext parses the incoming request and create context
 func NewPaymentRejectContext(ctx *gin.Context) *PaymentRejectContext {
-	rctx := PaymentRejectContext{context: ctx}
+	rctx := PaymentRejectContext{}
 	if v, ok := ctx.Get(keyCurrentUserID); ok {
 		rctx.CurrentUserID, _ = v.(string)
 	}
 	rctx.PaymentID = ctx.Param("paymentID")
 	return &rctx
-}
-
-// Forbidden sends HTTP response
-func (ctx *PaymentRejectContext) Forbidden() error {
-	return handleForbidden(ctx.context)
-}
-
-// NotFound sends HTTP response
-func (ctx *PaymentRejectContext) NotFound() error {
-	return handleNotFound(ctx.context)
-}
-
-// OK sends HTTP response
-func (ctx *PaymentRejectContext) OK() error {
-	return handleSuccess(ctx.context)
 }
 
 // RenderIndexContext provides the render index action context
