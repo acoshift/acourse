@@ -105,7 +105,7 @@ export default {
         .subscribe(
           (course) => {
             this.courseId = course.id
-            // if (!course.owned) return this.$router.replace(`/course/${this.courseURL}`)
+            if (!course.owned) return this.$router.replace(`/course/${this.courseURL}`)
             this.course = flow(
               pick(keys(this.course)),
               defaults(this.course)
