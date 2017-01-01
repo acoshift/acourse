@@ -1,9 +1,8 @@
 package store
 
 import (
-	"acourse/model"
-
 	"cloud.google.com/go/datastore"
+	"github.com/acoshift/acourse/model"
 )
 
 const kindPayment = "Payment"

@@ -1,12 +1,12 @@
 package main
 
 import (
-	"acourse/store"
 	"encoding/json"
 	"log"
-
 	"time"
 
+	"github.com/acoshift/acourse/model"
+	"github.com/acoshift/acourse/store"
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2/google"
 )
@@ -56,11 +56,11 @@ func main() {
 	json.NewDecoder(resp.Body).Decode(&contents)
 	resp.Body.Close()
 
-	es := []*store.Enroll{}
+	es := []*model.Enroll{}
 	for k, v := range courses {
 		start, _ := time.Parse("2006-01-02", v.Start)
 
-		x := store.Course{
+		x := model.Course{
 			Title:            v.Title,
 			ShortDescription: v.ShortDescription,
 			Description:      v.Description,
@@ -76,9 +76,9 @@ func main() {
 		// contents
 		cs := contents[k]
 		if len(cs) > 0 {
-			x.Contents = make([]store.CourseContent, len(cs))
+			x.Contents = make([]model.CourseContent, len(cs))
 			for i, c := range cs {
-				x.Contents[i] = store.CourseContent{
+				x.Contents[i] = model.CourseContent{
 					Title:       c.Title,
 					Description: c.Content,
 				}
@@ -93,7 +93,7 @@ func main() {
 
 		for uid, s := range v.Student {
 			if s {
-				es = append(es, &store.Enroll{UserID: uid, CourseID: mapCourseID(k)})
+				es = append(es, &model.Enroll{UserID: uid, CourseID: mapCourseID(k)})
 			}
 		}
 	}

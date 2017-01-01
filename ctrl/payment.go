@@ -1,14 +1,14 @@
 package ctrl
 
 import (
-	"acourse/app"
-	"acourse/model"
-	"acourse/store"
-	"acourse/view"
 	"fmt"
 	"log"
 	"time"
 
+	"github.com/acoshift/acourse/app"
+	"github.com/acoshift/acourse/model"
+	"github.com/acoshift/acourse/store"
+	"github.com/acoshift/acourse/view"
 	"github.com/acoshift/go-firebase-admin"
 )
 

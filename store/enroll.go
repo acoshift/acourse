@@ -1,10 +1,10 @@
 package store
 
 import (
-	"acourse/model"
 	"time"
 
 	"cloud.google.com/go/datastore"
+	"github.com/acoshift/acourse/model"
 )
 
 const kindEnroll = "Enroll"

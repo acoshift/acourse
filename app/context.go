@@ -1,10 +1,10 @@
 package app
 
 import (
-	"acourse/payload"
-	"acourse/view"
 	"net/http"
 
+	"github.com/acoshift/acourse/payload"
+	"github.com/acoshift/acourse/view"
 	"gopkg.in/gin-gonic/gin.v1"
 )
 

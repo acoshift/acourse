@@ -1,9 +1,9 @@
 package ctrl
 
 import (
-	"acourse/app"
-	"acourse/model"
-	"acourse/store"
+	"github.com/acoshift/acourse/app"
+	"github.com/acoshift/acourse/model"
+	"github.com/acoshift/acourse/store"
 )
 
 // UserController implements UserController interface

@@ -1,12 +1,12 @@
 package store
 
 import (
-	"acourse/model"
 	"context"
 	"strconv"
 	"time"
 
 	"cloud.google.com/go/datastore"
+	"github.com/acoshift/acourse/model"
 	"google.golang.org/api/iterator"
 )
 

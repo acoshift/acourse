@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"log"
 
-	"acourse/store"
-
+	"github.com/acoshift/acourse/model"
+	"github.com/acoshift/acourse/store"
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2/google"
 )

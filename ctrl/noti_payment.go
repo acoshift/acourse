@@ -1,11 +1,12 @@
 package ctrl
 
 import (
-	"acourse/model"
-	"acourse/store"
 	"fmt"
 	"log"
 	"time"
+
+	"github.com/acoshift/acourse/model"
+	"github.com/acoshift/acourse/store"
 )
 
 // StartNotiPayment runs notification payment service

@@ -1,10 +1,11 @@
 package ctrl
 
 import (
-	"acourse/app"
-	"acourse/store"
-	"acourse/view"
 	"time"
+
+	"github.com/acoshift/acourse/app"
+	"github.com/acoshift/acourse/store"
+	"github.com/acoshift/acourse/view"
 )
 
 // RenderController implements RenderController interface

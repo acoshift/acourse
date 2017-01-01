@@ -1,8 +1,9 @@
 package main
 
 import (
-	"acourse/store"
 	"log"
+
+	"github.com/acoshift/acourse/store"
 )
 
 func main() {
