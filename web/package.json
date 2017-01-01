@@ -58,7 +58,7 @@
     "http-proxy-middleware": "^0.17.1",
     "json-loader": "^0.5.4",
     "node-sass": "^4.0.0",
-    "ora": "^0.3.0",
+    "ora": "^0.4.0",
     "postcss-nested": "^1.0.0",
     "pug": "^2.0.0-beta6",
     "pug-loader": "^2.3.0",
@@ -75,7 +75,7 @@
     "webpack": "^2.1.0-beta.25",
     "webpack-dev-middleware": "^1.8.2",
     "webpack-hot-middleware": "^2.12.2",
-    "webpack-merge": "^1.1.1"
+    "webpack-merge": "^2.0.0"
   },
   "standard": {
     "parser": "babel-eslint"
