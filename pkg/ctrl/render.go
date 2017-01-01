@@ -21,7 +21,7 @@ func NewRenderController(db *store.DB) *RenderController {
 var cacheRender = store.NewCache(time.Second * 15)
 
 // Index runs index action
-func (c *RenderController) Index(ctx *app.RenderIndexContext) (*view.RenderIndex, error) {
+func (c *RenderController) Index(ctx *app.RenderIndexContext) (interface{}, error) {
 	var res view.CourseTinyCollection
 	if cache := cacheRender.Get("index"); cache != nil {
 		res = cache.(view.CourseTinyCollection)
@@ -51,7 +51,7 @@ func (c *RenderController) Index(ctx *app.RenderIndexContext) (*view.RenderIndex
 }
 
 // Course runs course action
-func (c *RenderController) Course(ctx *app.RenderCourseContext) (*view.RenderIndex, error) {
+func (c *RenderController) Course(ctx *app.RenderCourseContext) (interface{}, error) {
 	course, err := c.db.CourseFind(ctx.CourseID)
 	if course == nil {
 		course, err = c.db.CourseGet(ctx.CourseID)

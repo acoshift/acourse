@@ -2,7 +2,6 @@ package app
 
 import (
 	"github.com/acoshift/acourse/pkg/payload"
-	"github.com/acoshift/acourse/pkg/view"
 	"gopkg.in/gin-gonic/gin.v1"
 )
 
@@ -225,8 +224,8 @@ func MountPaymentController(service *gin.RouterGroup, ctrl PaymentController) {
 
 // RenderController is the controller interface for render actions
 type RenderController interface {
-	Index(*RenderIndexContext) (*view.RenderIndex, error)
-	Course(*RenderCourseContext) (*view.RenderIndex, error)
+	Index(*RenderIndexContext) (interface{}, error)
+	Course(*RenderCourseContext) (interface{}, error)
 }
 
 // MountRenderController mount a Render template controller on the given resource
