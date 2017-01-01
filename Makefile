@@ -6,7 +6,7 @@ dep:
 	go get
 
 build:
-	go build
+	go build github.com/acoshift/acourse/cmd/acourse
 
 clean: clean-ui
 	rm -f acourse
@@ -19,7 +19,7 @@ run:
 	go run main.go
 
 dev:
-	go run dev/main.go
+	go run cmd/acourse-dev/main.go
 
 ui: clean-ui
 	$(MAKE) -C ui build
@@ -38,7 +38,7 @@ clean-build:
 	rm -rf build
 
 build-server:
-	env GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o build/acourse -a -ldflags '-s' main.go
+	env GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o build/acourse -a -ldflags '-s' github.com/acoshift/acourse/cmd/acourse
 
 pre-build: dep ui
 	mkdir -p build
