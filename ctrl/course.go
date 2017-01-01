@@ -20,6 +20,11 @@ func NewCourseController(db *store.DB) *CourseController {
 
 // Show runs show action
 func (c *CourseController) Show(ctx *app.CourseShowContext) error {
+	role, err := c.db.RoleFindByUserID(ctx.CurrentUserID)
+	if err != nil {
+		return err
+	}
+
 	// try get by id first
 	x, err := c.db.CourseGet(ctx.CourseID)
 	if err != nil {
@@ -57,7 +62,7 @@ func (c *CourseController) Show(ctx *app.CourseShowContext) error {
 		return err
 	}
 
-	if enroll != nil || ctx.CurrentUserID == x.Owner {
+	if enroll != nil || ctx.CurrentUserID == x.Owner || role.Admin {
 		return ctx.OK(ToCourseView(x, ToUserTinyView(owner), student, enroll != nil, ctx.CurrentUserID == x.Owner))
 	}
 
