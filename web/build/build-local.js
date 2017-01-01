@@ -1,22 +1,23 @@
 // https://github.com/shelljs/shelljs
+/* globals env mkdir cp */
 require('shelljs/global')
 env.NODE_ENV = 'production'
 
-var path = require('path')
-var config = require('../config')
-var ora = require('ora')
-var webpack = require('webpack')
-var webpackConfig = require('./webpack.local.conf')
+const path = require('path')
+const config = require('../config')
+const ora = require('ora')
+const webpack = require('webpack')
+const webpackConfig = require('./webpack.local.conf')
 
-var spinner = ora('building for local...')
+const spinner = ora('building for local...')
 spinner.start()
 
-var assetsPath = path.join(config.local.assetsRoot, config.local.assetsSubDirectory)
+const assetsPath = path.join(config.local.assetsRoot, config.local.assetsSubDirectory)
 // rm('-rf', assetsPath)
 mkdir('-p', assetsPath)
 cp('-R', 'static/*', assetsPath)
 
-webpack(webpackConfig, function (err, stats) {
+webpack(webpackConfig, (err, stats) => {
   spinner.stop()
   if (err) throw err
   process.stdout.write(stats.toString({
