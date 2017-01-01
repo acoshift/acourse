@@ -3,13 +3,10 @@
 all: clean dep ui build
 
 dep:
-	go get
-
-build:
-	go build github.com/acoshift/acourse/cmd/acourse
+	go get github.com/acoshift/acourse/cmd/acourse
 
 clean: clean-ui
-	rm -f acourse
+	rm -f .build/acourse
 
 clean-ui:
 	rm -rf public
@@ -35,21 +32,21 @@ project:
 	gcloud config set project acourse-d9d0a
 
 clean-build:
-	rm -rf build
+	rm -rf .build
 
-build-server:
-	env GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o build/acourse -a -ldflags '-s' github.com/acoshift/acourse/cmd/acourse
+build:
+	env GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o .build/acourse -a -ldflags '-s' github.com/acoshift/acourse/cmd/acourse
 
 pre-build: dep ui
-	mkdir -p build
-	curl https://curl.haxx.se/ca/cacert.pem > build/cacert.pem
-	cp -rf private build/
-	cp -rf public build/
-	cp -rf templates build/
-	cp Dockerfile build/
+	mkdir -p .build
+	curl https://curl.haxx.se/ca/cacert.pem > .build/cacert.pem
+	cp -rf private .build/
+	cp -rf public .build/
+	cp -rf templates .build/
+	cp Dockerfile .build/
 
-deploy: clean-build pre-build build-server
-	cd build && docker build -t acourse .
+deploy: clean-build pre-build build
+	cd .build && docker build -t acourse .
 	docker tag acourse b.gcr.io/acoshift/acourse
 	gcloud docker -- push b.gcr.io/acoshift/acourse
 	./private/hook.sh

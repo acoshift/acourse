@@ -5,8 +5,7 @@ node_modules/
 private/
 
 # build
-build/
-!ui/build/
+.build/
 public/
 templates/
 
