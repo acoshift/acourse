@@ -1,6 +1,6 @@
-.PHONY: build web dev
+.PHONY: build ui dev
 
-all: clean dep web build
+all: clean dep ui build
 
 dep:
 	go get
@@ -8,10 +8,10 @@ dep:
 build:
 	go build
 
-clean: clean-web
+clean: clean-ui
 	rm -f acourse
 
-clean-web:
+clean-ui:
 	rm -rf public
 	rm -rf templates
 
@@ -21,13 +21,13 @@ run:
 dev:
 	go run dev/main.go
 
-web: clean-web
-	$(MAKE) -C web build
+ui: clean-ui
+	$(MAKE) -C ui build
 	mv public/static/* public/
 	rm -rf public/static
 
-local: clean-web
-	$(MAKE) -C web local
+local: clean-ui
+	$(MAKE) -C ui local
 	mv public/static/* public/
 	rm -rf public/static
 
@@ -40,7 +40,7 @@ clean-build:
 build-server:
 	env GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o build/acourse -a -ldflags '-s' main.go
 
-pre-build: dep web
+pre-build: dep ui
 	mkdir -p build
 	curl https://curl.haxx.se/ca/cacert.pem > build/cacert.pem
 	cp -rf private build/

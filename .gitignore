@@ -7,7 +7,7 @@ private/
 # build
 acourse
 build/
-!web/build/
+!ui/build/
 public/
 templates/
 
