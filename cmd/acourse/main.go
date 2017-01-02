@@ -35,7 +35,7 @@ func main() {
 	gin.SetMode(gin.ReleaseMode)
 	service := gin.New()
 
-	db := store.NewDB(store.ProjectID(cfg.ProjectID), store.ServiceAccount("private/service_account.json"))
+	db := store.NewDB(store.ProjectID(cfg.ProjectID), store.ServiceAccount(serviceAccount))
 
 	// globals middlewares
 	service.Use(gin.Logger())

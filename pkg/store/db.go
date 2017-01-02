@@ -31,10 +31,10 @@ func NewDB(options ...Option) *DB {
 	var ts oauth2.TokenSource
 	var err error
 
-	if opts.JSONKey != nil {
+	if opts.ServiceAccount != nil {
 		var conf *oauthjwt.Config
 		conf, err = google.JWTConfigFromJSON(
-			opts.JSONKey,
+			opts.ServiceAccount,
 			datastore.ScopeDatastore,
 			storage.ScopeReadWrite,
 		)
