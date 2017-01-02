@@ -3,6 +3,8 @@ package main
 import (
 	"io/ioutil"
 	"log"
+	"net"
+	"os"
 	"time"
 
 	"github.com/acoshift/acourse/pkg/app"
@@ -67,7 +69,10 @@ func main() {
 	app.MountPaymentController(service.Group("/api/payment"), ctrl.NewPaymentController(db, firAuth))
 	app.MountRenderController(service, ctrl.NewRenderController(db))
 
-	if err := service.Run(":8080"); err != nil {
+	hostPort := net.JoinHostPort("0.0.0.0", os.Getenv("PORT"))
+	log.Printf("Listening on %s", hostPort)
+
+	if err := service.Run(hostPort); err != nil {
 		log.Fatal(err)
 	}
 }
