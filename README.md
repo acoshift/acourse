@@ -20,3 +20,61 @@ Acoshift's course system [Link](https://acourse.io)
 - Firebase Storage
 - Cloud Datastore
 - Docker
+
+## Development
+
+### Frontend
+
+#### Required
+
+- Node.js
+- yarn `npm install -g yarn`
+
+```sh
+git clone https://github.com/acoshift/acourse.git
+cd acourse/ui
+yarn
+```
+
+#### Start
+
+- Use local backend `http://localhost:8080/api`
+
+`make dev`
+
+- Use production backend `https://acourse.io/api`
+
+`make prod`
+
+#### Build
+
+- Build for production
+
+`make build`
+
+- Build for local backend
+
+`make local`
+
+### Backend
+
+#### Required
+
+- Go 1.7.x `brew install go`
+
+```sh
+go get github.com/acoshift/acourse/cmd/acourse
+cd $GOPATH/acoshift/acourse
+```
+
+#### Start
+
+`make dev`
+
+#### Build Docker
+
+`make docker`
+
+#### Deploy
+
+`make deploy`
