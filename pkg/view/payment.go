@@ -1,6 +1,8 @@
 package view
 
-import "time"
+import (
+	"time"
+)
 
 // Payment type
 type Payment struct {
