@@ -45,8 +45,10 @@ pre-build: dep ui
 	cp -rf templates .build/
 	cp Dockerfile .build/
 
-deploy: clean-build pre-build build
+docker: clean-build pre-build build
 	cd .build && docker build -t acourse .
+
+deploy: docker
 	docker tag acourse b.gcr.io/acoshift/acourse
 	gcloud docker -- push b.gcr.io/acoshift/acourse
 	./private/hook.sh
