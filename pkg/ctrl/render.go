@@ -10,12 +10,13 @@ import (
 
 // RenderController implements RenderController interface
 type RenderController struct {
-	db *store.DB
+	db         *store.DB
+	courseCtrl app.CourseController
 }
 
 // NewRenderController creates controller
-func NewRenderController(db *store.DB) *RenderController {
-	return &RenderController{db}
+func NewRenderController(db *store.DB, courseCtrl app.CourseController) *RenderController {
+	return &RenderController{db, courseCtrl}
 }
 
 var cacheRender = store.NewCache(time.Second * 15)
@@ -28,14 +29,8 @@ func (c *RenderController) Index(ctx *app.RenderIndexContext) (interface{}, erro
 	} else {
 		// do not wait for api call
 		go func() {
-			xs, _ := c.db.CourseList(store.CourseListOptionPublic(true))
-			rs := make(view.CourseTinyCollection, len(xs))
-			for i, x := range xs {
-				u, _ := c.db.UserMustGet(x.Owner)
-				student, _ := c.db.EnrollCourseCount(x.ID)
-				rs[i] = ToCourseTinyView(x, ToUserTinyView(u), student)
-			}
-			cacheRender.Set("index", rs)
+			xs, _ := c.courseCtrl.List(&app.CourseListContext{})
+			cacheRender.Set("index", xs)
 		}()
 	}
 
@@ -52,11 +47,12 @@ func (c *RenderController) Index(ctx *app.RenderIndexContext) (interface{}, erro
 
 // Course runs course action
 func (c *RenderController) Course(ctx *app.RenderCourseContext) (interface{}, error) {
-	course, err := c.db.CourseFind(ctx.CourseID)
-	if course == nil {
-		course, err = c.db.CourseGet(ctx.CourseID)
+	courseInf, err := c.courseCtrl.Show(&app.CourseShowContext{CourseID: ctx.CourseID})
+	if err != nil || courseInf == nil {
+		return nil, nil
 	}
-	if err != nil || course == nil {
+	course, ok := courseInf.(*view.CoursePublic)
+	if !ok {
 		return nil, nil
 	}
 	r := &view.RenderIndex{

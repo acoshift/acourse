@@ -1,9 +1,8 @@
 package app
 
 import (
-	"net/http"
-
 	"fmt"
+	"net/http"
 
 	"github.com/unrolled/render"
 	"gopkg.in/gin-gonic/gin.v1"

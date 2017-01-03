@@ -11,7 +11,7 @@ const kindRole = "Role"
 func (c *DB) RoleGet(roleID string) (*model.Role, error) {
 	id := idInt(roleID)
 	if id == 0 {
-		return nil, ErrInvalidID
+		return &model.Role{}, nil
 	}
 
 	ctx, cancel := getContext()
@@ -31,7 +31,7 @@ func (c *DB) RoleGet(roleID string) (*model.Role, error) {
 // RoleFindByUserID retrieves role by user id
 func (c *DB) RoleFindByUserID(userID string) (*model.Role, error) {
 	if userID == "" {
-		return nil, ErrInvalidID
+		return &model.Role{}, nil
 	}
 
 	ctx, cancel := getContext()

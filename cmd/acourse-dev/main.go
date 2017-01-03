@@ -57,11 +57,12 @@ func main() {
 	})
 
 	// mount controllers
+	courseCtrl := ctrl.NewCourseController(db)
 	app.MountHealthController(service.Group("/_ah"), ctrl.NewHealthController())
 	app.MountUserController(service.Group("/api/user"), ctrl.NewUserController(db))
-	app.MountCourseController(service.Group("/api/course"), ctrl.NewCourseController(db))
+	app.MountCourseController(service.Group("/api/course"), courseCtrl)
 	app.MountPaymentController(service.Group("/api/payment"), ctrl.NewPaymentController(db, firAuth))
-	app.MountRenderController(service, ctrl.NewRenderController(db))
+	app.MountRenderController(service, ctrl.NewRenderController(db, courseCtrl))
 
 	if err := service.Run(":8080"); err != nil {
 		log.Fatal(err)
