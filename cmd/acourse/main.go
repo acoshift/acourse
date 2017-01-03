@@ -63,11 +63,12 @@ func main() {
 	ctrl.StartNotiPayment(db)
 
 	// mount controllers
+	courseCtrl := ctrl.NewCourseController(db)
 	app.MountHealthController(service.Group("/_ah"), ctrl.NewHealthController())
 	app.MountUserController(service.Group("/api/user"), ctrl.NewUserController(db))
-	app.MountCourseController(service.Group("/api/course"), ctrl.NewCourseController(db))
+	app.MountCourseController(service.Group("/api/course"), courseCtrl)
 	app.MountPaymentController(service.Group("/api/payment"), ctrl.NewPaymentController(db, firAuth))
-	app.MountRenderController(service, ctrl.NewRenderController(db))
+	app.MountRenderController(service, ctrl.NewRenderController(db, courseCtrl))
 
 	hostPort := net.JoinHostPort("0.0.0.0", os.Getenv("PORT"))
 	log.Printf("Listening on %s", hostPort)
