@@ -9,6 +9,19 @@ if (window.$$state) {
   if (window.$$state.courses) {
     $courses.next(window.$$state.courses)
   }
+  if (window.$$state.course) {
+    const course = window.$$state.course
+    $course.first()
+      .subscribe(($$course) => {
+        $course.next({
+          ...$$course,
+          [course.id]: {
+            ...course,
+            $preload: true
+          }
+        })
+      })
+  }
 }
 
 export default {

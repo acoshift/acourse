@@ -60,6 +60,9 @@ func (c *RenderController) Course(ctx *app.RenderCourseContext) (interface{}, er
 		Description: course.ShortDescription,
 		Image:       course.Photo,
 		URL:         "https://acourse.io/course/",
+		State: map[string]interface{}{
+			"course": course,
+		},
 	}
 	if course.URL != "" {
 		r.URL += course.URL

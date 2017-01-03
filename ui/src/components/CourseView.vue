@@ -1,7 +1,7 @@
 <template lang="pug">
   div
     CourseHeader(:course='course', v-if='course')
-    CourseEnrollPanel(v-if='course && !course.enrolled && !course.owned && course.enroll', :course='course')
+    CourseEnrollPanel(v-if='course && !course.enrolled && !course.owned && course.enroll && !course.$preload', :course='course')
     CourseOwnerPanel(v-if='course && course.owned', :course='course')
     // <course-student-panel v-if="course && course.enrolled" :course="course"></course-student-panel>
     CourseVideo(v-if='(course && course.video) && (course.enrolled || course.owned)', :src='course.video')
