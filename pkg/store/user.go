@@ -1,6 +1,7 @@
 package store
 
 import (
+	"log"
 	"time"
 
 	"cloud.google.com/go/datastore"
@@ -12,11 +13,20 @@ const kindUser = "User"
 
 var cacheUser = gotcha.New()
 
-func init() {
+func (c *DB) initUser() {
 	go func() {
 		for {
-			time.Sleep(time.Hour)
-			cacheUser.Cleanup()
+			xs, err := c.UserList()
+			if err != nil {
+				time.Sleep(time.Minute * 10)
+				continue
+			}
+			cacheUser.Purge()
+			for _, x := range xs {
+				cacheUser.Set(x.ID, x)
+			}
+			log.Println("Cached Users")
+			time.Sleep(time.Hour * 2)
 		}
 	}()
 }
@@ -140,10 +150,30 @@ func (c *DB) UserCreate(userID string, x *model.User) error {
 		return ErrInvalidID
 	}
 	x.SetKey(datastore.NameKey(kindUser, userID, nil))
-	return c.UserSave(x)
+	err := c.UserSave(x)
+	if err != nil {
+		return err
+	}
+	cacheUser.Set(x.ID, x)
+	return nil
 }
 
 // UserPurge purges all users
 func (c *DB) UserPurge() error {
 	return c.purge(kindUser)
+}
+
+// UserList retrieves all users
+func (c *DB) UserList() ([]*model.User, error) {
+	var xs []*model.User
+	ctx, cancel := getLongContext()
+	defer cancel()
+	keys, err := c.getAll(ctx, datastore.NewQuery(kindUser), &xs)
+	if err != nil {
+		return nil, err
+	}
+	for i := range keys {
+		xs[i].SetKey(keys[i])
+	}
+	return xs, nil
 }

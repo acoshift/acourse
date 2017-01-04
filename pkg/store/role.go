@@ -1,6 +1,9 @@
 package store
 
 import (
+	"log"
+	"time"
+
 	"cloud.google.com/go/datastore"
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/gotcha"
@@ -11,14 +14,21 @@ const kindRole = "Role"
 var cacheRole = gotcha.New()
 
 func (c *DB) initRole() {
-	xs, err := c.RoleList()
-	if err != nil {
-		return
-	}
-	for _, x := range xs {
-		cacheRole.Set("id:"+x.ID, x)
-		// cacheRole.Set("user:"+x, x)
-	}
+	go func() {
+		for {
+			xs, err := c.RoleList()
+			if err != nil {
+				time.Sleep(time.Minute * 10)
+				continue
+			}
+			cacheRole.Purge()
+			for _, x := range xs {
+				cacheRole.Set(x.ID, x)
+			}
+			log.Println("Cached Roles")
+			time.Sleep(time.Hour)
+		}
+	}()
 }
 
 // RoleGet retrieves role by id
@@ -94,7 +104,7 @@ func (c *DB) RolePurge() error {
 // RoleList retrieves all role in database
 func (c *DB) RoleList() ([]*model.Role, error) {
 	var xs []*model.Role
-	ctx, cancel := getContext()
+	ctx, cancel := getLongContext()
 	defer cancel()
 	keys, err := c.getAll(ctx, datastore.NewQuery(kindRole), &xs)
 	if err != nil {
