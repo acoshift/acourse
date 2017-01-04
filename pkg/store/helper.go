@@ -14,6 +14,10 @@ func getContext() (context.Context, context.CancelFunc) {
 	return context.WithTimeout(context.Background(), time.Second*30)
 }
 
+func getLongContext() (context.Context, context.CancelFunc) {
+	return context.WithTimeout(context.Background(), time.Minute*5)
+}
+
 func datastoreError(err error) bool {
 	if err == nil {
 		return false

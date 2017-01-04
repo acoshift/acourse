@@ -5,6 +5,7 @@ import (
 
 	"cloud.google.com/go/datastore"
 	"github.com/acoshift/acourse/pkg/model"
+	"github.com/acoshift/gotcha"
 )
 
 // CourseListOptions type
@@ -24,8 +25,8 @@ type CourseListOption func(*CourseListOptions)
 
 const kindCourse = "Course"
 
-var cacheCourse = NewCache(time.Second * 10)
-var cacheCourseURL = NewCache(time.Minute)
+var cacheCourse = gotcha.New()
+var cacheCourseURL = gotcha.New()
 
 /* CourseListOptions */
 
@@ -97,7 +98,7 @@ func (c *DB) CourseGet(courseID string) (*model.Course, error) {
 		return nil, err
 	}
 	x.SetKey(key)
-	cacheCourse.Set(courseID, &x)
+	cacheCourse.SetTTL(courseID, &x, time.Minute)
 	return &x, nil
 }
 
@@ -128,7 +129,7 @@ func (c *DB) CourseSave(x *model.Course) error {
 	}
 	x.SetKey(key)
 
-	cacheCourse.Del(x.ID)
+	cacheCourse.Unset(x.ID)
 	return nil
 }
 
@@ -191,7 +192,7 @@ func (c *DB) CourseDelete(courseID string) error {
 	if err != nil {
 		return err
 	}
-	cacheCourse.Del(courseID)
+	cacheCourse.Unset(courseID)
 	return nil
 }
 
@@ -217,7 +218,7 @@ func (c *DB) CourseFind(courseURL string) (*model.Course, error) {
 	if err != nil {
 		return nil, err
 	}
-	cacheCourseURL.Set(courseURL, x.ID)
+	cacheCourseURL.SetTTL(courseURL, x.ID, time.Minute*5)
 	return &x, nil
 }
 

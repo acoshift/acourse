@@ -1,15 +1,14 @@
 package store
 
 import (
-	"time"
-
 	"cloud.google.com/go/datastore"
 	"github.com/acoshift/acourse/pkg/model"
+	"github.com/acoshift/gotcha"
 )
 
 const kindEnroll = "Enroll"
 
-var cacheEnrollCount = NewCache(time.Hour)
+var cacheEnrollCount = gotcha.New()
 
 // EnrollFind finds enroll for given user id and course id
 func (c *DB) EnrollFind(userID, courseID string) (*model.Enroll, error) {
@@ -83,7 +82,7 @@ func (c *DB) EnrollSave(x *model.Enroll) error {
 		return err
 	}
 	x.SetKey(commit.Key(pKey))
-	cacheEnrollCount.Del(x.CourseID)
+	cacheEnrollCount.Unset(x.CourseID)
 	return nil
 }
 

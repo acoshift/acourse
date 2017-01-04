@@ -6,6 +6,7 @@ import (
 	"github.com/acoshift/acourse/pkg/app"
 	"github.com/acoshift/acourse/pkg/store"
 	"github.com/acoshift/acourse/pkg/view"
+	"github.com/acoshift/gotcha"
 )
 
 // RenderController implements RenderController interface
@@ -19,19 +20,20 @@ func NewRenderController(db *store.DB, courseCtrl app.CourseController) *RenderC
 	return &RenderController{db, courseCtrl}
 }
 
-var cacheRender = store.NewCache(time.Second * 15)
+var cacheRender = gotcha.New()
 
 // Index runs index action
 func (c *RenderController) Index(ctx *app.RenderIndexContext) (interface{}, error) {
 	var res view.CourseTinyCollection
+	refill := func() {
+		xs, _ := c.courseCtrl.List(&app.CourseListContext{})
+		cacheRender.SetTTL("index", xs, time.Second*30)
+	}
 	if cache := cacheRender.Get("index"); cache != nil {
 		res = cache.(view.CourseTinyCollection)
 	} else {
 		// do not wait for api call
-		go func() {
-			xs, _ := c.courseCtrl.List(&app.CourseListContext{})
-			cacheRender.Set("index", xs)
-		}()
+		go refill()
 	}
 
 	return &view.RenderIndex{
