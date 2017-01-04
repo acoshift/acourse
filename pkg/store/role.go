@@ -7,29 +7,8 @@ import (
 
 const kindRole = "Role"
 
-// RoleGet retrieves role by id
-func (c *DB) RoleGet(roleID string) (*model.Role, error) {
-	id := idInt(roleID)
-	if id == 0 {
-		return &model.Role{}, nil
-	}
-
-	ctx, cancel := getContext()
-	defer cancel()
-
-	var x model.Role
-	err := c.get(ctx, datastore.IDKey(kindRole, id, nil), &x)
-	if notFound(err) {
-		return nil, nil
-	}
-	if err != nil {
-		return nil, err
-	}
-	return &x, nil
-}
-
-// RoleFindByUserID retrieves role by user id
-func (c *DB) RoleFindByUserID(userID string) (*model.Role, error) {
+// RoleGet retrieves role by user id
+func (c *DB) RoleGet(userID string) (*model.Role, error) {
 	if userID == "" {
 		return &model.Role{}, nil
 	}
@@ -37,18 +16,10 @@ func (c *DB) RoleFindByUserID(userID string) (*model.Role, error) {
 	ctx, cancel := getContext()
 	defer cancel()
 
-	pID := datastore.NameKey(kindUser, userID, nil)
-
 	var x model.Role
-	q := datastore.
-		NewQuery(kindRole).
-		Ancestor(pID).
-		Limit(1)
-
-	err := c.findFirst(ctx, q, &x)
+	err := c.get(ctx, datastore.NameKey(kindRole, userID, nil), &x)
 	if notFound(err) {
-		x.SetKey(datastore.IncompleteKey(kindRole, pID))
-		return &x, nil
+		return nil, nil
 	}
 	if err != nil {
 		return nil, err

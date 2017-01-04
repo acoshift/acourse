@@ -25,7 +25,7 @@ func NewPaymentController(db *store.DB, auth *admin.FirebaseAuth) *PaymentContro
 
 // List runs list action
 func (c *PaymentController) List(ctx *app.PaymentListContext) (interface{}, error) {
-	role, err := c.db.RoleFindByUserID(ctx.CurrentUserID)
+	role, err := c.db.RoleGet(ctx.CurrentUserID)
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +64,7 @@ func (c *PaymentController) List(ctx *app.PaymentListContext) (interface{}, erro
 
 // Approve runs approve action
 func (c *PaymentController) Approve(ctx *app.PaymentApproveContext) error {
-	role, err := c.db.RoleFindByUserID(ctx.CurrentUserID)
+	role, err := c.db.RoleGet(ctx.CurrentUserID)
 	if err != nil {
 		return err
 	}
@@ -176,7 +176,7 @@ https://acourse.io`
 
 // Reject runs reject action
 func (c *PaymentController) Reject(ctx *app.PaymentRejectContext) error {
-	role, err := c.db.RoleFindByUserID(ctx.CurrentUserID)
+	role, err := c.db.RoleGet(ctx.CurrentUserID)
 	if err != nil {
 		return err
 	}

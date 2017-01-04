@@ -63,7 +63,7 @@ func main() {
 	resp.Body.Close()
 	for uid, r := range roles {
 		u, _ := db.UserGet(uid)
-		x, _ := db.RoleFindByUserID(u.ID)
+		x, _ := db.RoleGet(u.ID)
 		x.Instructor = r
 		err := db.RoleSave(x)
 		log.Println(x)
@@ -80,7 +80,7 @@ func main() {
 	resp.Body.Close()
 	for uid, r := range roles {
 		u, _ := db.UserGet(uid)
-		x, _ := db.RoleFindByUserID(u.ID)
+		x, _ := db.RoleGet(u.ID)
 		x.Admin = r
 		err := db.RoleSave(x)
 		log.Println(x)

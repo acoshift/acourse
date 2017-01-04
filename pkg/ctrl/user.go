@@ -20,7 +20,7 @@ func NewUserController(db *store.DB) *UserController {
 func (c *UserController) Show(ctx *app.UserShowContext) (interface{}, error) {
 	if ctx.CurrentUserID == ctx.UserID {
 		// show me view
-		role, err := c.db.RoleFindByUserID(ctx.UserID)
+		role, err := c.db.RoleGet(ctx.UserID)
 		if err != nil {
 			return nil, err
 		}
@@ -42,7 +42,7 @@ func (c *UserController) Show(ctx *app.UserShowContext) (interface{}, error) {
 
 // Update runs update action
 func (c *UserController) Update(ctx *app.UserUpdateContext) error {
-	role, err := c.db.RoleFindByUserID(ctx.CurrentUserID)
+	role, err := c.db.RoleGet(ctx.CurrentUserID)
 	if err != nil {
 		return err
 	}

@@ -21,7 +21,7 @@ func NewCourseController(db *store.DB) *CourseController {
 
 // Show runs show action
 func (c *CourseController) Show(ctx *app.CourseShowContext) (interface{}, error) {
-	role, err := c.db.RoleFindByUserID(ctx.CurrentUserID)
+	role, err := c.db.RoleGet(ctx.CurrentUserID)
 	if err != nil {
 		return nil, err
 	}
@@ -83,7 +83,7 @@ func (c *CourseController) Show(ctx *app.CourseShowContext) (interface{}, error)
 
 // Create runs create action
 func (c *CourseController) Create(ctx *app.CourseCreateContext) (interface{}, error) {
-	role, err := c.db.RoleFindByUserID(ctx.CurrentUserID)
+	role, err := c.db.RoleGet(ctx.CurrentUserID)
 	if err != nil {
 		return nil, err
 	}
@@ -121,7 +121,7 @@ func (c *CourseController) Create(ctx *app.CourseCreateContext) (interface{}, er
 
 // Update runs update action
 func (c *CourseController) Update(ctx *app.CourseUpdateContext) error {
-	role, err := c.db.RoleFindByUserID(ctx.CurrentUserID)
+	role, err := c.db.RoleGet(ctx.CurrentUserID)
 	if err != nil {
 		return err
 	}
