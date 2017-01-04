@@ -5,11 +5,21 @@ import (
 
 	"cloud.google.com/go/datastore"
 	"github.com/acoshift/acourse/pkg/model"
+	"github.com/acoshift/gotcha"
 )
 
 const kindUser = "User"
 
-var cacheUser = NewCache(time.Hour)
+var cacheUser = gotcha.New()
+
+func init() {
+	go func() {
+		for {
+			time.Sleep(time.Hour)
+			cacheUser.Cleanup()
+		}
+	}()
+}
 
 // UserGet retrieves user from database
 func (c *DB) UserGet(userID string) (*model.User, error) {
@@ -94,7 +104,7 @@ func (c *DB) UserSave(x *model.User) error {
 	defer cancel()
 	x.Stamp()
 	_, err := c.client.Put(ctx, x.Key(), x)
-	cacheUser.Del(x.ID)
+	cacheUser.Unset(x.ID)
 	return err
 }
 
