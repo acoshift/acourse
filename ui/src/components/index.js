@@ -12,6 +12,7 @@ const Course = () => System.import('./Course')
 // import CourseAssignmentEdit from './CourseAssignmentEdit'
 const AdminPayment = () => System.import('./AdminPayment')
 const AdminPaymentHistory = () => System.import('./AdminPaymentHistory')
+const Privacy = () => System.import('./Privacy')
 
 export {
   Layout,
@@ -26,5 +27,6 @@ export {
   // CourseAssignment,
   // CourseAssignmentEdit,
   AdminPayment,
-  AdminPaymentHistory
+  AdminPaymentHistory,
+  Privacy
 }

@@ -20,7 +20,8 @@ import {
   // CourseAssignment,
   // CourseAssignmentEdit,
   AdminPayment,
-  AdminPaymentHistory
+  AdminPaymentHistory,
+  Privacy
 } from 'components'
 
 Vue.use(VueRouter)
@@ -51,7 +52,8 @@ const router = new VueRouter({
           ]
         },
         { path: '/admin/payment', component: AdminPayment, beforeEnter: isRole('admin') },
-        { path: '/admin/payment/history', component: AdminPaymentHistory, beforeEnter: isRole('admin') }
+        { path: '/admin/payment/history', component: AdminPaymentHistory, beforeEnter: isRole('admin') },
+        { path: '/privacy', component: Privacy }
       ]
     },
     { path: '*', redirect: '/' }
