@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/acoshift/acourse/pkg/app"
+	"github.com/acoshift/acourse/pkg/e"
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/acourse/pkg/store"
 	"github.com/acoshift/acourse/pkg/view"
@@ -39,7 +40,7 @@ func (c *CourseController) Show(ctx *app.CourseShowContext) (interface{}, error)
 		}
 	}
 	if x == nil {
-		return nil, app.ErrNotFound
+		return nil, e.ErrNotFound
 	}
 
 	// get owner
@@ -88,7 +89,7 @@ func (c *CourseController) Create(ctx *app.CourseCreateContext) (interface{}, er
 		return nil, err
 	}
 	if !role.Instructor || !role.Admin {
-		return nil, app.ErrForbidden
+		return nil, e.ErrForbidden
 	}
 
 	user, err := c.db.UserGet(ctx.CurrentUserID)
@@ -130,10 +131,10 @@ func (c *CourseController) Update(ctx *app.CourseUpdateContext) error {
 		return err
 	}
 	if course == nil {
-		return app.ErrNotFound
+		return e.ErrNotFound
 	}
 	if course.Owner != ctx.CurrentUserID && !role.Admin {
-		return app.ErrForbidden
+		return e.ErrForbidden
 	}
 
 	// merge course with payload
@@ -233,12 +234,12 @@ func (c *CourseController) Enroll(ctx *app.CourseEnrollContext) error {
 		return err
 	}
 	if course == nil {
-		return app.ErrNotFound
+		return e.ErrNotFound
 	}
 
 	// owner can not enroll
 	if course.Owner == ctx.CurrentUserID {
-		return app.ErrForbidden
+		return e.ErrForbidden
 	}
 
 	// check is user already enrolled
@@ -248,7 +249,7 @@ func (c *CourseController) Enroll(ctx *app.CourseEnrollContext) error {
 	}
 	if enroll != nil {
 		// user already enroll
-		return app.ErrForbidden
+		return e.ErrForbidden
 	}
 
 	// check is user already send waiting payment
@@ -259,7 +260,7 @@ func (c *CourseController) Enroll(ctx *app.CourseEnrollContext) error {
 	if payment != nil {
 		// user already send payment
 		// wait admin to accept or reject to send another payment for this course
-		return app.ErrForbidden
+		return e.ErrForbidden
 	}
 
 	// calculate price

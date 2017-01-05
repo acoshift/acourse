@@ -1,7 +1,7 @@
 package app
 
 import (
-	"github.com/acoshift/acourse/pkg/payload"
+	"github.com/acoshift/acourse/pkg/e"
 	"gopkg.in/gin-gonic/gin.v1"
 )
 
@@ -14,7 +14,11 @@ type UserController interface {
 // MountUserController mounts a User resource controller on the given service
 func MountUserController(service *gin.RouterGroup, ctrl UserController) {
 	service.GET("/:userID", func(ctx *gin.Context) {
-		rctx := NewUserShowContext(ctx)
+		rctx, err := NewUserShowContext(ctx)
+		if err != nil {
+			handleError(ctx, err)
+			return
+		}
 		res, err := ctrl.Show(rctx)
 		if err != nil {
 			handleError(ctx, err)
@@ -24,18 +28,11 @@ func MountUserController(service *gin.RouterGroup, ctrl UserController) {
 	})
 
 	service.PATCH("/:userID", func(ctx *gin.Context) {
-		rctx := NewUserUpdateContext(ctx)
-		var rawPayload payload.RawUser
-		err := ctx.BindJSON(&rawPayload)
+		rctx, err := NewUserUpdateContext(ctx)
 		if err != nil {
-			handleBadRequest(ctx, err)
+			handleError(ctx, err)
 			return
 		}
-		if err = rawPayload.Validate(); err != nil {
-			handleBadRequest(ctx, err)
-			return
-		}
-		rctx.Payload = rawPayload.Payload()
 		err = ctrl.Update(rctx)
 		if err != nil {
 			handleError(ctx, err)
@@ -53,8 +50,12 @@ type HealthController interface {
 // MountHealthController mounts a Health resource controller on the given service
 func MountHealthController(service *gin.RouterGroup, ctrl HealthController) {
 	service.GET("/health", func(ctx *gin.Context) {
-		rctx := NewHealthHealthContext(ctx)
-		err := ctrl.Health(rctx)
+		rctx, err := NewHealthHealthContext(ctx)
+		if err != nil {
+			handleError(ctx, err)
+			return
+		}
+		err = ctrl.Health(rctx)
 		if err != nil {
 			handleError(ctx, err)
 		} else {
@@ -75,7 +76,11 @@ type CourseController interface {
 // MountCourseController mounts a Course resource controller on the given service
 func MountCourseController(service *gin.RouterGroup, ctrl CourseController) {
 	service.GET("", func(ctx *gin.Context) {
-		rctx := NewCourseListContext(ctx)
+		rctx, err := NewCourseListContext(ctx)
+		if err != nil {
+			handleError(ctx, err)
+			return
+		}
 		res, err := ctrl.List(rctx)
 		if err != nil {
 			handleError(ctx, err)
@@ -85,22 +90,15 @@ func MountCourseController(service *gin.RouterGroup, ctrl CourseController) {
 	})
 
 	service.POST("", func(ctx *gin.Context) {
-		rctx := NewCourseCreateContext(ctx)
-		if rctx.CurrentUserID == "" {
-			handleUnauthorized(ctx)
-			return
-		}
-		var rawPayload payload.RawCourse
-		err := ctx.Bind(&rawPayload)
+		rctx, err := NewCourseCreateContext(ctx)
 		if err != nil {
-			handleBadRequest(ctx, err)
+			handleError(ctx, err)
 			return
 		}
-		if err = rawPayload.Validate(); err != nil {
-			handleBadRequest(ctx, err)
+		if rctx.CurrentUserID == "" {
+			handleError(ctx, e.ErrUnauthorized)
 			return
 		}
-		rctx.Payload = rawPayload.Payload()
 		res, err := ctrl.Create(rctx)
 		if err != nil {
 			handleError(ctx, err)
@@ -110,7 +108,11 @@ func MountCourseController(service *gin.RouterGroup, ctrl CourseController) {
 	})
 
 	service.GET("/:courseID", func(ctx *gin.Context) {
-		rctx := NewCourseShowContext(ctx)
+		rctx, err := NewCourseShowContext(ctx)
+		if err != nil {
+			handleError(ctx, err)
+			return
+		}
 		res, err := ctrl.Show(rctx)
 		if err != nil {
 			handleError(ctx, err)
@@ -120,22 +122,15 @@ func MountCourseController(service *gin.RouterGroup, ctrl CourseController) {
 	})
 
 	service.PATCH("/:courseID", func(ctx *gin.Context) {
-		rctx := NewCourseUpdateContext(ctx)
-		if rctx.CurrentUserID == "" {
-			handleUnauthorized(ctx)
-			return
-		}
-		var rawPayload payload.RawCourse
-		err := ctx.Bind(&rawPayload)
+		rctx, err := NewCourseUpdateContext(ctx)
 		if err != nil {
-			handleBadRequest(ctx, err)
+			handleError(ctx, err)
 			return
 		}
-		if err = rawPayload.Validate(); err != nil {
-			handleBadRequest(ctx, err)
+		if rctx.CurrentUserID == "" {
+			handleError(ctx, e.ErrUnauthorized)
 			return
 		}
-		rctx.Payload = rawPayload.Payload()
 		err = ctrl.Update(rctx)
 		if err != nil {
 			handleError(ctx, err)
@@ -145,22 +140,15 @@ func MountCourseController(service *gin.RouterGroup, ctrl CourseController) {
 	})
 
 	service.PUT("/:courseID/enroll", func(ctx *gin.Context) {
-		rctx := NewCourseEnrollContext(ctx)
-		if rctx.CurrentUserID == "" {
-			handleUnauthorized(ctx)
-			return
-		}
-		var rawPayload payload.RawCourseEnroll
-		err := ctx.Bind(&rawPayload)
+		rctx, err := NewCourseEnrollContext(ctx)
 		if err != nil {
-			handleBadRequest(ctx, err)
+			handleError(ctx, err)
 			return
 		}
-		if err = rawPayload.Validate(); err != nil {
-			handleBadRequest(ctx, err)
+		if rctx.CurrentUserID == "" {
+			handleError(ctx, e.ErrUnauthorized)
 			return
 		}
-		rctx.Payload = rawPayload.Payload()
 		err = ctrl.Enroll(rctx)
 		if err != nil {
 			handleError(ctx, err)
@@ -180,9 +168,13 @@ type PaymentController interface {
 // MountPaymentController mount a Payment resource controller on the given service
 func MountPaymentController(service *gin.RouterGroup, ctrl PaymentController) {
 	service.GET("", func(ctx *gin.Context) {
-		rctx := NewPaymentListContext(ctx)
+		rctx, err := NewPaymentListContext(ctx)
+		if err != nil {
+			handleError(ctx, err)
+			return
+		}
 		if rctx.CurrentUserID == "" {
-			handleUnauthorized(ctx)
+			handleError(ctx, e.ErrUnauthorized)
 			return
 		}
 		res, err := ctrl.List(rctx)
@@ -194,12 +186,16 @@ func MountPaymentController(service *gin.RouterGroup, ctrl PaymentController) {
 	})
 
 	service.PUT("/:paymentID/approve", func(ctx *gin.Context) {
-		rctx := NewPaymentApproveContext(ctx)
-		if rctx.CurrentUserID == "" {
-			handleUnauthorized(ctx)
+		rctx, err := NewPaymentApproveContext(ctx)
+		if err != nil {
+			handleError(ctx, err)
 			return
 		}
-		err := ctrl.Approve(rctx)
+		if rctx.CurrentUserID == "" {
+			handleError(ctx, e.ErrUnauthorized)
+			return
+		}
+		err = ctrl.Approve(rctx)
 		if err != nil {
 			handleError(ctx, err)
 		} else {
@@ -208,12 +204,16 @@ func MountPaymentController(service *gin.RouterGroup, ctrl PaymentController) {
 	})
 
 	service.PUT("/:paymentID/reject", func(ctx *gin.Context) {
-		rctx := NewPaymentRejectContext(ctx)
-		if rctx.CurrentUserID == "" {
-			handleUnauthorized(ctx)
+		rctx, err := NewPaymentRejectContext(ctx)
+		if err != nil {
+			handleError(ctx, err)
 			return
 		}
-		err := ctrl.Reject(rctx)
+		if rctx.CurrentUserID == "" {
+			handleError(ctx, e.ErrUnauthorized)
+			return
+		}
+		err = ctrl.Reject(rctx)
 		if err != nil {
 			handleError(ctx, err)
 		} else {
@@ -240,7 +240,11 @@ func MountRenderController(service *gin.Engine, ctrl RenderController) {
 	service.StaticFile("/favicon.ico", "public/acourse-120.png")
 
 	service.GET("/course/:courseID", func(ctx *gin.Context) {
-		rctx := NewRenderCourseContext(ctx)
+		rctx, err := NewRenderCourseContext(ctx)
+		if err != nil {
+			handleError(ctx, err)
+			return
+		}
 		res, err := ctrl.Course(rctx)
 		if err != nil {
 			handleError(ctx, err)
@@ -252,7 +256,11 @@ func MountRenderController(service *gin.Engine, ctrl RenderController) {
 	})
 
 	h := func(ctx *gin.Context) {
-		rctx := NewRenderIndexContext(ctx)
+		rctx, err := NewRenderIndexContext(ctx)
+		if err != nil {
+			handleError(ctx, err)
+			return
+		}
 		res, err := ctrl.Index(rctx)
 		if err != nil {
 			handleError(ctx, err)
