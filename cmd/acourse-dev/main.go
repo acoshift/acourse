@@ -3,6 +3,7 @@ package main
 import (
 	"io/ioutil"
 	"log"
+	"net/http"
 
 	"github.com/acoshift/acourse/pkg/app"
 	"github.com/acoshift/acourse/pkg/ctrl"
@@ -40,7 +41,7 @@ func main() {
 	service.Use(cors.New(cors.Config{
 		AllowCredentials: false,
 		AllowHeaders:     []string{"Authorization", "Content-Type"},
-		AllowMethods:     []string{"GET", "POST", "PATCH", "PUT", "DELETE"},
+		AllowMethods:     []string{http.MethodGet, http.MethodPost, http.MethodPatch, http.MethodPut, http.MethodDelete},
 		AllowAllOrigins:  true,
 	}))
 

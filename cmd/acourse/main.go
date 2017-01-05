@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net"
+	"net/http"
 	"os"
 	"time"
 
@@ -43,7 +44,7 @@ func main() {
 	service.Use(cors.New(cors.Config{
 		AllowCredentials: false,
 		AllowHeaders:     []string{"Authorization", "Content-Type"},
-		AllowMethods:     []string{"GET", "POST", "PATCH", "PUT", "DELETE"},
+		AllowMethods:     []string{http.MethodGet, http.MethodPost, http.MethodPatch, http.MethodPut, http.MethodDelete},
 		AllowOrigins:     []string{"https://acourse.io", "http://localhost:9000"},
 		MaxAge:           12 * time.Hour,
 	}))

@@ -6,6 +6,7 @@ import (
 
 	"errors"
 
+	"github.com/acoshift/acourse/pkg/e"
 	"github.com/acoshift/go-firebase-admin"
 	"github.com/google/uuid"
 	"gopkg.in/gin-gonic/gin.v1"
@@ -19,7 +20,7 @@ const (
 var (
 	firAuth *admin.FirebaseAuth
 
-	tokenError = CreateErrors(http.StatusUnauthorized, "token")
+	tokenError = e.New(http.StatusUnauthorized, "token")
 )
 
 // InitService inits service

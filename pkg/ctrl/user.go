@@ -2,6 +2,7 @@ package ctrl
 
 import (
 	"github.com/acoshift/acourse/pkg/app"
+	"github.com/acoshift/acourse/pkg/e"
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/acourse/pkg/store"
 )
@@ -34,7 +35,7 @@ func (c *UserController) Show(ctx *app.UserShowContext) (interface{}, error) {
 		return nil, err
 	}
 	if x == nil {
-		return nil, app.ErrNotFound
+		return nil, e.ErrNotFound
 	}
 
 	return ToUserView(x), nil
@@ -48,7 +49,7 @@ func (c *UserController) Update(ctx *app.UserUpdateContext) error {
 	}
 
 	if !role.Admin && ctx.CurrentUserID != ctx.UserID {
-		return app.ErrForbidden
+		return e.ErrForbidden
 	}
 
 	var user *model.User
@@ -62,7 +63,7 @@ func (c *UserController) Update(ctx *app.UserUpdateContext) error {
 		return err
 	}
 	if user == nil {
-		return app.ErrNotFound
+		return e.ErrNotFound
 	}
 
 	user.Name = ctx.Payload.Name

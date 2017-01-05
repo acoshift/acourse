@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/acoshift/acourse/pkg/app"
+	"github.com/acoshift/acourse/pkg/e"
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/acourse/pkg/store"
 	"github.com/acoshift/acourse/pkg/view"
@@ -32,7 +33,7 @@ func (c *PaymentController) List(ctx *app.PaymentListContext) (interface{}, erro
 
 	// only admin can access
 	if !role.Admin {
-		return nil, app.ErrForbidden
+		return nil, e.ErrForbidden
 	}
 
 	var xs []*model.Payment
@@ -69,7 +70,7 @@ func (c *PaymentController) Approve(ctx *app.PaymentApproveContext) error {
 		return err
 	}
 	if !role.Admin {
-		return app.ErrForbidden
+		return e.ErrForbidden
 	}
 
 	payment, err := c.db.PaymentGet(ctx.PaymentID)
@@ -77,7 +78,7 @@ func (c *PaymentController) Approve(ctx *app.PaymentApproveContext) error {
 		return err
 	}
 	if payment == nil {
-		return app.ErrNotFound
+		return e.ErrNotFound
 	}
 	payment.Approve()
 
@@ -181,7 +182,7 @@ func (c *PaymentController) Reject(ctx *app.PaymentRejectContext) error {
 		return err
 	}
 	if !role.Admin {
-		return app.ErrForbidden
+		return e.ErrForbidden
 	}
 
 	payment, err := c.db.PaymentGet(ctx.PaymentID)
@@ -189,7 +190,7 @@ func (c *PaymentController) Reject(ctx *app.PaymentRejectContext) error {
 		return err
 	}
 	if payment == nil {
-		return app.ErrNotFound
+		return e.ErrNotFound
 	}
 	payment.Reject()
 
