@@ -6,10 +6,10 @@ import (
 	"time"
 
 	"github.com/acoshift/acourse/pkg/app"
-	"github.com/acoshift/acourse/pkg/e"
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/acourse/pkg/store"
 	"github.com/acoshift/acourse/pkg/view"
+	"github.com/acoshift/e"
 	"github.com/acoshift/go-firebase-admin"
 )
 
@@ -33,7 +33,7 @@ func (c *PaymentController) List(ctx *app.PaymentListContext) (interface{}, erro
 
 	// only admin can access
 	if !role.Admin {
-		return nil, e.ErrForbidden
+		return nil, e.Forbidden
 	}
 
 	var xs []*model.Payment
@@ -70,7 +70,7 @@ func (c *PaymentController) Approve(ctx *app.PaymentApproveContext) error {
 		return err
 	}
 	if !role.Admin {
-		return e.ErrForbidden
+		return e.Forbidden
 	}
 
 	payment, err := c.db.PaymentGet(ctx.PaymentID)
@@ -78,7 +78,7 @@ func (c *PaymentController) Approve(ctx *app.PaymentApproveContext) error {
 		return err
 	}
 	if payment == nil {
-		return e.ErrNotFound
+		return e.NotFound
 	}
 	payment.Approve()
 
@@ -182,7 +182,7 @@ func (c *PaymentController) Reject(ctx *app.PaymentRejectContext) error {
 		return err
 	}
 	if !role.Admin {
-		return e.ErrForbidden
+		return e.Forbidden
 	}
 
 	payment, err := c.db.PaymentGet(ctx.PaymentID)
@@ -190,7 +190,7 @@ func (c *PaymentController) Reject(ctx *app.PaymentRejectContext) error {
 		return err
 	}
 	if payment == nil {
-		return e.ErrNotFound
+		return e.NotFound
 	}
 	payment.Reject()
 

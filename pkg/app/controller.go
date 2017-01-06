@@ -1,7 +1,7 @@
 package app
 
 import (
-	"github.com/acoshift/acourse/pkg/e"
+	"github.com/acoshift/e"
 	"gopkg.in/gin-gonic/gin.v1"
 )
 
@@ -96,7 +96,7 @@ func MountCourseController(service *gin.RouterGroup, ctrl CourseController) {
 			return
 		}
 		if rctx.CurrentUserID == "" {
-			handleError(ctx, e.ErrUnauthorized)
+			handleError(ctx, e.Unauthorized)
 			return
 		}
 		res, err := ctrl.Create(rctx)
@@ -128,7 +128,7 @@ func MountCourseController(service *gin.RouterGroup, ctrl CourseController) {
 			return
 		}
 		if rctx.CurrentUserID == "" {
-			handleError(ctx, e.ErrUnauthorized)
+			handleError(ctx, e.Unauthorized)
 			return
 		}
 		err = ctrl.Update(rctx)
@@ -146,7 +146,7 @@ func MountCourseController(service *gin.RouterGroup, ctrl CourseController) {
 			return
 		}
 		if rctx.CurrentUserID == "" {
-			handleError(ctx, e.ErrUnauthorized)
+			handleError(ctx, e.Unauthorized)
 			return
 		}
 		err = ctrl.Enroll(rctx)
@@ -174,7 +174,7 @@ func MountPaymentController(service *gin.RouterGroup, ctrl PaymentController) {
 			return
 		}
 		if rctx.CurrentUserID == "" {
-			handleError(ctx, e.ErrUnauthorized)
+			handleError(ctx, e.Unauthorized)
 			return
 		}
 		res, err := ctrl.List(rctx)
@@ -192,7 +192,7 @@ func MountPaymentController(service *gin.RouterGroup, ctrl PaymentController) {
 			return
 		}
 		if rctx.CurrentUserID == "" {
-			handleError(ctx, e.ErrUnauthorized)
+			handleError(ctx, e.Unauthorized)
 			return
 		}
 		err = ctrl.Approve(rctx)
@@ -210,7 +210,7 @@ func MountPaymentController(service *gin.RouterGroup, ctrl PaymentController) {
 			return
 		}
 		if rctx.CurrentUserID == "" {
-			handleError(ctx, e.ErrUnauthorized)
+			handleError(ctx, e.Unauthorized)
 			return
 		}
 		err = ctrl.Reject(rctx)

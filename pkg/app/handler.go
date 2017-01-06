@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/acoshift/acourse/pkg/e"
+	"github.com/acoshift/e"
 	"github.com/unrolled/render"
 	"gopkg.in/gin-gonic/gin.v1"
 )
@@ -32,7 +32,7 @@ func handleError(ctx *gin.Context, r error) {
 		log.Println(r)
 		ctx.JSON(err.Status, &ErrorReply{err})
 	} else {
-		handleError(ctx, e.InternalError(r))
+		handleError(ctx, e.InternalServerErrorWith(r))
 	}
 }
 
