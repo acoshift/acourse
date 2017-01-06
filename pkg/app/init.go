@@ -1,10 +1,9 @@
 package app
 
 import (
+	"errors"
 	"net/http"
 	"strings"
-
-	"errors"
 
 	"github.com/acoshift/e"
 	"github.com/acoshift/go-firebase-admin"
