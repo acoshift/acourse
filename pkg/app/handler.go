@@ -4,14 +4,14 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/acoshift/e"
+	"github.com/acoshift/httperror"
 	"github.com/unrolled/render"
 	"gopkg.in/gin-gonic/gin.v1"
 )
 
 // ErrorReply is the error response
 type ErrorReply struct {
-	Error *e.Error `json:"error"`
+	Error *httperror.Error `json:"error"`
 }
 
 // SuccessReply is the success response without any content
@@ -28,11 +28,11 @@ func handleOK(ctx *gin.Context, r interface{}) {
 }
 
 func handleError(ctx *gin.Context, r error) {
-	if err, ok := r.(*e.Error); ok {
+	if err, ok := r.(*httperror.Error); ok {
 		log.Println(r)
 		ctx.JSON(err.Status, &ErrorReply{err})
 	} else {
-		handleError(ctx, e.InternalServerErrorWith(r))
+		handleError(ctx, httperror.InternalServerErrorWith(r))
 	}
 }
 

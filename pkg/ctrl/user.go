@@ -4,7 +4,7 @@ import (
 	"github.com/acoshift/acourse/pkg/app"
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/acourse/pkg/store"
-	"github.com/acoshift/e"
+	"github.com/acoshift/httperror"
 )
 
 // UserController implements UserController interface
@@ -35,7 +35,7 @@ func (c *UserController) Show(ctx *app.UserShowContext) (interface{}, error) {
 		return nil, err
 	}
 	if x == nil {
-		return nil, e.NotFound
+		return nil, httperror.NotFound
 	}
 
 	return ToUserView(x), nil
@@ -49,7 +49,7 @@ func (c *UserController) Update(ctx *app.UserUpdateContext) error {
 	}
 
 	if !role.Admin && ctx.CurrentUserID != ctx.UserID {
-		return e.Forbidden
+		return httperror.Forbidden
 	}
 
 	var user *model.User
@@ -63,7 +63,7 @@ func (c *UserController) Update(ctx *app.UserUpdateContext) error {
 		return err
 	}
 	if user == nil {
-		return e.NotFound
+		return httperror.NotFound
 	}
 
 	user.Name = ctx.Payload.Name

@@ -2,7 +2,7 @@ package app
 
 import (
 	"github.com/acoshift/acourse/pkg/payload"
-	"github.com/acoshift/e"
+	"github.com/acoshift/httperror"
 	"gopkg.in/gin-gonic/gin.v1"
 )
 
@@ -39,10 +39,10 @@ func NewUserUpdateContext(ctx *gin.Context) (*UserUpdateContext, error) {
 	var rp payload.RawUser
 	err := ctx.BindJSON(&rp)
 	if err != nil {
-		return nil, e.BadRequestWith(err)
+		return nil, httperror.BadRequestWith(err)
 	}
 	if err = rp.Validate(); err != nil {
-		return nil, e.BadRequestWith(err)
+		return nil, httperror.BadRequestWith(err)
 	}
 	rctx.Payload = rp.Payload()
 	return &rctx, nil
@@ -89,10 +89,10 @@ func NewCourseCreateContext(ctx *gin.Context) (*CourseCreateContext, error) {
 	var rp payload.RawCourse
 	err := ctx.Bind(&rp)
 	if err != nil {
-		return nil, e.BadRequestWith(err)
+		return nil, httperror.BadRequestWith(err)
 	}
 	if err = rp.Validate(); err != nil {
-		return nil, e.BadRequestWith(err)
+		return nil, httperror.BadRequestWith(err)
 	}
 	rctx.Payload = rp.Payload()
 	return &rctx, nil
@@ -115,10 +115,10 @@ func NewCourseUpdateContext(ctx *gin.Context) (*CourseUpdateContext, error) {
 	var rp payload.RawCourse
 	err := ctx.Bind(&rp)
 	if err != nil {
-		return nil, e.BadRequestWith(err)
+		return nil, httperror.BadRequestWith(err)
 	}
 	if err = rp.Validate(); err != nil {
-		return nil, e.BadRequestWith(err)
+		return nil, httperror.BadRequestWith(err)
 	}
 	rctx.Payload = rp.Payload()
 	return &rctx, nil
@@ -159,10 +159,10 @@ func NewCourseEnrollContext(ctx *gin.Context) (*CourseEnrollContext, error) {
 	var rp payload.RawCourseEnroll
 	err := ctx.Bind(&rp)
 	if err != nil {
-		return nil, e.BadRequestWith(err)
+		return nil, httperror.BadRequestWith(err)
 	}
 	if err = rp.Validate(); err != nil {
-		return nil, e.BadRequestWith(err)
+		return nil, httperror.BadRequestWith(err)
 	}
 	rctx.Payload = rp.Payload()
 	return &rctx, nil
