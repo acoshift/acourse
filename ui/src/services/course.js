@@ -54,9 +54,11 @@ export default {
   create (data) {
     return API.post('/course', data, true)
       .map(({ id }) => id)
+      .do((id) => this.fetch(id))
   },
   save (id, data) {
     return API.patch(`/course/${id}`, data)
+      .do(() => this.fetch(id))
   },
   enroll (id, { code, url, price }) {
     return API.put(`/course/${id}/enroll`, { code, url, price }, true)
