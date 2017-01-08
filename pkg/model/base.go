@@ -12,10 +12,9 @@ type Base struct {
 	ID  string `datastore:"-"`
 }
 
-// IsBase interface
-type IsBase interface {
+// KeySetter interface
+type KeySetter interface {
 	SetKey(*datastore.Key)
-	Key() *datastore.Key
 }
 
 // SetKey sets key to model

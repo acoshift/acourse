@@ -41,7 +41,7 @@ func (c *DB) getAll(ctx context.Context, q *datastore.Query, dst interface{}) ([
 	return keys, nil
 }
 
-func (c *DB) get(ctx context.Context, key *datastore.Key, dst model.IsBase) error {
+func (c *DB) get(ctx context.Context, key *datastore.Key, dst model.KeySetter) error {
 	err := c.client.Get(ctx, key, dst)
 	if datastoreError(err) {
 		return err
@@ -50,7 +50,7 @@ func (c *DB) get(ctx context.Context, key *datastore.Key, dst model.IsBase) erro
 	return nil
 }
 
-func (c *DB) findFirst(ctx context.Context, q *datastore.Query, dst model.IsBase) error {
+func (c *DB) findFirst(ctx context.Context, q *datastore.Query, dst model.KeySetter) error {
 	key, err := c.client.Run(ctx, q).Next(dst)
 	if datastoreError(err) {
 		return err
