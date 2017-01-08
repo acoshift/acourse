@@ -40,20 +40,20 @@ func jwtMiddleware(ctx *gin.Context) {
 	tk := strings.Split(auth, " ")
 	if len(tk) != 2 || strings.ToLower(tk[0]) != "bearer" {
 		handleError(ctx, tokenError(errors.New("invalid authorization header")))
+		ctx.Abort()
 		return
 	}
 	claims, err := firAuth.VerifyIDToken(tk[1])
 	if err != nil {
 		handleError(ctx, tokenError(err))
+		ctx.Abort()
 		return
 	}
 	ctx.Set(keyCurrentUserID, claims.UserID)
-	ctx.Next()
 }
 
 func requestIDMiddleware(ctx *gin.Context) {
 	rid := uuid.New().String()
 	ctx.Header("X-Request-Id", rid)
 	ctx.Set(keyRequestID, rid)
-	ctx.Next()
 }
