@@ -16,11 +16,11 @@ import (
 // PaymentController implements PaymentController interface
 type PaymentController struct {
 	db   *store.DB
-	auth *admin.FirebaseAuth
+	auth *admin.Auth
 }
 
 // NewPaymentController creates new controller
-func NewPaymentController(db *store.DB, auth *admin.FirebaseAuth) *PaymentController {
+func NewPaymentController(db *store.DB, auth *admin.Auth) *PaymentController {
 	return &PaymentController{db, auth}
 }
 

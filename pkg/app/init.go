@@ -17,13 +17,13 @@ const (
 )
 
 var (
-	firAuth *admin.FirebaseAuth
+	firAuth *admin.Auth
 
 	tokenError = httperror.New(http.StatusUnauthorized, "token")
 )
 
 // InitService inits service
-func InitService(service *gin.Engine, auth *admin.FirebaseAuth) (err error) {
+func InitService(service *gin.Engine, auth *admin.Auth) (err error) {
 	firAuth = auth
 
 	service.Use(requestIDMiddleware)

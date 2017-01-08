@@ -24,7 +24,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	firApp, err := admin.InitializeApp(admin.ProjectID(cfg.ProjectID), admin.ServiceAccount(serviceAccount))
+	firApp, err := admin.InitializeApp(admin.AppOptions{
+		ProjectID:      cfg.ProjectID,
+		ServiceAccount: serviceAccount,
+	})
 	if err != nil {
 		return
 	}
