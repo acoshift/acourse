@@ -26,6 +26,17 @@ func datastoreError(err error) bool {
 		// ignore field mismatch
 		return false
 	}
+	// check multi errors
+	if errs, ok := err.(datastore.MultiError); ok {
+		hasError := false
+		for _, err := range errs {
+			if datastoreError(err) {
+				hasError = true
+				break
+			}
+		}
+		return hasError
+	}
 	return true
 }
 
