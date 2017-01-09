@@ -93,6 +93,7 @@ func ToCoursePublicView(m *model.Course, owner *view.UserTiny, student int, purc
 		Type:             string(m.Type),
 		Price:            m.Price,
 		DiscountedPrice:  m.DiscountedPrice,
+		EnrollDetail:     m.EnrollDetail,
 		Student:          student,
 		Enroll:           m.Options.Enroll,
 		Discount:         m.Options.Discount,

@@ -21,6 +21,7 @@ type Course struct {
 	DiscountedPrice  float64
 	Options          CourseOption
 	Contents         []CourseContent `datastore:",noindex"`
+	EnrollDetail     string          `datastore:",noindex"`
 }
 
 // CourseOption type
