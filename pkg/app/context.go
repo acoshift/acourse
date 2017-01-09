@@ -36,14 +36,15 @@ func NewUserUpdateContext(ctx *gin.Context) (*UserUpdateContext, error) {
 		rctx.CurrentUserID, _ = v.(string)
 	}
 	rctx.UserID = ctx.Param("userID")
-	rctx.Payload = &payload.User{}
-	err := ctx.BindJSON(rctx.Payload)
+	var rp payload.RawUser
+	err := ctx.BindJSON(&rp)
 	if err != nil {
 		return nil, httperror.BadRequestWith(err)
 	}
-	if err = rctx.Payload.Validate(); err != nil {
+	if err = rp.Validate(); err != nil {
 		return nil, httperror.BadRequestWith(err)
 	}
+	rctx.Payload = rp.Payload()
 	return &rctx, nil
 }
 
@@ -85,14 +86,15 @@ func NewCourseCreateContext(ctx *gin.Context) (*CourseCreateContext, error) {
 	if v, ok := ctx.Get(keyCurrentUserID); ok {
 		rctx.CurrentUserID, _ = v.(string)
 	}
-	rctx.Payload = &payload.Course{}
-	err := ctx.Bind(rctx.Payload)
+	var rp payload.RawCourse
+	err := ctx.Bind(&rp)
 	if err != nil {
 		return nil, httperror.BadRequestWith(err)
 	}
-	if err = rctx.Payload.Validate(); err != nil {
+	if err = rp.Validate(); err != nil {
 		return nil, httperror.BadRequestWith(err)
 	}
+	rctx.Payload = rp.Payload()
 	return &rctx, nil
 }
 
@@ -110,14 +112,15 @@ func NewCourseUpdateContext(ctx *gin.Context) (*CourseUpdateContext, error) {
 		rctx.CurrentUserID, _ = v.(string)
 	}
 	rctx.CourseID = ctx.Param("courseID")
-	rctx.Payload = &payload.Course{}
-	err := ctx.Bind(rctx.Payload)
+	var rp payload.RawCourse
+	err := ctx.Bind(&rp)
 	if err != nil {
 		return nil, httperror.BadRequestWith(err)
 	}
-	if err = rctx.Payload.Validate(); err != nil {
+	if err = rp.Validate(); err != nil {
 		return nil, httperror.BadRequestWith(err)
 	}
+	rctx.Payload = rp.Payload()
 	return &rctx, nil
 }
 
@@ -153,14 +156,15 @@ func NewCourseEnrollContext(ctx *gin.Context) (*CourseEnrollContext, error) {
 		rctx.CurrentUserID, _ = v.(string)
 	}
 	rctx.CourseID = ctx.Param("courseID")
-	rctx.Payload = &payload.CourseEnroll{}
-	err := ctx.Bind(&rctx.Payload)
+	var rp payload.RawCourseEnroll
+	err := ctx.Bind(&rp)
 	if err != nil {
 		return nil, httperror.BadRequestWith(err)
 	}
-	if err = rctx.Payload.Validate(); err != nil {
+	if err = rp.Validate(); err != nil {
 		return nil, httperror.BadRequestWith(err)
 	}
+	rctx.Payload = rp.Payload()
 	return &rctx, nil
 }
 
