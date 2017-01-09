@@ -22,6 +22,7 @@ type Course struct {
 	DiscountedPrice  float64                 `json:"discountedPrice"`
 	Student          int                     `json:"student"`
 	Contents         CourseContentCollection `json:"contents"`
+	EnrollDetail     string                  `json:"enrollDetail"`
 	Enrolled         bool                    `json:"enrolled"`
 	Enroll           bool                    `json:"enroll"`
 	Public           bool                    `json:"public"`

@@ -66,6 +66,7 @@ func ToCourseView(m *model.Course, owner *view.UserTiny, student int, enrolled b
 		DiscountedPrice:  m.DiscountedPrice,
 		Student:          student,
 		Contents:         ToCourseContentCollectionView(m.Contents),
+		EnrollDetail:     m.EnrollDetail,
 		Enrolled:         enrolled,
 		Owned:            owned,
 		Enroll:           m.Options.Enroll,
