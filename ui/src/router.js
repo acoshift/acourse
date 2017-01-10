@@ -19,6 +19,7 @@ import {
   // CourseAttend,
   // CourseAssignment,
   // CourseAssignmentEdit,
+  AdminCourse,
   AdminPayment,
   AdminPaymentHistory,
   Privacy
@@ -51,6 +52,7 @@ const router = new VueRouter({
             // { path: 'assignment/edit', component: CourseAssignmentEdit, name: 'courseAssignmentEdit', beforeEnter: redirectIfNotAuth }
           ]
         },
+        { path: '/admin/course', component: AdminCourse, beforeEnter: isRole('admin') },
         { path: '/admin/payment', component: AdminPayment, beforeEnter: isRole('admin') },
         { path: '/admin/payment/history', component: AdminPaymentHistory, beforeEnter: isRole('admin') },
         { path: '/privacy', component: Privacy }

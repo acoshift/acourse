@@ -10,6 +10,7 @@ const Course = () => System.import('./Course')
 // import CourseAttend from './CourseAttend'
 // import CourseAssignment from './CourseAssignment'
 // import CourseAssignmentEdit from './CourseAssignmentEdit'
+const AdminCourse = () => System.import('./AdminCourse')
 const AdminPayment = () => System.import('./AdminPayment')
 const AdminPaymentHistory = () => System.import('./AdminPaymentHistory')
 const Privacy = () => System.import('./Privacy')
@@ -26,6 +27,7 @@ export {
   // CourseAttend,
   // CourseAssignment,
   // CourseAssignmentEdit,
+  AdminCourse,
   AdminPayment,
   AdminPaymentHistory,
   Privacy

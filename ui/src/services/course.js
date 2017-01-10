@@ -33,6 +33,9 @@ export default {
   list () {
     return $courses.asObservable()
   },
+  listAll () {
+    return API.get('/course?all=1', true)
+  },
   fetch (url) {
     const ob = API.get(`/course/${url}`)
       .share()

@@ -7,6 +7,7 @@
       | Admin
       i.dropdown.icon
       .menu
+        router-link.item(to='/admin/course') Course
         router-link.item(to='/admin/payment') Payment
         router-link.item(to='/admin/payment/history') Payment History
     .ui.dropdown.item(ref='dropdownUser', v-if='currentUser', style='padding-top: 0.5rem; padding-bottom: 0.5rem;')
