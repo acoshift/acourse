@@ -64,7 +64,7 @@ yarn
 
 ```sh
 go get github.com/acoshift/acourse/cmd/acourse
-cd $GOPATH/acoshift/acourse
+cd $GOPATH/src/github.com/acoshift/acourse
 ```
 
 #### Start
