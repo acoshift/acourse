@@ -3,7 +3,7 @@
     .ui.stackable.equal.width.grid
       .row(v-if="!purchased")
         .center.aligned.column
-          span(v-if="price === 0")
+          span(v-if="price <= 0")
             h2 FREE
           span(v-else)
             h2 ฿ {{ price }}

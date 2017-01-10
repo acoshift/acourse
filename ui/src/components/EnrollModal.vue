@@ -32,7 +32,8 @@ export default {
   },
   computed: {
     calcPrice () {
-      return this.course.discount ? this.course.discountedPrice : this.course.price
+      const price = this.course.discount ? this.course.discountedPrice : this.course.price
+      return price <= 0 ? 0 : price
     },
     detail () {
       return marked(this.course.enrollDetail, { sanitize: true })
