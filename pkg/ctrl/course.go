@@ -69,7 +69,7 @@ func (c *CourseController) Show(ctx *app.CourseShowContext) (interface{}, error)
 	}
 
 	// check is user already purchase
-	payment, err := c.db.PaymentFind(ctx.CurrentUserID, ctx.CourseID, model.PaymentStatusWaiting)
+	payment, err := c.db.PaymentFind(ctx.CurrentUserID, x.ID, model.PaymentStatusWaiting)
 	if err != nil {
 		return nil, err
 	}
