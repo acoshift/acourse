@@ -118,56 +118,6 @@ func NewCourseEnrollContext(ctx *gin.Context) (*CourseEnrollContext, error) {
 	return &rctx, nil
 }
 
-// PaymentListContext provides the payment list action context
-type PaymentListContext struct {
-	CurrentUserID string
-	History       bool
-}
-
-// NewPaymentListContext parses the incoming request and create context
-func NewPaymentListContext(ctx *gin.Context) (*PaymentListContext, error) {
-	rctx := PaymentListContext{}
-	if v, ok := ctx.Get(keyCurrentUserID); ok {
-		rctx.CurrentUserID, _ = v.(string)
-	}
-	if ctx.Query("history") == "true" {
-		rctx.History = true
-	}
-	return &rctx, nil
-}
-
-// PaymentApproveContext provides the payment approve action context
-type PaymentApproveContext struct {
-	CurrentUserID string
-	PaymentID     string
-}
-
-// NewPaymentApproveContext parses the incoming request and create context
-func NewPaymentApproveContext(ctx *gin.Context) (*PaymentApproveContext, error) {
-	rctx := PaymentApproveContext{}
-	if v, ok := ctx.Get(keyCurrentUserID); ok {
-		rctx.CurrentUserID, _ = v.(string)
-	}
-	rctx.PaymentID = ctx.Param("paymentID")
-	return &rctx, nil
-}
-
-// PaymentRejectContext provides the payment reject action context
-type PaymentRejectContext struct {
-	CurrentUserID string
-	PaymentID     string
-}
-
-// NewPaymentRejectContext parses the incoming request and create context
-func NewPaymentRejectContext(ctx *gin.Context) (*PaymentRejectContext, error) {
-	rctx := PaymentRejectContext{}
-	if v, ok := ctx.Get(keyCurrentUserID); ok {
-		rctx.CurrentUserID, _ = v.(string)
-	}
-	rctx.PaymentID = ctx.Param("paymentID")
-	return &rctx, nil
-}
-
 // RenderIndexContext provides the render index action context
 // use for render static file
 type RenderIndexContext struct{}

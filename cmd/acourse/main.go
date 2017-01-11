@@ -10,7 +10,9 @@ import (
 
 	"github.com/acoshift/acourse/pkg/app"
 	"github.com/acoshift/acourse/pkg/ctrl"
+	"github.com/acoshift/acourse/pkg/service/email"
 	"github.com/acoshift/acourse/pkg/service/health"
+	"github.com/acoshift/acourse/pkg/service/payment"
 	"github.com/acoshift/acourse/pkg/service/user"
 	"github.com/acoshift/acourse/pkg/store"
 	"github.com/acoshift/go-firebase-admin"
@@ -65,6 +67,13 @@ func main() {
 		User:     cfg.Email.User,
 		Password: cfg.Email.Password,
 	})
+	emailService := email.New(email.Config{
+		From:     cfg.Email.From,
+		Server:   cfg.Email.Server,
+		Port:     cfg.Email.Port,
+		User:     cfg.Email.User,
+		Password: cfg.Email.Password,
+	})
 
 	ctrl.StartNotiPayment(db)
 
@@ -72,8 +81,8 @@ func main() {
 	courseCtrl := ctrl.NewCourseController(db)
 	app.MountHealthService(service, health.New())
 	app.MountUserService(service, user.New(db))
+	app.MountPaymentService(service, payment.New(db, firAuth, emailService))
 	app.MountCourseController(service.Group("/api/course"), courseCtrl)
-	app.MountPaymentController(service.Group("/api/payment"), ctrl.NewPaymentController(db, firAuth))
 	app.MountRenderController(service, ctrl.NewRenderController(db, courseCtrl))
 
 	hostPort := net.JoinHostPort("0.0.0.0", os.Getenv("PORT"))

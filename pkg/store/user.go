@@ -60,9 +60,13 @@ func (c *DB) UserGet(userID string) (*model.User, error) {
 
 // UserGetMulti retrieves multiple users from database
 func (c *DB) UserGetMulti(ctx context.Context, userIDs []string) ([]*model.User, error) {
-	users := make([]*model.User, 0, len(userIDs))
+	if len(userIDs) == 0 {
+		return []*model.User{}, nil
+	}
 
+	users := make([]*model.User, 0, len(userIDs))
 	keys := make([]*datastore.Key, 0, len(userIDs))
+
 	// try get in cache first
 	for _, id := range userIDs {
 		if c := cacheUser.Get(id); c != nil {
@@ -76,10 +80,19 @@ func (c *DB) UserGetMulti(ctx context.Context, userIDs []string) ([]*model.User,
 		return users, nil
 	}
 
-	xs := users[len(users):]
-	err := c.client.GetMulti(ctx, keys, &xs)
-	if err != nil {
+	xs := make([]*model.User, len(keys))
+	err := c.client.GetMulti(ctx, keys, xs)
+	if multiError(err) {
 		return nil, err
+	}
+
+	for i, x := range xs {
+		if x == nil {
+			x = &model.User{}
+		}
+		x.SetKey(keys[i])
+		users = append(users, x)
+		cacheUser.Set(x.ID, x)
 	}
 	return users, nil
 }

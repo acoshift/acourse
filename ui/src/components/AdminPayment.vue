@@ -1,6 +1,8 @@
 <template lang="pug">
   .ui.segment
     h3.ui.header Payments
+    .ui.basic.segment
+      .ui.green.button(@click="approveAll") Approve All
     table.ui.compact.selectable.celled.table
       thead
         tr
@@ -57,7 +59,7 @@ export default {
     approve (x) {
       if (!window.confirm(`Approve ${x.user.name} to ${x.course.title} ?`)) return
       Loader.start('approve')
-      Payment.approve(x.id)
+      Payment.approve([x.id])
         .finally(() => { Loader.stop('approve') })
         .subscribe(
           () => {
@@ -68,8 +70,19 @@ export default {
     reject (x) {
       if (!window.confirm(`Reject ${x.user.name} from ${x.course.title} ?`)) return
       Loader.start('reject')
-      Payment.reject(x.id)
+      Payment.reject([x.id])
         .finally(() => { Loader.stop('reject') })
+        .subscribe(
+          () => {
+            this.refresh++
+          }
+        )
+    },
+    approveAll () {
+      if (!window.confirm(`Approve all payments?`)) return
+      Loader.start('approve')
+      Payment.approve(this.list.map((x) => x.id))
+        .finally(() => { Loader.stop('approve') })
         .subscribe(
           () => {
             this.refresh++

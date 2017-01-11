@@ -1,6 +1,7 @@
 package store
 
 import (
+	"context"
 	"time"
 
 	"cloud.google.com/go/datastore"
@@ -254,4 +255,43 @@ func (c *DB) CourseGetAllByIDs(courseIDs []string) ([]*model.Course, error) {
 // CoursePurge purges all users
 func (c *DB) CoursePurge() error {
 	return c.purge(kindCourse)
+}
+
+// CourseGetMulti retrieves multiple courses from database
+func (c *DB) CourseGetMulti(ctx context.Context, courseIDs []string) ([]*model.Course, error) {
+	if len(courseIDs) == 0 {
+		return []*model.Course{}, nil
+	}
+
+	courses := make([]*model.Course, 0, len(courseIDs))
+	keys := make([]*datastore.Key, 0, len(courseIDs))
+
+	for _, id := range courseIDs {
+		if c := cacheCourse.Get(id); c != nil {
+			courses = append(courses, c.(*model.Course))
+		} else {
+			tempID := idInt(id)
+			if tempID != 0 {
+				keys = append(keys, datastore.IDKey(kindCourse, tempID, nil))
+			}
+		}
+	}
+	if len(keys) == 0 {
+		return courses, nil
+	}
+
+	xs := make([]*model.Course, len(keys))
+	err := c.client.GetMulti(ctx, keys, xs)
+	if multiError(err) {
+		return nil, err
+	}
+	for i, x := range xs {
+		if x == nil {
+			continue
+		}
+		x.SetKey(keys[i])
+		courses = append(courses, x)
+		cacheCourse.SetTTL(x.ID, x, time.Minute)
+	}
+	return courses, nil
 }

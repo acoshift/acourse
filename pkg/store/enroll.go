@@ -1,6 +1,8 @@
 package store
 
 import (
+	"context"
+
 	"cloud.google.com/go/datastore"
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/gotcha"
@@ -134,4 +136,48 @@ func (c *DB) EnrollCourseCount(courseID string) (int, error) {
 
 	cacheEnrollCount.Set(courseID, r)
 	return r, nil
+}
+
+// EnrollSaveMulti saves multiple enrolls to database
+func (c *DB) EnrollSaveMulti(ctx context.Context, enrolls []*model.Enroll) error {
+	keys := make([]*datastore.Key, 0, len(enrolls))
+
+	for _, enroll := range enrolls {
+		enroll.Stamp()
+		keys = append(keys, datastore.IncompleteKey(kindEnroll, nil))
+	}
+
+	var pKey []*datastore.PendingKey
+
+	commit, err := c.client.RunInTransaction(ctx, func(tx *datastore.Transaction) error {
+		var t model.Enroll
+		var err error
+		for _, enroll := range enrolls {
+
+			q := datastore.
+				NewQuery(kindEnroll).
+				Filter("UserID =", enroll.UserID).
+				Filter("CourseID =", enroll.CourseID).
+				Limit(1).
+				Transaction(tx)
+
+			err = c.findFirst(ctx, q, &t)
+			if err == nil {
+				return ErrConflict("enroll already exists")
+			}
+		}
+
+		pKey, err = tx.PutMulti(keys, enrolls)
+		return err
+	})
+	if err != nil {
+		return err
+	}
+
+	for i, enroll := range enrolls {
+		enroll.SetKey(commit.Key(pKey[i]))
+		cacheEnrollCount.Unset(enroll.CourseID)
+	}
+
+	return nil
 }

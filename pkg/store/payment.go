@@ -1,6 +1,8 @@
 package store
 
 import (
+	"context"
+
 	"cloud.google.com/go/datastore"
 	"github.com/acoshift/acourse/pkg/model"
 )
@@ -70,6 +72,28 @@ func (c *DB) PaymentSave(x *model.Payment) error {
 	return nil
 }
 
+// PaymentSaveMulti saves multiple payments to database
+func (c *DB) PaymentSaveMulti(ctx context.Context, payments []*model.Payment) error {
+	keys := make([]*datastore.Key, 0, len(payments))
+
+	for _, payment := range payments {
+		payment.Stamp()
+		if payment.Key() == nil {
+			payment.SetKey(datastore.IncompleteKey(kindPayment, nil))
+		}
+		keys = append(keys, payment.Key())
+	}
+
+	keys, err := c.client.PutMulti(ctx, keys, payments)
+	if err != nil {
+		return err
+	}
+	for i, payment := range payments {
+		payment.SetKey(keys[i])
+	}
+	return nil
+}
+
 // PaymentGet retrieves a payment from database
 func (c *DB) PaymentGet(paymentID string) (*model.Payment, error) {
 	id := idInt(paymentID)
@@ -113,4 +137,33 @@ func (c *DB) PaymentFind(userID, courseID string, status model.PaymentStatus) (*
 		return nil, err
 	}
 	return &x, nil
+}
+
+// PaymentGetMulti retrieves multiple payments from database
+func (c *DB) PaymentGetMulti(ctx context.Context, paymentIDs []string) ([]*model.Payment, error) {
+	if len(paymentIDs) == 0 {
+		return []*model.Payment{}, nil
+	}
+
+	keys := make([]*datastore.Key, 0, len(paymentIDs))
+	for _, id := range paymentIDs {
+		tempID := idInt(id)
+		if tempID != 0 {
+			keys = append(keys, datastore.IDKey(kindPayment, tempID, nil))
+		}
+	}
+
+	payments := make([]*model.Payment, len(keys))
+	err := c.client.GetMulti(ctx, keys, payments)
+	if multiError(err) {
+		return nil, err
+	}
+
+	for i, x := range payments {
+		if x == nil {
+			continue
+		}
+		x.SetKey(keys[i])
+	}
+	return payments, nil
 }

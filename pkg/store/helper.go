@@ -44,6 +44,25 @@ func notFound(err error) bool {
 	return err == iterator.Done || err == datastore.ErrNoSuchEntity
 }
 
+func multiError(err error) bool {
+	if err == nil {
+		return false
+	}
+	if errs, ok := err.(datastore.MultiError); ok {
+		hasError := false
+		for _, err := range errs {
+			if _, ok := err.(*datastore.ErrFieldMismatch); err != datastore.ErrNoSuchEntity && !ok {
+				hasError = true
+				break
+			}
+		}
+		if hasError {
+			return true
+		}
+	}
+	return false
+}
+
 func (c *DB) getAll(ctx context.Context, q *datastore.Query, dst interface{}) ([]*datastore.Key, error) {
 	keys, err := c.client.GetAll(ctx, q, dst)
 	if datastoreError(err) {

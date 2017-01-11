@@ -167,23 +167,6 @@ func ToCourseContents(ps []*payload.CourseContent) []model.CourseContent {
 	return r
 }
 
-// ToPaymentView builds Payment view from a Payment model
-func ToPaymentView(m *model.Payment, user *view.UserTiny, course *view.CourseMini) *view.Payment {
-	return &view.Payment{
-		ID:            m.ID,
-		OriginalPrice: m.OriginalPrice,
-		Price:         m.Price,
-		Code:          m.Code,
-		Status:        string(m.Status),
-		URL:           m.URL,
-		User:          user,
-		Course:        course,
-		CreatedAt:     m.CreatedAt,
-		UpdatedAt:     m.UpdatedAt,
-		At:            m.At,
-	}
-}
-
 // ToCourseMiniView builds Course mini view from a course model
 func ToCourseMiniView(m *model.Course) *view.CourseMini {
 	return &view.CourseMini{

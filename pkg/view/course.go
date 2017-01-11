@@ -2,6 +2,8 @@ package view
 
 import (
 	"time"
+
+	"github.com/acoshift/acourse/pkg/model"
 )
 
 // Course type
@@ -77,6 +79,9 @@ type CourseMini struct {
 	Title string `json:"title"`
 }
 
+// CourseMiniCollection type
+type CourseMiniCollection []*CourseMini
+
 // CourseTinyCollection type
 type CourseTinyCollection []*CourseTiny
 
@@ -90,3 +95,20 @@ type CourseContent struct {
 
 // CourseContentCollection type
 type CourseContentCollection []*CourseContent
+
+// ToCourseMini builds a course mini view from a course model
+func ToCourseMini(m *model.Course) *CourseMini {
+	return &CourseMini{
+		ID:    m.ID,
+		Title: m.Title,
+	}
+}
+
+// ToCourseMiniCollection builds a course mini collection view from course models
+func ToCourseMiniCollection(ms []*model.Course) CourseMiniCollection {
+	rs := make(CourseMiniCollection, len(ms))
+	for i := range ms {
+		rs[i] = ToCourseMini(ms[i])
+	}
+	return rs
+}
