@@ -7,6 +7,7 @@ import (
 
 	"github.com/acoshift/acourse/pkg/app"
 	"github.com/acoshift/acourse/pkg/ctrl"
+	"github.com/acoshift/acourse/pkg/service/health"
 	"github.com/acoshift/acourse/pkg/service/user"
 	"github.com/acoshift/acourse/pkg/store"
 	"github.com/acoshift/go-firebase-admin"
@@ -63,7 +64,7 @@ func main() {
 
 	// mount controllers
 	courseCtrl := ctrl.NewCourseController(db)
-	app.MountHealthController(service.Group("/_ah"), ctrl.NewHealthController())
+	app.MountHealthService(service, health.New())
 	app.MountUserService(service, user.New(db))
 	app.MountCourseController(service.Group("/api/course"), courseCtrl)
 	app.MountPaymentController(service.Group("/api/payment"), ctrl.NewPaymentController(db, firAuth))

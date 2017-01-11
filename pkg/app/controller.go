@@ -5,28 +5,6 @@ import (
 	"gopkg.in/gin-gonic/gin.v1"
 )
 
-// HealthController is the controller interface for the Health actions
-type HealthController interface {
-	Health(*HealthHealthContext) error
-}
-
-// MountHealthController mounts a Health resource controller on the given service
-func MountHealthController(service *gin.RouterGroup, ctrl HealthController) {
-	service.GET("/health", func(ctx *gin.Context) {
-		rctx, err := NewHealthHealthContext(ctx)
-		if err != nil {
-			handleError(ctx, err)
-			return
-		}
-		err = ctrl.Health(rctx)
-		if err != nil {
-			handleError(ctx, err)
-		} else {
-			handleSuccess(ctx)
-		}
-	})
-}
-
 // CourseController is the controller interface for course actions
 type CourseController interface {
 	Show(*CourseShowContext) (interface{}, error)

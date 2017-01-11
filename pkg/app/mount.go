@@ -46,3 +46,15 @@ func MountUserService(service *gin.Engine, s UserService) {
 		handleSuccess(ctx)
 	})
 }
+
+// MountHealthService mounts a Health service
+func MountHealthService(service *gin.Engine, s HealthService) {
+	service.GET("/acourse.HealthService/Check", func(ctx *gin.Context) {
+		err := s.Check(ctx.Request.Context())
+		if err != nil {
+			handleError(ctx, err)
+			return
+		}
+		handleSuccess(ctx)
+	})
+}

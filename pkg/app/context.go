@@ -6,14 +6,6 @@ import (
 	"gopkg.in/gin-gonic/gin.v1"
 )
 
-// HealthHealthContext provides the health health action context
-type HealthHealthContext struct{}
-
-// NewHealthHealthContext parses the incoming request and create context
-func NewHealthHealthContext(ctx *gin.Context) (*HealthHealthContext, error) {
-	return &HealthHealthContext{}, nil
-}
-
 // CourseShowContext provides the course show action context
 type CourseShowContext struct {
 	CurrentUserID string

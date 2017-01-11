@@ -7,6 +7,11 @@ import (
 	"github.com/acoshift/acourse/pkg/view"
 )
 
+// HealthService interface
+type HealthService interface {
+	Check(context.Context) error
+}
+
 // UserService interface
 type UserService interface {
 	GetUsers(context.Context, *IDsRequest) (*UsersReply, error)
