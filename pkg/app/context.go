@@ -6,48 +6,6 @@ import (
 	"gopkg.in/gin-gonic/gin.v1"
 )
 
-// UserShowContext provides the user show action context
-type UserShowContext struct {
-	CurrentUserID string
-	UserID        string
-}
-
-// NewUserShowContext parses the incoming request and create context
-func NewUserShowContext(ctx *gin.Context) (*UserShowContext, error) {
-	rctx := UserShowContext{}
-	if v, ok := ctx.Get(keyCurrentUserID); ok {
-		rctx.CurrentUserID, _ = v.(string)
-	}
-	rctx.UserID = ctx.Param("userID")
-	return &rctx, nil
-}
-
-// UserUpdateContext provides the user update action context
-type UserUpdateContext struct {
-	CurrentUserID string
-	UserID        string
-	Payload       *payload.User
-}
-
-// NewUserUpdateContext parses the incoming request and create context
-func NewUserUpdateContext(ctx *gin.Context) (*UserUpdateContext, error) {
-	rctx := UserUpdateContext{}
-	if v, ok := ctx.Get(keyCurrentUserID); ok {
-		rctx.CurrentUserID, _ = v.(string)
-	}
-	rctx.UserID = ctx.Param("userID")
-	var rp payload.RawUser
-	err := ctx.BindJSON(&rp)
-	if err != nil {
-		return nil, httperror.BadRequestWith(err)
-	}
-	if err = rp.Validate(); err != nil {
-		return nil, httperror.BadRequestWith(err)
-	}
-	rctx.Payload = rp.Payload()
-	return &rctx, nil
-}
-
 // HealthHealthContext provides the health health action context
 type HealthHealthContext struct{}
 

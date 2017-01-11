@@ -5,43 +5,6 @@ import (
 	"gopkg.in/gin-gonic/gin.v1"
 )
 
-// UserController is the controller interface for the User actions
-type UserController interface {
-	Show(*UserShowContext) (interface{}, error)
-	Update(*UserUpdateContext) error
-}
-
-// MountUserController mounts a User resource controller on the given service
-func MountUserController(service *gin.RouterGroup, ctrl UserController) {
-	service.GET("/:userID", func(ctx *gin.Context) {
-		rctx, err := NewUserShowContext(ctx)
-		if err != nil {
-			handleError(ctx, err)
-			return
-		}
-		res, err := ctrl.Show(rctx)
-		if err != nil {
-			handleError(ctx, err)
-		} else {
-			handleOK(ctx, res)
-		}
-	})
-
-	service.PATCH("/:userID", func(ctx *gin.Context) {
-		rctx, err := NewUserUpdateContext(ctx)
-		if err != nil {
-			handleError(ctx, err)
-			return
-		}
-		err = ctrl.Update(rctx)
-		if err != nil {
-			handleError(ctx, err)
-		} else {
-			handleSuccess(ctx)
-		}
-	})
-}
-
 // HealthController is the controller interface for the Health actions
 type HealthController interface {
 	Health(*HealthHealthContext) error

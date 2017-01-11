@@ -1,5 +1,6 @@
 import Firebase from './firebase'
 import API from './api'
+import RPC from './rpc'
 import Auth from './auth'
 import User from './user'
 import Course from './course'
@@ -11,6 +12,7 @@ import Payment from './payment'
 export {
   Firebase,
   API,
+  RPC,
   Auth,
   User,
   Course,

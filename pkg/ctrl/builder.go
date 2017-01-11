@@ -6,7 +6,7 @@ import (
 	"github.com/acoshift/acourse/pkg/view"
 )
 
-// ToUserView builds a UserView from a User model
+// ToUserView builds an UserView from a User model
 func ToUserView(m *model.User) *view.User {
 	return &view.User{
 		ID:       m.ID,
@@ -17,7 +17,16 @@ func ToUserView(m *model.User) *view.User {
 	}
 }
 
-// ToUserMeView builds a UserMeView from a User model
+// ToUserCollectionView builds an UserCollection from User models
+func ToUserCollectionView(ms []*model.User) view.UserCollection {
+	rs := make(view.UserCollection, len(ms))
+	for i := range ms {
+		rs[i] = ToUserView(ms[i])
+	}
+	return rs
+}
+
+// ToUserMeView builds an UserMeView from a User model
 func ToUserMeView(m *model.User, role *view.Role) *view.UserMe {
 	return &view.UserMe{
 		ID:       m.ID,
@@ -29,7 +38,7 @@ func ToUserMeView(m *model.User, role *view.Role) *view.UserMe {
 	}
 }
 
-// ToUserTinyView builds a UserTinyView from a User model
+// ToUserTinyView builds an UserTinyView from a User model
 func ToUserTinyView(m *model.User) *view.UserTiny {
 	return &view.UserTiny{
 		ID:       m.ID,

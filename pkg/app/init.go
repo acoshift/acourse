@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"strings"
@@ -9,6 +10,15 @@ import (
 	"github.com/acoshift/httperror"
 	"github.com/google/uuid"
 	"gopkg.in/gin-gonic/gin.v1"
+)
+
+// ContextKey is the key for app's context
+type ContextKey int
+
+// Predefined context keys
+const (
+	KeyCurrentUserID ContextKey = iota
+	KeyRequestID
 )
 
 const (
@@ -49,11 +59,13 @@ func jwtMiddleware(ctx *gin.Context) {
 		ctx.Abort()
 		return
 	}
+	ctx.Request = ctx.Request.WithContext(context.WithValue(ctx.Request.Context(), KeyCurrentUserID, claims.UserID))
 	ctx.Set(keyCurrentUserID, claims.UserID)
 }
 
 func requestIDMiddleware(ctx *gin.Context) {
 	rid := uuid.New().String()
 	ctx.Header("X-Request-Id", rid)
+	ctx.Request = ctx.Request.WithContext(context.WithValue(ctx.Request.Context(), KeyRequestID, rid))
 	ctx.Set(keyRequestID, rid)
 }

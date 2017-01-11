@@ -1,6 +1,7 @@
 package store
 
 import (
+	"context"
 	"log"
 	"time"
 
@@ -55,6 +56,32 @@ func (c *DB) UserGet(userID string) (*model.User, error) {
 
 	cacheUser.Set(userID, &x)
 	return &x, nil
+}
+
+// UserGetMulti retrieves multiple users from database
+func (c *DB) UserGetMulti(ctx context.Context, userIDs []string) ([]*model.User, error) {
+	users := make([]*model.User, 0, len(userIDs))
+
+	keys := make([]*datastore.Key, 0, len(userIDs))
+	// try get in cache first
+	for _, id := range userIDs {
+		if c := cacheUser.Get(id); c != nil {
+			users = append(users, c.(*model.User))
+		} else {
+			keys = append(keys, datastore.NameKey(kindUser, id, nil))
+		}
+	}
+
+	if len(keys) == 0 {
+		return users, nil
+	}
+
+	xs := users[len(users):]
+	err := c.client.GetMulti(ctx, keys, &xs)
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
 }
 
 // UserMustGet retrieves user from database

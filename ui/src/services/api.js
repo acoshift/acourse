@@ -28,35 +28,35 @@ const justNull = Observable.of(null)
 const get = (url, requireAuth) => getConfig()
   .flatMap((config) =>
     ifThen(requireAuth, config.isAuth())
-      ? Observable.fromPromise(axios.get(API_URL + url, config))
+      ? Observable.fromPromise(axios.get(API_URL + '/api' + url, config))
       : justNull)
   .map(getResponse)
 
 const post = (url, data, requireAuth) => getConfig()
   .flatMap((config) =>
     ifThen(requireAuth, config.isAuth())
-      ? Observable.fromPromise(axios.post(API_URL + url, data, config))
+      ? Observable.fromPromise(axios.post(API_URL + '/api' + url, data, config))
       : justNull)
   .map(getResponse)
 
 const put = (url, data, requireAuth) => getConfig()
   .flatMap((config) =>
     ifThen(requireAuth, config.isAuth())
-      ? Observable.fromPromise(axios.put(API_URL + url, data, config))
+      ? Observable.fromPromise(axios.put(API_URL + '/api' + url, data, config))
       : justNull)
   .map(getResponse)
 
 const patch = (url, data, requireAuth) => getConfig()
   .flatMap((config) =>
     ifThen(requireAuth, config.isAuth())
-      ? Observable.fromPromise(axios.patch(API_URL + url, data, config))
+      ? Observable.fromPromise(axios.patch(API_URL + '/api' + url, data, config))
       : justNull)
   .map(getResponse)
 
 const del = (url, requireAuth) => getConfig()
   .flatMap((config) =>
     ifThen(requireAuth, config.isAuth())
-      ? Observable.fromPromise(axios.delete(API_URL + url, config))
+      ? Observable.fromPromise(axios.delete(API_URL + '/api' + url, config))
       : justNull)
   .map(getResponse)
 

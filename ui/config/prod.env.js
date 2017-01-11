@@ -7,5 +7,5 @@ module.exports = {
     storageBucket: 'acourse-d9d0a.appspot.com',
     messagingSenderId: '582047384847'
   }`,
-  API_URL: '"https://acourse.io/api"'
+  API_URL: '"https://acourse.io"'
 }

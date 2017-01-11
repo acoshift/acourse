@@ -58,3 +58,6 @@ indexes: project
 
 cleanup-indexes: project
 	gcloud preview datastore cleanup-indexes index.yaml
+
+proto:
+	protoc -I acourse/ acourse/acourse.proto --go_out=plugins=grpc:acourse
