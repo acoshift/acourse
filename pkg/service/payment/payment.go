@@ -241,3 +241,25 @@ https://acourse.io`
 		}
 	}
 }
+
+// StartNotification starts payment notification
+func StartNotification(s Store, email app.EmailService) {
+	go func() {
+		for {
+			// check is payments have status waiting
+			log.Println("Run Notification Payment")
+			payments, err := s.PaymentList(store.PaymentListOptionStatus(model.PaymentStatusWaiting))
+			if err == nil && len(payments) > 0 {
+				err = email.SendEmail(nil, &app.EmailRequest{
+					To:      []string{"acoshift@gmail.com", "k.chalermsook@gmail.com"},
+					Subject: "Acourse - Payment Received",
+					Body:    fmt.Sprintf("%d payments pending", len(payments)),
+				})
+				if err != nil {
+					log.Println(err)
+				}
+			}
+			time.Sleep(3 * time.Hour)
+		}
+	}()
+}

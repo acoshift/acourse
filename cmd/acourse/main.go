@@ -76,7 +76,7 @@ func main() {
 		Password: cfg.Email.Password,
 	})
 
-	ctrl.StartNotiPayment(db)
+	payment.StartNotification(db, emailService)
 
 	// mount controllers
 	courseCtrl := ctrl.NewCourseController(db)
