@@ -5,7 +5,6 @@ import (
 
 	"github.com/acoshift/acourse/pkg/app"
 	"github.com/acoshift/acourse/pkg/store"
-	"github.com/acoshift/acourse/pkg/view"
 	"github.com/acoshift/gotcha"
 )
 
@@ -18,6 +17,15 @@ type RenderController struct {
 // NewRenderController creates controller
 func NewRenderController(db *store.DB, courseCtrl app.CourseController) *RenderController {
 	return &RenderController{db, courseCtrl}
+}
+
+// RenderIndex type
+type RenderIndex struct {
+	Title       string
+	Description string
+	Image       string
+	URL         string
+	State       map[string]interface{}
 }
 
 var cacheRender = gotcha.New()
@@ -36,7 +44,7 @@ func (c *RenderController) Index(ctx *app.RenderIndexContext) (interface{}, erro
 		go refill()
 	}
 
-	return &view.RenderIndex{
+	return &RenderIndex{
 		Title:       "Acourse",
 		Description: "Online courses for everyone",
 		Image:       "https://acourse.io/static/acourse-og.jpg",
@@ -57,7 +65,7 @@ func (c *RenderController) Course(ctx *app.RenderCourseContext) (interface{}, er
 	if !ok {
 		return nil, nil
 	}
-	r := &view.RenderIndex{
+	r := &RenderIndex{
 		Title:       course.Title,
 		Description: course.ShortDescription,
 		Image:       course.Photo,
