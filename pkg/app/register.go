@@ -123,4 +123,13 @@ func RegisterCourseService(service *gin.Engine, s CourseService) {
 		}
 		handleOK(ctx, res.Expose())
 	})
+
+	service.GET("/acourse.CourseService/ListEnrolledCourses", func(ctx *gin.Context) {
+		res, err := s.ListEnrolledCourses(ctx.Request.Context())
+		if err != nil {
+			handleError(ctx, err)
+			return
+		}
+		handleOK(ctx, res.Expose())
+	})
 }

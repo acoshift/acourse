@@ -29,6 +29,7 @@ type PaymentService interface {
 // CourseService interface
 type CourseService interface {
 	ListCourses(context.Context, *CourseListRequest) (*CoursesReply, error)
+	ListEnrolledCourses(context.Context) (*CoursesReply, error)
 }
 
 // EmailService interface
@@ -75,8 +76,9 @@ type EmailRequest struct {
 
 // CourseListRequest type
 type CourseListRequest struct {
-	Public  *bool `json:"public"`
-	Student bool  `json:"student"`
+	Public      *bool  `json:"public"`
+	EnrollCount bool   `json:"enrollCount"`
+	Owner       string `json:"owner"`
 }
 
 // UsersReply type
@@ -126,19 +128,19 @@ func (reply *PaymentsReply) Expose() interface{} {
 
 // CoursesReply type
 type CoursesReply struct {
-	Courses  model.Courses
-	Users    model.Users
-	Students map[string]int
+	Courses     model.Courses
+	Users       model.Users
+	EnrollCount map[string]int
 }
 
 // Expose exposes reply
 func (reply *CoursesReply) Expose() interface{} {
-	r := map[string]interface{}{
-		"courses": reply.Courses.Expose(),
-		"users":   reply.Users.ExposeMap(),
+	r := map[string]interface{}{"courses": reply.Courses.Expose()}
+	if reply.Users != nil {
+		r["users"] = reply.Users.ExposeMap()
 	}
-	if reply.Students != nil {
-		r["students"] = reply.Students
+	if reply.EnrollCount != nil {
+		r["enrollCount"] = reply.EnrollCount
 	}
 	return r
 }

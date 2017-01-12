@@ -31,15 +31,15 @@ const mapCourseReply = (reply) => map(reply.courses, (course) => {
     ...course,
     owner: reply.users[course.owner]
   }
-  if (reply.students) {
-    res.student = reply.students[course.id]
+  if (reply.enrollCount) {
+    res.student = reply.enrollCount[course.id]
   }
   return res
 })
 
 export default {
   fetchList () {
-    RPC.post('/acourse.CourseService/ListCourses', { student: true })
+    RPC.post('/acourse.CourseService/ListCourses', { enrollCount: true })
       .map(mapCourseReply)
       .subscribe((courses) => {
         $courses.next(courses)

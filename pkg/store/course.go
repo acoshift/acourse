@@ -224,7 +224,7 @@ func (c *DB) CourseFind(courseURL string) (*model.Course, error) {
 }
 
 // CourseGetAllByIDs retrieves courses by given course ids
-func (c *DB) CourseGetAllByIDs(courseIDs []string) ([]*model.Course, error) {
+func (c *DB) CourseGetAllByIDs(courseIDs []string) (model.Courses, error) {
 	if len(courseIDs) == 0 {
 		return []*model.Course{}, nil
 	}
