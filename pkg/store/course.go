@@ -258,7 +258,7 @@ func (c *DB) CoursePurge() error {
 }
 
 // CourseGetMulti retrieves multiple courses from database
-func (c *DB) CourseGetMulti(ctx context.Context, courseIDs []string) ([]*model.Course, error) {
+func (c *DB) CourseGetMulti(ctx context.Context, courseIDs []string) (model.Courses, error) {
 	if len(courseIDs) == 0 {
 		return []*model.Course{}, nil
 	}

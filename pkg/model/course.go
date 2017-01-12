@@ -92,6 +92,7 @@ func (x *Course) Expose() interface{} {
 			"shortDescription": x.ShortDescription,
 			"description":      x.Description,
 			"photo":            x.Photo,
+			"owner":            x.Owner,
 			"start":            x.Start,
 			"url":              x.URL,
 			"video":            x.Video,
@@ -128,6 +129,7 @@ func (x *Course) Expose() interface{} {
 			"shortDescription": x.ShortDescription,
 			"description":      x.Description,
 			"photo":            x.Photo,
+			"owner":            x.Owner,
 			"start":            x.Start,
 			"url":              x.URL,
 			"type":             string(x.Type),
@@ -145,6 +147,7 @@ func (x *Course) Expose() interface{} {
 			"title":            x.Title,
 			"shortDescription": x.ShortDescription,
 			"photo":            x.Photo,
+			"owner":            x.Owner,
 			"start":            x.Start,
 			"url":              x.URL,
 			"type":             string(x.Type),
@@ -167,6 +170,15 @@ func (xs Courses) Expose() interface{} {
 	rs := make([]interface{}, len(xs))
 	for i, x := range xs {
 		rs[i] = x.Expose()
+	}
+	return rs
+}
+
+// ExposeMap exposes model as map
+func (xs Courses) ExposeMap() interface{} {
+	rs := map[string]interface{}{}
+	for _, x := range xs {
+		rs[x.ID] = x.Expose()
 	}
 	return rs
 }

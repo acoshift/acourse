@@ -1,6 +1,8 @@
 import { BehaviorSubject } from 'rxjs/BehaviorSubject'
 import API from './api'
+import RPC from './rpc'
 import find from 'lodash/find'
+import map from 'lodash/map'
 
 const $courses = new BehaviorSubject(false)
 const $course = new BehaviorSubject({})
@@ -24,17 +26,31 @@ if (window.$$state) {
   }
 }
 
+const mapCourseReply = (reply) => map(reply.courses, (course) => {
+  const res = {
+    ...course,
+    owner: reply.users[course.owner]
+  }
+  if (reply.students) {
+    res.student = reply.students[course.id]
+  }
+  return res
+})
+
 export default {
   fetchList () {
-    API.get('/course').subscribe((courses) => {
-      $courses.next(courses)
-    })
+    RPC.post('/acourse.CourseService/ListCourses', { student: true })
+      .map(mapCourseReply)
+      .subscribe((courses) => {
+        $courses.next(courses)
+      })
   },
   list () {
     return $courses.asObservable()
   },
   listAll () {
-    return API.get('/course?all=1', true)
+    return RPC.post('/acourse.CourseService/ListCourses', { public: false }, true)
+      .map(mapCourseReply)
   },
   fetch (url) {
     const ob = API.get(`/course/${url}`)

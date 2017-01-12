@@ -76,7 +76,7 @@ type EmailRequest struct {
 // CourseListRequest type
 type CourseListRequest struct {
 	Public  *bool `json:"public"`
-	Enrolls bool  `json:"enroll"`
+	Student bool  `json:"student"`
 }
 
 // UsersReply type
@@ -126,15 +126,19 @@ func (reply *PaymentsReply) Expose() interface{} {
 
 // CoursesReply type
 type CoursesReply struct {
-	Courses model.Courses
-	Users   *model.User
-	// Enrolls
+	Courses  model.Courses
+	Users    model.Users
+	Students map[string]int
 }
 
 // Expose exposes reply
 func (reply *CoursesReply) Expose() interface{} {
-	return map[string]interface{}{
+	r := map[string]interface{}{
 		"courses": reply.Courses.Expose(),
-		"users":   nil,
+		"users":   reply.Users.ExposeMap(),
 	}
+	if reply.Students != nil {
+		r["students"] = reply.Students
+	}
+	return r
 }

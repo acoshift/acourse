@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/acoshift/acourse/pkg/app"
-	"github.com/acoshift/acourse/pkg/ctrl"
 	"github.com/acoshift/acourse/pkg/service/course"
 	"github.com/acoshift/acourse/pkg/service/email"
 	"github.com/acoshift/acourse/pkg/service/health"
@@ -57,13 +56,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	ctrl.InitMail(ctrl.EmailConfig{
-		From:     cfg.Email.From,
-		Server:   cfg.Email.Server,
-		Port:     cfg.Email.Port,
-		User:     cfg.Email.User,
-		Password: cfg.Email.Password,
-	})
 	emailService := email.New(email.Config{
 		From:     cfg.Email.From,
 		Server:   cfg.Email.Server,
@@ -73,13 +65,13 @@ func main() {
 	})
 
 	// mount controllers
-	courseCtrl := ctrl.NewCourseController(db)
+	// courseCtrl := ctrl.NewCourseController(db)
 	app.RegisterHealthService(service, health.New())
 	app.RegisterUserService(service, user.New(db))
 	app.RegisterCourseService(service, course.New(db))
 	app.RegisterPaymentService(service, payment.New(db, firAuth, emailService))
-	app.MountCourseController(service.Group("/api/course"), courseCtrl)
-	app.MountRenderController(service, ctrl.NewRenderController(db, courseCtrl))
+	// app.MountCourseController(service.Group("/api/course"), courseCtrl)
+	// app.MountRenderController(service, ctrl.NewRenderController(db, courseCtrl))
 
 	if err := service.Run(":8080"); err != nil {
 		log.Fatal(err)

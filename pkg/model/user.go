@@ -69,3 +69,12 @@ func (xs Users) Expose() interface{} {
 	}
 	return rs
 }
+
+// ExposeMap exposes model as map
+func (xs Users) ExposeMap() interface{} {
+	rs := map[string]interface{}{}
+	for _, x := range xs {
+		rs[x.ID] = x.Expose()
+	}
+	return rs
+}

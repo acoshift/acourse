@@ -31,7 +31,7 @@ func RegisterUserService(service *gin.Engine, s UserService) {
 			handleError(ctx, err)
 			return
 		}
-		handleOK(ctx, res)
+		handleOK(ctx, res.Expose())
 	})
 
 	service.GET("/acourse.UserService/GetMe", func(ctx *gin.Context) {
@@ -40,7 +40,7 @@ func RegisterUserService(service *gin.Engine, s UserService) {
 			handleError(ctx, err)
 			return
 		}
-		handleOK(ctx, res)
+		handleOK(ctx, res.Expose())
 	})
 
 	service.POST("/acourse.UserService/UpdateMe", func(ctx *gin.Context) {
