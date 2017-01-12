@@ -11,7 +11,6 @@ type Course struct {
 	ID               string                  `json:"id"`
 	CreatedAt        time.Time               `json:"createdAt"`
 	UpdatedAt        time.Time               `json:"updatedAt"`
-	Owner            *UserTiny               `json:"owner"`
 	Title            string                  `json:"title"`
 	ShortDescription string                  `json:"shortDescription"`
 	Description      string                  `json:"description"`
@@ -39,7 +38,6 @@ type CoursePublic struct {
 	ID               string    `json:"id"`
 	CreatedAt        time.Time `json:"createdAt"`
 	UpdatedAt        time.Time `json:"updatedAt"`
-	Owner            *UserTiny `json:"owner"`
 	Title            string    `json:"title"`
 	ShortDescription string    `json:"shortDescription"`
 	Description      string    `json:"description"`
@@ -60,7 +58,6 @@ type CoursePublic struct {
 // CourseTiny type
 type CourseTiny struct {
 	ID               string    `json:"id"`
-	Owner            *UserTiny `json:"owner"`
 	Title            string    `json:"title"`
 	ShortDescription string    `json:"shortDescription"`
 	Photo            string    `json:"photo"`

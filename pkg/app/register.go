@@ -5,8 +5,8 @@ import (
 	"gopkg.in/gin-gonic/gin.v1"
 )
 
-// MountHealthService mounts a Health service
-func MountHealthService(service *gin.Engine, s HealthService) {
+// RegisterHealthService registers a Health service
+func RegisterHealthService(service *gin.Engine, s HealthService) {
 	service.GET("/acourse.HealthService/Check", func(ctx *gin.Context) {
 		err := s.Check(ctx.Request.Context())
 		if err != nil {
@@ -17,8 +17,8 @@ func MountHealthService(service *gin.Engine, s HealthService) {
 	})
 }
 
-// MountUserService mounts a User service
-func MountUserService(service *gin.Engine, s UserService) {
+// RegisterUserService registers a User service
+func RegisterUserService(service *gin.Engine, s UserService) {
 	service.POST("/acourse.UserService/GetUsers", func(ctx *gin.Context) {
 		req := new(IDsRequest)
 		err := ctx.BindJSON(req)
@@ -59,8 +59,8 @@ func MountUserService(service *gin.Engine, s UserService) {
 	})
 }
 
-// MountPaymentService mounts a payment service
-func MountPaymentService(service *gin.Engine, s PaymentService) {
+// RegisterPaymentService registers a payment service
+func RegisterPaymentService(service *gin.Engine, s PaymentService) {
 	service.POST("/acourse.PaymentService/ListPayments", func(ctx *gin.Context) {
 		req := new(PaymentListRequest)
 		err := ctx.BindJSON(req)
@@ -73,7 +73,7 @@ func MountPaymentService(service *gin.Engine, s PaymentService) {
 			handleError(ctx, err)
 			return
 		}
-		handleOK(ctx, res)
+		handleOK(ctx, res.Expose())
 	})
 
 	service.POST("/acourse.PaymentService/ApprovePayments", func(ctx *gin.Context) {
@@ -107,8 +107,8 @@ func MountPaymentService(service *gin.Engine, s PaymentService) {
 	})
 }
 
-// MountCourseService mounts a course service
-func MountCourseService(service *gin.Engine, s CourseService) {
+// RegisterCourseService registers a course service
+func RegisterCourseService(service *gin.Engine, s CourseService) {
 	service.POST("/acourse.CourseService/ListCourses", func(ctx *gin.Context) {
 		req := new(CourseListRequest)
 		err := ctx.BindJSON(req)

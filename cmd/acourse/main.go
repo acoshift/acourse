@@ -80,10 +80,10 @@ func main() {
 
 	// mount controllers
 	courseCtrl := ctrl.NewCourseController(db)
-	app.MountHealthService(service, health.New())
-	app.MountUserService(service, user.New(db))
-	app.MountCourseService(service, course.New(db))
-	app.MountPaymentService(service, payment.New(db, firAuth, emailService))
+	app.RegisterHealthService(service, health.New())
+	app.RegisterUserService(service, user.New(db))
+	app.RegisterCourseService(service, course.New(db))
+	app.RegisterPaymentService(service, payment.New(db, firAuth, emailService))
 	app.MountCourseController(service.Group("/api/course"), courseCtrl)
 	app.MountRenderController(service, ctrl.NewRenderController(db, courseCtrl))
 

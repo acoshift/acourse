@@ -9,20 +9,19 @@ import (
 	"github.com/acoshift/acourse/pkg/app"
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/acourse/pkg/store"
-	"github.com/acoshift/acourse/pkg/view"
 	"github.com/acoshift/go-firebase-admin"
 	"github.com/acoshift/httperror"
 )
 
 // Store is the payment store
 type Store interface {
-	PaymentList(opts ...store.PaymentListOption) ([]*model.Payment, error)
-	PaymentGetMulti(context.Context, []string) ([]*model.Payment, error)
-	PaymentSaveMulti(context.Context, []*model.Payment) error
+	PaymentList(opts ...store.PaymentListOption) (model.Payments, error)
+	PaymentGetMulti(context.Context, []string) (model.Payments, error)
+	PaymentSaveMulti(context.Context, model.Payments) error
 	UserGetMulti(context.Context, []string) (model.Users, error)
 	UserMustGet(string) (*model.User, error)
 	CourseGet(string) (*model.Course, error)
-	CourseGetMulti(context.Context, []string) ([]*model.Course, error)
+	CourseGetMulti(context.Context, []string) (model.Courses, error)
 	EnrollSaveMulti(context.Context, []*model.Enroll) error
 	RoleGet(string) (*model.Role, error)
 }
@@ -51,7 +50,7 @@ func (s *service) ListPayments(ctx context.Context, req *app.PaymentListRequest)
 		return nil, httperror.Forbidden
 	}
 
-	var payments []*model.Payment
+	var payments model.Payments
 	if req.History != nil && *req.History {
 		payments, err = s.store.PaymentList()
 	} else {
@@ -60,6 +59,7 @@ func (s *service) ListPayments(ctx context.Context, req *app.PaymentListRequest)
 	if err != nil {
 		return nil, err
 	}
+	payments.SetView(model.PaymentViewDefault)
 
 	userIDMap := map[string]bool{}
 	courseIDMap := map[string]bool{}
@@ -80,16 +80,18 @@ func (s *service) ListPayments(ctx context.Context, req *app.PaymentListRequest)
 	if err != nil {
 		return nil, err
 	}
+	users.SetView(model.UserViewTiny)
 
 	courses, err := s.store.CourseGetMulti(ctx, courseIDs)
 	if err != nil {
 		return nil, err
 	}
+	courses.SetView(model.CourseViewMini)
 
 	return &app.PaymentsReply{
-		Payments: view.ToPaymentCollection(payments),
-		Users:    view.ToUserTinyCollection(users),
-		Courses:  view.ToCourseMiniCollection(courses),
+		Payments: payments,
+		Users:    users,
+		Courses:  courses,
 	}, nil
 }
 

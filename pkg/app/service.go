@@ -5,7 +5,6 @@ import (
 
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/acourse/pkg/payload"
-	"github.com/acoshift/acourse/pkg/view"
 )
 
 // HealthService interface
@@ -111,9 +110,18 @@ func (reply *UserReply) Expose() interface{} {
 
 // PaymentsReply type
 type PaymentsReply struct {
-	Payments view.PaymentCollection    `json:"payments"`
-	Users    view.UserTinyCollection   `json:"users"`
-	Courses  view.CourseMiniCollection `json:"courses"`
+	Payments model.Payments
+	Users    model.Users
+	Courses  model.Courses
+}
+
+// Expose exposes reply
+func (reply *PaymentsReply) Expose() interface{} {
+	return map[string]interface{}{
+		"payments": reply.Payments.Expose(),
+		"users":    reply.Users.Expose(),
+		"courses":  reply.Courses.Expose(),
+	}
 }
 
 // CoursesReply type

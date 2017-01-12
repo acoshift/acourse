@@ -59,9 +59,9 @@ type CourseView int
 
 // CourseView
 const (
-	_ CourseView = iota
-	CourseViewDefault
+	CourseViewDefault CourseView = iota
 	CourseViewTiny
+	CourseViewMini
 )
 
 // SetView sets view to model
@@ -96,6 +96,11 @@ func (x *Course) Expose() interface{} {
 			"price":            x.Price,
 			"discountedPrice":  x.DiscountedPrice,
 			"discount":         x.Options.Discount,
+		}
+	case CourseViewMini:
+		return map[string]interface{}{
+			"id":    x.ID,
+			"title": x.Title,
 		}
 	default:
 		return nil
