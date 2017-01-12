@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import { Course } from 'services'
+import { Course, Auth } from 'services'
 import CourseHeader from './CourseHeader'
 import CourseVideo from './CourseVideo'
 import CourseDetail from './CourseDetail'
@@ -32,7 +32,10 @@ export default {
   subscriptions () {
     return {
       course: this.$$route
-        .flatMap((route) => Course.get(route.params.id))
+        .flatMap((route) => Course.get(route.params.id)),
+      currentUser: Auth.currentUser()
+        .flatMap(() => this.$$route.first())
+        .do((route) => Course.fetch(route.params.id))
     }
   }
 }
