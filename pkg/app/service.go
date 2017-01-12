@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 
+	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/acourse/pkg/payload"
 	"github.com/acoshift/acourse/pkg/view"
 )
@@ -24,6 +25,11 @@ type PaymentService interface {
 	ListPayments(context.Context, *PaymentListRequest) (*PaymentsReply, error)
 	ApprovePayments(context.Context, *IDsRequest) error
 	RejectPayments(context.Context, *IDsRequest) error
+}
+
+// CourseService interface
+type CourseService interface {
+	ListCourses(context.Context, *CourseListRequest) (*CoursesReply, error)
 }
 
 // EmailService interface
@@ -61,15 +67,46 @@ type PaymentListRequest struct {
 	History *bool `json:"history"`
 }
 
+// EmailRequest type
+type EmailRequest struct {
+	To      []string `json:"to"`
+	Subject string   `json:"subject"`
+	Body    string   `json:"body"`
+}
+
+// CourseListRequest type
+type CourseListRequest struct {
+	Public  *bool `json:"public"`
+	Enrolls bool  `json:"enroll"`
+}
+
 // UsersReply type
 type UsersReply struct {
-	Users view.UserCollection `json:"users"`
+	Users model.Users
+}
+
+// Expose exposes reply
+func (reply *UsersReply) Expose() interface{} {
+	return map[string]interface{}{
+		"users": reply.Users.Expose(),
+	}
 }
 
 // UserReply type
 type UserReply struct {
-	User *view.User `json:"user"`
-	Role *view.Role `json:"role,omitempty"`
+	User *model.User
+	Role *model.Role
+}
+
+// Expose exposes reply
+func (reply *UserReply) Expose() interface{} {
+	r := map[string]interface{}{
+		"user": reply.User.Expose(),
+	}
+	if reply.Role != nil {
+		r["role"] = reply.Role.Expose()
+	}
+	return r
 }
 
 // PaymentsReply type
@@ -79,9 +116,17 @@ type PaymentsReply struct {
 	Courses  view.CourseMiniCollection `json:"courses"`
 }
 
-// EmailRequest type
-type EmailRequest struct {
-	To      []string `json:"to"`
-	Subject string   `json:"subject"`
-	Body    string   `json:"body"`
+// CoursesReply type
+type CoursesReply struct {
+	Courses model.Courses
+	Users   *model.User
+	// Enrolls
+}
+
+// Expose exposes reply
+func (reply *CoursesReply) Expose() interface{} {
+	return map[string]interface{}{
+		"courses": reply.Courses.Expose(),
+		"users":   nil,
+	}
 }

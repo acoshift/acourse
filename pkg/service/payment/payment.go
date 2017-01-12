@@ -19,7 +19,7 @@ type Store interface {
 	PaymentList(opts ...store.PaymentListOption) ([]*model.Payment, error)
 	PaymentGetMulti(context.Context, []string) ([]*model.Payment, error)
 	PaymentSaveMulti(context.Context, []*model.Payment) error
-	UserGetMulti(context.Context, []string) ([]*model.User, error)
+	UserGetMulti(context.Context, []string) (model.Users, error)
 	UserMustGet(string) (*model.User, error)
 	CourseGet(string) (*model.Course, error)
 	CourseGetMulti(context.Context, []string) ([]*model.Course, error)

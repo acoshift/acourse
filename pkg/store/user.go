@@ -59,7 +59,7 @@ func (c *DB) UserGet(userID string) (*model.User, error) {
 }
 
 // UserGetMulti retrieves multiple users from database
-func (c *DB) UserGetMulti(ctx context.Context, userIDs []string) ([]*model.User, error) {
+func (c *DB) UserGetMulti(ctx context.Context, userIDs []string) (model.Users, error) {
 	if len(userIDs) == 0 {
 		return []*model.User{}, nil
 	}

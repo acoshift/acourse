@@ -5,7 +5,6 @@ import (
 
 	"github.com/acoshift/acourse/pkg/app"
 	"github.com/acoshift/acourse/pkg/model"
-	"github.com/acoshift/acourse/pkg/view"
 	"github.com/acoshift/httperror"
 )
 
@@ -16,7 +15,7 @@ func New(store Store) app.UserService {
 
 // Store is the store interface for user service
 type Store interface {
-	UserGetMulti(context.Context, []string) ([]*model.User, error)
+	UserGetMulti(context.Context, []string) (model.Users, error)
 	UserMustGet(string) (*model.User, error)
 	UserSave(*model.User) error
 	RoleGet(string) (*model.Role, error)
@@ -31,7 +30,8 @@ func (s *service) GetUsers(ctx context.Context, req *app.IDsRequest) (*app.Users
 	if err != nil {
 		return nil, err
 	}
-	return &app.UsersReply{Users: view.ToUserCollection(users)}, nil
+	users.SetView(model.UserViewDefault)
+	return &app.UsersReply{Users: users}, nil
 }
 
 func (s *service) GetMe(ctx context.Context) (*app.UserReply, error) {
@@ -47,7 +47,8 @@ func (s *service) GetMe(ctx context.Context) (*app.UserReply, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &app.UserReply{User: view.ToUser(user), Role: view.ToRole(role)}, nil
+	user.SetView(model.UserViewDefault)
+	return &app.UserReply{User: user, Role: role}, nil
 }
 
 func (s *service) UpdateMe(ctx context.Context, req *app.UserRequest) error {

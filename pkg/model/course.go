@@ -24,6 +24,9 @@ type Course struct {
 	EnrollDetail     string          `datastore:",noindex"`
 }
 
+// Courses model
+type Courses []*Course
+
 // CourseOption type
 type CourseOption struct {
 	Public     bool
@@ -50,3 +53,60 @@ const (
 	CourseTypeVideo CourseType = "video"
 	CourseTypeEbook CourseType = "ebook"
 )
+
+// CourseView type
+type CourseView int
+
+// CourseView
+const (
+	_ CourseView = iota
+	CourseViewDefault
+	CourseViewTiny
+)
+
+// SetView sets view to model
+func (x *Course) SetView(v CourseView) {
+	x.view = v
+}
+
+// SetView sets view to model
+func (xs Courses) SetView(v CourseView) {
+	for _, x := range xs {
+		x.SetView(v)
+	}
+}
+
+// Expose exposes model to view
+func (x *Course) Expose() interface{} {
+	if x.view == nil {
+		return nil
+	}
+	switch x.view.(CourseView) {
+	case CourseViewDefault:
+		return map[string]interface{}{}
+	case CourseViewTiny:
+		return map[string]interface{}{
+			"id":               x.ID,
+			"title":            x.Title,
+			"shortDescription": x.ShortDescription,
+			"photo":            x.Photo,
+			"start":            x.Start,
+			"url":              x.URL,
+			"type":             string(x.Type),
+			"price":            x.Price,
+			"discountedPrice":  x.DiscountedPrice,
+			"discount":         x.Options.Discount,
+		}
+	default:
+		return nil
+	}
+}
+
+// Expose exposes model to view
+func (xs Courses) Expose() interface{} {
+	rs := make([]interface{}, len(xs))
+	for i, x := range xs {
+		rs[i] = x.Expose()
+	}
+	return rs
+}

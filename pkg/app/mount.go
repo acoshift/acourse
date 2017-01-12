@@ -35,12 +35,12 @@ func MountUserService(service *gin.Engine, s UserService) {
 	})
 
 	service.GET("/acourse.UserService/GetMe", func(ctx *gin.Context) {
-		r, err := s.GetMe(ctx.Request.Context())
+		res, err := s.GetMe(ctx.Request.Context())
 		if err != nil {
 			handleError(ctx, err)
 			return
 		}
-		handleOK(ctx, r)
+		handleOK(ctx, res)
 	})
 
 	service.POST("/acourse.UserService/UpdateMe", func(ctx *gin.Context) {
@@ -65,7 +65,7 @@ func MountPaymentService(service *gin.Engine, s PaymentService) {
 		req := new(PaymentListRequest)
 		err := ctx.BindJSON(req)
 		if err != nil {
-			handleError(ctx, err)
+			handleError(ctx, httperror.BadRequestWith(err))
 			return
 		}
 		res, err := s.ListPayments(ctx.Request.Context(), req)
@@ -80,7 +80,7 @@ func MountPaymentService(service *gin.Engine, s PaymentService) {
 		req := new(IDsRequest)
 		err := ctx.BindJSON(req)
 		if err != nil {
-			handleError(ctx, err)
+			handleError(ctx, httperror.BadRequestWith(err))
 			return
 		}
 		err = s.ApprovePayments(ctx.Request.Context(), req)
@@ -95,7 +95,7 @@ func MountPaymentService(service *gin.Engine, s PaymentService) {
 		req := new(IDsRequest)
 		err := ctx.BindJSON(req)
 		if err != nil {
-			handleError(ctx, err)
+			handleError(ctx, httperror.BadRequestWith(err))
 			return
 		}
 		err = s.RejectPayments(ctx.Request.Context(), req)
@@ -104,5 +104,23 @@ func MountPaymentService(service *gin.Engine, s PaymentService) {
 			return
 		}
 		handleSuccess(ctx)
+	})
+}
+
+// MountCourseService mounts a course service
+func MountCourseService(service *gin.Engine, s CourseService) {
+	service.POST("/acourse.CourseService/ListCourses", func(ctx *gin.Context) {
+		req := new(CourseListRequest)
+		err := ctx.BindJSON(req)
+		if err != nil {
+			handleError(ctx, httperror.BadRequestWith(err))
+			return
+		}
+		res, err := s.ListCourses(ctx.Request.Context(), req)
+		if err != nil {
+			handleError(ctx, err)
+			return
+		}
+		handleOK(ctx, res.Expose())
 	})
 }

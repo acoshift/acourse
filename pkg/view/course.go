@@ -79,6 +79,9 @@ type CourseMini struct {
 	Title string `json:"title"`
 }
 
+// CourseCollection type
+type CourseCollection []*Course
+
 // CourseMiniCollection type
 type CourseMiniCollection []*CourseMini
 
@@ -95,6 +98,106 @@ type CourseContent struct {
 
 // CourseContentCollection type
 type CourseContentCollection []*CourseContent
+
+// ToCourse builds a course view from a course model
+func ToCourse(m *model.Course) *Course {
+	return &Course{
+		ID:               m.ID,
+		CreatedAt:        m.CreatedAt,
+		UpdatedAt:        m.UpdatedAt,
+		Title:            m.Title,
+		ShortDescription: m.ShortDescription,
+		Description:      m.Description,
+		Photo:            m.Photo,
+		Start:            m.Start,
+		URL:              m.URL,
+		Video:            m.Video,
+		Type:             string(m.Type),
+		Price:            m.Price,
+		DiscountedPrice:  m.DiscountedPrice,
+		Contents:         ToCourseContentCollection(m.Contents),
+		EnrollDetail:     m.EnrollDetail,
+		Enroll:           m.Options.Enroll,
+		Public:           m.Options.Public,
+		Attend:           m.Options.Attend,
+		Assignment:       m.Options.Assignment,
+		Discount:         m.Options.Discount,
+	}
+}
+
+// ToCoursePublic builds a course view from a course model
+func ToCoursePublic(m *model.Course) *Course {
+	return &Course{
+		ID:               m.ID,
+		CreatedAt:        m.CreatedAt,
+		UpdatedAt:        m.UpdatedAt,
+		Title:            m.Title,
+		ShortDescription: m.ShortDescription,
+		Description:      m.Description,
+		Photo:            m.Photo,
+		Start:            m.Start,
+		URL:              m.URL,
+		Video:            m.Video,
+		Type:             string(m.Type),
+		Price:            m.Price,
+		DiscountedPrice:  m.DiscountedPrice,
+		EnrollDetail:     m.EnrollDetail,
+		Enroll:           m.Options.Enroll,
+		Discount:         m.Options.Discount,
+	}
+}
+
+// ToCourseTiny builds a course tiny view from a course model
+func ToCourseTiny(m *model.Course) *Course {
+	return &Course{
+		ID:               m.ID,
+		Title:            m.Title,
+		ShortDescription: m.ShortDescription,
+		Photo:            m.Photo,
+		Start:            m.Start,
+		URL:              m.URL,
+		Type:             string(m.Type),
+		Price:            m.Price,
+		DiscountedPrice:  m.DiscountedPrice,
+		Discount:         m.Options.Discount,
+	}
+}
+
+// ToCourseCollection builds a course collection from course models
+func ToCourseCollection(ms []*model.Course) CourseCollection {
+	rs := make(CourseCollection, len(ms))
+	for i := range ms {
+		rs[i] = ToCourse(ms[i])
+	}
+	return rs
+}
+
+func ToCourses(ms []*model.Course, f func(*model.Course) *Course) CourseCollection {
+	rs := make(CourseCollection, len(ms))
+	for i := range ms {
+		rs[i] = f(ms[i])
+	}
+	return rs
+}
+
+// ToCourseContent builds a course content view from a course content model
+func ToCourseContent(m *model.CourseContent) *CourseContent {
+	return &CourseContent{
+		Title:       m.Title,
+		Description: m.Description,
+		Video:       m.Video,
+		DownloadURL: m.DownloadURL,
+	}
+}
+
+// ToCourseContentCollection builds a course content collection view from course content models
+func ToCourseContentCollection(ms []model.CourseContent) CourseContentCollection {
+	rs := make(CourseContentCollection, len(ms))
+	for i := range ms {
+		rs[i] = ToCourseContent(&ms[i])
+	}
+	return rs
+}
 
 // ToCourseMini builds a course mini view from a course model
 func ToCourseMini(m *model.Course) *CourseMini {

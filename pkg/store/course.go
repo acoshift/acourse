@@ -135,7 +135,7 @@ func (c *DB) CourseSave(x *model.Course) error {
 }
 
 // CourseList retrieves courses from database
-func (c *DB) CourseList(opts ...CourseListOption) ([]*model.Course, error) {
+func (c *DB) CourseList(opts ...CourseListOption) (model.Courses, error) {
 	ctx, cancel := getContext()
 	defer cancel()
 

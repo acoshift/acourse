@@ -7,6 +7,7 @@ import (
 
 	"github.com/acoshift/acourse/pkg/app"
 	"github.com/acoshift/acourse/pkg/ctrl"
+	"github.com/acoshift/acourse/pkg/service/course"
 	"github.com/acoshift/acourse/pkg/service/email"
 	"github.com/acoshift/acourse/pkg/service/health"
 	"github.com/acoshift/acourse/pkg/service/payment"
@@ -75,6 +76,7 @@ func main() {
 	courseCtrl := ctrl.NewCourseController(db)
 	app.MountHealthService(service, health.New())
 	app.MountUserService(service, user.New(db))
+	app.MountCourseService(service, course.New(db))
 	app.MountPaymentService(service, payment.New(db, firAuth, emailService))
 	app.MountCourseController(service.Group("/api/course"), courseCtrl)
 	app.MountRenderController(service, ctrl.NewRenderController(db, courseCtrl))
