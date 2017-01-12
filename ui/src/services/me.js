@@ -13,7 +13,7 @@ const fetch = () => {
     .first()
     .flatMap((user) => user ? RPC.get('/acourse.UserService/GetMe', true) : Observable.of(null))
     .subscribe((reply) => {
-      $me.next(reply.user)
+      $me.next(reply && reply.user || null)
     })
 }
 
