@@ -13,7 +13,14 @@ const fetch = () => {
     .first()
     .flatMap((user) => user ? RPC.get('/acourse.UserService/GetMe', true) : Observable.of(null))
     .subscribe((reply) => {
-      $me.next(reply && reply.user || null)
+      if (reply && reply.user) {
+        $me.next({
+          ...reply.user,
+          role: reply.role
+        })
+      } else {
+        $me.next(null)
+      }
     })
 }
 

@@ -21,16 +21,6 @@ type UserTiny struct {
 	Photo    string `json:"photo"`
 }
 
-// UserMe type
-type UserMe struct {
-	ID       string `json:"id"`
-	Username string `json:"username"`
-	Name     string `json:"name"`
-	Photo    string `json:"photo"`
-	AboutMe  string `json:"aboutMe"`
-	Role     *Role  `json:"role"`
-}
-
 // UserCollection type
 type UserCollection []*User
 
@@ -55,18 +45,6 @@ func ToUserCollection(ms []*model.User) UserCollection {
 		rs[i] = ToUser(ms[i])
 	}
 	return rs
-}
-
-// ToUserMe builds an UserMe view from an User model
-func ToUserMe(m *model.User, role *Role) *UserMe {
-	return &UserMe{
-		ID:       m.ID,
-		Username: m.Username,
-		Name:     m.Name,
-		Photo:    m.Photo,
-		AboutMe:  m.AboutMe,
-		Role:     role,
-	}
 }
 
 // ToUserTiny builds an UserTiny view from an User model

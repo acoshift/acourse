@@ -15,7 +15,7 @@ type HealthService interface {
 // UserService interface
 type UserService interface {
 	GetUsers(context.Context, *IDsRequest) (*UsersReply, error)
-	GetMe(context.Context) (*UserMeReply, error)
+	GetMe(context.Context) (*UserReply, error)
 	UpdateMe(context.Context, *UserRequest) error
 }
 
@@ -66,9 +66,10 @@ type UsersReply struct {
 	Users view.UserCollection `json:"users"`
 }
 
-// UserMeReply type
-type UserMeReply struct {
-	User *view.UserMe `json:"user"`
+// UserReply type
+type UserReply struct {
+	User *view.User `json:"user"`
+	Role *view.Role `json:"role,omitempty"`
 }
 
 // PaymentsReply type

@@ -26,18 +26,6 @@ func ToUserCollectionView(ms []*model.User) view.UserCollection {
 	return rs
 }
 
-// ToUserMeView builds an UserMeView from a User model
-func ToUserMeView(m *model.User, role *view.Role) *view.UserMe {
-	return &view.UserMe{
-		ID:       m.ID,
-		Name:     m.Name,
-		Username: m.Username,
-		Photo:    m.Photo,
-		AboutMe:  m.AboutMe,
-		Role:     role,
-	}
-}
-
 // ToUserTinyView builds an UserTinyView from a User model
 func ToUserTinyView(m *model.User) *view.UserTiny {
 	return &view.UserTiny{
@@ -45,14 +33,6 @@ func ToUserTinyView(m *model.User) *view.UserTiny {
 		Name:     m.Name,
 		Username: m.Username,
 		Photo:    m.Photo,
-	}
-}
-
-// ToRoleView builds a RoleView fromn a Role model
-func ToRoleView(m *model.Role) *view.Role {
-	return &view.Role{
-		Admin:      m.Admin,
-		Instructor: m.Instructor,
 	}
 }
 

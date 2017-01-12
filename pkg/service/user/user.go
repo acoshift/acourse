@@ -34,7 +34,7 @@ func (s *service) GetUsers(ctx context.Context, req *app.IDsRequest) (*app.Users
 	return &app.UsersReply{Users: view.ToUserCollection(users)}, nil
 }
 
-func (s *service) GetMe(ctx context.Context) (*app.UserMeReply, error) {
+func (s *service) GetMe(ctx context.Context) (*app.UserReply, error) {
 	currentUserID, ok := ctx.Value(app.KeyCurrentUserID).(string)
 	if !ok {
 		return nil, httperror.Unauthorized
@@ -47,7 +47,7 @@ func (s *service) GetMe(ctx context.Context) (*app.UserMeReply, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &app.UserMeReply{User: view.ToUserMe(user, view.ToRole(role))}, nil
+	return &app.UserReply{User: view.ToUser(user), Role: view.ToRole(role)}, nil
 }
 
 func (s *service) UpdateMe(ctx context.Context, req *app.UserRequest) error {
