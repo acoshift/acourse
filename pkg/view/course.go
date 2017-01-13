@@ -50,6 +50,51 @@ func ToCourse(x *model.Course) *Course {
 	}
 }
 
+// CoursePublic view
+type CoursePublic struct {
+	ID               string             `json:"id"`
+	CreatedAt        time.Time          `json:"createdAt"`
+	UpdatedAt        time.Time          `json:"updatedAt"`
+	Title            string             `json:"title"`
+	ShortDescription string             `json:"shortDescription"`
+	Description      string             `json:"description"`
+	Photo            string             `json:"photo"`
+	Owner            string             `json:"owner"`
+	Start            time.Time          `json:"start"`
+	URL              string             `json:"url"`
+	Type             string             `json:"type"`
+	Price            float64            `json:"price"`
+	DiscountedPrice  float64            `json:"discountedPrice"`
+	EnrollDetail     string             `json:"enrollDetail"`
+	Options          CourseOptionPublic `json:"options"`
+}
+
+// ToCoursePublic builds Course public view from Course model
+func ToCoursePublic(x *model.Course) *CoursePublic {
+	return &CoursePublic{
+		x.ID,
+		x.CreatedAt,
+		x.UpdatedAt,
+		x.Title,
+		x.ShortDescription,
+		x.Description,
+		x.Photo,
+		x.Owner,
+		x.Start,
+		x.URL,
+		string(x.Type),
+		x.Price,
+		x.DiscountedPrice,
+		x.EnrollDetail,
+		*ToCourseOptionPublic(&x.Options),
+	}
+}
+
+// CourseTiny view
+type CourseTiny struct {
+	ID string `json:"id"`
+}
+
 // CourseOption view
 type CourseOption struct {
 	Public    bool `json:"public"`
