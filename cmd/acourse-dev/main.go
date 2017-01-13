@@ -76,7 +76,9 @@ func main() {
 		}
 		grpcServer := grpc.NewServer()
 		acourse.RegisterUserServiceServer(grpcServer, user.New(db))
-		grpcServer.Serve(grpcListener)
+		if err = grpcServer.Serve(grpcListener); err != nil {
+			log.Fatal(err)
+		}
 	}()
 
 	// mount services
