@@ -3,8 +3,12 @@ package main
 import (
 	"io/ioutil"
 	"log"
+	"net"
 	"net/http"
 
+	"google.golang.org/grpc"
+
+	"github.com/acoshift/acourse/pkg/acourse"
 	"github.com/acoshift/acourse/pkg/app"
 	"github.com/acoshift/acourse/pkg/service/course"
 	"github.com/acoshift/acourse/pkg/service/email"
@@ -38,21 +42,21 @@ func main() {
 	firAuth := firApp.Auth()
 
 	gin.SetMode(gin.DebugMode)
-	service := gin.New()
+	httpServer := gin.New()
 
 	db := store.NewDB(store.ProjectID(cfg.ProjectID), store.ServiceAccount(serviceAccount))
 
 	// globals middlewares
-	service.Use(gin.Logger())
-	service.Use(gin.Recovery())
-	service.Use(cors.New(cors.Config{
+	httpServer.Use(gin.Logger())
+	httpServer.Use(gin.Recovery())
+	httpServer.Use(cors.New(cors.Config{
 		AllowCredentials: false,
 		AllowHeaders:     []string{"Authorization", "Content-Type"},
 		AllowMethods:     []string{http.MethodGet, http.MethodPost, http.MethodPatch, http.MethodPut, http.MethodDelete},
 		AllowAllOrigins:  true,
 	}))
 
-	if err := app.InitService(service, firAuth); err != nil {
+	if err := app.InitService(httpServer, firAuth); err != nil {
 		log.Fatal(err)
 	}
 
@@ -64,16 +68,27 @@ func main() {
 		Password: cfg.Email.Password,
 	})
 
-	// mount controllers
+	// run grpc server
+	go func() {
+		grpcListener, err := net.Listen("tcp", ":8081")
+		if err != nil {
+			log.Fatal(err)
+		}
+		grpcServer := grpc.NewServer()
+		acourse.RegisterUserServiceServer(grpcServer, user.New(db))
+		grpcServer.Serve(grpcListener)
+	}()
+
+	// mount services
 	// courseCtrl := ctrl.NewCourseController(db)
-	app.RegisterHealthService(service, health.New())
-	app.RegisterUserService(service, user.New(db))
-	app.RegisterCourseService(service, course.New(db))
-	app.RegisterPaymentService(service, payment.New(db, firAuth, emailService))
+	app.RegisterHealthService(httpServer, health.New())
+	app.RegisterUserServiceServer(httpServer, "127.0.0.1:8081")
+	app.RegisterCourseService(httpServer, course.New(db))
+	app.RegisterPaymentService(httpServer, payment.New(db, firAuth, emailService))
 	// app.MountCourseController(service.Group("/api/course"), courseCtrl)
 	// app.MountRenderController(service, ctrl.NewRenderController(db, courseCtrl))
 
-	if err := service.Run(":8080"); err != nil {
+	if err := httpServer.Run(":8080"); err != nil {
 		log.Fatal(err)
 	}
 }

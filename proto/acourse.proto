@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package acourse;
+
+service UserService {
+  rpc GetUser(GetUserRequest) returns (GetUserResponse) {}
+}
+
+message GetUserRequest {
+  repeated string userIds = 1;
+}
+
+message GetUserResponse {
+  repeated User users = 1;
+}
+
+message User {
+  string id = 1;
+  string username = 2;
+  string name = 3;
+  string photo = 4;
+  string about = 5;
+}

@@ -59,5 +59,6 @@ indexes: project
 cleanup-indexes: project
 	gcloud preview datastore cleanup-indexes index.yaml
 
+.PHONY: proto
 proto:
-	protoc -I acourse/ acourse/acourse.proto --go_out=plugins=grpc:acourse
+	protoc -I proto/ proto/acourse.proto --go_out=plugins=grpc:pkg/acourse

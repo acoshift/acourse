@@ -3,15 +3,14 @@ package user
 import (
 	"context"
 
-	"github.com/acoshift/acourse/pkg/app"
+	"github.com/acoshift/acourse/pkg/acourse"
 	"github.com/acoshift/acourse/pkg/model"
-	"github.com/acoshift/acourse/pkg/view"
-	"github.com/acoshift/httperror"
+	rctx "golang.org/x/net/context"
 )
 
-// New creates new user service
-func New(store Store) app.UserService {
-	return &service{store}
+// New creates new service
+func New(store Store) acourse.UserServiceServer {
+	return &userServiceServer{store}
 }
 
 // Store is the store interface for user service
@@ -22,65 +21,10 @@ type Store interface {
 	RoleGet(string) (*model.Role, error)
 }
 
-type service struct {
+type userServiceServer struct {
 	store Store
 }
 
-func (s *service) GetUsers(ctx context.Context, req *app.IDsRequest) (*app.UsersReply, error) {
-	users, err := s.store.UserGetMulti(ctx, req.IDs)
-	if err != nil {
-		return nil, err
-	}
-	users.SetView(model.UserViewDefault)
-	return &app.UsersReply{Users: users}, nil
-}
-
-func (s *service) GetMe(ctx context.Context) (*app.UserReply, error) {
-	currentUserID, ok := ctx.Value(app.KeyCurrentUserID).(string)
-	if !ok {
-		return nil, httperror.Unauthorized
-	}
-	user, err := s.store.UserMustGet(currentUserID)
-	if err != nil {
-		return nil, err
-	}
-	role, err := s.store.RoleGet(currentUserID)
-	if err != nil {
-		return nil, err
-	}
-	user.SetView(model.UserViewDefault)
-	reply := new(app.UserReply)
-	view.Convert(user, &reply.User)
-	view.Convert(role, &reply.Role)
-	return reply, nil
-}
-
-func (s *service) UpdateMe(ctx context.Context, req *app.UserRequest) error {
-	currentUserID, ok := ctx.Value(app.KeyCurrentUserID).(string)
-	if !ok {
-		return httperror.Unauthorized
-	}
-	if req.User == nil {
-		return httperror.BadRequest
-	}
-	if err := req.User.Validate(); err != nil {
-		return httperror.BadRequestWith(err)
-	}
-	user, err := s.store.UserMustGet(currentUserID)
-	if err != nil {
-		return err
-	}
-	if req.User.Username != nil {
-		user.Username = *req.User.Username
-	}
-	if req.User.Name != nil {
-		user.Name = *req.User.Name
-	}
-	if req.User.Photo != nil {
-		user.Photo = *req.User.Photo
-	}
-	if req.User.AboutMe != nil {
-		user.AboutMe = *req.User.AboutMe
-	}
-	return s.store.UserSave(user)
+func (s *userServiceServer) GetUser(ctx rctx.Context, req *acourse.GetUserRequest) (*acourse.GetUserResponse, error) {
+	return nil, nil
 }
