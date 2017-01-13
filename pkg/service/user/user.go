@@ -5,6 +5,7 @@ import (
 
 	"github.com/acoshift/acourse/pkg/app"
 	"github.com/acoshift/acourse/pkg/model"
+	"github.com/acoshift/acourse/pkg/view"
 	"github.com/acoshift/httperror"
 )
 
@@ -48,7 +49,10 @@ func (s *service) GetMe(ctx context.Context) (*app.UserReply, error) {
 		return nil, err
 	}
 	user.SetView(model.UserViewDefault)
-	return &app.UserReply{User: user, Role: role}, nil
+	reply := new(app.UserReply)
+	view.Convert(user, &reply.User)
+	view.Convert(role, &reply.Role)
+	return reply, nil
 }
 
 func (s *service) UpdateMe(ctx context.Context, req *app.UserRequest) error {

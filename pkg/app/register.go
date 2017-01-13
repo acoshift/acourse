@@ -40,7 +40,7 @@ func RegisterUserService(service *gin.Engine, s UserService) {
 			handleError(ctx, err)
 			return
 		}
-		handleOK(ctx, res.Expose())
+		handleOK(ctx, res)
 	})
 
 	service.POST("/acourse.UserService/UpdateMe", func(ctx *gin.Context) {
