@@ -20,8 +20,8 @@ type Course struct {
 	Price            float64
 	DiscountedPrice  float64
 	Options          CourseOption
-	Contents         []CourseContent `datastore:",noindex"`
-	EnrollDetail     string          `datastore:",noindex"`
+	Contents         CourseContents `datastore:",noindex"`
+	EnrollDetail     string         `datastore:",noindex"`
 }
 
 // Courses model
@@ -43,6 +43,9 @@ type CourseContent struct {
 	Video       string `datastore:",noindex"` // Youtube ID
 	DownloadURL string `datastore:",noindex"` // Video download link
 }
+
+// CourseContents type
+type CourseContents []CourseContent
 
 // CourseType type
 type CourseType string
