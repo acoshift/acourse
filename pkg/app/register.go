@@ -1,31 +1,36 @@
 package app
 
 import (
+	"context"
 	"log"
+	"net/http"
 
 	"github.com/acoshift/acourse/pkg/acourse"
 	"github.com/acoshift/httperror"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 	"gopkg.in/gin-gonic/gin.v1"
 )
 
-// RegisterHealthService registers a Health service
-func RegisterHealthService(service *gin.Engine, s HealthService) {
-	service.GET("/acourse.HealthService/Check", func(ctx *gin.Context) {
-		err := s.Check(ctx.Request.Context())
-		if err != nil {
-			handleError(ctx, err)
-			return
-		}
-		handleSuccess(ctx)
-	})
+func dial(addr string) (*grpc.ClientConn, error) {
+	return grpc.Dial(addr, grpc.WithInsecure())
+}
+
+func makeServiceContext(r *http.Request) context.Context {
+	md := metadata.MD{}
+	header := r.Header
+	if v := header.Get("Authorization"); v != "" {
+		md = metadata.Join(md, metadata.Pairs("authorization", v))
+	}
+	return metadata.NewContext(context.Background(), md)
 }
 
 // RegisterUserServiceServer registers a User service server
 func RegisterUserServiceServer(httpServer *gin.Engine, addr string) {
-	conn, err := grpc.Dial(addr, grpc.WithInsecure())
+	conn, err := dial(addr)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return
 	}
 	s := acourse.NewUserServiceClient(conn)
 	httpServer.POST("/acourse.UserService/GetUser", func(ctx *gin.Context) {
@@ -35,7 +40,7 @@ func RegisterUserServiceServer(httpServer *gin.Engine, addr string) {
 			handleError(ctx, httperror.BadRequestWith(err))
 			return
 		}
-		res, err := s.GetUser(ctx.Request.Context(), req)
+		res, err := s.GetUser(makeServiceContext(ctx.Request), req)
 		if err != nil {
 			handleError(ctx, err)
 			return
@@ -43,29 +48,29 @@ func RegisterUserServiceServer(httpServer *gin.Engine, addr string) {
 		handleOK(ctx, res)
 	})
 
-	// httpServer.GET("/acourse.UserService/GetMe", func(ctx *gin.Context) {
-	// 	res, err := s.GetMe(ctx.Request.Context())
-	// 	if err != nil {
-	// 		handleError(ctx, err)
-	// 		return
-	// 	}
-	// 	handleOK(ctx, res)
-	// })
+	httpServer.GET("/acourse.UserService/GetMe", func(ctx *gin.Context) {
+		res, err := s.GetMe(makeServiceContext(ctx.Request), new(acourse.Empty))
+		if err != nil {
+			handleError(ctx, err)
+			return
+		}
+		handleOK(ctx, res)
+	})
 
-	// httpServer.POST("/acourse.UserService/UpdateMe", func(ctx *gin.Context) {
-	// 	req := new(UserRequest)
-	// 	err := ctx.BindJSON(req)
-	// 	if err != nil {
-	// 		handleError(ctx, httperror.BadRequestWith(err))
-	// 		return
-	// 	}
-	// 	err = s.UpdateMe(ctx.Request.Context(), req)
-	// 	if err != nil {
-	// 		handleError(ctx, err)
-	// 		return
-	// 	}
-	// 	handleSuccess(ctx)
-	// })
+	httpServer.POST("/acourse.UserService/UpdateMe", func(ctx *gin.Context) {
+		req := new(acourse.User)
+		err := ctx.BindJSON(req)
+		if err != nil {
+			handleError(ctx, httperror.BadRequestWith(err))
+			return
+		}
+		_, err = s.UpdateMe(makeServiceContext(ctx.Request), req)
+		if err != nil {
+			handleError(ctx, err)
+			return
+		}
+		handleSuccess(ctx)
+	})
 }
 
 // RegisterPaymentService registers a payment service

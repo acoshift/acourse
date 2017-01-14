@@ -4,6 +4,8 @@ package acourse;
 
 service UserService {
   rpc GetUser(GetUserRequest) returns (GetUserResponse) {}
+  rpc GetMe(Empty) returns (GetMeResponse) {}
+  rpc UpdateMe(User) returns (Empty) {}
 }
 
 message GetUserRequest {
@@ -14,10 +16,22 @@ message GetUserResponse {
   repeated User users = 1;
 }
 
+message GetMeResponse {
+  User user = 1;
+  Role role = 2;
+}
+
+message Empty {}
+
 message User {
   string id = 1;
   string username = 2;
   string name = 3;
   string photo = 4;
-  string about = 5;
+  string aboutMe = 5;
+}
+
+message Role {
+  bool admin = 1;
+  bool instructor = 2;
 }

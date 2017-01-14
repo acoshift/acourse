@@ -5,6 +5,23 @@ import (
 	"gopkg.in/gin-gonic/gin.v1"
 )
 
+// HealthController is the controller interface for health check
+type HealthController interface {
+	Check() error
+}
+
+// MountHealthController mounts a Health controller to the http server
+func MountHealthController(server *gin.Engine, c HealthController) {
+	server.GET("/_ah/health", func(ctx *gin.Context) {
+		err := c.Check()
+		if err != nil {
+			handleError(ctx, err)
+			return
+		}
+		handleSuccess(ctx)
+	})
+}
+
 // CourseController is the controller interface for course actions
 type CourseController interface {
 	Show(*CourseShowContext) (interface{}, error)

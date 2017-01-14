@@ -6,17 +6,16 @@ import (
 	"net"
 	"net/http"
 
-	"google.golang.org/grpc"
-
 	"github.com/acoshift/acourse/pkg/acourse"
 	"github.com/acoshift/acourse/pkg/app"
+	"github.com/acoshift/acourse/pkg/ctrl"
 	"github.com/acoshift/acourse/pkg/service/course"
 	"github.com/acoshift/acourse/pkg/service/email"
-	"github.com/acoshift/acourse/pkg/service/health"
 	"github.com/acoshift/acourse/pkg/service/payment"
 	"github.com/acoshift/acourse/pkg/service/user"
 	"github.com/acoshift/acourse/pkg/store"
 	"github.com/acoshift/go-firebase-admin"
+	"google.golang.org/grpc"
 	"gopkg.in/gin-contrib/cors.v1"
 	"gopkg.in/gin-gonic/gin.v1"
 )
@@ -74,21 +73,23 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		grpcServer := grpc.NewServer()
+		grpcServer := grpc.NewServer(grpc.UnaryInterceptor(app.AuthUnaryInterceptor))
 		acourse.RegisterUserServiceServer(grpcServer, user.New(db))
 		if err = grpcServer.Serve(grpcListener); err != nil {
 			log.Fatal(err)
 		}
 	}()
 
-	// mount services
+	// register service servers
 	// courseCtrl := ctrl.NewCourseController(db)
-	app.RegisterHealthService(httpServer, health.New())
 	app.RegisterUserServiceServer(httpServer, "127.0.0.1:8081")
 	app.RegisterCourseService(httpServer, course.New(db))
 	app.RegisterPaymentService(httpServer, payment.New(db, firAuth, emailService))
-	// app.MountCourseController(service.Group("/api/course"), courseCtrl)
 	// app.MountRenderController(service, ctrl.NewRenderController(db, courseCtrl))
+
+	// mount controllers
+	app.MountHealthController(httpServer, ctrl.NewHealth())
+	app.MountRenderController(httpServer, ctrl.NewRenderController(db, nil))
 
 	if err := httpServer.Run(":8080"); err != nil {
 		log.Fatal(err)

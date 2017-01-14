@@ -41,26 +41,32 @@ func InitService(service *gin.Engine, auth *admin.Auth) (err error) {
 	return
 }
 
+func validateHeaderToken(header string) (string, error) {
+	tk := strings.Split(header, " ")
+	if len(tk) != 2 || strings.ToLower(tk[0]) != "bearer" {
+		return "", errors.New("invalid authorization header")
+	}
+	claims, err := firAuth.VerifyIDToken(tk[1])
+	if err != nil {
+		return "", err
+	}
+	return claims.UserID, nil
+}
+
 func jwtMiddleware(ctx *gin.Context) {
 	auth := strings.TrimSpace(ctx.Request.Header.Get("Authorization"))
 	if len(auth) == 0 {
 		ctx.Next()
 		return
 	}
-	tk := strings.Split(auth, " ")
-	if len(tk) != 2 || strings.ToLower(tk[0]) != "bearer" {
-		handleError(ctx, tokenError(errors.New("invalid authorization header")))
-		ctx.Abort()
-		return
-	}
-	claims, err := firAuth.VerifyIDToken(tk[1])
+	userID, err := validateHeaderToken(auth)
 	if err != nil {
 		handleError(ctx, tokenError(err))
 		ctx.Abort()
 		return
 	}
-	ctx.Request = ctx.Request.WithContext(context.WithValue(ctx.Request.Context(), KeyCurrentUserID, claims.UserID))
-	ctx.Set(keyCurrentUserID, claims.UserID)
+	ctx.Request = ctx.Request.WithContext(context.WithValue(ctx.Request.Context(), KeyCurrentUserID, userID))
+	ctx.Set(keyCurrentUserID, userID)
 }
 
 func requestIDMiddleware(ctx *gin.Context) {
