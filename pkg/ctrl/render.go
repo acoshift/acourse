@@ -1,8 +1,10 @@
 package ctrl
 
 import (
+	"context"
 	"time"
 
+	"github.com/acoshift/acourse/pkg/acourse"
 	"github.com/acoshift/acourse/pkg/app"
 	"github.com/acoshift/acourse/pkg/store"
 	"github.com/acoshift/gotcha"
@@ -10,13 +12,13 @@ import (
 
 // RenderController implements RenderController interface
 type RenderController struct {
-	db         *store.DB
-	courseCtrl app.CourseController
+	db            *store.DB
+	courseService acourse.CourseServiceClient
 }
 
 // NewRenderController creates controller
-func NewRenderController(db *store.DB, courseCtrl app.CourseController) *RenderController {
-	return &RenderController{db, courseCtrl}
+func NewRenderController(db *store.DB, courseService acourse.CourseServiceClient) *RenderController {
+	return &RenderController{db, courseService}
 }
 
 // RenderIndex type
@@ -32,13 +34,13 @@ var cacheRender = gotcha.New()
 
 // Index runs index action
 func (c *RenderController) Index(ctx *app.RenderIndexContext) (interface{}, error) {
-	var res view.CourseTinyCollection
+	var res *acourse.CoursesResponse
 	refill := func() {
-		xs, _ := c.courseCtrl.List(&app.CourseListContext{})
+		xs, _ := c.courseService.ListPublicCourses(context.Background(), &acourse.ListRequest{})
 		cacheRender.SetTTL("index", xs, time.Second*30)
 	}
 	if cache := cacheRender.Get("index"); cache != nil {
-		res = cache.(view.CourseTinyCollection)
+		res = cache.(*acourse.CoursesResponse)
 	} else {
 		// do not wait for api call
 		go refill()
@@ -57,12 +59,8 @@ func (c *RenderController) Index(ctx *app.RenderIndexContext) (interface{}, erro
 
 // Course runs course action
 func (c *RenderController) Course(ctx *app.RenderCourseContext) (interface{}, error) {
-	courseInf, err := c.courseCtrl.Show(&app.CourseShowContext{CourseID: ctx.CourseID})
-	if err != nil || courseInf == nil {
-		return nil, nil
-	}
-	course, ok := courseInf.(*view.CoursePublic)
-	if !ok {
+	course, err := c.courseService.GetCourse(context.Background(), &acourse.CourseIDRequest{CourseId: ctx.CourseID})
+	if err != nil || course == nil {
 		return nil, nil
 	}
 	r := &RenderIndex{
@@ -74,10 +72,10 @@ func (c *RenderController) Course(ctx *app.RenderCourseContext) (interface{}, er
 			"course": course,
 		},
 	}
-	if course.URL != "" {
-		r.URL += course.URL
+	if course.Url != "" {
+		r.URL += course.Url
 	} else {
-		r.URL += course.ID
+		r.URL += course.Id
 	}
 
 	if r.Title == "" {

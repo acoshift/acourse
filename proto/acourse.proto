@@ -24,7 +24,7 @@ service CourseService {
   rpc ListPublicCourses(ListRequest) returns (CoursesResponse) {}
   rpc ListOwnCourses(UserIDRequest) returns (CoursesResponse) {}
   rpc ListEnrolledCourses(UserIDRequest) returns (CoursesResponse) {}
-  rpc GetCourse(CourseIDRequest) returns (Course) {}
+  rpc GetCourse(CourseIDRequest) returns (CourseResponse) {}
   rpc CreateCourse(Course) returns (Course) {}
   rpc UpdateCourse(Course) returns (Empty) {}
   rpc EnrollCourse(EnrollRequest) returns (Empty) {}
@@ -77,6 +77,11 @@ message EnrollRequest {
   string url = 2;
   string code = 3;
   double price = 4;
+}
+
+message CourseResponse {
+  Course course = 1;
+  UserTiny user = 2;
 }
 
 message Empty {}

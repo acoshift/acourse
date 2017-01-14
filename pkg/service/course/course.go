@@ -2,6 +2,7 @@ package course
 
 import (
 	"context"
+	"time"
 
 	"github.com/acoshift/acourse/pkg/acourse"
 	"github.com/acoshift/acourse/pkg/model"
@@ -24,6 +25,12 @@ type Store interface {
 	RoleGet(string) (*model.Role, error)
 	EnrollListByUserID(string) (model.Enrolls, error)
 	CourseGetAllByIDs([]string) (model.Courses, error)
+	CourseGet(string) (*model.Course, error)
+	EnrollFind(string, string) (*model.Enroll, error)
+	PaymentFind(string, string, model.PaymentStatus) (*model.Payment, error)
+	EnrollSave(*model.Enroll) error
+	PaymentSave(*model.Payment) error
+	CourseSave(*model.Course) error
 }
 
 type service struct {
@@ -165,4 +172,182 @@ func (s *service) ListEnrolledCourses(ctx _context.Context, req *acourse.UserIDR
 		Users:        acourse.ToUsersTiny(users),
 		EnrollCounts: enrollCounts,
 	}, nil
+}
+
+func (s *service) GetCourse(ctx _context.Context, req *acourse.CourseIDRequest) (*acourse.CourseResponse, error) {
+	return nil, nil
+}
+
+func (s *service) CreateCourse(ctx _context.Context, req *acourse.Course) (*acourse.Course, error) {
+	userID, ok := ctx.Value(acourse.KeyUserID).(string)
+	if !ok || userID == "" {
+		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
+	}
+	role, err := s.store.RoleGet(userID)
+	if err != nil {
+		return nil, err
+	}
+	if !role.Instructor {
+		return nil, grpc.Errorf(codes.PermissionDenied, "don't have permission to create course")
+	}
+
+	course := &model.Course{
+		Title:            req.GetTitle(),
+		ShortDescription: req.GetShortDescription(),
+		Description:      req.GetDescription(),
+		Photo:            req.GetPhoto(),
+		Video:            req.GetVideo(),
+		Owner:            userID,
+		Options: model.CourseOption{
+			Attend:     req.GetOptions().GetAttend(),
+			Assignment: req.GetOptions().GetAssignment(),
+		},
+	}
+	course.Start, _ = time.Parse(time.RFC3339, req.GetStart())
+	course.Contents = make(model.CourseContents, len(req.GetContents()))
+	for i, c := range req.GetContents() {
+		course.Contents[i] = model.CourseContent{
+			Title:       c.GetTitle(),
+			Description: c.GetDescription(),
+			Video:       c.GetVideo(),
+			DownloadURL: c.GetDownloadURL(),
+		}
+	}
+
+	err = s.store.CourseSave(course)
+	if err != nil {
+		return nil, err
+	}
+
+	return acourse.ToCourse(course), nil
+}
+
+func (s *service) UpdateCourse(ctx _context.Context, req *acourse.Course) (*acourse.Empty, error) {
+	userID, ok := ctx.Value(acourse.KeyUserID).(string)
+	if !ok || userID == "" {
+		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
+	}
+
+	course, err := s.store.CourseGet(req.GetId())
+	if err != nil {
+		return nil, err
+	}
+	if course == nil {
+		return nil, grpc.Errorf(codes.NotFound, "course not found")
+	}
+	role, err := s.store.RoleGet(userID)
+	if err != nil {
+		return nil, err
+	}
+	if course.Owner != userID && !role.Admin {
+		return nil, grpc.Errorf(codes.PermissionDenied, "don't have permission to update this course")
+	}
+
+	// merge course with request
+	course.Title = req.GetTitle()
+	course.ShortDescription = req.GetShortDescription()
+	course.Description = req.GetDescription()
+	course.Photo = req.GetPhoto()
+	course.Start, _ = time.Parse(time.RFC3339, req.GetStart())
+	course.Video = req.GetVideo()
+	course.Contents = make(model.CourseContents, len(req.GetContents()))
+	for i, c := range req.GetContents() {
+		course.Contents[i] = model.CourseContent{
+			Title:       c.GetTitle(),
+			Description: c.GetDescription(),
+			Video:       c.GetVideo(),
+			DownloadURL: c.GetDownloadURL(),
+		}
+	}
+	course.Options.Attend = req.GetOptions().GetAttend()
+	course.Options.Assignment = req.GetOptions().GetAssignment()
+
+	err = s.store.CourseSave(course)
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}
+
+func (s *service) EnrollCourse(ctx _context.Context, req *acourse.EnrollRequest) (*acourse.Empty, error) {
+	userID, ok := ctx.Value(acourse.KeyUserID).(string)
+	if !ok || userID == "" {
+		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
+	}
+
+	if req.GetCourseId() == "" {
+		return nil, grpc.Errorf(codes.InvalidArgument, "course id required")
+	}
+
+	course, err := s.store.CourseGet(req.GetCourseId())
+	if err != nil {
+		return nil, err
+	}
+	if course == nil {
+		return nil, grpc.Errorf(codes.NotFound, "course not found")
+	}
+
+	// owner can not enroll
+	if course.Owner == userID {
+		return nil, grpc.Errorf(codes.PermissionDenied, "owner can not enroll their own course")
+	}
+
+	// check is user already enroll
+	enroll, err := s.store.EnrollFind(userID, req.GetCourseId())
+	if err != nil {
+		return nil, err
+	}
+	if enroll != nil {
+		// user already enroll
+		return nil, grpc.Errorf(codes.AlreadyExists, "already enroll")
+	}
+
+	// check is user already send waiting payment
+	payment, err := s.store.PaymentFind(userID, req.GetCourseId(), model.PaymentStatusWaiting)
+	if err != nil {
+		return nil, err
+	}
+	if payment != nil {
+		// user already send payment
+		return nil, grpc.Errorf(codes.FailedPrecondition, "wait admin to review your current payment before send another payment for this course")
+	}
+
+	// calculate price
+	originalPrice := course.Price
+	if course.Options.Discount {
+		originalPrice = course.DiscountedPrice
+	}
+	// TODO: calculate code
+
+	// auto enroll if course free
+	if originalPrice == 0.0 {
+		enroll = &model.Enroll{
+			UserID:   userID,
+			CourseID: req.GetCourseId(),
+		}
+		err = s.store.EnrollSave(enroll)
+		if err != nil {
+			return nil, err
+		}
+		return nil, nil
+	}
+
+	// create payment
+	payment = &model.Payment{
+		CourseID:      req.GetCourseId(),
+		UserID:        userID,
+		OriginalPrice: originalPrice,
+		Price:         req.GetPrice(),
+		Code:          req.GetCode(),
+		URL:           req.GetUrl(),
+		Status:        model.PaymentStatusWaiting,
+	}
+
+	err = s.store.PaymentSave(payment)
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
 }

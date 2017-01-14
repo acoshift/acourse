@@ -78,7 +78,7 @@ func main() {
 
 	// mount controllers
 	app.MountHealthController(httpServer, ctrl.NewHealth())
-	app.MountRenderController(httpServer, ctrl.NewRenderController(db, nil))
+	app.MountRenderController(httpServer, ctrl.NewRenderController(db, courseServiceClient))
 
 	// run grpc server
 	go func() {
