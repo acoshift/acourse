@@ -218,4 +218,49 @@ func RegisterCourseServiceClient(service *gin.Engine, s acourse.CourseServiceCli
 		}
 		handleOK(ctx, res)
 	})
+
+	service.POST("/acourse.CourseService/CreateCourse", func(ctx *gin.Context) {
+		req := new(acourse.Course)
+		err := ctx.BindJSON(req)
+		if err != nil {
+			handleError(ctx, httperror.BadRequestWith(err))
+			return
+		}
+		res, err := s.CreateCourse(makeServiceContext(ctx.Request), req)
+		if err != nil {
+			handleError(ctx, err)
+			return
+		}
+		handleOK(ctx, res)
+	})
+
+	service.POST("/acourse.CourseService/UpdateCourse", func(ctx *gin.Context) {
+		req := new(acourse.Course)
+		err := ctx.BindJSON(req)
+		if err != nil {
+			handleError(ctx, httperror.BadRequestWith(err))
+			return
+		}
+		_, err = s.UpdateCourse(makeServiceContext(ctx.Request), req)
+		if err != nil {
+			handleError(ctx, err)
+			return
+		}
+		handleSuccess(ctx)
+	})
+
+	service.POST("/acourse.CourseService/EnrollCourse", func(ctx *gin.Context) {
+		req := new(acourse.EnrollRequest)
+		err := ctx.BindJSON(req)
+		if err != nil {
+			handleError(ctx, err)
+			return
+		}
+		_, err = s.EnrollCourse(makeServiceContext(ctx.Request), req)
+		if err != nil {
+			handleError(ctx, err)
+			return
+		}
+		handleSuccess(ctx)
+	})
 }
