@@ -6,11 +6,15 @@ import (
 	"log"
 	"time"
 
+	"github.com/acoshift/acourse/pkg/acourse"
 	"github.com/acoshift/acourse/pkg/app"
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/acourse/pkg/store"
 	"github.com/acoshift/go-firebase-admin"
 	"github.com/acoshift/httperror"
+	_context "golang.org/x/net/context"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 )
 
 // Store is the payment store
@@ -27,39 +31,33 @@ type Store interface {
 }
 
 // New creates new payment service
-func New(store Store, auth *admin.Auth, email app.EmailService) app.PaymentService {
+func New(store Store, auth *admin.Auth, email acourse.EmailServiceClient) acourse.PaymentServiceServer {
 	return &service{store, auth, email}
 }
 
 type service struct {
 	store Store
 	auth  *admin.Auth
-	email app.EmailService
+	email acourse.EmailServiceClient
 }
 
-func (s *service) ListPayments(ctx context.Context, req *app.PaymentListRequest) (*app.PaymentsReply, error) {
-	currentUserID, ok := ctx.Value(app.KeyCurrentUserID).(string)
-	if !ok {
-		return nil, httperror.Unauthorized
+func (s *service) listPayments(ctx _context.Context, opts ...store.PaymentListOption) (*acourse.PaymentsResponse, error) {
+	userID, ok := ctx.Value(acourse.KeyUserID).(string)
+	if !ok || userID == "" {
+		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
-	role, err := s.store.RoleGet(currentUserID)
+	role, err := s.store.RoleGet(userID)
 	if err != nil {
 		return nil, err
 	}
 	if !role.Admin {
-		return nil, httperror.Forbidden
+		return nil, grpc.Errorf(codes.PermissionDenied, "permission denied")
 	}
 
-	var payments model.Payments
-	if req.History != nil && *req.History {
-		payments, err = s.store.PaymentList()
-	} else {
-		payments, err = s.store.PaymentList(store.PaymentListOptionStatus(model.PaymentStatusWaiting))
-	}
+	payments, err := s.store.PaymentList(opts...)
 	if err != nil {
 		return nil, err
 	}
-	payments.SetView(model.PaymentViewDefault)
 
 	userIDMap := map[string]bool{}
 	courseIDMap := map[string]bool{}
@@ -80,37 +78,43 @@ func (s *service) ListPayments(ctx context.Context, req *app.PaymentListRequest)
 	if err != nil {
 		return nil, err
 	}
-	users.SetView(model.UserViewTiny)
 
 	courses, err := s.store.CourseGetMulti(ctx, courseIDs)
 	if err != nil {
 		return nil, err
 	}
-	courses.SetView(model.CourseViewMini)
 
-	return &app.PaymentsReply{
-		Payments: payments,
-		Users:    users,
-		Courses:  courses,
+	return &acourse.PaymentsResponse{
+		Payments: acourse.ToPayments(payments),
+		Users:    acourse.ToUsersTiny(users),
+		Courses:  acourse.ToCoursesTiny(courses),
 	}, nil
 }
 
-func (s *service) ApprovePayments(ctx context.Context, req *app.IDsRequest) error {
-	currentUserID, ok := ctx.Value(app.KeyCurrentUserID).(string)
-	if !ok {
-		return httperror.Unauthorized
+func (s *service) ListWaitingPayments(ctx _context.Context, req *acourse.ListRequest) (*acourse.PaymentsResponse, error) {
+	return s.listPayments(ctx, store.PaymentListOptionStatus(model.PaymentStatusWaiting))
+}
+
+func (s *service) ListHistoryPayments(ctx _context.Context, req *acourse.ListRequest) (*acourse.PaymentsResponse, error) {
+	return s.listPayments(ctx)
+}
+
+func (s *service) ApprovePayments(ctx _context.Context, req *acourse.PaymentIDsRequest) (*acourse.Empty, error) {
+	userID, ok := ctx.Value(acourse.KeyUserID).(string)
+	if !ok || userID == "" {
+		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
-	role, err := s.store.RoleGet(currentUserID)
+	role, err := s.store.RoleGet(userID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if !role.Admin {
-		return httperror.Forbidden
+		return nil, httperror.Forbidden
 	}
 
-	payments, err := s.store.PaymentGetMulti(ctx, req.UniqueIDs())
+	payments, err := s.store.PaymentGetMulti(ctx, app.UniqueIDs(req.GetPaymentIds()))
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	enrolls := make([]*model.Enroll, 0, len(payments))
@@ -124,35 +128,35 @@ func (s *service) ApprovePayments(ctx context.Context, req *app.IDsRequest) erro
 
 	err = s.store.EnrollSaveMulti(ctx, enrolls)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	err = s.store.PaymentSaveMulti(ctx, payments)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	go s.sendApprovedNotification(payments)
 
-	return nil
+	return nil, nil
 }
 
-func (s *service) RejectPayments(ctx context.Context, req *app.IDsRequest) error {
-	currentUserID, ok := ctx.Value(app.KeyCurrentUserID).(string)
-	if !ok {
-		return httperror.Unauthorized
+func (s *service) RejectPayments(ctx _context.Context, req *acourse.PaymentIDsRequest) (*acourse.Empty, error) {
+	userID, ok := ctx.Value(acourse.KeyUserID).(string)
+	if !ok || userID == "" {
+		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
-	role, err := s.store.RoleGet(currentUserID)
+	role, err := s.store.RoleGet(userID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if !role.Admin {
-		return httperror.Forbidden
+		return nil, httperror.Forbidden
 	}
 
-	payments, err := s.store.PaymentGetMulti(ctx, req.UniqueIDs())
+	payments, err := s.store.PaymentGetMulti(ctx, app.UniqueIDs(req.GetPaymentIds()))
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	for _, payment := range payments {
@@ -161,10 +165,10 @@ func (s *service) RejectPayments(ctx context.Context, req *app.IDsRequest) error
 
 	err = s.store.PaymentSaveMulti(ctx, payments)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return nil, nil
 }
 
 func (s *service) sendApprovedNotification(payments []*model.Payment) {
@@ -231,7 +235,7 @@ Krissada Chalermsook (Oak)<br>
 Founder/CEO Acourse.io<br>
 https://acourse.io`
 
-		err = s.email.SendEmail(nil, &app.EmailRequest{
+		_, err = s.email.Send(nil, &acourse.Email{
 			To:      []string{userInfo.Email},
 			Subject: fmt.Sprintf("ยืนยันการชำระเงิน หลักสูตร %s", course.Title),
 			Body:    body,
@@ -243,14 +247,14 @@ https://acourse.io`
 }
 
 // StartNotification starts payment notification
-func StartNotification(s Store, email app.EmailService) {
+func StartNotification(s Store, email acourse.EmailServiceClient) {
 	go func() {
 		for {
 			// check is payments have status waiting
 			log.Println("Run Notification Payment")
 			payments, err := s.PaymentList(store.PaymentListOptionStatus(model.PaymentStatusWaiting))
 			if err == nil && len(payments) > 0 {
-				err = email.SendEmail(nil, &app.EmailRequest{
+				_, err = email.Send(nil, &acourse.Email{
 					To:      []string{"acoshift@gmail.com", "k.chalermsook@gmail.com"},
 					Subject: "Acourse - Payment Received",
 					Body:    fmt.Sprintf("%d payments pending", len(payments)),

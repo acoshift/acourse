@@ -57,14 +57,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	emailService := email.New(email.Config{
-		From:     cfg.Email.From,
-		Server:   cfg.Email.Server,
-		Port:     cfg.Email.Port,
-		User:     cfg.Email.User,
-		Password: cfg.Email.Password,
-	})
-
 	// run grpc server
 	go func() {
 		grpcListener, err := net.Listen("tcp", ":8081")
@@ -73,6 +65,13 @@ func main() {
 		}
 		grpcServer := grpc.NewServer(grpc.UnaryInterceptor(app.AuthUnaryInterceptor))
 		acourse.RegisterUserServiceServer(grpcServer, user.New(db))
+		acourse.RegisterEmailServiceServer(grpcServer, email.New(email.Config{
+			From:     cfg.Email.From,
+			Server:   cfg.Email.Server,
+			Port:     cfg.Email.Port,
+			User:     cfg.Email.User,
+			Password: cfg.Email.Password,
+		}))
 		if err = grpcServer.Serve(grpcListener); err != nil {
 			log.Fatal(err)
 		}
@@ -86,13 +85,12 @@ func main() {
 	}
 	userServiceClient := acourse.NewUserServiceClient(conn)
 	emailServiceClient := acourse.NewEmailServiceClient(conn)
+	paymentServiceClient := acourse.NewPaymentServiceClient(conn)
 
 	// register service clients to http server
 	app.RegisterUserServiceClient(httpServer, userServiceClient)
 	// app.RegisterEmailServiceClient(httpServer, emailService) // do not expose email service to the world right now
-	// app.RegisterCourseService(httpServer, course.New(db))
-	// app.RegisterPaymentService(httpServer, payment.New(db, firAuth, emailService))
-	// app.MountRenderController(service, ctrl.NewRenderController(db, courseCtrl))
+	app.RegisterPaymentServiceClient(httpServer, paymentServiceClient)
 
 	// mount controllers
 	app.MountHealthController(httpServer, ctrl.NewHealth())

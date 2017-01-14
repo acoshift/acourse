@@ -12,10 +12,19 @@ It has these top-level messages:
 	GetUserRequest
 	GetUserResponse
 	GetMeResponse
+	ListRequest
+	PaymentsResponse
+	PaymentIDsRequest
 	Empty
 	User
+	UserTiny
 	Role
 	Email
+	Course
+	CoursePublic
+	CourseSmall
+	CourseTiny
+	Payment
 */
 package acourse
 
@@ -95,13 +104,85 @@ func (m *GetMeResponse) GetRole() *Role {
 	return nil
 }
 
+type ListRequest struct {
+	Offset int32 `protobuf:"varint,1,opt,name=offset" json:"offset,omitempty"`
+	Limit  int32 `protobuf:"varint,2,opt,name=limit" json:"limit,omitempty"`
+}
+
+func (m *ListRequest) Reset()                    { *m = ListRequest{} }
+func (m *ListRequest) String() string            { return proto.CompactTextString(m) }
+func (*ListRequest) ProtoMessage()               {}
+func (*ListRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{3} }
+
+func (m *ListRequest) GetOffset() int32 {
+	if m != nil {
+		return m.Offset
+	}
+	return 0
+}
+
+func (m *ListRequest) GetLimit() int32 {
+	if m != nil {
+		return m.Limit
+	}
+	return 0
+}
+
+type PaymentsResponse struct {
+	Payments []*Payment    `protobuf:"bytes,1,rep,name=payments" json:"payments,omitempty"`
+	Users    []*UserTiny   `protobuf:"bytes,2,rep,name=users" json:"users,omitempty"`
+	Courses  []*CourseTiny `protobuf:"bytes,3,rep,name=courses" json:"courses,omitempty"`
+}
+
+func (m *PaymentsResponse) Reset()                    { *m = PaymentsResponse{} }
+func (m *PaymentsResponse) String() string            { return proto.CompactTextString(m) }
+func (*PaymentsResponse) ProtoMessage()               {}
+func (*PaymentsResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{4} }
+
+func (m *PaymentsResponse) GetPayments() []*Payment {
+	if m != nil {
+		return m.Payments
+	}
+	return nil
+}
+
+func (m *PaymentsResponse) GetUsers() []*UserTiny {
+	if m != nil {
+		return m.Users
+	}
+	return nil
+}
+
+func (m *PaymentsResponse) GetCourses() []*CourseTiny {
+	if m != nil {
+		return m.Courses
+	}
+	return nil
+}
+
+type PaymentIDsRequest struct {
+	PaymentIds []string `protobuf:"bytes,1,rep,name=paymentIds" json:"paymentIds,omitempty"`
+}
+
+func (m *PaymentIDsRequest) Reset()                    { *m = PaymentIDsRequest{} }
+func (m *PaymentIDsRequest) String() string            { return proto.CompactTextString(m) }
+func (*PaymentIDsRequest) ProtoMessage()               {}
+func (*PaymentIDsRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{5} }
+
+func (m *PaymentIDsRequest) GetPaymentIds() []string {
+	if m != nil {
+		return m.PaymentIds
+	}
+	return nil
+}
+
 type Empty struct {
 }
 
 func (m *Empty) Reset()                    { *m = Empty{} }
 func (m *Empty) String() string            { return proto.CompactTextString(m) }
 func (*Empty) ProtoMessage()               {}
-func (*Empty) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{3} }
+func (*Empty) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{6} }
 
 type User struct {
 	Id       string `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
@@ -114,7 +195,7 @@ type User struct {
 func (m *User) Reset()                    { *m = User{} }
 func (m *User) String() string            { return proto.CompactTextString(m) }
 func (*User) ProtoMessage()               {}
-func (*User) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{4} }
+func (*User) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{7} }
 
 func (m *User) GetId() string {
 	if m != nil {
@@ -151,6 +232,46 @@ func (m *User) GetAboutMe() string {
 	return ""
 }
 
+type UserTiny struct {
+	Id       string `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
+	Username string `protobuf:"bytes,2,opt,name=username" json:"username,omitempty"`
+	Name     string `protobuf:"bytes,3,opt,name=name" json:"name,omitempty"`
+	Photo    string `protobuf:"bytes,4,opt,name=photo" json:"photo,omitempty"`
+}
+
+func (m *UserTiny) Reset()                    { *m = UserTiny{} }
+func (m *UserTiny) String() string            { return proto.CompactTextString(m) }
+func (*UserTiny) ProtoMessage()               {}
+func (*UserTiny) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{8} }
+
+func (m *UserTiny) GetId() string {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
+func (m *UserTiny) GetUsername() string {
+	if m != nil {
+		return m.Username
+	}
+	return ""
+}
+
+func (m *UserTiny) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *UserTiny) GetPhoto() string {
+	if m != nil {
+		return m.Photo
+	}
+	return ""
+}
+
 type Role struct {
 	Admin      bool `protobuf:"varint,1,opt,name=admin" json:"admin,omitempty"`
 	Instructor bool `protobuf:"varint,2,opt,name=instructor" json:"instructor,omitempty"`
@@ -159,7 +280,7 @@ type Role struct {
 func (m *Role) Reset()                    { *m = Role{} }
 func (m *Role) String() string            { return proto.CompactTextString(m) }
 func (*Role) ProtoMessage()               {}
-func (*Role) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{5} }
+func (*Role) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{9} }
 
 func (m *Role) GetAdmin() bool {
 	if m != nil {
@@ -184,7 +305,7 @@ type Email struct {
 func (m *Email) Reset()                    { *m = Email{} }
 func (m *Email) String() string            { return proto.CompactTextString(m) }
 func (*Email) ProtoMessage()               {}
-func (*Email) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{6} }
+func (*Email) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{10} }
 
 func (m *Email) GetTo() []string {
 	if m != nil {
@@ -207,14 +328,315 @@ func (m *Email) GetBody() string {
 	return ""
 }
 
+type Course struct {
+}
+
+func (m *Course) Reset()                    { *m = Course{} }
+func (m *Course) String() string            { return proto.CompactTextString(m) }
+func (*Course) ProtoMessage()               {}
+func (*Course) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{11} }
+
+type Course_Content struct {
+}
+
+func (m *Course_Content) Reset()                    { *m = Course_Content{} }
+func (m *Course_Content) String() string            { return proto.CompactTextString(m) }
+func (*Course_Content) ProtoMessage()               {}
+func (*Course_Content) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{11, 0} }
+
+type Course_Option struct {
+}
+
+func (m *Course_Option) Reset()                    { *m = Course_Option{} }
+func (m *Course_Option) String() string            { return proto.CompactTextString(m) }
+func (*Course_Option) ProtoMessage()               {}
+func (*Course_Option) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{11, 1} }
+
+type CoursePublic struct {
+}
+
+func (m *CoursePublic) Reset()                    { *m = CoursePublic{} }
+func (m *CoursePublic) String() string            { return proto.CompactTextString(m) }
+func (*CoursePublic) ProtoMessage()               {}
+func (*CoursePublic) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{12} }
+
+type CoursePublic_Option struct {
+	Enroll   bool `protobuf:"varint,1,opt,name=enroll" json:"enroll,omitempty"`
+	Discount bool `protobuf:"varint,2,opt,name=discount" json:"discount,omitempty"`
+}
+
+func (m *CoursePublic_Option) Reset()                    { *m = CoursePublic_Option{} }
+func (m *CoursePublic_Option) String() string            { return proto.CompactTextString(m) }
+func (*CoursePublic_Option) ProtoMessage()               {}
+func (*CoursePublic_Option) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{12, 0} }
+
+func (m *CoursePublic_Option) GetEnroll() bool {
+	if m != nil {
+		return m.Enroll
+	}
+	return false
+}
+
+func (m *CoursePublic_Option) GetDiscount() bool {
+	if m != nil {
+		return m.Discount
+	}
+	return false
+}
+
+type CourseSmall struct {
+	Id               string              `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
+	Title            string              `protobuf:"bytes,2,opt,name=title" json:"title,omitempty"`
+	ShortDescription string              `protobuf:"bytes,3,opt,name=shortDescription" json:"shortDescription,omitempty"`
+	Photo            string              `protobuf:"bytes,4,opt,name=photo" json:"photo,omitempty"`
+	Owner            string              `protobuf:"bytes,5,opt,name=owner" json:"owner,omitempty"`
+	Start            string              `protobuf:"bytes,6,opt,name=start" json:"start,omitempty"`
+	Url              string              `protobuf:"bytes,7,opt,name=url" json:"url,omitempty"`
+	Type             string              `protobuf:"bytes,8,opt,name=type" json:"type,omitempty"`
+	Price            float64             `protobuf:"fixed64,9,opt,name=price" json:"price,omitempty"`
+	DiscountedPrice  float64             `protobuf:"fixed64,10,opt,name=discountedPrice" json:"discountedPrice,omitempty"`
+	Options          *CourseSmall_Option `protobuf:"bytes,11,opt,name=options" json:"options,omitempty"`
+}
+
+func (m *CourseSmall) Reset()                    { *m = CourseSmall{} }
+func (m *CourseSmall) String() string            { return proto.CompactTextString(m) }
+func (*CourseSmall) ProtoMessage()               {}
+func (*CourseSmall) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{13} }
+
+func (m *CourseSmall) GetId() string {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
+func (m *CourseSmall) GetTitle() string {
+	if m != nil {
+		return m.Title
+	}
+	return ""
+}
+
+func (m *CourseSmall) GetShortDescription() string {
+	if m != nil {
+		return m.ShortDescription
+	}
+	return ""
+}
+
+func (m *CourseSmall) GetPhoto() string {
+	if m != nil {
+		return m.Photo
+	}
+	return ""
+}
+
+func (m *CourseSmall) GetOwner() string {
+	if m != nil {
+		return m.Owner
+	}
+	return ""
+}
+
+func (m *CourseSmall) GetStart() string {
+	if m != nil {
+		return m.Start
+	}
+	return ""
+}
+
+func (m *CourseSmall) GetUrl() string {
+	if m != nil {
+		return m.Url
+	}
+	return ""
+}
+
+func (m *CourseSmall) GetType() string {
+	if m != nil {
+		return m.Type
+	}
+	return ""
+}
+
+func (m *CourseSmall) GetPrice() float64 {
+	if m != nil {
+		return m.Price
+	}
+	return 0
+}
+
+func (m *CourseSmall) GetDiscountedPrice() float64 {
+	if m != nil {
+		return m.DiscountedPrice
+	}
+	return 0
+}
+
+func (m *CourseSmall) GetOptions() *CourseSmall_Option {
+	if m != nil {
+		return m.Options
+	}
+	return nil
+}
+
+type CourseSmall_Option struct {
+	Discount bool `protobuf:"varint,1,opt,name=discount" json:"discount,omitempty"`
+}
+
+func (m *CourseSmall_Option) Reset()                    { *m = CourseSmall_Option{} }
+func (m *CourseSmall_Option) String() string            { return proto.CompactTextString(m) }
+func (*CourseSmall_Option) ProtoMessage()               {}
+func (*CourseSmall_Option) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{13, 0} }
+
+func (m *CourseSmall_Option) GetDiscount() bool {
+	if m != nil {
+		return m.Discount
+	}
+	return false
+}
+
+type CourseTiny struct {
+	Id    string `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
+	Title string `protobuf:"bytes,2,opt,name=title" json:"title,omitempty"`
+}
+
+func (m *CourseTiny) Reset()                    { *m = CourseTiny{} }
+func (m *CourseTiny) String() string            { return proto.CompactTextString(m) }
+func (*CourseTiny) ProtoMessage()               {}
+func (*CourseTiny) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{14} }
+
+func (m *CourseTiny) GetId() string {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
+func (m *CourseTiny) GetTitle() string {
+	if m != nil {
+		return m.Title
+	}
+	return ""
+}
+
+type Payment struct {
+	Id            string  `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
+	CreatedAt     string  `protobuf:"bytes,2,opt,name=createdAt" json:"createdAt,omitempty"`
+	UpdatedAt     string  `protobuf:"bytes,3,opt,name=updatedAt" json:"updatedAt,omitempty"`
+	UserId        string  `protobuf:"bytes,4,opt,name=userId" json:"userId,omitempty"`
+	CourseId      string  `protobuf:"bytes,5,opt,name=courseId" json:"courseId,omitempty"`
+	OriginalPrice float64 `protobuf:"fixed64,6,opt,name=originalPrice" json:"originalPrice,omitempty"`
+	Price         float64 `protobuf:"fixed64,7,opt,name=price" json:"price,omitempty"`
+	Code          string  `protobuf:"bytes,8,opt,name=code" json:"code,omitempty"`
+	Url           string  `protobuf:"bytes,9,opt,name=url" json:"url,omitempty"`
+	Status        string  `protobuf:"bytes,10,opt,name=status" json:"status,omitempty"`
+	At            string  `protobuf:"bytes,11,opt,name=at" json:"at,omitempty"`
+}
+
+func (m *Payment) Reset()                    { *m = Payment{} }
+func (m *Payment) String() string            { return proto.CompactTextString(m) }
+func (*Payment) ProtoMessage()               {}
+func (*Payment) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{15} }
+
+func (m *Payment) GetId() string {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
+func (m *Payment) GetCreatedAt() string {
+	if m != nil {
+		return m.CreatedAt
+	}
+	return ""
+}
+
+func (m *Payment) GetUpdatedAt() string {
+	if m != nil {
+		return m.UpdatedAt
+	}
+	return ""
+}
+
+func (m *Payment) GetUserId() string {
+	if m != nil {
+		return m.UserId
+	}
+	return ""
+}
+
+func (m *Payment) GetCourseId() string {
+	if m != nil {
+		return m.CourseId
+	}
+	return ""
+}
+
+func (m *Payment) GetOriginalPrice() float64 {
+	if m != nil {
+		return m.OriginalPrice
+	}
+	return 0
+}
+
+func (m *Payment) GetPrice() float64 {
+	if m != nil {
+		return m.Price
+	}
+	return 0
+}
+
+func (m *Payment) GetCode() string {
+	if m != nil {
+		return m.Code
+	}
+	return ""
+}
+
+func (m *Payment) GetUrl() string {
+	if m != nil {
+		return m.Url
+	}
+	return ""
+}
+
+func (m *Payment) GetStatus() string {
+	if m != nil {
+		return m.Status
+	}
+	return ""
+}
+
+func (m *Payment) GetAt() string {
+	if m != nil {
+		return m.At
+	}
+	return ""
+}
+
 func init() {
 	proto.RegisterType((*GetUserRequest)(nil), "acourse.GetUserRequest")
 	proto.RegisterType((*GetUserResponse)(nil), "acourse.GetUserResponse")
 	proto.RegisterType((*GetMeResponse)(nil), "acourse.GetMeResponse")
+	proto.RegisterType((*ListRequest)(nil), "acourse.ListRequest")
+	proto.RegisterType((*PaymentsResponse)(nil), "acourse.PaymentsResponse")
+	proto.RegisterType((*PaymentIDsRequest)(nil), "acourse.PaymentIDsRequest")
 	proto.RegisterType((*Empty)(nil), "acourse.Empty")
 	proto.RegisterType((*User)(nil), "acourse.User")
+	proto.RegisterType((*UserTiny)(nil), "acourse.UserTiny")
 	proto.RegisterType((*Role)(nil), "acourse.Role")
 	proto.RegisterType((*Email)(nil), "acourse.Email")
+	proto.RegisterType((*Course)(nil), "acourse.Course")
+	proto.RegisterType((*Course_Content)(nil), "acourse.Course.Content")
+	proto.RegisterType((*Course_Option)(nil), "acourse.Course.Option")
+	proto.RegisterType((*CoursePublic)(nil), "acourse.CoursePublic")
+	proto.RegisterType((*CoursePublic_Option)(nil), "acourse.CoursePublic.Option")
+	proto.RegisterType((*CourseSmall)(nil), "acourse.CourseSmall")
+	proto.RegisterType((*CourseSmall_Option)(nil), "acourse.CourseSmall.Option")
+	proto.RegisterType((*CourseTiny)(nil), "acourse.CourseTiny")
+	proto.RegisterType((*Payment)(nil), "acourse.Payment")
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -419,33 +841,227 @@ var _EmailService_serviceDesc = grpc.ServiceDesc{
 	Metadata: "acourse.proto",
 }
 
+// Client API for PaymentService service
+
+type PaymentServiceClient interface {
+	ListWaitingPayments(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*PaymentsResponse, error)
+	ListHistoryPayments(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*PaymentsResponse, error)
+	ApprovePayments(ctx context.Context, in *PaymentIDsRequest, opts ...grpc.CallOption) (*Empty, error)
+	RejectPayments(ctx context.Context, in *PaymentIDsRequest, opts ...grpc.CallOption) (*Empty, error)
+}
+
+type paymentServiceClient struct {
+	cc *grpc.ClientConn
+}
+
+func NewPaymentServiceClient(cc *grpc.ClientConn) PaymentServiceClient {
+	return &paymentServiceClient{cc}
+}
+
+func (c *paymentServiceClient) ListWaitingPayments(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*PaymentsResponse, error) {
+	out := new(PaymentsResponse)
+	err := grpc.Invoke(ctx, "/acourse.PaymentService/ListWaitingPayments", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *paymentServiceClient) ListHistoryPayments(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*PaymentsResponse, error) {
+	out := new(PaymentsResponse)
+	err := grpc.Invoke(ctx, "/acourse.PaymentService/ListHistoryPayments", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *paymentServiceClient) ApprovePayments(ctx context.Context, in *PaymentIDsRequest, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
+	err := grpc.Invoke(ctx, "/acourse.PaymentService/ApprovePayments", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *paymentServiceClient) RejectPayments(ctx context.Context, in *PaymentIDsRequest, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
+	err := grpc.Invoke(ctx, "/acourse.PaymentService/RejectPayments", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// Server API for PaymentService service
+
+type PaymentServiceServer interface {
+	ListWaitingPayments(context.Context, *ListRequest) (*PaymentsResponse, error)
+	ListHistoryPayments(context.Context, *ListRequest) (*PaymentsResponse, error)
+	ApprovePayments(context.Context, *PaymentIDsRequest) (*Empty, error)
+	RejectPayments(context.Context, *PaymentIDsRequest) (*Empty, error)
+}
+
+func RegisterPaymentServiceServer(s *grpc.Server, srv PaymentServiceServer) {
+	s.RegisterService(&_PaymentService_serviceDesc, srv)
+}
+
+func _PaymentService_ListWaitingPayments_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PaymentServiceServer).ListWaitingPayments(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/acourse.PaymentService/ListWaitingPayments",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PaymentServiceServer).ListWaitingPayments(ctx, req.(*ListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PaymentService_ListHistoryPayments_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PaymentServiceServer).ListHistoryPayments(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/acourse.PaymentService/ListHistoryPayments",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PaymentServiceServer).ListHistoryPayments(ctx, req.(*ListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PaymentService_ApprovePayments_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PaymentIDsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PaymentServiceServer).ApprovePayments(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/acourse.PaymentService/ApprovePayments",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PaymentServiceServer).ApprovePayments(ctx, req.(*PaymentIDsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PaymentService_RejectPayments_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PaymentIDsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PaymentServiceServer).RejectPayments(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/acourse.PaymentService/RejectPayments",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PaymentServiceServer).RejectPayments(ctx, req.(*PaymentIDsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+var _PaymentService_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "acourse.PaymentService",
+	HandlerType: (*PaymentServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "ListWaitingPayments",
+			Handler:    _PaymentService_ListWaitingPayments_Handler,
+		},
+		{
+			MethodName: "ListHistoryPayments",
+			Handler:    _PaymentService_ListHistoryPayments_Handler,
+		},
+		{
+			MethodName: "ApprovePayments",
+			Handler:    _PaymentService_ApprovePayments_Handler,
+		},
+		{
+			MethodName: "RejectPayments",
+			Handler:    _PaymentService_RejectPayments_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "acourse.proto",
+}
+
 func init() { proto.RegisterFile("acourse.proto", fileDescriptor0) }
 
 var fileDescriptor0 = []byte{
-	// 387 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x09, 0x6e, 0x88, 0x02, 0xff, 0x64, 0x52, 0x4d, 0x0b, 0xd3, 0x40,
-	0x10, 0x6d, 0xd2, 0x8d, 0x49, 0xa7, 0xb6, 0xca, 0x22, 0x1a, 0x72, 0x90, 0xba, 0x5e, 0x8a, 0x42,
-	0xc1, 0x0a, 0xe2, 0x41, 0xbc, 0x49, 0x51, 0xe9, 0x65, 0x4b, 0x7f, 0x40, 0x3e, 0x06, 0x8c, 0xa4,
-	0xd9, 0xb8, 0xbb, 0x29, 0xf4, 0x47, 0xf9, 0x1f, 0x65, 0x27, 0x1f, 0xf6, 0xe3, 0xb6, 0x6f, 0xe6,
-	0xbd, 0x99, 0x97, 0x79, 0x81, 0x45, 0x9a, 0xab, 0x56, 0x1b, 0xdc, 0x34, 0x5a, 0x59, 0xc5, 0xc3,
-	0x1e, 0x8a, 0x77, 0xb0, 0xdc, 0xa1, 0x3d, 0x1a, 0xd4, 0x12, 0xff, 0xb4, 0x68, 0x2c, 0x8f, 0x21,
-	0x6c, 0x0d, 0xea, 0xef, 0x85, 0x89, 0xbd, 0xd5, 0x74, 0x3d, 0x93, 0x03, 0x14, 0x9f, 0xe0, 0xd9,
-	0xc8, 0x35, 0x8d, 0xaa, 0x0d, 0xf2, 0xb7, 0x10, 0xb8, 0x6e, 0x47, 0x9d, 0x6f, 0x17, 0x9b, 0x61,
-	0x0d, 0xb1, 0xba, 0x9e, 0x38, 0xc2, 0x62, 0x87, 0x76, 0x8f, 0xa3, 0xea, 0x0d, 0x30, 0xd7, 0x89,
-	0xbd, 0x95, 0xf7, 0x28, 0xa2, 0x96, 0xa3, 0x68, 0x55, 0x61, 0xec, 0xdf, 0x51, 0xa4, 0xaa, 0x50,
-	0x52, 0x4b, 0x84, 0x10, 0x7c, 0x3b, 0x35, 0xf6, 0x22, 0xce, 0xc0, 0x9c, 0x92, 0x2f, 0xc1, 0x2f,
-	0x0b, 0x1a, 0x3a, 0x93, 0x7e, 0x59, 0xf0, 0x04, 0x22, 0x37, 0xab, 0x4e, 0x4f, 0xdd, 0x9c, 0x99,
-	0x1c, 0x31, 0xe7, 0xc0, 0xa8, 0x3e, 0xa5, 0x3a, 0xbd, 0xf9, 0x0b, 0x08, 0x9a, 0x5f, 0xca, 0xaa,
-	0x98, 0x51, 0xb1, 0x03, 0xee, 0x1e, 0x69, 0xa6, 0x5a, 0xbb, 0xc7, 0x38, 0xa0, 0xfa, 0x00, 0xc5,
-	0x17, 0x60, 0xce, 0x8e, 0xd3, 0xa5, 0xc5, 0xa9, 0xac, 0x69, 0x75, 0x24, 0x3b, 0xc0, 0x5f, 0x03,
-	0x94, 0xb5, 0xb1, 0xba, 0xcd, 0xad, 0xd2, 0xb4, 0x3f, 0x92, 0x57, 0x15, 0xf1, 0xd3, 0xd9, 0x4f,
-	0xcb, 0xca, 0xd9, 0xb6, 0xaa, 0xbf, 0xb5, 0xdf, 0x2d, 0x34, 0x6d, 0xf6, 0x1b, 0x73, 0xdb, 0xbb,
-	0x1e, 0xa0, 0x33, 0x9d, 0xa9, 0xe2, 0xd2, 0xfb, 0xa3, 0xf7, 0x0f, 0x16, 0x4d, 0x9f, 0xb3, 0xed,
-	0x5f, 0x0f, 0xe6, 0xee, 0x06, 0x07, 0xd4, 0xe7, 0x32, 0x47, 0xfe, 0x15, 0xc2, 0x3e, 0x2a, 0xfe,
-	0x6a, 0xbc, 0xdd, 0x6d, 0xd0, 0x49, 0xfc, 0xd8, 0xe8, 0xf2, 0x11, 0x13, 0xfe, 0x01, 0x02, 0x8a,
-	0x8c, 0x2f, 0x47, 0x12, 0xdd, 0x3a, 0x79, 0x79, 0x2d, 0xfa, 0x1f, 0xa9, 0x98, 0xf0, 0xf7, 0x10,
-	0x1d, 0x9b, 0x22, 0xb5, 0xb8, 0x47, 0x7e, 0x1b, 0x69, 0x72, 0x37, 0x44, 0x4c, 0xb6, 0x9f, 0xe1,
-	0x29, 0x7d, 0xfc, 0xe0, 0x77, 0x0d, 0xec, 0x80, 0x75, 0x71, 0xb3, 0x2e, 0x2d, 0xab, 0x47, 0x65,
-	0xf6, 0x84, 0x7e, 0xe0, 0x8f, 0xff, 0x02, 0x00, 0x00, 0xff, 0xff, 0x3e, 0x09, 0xe4, 0x43, 0xd1,
-	0x02, 0x00, 0x00,
+	// 893 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x09, 0x6e, 0x88, 0x02, 0xff, 0xb4, 0x56, 0x6d, 0x8f, 0xdc, 0x34,
+	0x10, 0xbe, 0xdd, 0x4d, 0x36, 0xc9, 0x6c, 0x6f, 0x6f, 0xeb, 0x9e, 0x8e, 0x10, 0x5e, 0x74, 0x98,
+	0x4a, 0x9c, 0x0a, 0x9c, 0xc4, 0x55, 0x20, 0x24, 0xaa, 0xa2, 0xaa, 0x45, 0xed, 0x41, 0x4f, 0x9c,
+	0x72, 0x9c, 0xf8, 0x4a, 0x36, 0x71, 0x7b, 0x46, 0xd9, 0x38, 0xd8, 0xce, 0xa1, 0xfd, 0x1d, 0x7c,
+	0xe1, 0x0f, 0xf0, 0x91, 0x7f, 0xc5, 0x0f, 0x41, 0x1e, 0xdb, 0xd9, 0x37, 0x90, 0x10, 0x88, 0x4f,
+	0xeb, 0x67, 0x66, 0xec, 0x99, 0x79, 0x1e, 0xc7, 0xb3, 0xb0, 0x5f, 0x94, 0xa2, 0x93, 0x8a, 0x9d,
+	0xb6, 0x52, 0x68, 0x41, 0x22, 0x07, 0xe9, 0x03, 0x98, 0x3e, 0x67, 0xfa, 0x5a, 0x31, 0x99, 0xb3,
+	0x9f, 0x3a, 0xa6, 0x34, 0x49, 0x21, 0xea, 0x14, 0x93, 0xe7, 0x95, 0x4a, 0x07, 0xc7, 0xa3, 0x93,
+	0x24, 0xf7, 0x90, 0x7e, 0x06, 0x07, 0x7d, 0xac, 0x6a, 0x45, 0xa3, 0x18, 0x79, 0x1f, 0x42, 0xe3,
+	0xb5, 0xa1, 0x93, 0xb3, 0xfd, 0x53, 0x9f, 0x06, 0xa3, 0xac, 0x8f, 0x5e, 0xc3, 0xfe, 0x73, 0xa6,
+	0x2f, 0x58, 0xbf, 0xeb, 0x3d, 0x08, 0x8c, 0x27, 0x1d, 0x1c, 0x0f, 0x76, 0x37, 0xa1, 0xcb, 0x84,
+	0x48, 0x51, 0xb3, 0x74, 0xb8, 0x15, 0x92, 0x8b, 0x9a, 0xe5, 0xe8, 0xa2, 0x5f, 0xc0, 0xe4, 0x25,
+	0x57, 0xda, 0xd7, 0x7d, 0x04, 0x63, 0xf1, 0xea, 0x95, 0x62, 0x1a, 0x8f, 0x0d, 0x73, 0x87, 0xc8,
+	0x21, 0x84, 0x35, 0x5f, 0x70, 0x8d, 0x47, 0x85, 0xb9, 0x05, 0xf4, 0xd7, 0x01, 0xcc, 0x2e, 0x8b,
+	0xe5, 0x82, 0x35, 0x5a, 0xf5, 0x75, 0x7d, 0x04, 0x71, 0xeb, 0x6c, 0xae, 0xa1, 0x59, 0x9f, 0xd8,
+	0x05, 0xe7, 0x7d, 0x04, 0xf9, 0xc0, 0xf7, 0x3e, 0xc4, 0xd0, 0xbb, 0x1b, 0x6d, 0x7c, 0xc7, 0x9b,
+	0xa5, 0xeb, 0x9f, 0x7c, 0x0c, 0x91, 0xf5, 0xa8, 0x74, 0x84, 0xa1, 0xf7, 0xfa, 0xd0, 0xa7, 0xf8,
+	0x83, 0xc1, 0x3e, 0x86, 0x3e, 0x84, 0xbb, 0x2e, 0xd9, 0xf9, 0x33, 0xe5, 0xbb, 0x7b, 0x17, 0xc0,
+	0x25, 0x5e, 0x09, 0xb3, 0x66, 0xa1, 0x11, 0x84, 0x5f, 0x2d, 0x5a, 0xbd, 0xa4, 0xb7, 0x10, 0x98,
+	0xfc, 0x64, 0x0a, 0x43, 0x5e, 0x21, 0x15, 0x49, 0x3e, 0xe4, 0x15, 0xc9, 0x20, 0x36, 0xd5, 0x34,
+	0xc5, 0xc2, 0x92, 0x9a, 0xe4, 0x3d, 0x26, 0x04, 0x02, 0xb4, 0x8f, 0xd0, 0x8e, 0x6b, 0x43, 0x5b,
+	0x7b, 0x23, 0xb4, 0x48, 0x03, 0x34, 0x5a, 0x60, 0x2e, 0x47, 0x31, 0x17, 0x9d, 0xbe, 0x60, 0x69,
+	0x88, 0x76, 0x0f, 0xe9, 0x0f, 0x10, 0xfb, 0xbe, 0xff, 0x9f, 0xdc, 0xf4, 0x11, 0x04, 0x46, 0x7d,
+	0xe3, 0x2d, 0xaa, 0x05, 0x6f, 0x30, 0x41, 0x9c, 0x5b, 0x60, 0x08, 0xe2, 0x8d, 0xd2, 0xb2, 0x2b,
+	0xb5, 0x90, 0x98, 0x25, 0xce, 0xd7, 0x2c, 0xf4, 0x1b, 0x43, 0x50, 0xc1, 0x6b, 0x53, 0x9c, 0x16,
+	0x8e, 0xc1, 0xa1, 0x6d, 0x49, 0x75, 0xf3, 0x1f, 0x59, 0xa9, 0x5d, 0x6d, 0x1e, 0x9a, 0xd2, 0xe6,
+	0xa2, 0x5a, 0xba, 0x2a, 0x70, 0xfd, 0x75, 0x10, 0x8f, 0x66, 0x01, 0x7d, 0x07, 0xc6, 0x56, 0xb9,
+	0x2c, 0x81, 0xe8, 0xa9, 0x68, 0x34, 0x6b, 0x74, 0x16, 0xc3, 0xf8, 0xdb, 0x56, 0x73, 0xd1, 0xd0,
+	0x97, 0x70, 0xc7, 0xba, 0x2f, 0xbb, 0x79, 0xcd, 0xcb, 0xec, 0x91, 0xf7, 0x98, 0x4b, 0xca, 0x1a,
+	0x29, 0xea, 0xda, 0x15, 0xef, 0x90, 0x61, 0xa8, 0xe2, 0xaa, 0x14, 0x5d, 0xa3, 0x5d, 0xed, 0x3d,
+	0xa6, 0x7f, 0x0c, 0x61, 0x62, 0x8f, 0xbb, 0x5a, 0x14, 0x75, 0xbd, 0xc3, 0xee, 0x21, 0x84, 0x9a,
+	0xeb, 0xda, 0x53, 0x6b, 0x01, 0x79, 0x00, 0x33, 0x75, 0x23, 0xa4, 0x7e, 0xc6, 0x54, 0x29, 0x39,
+	0x66, 0x77, 0x1c, 0xef, 0xd8, 0xff, 0x46, 0xeb, 0x43, 0x08, 0xc5, 0xcf, 0x0d, 0x93, 0x4e, 0x69,
+	0x0b, 0x8c, 0x55, 0xe9, 0x42, 0xea, 0x74, 0x6c, 0xad, 0x08, 0xc8, 0x0c, 0x46, 0x9d, 0xac, 0xd3,
+	0x08, 0x6d, 0x66, 0x69, 0xc8, 0xd3, 0xcb, 0x96, 0xa5, 0xb1, 0x25, 0xcf, 0xac, 0x31, 0x8f, 0xe4,
+	0x25, 0x4b, 0x93, 0xe3, 0xc1, 0xc9, 0x20, 0xb7, 0x80, 0x9c, 0xc0, 0x81, 0xef, 0x95, 0x55, 0x97,
+	0xe8, 0x07, 0xf4, 0x6f, 0x9b, 0xc9, 0xa7, 0x10, 0x09, 0xac, 0x58, 0xa5, 0x13, 0x7c, 0x17, 0xde,
+	0xda, 0xfa, 0x90, 0x90, 0xa0, 0x53, 0xcb, 0x75, 0xee, 0x63, 0xb3, 0xfb, 0x3d, 0xfd, 0xeb, 0x34,
+	0x0f, 0xb6, 0x68, 0x3e, 0x03, 0x58, 0x7d, 0x8d, 0xff, 0x8c, 0x64, 0xfa, 0xcb, 0x10, 0x22, 0xf7,
+	0xad, 0xee, 0xec, 0x78, 0x1b, 0x92, 0x52, 0xb2, 0x42, 0xb3, 0xea, 0x89, 0xbf, 0x59, 0x2b, 0x83,
+	0xf1, 0x76, 0x6d, 0xe5, 0xbc, 0x56, 0x97, 0x95, 0xc1, 0x5c, 0x13, 0xfb, 0xe8, 0x3a, 0x45, 0x1c,
+	0x32, 0xf5, 0xdb, 0x7e, 0xcf, 0x2b, 0xa7, 0x4a, 0x8f, 0xc9, 0x7d, 0xd8, 0x17, 0x92, 0xbf, 0xe6,
+	0x4d, 0x51, 0x5b, 0x12, 0xc7, 0x48, 0xe2, 0xa6, 0x71, 0x25, 0x41, 0xb4, 0x2e, 0x01, 0x81, 0xa0,
+	0x14, 0x55, 0x2f, 0x96, 0x59, 0x7b, 0x49, 0x93, 0x95, 0xa4, 0x47, 0x30, 0x56, 0xba, 0xd0, 0x9d,
+	0x42, 0x7d, 0x92, 0xdc, 0x21, 0xd3, 0x79, 0xa1, 0x51, 0x91, 0x24, 0x1f, 0x16, 0xfa, 0xec, 0xf7,
+	0x01, 0x4c, 0xcc, 0x5b, 0x70, 0xc5, 0xe4, 0xad, 0x39, 0xfd, 0x31, 0x44, 0x6e, 0x6e, 0x90, 0x37,
+	0x7a, 0xc1, 0x36, 0xa7, 0x4e, 0x96, 0xee, 0x3a, 0xec, 0xa3, 0x4c, 0xf7, 0xc8, 0x27, 0x10, 0xe2,
+	0xfc, 0x20, 0xd3, 0x3e, 0x08, 0xdf, 0xba, 0xec, 0x68, 0x7d, 0xd3, 0x6a, 0xbe, 0xd0, 0x3d, 0xf2,
+	0x21, 0xc4, 0xd7, 0xc8, 0xe6, 0x05, 0x23, 0x9b, 0xf3, 0x25, 0xdb, 0x3a, 0x84, 0xee, 0x9d, 0x7d,
+	0x0e, 0x77, 0xf0, 0x69, 0xf0, 0xf5, 0x9e, 0x40, 0x70, 0xc5, 0x9a, 0x6a, 0x23, 0x5d, 0xc1, 0xeb,
+	0xbf, 0xd8, 0xf9, 0xdb, 0x10, 0xa6, 0x4e, 0x7f, 0xbf, 0xf9, 0x05, 0xdc, 0x33, 0x53, 0xe9, 0xfb,
+	0x82, 0x6b, 0xde, 0xbc, 0xf6, 0x23, 0x86, 0x1c, 0xf6, 0x7b, 0xd7, 0x66, 0x56, 0xf6, 0xe6, 0xf6,
+	0x78, 0x51, 0x6b, 0x3d, 0xb8, 0x93, 0x5e, 0x70, 0xa5, 0x85, 0x5c, 0xfe, 0x97, 0x93, 0xbe, 0x84,
+	0x83, 0x27, 0x6d, 0x2b, 0xc5, 0x2d, 0xeb, 0x4f, 0xc9, 0xb6, 0xe3, 0x57, 0xb3, 0x66, 0xb7, 0x4f,
+	0xf2, 0x18, 0xa6, 0x39, 0x33, 0x6f, 0xe2, 0xbf, 0xdb, 0x3f, 0x1f, 0xe3, 0xbf, 0x8e, 0x87, 0x7f,
+	0x06, 0x00, 0x00, 0xff, 0xff, 0xc8, 0x48, 0x69, 0x48, 0x86, 0x08, 0x00, 0x00,
 }

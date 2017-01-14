@@ -12,6 +12,13 @@ service EmailService {
   rpc Send(Email) returns (Empty) {}
 }
 
+service PaymentService {
+  rpc ListWaitingPayments(ListRequest) returns (PaymentsResponse) {}
+  rpc ListHistoryPayments(ListRequest) returns (PaymentsResponse) {}
+  rpc ApprovePayments(PaymentIDsRequest) returns (Empty) {}
+  rpc RejectPayments(PaymentIDsRequest) returns (Empty) {}
+}
+
 message GetUserRequest {
   repeated string userIds = 1;
 }
@@ -25,6 +32,21 @@ message GetMeResponse {
   Role role = 2;
 }
 
+message ListRequest {
+  int32 offset = 1;
+  int32 limit = 2;
+}
+
+message PaymentsResponse {
+  repeated Payment payments = 1;
+  repeated UserTiny users = 2;
+  repeated CourseTiny courses = 3;
+}
+
+message PaymentIDsRequest {
+  repeated string paymentIds = 1;
+}
+
 message Empty {}
 
 message User {
@@ -33,6 +55,13 @@ message User {
   string name = 3;
   string photo = 4;
   string aboutMe = 5;
+}
+
+message UserTiny {
+  string id = 1;
+  string username = 2;
+  string name = 3;
+  string photo = 4;
 }
 
 message Role {
@@ -45,4 +74,56 @@ message Email {
   repeated string to = 1;
   string subject = 2;
   string body = 4;
+}
+
+message Course {
+  message Content {
+
+  }
+  message Option {
+
+  }
+}
+
+message CoursePublic {
+  message Option {
+    bool enroll = 1;
+    bool discount = 2;
+  }
+}
+
+message CourseSmall {
+  message Option {
+    bool discount = 1;
+  }
+  string id = 1;
+  string title = 2;
+  string shortDescription = 3;
+  string photo = 4;
+  string owner = 5;
+  string start = 6;
+  string url = 7;
+  string type = 8;
+  double price = 9;
+  double discountedPrice = 10;
+  Option options = 11;
+}
+
+message CourseTiny {
+  string id = 1;
+  string title = 2;
+}
+
+message Payment {
+  string id = 1;
+  string createdAt = 2;
+  string updatedAt = 3;
+  string userId = 4;
+  string courseId = 5;
+  double originalPrice = 6;
+  double price = 7;
+  string code = 8;
+  string url = 9;
+  string status = 10;
+  string at = 11;
 }

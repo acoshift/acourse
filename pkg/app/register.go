@@ -79,31 +79,46 @@ func RegisterEmailServiceClient(httpServer *gin.Engine, s acourse.EmailServiceCl
 	})
 }
 
-// RegisterPaymentService registers a payment service
-func RegisterPaymentService(service *gin.Engine, s PaymentService) {
-	service.POST("/acourse.PaymentService/ListPayments", func(ctx *gin.Context) {
-		req := new(PaymentListRequest)
+// RegisterPaymentServiceClient registers a Payment service client to http server
+func RegisterPaymentServiceClient(httpServer *gin.Engine, s acourse.PaymentServiceClient) {
+	httpServer.POST("/acourse.PaymentService/ListWaitingPayments", func(ctx *gin.Context) {
+		req := new(acourse.ListRequest)
 		err := ctx.BindJSON(req)
 		if err != nil {
 			handleError(ctx, httperror.BadRequestWith(err))
 			return
 		}
-		res, err := s.ListPayments(ctx.Request.Context(), req)
+		res, err := s.ListWaitingPayments(makeServiceContext(ctx.Request), req)
 		if err != nil {
 			handleError(ctx, err)
 			return
 		}
-		handleOK(ctx, res.Expose())
+		handleOK(ctx, res)
 	})
 
-	service.POST("/acourse.PaymentService/ApprovePayments", func(ctx *gin.Context) {
-		req := new(IDsRequest)
+	httpServer.POST("/acourse.PaymentService/ListHistoryPayments", func(ctx *gin.Context) {
+		req := new(acourse.ListRequest)
 		err := ctx.BindJSON(req)
 		if err != nil {
 			handleError(ctx, httperror.BadRequestWith(err))
 			return
 		}
-		err = s.ApprovePayments(ctx.Request.Context(), req)
+		res, err := s.ListHistoryPayments(makeServiceContext(ctx.Request), req)
+		if err != nil {
+			handleError(ctx, err)
+			return
+		}
+		handleOK(ctx, res)
+	})
+
+	httpServer.POST("/acourse.PaymentService/ApprovePayments", func(ctx *gin.Context) {
+		req := new(acourse.PaymentIDsRequest)
+		err := ctx.BindJSON(req)
+		if err != nil {
+			handleError(ctx, httperror.BadRequestWith(err))
+			return
+		}
+		_, err = s.ApprovePayments(makeServiceContext(ctx.Request), req)
 		if err != nil {
 			handleError(ctx, err)
 			return
@@ -111,14 +126,14 @@ func RegisterPaymentService(service *gin.Engine, s PaymentService) {
 		handleSuccess(ctx)
 	})
 
-	service.POST("/acourse.PaymentService/RejectPayments", func(ctx *gin.Context) {
-		req := new(IDsRequest)
+	httpServer.POST("/acourse.PaymentService/RejectPayments", func(ctx *gin.Context) {
+		req := new(acourse.PaymentIDsRequest)
 		err := ctx.BindJSON(req)
 		if err != nil {
 			handleError(ctx, httperror.BadRequestWith(err))
 			return
 		}
-		err = s.RejectPayments(ctx.Request.Context(), req)
+		_, err = s.RejectPayments(makeServiceContext(ctx.Request), req)
 		if err != nil {
 			handleError(ctx, err)
 			return
