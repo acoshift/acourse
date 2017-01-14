@@ -73,5 +73,5 @@ func (s *userServiceServer) UpdateMe(ctx _context.Context, req *acourse.User) (*
 		return nil, err
 	}
 
-	return &acourse.Empty{}, nil
+	return new(acourse.Empty), nil
 }

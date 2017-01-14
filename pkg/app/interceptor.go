@@ -10,6 +10,12 @@ import (
 
 // AuthUnaryInterceptor is the interceptor for auththentication
 func AuthUnaryInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = grpc.Errorf(codes.Internal, "%v", r)
+		}
+	}()
+
 	md, ok := metadata.FromContext(ctx)
 	if !ok {
 		return handler(ctx, req)

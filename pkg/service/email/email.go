@@ -38,7 +38,7 @@ type Config struct {
 // Send sends an email
 func (s *service) Send(ctx _context.Context, req *acourse.Email) (*acourse.Empty, error) {
 	if len(req.To) == 0 {
-		return &acourse.Empty{}, nil
+		return new(acourse.Empty), nil
 	}
 	log.Printf("Send mail to %s\n", req.To)
 
