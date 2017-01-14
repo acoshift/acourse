@@ -1,10 +1,10 @@
 <template lang="pug">
   div
     CourseHeader(:course='course', v-if='course')
-    CourseEnrollPanel(v-if='course && !course.enrolled && !course.owned && course.enroll && !course.$preload', :course='course')
+    CourseEnrollPanel(v-if='course && !course.enrolled && !course.owned && course.options.enroll && !course.$preload', :course='course')
     CourseOwnerPanel(v-if='course && course.owned', :course='course')
     // <course-student-panel v-if="course && course.enrolled" :course="course"></course-student-panel>
-    CourseVideo(v-if='(course && course.video) && (course.enrolled || course.owned)', :src='course.video')
+    CourseVideo(v-if='course && course.video', :src='course.video')
     CourseDetail(:course='course', v-if='course')
     CourseContent(:contents='course.contents', v-if='course && course.contents')
 </template>
@@ -32,7 +32,7 @@ export default {
   subscriptions () {
     return {
       course: this.$$route
-        .flatMap((route) => Course.get(route.params.id)),
+        .flatMap((route) => Course.get(route.params.id)).do(console.log),
       currentUser: Auth.currentUser()
         .flatMap(() => this.$$route.first())
         .do((route) => Course.fetch(route.params.id))

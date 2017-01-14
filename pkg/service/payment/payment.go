@@ -138,7 +138,7 @@ func (s *service) ApprovePayments(ctx _context.Context, req *acourse.PaymentIDsR
 
 	go s.sendApprovedNotification(payments)
 
-	return nil, nil
+	return &acourse.Empty{}, nil
 }
 
 func (s *service) RejectPayments(ctx _context.Context, req *acourse.PaymentIDsRequest) (*acourse.Empty, error) {
@@ -168,7 +168,7 @@ func (s *service) RejectPayments(ctx _context.Context, req *acourse.PaymentIDsRe
 		return nil, err
 	}
 
-	return nil, nil
+	return &acourse.Empty{}, nil
 }
 
 func (s *service) sendApprovedNotification(payments []*model.Payment) {

@@ -67,5 +67,11 @@ func (s *userServiceServer) UpdateMe(ctx _context.Context, req *acourse.User) (*
 	user.Name = req.GetName()
 	user.Photo = req.GetPhoto()
 	user.AboutMe = req.GetAboutMe()
-	return nil, s.store.UserSave(user)
+
+	err = s.store.UserSave(user)
+	if err != nil {
+		return nil, err
+	}
+
+	return &acourse.Empty{}, nil
 }

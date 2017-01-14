@@ -1,8 +1,7 @@
 import { BehaviorSubject } from 'rxjs/BehaviorSubject'
-import API from './api'
 import RPC from './rpc'
 import find from 'lodash/find'
-import map from 'lodash/map'
+import response from './response'
 
 const $courses = new BehaviorSubject(false)
 const $course = new BehaviorSubject({})
@@ -26,21 +25,10 @@ if (window.$$state) {
   }
 }
 
-const mapCourseReply = (reply) => map(reply.courses, (course) => {
-  const res = {
-    ...course,
-    owner: reply.users[course.owner]
-  }
-  if (reply.enrollCount) {
-    res.student = reply.enrollCount[course.id]
-  }
-  return res
-})
-
 export default {
   fetchList () {
-    RPC.post('/acourse.CourseService/ListCourses', { enrollCount: true })
-      .map(mapCourseReply)
+    RPC.invoke('/acourse.CourseService/ListPublicCourses')
+      .map(response.courses)
       .subscribe((courses) => {
         $courses.next(courses)
       })
@@ -49,11 +37,12 @@ export default {
     return $courses.asObservable()
   },
   listAll () {
-    return RPC.post('/acourse.CourseService/ListCourses', { public: false }, true)
-      .map(mapCourseReply)
+    return RPC.invoke('/acourse.CourseService/ListCourses', null, true)
+      .map(response.courses)
   },
   fetch (url) {
-    const ob = API.get(`/course/${url}`)
+    const ob = RPC.invoke('/acourse.CourseService/GetCourse', { courseId: url })
+      .map(response.course)
       .share()
     ob
       .flatMap(() => $course.first(), (x, y) => [x, y])
@@ -71,15 +60,15 @@ export default {
       .filter((x) => !!x)
   },
   create (data) {
-    return API.post('/course', data, true)
+    return RPC.invoke('/acourse.CourseService/CreateCourse', data, true)
       .map(({ id }) => id)
       .do((id) => this.fetch(id))
   },
   save (id, data) {
-    return API.patch(`/course/${id}`, data)
+    return RPC.invoke('/acourse.CourseService/UpdateCourse', { id, ...data }, true)
       .do(() => this.fetch(id))
   },
-  enroll (id, { code, url, price }) {
-    return API.put(`/course/${id}/enroll`, { code, url, price }, true)
+  enroll (courseId, { code, url, price }) {
+    return RPC.invoke('/acourse.CourseService/EnrollCourse', { courseId, code, url, price }, true)
   }
 }

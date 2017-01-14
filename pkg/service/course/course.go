@@ -346,7 +346,7 @@ func (s *service) UpdateCourse(ctx _context.Context, req *acourse.Course) (*acou
 		return nil, err
 	}
 
-	return nil, nil
+	return &acourse.Empty{}, nil
 }
 
 func (s *service) EnrollCourse(ctx _context.Context, req *acourse.EnrollRequest) (*acourse.Empty, error) {
@@ -409,7 +409,7 @@ func (s *service) EnrollCourse(ctx _context.Context, req *acourse.EnrollRequest)
 		if err != nil {
 			return nil, err
 		}
-		return nil, nil
+		return &acourse.Empty{}, nil
 	}
 
 	// create payment
@@ -428,5 +428,5 @@ func (s *service) EnrollCourse(ctx _context.Context, req *acourse.EnrollRequest)
 		return nil, err
 	}
 
-	return nil, nil
+	return &acourse.Empty{}, nil
 }

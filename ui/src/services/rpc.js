@@ -25,21 +25,13 @@ const getResponse = (res) => res && res.data
 
 const justNull = Observable.of(null)
 
-const get = (url, requireAuth) => getConfig()
+const invoke = (url, data, requireAuth) => getConfig()
   .flatMap((config) =>
     ifThen(requireAuth, config.isAuth())
-      ? Observable.fromPromise(axios.get(API_URL + url, config))
-      : justNull)
-  .map(getResponse)
-
-const post = (url, data, requireAuth) => getConfig()
-  .flatMap((config) =>
-    ifThen(requireAuth, config.isAuth())
-      ? Observable.fromPromise(axios.post(API_URL + url, data, config))
+      ? Observable.fromPromise(axios.post(API_URL + url, data || {}, config))
       : justNull)
   .map(getResponse)
 
 export default {
-  get,
-  post
+  invoke
 }
