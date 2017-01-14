@@ -19,6 +19,17 @@ service PaymentService {
   rpc RejectPayments(PaymentIDsRequest) returns (Empty) {}
 }
 
+service CourseService {
+  rpc ListCourses(ListRequest) returns (CoursesResponse) {}
+  rpc ListPublicCourses(ListRequest) returns (CoursesResponse) {}
+  rpc ListOwnCourses(UserIDRequest) returns (CoursesResponse) {}
+  rpc ListEnrolledCourses(UserIDRequest) returns (CoursesResponse) {}
+  rpc GetCourse(CourseIDRequest) returns (Course) {}
+  rpc CreateCourse(Course) returns (Course) {}
+  rpc UpdateCourse(Course) returns (Empty) {}
+  rpc EnrollCourse(EnrollRequest) returns (Empty) {}
+}
+
 message GetUserRequest {
   repeated string userIds = 1;
 }
@@ -45,6 +56,27 @@ message PaymentsResponse {
 
 message PaymentIDsRequest {
   repeated string paymentIds = 1;
+}
+
+message CoursesResponse {
+  repeated CourseSmall courses = 1;
+  repeated UserTiny users = 2;
+  repeated EnrollCount enrollCounts = 3;
+}
+
+message UserIDRequest {
+  string userId = 1;
+}
+
+message CourseIDRequest {
+  string courseId = 1;
+}
+
+message EnrollRequest {
+  string courseId = 1;
+  string url = 2;
+  string code = 3;
+  double price = 4;
 }
 
 message Empty {}
@@ -78,35 +110,52 @@ message Email {
 
 message Course {
   message Content {
-
+    string title = 1;
+    string description = 2;
+    string video = 3;
+    string downloadURL = 4;
   }
   message Option {
-
+    bool public = 1;
+    bool enroll = 2;
+    bool attend = 3;
+    bool assignment = 4;
+    bool discount = 5;
   }
-}
-
-message CoursePublic {
-  message Option {
-    bool enroll = 1;
-    bool discount = 2;
-  }
+  string id = 1;
+  string createdAt = 2;
+  string updatedAt = 3;
+  string title = 4;
+  string shortDescription = 5;
+  string description = 6;
+  string photo = 7;
+  string owner = 8;
+  string start = 9;
+  string url = 10;
+  string type = 11;
+  string video = 12;
+  double price = 13;
+  double discountedPrice = 14;
+  Option options = 15;
+  repeated Content contents = 16;
+  string enrollDetail = 17;
 }
 
 message CourseSmall {
   message Option {
-    bool discount = 1;
+    bool discount = 5;
   }
   string id = 1;
-  string title = 2;
-  string shortDescription = 3;
-  string photo = 4;
-  string owner = 5;
-  string start = 6;
-  string url = 7;
-  string type = 8;
-  double price = 9;
-  double discountedPrice = 10;
-  Option options = 11;
+  string title = 4;
+  string shortDescription = 5;
+  string photo = 7;
+  string owner = 8;
+  string start = 9;
+  string url = 10;
+  string type = 11;
+  double price = 13;
+  double discountedPrice = 14;
+  Option options = 15;
 }
 
 message CourseTiny {
@@ -126,4 +175,9 @@ message Payment {
   string url = 9;
   string status = 10;
   string at = 11;
+}
+
+message EnrollCount {
+  string courseId = 1;
+  int32 count = 2;
 }

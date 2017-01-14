@@ -85,7 +85,42 @@ func ToPayments(xs model.Payments) []*Payment {
 
 // ToCourse builds a Course message from Course model
 func ToCourse(x *model.Course) *Course {
-	return &Course{}
+	return &Course{
+		Id:               x.ID,
+		CreatedAt:        formatTime(x.CreatedAt),
+		UpdatedAt:        formatTime(x.UpdatedAt),
+		Title:            x.Title,
+		ShortDescription: x.ShortDescription,
+		Description:      x.Description,
+		Photo:            x.Photo,
+		Owner:            x.Owner,
+		Start:            formatTime(x.Start),
+		Url:              x.URL,
+		Type:             string(x.Type),
+		Video:            x.Video,
+		Price:            x.Price,
+		DiscountedPrice:  x.DiscountedPrice,
+		Options: &Course_Option{
+			Public:     x.Options.Public,
+			Enroll:     x.Options.Enroll,
+			Attend:     x.Options.Attend,
+			Assignment: x.Options.Assignment,
+			Discount:   x.Options.Discount,
+		},
+		Contents: func() []*Course_Content {
+			rs := make([]*Course_Content, len(x.Contents))
+			for i, c := range x.Contents {
+				rs[i] = &Course_Content{
+					Title:       c.Title,
+					Description: c.Description,
+					Video:       c.Video,
+					DownloadURL: c.DownloadURL,
+				}
+			}
+			return rs
+		}(),
+		EnrollDetail: x.EnrollDetail,
+	}
 }
 
 // ToCourses builds repeated Course message from Course models
@@ -93,6 +128,34 @@ func ToCourses(xs model.Courses) []*Course {
 	rs := make([]*Course, len(xs))
 	for i, x := range xs {
 		rs[i] = ToCourse(x)
+	}
+	return rs
+}
+
+// ToCourseSmall builds a Course small message from a Course model
+func ToCourseSmall(x *model.Course) *CourseSmall {
+	return &CourseSmall{
+		Id:               x.ID,
+		Title:            x.Title,
+		ShortDescription: x.ShortDescription,
+		Photo:            x.Photo,
+		Owner:            x.Owner,
+		Start:            formatTime(x.Start),
+		Url:              x.URL,
+		Type:             string(x.Type),
+		Price:            x.Price,
+		DiscountedPrice:  x.DiscountedPrice,
+		Options: &CourseSmall_Option{
+			Discount: x.Options.Discount,
+		},
+	}
+}
+
+// ToCoursesSmall builds repeated Course small message from Course models
+func ToCoursesSmall(xs model.Courses) []*CourseSmall {
+	rs := make([]*CourseSmall, len(xs))
+	for i, x := range xs {
+		rs[i] = ToCourseSmall(x)
 	}
 	return rs
 }

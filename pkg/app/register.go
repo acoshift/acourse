@@ -36,7 +36,7 @@ func RegisterUserServiceClient(httpServer *gin.Engine, s acourse.UserServiceClie
 		handleOK(ctx, res)
 	})
 
-	httpServer.GET("/acourse.UserService/GetMe", func(ctx *gin.Context) {
+	httpServer.POST("/acourse.UserService/GetMe", func(ctx *gin.Context) {
 		res, err := s.GetMe(makeServiceContext(ctx.Request), new(acourse.Empty))
 		if err != nil {
 			handleError(ctx, err)
@@ -142,29 +142,80 @@ func RegisterPaymentServiceClient(httpServer *gin.Engine, s acourse.PaymentServi
 	})
 }
 
-// RegisterCourseService registers a course service
-func RegisterCourseService(service *gin.Engine, s CourseService) {
+// RegisterCourseServiceClient registers a Course service client to http server
+func RegisterCourseServiceClient(service *gin.Engine, s acourse.CourseServiceClient) {
 	service.POST("/acourse.CourseService/ListCourses", func(ctx *gin.Context) {
-		req := new(CourseListRequest)
+		req := new(acourse.ListRequest)
 		err := ctx.BindJSON(req)
 		if err != nil {
 			handleError(ctx, httperror.BadRequestWith(err))
 			return
 		}
-		res, err := s.ListCourses(ctx.Request.Context(), req)
+		res, err := s.ListCourses(makeServiceContext(ctx.Request), req)
 		if err != nil {
 			handleError(ctx, err)
 			return
 		}
-		handleOK(ctx, res.Expose())
+		handleOK(ctx, res)
 	})
 
-	service.GET("/acourse.CourseService/ListEnrolledCourses", func(ctx *gin.Context) {
-		res, err := s.ListEnrolledCourses(ctx.Request.Context())
+	service.POST("/acourse.CourseService/ListPublicCourses", func(ctx *gin.Context) {
+		req := new(acourse.ListRequest)
+		err := ctx.BindJSON(req)
+		if err != nil {
+			handleError(ctx, httperror.BadRequestWith(err))
+			return
+		}
+		res, err := s.ListPublicCourses(makeServiceContext(ctx.Request), req)
 		if err != nil {
 			handleError(ctx, err)
 			return
 		}
-		handleOK(ctx, res.Expose())
+		handleOK(ctx, res)
+	})
+
+	service.POST("/acourse.CourseService/ListOwnCourses", func(ctx *gin.Context) {
+		req := new(acourse.UserIDRequest)
+		err := ctx.BindJSON(req)
+		if err != nil {
+			handleError(ctx, httperror.BadRequestWith(err))
+			return
+		}
+		res, err := s.ListOwnCourses(makeServiceContext(ctx.Request), req)
+		if err != nil {
+			handleError(ctx, err)
+			return
+		}
+		handleOK(ctx, res)
+	})
+
+	service.POST("/acourse.CourseService/ListEnrolledCourses", func(ctx *gin.Context) {
+		req := new(acourse.UserIDRequest)
+		err := ctx.BindJSON(req)
+		if err != nil {
+			handleError(ctx, httperror.BadRequestWith(err))
+			return
+		}
+		res, err := s.ListEnrolledCourses(makeServiceContext(ctx.Request), req)
+		if err != nil {
+			handleError(ctx, err)
+			return
+		}
+		handleOK(ctx, res)
+	})
+
+	service.POST("/acourse.CourseService/GetCourse", func(ctx *gin.Context) {
+		req := new(acourse.CourseIDRequest)
+		err := ctx.BindJSON(req)
+		if err != nil {
+			handleError(ctx, httperror.BadRequestWith(err))
+			return
+		}
+		res, err := s.GetCourse(makeServiceContext(ctx.Request), req)
+		if err != nil {
+			handleError(ctx, err)
+			return
+		}
+		handleOK(ctx, res)
 	})
 }

@@ -3,14 +3,16 @@ package course
 import (
 	"context"
 
-	"github.com/acoshift/acourse/pkg/app"
+	"github.com/acoshift/acourse/pkg/acourse"
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/acourse/pkg/store"
-	"github.com/acoshift/httperror"
+	_context "golang.org/x/net/context"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 )
 
 // New creates new course service
-func New(store Store) app.CourseService {
+func New(store Store) acourse.CourseServiceServer {
 	return &service{store}
 }
 
@@ -28,46 +30,11 @@ type service struct {
 	store Store
 }
 
-func (s *service) ListCourses(ctx context.Context, req *app.CourseListRequest) (*app.CoursesReply, error) {
-	currentUserID, _ := ctx.Value(app.KeyCurrentUserID).(string)
-
-	var courses model.Courses
-	var err error
-
-	opt := make([]store.CourseListOption, 0, 3)
-
-	if req.Owner != "" {
-		opt = append(opt, store.CourseListOptionOwner(req.Owner))
-		if req.Owner != currentUserID {
-			opt = append(opt, store.CourseListOptionPublic(true))
-		}
-	} else if req.Public == nil || *req.Public == true {
-		opt = append(opt, store.CourseListOptionPublic(true))
-	} else {
-		if currentUserID == "" {
-			return nil, httperror.Unauthorized
-		}
-		// check is admin
-		var role *model.Role
-		role, err = s.store.RoleGet(currentUserID)
-		if err != nil {
-			return nil, err
-		}
-		if !role.Admin {
-			return nil, httperror.Forbidden
-		}
-	}
-
-	courses, err = s.store.CourseList(opt...)
+func (s *service) listCourses(ctx _context.Context, opts ...store.CourseListOption) (*acourse.CoursesResponse, error) {
+	courses, err := s.store.CourseList(opts...)
 	if err != nil {
 		return nil, err
 	}
-
-	courses.SetView(model.CourseViewTiny)
-
-	reply := new(app.CoursesReply)
-	reply.Courses = courses
-
 	// get owners
 	userIDMap := map[string]bool{}
 	for _, course := range courses {
@@ -81,30 +48,84 @@ func (s *service) ListCourses(ctx context.Context, req *app.CourseListRequest) (
 	if err != nil {
 		return nil, err
 	}
-	users.SetView(model.UserViewTiny)
-	reply.Users = users
 
-	if req.EnrollCount {
-		enrollCount := map[string]int{}
-		for _, course := range courses {
-			enrollCount[course.ID], err = s.store.EnrollCourseCount(course.ID)
-			if err != nil {
-				return nil, err
-			}
+	enrollCounts := make([]*acourse.EnrollCount, len(courses))
+	for i, course := range courses {
+		c, err := s.store.EnrollCourseCount(course.ID)
+		if err != nil {
+			return nil, err
 		}
-		reply.EnrollCount = enrollCount
+		enrollCounts[i] = &acourse.EnrollCount{
+			CourseId: course.ID,
+			Count:    int32(c),
+		}
 	}
-
-	return reply, nil
+	return &acourse.CoursesResponse{
+		Courses:      acourse.ToCoursesSmall(courses),
+		Users:        acourse.ToUsersTiny(users),
+		EnrollCounts: enrollCounts,
+	}, nil
 }
 
-func (s *service) ListEnrolledCourses(ctx context.Context) (*app.CoursesReply, error) {
-	currentUserID, ok := ctx.Value(app.KeyCurrentUserID).(string)
-	if !ok {
-		return nil, httperror.Unauthorized
+func (s *service) ListPublicCourses(ctx _context.Context, req *acourse.ListRequest) (*acourse.CoursesResponse, error) {
+	return s.listCourses(ctx, store.CourseListOptionPublic(true))
+}
+
+func (s *service) ListCourses(ctx _context.Context, req *acourse.ListRequest) (*acourse.CoursesResponse, error) {
+	userID, ok := ctx.Value(acourse.KeyUserID).(string)
+	if !ok || userID == "" {
+		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
+	}
+	role, err := s.store.RoleGet(userID)
+	if err != nil {
+		return nil, err
+	}
+	if !role.Admin {
+		return nil, grpc.Errorf(codes.PermissionDenied, "permission denied")
+	}
+	return s.listCourses(ctx)
+}
+
+func (s *service) ListOwnCourses(ctx _context.Context, req *acourse.UserIDRequest) (*acourse.CoursesResponse, error) {
+	userID, _ := ctx.Value(acourse.KeyUserID).(string)
+
+	if req.GetUserId() == "" {
+		return nil, grpc.Errorf(codes.InvalidArgument, "invalid user id")
 	}
 
-	enrolls, err := s.store.EnrollListByUserID(currentUserID)
+	opt := make([]store.CourseListOption, 0, 3)
+	opt = append(opt, store.CourseListOptionOwner(req.GetUserId()))
+
+	// if not sign in, get only public courses
+	if userID == "" {
+		opt = append(opt, store.CourseListOptionPublic(true))
+	}
+
+	return s.listCourses(ctx, opt...)
+}
+
+func (s *service) ListEnrolledCourses(ctx _context.Context, req *acourse.UserIDRequest) (*acourse.CoursesResponse, error) {
+	userID, ok := ctx.Value(acourse.KeyUserID).(string)
+	if !ok || userID == "" {
+		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
+	}
+
+	if req.GetUserId() == "" {
+		return nil, grpc.Errorf(codes.InvalidArgument, "invalid user id")
+	}
+
+	// only admin allow for get other user enrolled courses
+	if req.GetUserId() != userID {
+		role, err := s.store.RoleGet(userID)
+		if err != nil {
+			return nil, err
+		}
+		if !role.Admin {
+			return nil, grpc.Errorf(codes.PermissionDenied, "permission denied")
+		}
+	}
+
+	enrolls, err := s.store.EnrollListByUserID(req.GetUserId())
 	if err != nil {
 		return nil, err
 	}
@@ -113,7 +134,6 @@ func (s *service) ListEnrolledCourses(ctx context.Context) (*app.CoursesReply, e
 		ids[i] = e.CourseID
 	}
 	courses, err := s.store.CourseGetAllByIDs(ids)
-	courses.SetView(model.CourseViewTiny)
 
 	// get owners
 	userIDMap := map[string]bool{}
@@ -128,18 +148,21 @@ func (s *service) ListEnrolledCourses(ctx context.Context) (*app.CoursesReply, e
 	if err != nil {
 		return nil, err
 	}
-	users.SetView(model.UserViewTiny)
 
-	enrollCount := map[string]int{}
-	for _, course := range courses {
-		enrollCount[course.ID], err = s.store.EnrollCourseCount(course.ID)
+	enrollCounts := make([]*acourse.EnrollCount, len(courses))
+	for i, course := range courses {
+		c, err := s.store.EnrollCourseCount(course.ID)
 		if err != nil {
 			return nil, err
 		}
+		enrollCounts[i] = &acourse.EnrollCount{
+			CourseId: course.ID,
+			Count:    int32(c),
+		}
 	}
-	return &app.CoursesReply{
-		Courses:     courses,
-		Users:       users,
-		EnrollCount: enrollCount,
+	return &acourse.CoursesResponse{
+		Courses:      acourse.ToCoursesSmall(courses),
+		Users:        acourse.ToUsersTiny(users),
+		EnrollCounts: enrollCounts,
 	}, nil
 }

@@ -9,7 +9,9 @@ import (
 	"github.com/acoshift/acourse/pkg/acourse"
 	"github.com/acoshift/acourse/pkg/app"
 	"github.com/acoshift/acourse/pkg/ctrl"
+	"github.com/acoshift/acourse/pkg/service/course"
 	"github.com/acoshift/acourse/pkg/service/email"
+	"github.com/acoshift/acourse/pkg/service/payment"
 	"github.com/acoshift/acourse/pkg/service/user"
 	"github.com/acoshift/acourse/pkg/store"
 	"github.com/acoshift/go-firebase-admin"
@@ -57,6 +59,27 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// create service clients
+	conn, err := grpc.Dial("127.0.0.1:8081", grpc.WithInsecure())
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	userServiceClient := acourse.NewUserServiceClient(conn)
+	courseServiceClient := acourse.NewCourseServiceClient(conn)
+	emailServiceClient := acourse.NewEmailServiceClient(conn)
+	paymentServiceClient := acourse.NewPaymentServiceClient(conn)
+
+	// register service clients to http server
+	app.RegisterUserServiceClient(httpServer, userServiceClient)
+	app.RegisterCourseServiceClient(httpServer, courseServiceClient)
+	// app.RegisterEmailServiceClient(httpServer, emailService) // do not expose email service to the world right now
+	app.RegisterPaymentServiceClient(httpServer, paymentServiceClient)
+
+	// mount controllers
+	app.MountHealthController(httpServer, ctrl.NewHealth())
+	app.MountRenderController(httpServer, ctrl.NewRenderController(db, nil))
+
 	// run grpc server
 	go func() {
 		grpcListener, err := net.Listen("tcp", ":8081")
@@ -65,6 +88,8 @@ func main() {
 		}
 		grpcServer := grpc.NewServer(grpc.UnaryInterceptor(app.AuthUnaryInterceptor))
 		acourse.RegisterUserServiceServer(grpcServer, user.New(db))
+		acourse.RegisterCourseServiceServer(grpcServer, course.New(db))
+		acourse.RegisterPaymentServiceServer(grpcServer, payment.New(db, firAuth, emailServiceClient))
 		acourse.RegisterEmailServiceServer(grpcServer, email.New(email.Config{
 			From:     cfg.Email.From,
 			Server:   cfg.Email.Server,
@@ -77,25 +102,7 @@ func main() {
 		}
 	}()
 
-	// create service clients
-	conn, err := grpc.Dial("127.0.0.1:8081", grpc.WithInsecure())
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
-	userServiceClient := acourse.NewUserServiceClient(conn)
-	emailServiceClient := acourse.NewEmailServiceClient(conn)
-	paymentServiceClient := acourse.NewPaymentServiceClient(conn)
-
-	// register service clients to http server
-	app.RegisterUserServiceClient(httpServer, userServiceClient)
-	// app.RegisterEmailServiceClient(httpServer, emailService) // do not expose email service to the world right now
-	app.RegisterPaymentServiceClient(httpServer, paymentServiceClient)
-
-	// mount controllers
-	app.MountHealthController(httpServer, ctrl.NewHealth())
-	app.MountRenderController(httpServer, ctrl.NewRenderController(db, nil))
-
+	// run http server
 	if err := httpServer.Run(":8080"); err != nil {
 		log.Fatal(err)
 	}
