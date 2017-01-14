@@ -8,9 +8,8 @@ import (
 
 // Base is the database base model
 type Base struct {
-	key  *datastore.Key
-	view interface{}
-	ID   string `datastore:"-"`
+	key *datastore.Key
+	ID  string `datastore:"-"`
 }
 
 // KeySetter interface
