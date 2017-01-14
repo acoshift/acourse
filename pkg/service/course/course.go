@@ -31,6 +31,8 @@ type Store interface {
 	EnrollSave(*model.Enroll) error
 	PaymentSave(*model.Payment) error
 	CourseSave(*model.Course) error
+	CourseFind(string) (*model.Course, error)
+	UserMustGet(string) (*model.User, error)
 }
 
 type service struct {
@@ -175,7 +177,84 @@ func (s *service) ListEnrolledCourses(ctx _context.Context, req *acourse.UserIDR
 }
 
 func (s *service) GetCourse(ctx _context.Context, req *acourse.CourseIDRequest) (*acourse.CourseResponse, error) {
-	return nil, nil
+	userID, ok := ctx.Value(acourse.KeyUserID).(string)
+	if !ok || userID == "" {
+		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
+	}
+
+	// try get by id first
+	course, err := s.store.CourseGet(req.GetCourseId())
+	if err != nil {
+		return nil, err
+	}
+	// try get by url
+	if course == nil {
+		course, err = s.store.CourseFind(req.GetCourseId())
+		if err != nil {
+			return nil, err
+		}
+	}
+	if course == nil {
+		return nil, grpc.Errorf(codes.NotFound, "course not found")
+	}
+
+	// get course owner
+	owner, err := s.store.UserMustGet(course.Owner)
+	if err != nil {
+		return nil, err
+	}
+
+	role, err := s.store.RoleGet(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	// check is user enrolled
+	enroll, err := s.store.EnrollFind(userID, course.ID)
+	if err != nil {
+		return nil, err
+	}
+	if enroll != nil || course.Owner == userID || role.Admin {
+		return &acourse.CourseResponse{
+			Course:   acourse.ToCourse(course),
+			User:     acourse.ToUserTiny(owner),
+			Enrolled: enroll != nil,
+			Owned:    course.Owner == userID,
+		}, nil
+	}
+
+	// filter out private fields
+	course = &model.Course{
+		Base:             course.Base,
+		Stampable:        course.Stampable,
+		Title:            course.Title,
+		ShortDescription: course.ShortDescription,
+		Description:      course.Description,
+		Photo:            course.Photo,
+		Owner:            course.Owner,
+		Start:            course.Start,
+		URL:              course.URL,
+		Type:             course.Type,
+		Price:            course.Price,
+		DiscountedPrice:  course.DiscountedPrice,
+		Options: model.CourseOption{
+			Public:   course.Options.Public,
+			Discount: course.Options.Discount,
+		},
+		EnrollDetail: course.EnrollDetail,
+	}
+
+	// check waiting payment
+	payment, err := s.store.PaymentFind(userID, course.ID, model.PaymentStatusWaiting)
+	if err != nil {
+		return nil, err
+	}
+
+	return &acourse.CourseResponse{
+		Course:   acourse.ToCourse(course),
+		User:     acourse.ToUserTiny(owner),
+		Purchase: payment != nil,
+	}, nil
 }
 
 func (s *service) CreateCourse(ctx _context.Context, req *acourse.Course) (*acourse.Course, error) {

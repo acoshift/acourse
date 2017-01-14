@@ -59,17 +59,18 @@ func (c *RenderController) Index(ctx *app.RenderIndexContext) (interface{}, erro
 
 // Course runs course action
 func (c *RenderController) Course(ctx *app.RenderCourseContext) (interface{}, error) {
-	course, err := c.courseService.GetCourse(context.Background(), &acourse.CourseIDRequest{CourseId: ctx.CourseID})
-	if err != nil || course == nil {
+	response, err := c.courseService.GetCourse(context.Background(), &acourse.CourseIDRequest{CourseId: ctx.CourseID})
+	if err != nil || response == nil {
 		return nil, nil
 	}
+	course := response.Course
 	r := &RenderIndex{
 		Title:       course.Title,
 		Description: course.ShortDescription,
 		Image:       course.Photo,
 		URL:         "https://acourse.io/course/",
 		State: map[string]interface{}{
-			"course": course,
+			"course": response,
 		},
 	}
 	if course.Url != "" {

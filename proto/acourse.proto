@@ -82,6 +82,9 @@ message EnrollRequest {
 message CourseResponse {
   Course course = 1;
   UserTiny user = 2;
+  bool enrolled = 3;
+  bool owned = 4;
+  bool purchase = 5;
 }
 
 message Empty {}
