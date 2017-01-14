@@ -1,15 +1,15 @@
 package email
 
 import (
-	"context"
 	"log"
 
-	"github.com/acoshift/acourse/pkg/app"
+	"github.com/acoshift/acourse/pkg/acourse"
+	_context "golang.org/x/net/context"
 	"gopkg.in/gomail.v2"
 )
 
-// New creates new email service
-func New(config Config) app.EmailService {
+// New creates new email service server
+func New(config Config) acourse.EmailServiceServer {
 	return &service{
 		config: config,
 		dialer: gomail.NewDialer(
@@ -35,10 +35,10 @@ type Config struct {
 	From     string
 }
 
-// SendEmail sends an email
-func (s *service) SendEmail(ctx context.Context, req *app.EmailRequest) error {
+// Send sends an email
+func (s *service) Send(ctx _context.Context, req *acourse.Email) (*acourse.Empty, error) {
 	if len(req.To) == 0 {
-		return nil
+		return nil, nil
 	}
 	log.Printf("Send mail to %s\n", req.To)
 
@@ -48,5 +48,5 @@ func (s *service) SendEmail(ctx context.Context, req *app.EmailRequest) error {
 	m.SetHeader("Subject", req.Subject)
 	m.SetBody("text/html", req.Body)
 
-	return s.dialer.DialAndSend(m)
+	return nil, s.dialer.DialAndSend(m)
 }

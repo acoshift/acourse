@@ -2,19 +2,13 @@ package app
 
 import (
 	"context"
-	"log"
 	"net/http"
 
 	"github.com/acoshift/acourse/pkg/acourse"
 	"github.com/acoshift/httperror"
-	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 	"gopkg.in/gin-gonic/gin.v1"
 )
-
-func dial(addr string) (*grpc.ClientConn, error) {
-	return grpc.Dial(addr, grpc.WithInsecure())
-}
 
 func makeServiceContext(r *http.Request) context.Context {
 	md := metadata.MD{}
@@ -25,14 +19,8 @@ func makeServiceContext(r *http.Request) context.Context {
 	return metadata.NewContext(context.Background(), md)
 }
 
-// RegisterUserServiceServer registers a User service server
-func RegisterUserServiceServer(httpServer *gin.Engine, addr string) {
-	conn, err := dial(addr)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	s := acourse.NewUserServiceClient(conn)
+// RegisterUserServiceClient registers a User service client to http server
+func RegisterUserServiceClient(httpServer *gin.Engine, s acourse.UserServiceClient) {
 	httpServer.POST("/acourse.UserService/GetUser", func(ctx *gin.Context) {
 		req := new(acourse.GetUserRequest)
 		err := ctx.BindJSON(req)
@@ -65,6 +53,24 @@ func RegisterUserServiceServer(httpServer *gin.Engine, addr string) {
 			return
 		}
 		_, err = s.UpdateMe(makeServiceContext(ctx.Request), req)
+		if err != nil {
+			handleError(ctx, err)
+			return
+		}
+		handleSuccess(ctx)
+	})
+}
+
+// RegisterEmailServiceClient registers a Email service client to http server
+func RegisterEmailServiceClient(httpServer *gin.Engine, s acourse.EmailServiceClient) {
+	httpServer.POST("/acourse.EmailService/Send", func(ctx *gin.Context) {
+		req := new(acourse.Email)
+		err := ctx.BindJSON(req)
+		if err != nil {
+			handleError(ctx, httperror.BadRequestWith(err))
+			return
+		}
+		_, err = s.Send(makeServiceContext(ctx.Request), req)
 		if err != nil {
 			handleError(ctx, err)
 			return

@@ -9,9 +9,7 @@ import (
 	"github.com/acoshift/acourse/pkg/acourse"
 	"github.com/acoshift/acourse/pkg/app"
 	"github.com/acoshift/acourse/pkg/ctrl"
-	"github.com/acoshift/acourse/pkg/service/course"
 	"github.com/acoshift/acourse/pkg/service/email"
-	"github.com/acoshift/acourse/pkg/service/payment"
 	"github.com/acoshift/acourse/pkg/service/user"
 	"github.com/acoshift/acourse/pkg/store"
 	"github.com/acoshift/go-firebase-admin"
@@ -80,11 +78,20 @@ func main() {
 		}
 	}()
 
-	// register service servers
-	// courseCtrl := ctrl.NewCourseController(db)
-	app.RegisterUserServiceServer(httpServer, "127.0.0.1:8081")
-	app.RegisterCourseService(httpServer, course.New(db))
-	app.RegisterPaymentService(httpServer, payment.New(db, firAuth, emailService))
+	// create service clients
+	conn, err := grpc.Dial("127.0.0.1:8081", grpc.WithInsecure())
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	userServiceClient := acourse.NewUserServiceClient(conn)
+	emailServiceClient := acourse.NewEmailServiceClient(conn)
+
+	// register service clients to http server
+	app.RegisterUserServiceClient(httpServer, userServiceClient)
+	// app.RegisterEmailServiceClient(httpServer, emailService) // do not expose email service to the world right now
+	// app.RegisterCourseService(httpServer, course.New(db))
+	// app.RegisterPaymentService(httpServer, payment.New(db, firAuth, emailService))
 	// app.MountRenderController(service, ctrl.NewRenderController(db, courseCtrl))
 
 	// mount controllers

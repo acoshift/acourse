@@ -8,6 +8,10 @@ service UserService {
   rpc UpdateMe(User) returns (Empty) {}
 }
 
+service EmailService {
+  rpc Send(Email) returns (Empty) {}
+}
+
 message GetUserRequest {
   repeated string userIds = 1;
 }
@@ -34,4 +38,11 @@ message User {
 message Role {
   bool admin = 1;
   bool instructor = 2;
+}
+
+message Email {
+  reserved 3; // maybe for content type ?
+  repeated string to = 1;
+  string subject = 2;
+  string body = 4;
 }
