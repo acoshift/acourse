@@ -1,6 +1,6 @@
 <template lang="pug">
 .ui.borderless.top.fixed.menu
-  router-link.item(to='/home')
+  router-link.item(to='/')
     img(src='../assets/acourse.svg')
   .right.menu
     .ui.dropdown.item(ref='dropdownAdmin', v-if='currentUser && currentUser.role && currentUser.role.admin')

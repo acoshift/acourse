@@ -77,7 +77,7 @@ router.afterEach((to) => {
 //       (user) => {
 //         Loader.stop('router')
 //         if (user) {
-//           next('/home')
+//           next('/')
 //         } else {
 //           next()
 //         }

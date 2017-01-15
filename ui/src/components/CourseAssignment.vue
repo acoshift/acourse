@@ -27,7 +27,7 @@ export default {
     Loader.start('assignment')
     Loader.start('userAssignments')
     return {
-      course: Course.get(this.courseId).do(() => Loader.stop('course')).catch(() => { this.$router.replace('/home') }),
+      course: Course.get(this.courseId).do(() => Loader.stop('course')).catch(() => { this.$router.replace('/') }),
       assignments: Assignment.getCode(this.courseId).do(() => Loader.stop('assignment')),
       userAssignments: Me.getCourseAssignments(this.courseId).do(() => Loader.stop('userAssignments'))
     }

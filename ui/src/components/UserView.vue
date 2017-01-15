@@ -30,7 +30,7 @@ export default {
     const id = this.$route.params.id
     Loader.start('user')
     return {
-      user: User.get(id).do(() => { Loader.stop('user') }).catch(() => { this.$router.replace('/home') }),
+      user: User.get(id).do(() => { Loader.stop('user') }).catch(() => { this.$router.replace('/') }),
       courses: User.courses(id)
         .flatMap((courseIds) =>
           isEmpty(courseIds)

@@ -1,7 +1,7 @@
 <template lang="pug">
   .ui.basic.segment(:class='{loading: !course}')
     .ui.huge.breadcrumb(style='padding-bottom: 1.5rem;')
-      router-link.section(to='/home') Courses
+      router-link.section(to='/') Courses
       i.right.chevron.icon.divider
       router-link.section(:to='`/course/${courseId}`', :tag="$route.name === 'courseView' && 'div' || 'a'", active-class='active', exact='') {{ course && course.title || courseId }}
       i.right.chevron.icon.divider(v-show="$route.name !== 'courseView'")
