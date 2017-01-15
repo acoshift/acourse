@@ -263,4 +263,34 @@ func RegisterCourseServiceClient(service *gin.Engine, s acourse.CourseServiceCli
 		}
 		handleSuccess(ctx)
 	})
+
+	service.POST("/acourse.CourseService/OpenAttend", func(ctx *gin.Context) {
+		req := new(acourse.CourseIDRequest)
+		err := ctx.BindJSON(req)
+		if err != nil {
+			handleError(ctx, err)
+			return
+		}
+		_, err = s.OpenAttend(makeServiceContext(ctx.Request), req)
+		if err != nil {
+			handleError(ctx, err)
+			return
+		}
+		handleSuccess(ctx)
+	})
+
+	service.POST("/acourse.CourseService/CloseAttend", func(ctx *gin.Context) {
+		req := new(acourse.CourseIDRequest)
+		err := ctx.BindJSON(req)
+		if err != nil {
+			handleError(ctx, err)
+			return
+		}
+		_, err = s.CloseAttend(makeServiceContext(ctx.Request), req)
+		if err != nil {
+			handleError(ctx, err)
+			return
+		}
+		handleSuccess(ctx)
+	})
 }

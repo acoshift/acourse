@@ -23,10 +23,6 @@
         input(type='date', v-model='course.start')
       .field
         .ui.toggle.checkbox
-          input.hidden(type='checkbox', v-model='course.options.attend')
-          label Can Attend
-      .field
-        .ui.toggle.checkbox
           input.hidden(type='checkbox', v-model='course.options.assignment')
           label Has Assignment
       .field
@@ -87,7 +83,6 @@ export default {
         video: '',
         contents: [],
         options: {
-          attend: false,
           assignment: false
         }
       },

@@ -285,7 +285,6 @@ func (s *service) CreateCourse(ctx _context.Context, req *acourse.Course) (*acou
 		Video:            req.GetVideo(),
 		Owner:            userID,
 		Options: model.CourseOption{
-			Attend:     req.GetOptions().GetAttend(),
 			Assignment: req.GetOptions().GetAssignment(),
 		},
 	}
@@ -345,7 +344,6 @@ func (s *service) UpdateCourse(ctx _context.Context, req *acourse.Course) (*acou
 			DownloadURL: c.GetDownloadURL(),
 		}
 	}
-	course.Options.Attend = req.GetOptions().GetAttend()
 	course.Options.Assignment = req.GetOptions().GetAssignment()
 
 	err = s.store.CourseSave(course)
@@ -436,4 +434,46 @@ func (s *service) EnrollCourse(ctx _context.Context, req *acourse.EnrollRequest)
 	}
 
 	return new(acourse.Empty), nil
+}
+
+func (s *service) AttendCourse(ctx _context.Context, req *acourse.CourseIDRequest) (*acourse.Empty, error) {
+	return nil, nil
+}
+
+func (s *service) changeAttend(ctx _context.Context, req *acourse.CourseIDRequest, value bool) (*acourse.Empty, error) {
+	userID, ok := ctx.Value(acourse.KeyUserID).(string)
+	if !ok || userID == "" {
+		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
+	}
+
+	course, err := s.store.CourseGet(req.GetCourseId())
+	if err != nil {
+		return nil, err
+	}
+	if course == nil {
+		return nil, grpc.Errorf(codes.NotFound, "course not found")
+	}
+
+	if course.Owner != userID {
+		return nil, grpc.Errorf(codes.PermissionDenied, "don't have permission to change attend for this course")
+	}
+
+	course.Options.Attend = value
+
+	err = s.store.CourseSave(course)
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO: notify users
+
+	return new(acourse.Empty), nil
+}
+
+func (s *service) OpenAttend(ctx _context.Context, req *acourse.CourseIDRequest) (*acourse.Empty, error) {
+	return s.changeAttend(ctx, req, true)
+}
+
+func (s *service) CloseAttend(ctx _context.Context, req *acourse.CourseIDRequest) (*acourse.Empty, error) {
+	return s.changeAttend(ctx, req, false)
 }

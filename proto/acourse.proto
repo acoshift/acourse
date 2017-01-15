@@ -28,6 +28,9 @@ service CourseService {
   rpc CreateCourse(Course) returns (Course) {}
   rpc UpdateCourse(Course) returns (Empty) {}
   rpc EnrollCourse(EnrollRequest) returns (Empty) {}
+  rpc AttendCourse(CourseIDRequest) returns (Empty) {}
+  rpc OpenAttend(CourseIDRequest) returns (Empty) {}
+  rpc CloseAttend(CourseIDRequest) returns (Empty) {}
 }
 
 message GetUserRequest {
