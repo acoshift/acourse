@@ -34,6 +34,7 @@ export default {
       course: this.$$route
         .flatMap((route) => Course.get(route.params.id)),
       currentUser: Auth.currentUser()
+        .skip(1)
         .flatMap(() => this.$$route.first())
         .do((route) => Course.fetch(route.params.id))
     }

@@ -65,6 +65,7 @@ export default {
   },
   save (id, data) {
     return RPC.invoke('/acourse.CourseService/UpdateCourse', { id, ...data }, true)
+      .do(() => this.fetch(id))
   },
   enroll (courseId, { code, url, price }) {
     return RPC.invoke('/acourse.CourseService/EnrollCourse', { courseId, code, url, price }, true)
