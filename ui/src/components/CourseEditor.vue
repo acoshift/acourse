@@ -23,11 +23,11 @@
         input(type='date', v-model='course.start')
       .field
         .ui.toggle.checkbox
-          input.hidden(type='checkbox', v-model='course.attend')
+          input.hidden(type='checkbox', v-model='course.options.attend')
           label Can Attend
       .field
         .ui.toggle.checkbox
-          input.hidden(type='checkbox', v-model='course.assignment')
+          input.hidden(type='checkbox', v-model='course.options.assignment')
           label Has Assignment
       .field
         label Youtube Video ID (ex. 82xX0OOa_FA)
@@ -86,8 +86,10 @@ export default {
         start: '',
         video: '',
         contents: [],
-        attend: false,
-        assignment: false
+        options: {
+          attend: false,
+          assignment: false
+        }
       },
       courseId: '',
       courseURL: this.$route.params.id,

@@ -1,7 +1,7 @@
 <template lang="pug">
   .ui.segment
     .ui.stackable.equal.width.grid
-      .row(v-if="!purchased")
+      .row(v-if="!course.purchase")
         .center.aligned.column
           span(v-if="price <= 0")
             h2 FREE
@@ -9,7 +9,7 @@
             h2 ฿ {{ price }}
       .row(v-if="isAuth")
         .center.aligned.column
-          .ui.blue.button(style="width: 200px;", :class="{loading: applying}", @click="apply", v-if="!purchased") Enroll
+          .ui.blue.button(style="width: 200px;", :class="{loading: applying}", @click="apply", v-if="!course.purchase") Enroll
           .ui.blue.disabled.button(v-else) Wait for Approve
       .row(v-else)
         .center.aligned.column
@@ -64,9 +64,6 @@ export default {
     price () {
       if (this.course.discount) return this.course.discountedPrice
       return this.course.price
-    },
-    purchased () {
-      return this.course.purchaseStatus === 'waiting'
     }
   }
 }

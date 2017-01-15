@@ -32,7 +32,7 @@ export default {
   subscriptions () {
     return {
       course: this.$$route
-        .flatMap((route) => Course.get(route.params.id)).do(console.log),
+        .flatMap((route) => Course.get(route.params.id)),
       currentUser: Auth.currentUser()
         .flatMap(() => this.$$route.first())
         .do((route) => Course.fetch(route.params.id))

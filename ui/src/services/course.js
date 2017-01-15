@@ -8,10 +8,10 @@ const $course = new BehaviorSubject({})
 
 if (window.$$state) {
   if (window.$$state.courses) {
-    $courses.next(window.$$state.courses)
+    $courses.next(response.courses(window.$$state.courses))
   }
   if (window.$$state.course) {
-    const course = window.$$state.course
+    const course = response.course(window.$$state.course)
     $course.first()
       .subscribe(($$course) => {
         $course.next({
@@ -62,11 +62,9 @@ export default {
   create (data) {
     return RPC.invoke('/acourse.CourseService/CreateCourse', data, true)
       .map(({ id }) => id)
-      .do((id) => this.fetch(id))
   },
   save (id, data) {
     return RPC.invoke('/acourse.CourseService/UpdateCourse', { id, ...data }, true)
-      .do(() => this.fetch(id))
   },
   enroll (courseId, { code, url, price }) {
     return RPC.invoke('/acourse.CourseService/EnrollCourse', { courseId, code, url, price }, true)

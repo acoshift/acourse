@@ -204,22 +204,37 @@ func (s *service) GetCourse(ctx _context.Context, req *acourse.CourseIDRequest) 
 		return nil, err
 	}
 
-	role, err := s.store.RoleGet(userID)
-	if err != nil {
-		return nil, err
-	}
-
 	// check is user enrolled
 	enroll, err := s.store.EnrollFind(userID, course.ID)
 	if err != nil {
 		return nil, err
 	}
-	if enroll != nil || course.Owner == userID || role.Admin {
+	if enroll != nil || course.Owner == userID {
 		return &acourse.CourseResponse{
 			Course:   acourse.ToCourse(course),
 			User:     acourse.ToUserTiny(owner),
 			Enrolled: enroll != nil,
 			Owned:    course.Owner == userID,
+		}, nil
+	}
+
+	// check waiting payment
+	payment, err := s.store.PaymentFind(userID, course.ID, model.PaymentStatusWaiting)
+	if err != nil {
+		return nil, err
+	}
+
+	role, err := s.store.RoleGet(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	if role.Admin {
+		return &acourse.CourseResponse{
+			Course:   acourse.ToCourse(course),
+			User:     acourse.ToUserTiny(owner),
+			Enrolled: enroll != nil,
+			Purchase: payment != nil,
 		}, nil
 	}
 
@@ -240,14 +255,9 @@ func (s *service) GetCourse(ctx _context.Context, req *acourse.CourseIDRequest) 
 		Options: model.CourseOption{
 			Public:   course.Options.Public,
 			Discount: course.Options.Discount,
+			Enroll:   course.Options.Enroll,
 		},
 		EnrollDetail: course.EnrollDetail,
-	}
-
-	// check waiting payment
-	payment, err := s.store.PaymentFind(userID, course.ID, model.PaymentStatusWaiting)
-	if err != nil {
-		return nil, err
 	}
 
 	return &acourse.CourseResponse{
