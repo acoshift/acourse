@@ -14,7 +14,7 @@
       .right.floated
         i.user.icon
         | &nbsp;{{ course.student }}
-      span.price(v-if='!hidePrice && !course.discount && course.price <= 0') FREE
+      span.price(v-if='!hidePrice && !course.discount && (course.price <= 0 || !course.price)') FREE
       span.price(v-if='!hidePrice && !course.discount && course.price > 0', :class='{line: course.discount}') ฿ {{ course.price | money }}
       span.discount.price(v-if='!hidePrice && course.discount') &nbsp;฿ {{ course.discountedPrice | money }}
 </template>
