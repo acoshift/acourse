@@ -6,86 +6,121 @@ import (
 	"github.com/acoshift/acourse/pkg/model"
 )
 
-// Course type
+// Course view
 type Course struct {
-	ID               string                  `json:"id"`
-	CreatedAt        time.Time               `json:"createdAt"`
-	UpdatedAt        time.Time               `json:"updatedAt"`
-	Owner            *UserTiny               `json:"owner"`
-	Title            string                  `json:"title"`
-	ShortDescription string                  `json:"shortDescription"`
-	Description      string                  `json:"description"`
-	Photo            string                  `json:"photo"`
-	Start            time.Time               `json:"start"`
-	URL              string                  `json:"url"`
-	Video            string                  `json:"video"`
-	Type             string                  `json:"type"`
-	Price            float64                 `json:"price"`
-	DiscountedPrice  float64                 `json:"discountedPrice"`
-	Student          int                     `json:"student"`
-	Contents         CourseContentCollection `json:"contents"`
-	EnrollDetail     string                  `json:"enrollDetail"`
-	Enrolled         bool                    `json:"enrolled"`
-	Enroll           bool                    `json:"enroll"`
-	Public           bool                    `json:"public"`
-	Owned            bool                    `json:"owned"`
-	Attend           bool                    `json:"attend"`
-	Assignment       bool                    `json:"assignment"`
-	Discount         bool                    `json:"discount"`
+	ID               string         `json:"id"`
+	CreatedAt        time.Time      `json:"createdAt"`
+	UpdatedAt        time.Time      `json:"updatedAt"`
+	Title            string         `json:"title"`
+	ShortDescription string         `json:"shortDescription"`
+	Description      string         `json:"description"`
+	Photo            string         `json:"photo"`
+	Owner            string         `json:"owner"`
+	Start            time.Time      `json:"start"`
+	URL              string         `json:"url"`
+	Video            string         `json:"video"`
+	Type             string         `json:"type"`
+	Price            float64        `json:"price"`
+	DiscountedPrice  float64        `json:"discountedPrice"`
+	Contents         CourseContents `json:"courseContents"`
+	EnrollDetail     string         `json:"enrollDetail"`
+	Options          CourseOption   `json:"options"`
 }
 
-// CoursePublic type
+// ToCourse builds Course view from Course model
+func ToCourse(x *model.Course) *Course {
+	return &Course{
+		x.ID,
+		x.CreatedAt,
+		x.UpdatedAt,
+		x.Title,
+		x.ShortDescription,
+		x.Description,
+		x.Photo,
+		x.Owner,
+		x.Start,
+		x.URL,
+		x.Video,
+		string(x.Type),
+		x.Price,
+		x.DiscountedPrice,
+		ToCourseContents(x.Contents),
+		x.EnrollDetail,
+		*ToCourseOption(&x.Options),
+	}
+}
+
+// CoursePublic view
 type CoursePublic struct {
-	ID               string    `json:"id"`
-	CreatedAt        time.Time `json:"createdAt"`
-	UpdatedAt        time.Time `json:"updatedAt"`
-	Owner            *UserTiny `json:"owner"`
-	Title            string    `json:"title"`
-	ShortDescription string    `json:"shortDescription"`
-	Description      string    `json:"description"`
-	Photo            string    `json:"photo"`
-	Start            time.Time `json:"start"`
-	URL              string    `json:"url"`
-	Video            string    `json:"video"`
-	Type             string    `json:"type"`
-	Price            float64   `json:"price"`
-	DiscountedPrice  float64   `json:"discountedPrice"`
-	EnrollDetail     string    `json:"enrollDetail"`
-	Student          int       `json:"student"`
-	Enroll           bool      `json:"enroll"`
-	Discount         bool      `json:"discount"`
-	PurchaseStatus   string    `json:"purchaseStatus"`
+	ID               string             `json:"id"`
+	CreatedAt        time.Time          `json:"createdAt"`
+	UpdatedAt        time.Time          `json:"updatedAt"`
+	Title            string             `json:"title"`
+	ShortDescription string             `json:"shortDescription"`
+	Description      string             `json:"description"`
+	Photo            string             `json:"photo"`
+	Owner            string             `json:"owner"`
+	Start            time.Time          `json:"start"`
+	URL              string             `json:"url"`
+	Type             string             `json:"type"`
+	Price            float64            `json:"price"`
+	DiscountedPrice  float64            `json:"discountedPrice"`
+	EnrollDetail     string             `json:"enrollDetail"`
+	Options          CourseOptionPublic `json:"options"`
 }
 
-// CourseTiny type
+// ToCoursePublic builds Course public view from Course model
+func ToCoursePublic(x *model.Course) *CoursePublic {
+	return &CoursePublic{
+		x.ID,
+		x.CreatedAt,
+		x.UpdatedAt,
+		x.Title,
+		x.ShortDescription,
+		x.Description,
+		x.Photo,
+		x.Owner,
+		x.Start,
+		x.URL,
+		string(x.Type),
+		x.Price,
+		x.DiscountedPrice,
+		x.EnrollDetail,
+		*ToCourseOptionPublic(&x.Options),
+	}
+}
+
+// CourseTiny view
 type CourseTiny struct {
-	ID               string    `json:"id"`
-	Owner            *UserTiny `json:"owner"`
-	Title            string    `json:"title"`
-	ShortDescription string    `json:"shortDescription"`
-	Photo            string    `json:"photo"`
-	Start            time.Time `json:"start"`
-	URL              string    `json:"url"`
-	Type             string    `json:"type"`
-	Price            float64   `json:"price"`
-	DiscountedPrice  float64   `json:"discountedPrice"`
-	Student          int       `json:"student"`
-	Discount         bool      `json:"discount"`
+	ID string `json:"id"`
 }
 
-// CourseMini type
-type CourseMini struct {
-	ID    string `json:"id"`
-	Title string `json:"title"`
+// CourseOption view
+type CourseOption struct {
+	Public    bool `json:"public"`
+	Enroll    bool `json:"enroll"`
+	Attend    bool `json:"attend"`
+	Assigment bool `json:"assignment"`
+	Discount  bool `json:"discount"`
 }
 
-// CourseMiniCollection type
-type CourseMiniCollection []*CourseMini
+// ToCourseOption builds Course option view from Course option model
+func ToCourseOption(x *model.CourseOption) *CourseOption {
+	return &CourseOption{x.Public, x.Enroll, x.Attend, x.Assignment, x.Discount}
+}
 
-// CourseTinyCollection type
-type CourseTinyCollection []*CourseTiny
+// CourseOptionPublic view
+type CourseOptionPublic struct {
+	Enroll   bool `json:"enroll"`
+	Discount bool `json:"discount"`
+}
 
-// CourseContent type
+// ToCourseOptionPublic builds Course option public view from Course option model
+func ToCourseOptionPublic(x *model.CourseOption) *CourseOptionPublic {
+	return &CourseOptionPublic{x.Enroll, x.Discount}
+}
+
+// CourseContent view
 type CourseContent struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
@@ -93,22 +128,19 @@ type CourseContent struct {
 	DownloadURL string `json:"downloadURL"`
 }
 
-// CourseContentCollection type
-type CourseContentCollection []*CourseContent
-
-// ToCourseMini builds a course mini view from a course model
-func ToCourseMini(m *model.Course) *CourseMini {
-	return &CourseMini{
-		ID:    m.ID,
-		Title: m.Title,
-	}
+// ToCourseContent builds Course content view from Course content model
+func ToCourseContent(x *model.CourseContent) *CourseContent {
+	return &CourseContent{x.Title, x.Description, x.Video, x.DownloadURL}
 }
 
-// ToCourseMiniCollection builds a course mini collection view from course models
-func ToCourseMiniCollection(ms []*model.Course) CourseMiniCollection {
-	rs := make(CourseMiniCollection, len(ms))
-	for i := range ms {
-		rs[i] = ToCourseMini(ms[i])
+// CourseContents view
+type CourseContents []*CourseContent
+
+// ToCourseContents builds Course contents view from Course contents model
+func ToCourseContents(xs model.CourseContents) CourseContents {
+	rs := make(CourseContents, len(xs))
+	for i, x := range xs {
+		rs[i] = ToCourseContent(&x)
 	}
 	return rs
 }

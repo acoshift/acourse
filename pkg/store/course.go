@@ -135,7 +135,7 @@ func (c *DB) CourseSave(x *model.Course) error {
 }
 
 // CourseList retrieves courses from database
-func (c *DB) CourseList(opts ...CourseListOption) ([]*model.Course, error) {
+func (c *DB) CourseList(opts ...CourseListOption) (model.Courses, error) {
 	ctx, cancel := getContext()
 	defer cancel()
 
@@ -224,7 +224,7 @@ func (c *DB) CourseFind(courseURL string) (*model.Course, error) {
 }
 
 // CourseGetAllByIDs retrieves courses by given course ids
-func (c *DB) CourseGetAllByIDs(courseIDs []string) ([]*model.Course, error) {
+func (c *DB) CourseGetAllByIDs(courseIDs []string) (model.Courses, error) {
 	if len(courseIDs) == 0 {
 		return []*model.Course{}, nil
 	}
@@ -258,7 +258,7 @@ func (c *DB) CoursePurge() error {
 }
 
 // CourseGetMulti retrieves multiple courses from database
-func (c *DB) CourseGetMulti(ctx context.Context, courseIDs []string) ([]*model.Course, error) {
+func (c *DB) CourseGetMulti(ctx context.Context, courseIDs []string) (model.Courses, error) {
 	if len(courseIDs) == 0 {
 		return []*model.Course{}, nil
 	}

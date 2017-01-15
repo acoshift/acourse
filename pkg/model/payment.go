@@ -18,6 +18,9 @@ type Payment struct {
 	At            time.Time
 }
 
+// Payments type
+type Payments []*Payment
+
 // PaymentStatus type
 type PaymentStatus string
 

@@ -1,0 +1,191 @@
+syntax = "proto3";
+
+package acourse;
+
+service UserService {
+  rpc GetUser(GetUserRequest) returns (GetUserResponse) {}
+  rpc GetMe(Empty) returns (GetMeResponse) {}
+  rpc UpdateMe(User) returns (Empty) {}
+}
+
+service EmailService {
+  rpc Send(Email) returns (Empty) {}
+}
+
+service PaymentService {
+  rpc ListWaitingPayments(ListRequest) returns (PaymentsResponse) {}
+  rpc ListHistoryPayments(ListRequest) returns (PaymentsResponse) {}
+  rpc ApprovePayments(PaymentIDsRequest) returns (Empty) {}
+  rpc RejectPayments(PaymentIDsRequest) returns (Empty) {}
+}
+
+service CourseService {
+  rpc ListCourses(ListRequest) returns (CoursesResponse) {}
+  rpc ListPublicCourses(ListRequest) returns (CoursesResponse) {}
+  rpc ListOwnCourses(UserIDRequest) returns (CoursesResponse) {}
+  rpc ListEnrolledCourses(UserIDRequest) returns (CoursesResponse) {}
+  rpc GetCourse(CourseIDRequest) returns (CourseResponse) {}
+  rpc CreateCourse(Course) returns (Course) {}
+  rpc UpdateCourse(Course) returns (Empty) {}
+  rpc EnrollCourse(EnrollRequest) returns (Empty) {}
+}
+
+message GetUserRequest {
+  repeated string userIds = 1;
+}
+
+message GetUserResponse {
+  repeated User users = 1;
+}
+
+message GetMeResponse {
+  User user = 1;
+  Role role = 2;
+}
+
+message ListRequest {
+  int32 offset = 1;
+  int32 limit = 2;
+}
+
+message PaymentsResponse {
+  repeated Payment payments = 1;
+  repeated UserTiny users = 2;
+  repeated CourseTiny courses = 3;
+}
+
+message PaymentIDsRequest {
+  repeated string paymentIds = 1;
+}
+
+message CoursesResponse {
+  repeated CourseSmall courses = 1;
+  repeated UserTiny users = 2;
+  repeated EnrollCount enrollCounts = 3;
+}
+
+message UserIDRequest {
+  string userId = 1;
+}
+
+message CourseIDRequest {
+  string courseId = 1;
+}
+
+message EnrollRequest {
+  string courseId = 1;
+  string url = 2;
+  string code = 3;
+  double price = 4;
+}
+
+message CourseResponse {
+  Course course = 1;
+  UserTiny user = 2;
+  bool enrolled = 3;
+  bool owned = 4;
+  bool purchase = 5;
+}
+
+message Empty {}
+
+message User {
+  string id = 1;
+  string username = 2;
+  string name = 3;
+  string photo = 4;
+  string aboutMe = 5;
+}
+
+message UserTiny {
+  string id = 1;
+  string username = 2;
+  string name = 3;
+  string photo = 4;
+}
+
+message Role {
+  bool admin = 1;
+  bool instructor = 2;
+}
+
+message Email {
+  reserved 3; // maybe for content type ?
+  repeated string to = 1;
+  string subject = 2;
+  string body = 4;
+}
+
+message Course {
+  message Content {
+    string title = 1;
+    string description = 2;
+    string video = 3;
+    string downloadURL = 4;
+  }
+  message Option {
+    bool public = 1;
+    bool enroll = 2;
+    bool attend = 3;
+    bool assignment = 4;
+    bool discount = 5;
+  }
+  string id = 1;
+  string createdAt = 2;
+  string updatedAt = 3;
+  string title = 4;
+  string shortDescription = 5;
+  string description = 6;
+  string photo = 7;
+  string owner = 8;
+  string start = 9;
+  string url = 10;
+  string type = 11;
+  string video = 12;
+  double price = 13;
+  double discountedPrice = 14;
+  Option options = 15;
+  repeated Content contents = 16;
+  string enrollDetail = 17;
+}
+
+message CourseSmall {
+  message Option {
+    bool discount = 5;
+  }
+  string id = 1;
+  string title = 4;
+  string shortDescription = 5;
+  string photo = 7;
+  string owner = 8;
+  string start = 9;
+  string url = 10;
+  string type = 11;
+  double price = 13;
+  double discountedPrice = 14;
+  Option options = 15;
+}
+
+message CourseTiny {
+  string id = 1;
+  string title = 2;
+}
+
+message Payment {
+  string id = 1;
+  string createdAt = 2;
+  string updatedAt = 3;
+  string userId = 4;
+  string courseId = 5;
+  double originalPrice = 6;
+  double price = 7;
+  string code = 8;
+  string url = 9;
+  string status = 10;
+  string at = 11;
+}
+
+message EnrollCount {
+  string courseId = 1;
+  int32 count = 2;
+}

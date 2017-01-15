@@ -1,17 +1,17 @@
 import { Observable } from 'rxjs/Observable'
 import { BehaviorSubject } from 'rxjs/BehaviorSubject'
-import API from './api'
 import RPC from './rpc'
 import Auth from './auth'
 import User from './user'
 import orderBy from 'lodash/fp/orderBy'
+import response from './response'
 
 const $me = new BehaviorSubject(false)
 
 const fetch = () => {
   Auth.currentUser()
     .first()
-    .flatMap((user) => user ? RPC.get('/acourse.UserService/GetMe', true) : Observable.of(null))
+    .flatMap((user) => user ? RPC.invoke('/acourse.UserService/GetMe', true) : Observable.of(null))
     .subscribe((reply) => {
       if (reply && reply.user) {
         $me.next({
@@ -25,23 +25,23 @@ const fetch = () => {
 }
 
 const get = () => $me.asObservable().filter((x) => x !== false)
-const update = (data) => RPC.post('/acourse.UserService/UpdateMe', { user: data })
+const update = (data) => RPC.invoke('/acourse.UserService/UpdateMe', data)
+const ownCourses = () => Auth.requireUser()
+  .flatMap(({ uid }) => RPC.invoke('/acourse.CourseService/ListOwnCourses', { userId: uid }, true))
+  .map(response.courses)
+  .map(orderBy(['createdAt'], ['desc']))
+const courses = () => Auth.requireUser()
+  .flatMap(({ uid }) => RPC.invoke(`/acourse.CourseService/ListEnrolledCourses`, { userId: uid }, true))
+  .map(response.courses)
+  .map(orderBy(['createdAt'], ['desc']))
 
 Auth.currentUser().subscribe(fetch)
 
 export default {
   fetch,
   get,
-  ownCourses () {
-    return Auth.requireUser()
-      .flatMap(({ uid }) => API.get(`/course?owner=${uid}`, true))
-      .map(orderBy(['createdAt'], ['desc']))
-  },
-  courses () {
-    return Auth.requireUser()
-      .flatMap(({ uid }) => API.get(`/course?student=${uid}`, true))
-      .map(orderBy(['createdAt'], ['desc']))
-  },
+  ownCourses,
+  courses,
   upload (file) {
     return Auth.currentUser()
       .first()

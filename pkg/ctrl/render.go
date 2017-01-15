@@ -1,42 +1,52 @@
 package ctrl
 
 import (
+	"context"
 	"time"
 
+	"github.com/acoshift/acourse/pkg/acourse"
 	"github.com/acoshift/acourse/pkg/app"
 	"github.com/acoshift/acourse/pkg/store"
-	"github.com/acoshift/acourse/pkg/view"
 	"github.com/acoshift/gotcha"
 )
 
 // RenderController implements RenderController interface
 type RenderController struct {
-	db         *store.DB
-	courseCtrl app.CourseController
+	db            *store.DB
+	courseService acourse.CourseServiceClient
 }
 
 // NewRenderController creates controller
-func NewRenderController(db *store.DB, courseCtrl app.CourseController) *RenderController {
-	return &RenderController{db, courseCtrl}
+func NewRenderController(db *store.DB, courseService acourse.CourseServiceClient) *RenderController {
+	return &RenderController{db, courseService}
+}
+
+// RenderIndex type
+type RenderIndex struct {
+	Title       string
+	Description string
+	Image       string
+	URL         string
+	State       map[string]interface{}
 }
 
 var cacheRender = gotcha.New()
 
 // Index runs index action
 func (c *RenderController) Index(ctx *app.RenderIndexContext) (interface{}, error) {
-	var res view.CourseTinyCollection
+	var res *acourse.CoursesResponse
 	refill := func() {
-		xs, _ := c.courseCtrl.List(&app.CourseListContext{})
+		xs, _ := c.courseService.ListPublicCourses(context.Background(), &acourse.ListRequest{})
 		cacheRender.SetTTL("index", xs, time.Second*30)
 	}
 	if cache := cacheRender.Get("index"); cache != nil {
-		res = cache.(view.CourseTinyCollection)
+		res = cache.(*acourse.CoursesResponse)
 	} else {
 		// do not wait for api call
 		go refill()
 	}
 
-	return &view.RenderIndex{
+	return &RenderIndex{
 		Title:       "Acourse",
 		Description: "Online courses for everyone",
 		Image:       "https://acourse.io/static/acourse-og.jpg",
@@ -49,27 +59,24 @@ func (c *RenderController) Index(ctx *app.RenderIndexContext) (interface{}, erro
 
 // Course runs course action
 func (c *RenderController) Course(ctx *app.RenderCourseContext) (interface{}, error) {
-	courseInf, err := c.courseCtrl.Show(&app.CourseShowContext{CourseID: ctx.CourseID})
-	if err != nil || courseInf == nil {
+	response, err := c.courseService.GetCourse(context.Background(), &acourse.CourseIDRequest{CourseId: ctx.CourseID})
+	if err != nil || response == nil {
 		return nil, nil
 	}
-	course, ok := courseInf.(*view.CoursePublic)
-	if !ok {
-		return nil, nil
-	}
-	r := &view.RenderIndex{
+	course := response.Course
+	r := &RenderIndex{
 		Title:       course.Title,
 		Description: course.ShortDescription,
 		Image:       course.Photo,
 		URL:         "https://acourse.io/course/",
 		State: map[string]interface{}{
-			"course": course,
+			"course": response,
 		},
 	}
-	if course.URL != "" {
-		r.URL += course.URL
+	if course.Url != "" {
+		r.URL += course.Url
 	} else {
-		r.URL += course.ID
+		r.URL += course.Id
 	}
 
 	if r.Title == "" {

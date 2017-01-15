@@ -7,3 +7,6 @@ type Enroll struct {
 	UserID   string
 	CourseID string
 }
+
+// Enrolls type
+type Enrolls []*Enroll

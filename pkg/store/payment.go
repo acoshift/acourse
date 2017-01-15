@@ -25,7 +25,7 @@ func PaymentListOptionStatus(status model.PaymentStatus) PaymentListOption {
 }
 
 // PaymentList list all payments
-func (c *DB) PaymentList(opts ...PaymentListOption) ([]*model.Payment, error) {
+func (c *DB) PaymentList(opts ...PaymentListOption) (model.Payments, error) {
 	ctx, cancel := getContext()
 	defer cancel()
 
@@ -73,7 +73,7 @@ func (c *DB) PaymentSave(x *model.Payment) error {
 }
 
 // PaymentSaveMulti saves multiple payments to database
-func (c *DB) PaymentSaveMulti(ctx context.Context, payments []*model.Payment) error {
+func (c *DB) PaymentSaveMulti(ctx context.Context, payments model.Payments) error {
 	keys := make([]*datastore.Key, 0, len(payments))
 
 	for _, payment := range payments {
@@ -140,7 +140,7 @@ func (c *DB) PaymentFind(userID, courseID string, status model.PaymentStatus) (*
 }
 
 // PaymentGetMulti retrieves multiple payments from database
-func (c *DB) PaymentGetMulti(ctx context.Context, paymentIDs []string) ([]*model.Payment, error) {
+func (c *DB) PaymentGetMulti(ctx context.Context, paymentIDs []string) (model.Payments, error) {
 	if len(paymentIDs) == 0 {
 		return []*model.Payment{}, nil
 	}

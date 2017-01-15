@@ -4,7 +4,7 @@ import (
 	"github.com/acoshift/acourse/pkg/model"
 )
 
-// User type
+// User view
 type User struct {
 	ID       string `json:"id"`
 	Username string `json:"username"`
@@ -13,7 +13,36 @@ type User struct {
 	AboutMe  string `json:"aboutMe"`
 }
 
-// UserTiny type
+// ToUser builds User view from User model
+func ToUser(x *model.User) *User {
+	return &User{x.ID, x.Username, x.Name, x.Photo, x.AboutMe}
+}
+
+// Users view
+type Users []*User
+
+// ToUsers builds Users view from Users model
+func ToUsers(xs model.Users) Users {
+	rs := make(Users, len(xs))
+	for i, x := range xs {
+		rs[i] = ToUser(x)
+	}
+	return rs
+}
+
+// UserMap view
+type UserMap map[string]*User
+
+// ToUserMap builds User map from Users model
+func ToUserMap(xs model.Users) UserMap {
+	m := make(UserMap, len(xs))
+	for _, x := range xs {
+		m[x.ID] = ToUser(x)
+	}
+	return m
+}
+
+// UserTiny view
 type UserTiny struct {
 	ID       string `json:"id"`
 	Username string `json:"username"`
@@ -21,47 +50,31 @@ type UserTiny struct {
 	Photo    string `json:"photo"`
 }
 
-// UserCollection type
-type UserCollection []*User
-
-// UserTinyCollection type
-type UserTinyCollection []*UserTiny
-
-// ToUser builds an User view from an User model
-func ToUser(m *model.User) *User {
-	return &User{
-		ID:       m.ID,
-		Username: m.Username,
-		Name:     m.Name,
-		Photo:    m.Photo,
-		AboutMe:  m.AboutMe,
-	}
+// ToUserTiny builds User tiny view from User model
+func ToUserTiny(x *model.User) *UserTiny {
+	return &UserTiny{x.ID, x.Username, x.Name, x.Photo}
 }
 
-// ToUserCollection builds an UserCollection view from User models
-func ToUserCollection(ms []*model.User) UserCollection {
-	rs := make(UserCollection, len(ms))
-	for i := range ms {
-		rs[i] = ToUser(ms[i])
+// UsersTiny view
+type UsersTiny []*UserTiny
+
+// ToUsersTiny builds Users tiny view from Users model
+func ToUsersTiny(xs model.Users) UsersTiny {
+	rs := make(UsersTiny, len(xs))
+	for i, x := range xs {
+		rs[i] = ToUserTiny(x)
 	}
 	return rs
 }
 
-// ToUserTiny builds an UserTiny view from an User model
-func ToUserTiny(m *model.User) *UserTiny {
-	return &UserTiny{
-		ID:       m.ID,
-		Username: m.Username,
-		Name:     m.Name,
-		Photo:    m.Photo,
-	}
-}
+// UserTinyMap view
+type UserTinyMap map[string]*UserTiny
 
-// ToUserTinyCollection build an UserTinyCollection view from User models
-func ToUserTinyCollection(ms []*model.User) UserTinyCollection {
-	rs := make(UserTinyCollection, len(ms))
-	for i := range ms {
-		rs[i] = ToUserTiny(ms[i])
+// ToUserTinyMap builds User tiny map from Users model
+func ToUserTinyMap(xs model.Users) UserTinyMap {
+	m := make(UserTinyMap, len(xs))
+	for _, x := range xs {
+		m[x.ID] = ToUserTiny(x)
 	}
-	return rs
+	return m
 }

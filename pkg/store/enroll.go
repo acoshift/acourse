@@ -35,7 +35,7 @@ func (c *DB) EnrollFind(userID, courseID string) (*model.Enroll, error) {
 }
 
 // EnrollListByUserID list all enroll by given user id
-func (c *DB) EnrollListByUserID(userID string) ([]*model.Enroll, error) {
+func (c *DB) EnrollListByUserID(userID string) (model.Enrolls, error) {
 	ctx, cancel := getContext()
 	defer cancel()
 

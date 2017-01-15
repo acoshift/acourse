@@ -1,23 +1,16 @@
 import RPC from './rpc'
 import reverse from 'lodash/fp/reverse'
-import map from 'lodash/map'
-import find from 'lodash/find'
+import response from './response'
 
-const mapPaymentsReply = (res) => map(res.payments, (payment) => ({
-  ...payment,
-  user: find(res.users, { id: payment.userId }),
-  course: find(res.courses, { id: payment.courseId })
-}))
+const list = () => RPC.invoke('/acourse.PaymentService/ListWaitingPayments', null, true)
+  .map(response.payments)
 
-const list = () => RPC.post('/acourse.PaymentService/ListPayments', {}, true)
-  .map(mapPaymentsReply)
-
-const history = () => RPC.post('/acourse.PaymentService/ListPayments', { history: true }, true)
-  .map(mapPaymentsReply)
+const history = () => RPC.invoke('/acourse.PaymentService/ListHistoryPayments', null, true)
+  .map(response.payments)
   .map(reverse)
 
-const approve = (ids) => RPC.post('/acourse.PaymentService/ApprovePayments', { ids }, true)
-const reject = (ids) => RPC.post('/acourse.PaymentService/RejectPayments', { ids }, true)
+const approve = (paymentIds) => RPC.invoke('/acourse.PaymentService/ApprovePayments', { paymentIds }, true)
+const reject = (paymentIds) => RPC.invoke('/acourse.PaymentService/RejectPayments', { paymentIds }, true)
 
 export default {
   list,

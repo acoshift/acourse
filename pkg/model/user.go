@@ -9,3 +9,6 @@ type User struct {
 	Photo    string `datastore:",noindex"`
 	AboutMe  string `datastore:",noindex"`
 }
+
+// Users type
+type Users []*User
