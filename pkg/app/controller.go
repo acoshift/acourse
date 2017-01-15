@@ -28,23 +28,22 @@ type RenderController interface {
 }
 
 // MountRenderController mount a Render template controller on the given resource
-func MountRenderController(service *gin.Engine, ctrl RenderController) {
+func MountRenderController(server *gin.Engine, c RenderController) {
 	cc := func(ctx *gin.Context) {
 		ctx.Header("Cache-Control", "public, max-age=31536000")
-		ctx.Next()
 	}
 
-	service.Group("/static", cc).Static("", "public")
+	server.Group("/static", cc).Static("", "public")
 
-	service.StaticFile("/favicon.ico", "public/acourse-120.png")
+	server.StaticFile("/favicon.ico", "public/acourse-120.png")
 
-	service.GET("/course/:courseID", func(ctx *gin.Context) {
+	server.GET("/course/:courseID", func(ctx *gin.Context) {
 		rctx, err := NewRenderCourseContext(ctx)
 		if err != nil {
 			handleError(ctx, err)
 			return
 		}
-		res, err := ctrl.Course(rctx)
+		res, err := c.Course(rctx)
 		if err != nil {
 			handleError(ctx, err)
 		} else if res == nil {
@@ -60,7 +59,7 @@ func MountRenderController(service *gin.Engine, ctrl RenderController) {
 			handleError(ctx, err)
 			return
 		}
-		res, err := ctrl.Index(rctx)
+		res, err := c.Index(rctx)
 		if err != nil {
 			handleError(ctx, err)
 		} else {
@@ -68,5 +67,5 @@ func MountRenderController(service *gin.Engine, ctrl RenderController) {
 		}
 	}
 
-	service.Use(h)
+	server.Use(h)
 }

@@ -177,10 +177,7 @@ func (s *service) ListEnrolledCourses(ctx _context.Context, req *acourse.UserIDR
 }
 
 func (s *service) GetCourse(ctx _context.Context, req *acourse.CourseIDRequest) (*acourse.CourseResponse, error) {
-	userID, ok := ctx.Value(acourse.KeyUserID).(string)
-	if !ok || userID == "" {
-		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
-	}
+	userID, _ := ctx.Value(acourse.KeyUserID).(string)
 
 	// try get by id first
 	course, err := s.store.CourseGet(req.GetCourseId())
