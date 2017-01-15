@@ -37,16 +37,21 @@ type Config struct {
 
 // Send sends an email
 func (s *service) Send(ctx _context.Context, req *acourse.Email) (*acourse.Empty, error) {
-	if len(req.To) == 0 {
+	if len(req.GetTo()) == 0 {
 		return new(acourse.Empty), nil
 	}
-	log.Printf("Send mail to %s\n", req.To)
+	log.Printf("Send mail to %s\n", req.GetTo())
 
 	m := gomail.NewMessage()
 	m.SetHeader("From", s.config.From)
-	m.SetHeader("To", req.To...)
-	m.SetHeader("Subject", req.Subject)
-	m.SetBody("text/html", req.Body)
+	m.SetHeader("To", req.GetTo()...)
+	m.SetHeader("Subject", req.GetSubject())
+	m.SetBody("text/html", req.GetBody())
 
-	return nil, s.dialer.DialAndSend(m)
+	err := s.dialer.DialAndSend(m)
+	if err != nil {
+		return nil, err
+	}
+
+	return new(acourse.Empty), nil
 }

@@ -16,11 +16,14 @@ import (
 	"github.com/acoshift/acourse/pkg/store"
 	"github.com/acoshift/go-firebase-admin"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/grpclog"
 	"gopkg.in/gin-contrib/cors.v1"
 	"gopkg.in/gin-gonic/gin.v1"
 )
 
 func main() {
+	grpclog.SetLogger(app.NewLogger())
+
 	cfg, err := app.LoadConfig("private/config.yaml")
 	if err != nil {
 		log.Fatal(err)
@@ -86,7 +89,7 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		grpcServer := grpc.NewServer(grpc.UnaryInterceptor(app.AuthUnaryInterceptor))
+		grpcServer := grpc.NewServer(grpc.UnaryInterceptor(app.UnaryInterceptors))
 		acourse.RegisterUserServiceServer(grpcServer, user.New(db))
 		acourse.RegisterCourseServiceServer(grpcServer, course.New(db))
 		acourse.RegisterPaymentServiceServer(grpcServer, payment.New(db, firAuth, emailServiceClient))
@@ -98,7 +101,8 @@ func main() {
 			Password: cfg.Email.Password,
 		}))
 		if err = grpcServer.Serve(grpcListener); err != nil {
-			log.Fatal(err)
+			log.Println("eh ?")
+			log.Println(err)
 		}
 	}()
 

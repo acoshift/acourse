@@ -8,14 +8,18 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
-// AuthUnaryInterceptor is the interceptor for auththentication
-func AuthUnaryInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+// RecoveryUnaryInterceptor is the interceptor for panic recovery
+func RecoveryUnaryInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			err = grpc.Errorf(codes.Internal, "%v", r)
 		}
 	}()
+	return handler(ctx, req)
+}
 
+// AuthUnaryInterceptor is the interceptor for auththentication
+func AuthUnaryInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	md, ok := metadata.FromContext(ctx)
 	if !ok {
 		return handler(ctx, req)
@@ -32,4 +36,11 @@ func AuthUnaryInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 	}
 	rctx := context.WithValue(ctx, acourse.KeyUserID, userID)
 	return handler(rctx, req)
+}
+
+// UnaryInterceptors is the chain interceptors for server
+func UnaryInterceptors(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+	return RecoveryUnaryInterceptor(ctx, req, info, func(ctx context.Context, req interface{}) (interface{}, error) {
+		return AuthUnaryInterceptor(ctx, req, info, handler)
+	})
 }

@@ -235,7 +235,7 @@ Krissada Chalermsook (Oak)<br>
 Founder/CEO Acourse.io<br>
 https://acourse.io`
 
-		_, err = s.email.Send(nil, &acourse.Email{
+		_, err = s.email.Send(context.Background(), &acourse.Email{
 			To:      []string{userInfo.Email},
 			Subject: fmt.Sprintf("ยืนยันการชำระเงิน หลักสูตร %s", course.Title),
 			Body:    body,
@@ -254,7 +254,7 @@ func StartNotification(s Store, email acourse.EmailServiceClient) {
 			log.Println("Run Notification Payment")
 			payments, err := s.PaymentList(store.PaymentListOptionStatus(model.PaymentStatusWaiting))
 			if err == nil && len(payments) > 0 {
-				_, err = email.Send(nil, &acourse.Email{
+				_, err = email.Send(context.Background(), &acourse.Email{
 					To:      []string{"acoshift@gmail.com", "k.chalermsook@gmail.com"},
 					Subject: "Acourse - Payment Received",
 					Body:    fmt.Sprintf("%d payments pending", len(payments)),
