@@ -16,6 +16,8 @@ Acoshift's course system [Link](https://acourse.io)
 
 - Go
 - Gin
+- gRPC
+- Protocol Buffers
 - Firebase Authentication
 - Firebase Storage
 - Cloud Datastore
@@ -66,6 +68,10 @@ yarn
 go get github.com/acoshift/acourse/cmd/acourse
 cd $GOPATH/src/github.com/acoshift/acourse
 ```
+
+#### Protoc
+
+`make proto`
 
 #### Start
 
