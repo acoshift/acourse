@@ -101,8 +101,7 @@ func main() {
 			Password: cfg.Email.Password,
 		}))
 		if err = grpcServer.Serve(grpcListener); err != nil {
-			log.Println("eh ?")
-			log.Println(err)
+			log.Fatal(err)
 		}
 	}()
 
