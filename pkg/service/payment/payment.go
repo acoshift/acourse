@@ -11,7 +11,6 @@ import (
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/acourse/pkg/store"
 	"github.com/acoshift/go-firebase-admin"
-	"github.com/acoshift/httperror"
 	_context "golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -28,6 +27,8 @@ type Store interface {
 	CourseGetMulti(context.Context, []string) (model.Courses, error)
 	EnrollSaveMulti(context.Context, []*model.Enroll) error
 	RoleGet(string) (*model.Role, error)
+	PaymentGet(context.Context, string) (*model.Payment, error)
+	PaymentSave(context.Context, *model.Payment) error
 }
 
 // New creates new payment service
@@ -109,7 +110,7 @@ func (s *service) ApprovePayments(ctx _context.Context, req *acourse.PaymentIDsR
 		return nil, err
 	}
 	if !role.Admin {
-		return nil, httperror.Forbidden
+		return nil, grpc.Errorf(codes.PermissionDenied, "permission denied")
 	}
 
 	payments, err := s.store.PaymentGetMulti(ctx, app.UniqueIDs(req.GetPaymentIds()))
@@ -151,7 +152,7 @@ func (s *service) RejectPayments(ctx _context.Context, req *acourse.PaymentIDsRe
 		return nil, err
 	}
 	if !role.Admin {
-		return nil, httperror.Forbidden
+		return nil, grpc.Errorf(codes.PermissionDenied, "permission denied")
 	}
 
 	payments, err := s.store.PaymentGetMulti(ctx, app.UniqueIDs(req.GetPaymentIds()))
@@ -244,6 +245,38 @@ https://acourse.io`
 			log.Println(err)
 		}
 	}
+}
+
+func (s *service) UpdatePrice(ctx _context.Context, req *acourse.PaymentUpdatePriceRequest) (*acourse.Empty, error) {
+	userID, ok := ctx.Value(acourse.KeyUserID).(string)
+	if !ok || userID == "" {
+		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
+	}
+
+	role, err := s.store.RoleGet(userID)
+	if err != nil {
+		return nil, err
+	}
+	if !role.Admin {
+		return nil, grpc.Errorf(codes.PermissionDenied, "permission denied")
+	}
+
+	if req.GetPaymentId() == "" {
+		return nil, grpc.Errorf(codes.InvalidArgument, "payment id required")
+	}
+
+	payment, err := s.store.PaymentGet(ctx, req.GetPaymentId())
+	if err != nil {
+		return nil, err
+	}
+	payment.Price = req.GetPrice()
+
+	err = s.store.PaymentSave(ctx, payment)
+	if err != nil {
+		return nil, err
+	}
+
+	return new(acourse.Empty), nil
 }
 
 // StartNotification starts payment notification

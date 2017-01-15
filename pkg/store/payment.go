@@ -55,10 +55,7 @@ func (c *DB) PaymentList(opts ...PaymentListOption) (model.Payments, error) {
 }
 
 // PaymentSave saves a payment to database
-func (c *DB) PaymentSave(x *model.Payment) error {
-	ctx, cancel := getContext()
-	defer cancel()
-
+func (c *DB) PaymentSave(ctx context.Context, x *model.Payment) error {
 	x.Stamp()
 	if x.Key() == nil {
 		x.SetKey(datastore.IncompleteKey(kindPayment, nil))
@@ -95,14 +92,11 @@ func (c *DB) PaymentSaveMulti(ctx context.Context, payments model.Payments) erro
 }
 
 // PaymentGet retrieves a payment from database
-func (c *DB) PaymentGet(paymentID string) (*model.Payment, error) {
+func (c *DB) PaymentGet(ctx context.Context, paymentID string) (*model.Payment, error) {
 	id := idInt(paymentID)
 	if id == 0 {
 		return nil, ErrInvalidID
 	}
-
-	ctx, cancel := getContext()
-	defer cancel()
 
 	var x model.Payment
 	err := c.get(ctx, datastore.IDKey(kindPayment, id, nil), &x)

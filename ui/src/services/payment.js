@@ -11,10 +11,12 @@ const history = () => RPC.invoke('/acourse.PaymentService/ListHistoryPayments', 
 
 const approve = (paymentIds) => RPC.invoke('/acourse.PaymentService/ApprovePayments', { paymentIds }, true)
 const reject = (paymentIds) => RPC.invoke('/acourse.PaymentService/RejectPayments', { paymentIds }, true)
+const updatePrice = (paymentId, price) => RPC.invoke('/acourse.PaymentService/UpdatePrice', { paymentId, price }, true)
 
 export default {
   list,
   history,
   approve,
-  reject
+  reject,
+  updatePrice
 }

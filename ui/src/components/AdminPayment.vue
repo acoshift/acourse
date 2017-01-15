@@ -23,12 +23,15 @@
           td
             a(:href='x.url')
               img.ui.tiny.image(:src='x.url')
-          td {{ x.originalPrice }}
-          td {{ x.price }}
+          td {{ x.originalPrice || '0' }}
+          td {{ x.price || '0' }}
           td {{ x.createdAt | date('YYYY/MM/DD, HH:mm') }}
           td
-            .ui.green.button(@click='approve(x)') Approve
-            .ui.red.button(@click='reject(x)') Reject
+            .ui.green.icon.button(@click='approve(x)')
+              i.check.icon
+            .ui.red.icon.button(@click='reject(x)')
+              i.close.icon
+            .ui.button(@click='editPrice(x)') Edit Price
 </template>
 
 <script>
@@ -47,9 +50,9 @@ export default {
   subscriptions () {
     return {
       list: this.$watchAsObservable('refresh')
-        .do(() => { Loader.start('payment') })
+        .do(() => Loader.start('payment'))
         .flatMap(() => Payment.list())
-        .do(() => { Loader.stop('payment') })
+        .do(() => Loader.stop('payment'))
     }
   },
   created () {
@@ -60,7 +63,7 @@ export default {
       if (!window.confirm(`Approve ${x.user.name} to ${x.course.title} ?`)) return
       Loader.start('approve')
       Payment.approve([x.id])
-        .finally(() => { Loader.stop('approve') })
+        .finally(() => Loader.stop('approve'))
         .subscribe(
           () => {
             this.refresh++
@@ -71,7 +74,7 @@ export default {
       if (!window.confirm(`Reject ${x.user.name} from ${x.course.title} ?`)) return
       Loader.start('reject')
       Payment.reject([x.id])
-        .finally(() => { Loader.stop('reject') })
+        .finally(() => Loader.stop('reject'))
         .subscribe(
           () => {
             this.refresh++
@@ -82,7 +85,23 @@ export default {
       if (!window.confirm(`Approve all payments?`)) return
       Loader.start('approve')
       Payment.approve(this.list.map((x) => x.id))
-        .finally(() => { Loader.stop('approve') })
+        .finally(() => Loader.stop('approve'))
+        .subscribe(
+          () => {
+            this.refresh++
+          }
+        )
+    },
+    editPrice (x) {
+      let price = +window.prompt(`Change ${x.course.title} price from ${x.course.price || 0} to...`)
+      if (!price) return
+      price = +price
+      console.log(price)
+      if (!isFinite(price)) return
+      Loader.start('updatePrice')
+      Payment.updatePrice(x.id, price)
+        .do(() => this.refresh++)
+        .finally(() => Loader.stop('updatePrice'))
         .subscribe(
           () => {
             this.refresh++

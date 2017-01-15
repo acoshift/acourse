@@ -29,7 +29,7 @@ type Store interface {
 	EnrollFind(string, string) (*model.Enroll, error)
 	PaymentFind(string, string, model.PaymentStatus) (*model.Payment, error)
 	EnrollSave(*model.Enroll) error
-	PaymentSave(*model.Payment) error
+	PaymentSave(context.Context, *model.Payment) error
 	CourseSave(*model.Course) error
 	CourseFind(string) (*model.Course, error)
 	UserMustGet(string) (*model.User, error)
@@ -436,7 +436,7 @@ func (s *service) EnrollCourse(ctx _context.Context, req *acourse.EnrollRequest)
 		Status:        model.PaymentStatusWaiting,
 	}
 
-	err = s.store.PaymentSave(payment)
+	err = s.store.PaymentSave(ctx, payment)
 	if err != nil {
 		return nil, err
 	}
