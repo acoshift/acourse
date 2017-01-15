@@ -253,10 +253,25 @@ func RegisterCourseServiceClient(service *gin.Engine, s acourse.CourseServiceCli
 		req := new(acourse.EnrollRequest)
 		err := ctx.BindJSON(req)
 		if err != nil {
-			handleError(ctx, err)
+			handleError(ctx, httperror.BadRequestWith(err))
 			return
 		}
 		_, err = s.EnrollCourse(makeServiceContext(ctx.Request), req)
+		if err != nil {
+			handleError(ctx, err)
+			return
+		}
+		handleSuccess(ctx)
+	})
+
+	service.POST("/acourse.CourseService/AttendCourse", func(ctx *gin.Context) {
+		req := new(acourse.CourseIDRequest)
+		err := ctx.BindJSON(req)
+		if err != nil {
+			handleError(ctx, httperror.BadRequestWith(err))
+			return
+		}
+		_, err = s.AttendCourse(makeServiceContext(ctx.Request), req)
 		if err != nil {
 			handleError(ctx, err)
 			return
@@ -268,7 +283,7 @@ func RegisterCourseServiceClient(service *gin.Engine, s acourse.CourseServiceCli
 		req := new(acourse.CourseIDRequest)
 		err := ctx.BindJSON(req)
 		if err != nil {
-			handleError(ctx, err)
+			handleError(ctx, httperror.BadRequestWith(err))
 			return
 		}
 		_, err = s.OpenAttend(makeServiceContext(ctx.Request), req)
@@ -283,7 +298,7 @@ func RegisterCourseServiceClient(service *gin.Engine, s acourse.CourseServiceCli
 		req := new(acourse.CourseIDRequest)
 		err := ctx.BindJSON(req)
 		if err != nil {
-			handleError(ctx, err)
+			handleError(ctx, httperror.BadRequestWith(err))
 			return
 		}
 		_, err = s.CloseAttend(makeServiceContext(ctx.Request), req)

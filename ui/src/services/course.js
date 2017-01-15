@@ -79,6 +79,9 @@ const closeAttend = (courseId) =>
   RPC.invoke('/acourse.CourseService/CloseAttend', { courseId }, true)
     .flatMap(() => fetch(courseId))
 
+const attend = (courseId) =>
+  RPC.invoke('/acourse.CourseService/AttendCourse', { courseId }, true)
+
 export default {
   fetchList,
   list,
@@ -89,5 +92,6 @@ export default {
   save,
   enroll,
   openAttend,
-  closeAttend
+  closeAttend,
+  attend
 }

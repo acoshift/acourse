@@ -6,7 +6,8 @@ const course = (res) => ({
   owner: res.user,
   owned: !!res.owned,
   purchase: !!res.purchase,
-  enrolled: !!res.enrolled
+  enrolled: !!res.enrolled,
+  attended: !!res.attended
 })
 
 const courses = (res) => map(res.courses, (course) => ({

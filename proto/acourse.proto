@@ -88,6 +88,7 @@ message CourseResponse {
   bool enrolled = 3;
   bool owned = 4;
   bool purchase = 5;
+  bool attended = 6;
 }
 
 message Empty {}

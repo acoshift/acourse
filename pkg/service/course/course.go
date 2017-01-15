@@ -33,6 +33,8 @@ type Store interface {
 	CourseSave(*model.Course) error
 	CourseFind(string) (*model.Course, error)
 	UserMustGet(string) (*model.User, error)
+	AttendFind(context.Context, string, string) (*model.Attend, error)
+	AttendSave(context.Context, *model.Attend) error
 }
 
 type service struct {
@@ -207,11 +209,17 @@ func (s *service) GetCourse(ctx _context.Context, req *acourse.CourseIDRequest) 
 		return nil, err
 	}
 	if enroll != nil || course.Owner == userID {
+		attend, err := s.store.AttendFind(ctx, userID, course.ID)
+		if err != nil {
+			return nil, err
+		}
+
 		return &acourse.CourseResponse{
 			Course:   acourse.ToCourse(course),
 			User:     acourse.ToUserTiny(owner),
 			Enrolled: enroll != nil,
 			Owned:    course.Owner == userID,
+			Attended: attend != nil,
 		}, nil
 	}
 
@@ -437,7 +445,43 @@ func (s *service) EnrollCourse(ctx _context.Context, req *acourse.EnrollRequest)
 }
 
 func (s *service) AttendCourse(ctx _context.Context, req *acourse.CourseIDRequest) (*acourse.Empty, error) {
-	return nil, nil
+	userID, ok := ctx.Value(acourse.KeyUserID).(string)
+	if !ok || userID == "" {
+		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
+	}
+
+	course, err := s.store.CourseGet(req.GetCourseId())
+	if err != nil {
+		return nil, err
+	}
+	if course == nil {
+		return nil, grpc.Errorf(codes.NotFound, "course not found")
+	}
+
+	// user must enrolled in this course
+	enroll, err := s.store.EnrollFind(userID, course.ID)
+	if err != nil {
+		return nil, err
+	}
+	if enroll == nil {
+		return nil, grpc.Errorf(codes.FailedPrecondition, "user must enroll first")
+	}
+
+	// check is user already attend
+	attend, err := s.store.AttendFind(ctx, userID, course.ID)
+	if err != nil {
+		return nil, err
+	}
+	if attend != nil {
+		return nil, grpc.Errorf(codes.AlreadyExists, "already attend in last 6 hr")
+	}
+
+	err = s.store.AttendSave(ctx, &model.Attend{UserID: userID, CourseID: course.ID})
+	if err != nil {
+		return nil, err
+	}
+
+	return new(acourse.Empty), nil
 }
 
 func (s *service) changeAttend(ctx _context.Context, req *acourse.CourseIDRequest, value bool) (*acourse.Empty, error) {

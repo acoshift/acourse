@@ -1,14 +1,14 @@
 <template lang="pug">
-  .ui.segment(v-if='course.attend || course.assignment')
+  .ui.segment(v-if='course.options.attend || course.options.assignment')
     .ui.stackable.equal.width.grid
-      .column(v-if='course.attend')
-        .ui.blue.fluid.button(:class='{disabled: isAttended || !course.attend, loading: attending}', @click='attend') Attend
-      .column(v-if='course.assignment')
-        router-link.ui.teal.fluid.button(:to='`/course/${course.id}/assignment`') Assignments
+      .column(v-if='course.options.attend')
+        .ui.blue.fluid.button(:class='{disabled: !course.options.attend || course.attended, loading: attending}', @click='attend') Attend
+      // .column(v-if='course.options.assignment')
+      //   router-link.ui.teal.fluid.button(:to='`/course/${course.id}/assignment`') Assignments
 </template>
 
 <script>
-import { Me, Document } from 'services'
+import { Course, Document } from 'services'
 
 export default {
   props: {
@@ -22,15 +22,12 @@ export default {
       attending: false
     }
   },
-  subscriptions () {
-    return {
-      isAttended: Me.isAttendedCourse(this.course.id)
-    }
-  },
   methods: {
     attend () {
+      if (this.attending) return
       this.attending = true
-      Me.attendCourse(this.course.id)
+      Course.attend(this.course.id)
+        .flatMap(() => Course.fetch(this.course.id))
         .finally(() => { this.attending = false })
         .subscribe(
           () => {

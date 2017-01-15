@@ -3,3 +3,8 @@ indexes:
   properties:
   - name: Status
   - name: CreatedAt
+- kind: Attend
+  properties:
+  - name: UserID
+  - name: CourseID
+  - name: CreatedAt

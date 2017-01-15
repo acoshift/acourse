@@ -54,10 +54,10 @@ deploy: docker
 	./private/hook.sh
 
 indexes: project
-	gcloud preview datastore create-indexes index.yaml
+	gcloud datastore create-indexes index.yaml
 
 cleanup-indexes: project
-	gcloud preview datastore cleanup-indexes index.yaml
+	gcloud datastore cleanup-indexes index.yaml
 
 .PHONY: proto
 proto:
