@@ -32,10 +32,11 @@ export default {
   },
   computed: {
     calcPrice () {
-      const price = this.course.discount ? this.course.discountedPrice : this.course.price
+      const price = this.course.discount ? this.course.discountedPrice : this.course.price || 0
       return price <= 0 ? 0 : price
     },
     detail () {
+      if (!this.course.enrollDetail) return ''
       return marked(this.course.enrollDetail, { sanitize: true })
     }
   },

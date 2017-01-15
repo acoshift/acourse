@@ -45,7 +45,7 @@ export default {
     apply () {
       if (this.applying) return
 
-      if (this.price === 0) {
+      if (!this.price) {
         this.applying = true
         Course.enroll(this.course.id, {})
           .finally(() => { this.applying = false })
@@ -63,7 +63,7 @@ export default {
   computed: {
     price () {
       if (this.course.discount) return this.course.discountedPrice
-      return this.course.price
+      return this.course.price || 0
     }
   }
 }
