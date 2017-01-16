@@ -21,34 +21,69 @@ import (
 	"google.golang.org/grpc/grpclog"
 	"gopkg.in/gin-contrib/cors.v1"
 	"gopkg.in/gin-gonic/gin.v1"
+	"gopkg.in/yaml.v2"
 )
+
+// Config type
+type Config struct {
+	Debug     bool   `yaml:"debug"`
+	Port      string `yaml:"port"`
+	ProjectID string `yaml:"projectId"`
+	Email     struct {
+		From     string `yaml:"from"`
+		Server   string `yaml:"server"`
+		Port     int    `yaml:"port"`
+		User     string `yaml:"user"`
+		Password string `yaml:"password"`
+	} `yaml:"email"`
+	ServiceAccountString string `yaml:"serviceAccount"`
+	ServiceAccount       []byte `yaml:"-"`
+}
+
+// LoadConfig loads config from file
+func LoadConfig(filename string) (*Config, error) {
+	bs, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return nil, err
+	}
+	cfg := Config{}
+	err = yaml.Unmarshal(bs, &cfg)
+	if err != nil {
+		return nil, err
+	}
+	cfg.ServiceAccount = []byte(cfg.ServiceAccountString)
+	return &cfg, nil
+}
 
 func main() {
 	grpclog.SetLogger(app.NewLogger())
 
-	cfg, err := app.LoadConfig("private/config.yaml")
+	configFile := os.Getenv("CONFIG")
+	if configFile == "" {
+		configFile = "config.yaml"
+	}
+
+	cfg, err := LoadConfig(configFile)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	serviceAccount, err := ioutil.ReadFile("private/service_account.json")
-	if err != nil {
-		log.Fatal(err)
+	if !cfg.Debug {
+		gin.SetMode(gin.ReleaseMode)
 	}
 
 	firApp, err := admin.InitializeApp(admin.AppOptions{
 		ProjectID:      cfg.ProjectID,
-		ServiceAccount: serviceAccount,
+		ServiceAccount: cfg.ServiceAccount,
 	})
 	if err != nil {
 		return
 	}
 	firAuth := firApp.Auth()
 
-	gin.SetMode(gin.ReleaseMode)
 	httpServer := gin.New()
 
-	db := store.NewDB(store.ProjectID(cfg.ProjectID), store.ServiceAccount(serviceAccount))
+	db := store.NewDB(store.ProjectID(cfg.ProjectID), store.ServiceAccount(cfg.ServiceAccount))
 
 	// globals middlewares
 	httpServer.Use(gin.Logger())
@@ -108,10 +143,12 @@ func main() {
 		}
 	}()
 
-	hostPort := net.JoinHostPort("0.0.0.0", os.Getenv("PORT"))
+	hostPort := net.JoinHostPort("0.0.0.0", cfg.Port)
 	log.Printf("Listening on %s", hostPort)
 
-	go payment.StartNotification(db, emailServiceClient)
+	if !cfg.Debug {
+		go payment.StartNotification(db, emailServiceClient)
+	}
 
 	if err := httpServer.Run(hostPort); err != nil {
 		log.Fatal(err)

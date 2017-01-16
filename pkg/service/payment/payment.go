@@ -283,7 +283,9 @@ func (s *service) UpdatePrice(ctx _context.Context, req *acourse.PaymentUpdatePr
 func StartNotification(s Store, email acourse.EmailServiceClient) {
 	go func() {
 		for {
-			// check is payments have status waiting
+			time.Sleep(6 * time.Hour)
+
+			// check is any payments have status waiting
 			log.Println("Run Notification Payment")
 			payments, err := s.PaymentList(store.PaymentListOptionStatus(model.PaymentStatusWaiting))
 			if err == nil && len(payments) > 0 {
@@ -296,7 +298,6 @@ func StartNotification(s Store, email acourse.EmailServiceClient) {
 					log.Println(err)
 				}
 			}
-			time.Sleep(3 * time.Hour)
 		}
 	}()
 }

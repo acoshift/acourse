@@ -8,9 +8,8 @@ ADD cacert.pem /etc/ssl/certs/ca-certificates.crt
 
 # Setup App
 ADD acourse /
+COPY config.yaml /
 COPY templates /templates
-COPY private /private
 COPY public /public
-ENV PORT 8080
 EXPOSE 8080
 ENTRYPOINT ["/acourse"]
