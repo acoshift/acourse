@@ -22,8 +22,7 @@ const (
 )
 
 const (
-	keyCurrentUserID = "CurrentUserID"
-	keyRequestID     = "RequestID"
+	keyRequestID = "RequestID"
 )
 
 var (
@@ -37,7 +36,6 @@ func InitService(service *gin.Engine, auth *admin.Auth) (err error) {
 	firAuth = auth
 
 	service.Use(requestIDMiddleware)
-	service.Use(jwtMiddleware)
 	return
 }
 
@@ -51,22 +49,6 @@ func validateHeaderToken(header string) (string, error) {
 		return "", err
 	}
 	return claims.UserID, nil
-}
-
-func jwtMiddleware(ctx *gin.Context) {
-	auth := strings.TrimSpace(ctx.Request.Header.Get("Authorization"))
-	if len(auth) == 0 {
-		ctx.Next()
-		return
-	}
-	userID, err := validateHeaderToken(auth)
-	if err != nil {
-		handleError(ctx, tokenError(err))
-		ctx.Abort()
-		return
-	}
-	ctx.Request = ctx.Request.WithContext(context.WithValue(ctx.Request.Context(), KeyCurrentUserID, userID))
-	ctx.Set(keyCurrentUserID, userID)
 }
 
 func requestIDMiddleware(ctx *gin.Context) {
