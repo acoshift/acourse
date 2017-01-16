@@ -10,7 +10,8 @@ import (
 
 	"github.com/acoshift/acourse/pkg/acourse"
 	"github.com/acoshift/acourse/pkg/app"
-	"github.com/acoshift/acourse/pkg/ctrl"
+	"github.com/acoshift/acourse/pkg/ctrl/health"
+	"github.com/acoshift/acourse/pkg/ctrl/render"
 	"github.com/acoshift/acourse/pkg/service/course"
 	"github.com/acoshift/acourse/pkg/service/email"
 	"github.com/acoshift/acourse/pkg/service/payment"
@@ -118,8 +119,8 @@ func main() {
 	app.RegisterPaymentServiceClient(httpServer, paymentServiceClient)
 
 	// mount controllers
-	app.MountHealthController(httpServer, ctrl.NewHealth())
-	app.MountRenderController(httpServer, ctrl.NewRenderController(db, courseServiceClient))
+	app.MountHealthController(httpServer, health.New())
+	app.MountRenderController(httpServer, render.New(db, courseServiceClient))
 
 	// run grpc server
 	go func() {

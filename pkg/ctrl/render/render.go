@@ -1,4 +1,4 @@
-package ctrl
+package render
 
 import (
 	"context"
@@ -10,19 +10,18 @@ import (
 	"github.com/acoshift/gotcha"
 )
 
-// RenderController implements RenderController interface
-type RenderController struct {
+// New creates new render controller
+func New(db *store.DB, courseService acourse.CourseServiceClient) app.RenderController {
+	return &renderController{db, courseService}
+}
+
+// renderController implements RenderController interface
+type renderController struct {
 	db            *store.DB
 	courseService acourse.CourseServiceClient
 }
 
-// NewRenderController creates controller
-func NewRenderController(db *store.DB, courseService acourse.CourseServiceClient) *RenderController {
-	return &RenderController{db, courseService}
-}
-
-// RenderIndex type
-type RenderIndex struct {
+type index struct {
 	Title       string
 	Description string
 	Image       string
@@ -33,20 +32,19 @@ type RenderIndex struct {
 var cacheRender = gotcha.New()
 
 // Index runs index action
-func (c *RenderController) Index(ctx *app.RenderIndexContext) (interface{}, error) {
+func (c *renderController) Index(ctx *app.RenderIndexContext) (interface{}, error) {
 	var res *acourse.CoursesResponse
-	refill := func() {
-		xs, _ := c.courseService.ListPublicCourses(context.Background(), &acourse.ListRequest{})
-		cacheRender.SetTTL("index", xs, time.Second*30)
-	}
 	if cache := cacheRender.Get("index"); cache != nil {
 		res = cache.(*acourse.CoursesResponse)
 	} else {
 		// do not wait for api call
-		go refill()
+		go func() {
+			xs, _ := c.courseService.ListPublicCourses(context.Background(), &acourse.ListRequest{})
+			cacheRender.SetTTL("index", xs, time.Second*30)
+		}()
 	}
 
-	return &RenderIndex{
+	return &index{
 		Title:       "Acourse",
 		Description: "Online courses for everyone",
 		Image:       "https://acourse.io/static/acourse-og.jpg",
@@ -58,13 +56,13 @@ func (c *RenderController) Index(ctx *app.RenderIndexContext) (interface{}, erro
 }
 
 // Course runs course action
-func (c *RenderController) Course(ctx *app.RenderCourseContext) (interface{}, error) {
+func (c *renderController) Course(ctx *app.RenderCourseContext) (interface{}, error) {
 	response, err := c.courseService.GetCourse(context.Background(), &acourse.CourseIDRequest{CourseId: ctx.CourseID})
 	if err != nil || response == nil {
 		return nil, nil
 	}
 	course := response.Course
-	r := &RenderIndex{
+	r := &index{
 		Title:       course.Title,
 		Description: course.ShortDescription,
 		Image:       course.Photo,

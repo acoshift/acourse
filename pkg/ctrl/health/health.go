@@ -1,11 +1,11 @@
-package ctrl
+package health
 
 import (
 	"github.com/acoshift/acourse/pkg/app"
 )
 
-// NewHealth creates new health controller
-func NewHealth() app.HealthController {
+// New creates new health controller
+func New() app.HealthController {
 	return &healthController{}
 }
 
