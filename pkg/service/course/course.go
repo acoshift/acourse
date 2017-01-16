@@ -19,20 +19,20 @@ func New(store Store) acourse.CourseServiceServer {
 
 // Store is the store interface for course service
 type Store interface {
-	CourseList(opts ...store.CourseListOption) (model.Courses, error)
+	CourseList(context.Context, ...store.CourseListOption) (model.Courses, error)
 	UserGetMulti(context.Context, []string) (model.Users, error)
-	EnrollCourseCount(string) (int, error)
-	RoleGet(string) (*model.Role, error)
-	EnrollListByUserID(string) (model.Enrolls, error)
-	CourseGetAllByIDs([]string) (model.Courses, error)
-	CourseGet(string) (*model.Course, error)
-	EnrollFind(string, string) (*model.Enroll, error)
-	PaymentFind(string, string, model.PaymentStatus) (*model.Payment, error)
-	EnrollSave(*model.Enroll) error
+	EnrollCourseCount(context.Context, string) (int, error)
+	RoleGet(context.Context, string) (*model.Role, error)
+	EnrollListByUserID(context.Context, string) (model.Enrolls, error)
+	CourseGetAllByIDs(context.Context, []string) (model.Courses, error)
+	CourseGet(context.Context, string) (*model.Course, error)
+	EnrollFind(context.Context, string, string) (*model.Enroll, error)
+	PaymentFind(context.Context, string, string, model.PaymentStatus) (*model.Payment, error)
+	EnrollSave(context.Context, *model.Enroll) error
 	PaymentSave(context.Context, *model.Payment) error
-	CourseSave(*model.Course) error
-	CourseFind(string) (*model.Course, error)
-	UserMustGet(string) (*model.User, error)
+	CourseSave(context.Context, *model.Course) error
+	CourseFind(context.Context, string) (*model.Course, error)
+	UserMustGet(context.Context, string) (*model.User, error)
 	AttendFind(context.Context, string, string) (*model.Attend, error)
 	AttendSave(context.Context, *model.Attend) error
 }
@@ -42,7 +42,7 @@ type service struct {
 }
 
 func (s *service) listCourses(ctx _context.Context, opts ...store.CourseListOption) (*acourse.CoursesResponse, error) {
-	courses, err := s.store.CourseList(opts...)
+	courses, err := s.store.CourseList(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +62,7 @@ func (s *service) listCourses(ctx _context.Context, opts ...store.CourseListOpti
 
 	enrollCounts := make([]*acourse.EnrollCount, len(courses))
 	for i, course := range courses {
-		c, err := s.store.EnrollCourseCount(course.ID)
+		c, err := s.store.EnrollCourseCount(ctx, course.ID)
 		if err != nil {
 			return nil, err
 		}
@@ -87,7 +87,7 @@ func (s *service) ListCourses(ctx _context.Context, req *acourse.ListRequest) (*
 	if !ok || userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
-	role, err := s.store.RoleGet(userID)
+	role, err := s.store.RoleGet(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -127,7 +127,7 @@ func (s *service) ListEnrolledCourses(ctx _context.Context, req *acourse.UserIDR
 
 	// only admin allow for get other user enrolled courses
 	if req.GetUserId() != userID {
-		role, err := s.store.RoleGet(userID)
+		role, err := s.store.RoleGet(ctx, userID)
 		if err != nil {
 			return nil, err
 		}
@@ -136,7 +136,7 @@ func (s *service) ListEnrolledCourses(ctx _context.Context, req *acourse.UserIDR
 		}
 	}
 
-	enrolls, err := s.store.EnrollListByUserID(req.GetUserId())
+	enrolls, err := s.store.EnrollListByUserID(ctx, req.GetUserId())
 	if err != nil {
 		return nil, err
 	}
@@ -144,7 +144,7 @@ func (s *service) ListEnrolledCourses(ctx _context.Context, req *acourse.UserIDR
 	for i, e := range enrolls {
 		ids[i] = e.CourseID
 	}
-	courses, err := s.store.CourseGetAllByIDs(ids)
+	courses, err := s.store.CourseGetAllByIDs(ctx, ids)
 
 	// get owners
 	userIDMap := map[string]bool{}
@@ -162,7 +162,7 @@ func (s *service) ListEnrolledCourses(ctx _context.Context, req *acourse.UserIDR
 
 	enrollCounts := make([]*acourse.EnrollCount, len(courses))
 	for i, course := range courses {
-		c, err := s.store.EnrollCourseCount(course.ID)
+		c, err := s.store.EnrollCourseCount(ctx, course.ID)
 		if err != nil {
 			return nil, err
 		}
@@ -182,13 +182,13 @@ func (s *service) GetCourse(ctx _context.Context, req *acourse.CourseIDRequest) 
 	userID, _ := ctx.Value(acourse.KeyUserID).(string)
 
 	// try get by id first
-	course, err := s.store.CourseGet(req.GetCourseId())
+	course, err := s.store.CourseGet(ctx, req.GetCourseId())
 	if err != nil {
 		return nil, err
 	}
 	// try get by url
 	if course == nil {
-		course, err = s.store.CourseFind(req.GetCourseId())
+		course, err = s.store.CourseFind(ctx, req.GetCourseId())
 		if err != nil {
 			return nil, err
 		}
@@ -198,13 +198,13 @@ func (s *service) GetCourse(ctx _context.Context, req *acourse.CourseIDRequest) 
 	}
 
 	// get course owner
-	owner, err := s.store.UserMustGet(course.Owner)
+	owner, err := s.store.UserMustGet(ctx, course.Owner)
 	if err != nil {
 		return nil, err
 	}
 
 	// check is user enrolled
-	enroll, err := s.store.EnrollFind(userID, course.ID)
+	enroll, err := s.store.EnrollFind(ctx, userID, course.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -224,12 +224,12 @@ func (s *service) GetCourse(ctx _context.Context, req *acourse.CourseIDRequest) 
 	}
 
 	// check waiting payment
-	payment, err := s.store.PaymentFind(userID, course.ID, model.PaymentStatusWaiting)
+	payment, err := s.store.PaymentFind(ctx, userID, course.ID, model.PaymentStatusWaiting)
 	if err != nil {
 		return nil, err
 	}
 
-	role, err := s.store.RoleGet(userID)
+	role, err := s.store.RoleGet(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -277,7 +277,7 @@ func (s *service) CreateCourse(ctx _context.Context, req *acourse.Course) (*acou
 	if !ok || userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
-	role, err := s.store.RoleGet(userID)
+	role, err := s.store.RoleGet(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -307,7 +307,7 @@ func (s *service) CreateCourse(ctx _context.Context, req *acourse.Course) (*acou
 		}
 	}
 
-	err = s.store.CourseSave(course)
+	err = s.store.CourseSave(ctx, course)
 	if err != nil {
 		return nil, err
 	}
@@ -321,14 +321,14 @@ func (s *service) UpdateCourse(ctx _context.Context, req *acourse.Course) (*acou
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
 
-	course, err := s.store.CourseGet(req.GetId())
+	course, err := s.store.CourseGet(ctx, req.GetId())
 	if err != nil {
 		return nil, err
 	}
 	if course == nil {
 		return nil, grpc.Errorf(codes.NotFound, "course not found")
 	}
-	role, err := s.store.RoleGet(userID)
+	role, err := s.store.RoleGet(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -354,7 +354,7 @@ func (s *service) UpdateCourse(ctx _context.Context, req *acourse.Course) (*acou
 	}
 	course.Options.Assignment = req.GetOptions().GetAssignment()
 
-	err = s.store.CourseSave(course)
+	err = s.store.CourseSave(ctx, course)
 	if err != nil {
 		return nil, err
 	}
@@ -372,7 +372,7 @@ func (s *service) EnrollCourse(ctx _context.Context, req *acourse.EnrollRequest)
 		return nil, grpc.Errorf(codes.InvalidArgument, "course id required")
 	}
 
-	course, err := s.store.CourseGet(req.GetCourseId())
+	course, err := s.store.CourseGet(ctx, req.GetCourseId())
 	if err != nil {
 		return nil, err
 	}
@@ -386,7 +386,7 @@ func (s *service) EnrollCourse(ctx _context.Context, req *acourse.EnrollRequest)
 	}
 
 	// check is user already enroll
-	enroll, err := s.store.EnrollFind(userID, req.GetCourseId())
+	enroll, err := s.store.EnrollFind(ctx, userID, req.GetCourseId())
 	if err != nil {
 		return nil, err
 	}
@@ -396,7 +396,7 @@ func (s *service) EnrollCourse(ctx _context.Context, req *acourse.EnrollRequest)
 	}
 
 	// check is user already send waiting payment
-	payment, err := s.store.PaymentFind(userID, req.GetCourseId(), model.PaymentStatusWaiting)
+	payment, err := s.store.PaymentFind(ctx, userID, req.GetCourseId(), model.PaymentStatusWaiting)
 	if err != nil {
 		return nil, err
 	}
@@ -418,7 +418,7 @@ func (s *service) EnrollCourse(ctx _context.Context, req *acourse.EnrollRequest)
 			UserID:   userID,
 			CourseID: req.GetCourseId(),
 		}
-		err = s.store.EnrollSave(enroll)
+		err = s.store.EnrollSave(ctx, enroll)
 		if err != nil {
 			return nil, err
 		}
@@ -450,7 +450,7 @@ func (s *service) AttendCourse(ctx _context.Context, req *acourse.CourseIDReques
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
 
-	course, err := s.store.CourseGet(req.GetCourseId())
+	course, err := s.store.CourseGet(ctx, req.GetCourseId())
 	if err != nil {
 		return nil, err
 	}
@@ -459,7 +459,7 @@ func (s *service) AttendCourse(ctx _context.Context, req *acourse.CourseIDReques
 	}
 
 	// user must enrolled in this course
-	enroll, err := s.store.EnrollFind(userID, course.ID)
+	enroll, err := s.store.EnrollFind(ctx, userID, course.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -490,7 +490,7 @@ func (s *service) changeAttend(ctx _context.Context, req *acourse.CourseIDReques
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
 
-	course, err := s.store.CourseGet(req.GetCourseId())
+	course, err := s.store.CourseGet(ctx, req.GetCourseId())
 	if err != nil {
 		return nil, err
 	}
@@ -504,7 +504,7 @@ func (s *service) changeAttend(ctx _context.Context, req *acourse.CourseIDReques
 
 	course.Options.Attend = value
 
-	err = s.store.CourseSave(course)
+	err = s.store.CourseSave(ctx, course)
 	if err != nil {
 		return nil, err
 	}

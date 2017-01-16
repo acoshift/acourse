@@ -1,6 +1,8 @@
 package store
 
 import (
+	"context"
+
 	"cloud.google.com/go/datastore"
 	"github.com/acoshift/acourse/pkg/model"
 )
@@ -8,10 +10,7 @@ import (
 const kindFavorite = "Favorite"
 
 // FavoriteFind finds favorite
-func (c *DB) FavoriteFind(userID, courseID string) (*model.Favorite, error) {
-	ctx, cancel := getContext()
-	defer cancel()
-
+func (c *DB) FavoriteFind(ctx context.Context, userID, courseID string) (*model.Favorite, error) {
 	var x model.Favorite
 	q := datastore.
 		NewQuery(kindFavorite).
@@ -30,10 +29,7 @@ func (c *DB) FavoriteFind(userID, courseID string) (*model.Favorite, error) {
 }
 
 // FavoriteCountCourse counts favorite for a course
-func (c *DB) FavoriteCountCourse(courseID string) (int, error) {
-	ctx, cancel := getContext()
-	defer cancel()
-
+func (c *DB) FavoriteCountCourse(ctx context.Context, courseID string) (int, error) {
 	q := datastore.
 		NewQuery(kindFavorite).
 		Filter("CourseID =", courseID).
@@ -47,18 +43,15 @@ func (c *DB) FavoriteCountCourse(courseID string) (int, error) {
 }
 
 // FavoriteAdd adds course favorite to a user
-func (c *DB) FavoriteAdd(userID, courseID string) error {
+func (c *DB) FavoriteAdd(ctx context.Context, userID, courseID string) error {
 	// find duplicate favorite
-	x, err := c.FavoriteFind(userID, courseID)
+	x, err := c.FavoriteFind(ctx, userID, courseID)
 	if err != nil {
 		return err
 	}
 	if x != nil {
 		return nil
 	}
-
-	ctx, cancel := getContext()
-	defer cancel()
 
 	x = &model.Favorite{
 		UserID:   userID,
@@ -75,9 +68,9 @@ func (c *DB) FavoriteAdd(userID, courseID string) error {
 }
 
 // FavoriteRemove removes course favorite to a user
-func (c *DB) FavoriteRemove(userID, courseID string) error {
+func (c *DB) FavoriteRemove(ctx context.Context, userID, courseID string) error {
 	// find favorite key
-	x, err := c.FavoriteFind(userID, courseID)
+	x, err := c.FavoriteFind(ctx, userID, courseID)
 	if err != nil {
 		return err
 	}
@@ -85,17 +78,11 @@ func (c *DB) FavoriteRemove(userID, courseID string) error {
 		return nil
 	}
 
-	ctx, cancel := getContext()
-	defer cancel()
-
 	return c.client.Delete(ctx, x.Key())
 }
 
 // FavoriteCreateAll creates all favorites
-func (c *DB) FavoriteCreateAll(xs []*model.Favorite) error {
-	ctx, cancel := getContext()
-	defer cancel()
-
+func (c *DB) FavoriteCreateAll(ctx context.Context, xs []*model.Favorite) error {
 	keys := make([]*datastore.Key, len(xs))
 	for i, x := range xs {
 		x.Stamp()
@@ -110,9 +97,4 @@ func (c *DB) FavoriteCreateAll(xs []*model.Favorite) error {
 		x.SetKey(keys[i])
 	}
 	return nil
-}
-
-// FavoritePurge purges all favorites
-func (c *DB) FavoritePurge() error {
-	return c.purge(kindFavorite)
 }

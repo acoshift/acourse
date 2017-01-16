@@ -74,7 +74,7 @@ func CourseListOptionStartTo(to time.Time) CourseListOption {
 }
 
 // CourseGet retrieves course from database
-func (c *DB) CourseGet(courseID string) (*model.Course, error) {
+func (c *DB) CourseGet(ctx context.Context, courseID string) (*model.Course, error) {
 	id := idInt(courseID)
 	if id == 0 {
 		return nil, nil
@@ -83,9 +83,6 @@ func (c *DB) CourseGet(courseID string) (*model.Course, error) {
 	if cache := cacheCourse.Get(courseID); cache != nil {
 		return cache.(*model.Course), nil
 	}
-
-	ctx, cancel := getContext()
-	defer cancel()
 
 	var err error
 	var x model.Course
@@ -104,13 +101,10 @@ func (c *DB) CourseGet(courseID string) (*model.Course, error) {
 }
 
 // CourseSave saves course to database
-func (c *DB) CourseSave(x *model.Course) error {
-	ctx, cancel := getContext()
-	defer cancel()
-
+func (c *DB) CourseSave(ctx context.Context, x *model.Course) error {
 	// Check duplicate URL
 	if x.URL != "" {
-		if t, err := c.CourseFind(x.URL); (t != nil && t.ID != x.ID) || err != nil {
+		if t, err := c.CourseFind(ctx, x.URL); (t != nil && t.ID != x.ID) || err != nil {
 			if err != nil {
 				return err
 			}
@@ -135,10 +129,7 @@ func (c *DB) CourseSave(x *model.Course) error {
 }
 
 // CourseList retrieves courses from database
-func (c *DB) CourseList(opts ...CourseListOption) (model.Courses, error) {
-	ctx, cancel := getContext()
-	defer cancel()
-
+func (c *DB) CourseList(ctx context.Context, opts ...CourseListOption) (model.Courses, error) {
 	var xs []*model.Course
 
 	q := datastore.NewQuery(kindCourse)
@@ -180,14 +171,11 @@ func (c *DB) CourseList(opts ...CourseListOption) (model.Courses, error) {
 }
 
 // CourseDelete delete course from database
-func (c *DB) CourseDelete(courseID string) error {
+func (c *DB) CourseDelete(ctx context.Context, courseID string) error {
 	id := idInt(courseID)
 	if id == 0 {
 		return nil
 	}
-
-	ctx, cancel := getContext()
-	defer cancel()
 
 	err := c.client.Delete(ctx, datastore.IDKey(kindCourse, id, nil))
 	if err != nil {
@@ -198,13 +186,10 @@ func (c *DB) CourseDelete(courseID string) error {
 }
 
 // CourseFind retrieves course from URL
-func (c *DB) CourseFind(courseURL string) (*model.Course, error) {
+func (c *DB) CourseFind(ctx context.Context, courseURL string) (*model.Course, error) {
 	if cache := cacheCourseURL.Get(courseURL); cache != nil {
-		return c.CourseGet(cache.(string))
+		return c.CourseGet(ctx, cache.(string))
 	}
-
-	ctx, cancel := getContext()
-	defer cancel()
 
 	var x model.Course
 	q := datastore.
@@ -224,7 +209,7 @@ func (c *DB) CourseFind(courseURL string) (*model.Course, error) {
 }
 
 // CourseGetAllByIDs retrieves courses by given course ids
-func (c *DB) CourseGetAllByIDs(courseIDs []string) (model.Courses, error) {
+func (c *DB) CourseGetAllByIDs(ctx context.Context, courseIDs []string) (model.Courses, error) {
 	if len(courseIDs) == 0 {
 		return []*model.Course{}, nil
 	}
@@ -238,9 +223,6 @@ func (c *DB) CourseGetAllByIDs(courseIDs []string) (model.Courses, error) {
 		keys[i] = datastore.IDKey(kindCourse, d, nil)
 	}
 
-	ctx, cancel := getContext()
-	defer cancel()
-
 	xs := make([]*model.Course, len(keys))
 	err := c.client.GetMulti(ctx, keys, xs)
 	if datastoreError(err) {
@@ -250,11 +232,6 @@ func (c *DB) CourseGetAllByIDs(courseIDs []string) (model.Courses, error) {
 		x.SetKey(keys[i])
 	}
 	return xs, nil
-}
-
-// CoursePurge purges all users
-func (c *DB) CoursePurge() error {
-	return c.purge(kindCourse)
 }
 
 // CourseGetMulti retrieves multiple courses from database

@@ -18,15 +18,15 @@ import (
 
 // Store is the payment store
 type Store interface {
-	PaymentList(opts ...store.PaymentListOption) (model.Payments, error)
+	PaymentList(context.Context, ...store.PaymentListOption) (model.Payments, error)
 	PaymentGetMulti(context.Context, []string) (model.Payments, error)
 	PaymentSaveMulti(context.Context, model.Payments) error
 	UserGetMulti(context.Context, []string) (model.Users, error)
-	UserMustGet(string) (*model.User, error)
-	CourseGet(string) (*model.Course, error)
+	UserMustGet(context.Context, string) (*model.User, error)
+	CourseGet(context.Context, string) (*model.Course, error)
 	CourseGetMulti(context.Context, []string) (model.Courses, error)
 	EnrollSaveMulti(context.Context, []*model.Enroll) error
-	RoleGet(string) (*model.Role, error)
+	RoleGet(context.Context, string) (*model.Role, error)
 	PaymentGet(context.Context, string) (*model.Payment, error)
 	PaymentSave(context.Context, *model.Payment) error
 }
@@ -47,7 +47,7 @@ func (s *service) listPayments(ctx _context.Context, opts ...store.PaymentListOp
 	if !ok || userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
-	role, err := s.store.RoleGet(userID)
+	role, err := s.store.RoleGet(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +55,7 @@ func (s *service) listPayments(ctx _context.Context, opts ...store.PaymentListOp
 		return nil, grpc.Errorf(codes.PermissionDenied, "permission denied")
 	}
 
-	payments, err := s.store.PaymentList(opts...)
+	payments, err := s.store.PaymentList(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +105,7 @@ func (s *service) ApprovePayments(ctx _context.Context, req *acourse.PaymentIDsR
 	if !ok || userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
-	role, err := s.store.RoleGet(userID)
+	role, err := s.store.RoleGet(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -147,7 +147,7 @@ func (s *service) RejectPayments(ctx _context.Context, req *acourse.PaymentIDsRe
 	if !ok || userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
-	role, err := s.store.RoleGet(userID)
+	role, err := s.store.RoleGet(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -173,8 +173,9 @@ func (s *service) RejectPayments(ctx _context.Context, req *acourse.PaymentIDsRe
 }
 
 func (s *service) sendApprovedNotification(payments []*model.Payment) {
+	ctx := context.Background()
 	for _, payment := range payments {
-		course, err := s.store.CourseGet(payment.CourseID)
+		course, err := s.store.CourseGet(ctx, payment.CourseID)
 		if err != nil {
 			log.Println(err)
 			continue
@@ -188,7 +189,7 @@ func (s *service) sendApprovedNotification(payments []*model.Payment) {
 			log.Println("User don't have email")
 			continue
 		}
-		user, err := s.store.UserMustGet(payment.UserID)
+		user, err := s.store.UserMustGet(ctx, payment.UserID)
 		if err != nil {
 			log.Println(err)
 			continue
@@ -253,7 +254,7 @@ func (s *service) UpdatePrice(ctx _context.Context, req *acourse.PaymentUpdatePr
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
 
-	role, err := s.store.RoleGet(userID)
+	role, err := s.store.RoleGet(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -287,7 +288,7 @@ func StartNotification(s Store, email acourse.EmailServiceClient) {
 
 			// check is any payments have status waiting
 			log.Println("Run Notification Payment")
-			payments, err := s.PaymentList(store.PaymentListOptionStatus(model.PaymentStatusWaiting))
+			payments, err := s.PaymentList(context.Background(), store.PaymentListOptionStatus(model.PaymentStatusWaiting))
 			if err == nil && len(payments) > 0 {
 				_, err = email.Send(context.Background(), &acourse.Email{
 					To:      []string{"acoshift@gmail.com", "k.chalermsook@gmail.com"},

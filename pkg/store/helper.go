@@ -3,20 +3,11 @@ package store
 import (
 	"context"
 	"strconv"
-	"time"
 
 	"cloud.google.com/go/datastore"
 	"github.com/acoshift/acourse/pkg/model"
 	"google.golang.org/api/iterator"
 )
-
-func getContext() (context.Context, context.CancelFunc) {
-	return context.WithTimeout(context.Background(), time.Second*30)
-}
-
-func getLongContext() (context.Context, context.CancelFunc) {
-	return context.WithTimeout(context.Background(), time.Minute*5)
-}
 
 func datastoreError(err error) bool {
 	if err == nil {
@@ -87,16 +78,6 @@ func (c *DB) findFirst(ctx context.Context, q *datastore.Query, dst model.KeySet
 	}
 	dst.SetKey(key)
 	return nil
-}
-
-func (c *DB) purge(kind string) error {
-	ctx, cancel := getContext()
-	defer cancel()
-	keys, err := c.client.GetAll(ctx, datastore.NewQuery(kind).KeysOnly(), nil)
-	if err != nil {
-		return err
-	}
-	return c.client.DeleteMulti(ctx, keys)
 }
 
 func idStr(id int64) string {

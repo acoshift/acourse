@@ -17,7 +17,7 @@ var cacheUser = gotcha.New()
 func (c *DB) initUser() {
 	go func() {
 		for {
-			xs, err := c.UserList()
+			xs, err := c.UserList(context.Background())
 			if err != nil {
 				time.Sleep(time.Minute * 10)
 				continue
@@ -33,13 +33,10 @@ func (c *DB) initUser() {
 }
 
 // UserGet retrieves user from database
-func (c *DB) UserGet(userID string) (*model.User, error) {
+func (c *DB) UserGet(ctx context.Context, userID string) (*model.User, error) {
 	if cache := cacheUser.Get(userID); cache != nil {
 		return cache.(*model.User), nil
 	}
-
-	ctx, cancel := getContext()
-	defer cancel()
 
 	var err error
 	var x model.User
@@ -99,8 +96,8 @@ func (c *DB) UserGetMulti(ctx context.Context, userIDs []string) (model.Users, e
 
 // UserMustGet retrieves user from database
 // if not exists return empty user with given id
-func (c *DB) UserMustGet(userID string) (*model.User, error) {
-	x, err := c.UserGet(userID)
+func (c *DB) UserMustGet(ctx context.Context, userID string) (*model.User, error) {
+	x, err := c.UserGet(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -112,10 +109,7 @@ func (c *DB) UserMustGet(userID string) (*model.User, error) {
 }
 
 // UserFindUsername retrieves user from username from database
-func (c *DB) UserFindUsername(username string) (*model.User, error) {
-	ctx, cancel := getContext()
-	defer cancel()
-
+func (c *DB) UserFindUsername(ctx context.Context, username string) (*model.User, error) {
 	var x model.User
 
 	q := datastore.
@@ -134,14 +128,14 @@ func (c *DB) UserFindUsername(username string) (*model.User, error) {
 }
 
 // UserSave saves user to database
-func (c *DB) UserSave(x *model.User) error {
+func (c *DB) UserSave(ctx context.Context, x *model.User) error {
 	if x.Key() == nil {
 		return ErrInvalidID
 	}
 
 	// check duplicated username
 	if x.Username != "" {
-		u, err := c.UserFindUsername(x.Username)
+		u, err := c.UserFindUsername(ctx, x.Username)
 		if err != nil {
 			return err
 		}
@@ -150,8 +144,6 @@ func (c *DB) UserSave(x *model.User) error {
 		}
 	}
 
-	ctx, cancel := getContext()
-	defer cancel()
 	x.Stamp()
 	_, err := c.client.Put(ctx, x.Key(), x)
 	cacheUser.Unset(x.ID)
@@ -159,7 +151,7 @@ func (c *DB) UserSave(x *model.User) error {
 }
 
 // UserCreateAll creates new users to database
-func (c *DB) UserCreateAll(userIDs []string, xs []*model.User) error {
+func (c *DB) UserCreateAll(ctx context.Context, userIDs []string, xs []*model.User) error {
 	if len(userIDs) != len(xs) {
 		return ErrConflict("user id count not match user count")
 	}
@@ -178,19 +170,17 @@ func (c *DB) UserCreateAll(userIDs []string, xs []*model.User) error {
 
 	// TODO: check duplicated username
 
-	ctx, cancel := getContext()
-	defer cancel()
 	_, err := c.client.PutMulti(ctx, keys, xs)
 	return err
 }
 
 // UserCreate creates new user
-func (c *DB) UserCreate(userID string, x *model.User) error {
+func (c *DB) UserCreate(ctx context.Context, userID string, x *model.User) error {
 	if userID == "" {
 		return ErrInvalidID
 	}
 	x.SetKey(datastore.NameKey(kindUser, userID, nil))
-	err := c.UserSave(x)
+	err := c.UserSave(ctx, x)
 	if err != nil {
 		return err
 	}
@@ -198,16 +188,9 @@ func (c *DB) UserCreate(userID string, x *model.User) error {
 	return nil
 }
 
-// UserPurge purges all users
-func (c *DB) UserPurge() error {
-	return c.purge(kindUser)
-}
-
 // UserList retrieves all users
-func (c *DB) UserList() ([]*model.User, error) {
+func (c *DB) UserList(ctx context.Context) ([]*model.User, error) {
 	var xs []*model.User
-	ctx, cancel := getLongContext()
-	defer cancel()
 	keys, err := c.getAll(ctx, datastore.NewQuery(kindUser), &xs)
 	if err != nil {
 		return nil, err

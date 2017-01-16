@@ -47,10 +47,7 @@ func (c *DB) AttendSave(ctx context.Context, attend *model.Attend) error {
 }
 
 // AttendCreateAll creates all attend
-func (c *DB) AttendCreateAll(xs []*model.Attend) error {
-	ctx, cancel := getContext()
-	defer cancel()
-
+func (c *DB) AttendCreateAll(ctx context.Context, xs []*model.Attend) error {
 	keys := make([]*datastore.Key, len(xs))
 	for i, x := range xs {
 		x.Stamp()
@@ -65,9 +62,4 @@ func (c *DB) AttendCreateAll(xs []*model.Attend) error {
 		x.SetKey(keys[i])
 	}
 	return nil
-}
-
-// AttendPurge purges all attends
-func (c *DB) AttendPurge() error {
-	return c.purge(kindAttend)
 }

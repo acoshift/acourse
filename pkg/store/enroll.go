@@ -13,10 +13,7 @@ const kindEnroll = "Enroll"
 var cacheEnrollCount = gotcha.New()
 
 // EnrollFind finds enroll for given user id and course id
-func (c *DB) EnrollFind(userID, courseID string) (*model.Enroll, error) {
-	ctx, cancel := getContext()
-	defer cancel()
-
+func (c *DB) EnrollFind(ctx context.Context, userID, courseID string) (*model.Enroll, error) {
 	var x model.Enroll
 	q := datastore.
 		NewQuery(kindEnroll).
@@ -35,10 +32,7 @@ func (c *DB) EnrollFind(userID, courseID string) (*model.Enroll, error) {
 }
 
 // EnrollListByUserID list all enroll by given user id
-func (c *DB) EnrollListByUserID(userID string) (model.Enrolls, error) {
-	ctx, cancel := getContext()
-	defer cancel()
-
+func (c *DB) EnrollListByUserID(ctx context.Context, userID string) (model.Enrolls, error) {
 	var xs []*model.Enroll
 	q := datastore.
 		NewQuery(kindEnroll).
@@ -55,10 +49,7 @@ func (c *DB) EnrollListByUserID(userID string) (model.Enrolls, error) {
 }
 
 // EnrollSave saves enroll to database
-func (c *DB) EnrollSave(x *model.Enroll) error {
-	ctx, cancel := getContext()
-	defer cancel()
-
+func (c *DB) EnrollSave(ctx context.Context, x *model.Enroll) error {
 	var pKey *datastore.PendingKey
 	x.Stamp()
 
@@ -89,10 +80,7 @@ func (c *DB) EnrollSave(x *model.Enroll) error {
 }
 
 // EnrollCreateAll creates all enrolls
-func (c *DB) EnrollCreateAll(xs []*model.Enroll) error {
-	ctx, cancel := getContext()
-	defer cancel()
-
+func (c *DB) EnrollCreateAll(ctx context.Context, xs []*model.Enroll) error {
 	keys := make([]*datastore.Key, len(xs))
 	for i, x := range xs {
 		x.Stamp()
@@ -109,19 +97,11 @@ func (c *DB) EnrollCreateAll(xs []*model.Enroll) error {
 	return nil
 }
 
-// EnrollPurge purges all users
-func (c *DB) EnrollPurge() error {
-	return c.purge(kindEnroll)
-}
-
 // EnrollCourseCount counts enroll from course id
-func (c *DB) EnrollCourseCount(courseID string) (int, error) {
+func (c *DB) EnrollCourseCount(ctx context.Context, courseID string) (int, error) {
 	if cache := cacheEnrollCount.Get(courseID); cache != nil {
 		return cache.(int), nil
 	}
-
-	ctx, cancel := getContext()
-	defer cancel()
 
 	q := datastore.
 		NewQuery(kindEnroll).

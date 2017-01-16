@@ -25,10 +25,7 @@ func PaymentListOptionStatus(status model.PaymentStatus) PaymentListOption {
 }
 
 // PaymentList list all payments
-func (c *DB) PaymentList(opts ...PaymentListOption) (model.Payments, error) {
-	ctx, cancel := getContext()
-	defer cancel()
-
+func (c *DB) PaymentList(ctx context.Context, opts ...PaymentListOption) (model.Payments, error) {
 	var xs []*model.Payment
 
 	opt := &PaymentListOptions{}
@@ -111,10 +108,7 @@ func (c *DB) PaymentGet(ctx context.Context, paymentID string) (*model.Payment, 
 }
 
 // PaymentFind finds a payment with user id and course id
-func (c *DB) PaymentFind(userID, courseID string, status model.PaymentStatus) (*model.Payment, error) {
-	ctx, cancel := getContext()
-	defer cancel()
-
+func (c *DB) PaymentFind(ctx context.Context, userID, courseID string, status model.PaymentStatus) (*model.Payment, error) {
 	q := datastore.
 		NewQuery(kindPayment).
 		Filter("UserID =", userID).

@@ -18,9 +18,9 @@ func New(store Store) acourse.UserServiceServer {
 // Store is the store interface for user service
 type Store interface {
 	UserGetMulti(context.Context, []string) (model.Users, error)
-	UserMustGet(string) (*model.User, error)
-	UserSave(*model.User) error
-	RoleGet(string) (*model.Role, error)
+	UserMustGet(context.Context, string) (*model.User, error)
+	UserSave(context.Context, *model.User) error
+	RoleGet(context.Context, string) (*model.Role, error)
 }
 
 type userServiceServer struct {
@@ -40,11 +40,11 @@ func (s *userServiceServer) GetMe(ctx _context.Context, req *acourse.Empty) (*ac
 	if !ok || userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
-	user, err := s.store.UserMustGet(userID)
+	user, err := s.store.UserMustGet(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
-	role, err := s.store.RoleGet(userID)
+	role, err := s.store.RoleGet(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +59,7 @@ func (s *userServiceServer) UpdateMe(ctx _context.Context, req *acourse.User) (*
 	if !ok || userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
-	user, err := s.store.UserMustGet(userID)
+	user, err := s.store.UserMustGet(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +68,7 @@ func (s *userServiceServer) UpdateMe(ctx _context.Context, req *acourse.User) (*
 	user.Photo = req.GetPhoto()
 	user.AboutMe = req.GetAboutMe()
 
-	err = s.store.UserSave(user)
+	err = s.store.UserSave(ctx, user)
 	if err != nil {
 		return nil, err
 	}
