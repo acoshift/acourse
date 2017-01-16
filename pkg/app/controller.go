@@ -46,11 +46,13 @@ func MountRenderController(server *gin.Engine, c RenderController) {
 		res, err := c.Course(rctx)
 		if err != nil {
 			handleError(ctx, err)
-		} else if res == nil {
-			handleRedirect(ctx, "/")
-		} else {
-			handleHTML(ctx, "index", res)
+			return
 		}
+		if res == nil {
+			handleRedirect(ctx, "/")
+			return
+		}
+		handleHTML(ctx, "index", res)
 	})
 
 	h := func(ctx *gin.Context) {
@@ -62,9 +64,9 @@ func MountRenderController(server *gin.Engine, c RenderController) {
 		res, err := c.Index(rctx)
 		if err != nil {
 			handleError(ctx, err)
-		} else {
-			handleHTML(ctx, "index", res)
+			return
 		}
+		handleHTML(ctx, "index", res)
 	}
 
 	server.Use(h)
