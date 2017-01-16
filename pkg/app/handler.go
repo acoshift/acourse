@@ -24,7 +24,9 @@ var success = &SuccessReply{1}
 var rr = render.New(render.Options{DisableHTTPErrorRendering: true})
 
 func handleOK(ctx *gin.Context, r interface{}) {
-	ctx.JSON(http.StatusOK, r)
+	if err := rr.JSON(ctx.Writer, http.StatusOK, r); err != nil {
+		panic(err)
+	}
 }
 
 func handleError(ctx *gin.Context, r error) {
@@ -37,14 +39,15 @@ func handleError(ctx *gin.Context, r error) {
 }
 
 func handleSuccess(ctx *gin.Context) {
-	ctx.JSON(http.StatusOK, success)
+	handleOK(ctx, success)
 }
 
-func handleHTML(ctx *gin.Context, name string, binding interface{}) error {
-	return rr.HTML(ctx.Writer, http.StatusOK, name, binding)
+func handleHTML(ctx *gin.Context, name string, binding interface{}) {
+	if err := rr.HTML(ctx.Writer, http.StatusOK, name, binding); err != nil {
+		panic(err)
+	}
 }
 
-func handleRedirect(ctx *gin.Context, path string) error {
-	ctx.Redirect(http.StatusTemporaryRedirect, path)
-	return nil
+func handleRedirect(ctx *gin.Context, path string) {
+	http.Redirect(ctx.Writer, ctx.Request, path, http.StatusFound)
 }
