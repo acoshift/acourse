@@ -111,6 +111,8 @@ func main() {
 	hostPort := net.JoinHostPort("0.0.0.0", os.Getenv("PORT"))
 	log.Printf("Listening on %s", hostPort)
 
+	go payment.StartNotification(db, emailServiceClient)
+
 	if err := httpServer.Run(hostPort); err != nil {
 		log.Fatal(err)
 	}
