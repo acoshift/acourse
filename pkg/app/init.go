@@ -21,10 +21,6 @@ const (
 	KeyRequestID
 )
 
-const (
-	keyRequestID = "RequestID"
-)
-
 var (
 	firAuth *admin.Auth
 
@@ -55,5 +51,4 @@ func requestIDMiddleware(ctx *gin.Context) {
 	rid := uuid.New().String()
 	ctx.Header("X-Request-Id", rid)
 	ctx.Request = ctx.Request.WithContext(context.WithValue(ctx.Request.Context(), KeyRequestID, rid))
-	ctx.Set(keyRequestID, rid)
 }
