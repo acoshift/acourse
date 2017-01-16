@@ -23,6 +23,8 @@ Acoshift's course system [Link](https://acourse.io)
 - Cloud Datastore
 - Docker
 
+---
+
 ## Development
 
 ### Frontend
@@ -38,25 +40,25 @@ cd acourse/ui
 yarn
 ```
 
-#### Start
+#### Development
 
-- Use local backend `http://localhost:8080/api`
+- Run backend on localhost (load config from private/config.stag.yaml)
 
-`make dev`
+  - Start backend by run `make dev`
 
-- Use production backend `https://acourse.io/api`
+  - Start ui on port 9000 by run `cd ui && make dev`
 
-`make prod`
+- Use production backend
+
+  - Start ui on port 9000 by run `cd ui && make prod`
 
 #### Build
 
-- Build for production
+- For build in production mode, see on backend section
 
-`make build`
+- For build for local backend (for test preload data)
 
-- Build for local backend
-
-`make local`
+  - Run `make local` on root directory
 
 ### Backend
 
@@ -69,18 +71,16 @@ go get github.com/acoshift/acourse/cmd/acourse
 cd $GOPATH/src/github.com/acoshift/acourse
 ```
 
-#### Protoc
+#### Generate Protocol Buffers
 
-`make proto`
+- Install protoc and protoc-gen-go
 
-#### Start
+- Run `make proto`
+
+#### Development
 
 `make dev`
 
-#### Build Docker
-
-`make docker`
-
 #### Deploy
 
-`make deploy`
+`make deploy` or just `make`

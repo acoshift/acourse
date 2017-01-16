@@ -52,10 +52,10 @@ build:
 	env GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o .build/acourse -a -ldflags '-s' github.com/acoshift/acourse/cmd/acourse
 
 config-stag:
-	cp private/config.stag.yaml .build/
+	cp private/config.stag.yaml .build/config.yaml
 
 config-prod:
-	cp private/config.prod.yaml .build/
+	cp private/config.prod.yaml .build/config.yaml
 
 pre-build:
 	mkdir -p .build
