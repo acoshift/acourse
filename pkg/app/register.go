@@ -21,7 +21,9 @@ func makeServiceContext(r *http.Request) context.Context {
 
 // RegisterUserServiceClient registers a User service client to http server
 func RegisterUserServiceClient(httpServer *gin.Engine, s acourse.UserServiceClient) {
-	httpServer.POST("/acourse.UserService/GetUser", func(ctx *gin.Context) {
+	sv := "/acourse.UserService"
+
+	httpServer.POST(sv+"/GetUser", func(ctx *gin.Context) {
 		req := new(acourse.GetUserRequest)
 		err := ctx.BindJSON(req)
 		if err != nil {
@@ -36,7 +38,7 @@ func RegisterUserServiceClient(httpServer *gin.Engine, s acourse.UserServiceClie
 		handleOK(ctx, res)
 	})
 
-	httpServer.POST("/acourse.UserService/GetMe", func(ctx *gin.Context) {
+	httpServer.POST(sv+"/GetMe", func(ctx *gin.Context) {
 		res, err := s.GetMe(makeServiceContext(ctx.Request), new(acourse.Empty))
 		if err != nil {
 			handleError(ctx, err)
@@ -45,7 +47,7 @@ func RegisterUserServiceClient(httpServer *gin.Engine, s acourse.UserServiceClie
 		handleOK(ctx, res)
 	})
 
-	httpServer.POST("/acourse.UserService/UpdateMe", func(ctx *gin.Context) {
+	httpServer.POST(sv+"/UpdateMe", func(ctx *gin.Context) {
 		req := new(acourse.User)
 		err := ctx.BindJSON(req)
 		if err != nil {
@@ -63,7 +65,9 @@ func RegisterUserServiceClient(httpServer *gin.Engine, s acourse.UserServiceClie
 
 // RegisterEmailServiceClient registers a Email service client to http server
 func RegisterEmailServiceClient(httpServer *gin.Engine, s acourse.EmailServiceClient) {
-	httpServer.POST("/acourse.EmailService/Send", func(ctx *gin.Context) {
+	sv := "/acourse.EmailService"
+
+	httpServer.POST(sv+"/Send", func(ctx *gin.Context) {
 		req := new(acourse.Email)
 		err := ctx.BindJSON(req)
 		if err != nil {
@@ -81,7 +85,9 @@ func RegisterEmailServiceClient(httpServer *gin.Engine, s acourse.EmailServiceCl
 
 // RegisterPaymentServiceClient registers a Payment service client to http server
 func RegisterPaymentServiceClient(httpServer *gin.Engine, s acourse.PaymentServiceClient) {
-	httpServer.POST("/acourse.PaymentService/ListWaitingPayments", func(ctx *gin.Context) {
+	sv := "/acourse.PaymentService"
+
+	httpServer.POST(sv+"/ListWaitingPayments", func(ctx *gin.Context) {
 		req := new(acourse.ListRequest)
 		err := ctx.BindJSON(req)
 		if err != nil {
@@ -96,7 +102,7 @@ func RegisterPaymentServiceClient(httpServer *gin.Engine, s acourse.PaymentServi
 		handleOK(ctx, res)
 	})
 
-	httpServer.POST("/acourse.PaymentService/ListHistoryPayments", func(ctx *gin.Context) {
+	httpServer.POST(sv+"/ListHistoryPayments", func(ctx *gin.Context) {
 		req := new(acourse.ListRequest)
 		err := ctx.BindJSON(req)
 		if err != nil {
@@ -111,7 +117,7 @@ func RegisterPaymentServiceClient(httpServer *gin.Engine, s acourse.PaymentServi
 		handleOK(ctx, res)
 	})
 
-	httpServer.POST("/acourse.PaymentService/ApprovePayments", func(ctx *gin.Context) {
+	httpServer.POST(sv+"/ApprovePayments", func(ctx *gin.Context) {
 		req := new(acourse.PaymentIDsRequest)
 		err := ctx.BindJSON(req)
 		if err != nil {
@@ -126,7 +132,7 @@ func RegisterPaymentServiceClient(httpServer *gin.Engine, s acourse.PaymentServi
 		handleSuccess(ctx)
 	})
 
-	httpServer.POST("/acourse.PaymentService/RejectPayments", func(ctx *gin.Context) {
+	httpServer.POST(sv+"/RejectPayments", func(ctx *gin.Context) {
 		req := new(acourse.PaymentIDsRequest)
 		err := ctx.BindJSON(req)
 		if err != nil {
@@ -141,7 +147,7 @@ func RegisterPaymentServiceClient(httpServer *gin.Engine, s acourse.PaymentServi
 		handleSuccess(ctx)
 	})
 
-	httpServer.POST("/acourse.PaymentService/UpdatePrice", func(ctx *gin.Context) {
+	httpServer.POST(sv+"/UpdatePrice", func(ctx *gin.Context) {
 		req := new(acourse.PaymentUpdatePriceRequest)
 		err := ctx.BindJSON(req)
 		if err != nil {
@@ -159,7 +165,9 @@ func RegisterPaymentServiceClient(httpServer *gin.Engine, s acourse.PaymentServi
 
 // RegisterCourseServiceClient registers a Course service client to http server
 func RegisterCourseServiceClient(httpServer *gin.Engine, s acourse.CourseServiceClient) {
-	httpServer.POST("/acourse.CourseService/ListCourses", func(ctx *gin.Context) {
+	sv := "/acourse.CourseService"
+
+	httpServer.POST(sv+"/ListCourses", func(ctx *gin.Context) {
 		req := new(acourse.ListRequest)
 		err := ctx.BindJSON(req)
 		if err != nil {
@@ -174,7 +182,7 @@ func RegisterCourseServiceClient(httpServer *gin.Engine, s acourse.CourseService
 		handleOK(ctx, res)
 	})
 
-	httpServer.POST("/acourse.CourseService/ListPublicCourses", func(ctx *gin.Context) {
+	httpServer.POST(sv+"/ListPublicCourses", func(ctx *gin.Context) {
 		req := new(acourse.ListRequest)
 		err := ctx.BindJSON(req)
 		if err != nil {
@@ -189,7 +197,7 @@ func RegisterCourseServiceClient(httpServer *gin.Engine, s acourse.CourseService
 		handleOK(ctx, res)
 	})
 
-	httpServer.POST("/acourse.CourseService/ListOwnCourses", func(ctx *gin.Context) {
+	httpServer.POST(sv+"/ListOwnCourses", func(ctx *gin.Context) {
 		req := new(acourse.UserIDRequest)
 		err := ctx.BindJSON(req)
 		if err != nil {
@@ -204,7 +212,7 @@ func RegisterCourseServiceClient(httpServer *gin.Engine, s acourse.CourseService
 		handleOK(ctx, res)
 	})
 
-	httpServer.POST("/acourse.CourseService/ListEnrolledCourses", func(ctx *gin.Context) {
+	httpServer.POST(sv+"/ListEnrolledCourses", func(ctx *gin.Context) {
 		req := new(acourse.UserIDRequest)
 		err := ctx.BindJSON(req)
 		if err != nil {
@@ -219,7 +227,7 @@ func RegisterCourseServiceClient(httpServer *gin.Engine, s acourse.CourseService
 		handleOK(ctx, res)
 	})
 
-	httpServer.POST("/acourse.CourseService/GetCourse", func(ctx *gin.Context) {
+	httpServer.POST(sv+"/GetCourse", func(ctx *gin.Context) {
 		req := new(acourse.CourseIDRequest)
 		err := ctx.BindJSON(req)
 		if err != nil {
@@ -234,7 +242,7 @@ func RegisterCourseServiceClient(httpServer *gin.Engine, s acourse.CourseService
 		handleOK(ctx, res)
 	})
 
-	httpServer.POST("/acourse.CourseService/CreateCourse", func(ctx *gin.Context) {
+	httpServer.POST(sv+"/CreateCourse", func(ctx *gin.Context) {
 		req := new(acourse.Course)
 		err := ctx.BindJSON(req)
 		if err != nil {
@@ -249,7 +257,7 @@ func RegisterCourseServiceClient(httpServer *gin.Engine, s acourse.CourseService
 		handleOK(ctx, res)
 	})
 
-	httpServer.POST("/acourse.CourseService/UpdateCourse", func(ctx *gin.Context) {
+	httpServer.POST(sv+"/UpdateCourse", func(ctx *gin.Context) {
 		req := new(acourse.Course)
 		err := ctx.BindJSON(req)
 		if err != nil {
@@ -264,7 +272,7 @@ func RegisterCourseServiceClient(httpServer *gin.Engine, s acourse.CourseService
 		handleSuccess(ctx)
 	})
 
-	httpServer.POST("/acourse.CourseService/EnrollCourse", func(ctx *gin.Context) {
+	httpServer.POST(sv+"/EnrollCourse", func(ctx *gin.Context) {
 		req := new(acourse.EnrollRequest)
 		err := ctx.BindJSON(req)
 		if err != nil {
@@ -279,7 +287,7 @@ func RegisterCourseServiceClient(httpServer *gin.Engine, s acourse.CourseService
 		handleSuccess(ctx)
 	})
 
-	httpServer.POST("/acourse.CourseService/AttendCourse", func(ctx *gin.Context) {
+	httpServer.POST(sv+"/AttendCourse", func(ctx *gin.Context) {
 		req := new(acourse.CourseIDRequest)
 		err := ctx.BindJSON(req)
 		if err != nil {
@@ -294,7 +302,7 @@ func RegisterCourseServiceClient(httpServer *gin.Engine, s acourse.CourseService
 		handleSuccess(ctx)
 	})
 
-	httpServer.POST("/acourse.CourseService/OpenAttend", func(ctx *gin.Context) {
+	httpServer.POST(sv+"/OpenAttend", func(ctx *gin.Context) {
 		req := new(acourse.CourseIDRequest)
 		err := ctx.BindJSON(req)
 		if err != nil {
@@ -309,7 +317,7 @@ func RegisterCourseServiceClient(httpServer *gin.Engine, s acourse.CourseService
 		handleSuccess(ctx)
 	})
 
-	httpServer.POST("/acourse.CourseService/CloseAttend", func(ctx *gin.Context) {
+	httpServer.POST(sv+"/CloseAttend", func(ctx *gin.Context) {
 		req := new(acourse.CourseIDRequest)
 		err := ctx.BindJSON(req)
 		if err != nil {
