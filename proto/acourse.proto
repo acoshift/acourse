@@ -238,7 +238,8 @@ message UserAssignment {
   string createdAt = 2;
   string updatedAt = 3;
   string assignmentId = 4;
-  string url = 5;
+  string userId = 5;
+  string url = 6;
 }
 
 message UserAssignmentsResponse {

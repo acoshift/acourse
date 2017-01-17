@@ -18,6 +18,7 @@ type UserAssignment struct {
 	Base
 	Stampable
 	AssignmentID string
+	UserID       string
 	URL          string `datastore:",noindex"`
 }
 
