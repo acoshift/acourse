@@ -87,15 +87,13 @@ func (c *DB) CourseGet(ctx context.Context, courseID string) (*model.Course, err
 	var err error
 	var x model.Course
 
-	key := datastore.IDKey(kindCourse, id, nil)
-	err = c.client.Get(ctx, key, &x)
+	err = c.get(ctx, datastore.IDKey(kindCourse, id, nil), &x)
 	if notFound(err) {
 		return nil, nil
 	}
 	if datastoreError(err) {
 		return nil, err
 	}
-	x.SetKey(key)
 	cacheCourse.SetTTL(courseID, &x, time.Minute)
 	return &x, nil
 }
@@ -112,17 +110,15 @@ func (c *DB) CourseSave(ctx context.Context, x *model.Course) error {
 		}
 	}
 
-	var err error
 	x.Stamp()
 	if x.Key() == nil {
 		x.SetKey(datastore.IncompleteKey(kindCourse, nil))
 	}
 
-	key, err := c.client.Put(ctx, x.Key(), x)
+	err := c.put(ctx, x)
 	if err != nil {
 		return err
 	}
-	x.SetKey(key)
 
 	cacheCourse.Unset(x.ID)
 	return nil

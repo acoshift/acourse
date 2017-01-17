@@ -209,7 +209,8 @@ func (s *service) GetCourse(ctx _context.Context, req *acourse.CourseIDRequest) 
 		return nil, err
 	}
 	if enroll != nil || course.Owner == userID {
-		attend, err := s.store.AttendFind(ctx, userID, course.ID)
+		var attend *model.Attend
+		attend, err = s.store.AttendFind(ctx, userID, course.ID)
 		if err != nil {
 			return nil, err
 		}
@@ -306,14 +307,6 @@ func (s *service) CreateCourse(ctx _context.Context, req *acourse.Course) (*acou
 			DownloadURL: c.GetDownloadURL(),
 		}
 	}
-	course.Assignments = make(model.CourseAssignments, len(req.GetAssignments()))
-	for i, c := range req.GetAssignments() {
-		course.Assignments[i] = model.CourseAssignment{
-			Title:       c.GetTitle(),
-			Description: c.GetDescription(),
-			Open:        c.GetOpen(),
-		}
-	}
 
 	err = s.store.CourseSave(ctx, course)
 	if err != nil {
@@ -361,14 +354,6 @@ func (s *service) UpdateCourse(ctx _context.Context, req *acourse.Course) (*acou
 		}
 	}
 	course.Options.Assignment = req.GetOptions().GetAssignment()
-	course.Assignments = make(model.CourseAssignments, len(req.GetAssignments()))
-	for i, c := range req.GetAssignments() {
-		course.Assignments[i] = model.CourseAssignment{
-			Title:       c.GetTitle(),
-			Description: c.GetDescription(),
-			Open:        c.GetOpen(),
-		}
-	}
 
 	err = s.store.CourseSave(ctx, course)
 	if err != nil {

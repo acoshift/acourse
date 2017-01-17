@@ -20,9 +20,8 @@ type Course struct {
 	Price            float64
 	DiscountedPrice  float64
 	Options          CourseOption
-	Contents         CourseContents    `datastore:",noindex"`
-	EnrollDetail     string            `datastore:",noindex"`
-	Assignments      CourseAssignments `datastore:",noindex"`
+	Contents         CourseContents `datastore:",noindex"`
+	EnrollDetail     string         `datastore:",noindex"`
 }
 
 // Courses model
@@ -57,13 +56,3 @@ const (
 	CourseTypeVideo CourseType = "video"
 	CourseTypeEbook CourseType = "ebook"
 )
-
-// CourseAssignment type
-type CourseAssignment struct {
-	Title       string `datastore:",noindex"`
-	Description string `datastore:",noindex"`
-	Open        bool   `datastore:",noindex"`
-}
-
-// CourseAssignments type
-type CourseAssignments []CourseAssignment

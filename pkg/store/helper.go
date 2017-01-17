@@ -80,6 +80,15 @@ func (c *DB) findFirst(ctx context.Context, q *datastore.Query, dst model.KeySet
 	return nil
 }
 
+func (c *DB) put(ctx context.Context, src model.KeyGetSetter) error {
+	key, err := c.client.Put(ctx, src.Key(), src)
+	if err != nil {
+		return err
+	}
+	src.SetKey(key)
+	return nil
+}
+
 func idStr(id int64) string {
 	return strconv.FormatInt(id, 10)
 }

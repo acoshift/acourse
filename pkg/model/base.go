@@ -17,6 +17,12 @@ type KeySetter interface {
 	SetKey(*datastore.Key)
 }
 
+// KeyGetSetter interface
+type KeyGetSetter interface {
+	SetKey(*datastore.Key)
+	Key() *datastore.Key
+}
+
 // SetKey sets key to model
 func (x *Base) SetKey(key *datastore.Key) {
 	x.key = key
@@ -33,4 +39,9 @@ func (x *Base) SetKey(key *datastore.Key) {
 // Key expose key from model
 func (x *Base) Key() *datastore.Key {
 	return x.key
+}
+
+// NewKey sets incomplete key to key
+func (x *Base) NewKey(kind string) {
+	x.key = datastore.IncompleteKey(kind, nil)
 }

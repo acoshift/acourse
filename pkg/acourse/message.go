@@ -120,15 +120,6 @@ func ToCourse(x *model.Course) *Course {
 		}
 	}
 
-	r.Assignments = make([]*Course_Assignment, len(x.Assignments))
-	for i, c := range x.Assignments {
-		r.Assignments[i] = &Course_Assignment{
-			Title:       c.Title,
-			Description: c.Description,
-			Open:        c.Open,
-		}
-	}
-
 	return r
 }
 
