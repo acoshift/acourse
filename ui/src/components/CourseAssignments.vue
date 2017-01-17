@@ -1,19 +1,19 @@
 <template lang="pug">
   .ui.segment(v-if="course")
-    .ui.grid
-      .three.column.row(v-for="x in course.assignments")
-        .five.wide.column {{ x.title }}
-        .column
-          // div(v-if="userAssignments")
-          //   div(v-for="(y, i) in userAssignments[x.id]")
-          //     a(target="_bank", :href="y.url") {{ i }}
-          //     br
-        .two.wide.column
-          .ui.green.button(v-if="x.open", @click="selectFile(x.id)") Upload
+    .ui.segment(v-for="(x, i) in course.assignments")
+      h4.ui.header {{ x.title }}
+      div(v-html="marked(x.description)")
+      // div(v-if="userAssignments")
+      //   div(v-for="(y, i) in userAssignments[x.id]")
+      //     a(target="_bank", :href="y.url") {{ i }}
+      //     br
+      .ui.basic.segment
+        .ui.green.button(v-if="x.open", @click="selectFile(i)") Upload
 </template>
 
 <script>
 import { Course, Me, Loader, Document } from 'services'
+import marked from 'marked'
 
 export default {
   data () {
@@ -42,6 +42,10 @@ export default {
             Document.openErrorModal('Upload Error', err && err.message || err)
           }
         )
+    },
+    marked (data) {
+      if (!data) return ''
+      return marked(data)
     }
   }
 }

@@ -4,6 +4,8 @@ package model
 type Assignment struct {
 	Base
 	Stampable
-	UserID   string
-	CourseID string
+	UserID             string
+	CourseID           string
+	CourseAssignmentID string `datastore:",noindex"`
+	URL                string `datastore:",noindex"`
 }

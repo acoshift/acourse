@@ -34,6 +34,11 @@ service CourseService {
   rpc CloseAttend(CourseIDRequest) returns (Empty) {}
 }
 
+service AssignmentService {
+  rpc ListMyAssignmentsByCourse(CourseIDRequest) returns (AssignmentsResponse) {}
+  rpc SubmitAssignment(Assignment) returns (Empty) {}
+}
+
 message GetUserRequest {
   repeated string userIds = 1;
 }
@@ -204,4 +209,18 @@ message Payment {
 message EnrollCount {
   string courseId = 1;
   int32 count = 2;
+}
+
+message Assignment {
+  string id = 1;
+  string createdAt = 2;
+  string updatedAt = 3;
+  string userId = 4;
+  string courseId = 5;
+  string courseAssignmentId = 6;
+  string url = 7;
+}
+
+message AssignmentsResponse {
+  repeated Assignment assignments = 1;
 }

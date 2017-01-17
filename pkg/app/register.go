@@ -332,3 +332,23 @@ func RegisterCourseServiceClient(httpServer *gin.Engine, s acourse.CourseService
 		handleSuccess(ctx)
 	})
 }
+
+// RegisterAssignmentServiceClient registers s Assignment service client to http server
+func RegisterAssignmentServiceClient(httpServer *gin.Engine, s acourse.AssignmentServiceClient) {
+	sv := "/acourse.AssignmentService"
+
+	httpServer.POST(sv+"/ListMyAssignmentsByCourse", func(ctx *gin.Context) {
+		req := new(acourse.CourseIDRequest)
+		err := ctx.BindJSON(req)
+		if err != nil {
+			handleError(ctx, httperror.BadRequestWith(err))
+			return
+		}
+		res, err := s.ListMyAssignmentsByCourse(makeServiceContext(ctx.Request), req)
+		if err != nil {
+			handleError(ctx, err)
+			return
+		}
+		handleOK(ctx, res)
+	})
+}
