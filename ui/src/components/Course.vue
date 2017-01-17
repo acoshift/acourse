@@ -7,7 +7,7 @@
       i.right.chevron.icon.divider(v-show="$route.name !== 'courseView'")
       .active.section(v-show="$route.name === 'courseEdit'") Edit
       .active.section(v-show="$route.name === 'courseNew'") New
-      .active.section(v-show="$route.name === 'courseAssignment'") Assignments
+      .active.section(v-show="$route.name === 'courseAssignments'") Assignments
       .active.section(v-show="$route.name === 'courseAttend'") Attendants
       .active.section(v-show="$route.name === 'courseAssignmentEdit'") Edit Assignment
     router-view

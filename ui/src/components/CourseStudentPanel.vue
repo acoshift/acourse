@@ -3,8 +3,8 @@
     .ui.stackable.equal.width.grid
       .column(v-if='course.options.attend')
         .ui.blue.fluid.button(:class='{disabled: !course.options.attend || course.attended, loading: attending}', @click='attend') Attend
-      // .column(v-if='course.options.assignment')
-      //   router-link.ui.teal.fluid.button(:to='`/course/${course.id}/assignment`') Assignments
+      .column(v-if='course.options.assignment')
+        router-link.ui.teal.fluid.button(:to='`/course/${course.id}/assignments`') Assignments
 </template>
 
 <script>

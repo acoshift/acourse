@@ -17,7 +17,7 @@ import {
   CourseEditor,
   CourseView,
   // CourseAttend,
-  // CourseAssignment,
+  CourseAssignments,
   // CourseAssignmentEdit,
   AdminCourse,
   AdminPayment,
@@ -46,9 +46,9 @@ const router = new VueRouter({
           component: Course,
           children: [
             { path: '', component: CourseView, name: 'courseView' },
-            { path: 'edit', component: CourseEditor, name: 'courseEdit', beforeEnter: redirectIfNotAuth }
+            { path: 'edit', component: CourseEditor, name: 'courseEdit', beforeEnter: redirectIfNotAuth },
             // { path: 'attend', component: CourseAttend, name: 'courseAttend', beforeEnter: redirectIfNotAuth },
-            // { path: 'assignment', component: CourseAssignment, name: 'courseAssignment' },
+            { path: 'assignments', component: CourseAssignments, name: 'courseAssignments' }
             // { path: 'assignment/edit', component: CourseAssignmentEdit, name: 'courseAssignmentEdit', beforeEnter: redirectIfNotAuth }
           ]
         },

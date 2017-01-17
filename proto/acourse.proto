@@ -140,6 +140,11 @@ message Course {
     bool assignment = 4;
     bool discount = 5;
   }
+  message Assignment {
+    string title = 1;
+    string description = 2;
+    bool open = 3;
+  }
   string id = 1;
   string createdAt = 2;
   string updatedAt = 3;
@@ -157,6 +162,7 @@ message Course {
   Option options = 15;
   repeated Content contents = 16;
   string enrollDetail = 17;
+  repeated Assignment assignments = 18;
 }
 
 message CourseSmall {

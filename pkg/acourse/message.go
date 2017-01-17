@@ -85,7 +85,7 @@ func ToPayments(xs model.Payments) []*Payment {
 
 // ToCourse builds a Course message from Course model
 func ToCourse(x *model.Course) *Course {
-	return &Course{
+	r := &Course{
 		Id:               x.ID,
 		CreatedAt:        formatTime(x.CreatedAt),
 		UpdatedAt:        formatTime(x.UpdatedAt),
@@ -107,20 +107,29 @@ func ToCourse(x *model.Course) *Course {
 			Assignment: x.Options.Assignment,
 			Discount:   x.Options.Discount,
 		},
-		Contents: func() []*Course_Content {
-			rs := make([]*Course_Content, len(x.Contents))
-			for i, c := range x.Contents {
-				rs[i] = &Course_Content{
-					Title:       c.Title,
-					Description: c.Description,
-					Video:       c.Video,
-					DownloadURL: c.DownloadURL,
-				}
-			}
-			return rs
-		}(),
 		EnrollDetail: x.EnrollDetail,
 	}
+
+	r.Contents = make([]*Course_Content, len(x.Contents))
+	for i, c := range x.Contents {
+		r.Contents[i] = &Course_Content{
+			Title:       c.Title,
+			Description: c.Description,
+			Video:       c.Video,
+			DownloadURL: c.DownloadURL,
+		}
+	}
+
+	r.Assignments = make([]*Course_Assignment, len(x.Assignments))
+	for i, c := range x.Assignments {
+		r.Assignments[i] = &Course_Assignment{
+			Title:       c.Title,
+			Description: c.Description,
+			Open:        c.Open,
+		}
+	}
+
+	return r
 }
 
 // ToCourses builds repeated Course message from Course models

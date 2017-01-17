@@ -1,19 +1,19 @@
 <template lang="pug">
   .ui.segment(v-if="course")
     .ui.grid
-      .three.column.row(v-for="x in assignments")
+      .three.column.row(v-for="x in course.assignments")
         .five.wide.column {{ x.title }}
         .column
-          div(v-if="userAssignments")
-            div(v-for="(y, i) in userAssignments[x.id]")
-              a(target="_bank", :href="y.url") {{ i }}
-              br
-        two.wide.column
+          // div(v-if="userAssignments")
+          //   div(v-for="(y, i) in userAssignments[x.id]")
+          //     a(target="_bank", :href="y.url") {{ i }}
+          //     br
+        .two.wide.column
           .ui.green.button(v-if="x.open", @click="selectFile(x.id)") Upload
 </template>
 
 <script>
-import { Course, Assignment, Me, Loader, Document } from 'services'
+import { Course, Me, Loader, Document } from 'services'
 
 export default {
   data () {
@@ -23,13 +23,12 @@ export default {
     }
   },
   subscriptions () {
-    Loader.start('course')
-    Loader.start('assignment')
-    Loader.start('userAssignments')
+    Loader
+    // Loader.start('assignments')
     return {
-      course: Course.get(this.courseId).do(() => Loader.stop('course')).catch(() => { this.$router.replace('/') }),
-      assignments: Assignment.getCode(this.courseId).do(() => Loader.stop('assignment')),
-      userAssignments: Me.getCourseAssignments(this.courseId).do(() => Loader.stop('userAssignments'))
+      course: this.$$route
+        .flatMap((route) => Course.get(route.params.id))
+      // userAssignments: Me.getCourseAssignments(this.courseId).do(() => Loader.stop('assignments'))
     }
   },
   methods: {

@@ -8,7 +8,7 @@ const CourseView = () => System.import('./CourseView')
 // import UserView from './UserView'
 const Course = () => System.import('./Course')
 // import CourseAttend from './CourseAttend'
-// import CourseAssignment from './CourseAssignment'
+import CourseAssignments from './CourseAssignments'
 // import CourseAssignmentEdit from './CourseAssignmentEdit'
 const AdminCourse = () => System.import('./AdminCourse')
 const AdminPayment = () => System.import('./AdminPayment')
@@ -25,7 +25,7 @@ export {
   CourseView,
   // UserView,
   // CourseAttend,
-  // CourseAssignment,
+  CourseAssignments,
   // CourseAssignmentEdit,
   AdminCourse,
   AdminPayment,
