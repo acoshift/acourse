@@ -176,3 +176,24 @@ func ToCoursesTiny(xs model.Courses) []*CourseTiny {
 	}
 	return rs
 }
+
+// ToAssignment builds an Assignment message from an Assignment model
+func ToAssignment(x *model.Assignment) *Assignment {
+	return &Assignment{
+		Id:          x.ID,
+		CreatedAt:   formatTime(x.CreatedAt),
+		UpdatedAt:   formatTime(x.UpdatedAt),
+		Title:       x.Title,
+		Description: x.Description,
+		Open:        x.Open,
+	}
+}
+
+// ToAssignments builds repeated Assignment message from Assignment models
+func ToAssignments(xs model.Assignments) []*Assignment {
+	rs := make([]*Assignment, len(xs))
+	for i, x := range xs {
+		rs[i] = ToAssignment(x)
+	}
+	return rs
+}
