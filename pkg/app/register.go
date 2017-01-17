@@ -337,14 +337,119 @@ func RegisterCourseServiceClient(httpServer *gin.Engine, s acourse.CourseService
 func RegisterAssignmentServiceClient(httpServer *gin.Engine, s acourse.AssignmentServiceClient) {
 	sv := "/acourse.AssignmentService"
 
-	httpServer.POST(sv+"/ListMyAssignmentsByCourse", func(ctx *gin.Context) {
-		req := new(acourse.CourseIDRequest)
+	httpServer.POST(sv+"/CreateAssignment", func(ctx *gin.Context) {
+		req := new(acourse.Assignment)
 		err := ctx.BindJSON(req)
 		if err != nil {
 			handleError(ctx, httperror.BadRequestWith(err))
 			return
 		}
-		res, err := s.ListMyAssignmentsByCourse(makeServiceContext(ctx.Request), req)
+		res, err := s.CreateAssignment(makeServiceContext(ctx.Request), req)
+		if err != nil {
+			handleError(ctx, err)
+			return
+		}
+		handleOK(ctx, res)
+	})
+
+	httpServer.POST(sv+"/UpdateAssignment", func(ctx *gin.Context) {
+		req := new(acourse.Assignment)
+		err := ctx.BindJSON(req)
+		if err != nil {
+			handleError(ctx, httperror.BadRequestWith(err))
+			return
+		}
+		res, err := s.UpdateAssignment(makeServiceContext(ctx.Request), req)
+		if err != nil {
+			handleError(ctx, err)
+			return
+		}
+		handleOK(ctx, res)
+	})
+
+	httpServer.POST(sv+"/OpenAssignment", func(ctx *gin.Context) {
+		req := new(acourse.AssignmentIDRequest)
+		err := ctx.BindJSON(req)
+		if err != nil {
+			handleError(ctx, httperror.BadRequestWith(err))
+			return
+		}
+		res, err := s.OpenAssignment(makeServiceContext(ctx.Request), req)
+		if err != nil {
+			handleError(ctx, err)
+			return
+		}
+		handleOK(ctx, res)
+	})
+
+	httpServer.POST(sv+"/CloseAssignment", func(ctx *gin.Context) {
+		req := new(acourse.AssignmentIDRequest)
+		err := ctx.BindJSON(req)
+		if err != nil {
+			handleError(ctx, httperror.BadRequestWith(err))
+			return
+		}
+		res, err := s.CloseAssignment(makeServiceContext(ctx.Request), req)
+		if err != nil {
+			handleError(ctx, err)
+			return
+		}
+		handleOK(ctx, res)
+	})
+
+	httpServer.POST(sv+"/DeleteAssignment", func(ctx *gin.Context) {
+		req := new(acourse.AssignmentIDRequest)
+		err := ctx.BindJSON(req)
+		if err != nil {
+			handleError(ctx, httperror.BadRequestWith(err))
+			return
+		}
+		res, err := s.DeleteAssignment(makeServiceContext(ctx.Request), req)
+		if err != nil {
+			handleError(ctx, err)
+			return
+		}
+		handleOK(ctx, res)
+	})
+
+	httpServer.POST(sv+"/SubmitUserAssignment", func(ctx *gin.Context) {
+		req := new(acourse.UserAssignment)
+		err := ctx.BindJSON(req)
+		if err != nil {
+			handleError(ctx, httperror.BadRequestWith(err))
+			return
+		}
+		res, err := s.SubmitUserAssignment(makeServiceContext(ctx.Request), req)
+		if err != nil {
+			handleError(ctx, err)
+			return
+		}
+		handleOK(ctx, res)
+	})
+
+	httpServer.POST(sv+"/DeleteUserAssignment", func(ctx *gin.Context) {
+		req := new(acourse.UserAssignmentIDRequest)
+		err := ctx.BindJSON(req)
+		if err != nil {
+			handleError(ctx, httperror.BadRequestWith(err))
+			return
+		}
+		res, err := s.DeleteUserAssignment(makeServiceContext(ctx.Request), req)
+		if err != nil {
+			handleError(ctx, err)
+			return
+		}
+		handleOK(ctx, res)
+	})
+
+	httpServer.POST(sv+"/GetUserAssignments", func(ctx *gin.Context) {
+		req := new(acourse.AssignmentIDsRequest)
+		err := ctx.BindJSON(req)
+		if err != nil {
+			handleError(ctx, httperror.BadRequestWith(err))
+			return
+		}
+		res, err := s.GetUserAssignments(makeServiceContext(ctx.Request), req)
 		if err != nil {
 			handleError(ctx, err)
 			return

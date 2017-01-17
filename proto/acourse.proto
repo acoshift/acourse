@@ -35,8 +35,14 @@ service CourseService {
 }
 
 service AssignmentService {
-  rpc ListMyAssignmentsByCourse(CourseIDRequest) returns (AssignmentsResponse) {}
-  rpc SubmitAssignment(Assignment) returns (Empty) {}
+  rpc CreateAssignment(Assignment) returns (Assignment) {}
+  rpc UpdateAssignment(Assignment) returns (Empty) {}
+  rpc OpenAssignment(AssignmentIDRequest) returns (Empty) {}
+  rpc CloseAssignment(AssignmentIDRequest) returns (Empty) {}
+  rpc DeleteAssignment(AssignmentIDRequest) returns (Empty) {}
+  rpc SubmitUserAssignment(UserAssignment) returns (UserAssignment) {}
+  rpc DeleteUserAssignment(UserAssignmentIDRequest) returns (Empty) {}
+  rpc GetUserAssignments(AssignmentIDsRequest) returns (UserAssignmentsResponse) {}
 }
 
 message GetUserRequest {
@@ -209,12 +215,36 @@ message Assignment {
   string id = 1;
   string createdAt = 2;
   string updatedAt = 3;
-  string userId = 4;
-  string courseId = 5;
-  string courseAssignmentId = 6;
-  string url = 7;
+  string courseId = 4;
+  string title = 5;
+  string description = 6;
+  bool open = 7;
+}
+
+message AssignmentIDRequest {
+  string assignmentId = 1;
+}
+
+message AssignmentIDsRequest {
+  repeated string assignmentIds = 1;
 }
 
 message AssignmentsResponse {
   repeated Assignment assignments = 1;
+}
+
+message UserAssignment {
+  string id = 1;
+  string createdAt = 2;
+  string updatedAt = 3;
+  string assignmentId = 4;
+  string url = 5;
+}
+
+message UserAssignmentsResponse {
+  repeated UserAssignment userAssignments = 1;
+}
+
+message UserAssignmentIDRequest {
+  string id = 1;
 }
