@@ -18,7 +18,9 @@ func New(store Store) acourse.AssignmentServiceServer {
 // Store is the store interface for assignment service
 type Store interface {
 	CourseGet(context.Context, string) (*model.Course, error)
+	AssignmentGet(context.Context, string) (*model.Assignment, error)
 	AssignmentSave(context.Context, *model.Assignment) error
+	AssignmentList(context.Context, string) (model.Assignments, error)
 }
 
 type service struct {
@@ -63,36 +65,65 @@ func (s *service) CreateAssignment(ctx _context.Context, req *acourse.Assignment
 }
 
 func (s *service) UpdateAssignment(ctx _context.Context, req *acourse.Assignment) (*acourse.Empty, error) {
-	// check is course owner
+	userID, ok := ctx.Value(acourse.KeyUserID).(string)
+	if !ok || userID == "" {
+		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
+	}
+	if err := s.isCourseOwner(ctx, req.GetCourseId(), userID); err != nil {
+		return nil, err
+	}
 
-	// get model
+	assignment, err := s.store.AssignmentGet(ctx, req.GetId())
+	if err != nil {
+		return nil, err
+	}
+	if assignment == nil {
+		return nil, grpc.Errorf(codes.NotFound, "assignment not found")
+	}
 
-	// update model
+	assignment.Title = req.GetTitle()
+	assignment.Description = req.GetDescription()
 
-	// save model
-	return nil, nil
+	err = s.store.AssignmentSave(ctx, assignment)
+	if err != nil {
+		return nil, err
+	}
+	return new(acourse.Empty), nil
+}
+
+func (s *service) changeOpenAssignment(ctx context.Context, req *acourse.AssignmentIDRequest, open bool) (*acourse.Empty, error) {
+	userID, ok := ctx.Value(acourse.KeyUserID).(string)
+	if !ok || userID == "" {
+		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
+	}
+
+	assignment, err := s.store.AssignmentGet(ctx, req.GetAssignmentId())
+	if err != nil {
+		return nil, err
+	}
+	if assignment == nil {
+		return nil, grpc.Errorf(codes.NotFound, "assignment not found")
+	}
+
+	if err := s.isCourseOwner(ctx, assignment.CourseID, userID); err != nil {
+		return nil, err
+	}
+
+	assignment.Open = open
+
+	err = s.store.AssignmentSave(ctx, assignment)
+	if err != nil {
+		return nil, err
+	}
+	return new(acourse.Empty), nil
 }
 
 func (s *service) OpenAssignment(ctx _context.Context, req *acourse.AssignmentIDRequest) (*acourse.Empty, error) {
-	// check is course owner
-
-	// get model
-
-	// update model
-
-	// save model
-	return nil, nil
+	return s.changeOpenAssignment(ctx, req, true)
 }
 
 func (s *service) CloseAssignment(ctx _context.Context, req *acourse.AssignmentIDRequest) (*acourse.Empty, error) {
-	// check is course owner
-
-	// get model
-
-	// update model
-
-	// save model
-	return nil, nil
+	return s.changeOpenAssignment(ctx, req, false)
 }
 
 func (s *service) DeleteAssignment(ctx _context.Context, req *acourse.AssignmentIDRequest) (*acourse.Empty, error) {
