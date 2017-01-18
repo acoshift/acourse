@@ -60,3 +60,17 @@ func (c *DB) AssignmentSave(ctx context.Context, x *model.Assignment) error {
 	}
 	return nil
 }
+
+// AssignmentDelete deletes assignment from database
+func (c *DB) AssignmentDelete(ctx context.Context, assignmentID string) error {
+	id := idInt(assignmentID)
+	if id == 0 {
+		return nil
+	}
+
+	err := c.client.Delete(ctx, datastore.IDKey(kindAssignment, id, nil))
+	if err != nil {
+		return err
+	}
+	return nil
+}
