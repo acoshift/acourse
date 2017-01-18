@@ -131,7 +131,6 @@ func (c *DB) EnrollSaveMulti(ctx context.Context, enrolls []*model.Enroll) error
 		var t model.Enroll
 		var err error
 		for _, enroll := range enrolls {
-
 			q := datastore.
 				NewQuery(kindEnroll).
 				Filter("UserID =", enroll.UserID).

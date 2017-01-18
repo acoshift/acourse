@@ -129,11 +129,11 @@ func (c *DB) findFirst(ctx context.Context, q *datastore.Query, dst model.KeySet
 
 func (c *DB) getFirst(ctx context.Context, q *datastore.Query, dst model.KeySetter) error {
 	key, err := c.client.Run(ctx, q.Limit(1)).Next(dst)
-	if datastoreError(err) {
-		return err
-	}
 	if notFound(err) {
 		return ErrNotFound
+	}
+	if datastoreError(err) {
+		return err
 	}
 	dst.SetKey(key)
 	return nil
@@ -145,6 +145,22 @@ func (c *DB) put(ctx context.Context, src model.KeyGetSetter) error {
 		return err
 	}
 	src.SetKey(key)
+	return nil
+}
+
+func (c *DB) putMulti(ctx context.Context, src interface{}) error {
+	xs := reflect.ValueOf(src)
+	keys := make([]*datastore.Key, xs.Len())
+	for i := range keys {
+		keys[i] = xs.Index(i).Interface().(model.KeyGetter).Key()
+	}
+	keys, err := c.client.PutMulti(ctx, keys, src)
+	if err != nil {
+		return err
+	}
+	for i := range keys {
+		xs.Index(i).Interface().(model.KeySetter).SetKey(keys[i])
+	}
 	return nil
 }
 

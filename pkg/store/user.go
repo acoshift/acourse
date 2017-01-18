@@ -114,11 +114,10 @@ func (c *DB) UserFindUsername(ctx context.Context, username string) (*model.User
 
 	q := datastore.
 		NewQuery(kindUser).
-		Filter("Username =", username).
-		Limit(1)
+		Filter("Username =", username)
 
-	err := c.findFirst(ctx, q, &x)
-	if notFound(err) {
+	err := c.getFirst(ctx, q, &x)
+	if err == ErrNotFound {
 		return nil, nil
 	}
 	if err != nil {

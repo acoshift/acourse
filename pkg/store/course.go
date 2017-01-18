@@ -177,11 +177,10 @@ func (c *DB) CourseFind(ctx context.Context, courseURL string) (*model.Course, e
 	var x model.Course
 	q := datastore.
 		NewQuery(kindCourse).
-		Filter("URL =", courseURL).
-		Limit(1)
+		Filter("URL =", courseURL)
 
-	err := c.findFirst(ctx, q, &x)
-	if notFound(err) {
+	err := c.getFirst(ctx, q, &x)
+	if err == ErrNotFound {
 		return nil, nil
 	}
 	if err != nil {

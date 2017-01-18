@@ -95,12 +95,11 @@ func (c *DB) PaymentFind(ctx context.Context, userID, courseID string, status mo
 		NewQuery(kindPayment).
 		Filter("UserID =", userID).
 		Filter("CourseID =", courseID).
-		Filter("Status =", string(status)).
-		Limit(1)
+		Filter("Status =", string(status))
 
 	var x model.Payment
-	err := c.findFirst(ctx, q, &x)
-	if notFound(err) {
+	err := c.getFirst(ctx, q, &x)
+	if err == ErrNotFound {
 		return nil, nil
 	}
 	if err != nil {

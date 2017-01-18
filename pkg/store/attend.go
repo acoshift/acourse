@@ -16,12 +16,11 @@ func (c *DB) AttendFind(ctx context.Context, userID, courseID string) (*model.At
 		NewQuery(kindAttend).
 		Filter("UserID =", userID).
 		Filter("CourseID =", courseID).
-		Filter("CreatedAt >=", time.Now().Add(-6*time.Hour)).
-		Limit(1)
+		Filter("CreatedAt >=", time.Now().Add(-6*time.Hour))
 
 	var x model.Attend
-	err := c.findFirst(ctx, q, &x)
-	if notFound(err) {
+	err := c.getFirst(ctx, q, &x)
+	if err == ErrNotFound {
 		return nil, nil
 	}
 	if err != nil {

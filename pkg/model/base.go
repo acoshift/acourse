@@ -17,6 +17,11 @@ type KeySetter interface {
 	SetKey(*datastore.Key)
 }
 
+// KeyGetter interface
+type KeyGetter interface {
+	Key() *datastore.Key
+}
+
 // KeyGetSetter interface
 type KeyGetSetter interface {
 	SetKey(*datastore.Key)
