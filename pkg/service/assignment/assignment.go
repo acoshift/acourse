@@ -24,6 +24,8 @@ type Store interface {
 	AssignmentDelete(context.Context, string) error
 	EnrollFind(context.Context, string, string) (*model.Enroll, error)
 	UserAssignmentSave(context.Context, *model.UserAssignment) error
+	UserAssignmentGet(context.Context, string) (*model.UserAssignment, error)
+	UserAssignmentDelete(context.Context, string) error
 }
 
 type service struct {
@@ -192,10 +194,28 @@ func (s *service) SubmitUserAssignment(ctx _context.Context, req *acourse.UserAs
 }
 
 func (s *service) DeleteUserAssignment(ctx _context.Context, req *acourse.UserAssignmentIDRequest) (*acourse.Empty, error) {
-	// check is owner
+	userID, ok := ctx.Value(acourse.KeyUserID).(string)
+	if !ok || userID == "" {
+		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
+	}
 
-	// delete model
-	return nil, nil
+	userAssignment, err := s.store.UserAssignmentGet(ctx, req.GetId())
+	if err != nil {
+		return nil, err
+	}
+	if userAssignment == nil {
+		return nil, grpc.Errorf(codes.NotFound, "user assignment not found")
+	}
+
+	if userAssignment.UserID != userID {
+		return nil, grpc.Errorf(codes.PermissionDenied, "can not delete this user assignment")
+	}
+
+	err = s.store.UserAssignmentDelete(req.GetId())
+	if err != nil {
+		return nil, err
+	}
+	return new(acourse.Empty), nil
 }
 
 func (s *service) GetUserAssignments(ctx _context.Context, req *acourse.AssignmentIDsRequest) (*acourse.UserAssignmentsResponse, error) {

@@ -88,3 +88,35 @@ func (c *DB) UserAssignmentSave(ctx context.Context, x *model.UserAssignment) er
 	}
 	return nil
 }
+
+// UserAssignmentGet retrieves an User Assignment from database
+func (c *DB) UserAssignmentGet(ctx context.Context, userAssignmentID string) (*model.UserAssignment, error) {
+	id := idInt(userAssignmentID)
+	if id == 0 {
+		return nil, nil
+	}
+
+	var x model.UserAssignment
+	err := c.get(ctx, datastore.IDKey(kindUserAssignment, id, nil), &x)
+	if notFound(err) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &x, nil
+}
+
+// UserAssignmentDelete deletes user assignment from database
+func (c *DB) UserAssignmentDelete(ctx context.Context, userAssignmentID string) error {
+	id := idInt(userAssignmentID)
+	if id == 0 {
+		return nil
+	}
+
+	err := c.client.Delete(ctx, datastore.IDKey(kindUserAssignment, id, nil))
+	if err != nil {
+		return err
+	}
+	return nil
+}
