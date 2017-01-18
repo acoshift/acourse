@@ -32,18 +32,9 @@ func (c *DB) AttendFind(ctx context.Context, userID, courseID string) (*model.At
 }
 
 // AttendSave saves attend to database
-func (c *DB) AttendSave(ctx context.Context, attend *model.Attend) error {
-	attend.Stamp()
-	if attend.Key() == nil {
-		attend.SetKey(datastore.IncompleteKey(kindAttend, nil))
-	}
-
-	key, err := c.client.Put(ctx, attend.Key(), attend)
-	if err != nil {
-		return err
-	}
-	attend.SetKey(key)
-	return nil
+func (c *DB) AttendSave(ctx context.Context, x *model.Attend) error {
+	x.Stamp()
+	return c.save(ctx, kindAttend, x)
 }
 
 // AttendCreateAll creates all attend

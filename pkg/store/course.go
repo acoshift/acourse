@@ -111,11 +111,7 @@ func (c *DB) CourseSave(ctx context.Context, x *model.Course) error {
 	}
 
 	x.Stamp()
-	if x.Key() == nil {
-		x.SetKey(datastore.IncompleteKey(kindCourse, nil))
-	}
-
-	err := c.put(ctx, x)
+	err := c.save(ctx, kindCourse, x)
 	if err != nil {
 		return err
 	}

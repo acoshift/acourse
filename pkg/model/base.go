@@ -21,6 +21,7 @@ type KeySetter interface {
 type KeyGetSetter interface {
 	SetKey(*datastore.Key)
 	Key() *datastore.Key
+	NewKey(string)
 }
 
 // SetKey sets key to model

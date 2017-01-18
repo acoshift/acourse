@@ -54,16 +54,7 @@ func (c *DB) PaymentList(ctx context.Context, opts ...PaymentListOption) (model.
 // PaymentSave saves a payment to database
 func (c *DB) PaymentSave(ctx context.Context, x *model.Payment) error {
 	x.Stamp()
-	if x.Key() == nil {
-		x.SetKey(datastore.IncompleteKey(kindPayment, nil))
-	}
-
-	key, err := c.client.Put(ctx, x.Key(), x)
-	if err != nil {
-		return err
-	}
-	x.SetKey(key)
-	return nil
+	return c.save(ctx, kindPayment, x)
 }
 
 // PaymentSaveMulti saves multiple payments to database

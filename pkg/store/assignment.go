@@ -50,15 +50,7 @@ func (c *DB) AssignmentGet(ctx context.Context, assignmentID string) (*model.Ass
 // AssignmentSave saves assignment to database
 func (c *DB) AssignmentSave(ctx context.Context, x *model.Assignment) error {
 	x.Stamp()
-	if x.Key() == nil {
-		x.NewKey(kindAssignment)
-	}
-
-	err := c.put(ctx, x)
-	if err != nil {
-		return err
-	}
-	return nil
+	return c.save(ctx, kindAssignment, x)
 }
 
 // AssignmentDelete deletes assignment from database
@@ -69,15 +61,7 @@ func (c *DB) AssignmentDelete(ctx context.Context, assignmentID string) error {
 // UserAssignmentSave saves user assignment to database
 func (c *DB) UserAssignmentSave(ctx context.Context, x *model.UserAssignment) error {
 	x.Stamp()
-	if x.Key() == nil {
-		x.NewKey(kindUserAssignment)
-	}
-
-	err := c.put(ctx, x)
-	if err != nil {
-		return err
-	}
-	return nil
+	return c.save(ctx, kindUserAssignment, x)
 }
 
 // UserAssignmentGet retrieves an User Assignment from database

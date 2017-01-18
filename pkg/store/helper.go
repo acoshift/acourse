@@ -101,6 +101,13 @@ func (c *DB) deleteByName(ctx context.Context, kind string, name string) error {
 	return c.client.Delete(ctx, datastore.NameKey(kind, name, nil))
 }
 
+func (c *DB) save(ctx context.Context, kind string, src model.KeyGetSetter) error {
+	if src.Key() == nil {
+		src.NewKey(kind)
+	}
+	return c.put(ctx, src)
+}
+
 func idStr(id int64) string {
 	return strconv.FormatInt(id, 10)
 }

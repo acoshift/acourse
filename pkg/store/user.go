@@ -145,7 +145,7 @@ func (c *DB) UserSave(ctx context.Context, x *model.User) error {
 	}
 
 	x.Stamp()
-	_, err := c.client.Put(ctx, x.Key(), x)
+	err := c.put(ctx, x)
 	cacheUser.Unset(x.ID)
 	return err
 }
