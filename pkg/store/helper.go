@@ -89,6 +89,18 @@ func (c *DB) put(ctx context.Context, src model.KeyGetSetter) error {
 	return nil
 }
 
+func (c *DB) deleteByID(ctx context.Context, kind string, id int64) error {
+	return c.client.Delete(ctx, datastore.IDKey(kind, id, nil))
+}
+
+func (c *DB) deleteByIDStr(ctx context.Context, kind string, id string) error {
+	return c.deleteByID(ctx, kind, idInt(id))
+}
+
+func (c *DB) deleteByName(ctx context.Context, kind string, name string) error {
+	return c.client.Delete(ctx, datastore.NameKey(kind, name, nil))
+}
+
 func idStr(id int64) string {
 	return strconv.FormatInt(id, 10)
 }

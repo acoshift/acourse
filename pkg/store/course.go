@@ -168,12 +168,7 @@ func (c *DB) CourseList(ctx context.Context, opts ...CourseListOption) (model.Co
 
 // CourseDelete delete course from database
 func (c *DB) CourseDelete(ctx context.Context, courseID string) error {
-	id := idInt(courseID)
-	if id == 0 {
-		return nil
-	}
-
-	err := c.client.Delete(ctx, datastore.IDKey(kindCourse, id, nil))
+	err := c.deleteByIDStr(ctx, kindCourse, courseID)
 	if err != nil {
 		return err
 	}

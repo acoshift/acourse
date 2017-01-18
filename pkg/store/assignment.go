@@ -63,16 +63,7 @@ func (c *DB) AssignmentSave(ctx context.Context, x *model.Assignment) error {
 
 // AssignmentDelete deletes assignment from database
 func (c *DB) AssignmentDelete(ctx context.Context, assignmentID string) error {
-	id := idInt(assignmentID)
-	if id == 0 {
-		return nil
-	}
-
-	err := c.client.Delete(ctx, datastore.IDKey(kindAssignment, id, nil))
-	if err != nil {
-		return err
-	}
-	return nil
+	return c.deleteByIDStr(ctx, kindAssignment, assignmentID)
 }
 
 // UserAssignmentSave saves user assignment to database
@@ -109,14 +100,5 @@ func (c *DB) UserAssignmentGet(ctx context.Context, userAssignmentID string) (*m
 
 // UserAssignmentDelete deletes user assignment from database
 func (c *DB) UserAssignmentDelete(ctx context.Context, userAssignmentID string) error {
-	id := idInt(userAssignmentID)
-	if id == 0 {
-		return nil
-	}
-
-	err := c.client.Delete(ctx, datastore.IDKey(kindUserAssignment, id, nil))
-	if err != nil {
-		return err
-	}
-	return nil
+	return c.deleteByIDStr(ctx, kindUserAssignment, userAssignmentID)
 }
