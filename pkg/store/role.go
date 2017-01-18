@@ -66,12 +66,9 @@ func (c *DB) RoleSave(ctx context.Context, x *model.Role) error {
 // RoleList retrieves all role in database
 func (c *DB) RoleList(ctx context.Context) ([]*model.Role, error) {
 	var xs []*model.Role
-	keys, err := c.getAll(ctx, datastore.NewQuery(kindRole), &xs)
+	err := c.getAll(ctx, datastore.NewQuery(kindRole), &xs)
 	if err != nil {
 		return nil, err
-	}
-	for i := range keys {
-		xs[i].SetKey(keys[i])
 	}
 	return xs, nil
 }

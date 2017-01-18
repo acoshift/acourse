@@ -38,13 +38,11 @@ func (c *DB) EnrollListByUserID(ctx context.Context, userID string) (model.Enrol
 		NewQuery(kindEnroll).
 		Filter("UserID =", userID)
 
-	keys, err := c.getAll(ctx, q, &xs)
+	err := c.getAll(ctx, q, &xs)
 	if err != nil {
 		return nil, err
 	}
-	for i, x := range xs {
-		x.SetKey(keys[i])
-	}
+
 	return xs, nil
 }
 

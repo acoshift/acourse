@@ -17,13 +17,9 @@ func (c *DB) AssignmentList(ctx context.Context, courseID string) (model.Assignm
 		Filter("CourseID =", courseID)
 
 	var xs model.Assignments
-	keys, err := c.getAll(ctx, q, &xs)
+	err := c.getAll(ctx, q, &xs)
 	if err != nil {
 		return nil, err
-	}
-
-	for i, x := range xs {
-		x.SetKey(keys[i])
 	}
 
 	return xs, nil

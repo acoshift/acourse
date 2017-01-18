@@ -150,13 +150,9 @@ func (c *DB) CourseList(ctx context.Context, opts ...CourseListOption) (model.Co
 		q = q.Filter("Start <=", *opt.Start.To)
 	}
 
-	keys, err := c.getAll(ctx, q, &xs)
+	err := c.getAll(ctx, q, &xs)
 	if err != nil {
 		return nil, err
-	}
-
-	for i := range keys {
-		xs[i].SetKey(keys[i])
 	}
 
 	return xs, nil

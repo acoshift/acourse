@@ -62,10 +62,10 @@ func multiError(err error) bool {
 	return false
 }
 
-func (c *DB) getAll(ctx context.Context, q *datastore.Query, dst interface{}) ([]*datastore.Key, error) {
+func (c *DB) getAll(ctx context.Context, q *datastore.Query, dst interface{}) error {
 	keys, err := c.client.GetAll(ctx, q, dst)
 	if datastoreError(err) {
-		return nil, err
+		return err
 	}
 	xs := reflect.ValueOf(dst).Elem()
 	for i := 0; i < xs.Len(); i++ {
@@ -73,7 +73,7 @@ func (c *DB) getAll(ctx context.Context, q *datastore.Query, dst interface{}) ([
 			x.SetKey(keys[i])
 		}
 	}
-	return keys, nil
+	return nil
 }
 
 func (c *DB) get(ctx context.Context, key *datastore.Key, dst model.KeySetter) error {
@@ -106,7 +106,7 @@ func (c *DB) Query(ctx context.Context, kind string, dst interface{}, qs ...Quer
 	for _, setter := range qs {
 		setter(q)
 	}
-	_, err := c.getAll(ctx, q, dst)
+	err := c.getAll(ctx, q, dst)
 	if err != nil {
 		return err
 	}

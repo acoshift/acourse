@@ -191,12 +191,9 @@ func (c *DB) UserCreate(ctx context.Context, userID string, x *model.User) error
 // UserList retrieves all users
 func (c *DB) UserList(ctx context.Context) ([]*model.User, error) {
 	var xs []*model.User
-	keys, err := c.getAll(ctx, datastore.NewQuery(kindUser), &xs)
+	err := c.getAll(ctx, datastore.NewQuery(kindUser), &xs)
 	if err != nil {
 		return nil, err
-	}
-	for i := range keys {
-		xs[i].SetKey(keys[i])
 	}
 	return xs, nil
 }
