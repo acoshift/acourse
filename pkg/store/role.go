@@ -34,19 +34,21 @@ func (c *DB) initRole() {
 
 // RoleGet retrieves role by id
 func (c *DB) RoleGet(ctx context.Context, userID string) (*model.Role, error) {
-	if userID == "" {
+	// var x model.Role
+	x, _ := cacheRole.Get(userID).(*model.Role)
+	if x == nil {
 		return &model.Role{}, nil
 	}
-
-	var x model.Role
-	err := c.get(ctx, datastore.NameKey(kindRole, userID, nil), &x)
-	if notFound(err) {
-		return &model.Role{}, nil
-	}
-	if err != nil {
-		return nil, err
-	}
-	return &x, nil
+	return x, nil
+	// err := c.getByName(ctx, kindRole, userID, &x)
+	// log.Println(err)
+	// if err == ErrNotFound {
+	// 	return &model.Role{}, nil
+	// }
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// return &x, nil
 }
 
 // RoleSave saves role for a user
@@ -54,12 +56,12 @@ func (c *DB) RoleSave(ctx context.Context, x *model.Role) error {
 	if x.Key() == nil {
 		return ErrInvalidID
 	}
-
 	x.Stamp()
-	_, err := c.client.Put(ctx, x.Key(), x)
+	err := c.put(ctx, x)
 	if err != nil {
 		return err
 	}
+	cacheRole.Unset(x.ID)
 	return nil
 }
 

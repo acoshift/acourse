@@ -15,7 +15,12 @@ import (
 // Errors
 var (
 	ErrNotFound = grpc.Errorf(codes.NotFound, "not found")
+	ErrInternal = grpc.Errorf(codes.Internal, "internal")
 )
+
+func errInternalWith(err error) error {
+	return grpc.Errorf(codes.Internal, err.Error())
+}
 
 func datastoreError(err error) bool {
 	if err == nil {
@@ -78,11 +83,11 @@ func (c *DB) getAll(ctx context.Context, q *datastore.Query, dst interface{}) er
 
 func (c *DB) get(ctx context.Context, key *datastore.Key, dst model.KeySetter) error {
 	err := c.client.Get(ctx, key, dst)
-	if datastoreError(err) {
-		return err
-	}
 	if notFound(err) {
 		return ErrNotFound
+	}
+	if datastoreError(err) {
+		return errInternalWith(err)
 	}
 	dst.SetKey(key)
 	return nil
