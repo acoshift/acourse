@@ -81,20 +81,14 @@ func (c *DB) PaymentSaveMulti(ctx context.Context, payments model.Payments) erro
 
 // PaymentGet retrieves a payment from database
 func (c *DB) PaymentGet(ctx context.Context, paymentID string) (*model.Payment, error) {
-	id := idInt(paymentID)
-	if id == 0 {
-		return nil, ErrInvalidID
-	}
-
 	var x model.Payment
-	err := c.get(ctx, datastore.IDKey(kindPayment, id, nil), &x)
-	if notFound(err) {
+	err := c.getByIDStr(ctx, kindPayment, paymentID, &x)
+	if err == ErrNotFound {
 		return nil, nil
 	}
 	if err != nil {
 		return nil, err
 	}
-
 	return &x, nil
 }
 

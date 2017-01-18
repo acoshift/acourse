@@ -2,11 +2,19 @@ package store
 
 import (
 	"context"
+	"reflect"
 	"strconv"
 
 	"cloud.google.com/go/datastore"
 	"github.com/acoshift/acourse/pkg/model"
 	"google.golang.org/api/iterator"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+)
+
+// Errors
+var (
+	ErrNotFound = grpc.Errorf(codes.NotFound, "not found")
 )
 
 func datastoreError(err error) bool {
@@ -59,6 +67,12 @@ func (c *DB) getAll(ctx context.Context, q *datastore.Query, dst interface{}) ([
 	if datastoreError(err) {
 		return nil, err
 	}
+	xs := reflect.ValueOf(dst).Elem()
+	for i := 0; i < xs.Len(); i++ {
+		if x, ok := xs.Index(i).Interface().(model.KeySetter); ok {
+			x.SetKey(keys[i])
+		}
+	}
 	return keys, nil
 }
 
@@ -67,7 +81,35 @@ func (c *DB) get(ctx context.Context, key *datastore.Key, dst model.KeySetter) e
 	if datastoreError(err) {
 		return err
 	}
+	if notFound(err) {
+		return ErrNotFound
+	}
 	dst.SetKey(key)
+	return nil
+}
+
+func (c *DB) getByID(ctx context.Context, kind string, id int64, dst model.KeySetter) error {
+	return c.get(ctx, datastore.IDKey(kind, id, nil), dst)
+}
+
+func (c *DB) getByIDStr(ctx context.Context, kind string, id string, dst model.KeySetter) error {
+	return c.getByID(ctx, kind, idInt(id), dst)
+}
+
+func (c *DB) getByName(ctx context.Context, kind string, name string, dst model.KeySetter) error {
+	return c.get(ctx, datastore.NameKey(kind, name, nil), dst)
+}
+
+// Query queries data
+func (c *DB) Query(ctx context.Context, kind string, dst interface{}, qs ...Query) error {
+	q := datastore.NewQuery(kind)
+	for _, setter := range qs {
+		setter(q)
+	}
+	_, err := c.getAll(ctx, q, dst)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -75,6 +117,18 @@ func (c *DB) findFirst(ctx context.Context, q *datastore.Query, dst model.KeySet
 	key, err := c.client.Run(ctx, q).Next(dst)
 	if datastoreError(err) {
 		return err
+	}
+	dst.SetKey(key)
+	return nil
+}
+
+func (c *DB) getFirst(ctx context.Context, q *datastore.Query, dst model.KeySetter) error {
+	key, err := c.client.Run(ctx, q.Limit(1)).Next(dst)
+	if datastoreError(err) {
+		return err
+	}
+	if notFound(err) {
+		return ErrNotFound
 	}
 	dst.SetKey(key)
 	return nil
