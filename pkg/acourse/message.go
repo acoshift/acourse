@@ -197,3 +197,15 @@ func ToAssignments(xs model.Assignments) []*Assignment {
 	}
 	return rs
 }
+
+// ToUserAssignment buildss an UserAssignment message from an UserAssignment model
+func ToUserAssignment(x *model.UserAssignment) *UserAssignment {
+	return &UserAssignment{
+		Id:           x.ID,
+		CreatedAt:    formatTime(x.CreatedAt),
+		UpdatedAt:    formatTime(x.UpdatedAt),
+		AssignmentId: x.AssignmentID,
+		UserId:       x.UserID,
+		Url:          x.URL,
+	}
+}

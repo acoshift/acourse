@@ -22,6 +22,8 @@ type Store interface {
 	AssignmentSave(context.Context, *model.Assignment) error
 	AssignmentList(context.Context, string) (model.Assignments, error)
 	AssignmentDelete(context.Context, string) error
+	EnrollFind(context.Context, string, string) (*model.Enroll, error)
+	UserAssignmentSave(context.Context, *model.UserAssignment) error
 }
 
 type service struct {
@@ -153,12 +155,40 @@ func (s *service) DeleteAssignment(ctx _context.Context, req *acourse.Assignment
 }
 
 func (s *service) SubmitUserAssignment(ctx _context.Context, req *acourse.UserAssignment) (*acourse.UserAssignment, error) {
-	// check is enrolled
+	userID, ok := ctx.Value(acourse.KeyUserID).(string)
+	if !ok || userID == "" {
+		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
+	}
+
+	assignment, err := s.store.AssignmentGet(ctx, req.GetAssignmentId())
+	if err != nil {
+		return nil, err
+	}
+	if assignment == nil {
+		return nil, grpc.Errorf(codes.NotFound, "assignment not found")
+	}
+
+	enroll, err := s.store.EnrollFind(ctx, userID, assignment.CourseID)
+	if err != nil {
+		return nil, err
+	}
+	if enroll == nil {
+		return nil, grpc.Errorf(codes.PermissionDenied, "can not submit user assignment for this course")
+	}
 
 	// create model
+	userAssignment := &model.UserAssignment{
+		AssignmentID: assignment.ID,
+		UserID:       userID,
+		URL:          req.GetUrl(),
+	}
 
-	// save model
-	return nil, nil
+	err = s.store.UserAssignmentSave(ctx, userAssignment)
+	if err != nil {
+		return nil, err
+	}
+
+	return acourse.ToUserAssignment(userAssignment), nil
 }
 
 func (s *service) DeleteUserAssignment(ctx _context.Context, req *acourse.UserAssignmentIDRequest) (*acourse.Empty, error) {

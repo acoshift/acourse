@@ -4,11 +4,11 @@ import (
 	"context"
 
 	"cloud.google.com/go/datastore"
-
 	"github.com/acoshift/acourse/pkg/model"
 )
 
 const kindAssignment = "Assignment"
+const kindUserAssignment = "UserAssignment"
 
 // AssignmentList retrieves assignments from course id
 func (c *DB) AssignmentList(ctx context.Context, courseID string) (model.Assignments, error) {
@@ -69,6 +69,20 @@ func (c *DB) AssignmentDelete(ctx context.Context, assignmentID string) error {
 	}
 
 	err := c.client.Delete(ctx, datastore.IDKey(kindAssignment, id, nil))
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// UserAssignmentSave saves user assignment to database
+func (c *DB) UserAssignmentSave(ctx context.Context, x *model.UserAssignment) error {
+	x.Stamp()
+	if x.Key() == nil {
+		x.NewKey(kindUserAssignment)
+	}
+
+	err := c.put(ctx, x)
 	if err != nil {
 		return err
 	}
