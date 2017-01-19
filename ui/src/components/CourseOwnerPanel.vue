@@ -7,7 +7,7 @@
         .ui.teal.fluid.button(@click='openAttend', :class='{loading: attending}') Open Attend
       .column(v-else)
         .ui.red.fluid.button(@click='closeAttend', :class='{loading: attending}') Close Attend
-      .column(v-if='course.hasAssignment')
+      .column(v-if='course.options.assignment')
         router-link.ui.blue.fluid.button(:to='`/course/${course.id}/assignment/edit`') Assignments
       .column(v-if='course.canAttend')
         router-link.ui.blue.fluid.button(:to='`/course/${course.id}/attend`') Attendants

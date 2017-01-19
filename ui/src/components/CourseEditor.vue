@@ -46,24 +46,6 @@
             .field
               label Description
               textarea(v-model='x.description', rows='5')
-      div(style='padding-bottom: 1rem;')
-        h3 Assignments
-        .ui.green.button(@click='addAssignment') Add Assignment
-        .ui.segment(v-for='(x, i) in course.assignments')
-          h4.ui.header
-            | Assignment {{ i + 1 }}
-            i.red.remove.link.icon(@click='removeContent(i)')
-          .ui.form
-            .field
-              label Title
-              input(v-model='x.title')
-            .field
-              .ui.toggle.checkbox
-                input.hidden(type='checkbox', v-model='x.open')
-                label Open
-            .field
-              label Description
-              textarea(v-model='x.description', rows='3')
       button.ui.blue.save.button(:class='{loading: saving}')
         span(v-if='isNew') Create
         span(v-else='') Save
@@ -102,8 +84,7 @@ export default {
         contents: [],
         options: {
           assignment: false
-        },
-        assignments: []
+        }
       },
       courseId: '',
       courseURL: this.$route.params.id,
@@ -180,15 +161,6 @@ export default {
     },
     removeContent (position) {
       this.course.contents.splice(position, 1)
-    },
-    addAssignment () {
-      this.course.assignments.push({
-        title: '',
-        description: ''
-      })
-    },
-    removeAssignment (position) {
-      this.course.assignments.splice(position, 1)
     }
   }
 }
