@@ -134,6 +134,19 @@ func (s *service) CloseAssignment(ctx _context.Context, req *acourse.AssignmentI
 	return s.changeOpenAssignment(ctx, req, false)
 }
 
+func (s *service) ListAssignments(ctx _context.Context, req *acourse.CourseIDRequest) (*acourse.AssignmentsResponse, error) {
+	// TODO: check is owner or enrolled
+
+	var assignments model.Assignments
+	err := s.store.Query(ctx, "Assignment", &assignments, store.QueryCourseID(req.GetCourseId()))
+	if err != nil {
+		return nil, err
+	}
+	return &acourse.AssignmentsResponse{
+		Assignments: acourse.ToAssignments(assignments),
+	}, nil
+}
+
 func (s *service) DeleteAssignment(ctx _context.Context, req *acourse.AssignmentIDRequest) (*acourse.Empty, error) {
 	userID, ok := ctx.Value(acourse.KeyUserID).(string)
 	if !ok || userID == "" {

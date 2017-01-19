@@ -89,3 +89,8 @@ func QueryUserID(userID string) Query {
 func QueryAssignmentID(assignmentID string) Query {
 	return queryFilter("AssignmentID =", assignmentID)
 }
+
+// QueryCourseID adds course id to query
+func QueryCourseID(courseID string) Query {
+	return queryFilter("CourseID =", courseID)
+}

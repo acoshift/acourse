@@ -397,6 +397,21 @@ func RegisterAssignmentServiceClient(httpServer *gin.Engine, s acourse.Assignmen
 		handleOK(ctx, res)
 	})
 
+	httpServer.POST(sv+"/ListAssignments", func(ctx *gin.Context) {
+		req := new(acourse.CourseIDRequest)
+		err := ctx.BindJSON(req)
+		if err != nil {
+			handleError(ctx, httperror.BadRequestWith(err))
+			return
+		}
+		res, err := s.ListAssignments(makeServiceContext(ctx.Request), req)
+		if err != nil {
+			handleError(ctx, err)
+			return
+		}
+		handleOK(ctx, res)
+	})
+
 	httpServer.POST(sv+"/DeleteAssignment", func(ctx *gin.Context) {
 		req := new(acourse.AssignmentIDRequest)
 		err := ctx.BindJSON(req)

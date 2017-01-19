@@ -39,6 +39,7 @@ service AssignmentService {
   rpc UpdateAssignment(Assignment) returns (Empty) {}
   rpc OpenAssignment(AssignmentIDRequest) returns (Empty) {}
   rpc CloseAssignment(AssignmentIDRequest) returns (Empty) {}
+  rpc ListAssignments(CourseIDRequest) returns (AssignmentsResponse) {}
   rpc DeleteAssignment(AssignmentIDRequest) returns (Empty) {}
   rpc SubmitUserAssignment(UserAssignment) returns (UserAssignment) {}
   rpc DeleteUserAssignment(UserAssignmentIDRequest) returns (Empty) {}
