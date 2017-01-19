@@ -209,3 +209,12 @@ func ToUserAssignment(x *model.UserAssignment) *UserAssignment {
 		Url:          x.URL,
 	}
 }
+
+// ToUserAssignments builds repeated UserAssignment message from UserAssignment models
+func ToUserAssignments(xs model.UserAssignments) []*UserAssignment {
+	rs := make([]*UserAssignment, len(xs))
+	for i, x := range xs {
+		rs[i] = ToUserAssignment(x)
+	}
+	return rs
+}

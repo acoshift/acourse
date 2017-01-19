@@ -27,20 +27,32 @@ func (c *DB) AssignmentList(ctx context.Context, courseID string) (model.Assignm
 
 // AssignmentGet retrieves assignment from database
 func (c *DB) AssignmentGet(ctx context.Context, assignmentID string) (*model.Assignment, error) {
-	id := idInt(assignmentID)
-	if id == 0 {
-		return nil, nil
-	}
-
 	var x model.Assignment
-	err := c.get(ctx, datastore.IDKey(kindAssignment, id, nil), &x)
-	if notFound(err) {
+	err := c.getByIDStr(ctx, kindAssignment, assignmentID, &x)
+	if err == ErrNotFound {
 		return nil, nil
 	}
 	if err != nil {
 		return nil, err
 	}
 	return &x, nil
+}
+
+// AssignmentGetMulti retrieves assignments from database
+func (c *DB) AssignmentGetMulti(ctx context.Context, assignmentIDs []string) (model.Assignments, error) {
+	keys := make([]*datastore.Key, len(assignmentIDs))
+	for i, id := range assignmentIDs {
+		keys[i] = datastore.IDKey(kindAssignment, idInt(id), nil)
+	}
+	xs := make(model.Assignments, len(assignmentIDs))
+	err := c.client.GetMulti(ctx, keys, xs)
+	if multiError(err) {
+		return nil, err
+	}
+	for i, x := range xs {
+		x.SetKey(keys[i])
+	}
+	return xs, nil
 }
 
 // AssignmentSave saves assignment to database
@@ -62,14 +74,9 @@ func (c *DB) UserAssignmentSave(ctx context.Context, x *model.UserAssignment) er
 
 // UserAssignmentGet retrieves an User Assignment from database
 func (c *DB) UserAssignmentGet(ctx context.Context, userAssignmentID string) (*model.UserAssignment, error) {
-	id := idInt(userAssignmentID)
-	if id == 0 {
-		return nil, nil
-	}
-
 	var x model.UserAssignment
-	err := c.get(ctx, datastore.IDKey(kindUserAssignment, id, nil), &x)
-	if notFound(err) {
+	err := c.getByIDStr(ctx, kindUserAssignment, userAssignmentID, &x)
+	if err == ErrNotFound {
 		return nil, nil
 	}
 	if err != nil {
@@ -81,4 +88,21 @@ func (c *DB) UserAssignmentGet(ctx context.Context, userAssignmentID string) (*m
 // UserAssignmentDelete deletes user assignment from database
 func (c *DB) UserAssignmentDelete(ctx context.Context, userAssignmentID string) error {
 	return c.deleteByIDStr(ctx, kindUserAssignment, userAssignmentID)
+}
+
+// UserAssignmentGetMulti retrieves assignments from database
+func (c *DB) UserAssignmentGetMulti(ctx context.Context, userAssignmentIDs []string) (model.UserAssignments, error) {
+	keys := make([]*datastore.Key, len(userAssignmentIDs))
+	for i, id := range userAssignmentIDs {
+		keys[i] = datastore.IDKey(kindUserAssignment, idInt(id), nil)
+	}
+	xs := make(model.UserAssignments, len(userAssignmentIDs))
+	err := c.client.GetMulti(ctx, keys, xs)
+	if multiError(err) {
+		return nil, err
+	}
+	for i, x := range xs {
+		x.SetKey(keys[i])
+	}
+	return xs, nil
 }

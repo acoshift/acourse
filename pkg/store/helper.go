@@ -109,7 +109,7 @@ func (c *DB) getByName(ctx context.Context, kind string, name string, dst model.
 func (c *DB) Query(ctx context.Context, kind string, dst interface{}, qs ...Query) error {
 	q := datastore.NewQuery(kind)
 	for _, setter := range qs {
-		setter(q)
+		q = setter(q)
 	}
 	err := c.getAll(ctx, q, dst)
 	if err != nil {

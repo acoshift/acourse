@@ -5,6 +5,7 @@ import (
 
 	"github.com/acoshift/acourse/pkg/acourse"
 	"github.com/acoshift/acourse/pkg/model"
+	"github.com/acoshift/acourse/pkg/store"
 	_context "golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -22,10 +23,12 @@ type Store interface {
 	AssignmentSave(context.Context, *model.Assignment) error
 	AssignmentList(context.Context, string) (model.Assignments, error)
 	AssignmentDelete(context.Context, string) error
+	AssignmentGetMulti(context.Context, []string) (model.Assignments, error)
 	EnrollFind(context.Context, string, string) (*model.Enroll, error)
 	UserAssignmentSave(context.Context, *model.UserAssignment) error
 	UserAssignmentGet(context.Context, string) (*model.UserAssignment, error)
 	UserAssignmentDelete(context.Context, string) error
+	Query(context.Context, string, interface{}, ...store.Query) error
 }
 
 type service struct {
@@ -211,7 +214,7 @@ func (s *service) DeleteUserAssignment(ctx _context.Context, req *acourse.UserAs
 		return nil, grpc.Errorf(codes.PermissionDenied, "can not delete this user assignment")
 	}
 
-	err = s.store.UserAssignmentDelete(req.GetId())
+	err = s.store.UserAssignmentDelete(ctx, req.GetId())
 	if err != nil {
 		return nil, err
 	}
@@ -219,8 +222,28 @@ func (s *service) DeleteUserAssignment(ctx _context.Context, req *acourse.UserAs
 }
 
 func (s *service) GetUserAssignments(ctx _context.Context, req *acourse.AssignmentIDsRequest) (*acourse.UserAssignmentsResponse, error) {
-	// check is owner or course owner
+	userID, ok := ctx.Value(acourse.KeyUserID).(string)
+	if !ok || userID == "" {
+		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
+	}
 
-	// get models
-	return nil, nil
+	assignments, err := s.store.AssignmentGetMulti(ctx, req.GetAssignmentIds())
+	if err != nil {
+		return nil, err
+	}
+
+	userAssignments := make(model.UserAssignments, 0)
+	for _, assignment := range assignments {
+		var tmp model.UserAssignments
+		// TODO: need refactor
+		err := s.store.Query(ctx, "UserAssignment", &userAssignments, store.QueryUserID(userID), store.QueryAssignmentID(assignment.ID))
+		if err != nil {
+			return nil, err
+		}
+		userAssignments = append(userAssignments, tmp...)
+	}
+
+	return &acourse.UserAssignmentsResponse{
+		UserAssignments: acourse.ToUserAssignments(userAssignments),
+	}, nil
 }
