@@ -2,12 +2,14 @@ package model
 
 import (
 	"time"
+
+	"github.com/acoshift/ds"
 )
 
 // Course model
 type Course struct {
-	Base
-	Stampable
+	ds.Model
+	ds.StampModel
 	Title            string `datastore:",noindex"`
 	ShortDescription string `datastore:",noindex"`
 	Description      string `datastore:",noindex"` // Markdown
@@ -23,6 +25,9 @@ type Course struct {
 	Contents         CourseContents `datastore:",noindex"`
 	EnrollDetail     string         `datastore:",noindex"`
 }
+
+// Kind implements Kind interface
+func (*Course) Kind() string { return "Course" }
 
 // Courses model
 type Courses []*Course

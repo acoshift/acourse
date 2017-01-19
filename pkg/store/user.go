@@ -5,12 +5,10 @@ import (
 	"log"
 	"time"
 
-	"cloud.google.com/go/datastore"
 	"github.com/acoshift/acourse/pkg/model"
+	"github.com/acoshift/ds"
 	"github.com/acoshift/gotcha"
 )
-
-const kindUser = "User"
 
 var cacheUser = gotcha.New()
 
@@ -41,15 +39,14 @@ func (c *DB) UserGet(ctx context.Context, userID string) (*model.User, error) {
 	var err error
 	var x model.User
 
-	key := datastore.NameKey(kindUser, userID, nil)
-	err = c.client.Get(ctx, key, &x)
-	if notFound(err) {
+	err = c.client.GetByName(ctx, userID, &x)
+	err = ds.IgnoreFieldMismatch(err)
+	if ds.NotFound(err) {
 		return nil, nil
 	}
-	if datastoreError(err) {
+	if err != nil {
 		return nil, err
 	}
-	x.SetKey(key)
 
 	cacheUser.Set(userID, &x)
 	return &x, nil
@@ -62,32 +59,34 @@ func (c *DB) UserGetMulti(ctx context.Context, userIDs []string) (model.Users, e
 	}
 
 	users := make([]*model.User, 0, len(userIDs))
-	keys := make([]*datastore.Key, 0, len(userIDs))
+	ids := make([]string, 0, len(userIDs))
 
 	// try get in cache first
 	for _, id := range userIDs {
 		if c := cacheUser.Get(id); c != nil {
 			users = append(users, c.(*model.User))
 		} else {
-			keys = append(keys, datastore.NameKey(kindUser, id, nil))
+			ids = append(ids, id)
 		}
 	}
 
-	if len(keys) == 0 {
+	if len(ids) == 0 {
 		return users, nil
 	}
 
-	xs := make([]*model.User, len(keys))
-	err := c.client.GetMulti(ctx, keys, xs)
-	if multiError(err) {
+	xs := make([]*model.User, len(ids))
+	err := c.client.GetByNames(ctx, ids, &model.User{}, xs)
+	err = ds.IgnoreNotFound(err)
+	err = ds.IgnoreFieldMismatch(err)
+	if err != nil {
 		return nil, err
 	}
 
 	for i, x := range xs {
 		if x == nil {
 			x = &model.User{}
+			x.SetNameKey(x, ids[i])
 		}
-		x.SetKey(keys[i])
 		users = append(users, x)
 		cacheUser.Set(x.ID, x)
 	}
@@ -103,7 +102,7 @@ func (c *DB) UserMustGet(ctx context.Context, userID string) (*model.User, error
 	}
 	if x == nil {
 		x = &model.User{}
-		x.SetKey(datastore.NameKey(kindUser, userID, nil))
+		x.SetNameKey(x, userID)
 	}
 	return x, nil
 }
@@ -112,12 +111,9 @@ func (c *DB) UserMustGet(ctx context.Context, userID string) (*model.User, error
 func (c *DB) UserFindUsername(ctx context.Context, username string) (*model.User, error) {
 	var x model.User
 
-	q := datastore.
-		NewQuery(kindUser).
-		Filter("Username =", username)
-
-	err := c.getFirst(ctx, q, &x)
-	if err == ErrNotFound {
+	err := c.client.QueryFirst(ctx, &x, ds.Filter("Username =", username))
+	err = ds.IgnoreFieldMismatch(err)
+	if ds.NotFound(err) {
 		return nil, nil
 	}
 	if err != nil {
@@ -143,8 +139,7 @@ func (c *DB) UserSave(ctx context.Context, x *model.User) error {
 		}
 	}
 
-	x.Stamp()
-	err := c.put(ctx, x)
+	err := c.client.Save(ctx, x)
 	cacheUser.Unset(x.ID)
 	return err
 }
@@ -156,21 +151,20 @@ func (c *DB) UserCreateAll(ctx context.Context, userIDs []string, xs []*model.Us
 	}
 
 	// validate keys, stamp model, and get keys
-	keys := make([]*datastore.Key, len(xs))
 	for i, x := range xs {
 		if userIDs[i] == "" {
 			return ErrInvalidID
 		}
-		x.Stamp()
-		k := datastore.NameKey(kindUser, userIDs[i], nil)
-		keys[i] = k
-		x.SetKey(k)
+		x.SetNameKey(&model.User{}, userIDs[i])
 	}
 
 	// TODO: check duplicated username
 
-	_, err := c.client.PutMulti(ctx, keys, xs)
-	return err
+	err := c.client.SaveMulti(ctx, xs)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // UserCreate creates new user
@@ -178,7 +172,7 @@ func (c *DB) UserCreate(ctx context.Context, userID string, x *model.User) error
 	if userID == "" {
 		return ErrInvalidID
 	}
-	x.SetKey(datastore.NameKey(kindUser, userID, nil))
+	x.SetNameKey(x, userID)
 	err := c.UserSave(ctx, x)
 	if err != nil {
 		return err
@@ -190,7 +184,8 @@ func (c *DB) UserCreate(ctx context.Context, userID string, x *model.User) error
 // UserList retrieves all users
 func (c *DB) UserList(ctx context.Context) ([]*model.User, error) {
 	var xs []*model.User
-	err := c.getAll(ctx, datastore.NewQuery(kindUser), &xs)
+	err := c.client.Query(ctx, &model.User{}, &xs)
+	err = ds.IgnoreFieldMismatch(err)
 	if err != nil {
 		return nil, err
 	}

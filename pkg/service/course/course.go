@@ -246,8 +246,8 @@ func (s *service) GetCourse(ctx _context.Context, req *acourse.CourseIDRequest) 
 
 	// filter out private fields
 	course = &model.Course{
-		Base:             course.Base,
-		Stampable:        course.Stampable,
+		Model:            course.Model,
+		StampModel:       course.StampModel,
 		Title:            course.Title,
 		ShortDescription: course.ShortDescription,
 		Description:      course.Description,

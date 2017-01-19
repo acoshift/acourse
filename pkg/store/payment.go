@@ -3,11 +3,9 @@ package store
 import (
 	"context"
 
-	"cloud.google.com/go/datastore"
 	"github.com/acoshift/acourse/pkg/model"
+	"github.com/acoshift/ds"
 )
-
-const kindPayment = "Payment"
 
 // PaymentListOptions type
 type PaymentListOptions struct {
@@ -33,15 +31,16 @@ func (c *DB) PaymentList(ctx context.Context, opts ...PaymentListOption) (model.
 		setter(opt)
 	}
 
-	q := datastore.NewQuery(kindPayment)
+	qs := []ds.Query{}
 
 	if opt.Status != nil {
-		q = q.Filter("Status =", string(*opt.Status))
+		qs = append(qs, ds.Filter("Status =", string(*opt.Status)))
 	}
 
-	q = q.Order("CreatedAt")
+	qs = append(qs, ds.Order("CreatedAt"))
 
-	err := c.getAll(ctx, q, &xs)
+	err := c.client.Query(ctx, &model.Payment{}, &xs, qs...)
+	err = ds.IgnoreFieldMismatch(err)
 	if err != nil {
 		return nil, err
 	}
@@ -50,28 +49,14 @@ func (c *DB) PaymentList(ctx context.Context, opts ...PaymentListOption) (model.
 
 // PaymentSave saves a payment to database
 func (c *DB) PaymentSave(ctx context.Context, x *model.Payment) error {
-	x.Stamp()
-	return c.save(ctx, kindPayment, x)
+	return c.client.Save(ctx, x)
 }
 
 // PaymentSaveMulti saves multiple payments to database
 func (c *DB) PaymentSaveMulti(ctx context.Context, payments model.Payments) error {
-	keys := make([]*datastore.Key, 0, len(payments))
-
-	for _, payment := range payments {
-		payment.Stamp()
-		if payment.Key() == nil {
-			payment.SetKey(datastore.IncompleteKey(kindPayment, nil))
-		}
-		keys = append(keys, payment.Key())
-	}
-
-	keys, err := c.client.PutMulti(ctx, keys, payments)
+	err := c.client.SaveMulti(ctx, payments)
 	if err != nil {
 		return err
-	}
-	for i, payment := range payments {
-		payment.SetKey(keys[i])
 	}
 	return nil
 }
@@ -79,8 +64,9 @@ func (c *DB) PaymentSaveMulti(ctx context.Context, payments model.Payments) erro
 // PaymentGet retrieves a payment from database
 func (c *DB) PaymentGet(ctx context.Context, paymentID string) (*model.Payment, error) {
 	var x model.Payment
-	err := c.getByIDStr(ctx, kindPayment, paymentID, &x)
-	if err == ErrNotFound {
+	err := c.client.GetByID(ctx, paymentID, &x)
+	err = ds.IgnoreFieldMismatch(err)
+	if ds.NotFound(err) {
 		return nil, nil
 	}
 	if err != nil {
@@ -91,15 +77,14 @@ func (c *DB) PaymentGet(ctx context.Context, paymentID string) (*model.Payment, 
 
 // PaymentFind finds a payment with user id and course id
 func (c *DB) PaymentFind(ctx context.Context, userID, courseID string, status model.PaymentStatus) (*model.Payment, error) {
-	q := datastore.
-		NewQuery(kindPayment).
-		Filter("UserID =", userID).
-		Filter("CourseID =", courseID).
-		Filter("Status =", string(status))
-
 	var x model.Payment
-	err := c.getFirst(ctx, q, &x)
-	if err == ErrNotFound {
+	err := c.client.QueryFirst(ctx, &x,
+		ds.Filter("UserID =", userID),
+		ds.Filter("CourseID =", courseID),
+		ds.Filter("Status =", string(status)),
+	)
+	err = ds.IgnoreFieldMismatch(err)
+	if ds.NotFound(err) {
 		return nil, nil
 	}
 	if err != nil {
@@ -114,25 +99,11 @@ func (c *DB) PaymentGetMulti(ctx context.Context, paymentIDs []string) (model.Pa
 		return []*model.Payment{}, nil
 	}
 
-	keys := make([]*datastore.Key, 0, len(paymentIDs))
-	for _, id := range paymentIDs {
-		tempID := idInt(id)
-		if tempID != 0 {
-			keys = append(keys, datastore.IDKey(kindPayment, tempID, nil))
-		}
-	}
-
-	payments := make([]*model.Payment, len(keys))
-	err := c.client.GetMulti(ctx, keys, payments)
-	if multiError(err) {
+	payments := make([]*model.Payment, len(paymentIDs))
+	err := c.client.GetByIDs(ctx, paymentIDs, &model.Payment{}, &payments)
+	err = ds.IgnoreFieldMismatch(err)
+	if err != nil {
 		return nil, err
-	}
-
-	for i, x := range payments {
-		if x == nil {
-			continue
-		}
-		x.SetKey(keys[i])
 	}
 	return payments, nil
 }

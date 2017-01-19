@@ -5,7 +5,6 @@ import (
 	"log"
 	"time"
 
-	"cloud.google.com/go/datastore"
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/gotcha"
 )
@@ -56,8 +55,7 @@ func (c *DB) RoleSave(ctx context.Context, x *model.Role) error {
 	if x.Key() == nil {
 		return ErrInvalidID
 	}
-	x.Stamp()
-	err := c.put(ctx, x)
+	err := c.client.Save(ctx, x)
 	if err != nil {
 		return err
 	}
@@ -68,7 +66,7 @@ func (c *DB) RoleSave(ctx context.Context, x *model.Role) error {
 // RoleList retrieves all role in database
 func (c *DB) RoleList(ctx context.Context) ([]*model.Role, error) {
 	var xs []*model.Role
-	err := c.getAll(ctx, datastore.NewQuery(kindRole), &xs)
+	err := c.client.Query(ctx, &model.Role{}, &xs)
 	if err != nil {
 		return nil, err
 	}

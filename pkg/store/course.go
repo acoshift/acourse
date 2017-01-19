@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"cloud.google.com/go/datastore"
 	"github.com/acoshift/acourse/pkg/model"
+	"github.com/acoshift/ds"
 	"github.com/acoshift/gotcha"
 )
 
@@ -23,8 +23,6 @@ type CourseListOptions struct {
 
 // CourseListOption type
 type CourseListOption func(*CourseListOptions)
-
-const kindCourse = "Course"
 
 var cacheCourse = gotcha.New()
 var cacheCourseURL = gotcha.New()
@@ -75,23 +73,17 @@ func CourseListOptionStartTo(to time.Time) CourseListOption {
 
 // CourseGet retrieves course from database
 func (c *DB) CourseGet(ctx context.Context, courseID string) (*model.Course, error) {
-	id := idInt(courseID)
-	if id == 0 {
-		return nil, nil
-	}
-
 	if cache := cacheCourse.Get(courseID); cache != nil {
 		return cache.(*model.Course), nil
 	}
 
-	var err error
 	var x model.Course
-
-	err = c.get(ctx, datastore.IDKey(kindCourse, id, nil), &x)
-	if notFound(err) {
+	err := c.client.GetByID(ctx, courseID, &x)
+	err = ds.IgnoreFieldMismatch(err)
+	if ds.NotFound(err) {
 		return nil, nil
 	}
-	if datastoreError(err) {
+	if err != nil {
 		return nil, err
 	}
 	cacheCourse.SetTTL(courseID, &x, time.Minute)
@@ -110,8 +102,7 @@ func (c *DB) CourseSave(ctx context.Context, x *model.Course) error {
 		}
 	}
 
-	x.Stamp()
-	err := c.save(ctx, kindCourse, x)
+	err := c.client.Save(ctx, x)
 	if err != nil {
 		return err
 	}
@@ -124,7 +115,7 @@ func (c *DB) CourseSave(ctx context.Context, x *model.Course) error {
 func (c *DB) CourseList(ctx context.Context, opts ...CourseListOption) (model.Courses, error) {
 	var xs []*model.Course
 
-	q := datastore.NewQuery(kindCourse)
+	qs := []ds.Query{}
 
 	opt := &CourseListOptions{}
 	for _, setter := range opts {
@@ -132,25 +123,26 @@ func (c *DB) CourseList(ctx context.Context, opts ...CourseListOption) (model.Co
 	}
 
 	if opt.Offset != nil {
-		q = q.Offset(*opt.Offset)
+		qs = append(qs, ds.Offset(*opt.Offset))
 	}
 	if opt.Limit != nil {
-		q = q.Limit(*opt.Limit)
+		qs = append(qs, ds.Limit(*opt.Limit))
 	}
 	if opt.Public != nil {
-		q = q.Filter("Options.Public =", *opt.Public)
+		qs = append(qs, ds.Filter("Options.Public =", *opt.Public))
 	}
 	if opt.Owner != nil {
-		q = q.Filter("Owner =", *opt.Owner)
+		qs = append(qs, ds.Filter("Owner =", *opt.Owner))
 	}
 	if opt.Start.From != nil {
-		q = q.Filter("Start >=", *opt.Start.From)
+		qs = append(qs, ds.Filter("Start >=", *opt.Start.From))
 	}
 	if opt.Start.To != nil {
-		q = q.Filter("Start <=", *opt.Start.To)
+		qs = append(qs, ds.Filter("Start <=", *opt.Start.To))
 	}
 
-	err := c.getAll(ctx, q, &xs)
+	err := c.client.Query(ctx, &model.Course{}, &xs, qs...)
+	err = ds.IgnoreFieldMismatch(err)
 	if err != nil {
 		return nil, err
 	}
@@ -160,7 +152,7 @@ func (c *DB) CourseList(ctx context.Context, opts ...CourseListOption) (model.Co
 
 // CourseDelete delete course from database
 func (c *DB) CourseDelete(ctx context.Context, courseID string) error {
-	err := c.deleteByIDStr(ctx, kindCourse, courseID)
+	err := c.client.DeleteByID(ctx, &model.Course{}, courseID)
 	if err != nil {
 		return err
 	}
@@ -175,12 +167,8 @@ func (c *DB) CourseFind(ctx context.Context, courseURL string) (*model.Course, e
 	}
 
 	var x model.Course
-	q := datastore.
-		NewQuery(kindCourse).
-		Filter("URL =", courseURL)
-
-	err := c.getFirst(ctx, q, &x)
-	if err == ErrNotFound {
+	err := c.client.QueryFirst(ctx, &x, ds.Filter("URL =", courseURL))
+	if ds.NotFound(err) {
 		return nil, nil
 	}
 	if err != nil {
@@ -196,22 +184,10 @@ func (c *DB) CourseGetAllByIDs(ctx context.Context, courseIDs []string) (model.C
 		return []*model.Course{}, nil
 	}
 
-	keys := make([]*datastore.Key, len(courseIDs))
-	for i, id := range courseIDs {
-		d := idInt(id)
-		if d == 0 {
-			return nil, ErrInvalidID
-		}
-		keys[i] = datastore.IDKey(kindCourse, d, nil)
-	}
-
-	xs := make([]*model.Course, len(keys))
-	err := c.client.GetMulti(ctx, keys, xs)
-	if datastoreError(err) {
+	xs := make([]*model.Course, len(courseIDs))
+	err := c.client.GetByIDs(ctx, courseIDs, &model.Course{}, xs)
+	if ds.NotFound(err) {
 		return nil, err
-	}
-	for i, x := range xs {
-		x.SetKey(keys[i])
 	}
 	return xs, nil
 }
@@ -223,32 +199,29 @@ func (c *DB) CourseGetMulti(ctx context.Context, courseIDs []string) (model.Cour
 	}
 
 	courses := make([]*model.Course, 0, len(courseIDs))
-	keys := make([]*datastore.Key, 0, len(courseIDs))
+	ids := make([]string, 0, len(courseIDs))
 
 	for _, id := range courseIDs {
 		if c := cacheCourse.Get(id); c != nil {
 			courses = append(courses, c.(*model.Course))
 		} else {
-			tempID := idInt(id)
-			if tempID != 0 {
-				keys = append(keys, datastore.IDKey(kindCourse, tempID, nil))
-			}
+			ids = append(ids, id)
 		}
 	}
-	if len(keys) == 0 {
+	if len(ids) == 0 {
 		return courses, nil
 	}
 
-	xs := make([]*model.Course, len(keys))
-	err := c.client.GetMulti(ctx, keys, xs)
-	if multiError(err) {
+	xs := make([]*model.Course, len(ids))
+	err := c.client.GetByIDs(ctx, ids, &model.Course{}, xs)
+	err = ds.IgnoreFieldMismatch(err)
+	if err != nil {
 		return nil, err
 	}
-	for i, x := range xs {
+	for _, x := range xs {
 		if x == nil {
 			continue
 		}
-		x.SetKey(keys[i])
 		courses = append(courses, x)
 		cacheCourse.SetTTL(x.ID, x, time.Minute)
 	}

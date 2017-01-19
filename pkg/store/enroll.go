@@ -5,24 +5,22 @@ import (
 
 	"cloud.google.com/go/datastore"
 	"github.com/acoshift/acourse/pkg/model"
+	"github.com/acoshift/ds"
 	"github.com/acoshift/gotcha"
 )
-
-const kindEnroll = "Enroll"
 
 var cacheEnrollCount = gotcha.New()
 
 // EnrollFind finds enroll for given user id and course id
 func (c *DB) EnrollFind(ctx context.Context, userID, courseID string) (*model.Enroll, error) {
 	var x model.Enroll
-	q := datastore.
-		NewQuery(kindEnroll).
-		Filter("UserID =", userID).
-		Filter("CourseID =", courseID).
-		Limit(1)
 
-	err := c.findFirst(ctx, q, &x)
-	if notFound(err) {
+	err := c.client.QueryFirst(ctx, &x,
+		ds.Filter("UserID =", userID),
+		ds.Filter("CourseID =", courseID),
+	)
+
+	if ds.NotFound(err) {
 		return nil, nil
 	}
 	if err != nil {
@@ -34,11 +32,10 @@ func (c *DB) EnrollFind(ctx context.Context, userID, courseID string) (*model.En
 // EnrollListByUserID list all enroll by given user id
 func (c *DB) EnrollListByUserID(ctx context.Context, userID string) (model.Enrolls, error) {
 	var xs []*model.Enroll
-	q := datastore.
-		NewQuery(kindEnroll).
-		Filter("UserID =", userID)
 
-	err := c.getAll(ctx, q, &xs)
+	err := c.client.Query(ctx, &model.Enroll{}, &xs,
+		ds.Filter("UserID =", userID),
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -48,50 +45,23 @@ func (c *DB) EnrollListByUserID(ctx context.Context, userID string) (model.Enrol
 
 // EnrollSave saves enroll to database
 func (c *DB) EnrollSave(ctx context.Context, x *model.Enroll) error {
-	var pKey *datastore.PendingKey
-	x.Stamp()
+	// TODO: race condition
+	// TODO: use keysonly query
+	var t model.Enroll
+	err := c.client.QueryFirst(ctx, &t,
+		ds.Filter("UserID =", x.UserID),
+		ds.Filter("CourseID =", x.CourseID),
+	)
+	if err == nil {
+		return ErrConflict("enroll already exists")
+	}
 
-	commit, err := c.client.RunInTransaction(ctx, func(tx *datastore.Transaction) error {
-		var t model.Enroll
-
-		q := datastore.
-			NewQuery(kindEnroll).
-			Filter("UserID =", x.UserID).
-			Filter("CourseID =", x.CourseID).
-			Limit(1).
-			Transaction(tx)
-
-		err := c.findFirst(ctx, q, &t)
-		if err == nil {
-			return ErrConflict("enroll already exists")
-		}
-
-		pKey, err = tx.Put(datastore.IncompleteKey(kindEnroll, nil), x)
-		return err
-	})
+	err = c.client.Save(ctx, x)
 	if err != nil {
 		return err
 	}
-	x.SetKey(commit.Key(pKey))
+
 	cacheEnrollCount.Unset(x.CourseID)
-	return nil
-}
-
-// EnrollCreateAll creates all enrolls
-func (c *DB) EnrollCreateAll(ctx context.Context, xs []*model.Enroll) error {
-	keys := make([]*datastore.Key, len(xs))
-	for i, x := range xs {
-		x.Stamp()
-		keys[i] = datastore.IncompleteKey(kindEnroll, nil)
-	}
-	var err error
-	keys, err = c.client.PutMulti(ctx, keys, xs)
-	if err != nil {
-		return err
-	}
-	for i, x := range xs {
-		x.SetKey(keys[i])
-	}
 	return nil
 }
 
@@ -101,12 +71,7 @@ func (c *DB) EnrollCourseCount(ctx context.Context, courseID string) (int, error
 		return cache.(int), nil
 	}
 
-	q := datastore.
-		NewQuery(kindEnroll).
-		Filter("CourseID =", courseID).
-		KeysOnly()
-
-	keys, err := c.client.GetAll(ctx, q, nil)
+	keys, err := c.client.QueryKeys(ctx, &model.Enroll{}, ds.Filter("CourseID =", courseID))
 	if err != nil {
 		return 0, err
 	}
@@ -118,41 +83,39 @@ func (c *DB) EnrollCourseCount(ctx context.Context, courseID string) (int, error
 
 // EnrollSaveMulti saves multiple enrolls to database
 func (c *DB) EnrollSaveMulti(ctx context.Context, enrolls []*model.Enroll) error {
+	// TODO: change to ds
 	keys := make([]*datastore.Key, 0, len(enrolls))
-
+	kind := (&model.Enroll{}).Kind()
 	for _, enroll := range enrolls {
 		enroll.Stamp()
-		keys = append(keys, datastore.IncompleteKey(kindEnroll, nil))
+		keys = append(keys, datastore.IncompleteKey(kind, nil))
 	}
 
-	var pKey []*datastore.PendingKey
+	var pKeys []*datastore.PendingKey
 
 	commit, err := c.client.RunInTransaction(ctx, func(tx *datastore.Transaction) error {
 		var t model.Enroll
 		var err error
 		for _, enroll := range enrolls {
-			q := datastore.
-				NewQuery(kindEnroll).
-				Filter("UserID =", enroll.UserID).
-				Filter("CourseID =", enroll.CourseID).
-				Limit(1).
-				Transaction(tx)
-
-			err = c.findFirst(ctx, q, &t)
+			err = c.client.QueryFirst(ctx, &t,
+				ds.Filter("UserID =", enroll.UserID),
+				ds.Filter("CourseID =", enroll.CourseID),
+				ds.Transaction(tx),
+			)
 			if err == nil {
 				return ErrConflict("enroll already exists")
 			}
 		}
 
-		pKey, err = tx.PutMulti(keys, enrolls)
+		pKeys, err = tx.PutMulti(keys, enrolls)
 		return err
 	})
 	if err != nil {
 		return err
 	}
 
-	for i, enroll := range enrolls {
-		enroll.SetKey(commit.Key(pKey[i]))
+	ds.SetCommitKeys(commit, pKeys, enrolls)
+	for _, enroll := range enrolls {
 		cacheEnrollCount.Unset(enroll.CourseID)
 	}
 

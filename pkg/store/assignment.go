@@ -3,21 +3,14 @@ package store
 import (
 	"context"
 
-	"cloud.google.com/go/datastore"
 	"github.com/acoshift/acourse/pkg/model"
+	"github.com/acoshift/ds"
 )
-
-const kindAssignment = "Assignment"
-const kindUserAssignment = "UserAssignment"
 
 // AssignmentList retrieves assignments from course id
 func (c *DB) AssignmentList(ctx context.Context, courseID string) (model.Assignments, error) {
-	q := datastore.
-		NewQuery(kindAssignment).
-		Filter("CourseID =", courseID)
-
 	var xs model.Assignments
-	err := c.getAll(ctx, q, &xs)
+	err := c.client.Query(ctx, &model.Assignment{}, &xs, ds.Filter("CourseID =", courseID))
 	if err != nil {
 		return nil, err
 	}
@@ -28,8 +21,8 @@ func (c *DB) AssignmentList(ctx context.Context, courseID string) (model.Assignm
 // AssignmentGet retrieves assignment from database
 func (c *DB) AssignmentGet(ctx context.Context, assignmentID string) (*model.Assignment, error) {
 	var x model.Assignment
-	err := c.getByIDStr(ctx, kindAssignment, assignmentID, &x)
-	if err == ErrNotFound {
+	err := c.client.GetByID(ctx, assignmentID, &x)
+	if ds.NotFound(err) {
 		return nil, nil
 	}
 	if err != nil {
@@ -40,43 +33,35 @@ func (c *DB) AssignmentGet(ctx context.Context, assignmentID string) (*model.Ass
 
 // AssignmentGetMulti retrieves assignments from database
 func (c *DB) AssignmentGetMulti(ctx context.Context, assignmentIDs []string) (model.Assignments, error) {
-	keys := make([]*datastore.Key, len(assignmentIDs))
-	for i, id := range assignmentIDs {
-		keys[i] = datastore.IDKey(kindAssignment, idInt(id), nil)
-	}
 	xs := make(model.Assignments, len(assignmentIDs))
-	err := c.client.GetMulti(ctx, keys, xs)
-	if multiError(err) {
+	err := c.client.GetByIDs(ctx, assignmentIDs, &model.Assignment{}, xs)
+	err = ds.IgnoreFieldMismatch(err)
+	if err != nil {
 		return nil, err
-	}
-	for i, x := range xs {
-		x.SetKey(keys[i])
 	}
 	return xs, nil
 }
 
 // AssignmentSave saves assignment to database
 func (c *DB) AssignmentSave(ctx context.Context, x *model.Assignment) error {
-	x.Stamp()
-	return c.save(ctx, kindAssignment, x)
+	return c.client.Save(ctx, x)
 }
 
 // AssignmentDelete deletes assignment from database
 func (c *DB) AssignmentDelete(ctx context.Context, assignmentID string) error {
-	return c.deleteByIDStr(ctx, kindAssignment, assignmentID)
+	return c.client.DeleteByID(ctx, &model.Assignment{}, assignmentID)
 }
 
 // UserAssignmentSave saves user assignment to database
 func (c *DB) UserAssignmentSave(ctx context.Context, x *model.UserAssignment) error {
-	x.Stamp()
-	return c.save(ctx, kindUserAssignment, x)
+	return c.client.Save(ctx, x)
 }
 
 // UserAssignmentGet retrieves an User Assignment from database
 func (c *DB) UserAssignmentGet(ctx context.Context, userAssignmentID string) (*model.UserAssignment, error) {
 	var x model.UserAssignment
-	err := c.getByIDStr(ctx, kindUserAssignment, userAssignmentID, &x)
-	if err == ErrNotFound {
+	err := c.client.GetByID(ctx, userAssignmentID, &x)
+	if ds.NotFound(err) {
 		return nil, nil
 	}
 	if err != nil {
@@ -87,22 +72,16 @@ func (c *DB) UserAssignmentGet(ctx context.Context, userAssignmentID string) (*m
 
 // UserAssignmentDelete deletes user assignment from database
 func (c *DB) UserAssignmentDelete(ctx context.Context, userAssignmentID string) error {
-	return c.deleteByIDStr(ctx, kindUserAssignment, userAssignmentID)
+	return c.client.DeleteByID(ctx, &model.UserAssignment{}, userAssignmentID)
 }
 
 // UserAssignmentGetMulti retrieves assignments from database
 func (c *DB) UserAssignmentGetMulti(ctx context.Context, userAssignmentIDs []string) (model.UserAssignments, error) {
-	keys := make([]*datastore.Key, len(userAssignmentIDs))
-	for i, id := range userAssignmentIDs {
-		keys[i] = datastore.IDKey(kindUserAssignment, idInt(id), nil)
-	}
 	xs := make(model.UserAssignments, len(userAssignmentIDs))
-	err := c.client.GetMulti(ctx, keys, xs)
-	if multiError(err) {
+	err := c.client.GetByIDs(ctx, userAssignmentIDs, &model.UserAssignment{}, xs)
+	err = ds.IgnoreFieldMismatch(err)
+	if err != nil {
 		return nil, err
-	}
-	for i, x := range xs {
-		x.SetKey(keys[i])
 	}
 	return xs, nil
 }

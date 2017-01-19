@@ -2,12 +2,14 @@ package model
 
 import (
 	"time"
+
+	"github.com/acoshift/ds"
 )
 
 // Payment model
 type Payment struct {
-	Base
-	Stampable
+	ds.Model
+	ds.StampModel
 	UserID        string
 	CourseID      string
 	OriginalPrice float64 `datastore:",noindex"`
@@ -17,6 +19,9 @@ type Payment struct {
 	Status        PaymentStatus
 	At            time.Time
 }
+
+// Kind implements Kind interface
+func (*Payment) Kind() string { return "Payment" }
 
 // Payments type
 type Payments []*Payment
