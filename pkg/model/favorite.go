@@ -6,11 +6,8 @@ import (
 
 // Favorite model
 type Favorite struct {
-	ds.Model
+	ds.StringIDModel
 	ds.StampModel
 	UserID   string
 	CourseID string
 }
-
-// Kind implements Kind interface
-func (*Favorite) Kind() string { return "Favorite" }

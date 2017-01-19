@@ -8,7 +8,7 @@ import (
 
 // Payment model
 type Payment struct {
-	ds.Model
+	ds.StringIDModel
 	ds.StampModel
 	UserID        string
 	CourseID      string
@@ -19,9 +19,6 @@ type Payment struct {
 	Status        PaymentStatus
 	At            time.Time
 }
-
-// Kind implements Kind interface
-func (*Payment) Kind() string { return "Payment" }
 
 // Payments type
 type Payments []*Payment

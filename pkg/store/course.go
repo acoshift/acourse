@@ -78,7 +78,7 @@ func (c *DB) CourseGet(ctx context.Context, courseID string) (*model.Course, err
 	}
 
 	var x model.Course
-	err := c.client.GetByID(ctx, courseID, &x)
+	err := c.client.GetByStringID(ctx, kindCourse, courseID, &x)
 	err = ds.IgnoreFieldMismatch(err)
 	if ds.NotFound(err) {
 		return nil, nil
@@ -102,7 +102,7 @@ func (c *DB) CourseSave(ctx context.Context, x *model.Course) error {
 		}
 	}
 
-	err := c.client.Save(ctx, x)
+	err := c.client.Save(ctx, kindCourse, x)
 	if err != nil {
 		return err
 	}
@@ -141,7 +141,7 @@ func (c *DB) CourseList(ctx context.Context, opts ...CourseListOption) (model.Co
 		qs = append(qs, ds.Filter("Start <=", *opt.Start.To))
 	}
 
-	err := c.client.Query(ctx, &model.Course{}, &xs, qs...)
+	err := c.client.Query(ctx, kindCourse, &xs, qs...)
 	err = ds.IgnoreFieldMismatch(err)
 	if err != nil {
 		return nil, err
@@ -152,7 +152,7 @@ func (c *DB) CourseList(ctx context.Context, opts ...CourseListOption) (model.Co
 
 // CourseDelete delete course from database
 func (c *DB) CourseDelete(ctx context.Context, courseID string) error {
-	err := c.client.DeleteByID(ctx, &model.Course{}, courseID)
+	err := c.client.DeleteByStringID(ctx, kindCourse, courseID)
 	if err != nil {
 		return err
 	}
@@ -167,7 +167,7 @@ func (c *DB) CourseFind(ctx context.Context, courseURL string) (*model.Course, e
 	}
 
 	var x model.Course
-	err := c.client.QueryFirst(ctx, &x, ds.Filter("URL =", courseURL))
+	err := c.client.QueryFirst(ctx, kindCourse, &x, ds.Filter("URL =", courseURL))
 	if ds.NotFound(err) {
 		return nil, nil
 	}
@@ -185,7 +185,7 @@ func (c *DB) CourseGetAllByIDs(ctx context.Context, courseIDs []string) (model.C
 	}
 
 	xs := make([]*model.Course, len(courseIDs))
-	err := c.client.GetByIDs(ctx, courseIDs, &model.Course{}, xs)
+	err := c.client.GetByStringIDs(ctx, kindCourse, courseIDs, xs)
 	if ds.NotFound(err) {
 		return nil, err
 	}
@@ -213,7 +213,7 @@ func (c *DB) CourseGetMulti(ctx context.Context, courseIDs []string) (model.Cour
 	}
 
 	xs := make([]*model.Course, len(ids))
-	err := c.client.GetByIDs(ctx, ids, &model.Course{}, xs)
+	err := c.client.GetByStringIDs(ctx, kindCourse, ids, xs)
 	err = ds.IgnoreFieldMismatch(err)
 	if err != nil {
 		return nil, err
