@@ -1,15 +1,12 @@
 package app
 
 import (
-	"context"
 	"errors"
 	"net/http"
 	"strings"
 
 	"github.com/acoshift/go-firebase-admin"
 	"github.com/acoshift/httperror"
-	"github.com/google/uuid"
-	"gopkg.in/gin-gonic/gin.v1"
 )
 
 // ContextKey is the key for app's context
@@ -28,10 +25,8 @@ var (
 )
 
 // InitService inits service
-func InitService(service *gin.Engine, auth *admin.Auth) (err error) {
+func InitService(auth *admin.Auth) (err error) {
 	firAuth = auth
-
-	service.Use(requestIDMiddleware)
 	return
 }
 
@@ -45,10 +40,4 @@ func validateHeaderToken(header string) (string, error) {
 		return "", err
 	}
 	return claims.UserID, nil
-}
-
-func requestIDMiddleware(ctx *gin.Context) {
-	rid := uuid.New().String()
-	ctx.Header("X-Request-Id", rid)
-	ctx.Request = ctx.Request.WithContext(context.WithValue(ctx.Request.Context(), KeyRequestID, rid))
 }

@@ -1,7 +1,7 @@
 package app
 
 import (
-	"gopkg.in/gin-gonic/gin.v1"
+	"net/http"
 )
 
 // RenderIndexContext provides the render index action context
@@ -9,7 +9,7 @@ import (
 type RenderIndexContext struct{}
 
 // NewRenderIndexContext parses the incoming request and create context
-func NewRenderIndexContext(ctx *gin.Context) (*RenderIndexContext, error) {
+func NewRenderIndexContext(r *http.Request) (*RenderIndexContext, error) {
 	return &RenderIndexContext{}, nil
 }
 
@@ -19,8 +19,8 @@ type RenderCourseContext struct {
 }
 
 // NewRenderCourseContext parses the incoming request and create context
-func NewRenderCourseContext(ctx *gin.Context) (*RenderCourseContext, error) {
+func NewRenderCourseContext(r *http.Request) (*RenderCourseContext, error) {
 	rctx := RenderCourseContext{}
-	rctx.CourseID = ctx.Param("courseID")
+	rctx.CourseID = r.URL.Path
 	return &rctx, nil
 }
