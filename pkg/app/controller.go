@@ -1,6 +1,8 @@
 package app
 
 import (
+	"net/http"
+
 	"gopkg.in/gin-gonic/gin.v1"
 )
 
@@ -10,14 +12,16 @@ type HealthController interface {
 }
 
 // MountHealthController mounts a Health controller to the http server
-func MountHealthController(server *gin.Engine, c HealthController) {
-	server.GET("/_ah/health", func(ctx *gin.Context) {
-		err := c.Check()
-		if err != nil {
-			handleError(ctx, err)
-			return
+func MountHealthController(mux *http.ServeMux, c HealthController) {
+	mux.HandleFunc("/_ah/health", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodGet {
+			err := c.Check()
+			if err != nil {
+				handleError(w, err)
+				return
+			}
+			handleSuccess(w)
 		}
-		handleSuccess(ctx)
 	})
 }
 

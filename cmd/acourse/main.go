@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net"
@@ -17,10 +18,10 @@ import (
 	"github.com/acoshift/acourse/pkg/service/payment"
 	"github.com/acoshift/acourse/pkg/service/user"
 	"github.com/acoshift/acourse/pkg/store"
+	"github.com/acoshift/cors"
 	"github.com/acoshift/go-firebase-admin"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/grpclog"
-	"gopkg.in/gin-contrib/cors.v1"
 	"gopkg.in/gin-gonic/gin.v1"
 	"gopkg.in/yaml.v2"
 )
@@ -56,6 +57,54 @@ func LoadConfig(filename string) (*Config, error) {
 	return &cfg, nil
 }
 
+type loggerWriter struct {
+	http.ResponseWriter
+	header int
+}
+
+func (w *loggerWriter) WriteHeader(header int) {
+	w.header = header
+	w.ResponseWriter.WriteHeader(header)
+}
+
+func logger(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		tw := &loggerWriter{w, 0}
+		h.ServeHTTP(tw, r)
+		end := time.Now()
+		fmt.Printf("%v | %3d | %13v | %s |%s\n",
+			end.Format("2006/01/02 - 15:04:05"),
+			tw.header,
+			end.Sub(start),
+			r.Method,
+			r.URL.Path,
+		)
+	})
+}
+
+func recovery(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			if e := recover(); e != nil {
+				log.Println(e)
+				w.WriteHeader(http.StatusInternalServerError)
+				fmt.Fprintf(w, "%v", e)
+			}
+		}()
+		h.ServeHTTP(w, r)
+	})
+}
+
+func chain(hs ...func(http.Handler) http.Handler) func(http.Handler) http.Handler {
+	return func(h http.Handler) http.Handler {
+		for i := len(hs); i > 0; i-- {
+			h = hs[i-1](h)
+		}
+		return h
+	}
+}
+
 func main() {
 	grpclog.SetLogger(app.NewLogger())
 
@@ -82,20 +131,30 @@ func main() {
 	}
 	firAuth := firApp.Auth()
 
-	httpServer := gin.New()
-
 	db := store.NewDB(store.ProjectID(cfg.ProjectID), store.ServiceAccount(cfg.ServiceAccount))
 
-	// globals middlewares
-	httpServer.Use(gin.Logger())
-	httpServer.Use(gin.Recovery())
-	httpServer.Use(cors.New(cors.Config{
-		AllowCredentials: false,
-		AllowHeaders:     []string{"Authorization", "Content-Type"},
-		AllowMethods:     []string{http.MethodGet, http.MethodPost, http.MethodPatch, http.MethodPut, http.MethodDelete},
-		AllowOrigins:     []string{"https://acourse.io", "http://localhost:9000"},
-		MaxAge:           12 * time.Hour,
-	}))
+	httpServer := chain(
+		logger,
+		recovery,
+		cors.New(cors.Config{
+			AllowCredentials: false,
+			AllowOrigins: []string{
+				"https://acourse.io",
+				"http://localhost:9000",
+			},
+			AllowMethods: []string{
+				http.MethodGet,
+				http.MethodPost,
+			},
+			AllowHeaders: []string{
+				"Content-Type",
+				"Authorization",
+			},
+			MaxAge: 12 * time.Hour,
+		}),
+	)
+
+	mux := http.NewServeMux()
 
 	if err := app.InitService(httpServer, firAuth); err != nil {
 		log.Fatal(err)
@@ -105,7 +164,6 @@ func main() {
 	conn, err := grpc.Dial("127.0.0.1:8081", grpc.WithInsecure())
 	if err != nil {
 		log.Fatal(err)
-		return
 	}
 	userServiceClient := acourse.NewUserServiceClient(conn)
 	courseServiceClient := acourse.NewCourseServiceClient(conn)
@@ -144,14 +202,11 @@ func main() {
 		}
 	}()
 
-	hostPort := net.JoinHostPort("0.0.0.0", cfg.Port)
-	log.Printf("Listening on %s", hostPort)
-
 	if !cfg.Debug {
 		go payment.StartNotification(db, emailServiceClient)
 	}
 
-	if err := httpServer.Run(hostPort); err != nil {
-		log.Fatal(err)
-	}
+	addr := net.JoinHostPort("0.0.0.0", cfg.Port)
+	log.Printf("Listening on %s", addr)
+	log.Fatal(http.ListenAndServe(addr, httpServer(mux)))
 }
