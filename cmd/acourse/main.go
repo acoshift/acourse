@@ -20,6 +20,7 @@ import (
 	"github.com/acoshift/acourse/pkg/store"
 	"github.com/acoshift/cors"
 	"github.com/acoshift/go-firebase-admin"
+	"github.com/google/uuid"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/grpclog"
 	"gopkg.in/gin-gonic/gin.v1"
@@ -73,10 +74,11 @@ func logger(h http.Handler) http.Handler {
 		tw := &loggerWriter{w, 0}
 		h.ServeHTTP(tw, r)
 		end := time.Now()
-		fmt.Printf("%v | %3d | %13v | %s |%s\n",
-			end.Format("2006/01/02 - 15:04:05"),
+		fmt.Printf("%v | %3d | %13v | %s | %s | %s\n",
+			end.Format(time.RFC3339),
 			tw.header,
 			end.Sub(start),
+			w.Header().Get("X-Request-Id"),
 			r.Method,
 			r.URL.Path,
 		)
@@ -92,6 +94,14 @@ func recovery(h http.Handler) http.Handler {
 				fmt.Fprintf(w, "%v", e)
 			}
 		}()
+		h.ServeHTTP(w, r)
+	})
+}
+
+func requestID(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		rid := uuid.New().String()
+		w.Header().Set("X-Request-Id", rid)
 		h.ServeHTTP(w, r)
 	})
 }
@@ -135,6 +145,7 @@ func main() {
 
 	httpServer := chain(
 		logger,
+		requestID,
 		recovery,
 		cors.New(cors.Config{
 			AllowCredentials: false,
@@ -156,7 +167,7 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	if err := app.InitService(httpServer, firAuth); err != nil {
+	if err := app.InitService(firAuth); err != nil {
 		log.Fatal(err)
 	}
 
