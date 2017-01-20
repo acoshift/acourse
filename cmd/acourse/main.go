@@ -23,7 +23,6 @@ import (
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/grpclog"
-	"gopkg.in/gin-gonic/gin.v1"
 	"gopkg.in/yaml.v2"
 )
 
@@ -134,10 +133,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if !cfg.Debug {
-		gin.SetMode(gin.ReleaseMode)
-	}
-
 	firApp, err := admin.InitializeApp(admin.AppOptions{
 		ProjectID:      cfg.ProjectID,
 		ServiceAccount: cfg.ServiceAccount,
@@ -157,6 +152,7 @@ func main() {
 			AllowCredentials: false,
 			AllowOrigins: []string{
 				"https://acourse.io",
+				"http://localhost:8080",
 				"http://localhost:9000",
 			},
 			AllowMethods: []string{
