@@ -71,16 +71,22 @@ func (w *loggerWriter) WriteHeader(header int) {
 func logger(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
+		path := r.URL.Path
 		tw := &loggerWriter{w, 0}
+		ip := r.Header.Get("X-Real-IP")
+		if ip == "" {
+			ip = r.RemoteAddr
+		}
 		h.ServeHTTP(tw, r)
 		end := time.Now()
-		fmt.Printf("%v | %3d | %13v | %s | %s | %s\n",
+		fmt.Printf("%v | %3d | %13v | %s | %s | %s | %s\n",
 			end.Format(time.RFC3339),
 			tw.header,
 			end.Sub(start),
-			w.Header().Get("X-Request-Id"),
+			ip,
+			w.Header().Get("X-Request-ID"),
 			r.Method,
-			r.URL.Path,
+			path,
 		)
 	})
 }
@@ -101,7 +107,7 @@ func recovery(h http.Handler) http.Handler {
 func requestID(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		rid := uuid.New().String()
-		w.Header().Set("X-Request-Id", rid)
+		w.Header().Set("X-Request-ID", rid)
 		h.ServeHTTP(w, r)
 	})
 }

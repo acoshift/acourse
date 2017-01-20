@@ -56,7 +56,7 @@ func MountRenderController(mux *http.ServeMux, c RenderController) {
 	// 	ctx.Header("Cache-Control", "public, max-age=31536000")
 	// }
 
-	mux.Handle("/static", http.StripPrefix("/static", http.FileServer(&fileFS{http.Dir("public")})))
+	mux.Handle("/static/*filepath", http.StripPrefix("/static", http.FileServer(&fileFS{http.Dir("public")})))
 	mux.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "public/acourse-120.png")
 	})
