@@ -59,7 +59,7 @@ func MountRenderController(mux *http.ServeMux, c RenderController) {
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasPrefix(r.URL.Path, "/static") {
-			w.Header().Add("Cache-Control", "public, max-age=31536000")
+			w.Header().Set("Cache-Control", "public, max-age=31536000")
 			http.StripPrefix("/static", http.FileServer(&fileFS{http.Dir("public")})).ServeHTTP(w, r)
 			return
 		}
@@ -95,42 +95,4 @@ func MountRenderController(mux *http.ServeMux, c RenderController) {
 		}
 		handleHTML(w, "index", res)
 	})
-
-	// server.Group("/static", cc).Static("", "public")
-
-	// server.StaticFile("/favicon.ico", "public/acourse-120.png")
-
-	// server.GET("/course/:courseID", func(ctx *gin.Context) {
-	// 	rctx, err := NewRenderCourseContext(ctx)
-	// 	if err != nil {
-	// 		handleError(ctx, err)
-	// 		return
-	// 	}
-	// 	res, err := c.Course(rctx)
-	// 	if err != nil {
-	// 		handleError(ctx, err)
-	// 		return
-	// 	}
-	// 	if res == nil {
-	// 		handleRedirect(ctx, "/")
-	// 		return
-	// 	}
-	// 	handleHTML(ctx, "index", res)
-	// })
-
-	// h := func(ctx *gin.Context) {
-	// 	rctx, err := NewRenderIndexContext(ctx)
-	// 	if err != nil {
-	// 		handleError(ctx, err)
-	// 		return
-	// 	}
-	// 	res, err := c.Index(rctx)
-	// 	if err != nil {
-	// 		handleError(ctx, err)
-	// 		return
-	// 	}
-	// 	handleHTML(ctx, "index", res)
-	// }
-
-	// server.Use(h)
 }
