@@ -2,8 +2,7 @@ package app
 
 import (
 	"net/http"
-
-	"gopkg.in/gin-gonic/gin.v1"
+	"os"
 )
 
 // HealthController is the controller interface for health check
@@ -25,6 +24,26 @@ func MountHealthController(mux *http.ServeMux, c HealthController) {
 	})
 }
 
+type fileFS struct {
+	http.FileSystem
+}
+
+type noDirFile struct {
+	http.File
+}
+
+func (fs *fileFS) Open(name string) (http.File, error) {
+	f, err := fs.FileSystem.Open(name)
+	if err != nil {
+		return nil, err
+	}
+	return &noDirFile{f}, nil
+}
+
+func (f *noDirFile) Readdir(int) ([]os.FileInfo, error) {
+	return nil, nil
+}
+
 // RenderController is the controller interface for render actions
 type RenderController interface {
 	Index(*RenderIndexContext) (interface{}, error)
@@ -32,46 +51,51 @@ type RenderController interface {
 }
 
 // MountRenderController mount a Render template controller on the given resource
-func MountRenderController(server *gin.Engine, c RenderController) {
-	cc := func(ctx *gin.Context) {
-		ctx.Header("Cache-Control", "public, max-age=31536000")
-	}
+func MountRenderController(mux *http.ServeMux, c RenderController) {
+	// cc := func(ctx *gin.Context) {
+	// 	ctx.Header("Cache-Control", "public, max-age=31536000")
+	// }
 
-	server.Group("/static", cc).Static("", "public")
-
-	server.StaticFile("/favicon.ico", "public/acourse-120.png")
-
-	server.GET("/course/:courseID", func(ctx *gin.Context) {
-		rctx, err := NewRenderCourseContext(ctx)
-		if err != nil {
-			handleError(ctx, err)
-			return
-		}
-		res, err := c.Course(rctx)
-		if err != nil {
-			handleError(ctx, err)
-			return
-		}
-		if res == nil {
-			handleRedirect(ctx, "/")
-			return
-		}
-		handleHTML(ctx, "index", res)
+	mux.Handle("/static", http.StripPrefix("/static", http.FileServer(&fileFS{http.Dir("public")})))
+	mux.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "public/acourse-120.png")
 	})
 
-	h := func(ctx *gin.Context) {
-		rctx, err := NewRenderIndexContext(ctx)
-		if err != nil {
-			handleError(ctx, err)
-			return
-		}
-		res, err := c.Index(rctx)
-		if err != nil {
-			handleError(ctx, err)
-			return
-		}
-		handleHTML(ctx, "index", res)
-	}
+	// server.Group("/static", cc).Static("", "public")
 
-	server.Use(h)
+	// server.StaticFile("/favicon.ico", "public/acourse-120.png")
+
+	// server.GET("/course/:courseID", func(ctx *gin.Context) {
+	// 	rctx, err := NewRenderCourseContext(ctx)
+	// 	if err != nil {
+	// 		handleError(ctx, err)
+	// 		return
+	// 	}
+	// 	res, err := c.Course(rctx)
+	// 	if err != nil {
+	// 		handleError(ctx, err)
+	// 		return
+	// 	}
+	// 	if res == nil {
+	// 		handleRedirect(ctx, "/")
+	// 		return
+	// 	}
+	// 	handleHTML(ctx, "index", res)
+	// })
+
+	// h := func(ctx *gin.Context) {
+	// 	rctx, err := NewRenderIndexContext(ctx)
+	// 	if err != nil {
+	// 		handleError(ctx, err)
+	// 		return
+	// 	}
+	// 	res, err := c.Index(rctx)
+	// 	if err != nil {
+	// 		handleError(ctx, err)
+	// 		return
+	// 	}
+	// 	handleHTML(ctx, "index", res)
+	// }
+
+	// server.Use(h)
 }

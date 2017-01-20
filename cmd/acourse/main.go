@@ -171,14 +171,14 @@ func main() {
 	paymentServiceClient := acourse.NewPaymentServiceClient(conn)
 
 	// register service clients to http server
-	app.RegisterUserServiceClient(httpServer, userServiceClient)
-	app.RegisterCourseServiceClient(httpServer, courseServiceClient)
-	// app.RegisterEmailServiceClient(httpServer, emailService) // do not expose email service to the world right now
-	app.RegisterPaymentServiceClient(httpServer, paymentServiceClient)
+	app.RegisterUserServiceClient(mux, userServiceClient)
+	app.RegisterCourseServiceClient(mux, courseServiceClient)
+	// app.RegisterEmailServiceClient(mux, emailService) // do not expose email service to the world right now
+	app.RegisterPaymentServiceClient(mux, paymentServiceClient)
 
 	// mount controllers
-	app.MountHealthController(httpServer, health.New())
-	app.MountRenderController(httpServer, render.New(db, courseServiceClient))
+	app.MountHealthController(mux, health.New())
+	app.MountRenderController(mux, render.New(db, courseServiceClient))
 
 	// run grpc server
 	go func() {

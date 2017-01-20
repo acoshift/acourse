@@ -1,6 +1,7 @@
 package app
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 
@@ -26,6 +27,11 @@ func handleJSON(w http.ResponseWriter, status int, v interface{}) {
 	if err := rr.JSON(w, status, v); err != nil {
 		panic(err)
 	}
+}
+
+func bindJSON(r *http.Request, dst interface{}) error {
+	defer r.Body.Close()
+	return json.NewDecoder(r.Body).Decode(dst)
 }
 
 func handleOK(w http.ResponseWriter, v interface{}) {

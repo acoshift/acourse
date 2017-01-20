@@ -7,7 +7,6 @@ import (
 	"github.com/acoshift/acourse/pkg/acourse"
 	"github.com/acoshift/httperror"
 	"google.golang.org/grpc/metadata"
-	"gopkg.in/gin-gonic/gin.v1"
 )
 
 func makeServiceContext(r *http.Request) context.Context {
@@ -20,455 +19,513 @@ func makeServiceContext(r *http.Request) context.Context {
 }
 
 // RegisterUserServiceClient registers a User service client to http server
-func RegisterUserServiceClient(httpServer *gin.Engine, s acourse.UserServiceClient) {
+func RegisterUserServiceClient(mux *http.ServeMux, s acourse.UserServiceClient) {
 	sv := "/acourse.UserService"
 
-	httpServer.POST(sv+"/GetUser", func(ctx *gin.Context) {
-		req := new(acourse.GetUserRequest)
-		err := ctx.BindJSON(req)
-		if err != nil {
-			handleError(ctx, httperror.BadRequestWith(err))
-			return
+	mux.HandleFunc(sv+"/GetUser", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			req := new(acourse.GetUserRequest)
+			err := bindJSON(r, req)
+			if err != nil {
+				handleError(w, httperror.BadRequestWith(err))
+				return
+			}
+			res, err := s.GetUser(makeServiceContext(r), req)
+			if err != nil {
+				handleError(w, err)
+				return
+			}
+			handleOK(w, res)
 		}
-		res, err := s.GetUser(makeServiceContext(ctx.Request), req)
-		if err != nil {
-			handleError(ctx, err)
-			return
-		}
-		handleOK(ctx, res)
 	})
 
-	httpServer.POST(sv+"/GetMe", func(ctx *gin.Context) {
-		res, err := s.GetMe(makeServiceContext(ctx.Request), new(acourse.Empty))
-		if err != nil {
-			handleError(ctx, err)
-			return
+	mux.HandleFunc(sv+"/GetMe", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			res, err := s.GetMe(makeServiceContext(r), new(acourse.Empty))
+			if err != nil {
+				handleError(w, err)
+				return
+			}
+			handleOK(w, res)
 		}
-		handleOK(ctx, res)
 	})
 
-	httpServer.POST(sv+"/UpdateMe", func(ctx *gin.Context) {
-		req := new(acourse.User)
-		err := ctx.BindJSON(req)
-		if err != nil {
-			handleError(ctx, httperror.BadRequestWith(err))
-			return
+	mux.HandleFunc(sv+"/UpdateMe", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			req := new(acourse.User)
+			err := bindJSON(r, req)
+			if err != nil {
+				handleError(w, httperror.BadRequestWith(err))
+				return
+			}
+			res, err := s.UpdateMe(makeServiceContext(r), req)
+			if err != nil {
+				handleError(w, err)
+				return
+			}
+			handleOK(w, res)
 		}
-		_, err = s.UpdateMe(makeServiceContext(ctx.Request), req)
-		if err != nil {
-			handleError(ctx, err)
-			return
-		}
-		handleSuccess(ctx)
 	})
 }
 
 // RegisterEmailServiceClient registers a Email service client to http server
-func RegisterEmailServiceClient(httpServer *gin.Engine, s acourse.EmailServiceClient) {
+func RegisterEmailServiceClient(mux *http.ServeMux, s acourse.EmailServiceClient) {
 	sv := "/acourse.EmailService"
 
-	httpServer.POST(sv+"/Send", func(ctx *gin.Context) {
-		req := new(acourse.Email)
-		err := ctx.BindJSON(req)
-		if err != nil {
-			handleError(ctx, httperror.BadRequestWith(err))
-			return
+	mux.HandleFunc(sv+"/Send", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			req := new(acourse.Email)
+			err := bindJSON(r, req)
+			if err != nil {
+				handleError(w, httperror.BadRequestWith(err))
+				return
+			}
+			res, err := s.Send(makeServiceContext(r), req)
+			if err != nil {
+				handleError(w, err)
+				return
+			}
+			handleOK(w, res)
 		}
-		_, err = s.Send(makeServiceContext(ctx.Request), req)
-		if err != nil {
-			handleError(ctx, err)
-			return
-		}
-		handleSuccess(ctx)
 	})
 }
 
 // RegisterPaymentServiceClient registers a Payment service client to http server
-func RegisterPaymentServiceClient(httpServer *gin.Engine, s acourse.PaymentServiceClient) {
+func RegisterPaymentServiceClient(mux *http.ServeMux, s acourse.PaymentServiceClient) {
 	sv := "/acourse.PaymentService"
 
-	httpServer.POST(sv+"/ListWaitingPayments", func(ctx *gin.Context) {
-		req := new(acourse.ListRequest)
-		err := ctx.BindJSON(req)
-		if err != nil {
-			handleError(ctx, httperror.BadRequestWith(err))
-			return
+	mux.HandleFunc(sv+"/ListWaitingPayments", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			req := new(acourse.ListRequest)
+			err := bindJSON(r, req)
+			if err != nil {
+				handleError(w, httperror.BadRequestWith(err))
+				return
+			}
+			res, err := s.ListWaitingPayments(makeServiceContext(r), req)
+			if err != nil {
+				handleError(w, err)
+				return
+			}
+			handleOK(w, res)
 		}
-		res, err := s.ListWaitingPayments(makeServiceContext(ctx.Request), req)
-		if err != nil {
-			handleError(ctx, err)
-			return
-		}
-		handleOK(ctx, res)
 	})
 
-	httpServer.POST(sv+"/ListHistoryPayments", func(ctx *gin.Context) {
-		req := new(acourse.ListRequest)
-		err := ctx.BindJSON(req)
-		if err != nil {
-			handleError(ctx, httperror.BadRequestWith(err))
-			return
+	mux.HandleFunc(sv+"/ListHistoryPayments", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			req := new(acourse.ListRequest)
+			err := bindJSON(r, req)
+			if err != nil {
+				handleError(w, httperror.BadRequestWith(err))
+				return
+			}
+			res, err := s.ListHistoryPayments(makeServiceContext(r), req)
+			if err != nil {
+				handleError(w, err)
+				return
+			}
+			handleOK(w, res)
 		}
-		res, err := s.ListHistoryPayments(makeServiceContext(ctx.Request), req)
-		if err != nil {
-			handleError(ctx, err)
-			return
-		}
-		handleOK(ctx, res)
 	})
 
-	httpServer.POST(sv+"/ApprovePayments", func(ctx *gin.Context) {
-		req := new(acourse.PaymentIDsRequest)
-		err := ctx.BindJSON(req)
-		if err != nil {
-			handleError(ctx, httperror.BadRequestWith(err))
-			return
+	mux.HandleFunc(sv+"/ApprovePayments", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			req := new(acourse.PaymentIDsRequest)
+			err := bindJSON(r, req)
+			if err != nil {
+				handleError(w, httperror.BadRequestWith(err))
+				return
+			}
+			res, err := s.ApprovePayments(makeServiceContext(r), req)
+			if err != nil {
+				handleError(w, err)
+				return
+			}
+			handleOK(w, res)
 		}
-		_, err = s.ApprovePayments(makeServiceContext(ctx.Request), req)
-		if err != nil {
-			handleError(ctx, err)
-			return
-		}
-		handleSuccess(ctx)
 	})
 
-	httpServer.POST(sv+"/RejectPayments", func(ctx *gin.Context) {
-		req := new(acourse.PaymentIDsRequest)
-		err := ctx.BindJSON(req)
-		if err != nil {
-			handleError(ctx, httperror.BadRequestWith(err))
-			return
+	mux.HandleFunc(sv+"/RejectPayments", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			req := new(acourse.PaymentIDsRequest)
+			err := bindJSON(r, req)
+			if err != nil {
+				handleError(w, httperror.BadRequestWith(err))
+				return
+			}
+			res, err := s.RejectPayments(makeServiceContext(r), req)
+			if err != nil {
+				handleError(w, err)
+				return
+			}
+			handleOK(w, res)
 		}
-		_, err = s.RejectPayments(makeServiceContext(ctx.Request), req)
-		if err != nil {
-			handleError(ctx, err)
-			return
-		}
-		handleSuccess(ctx)
 	})
 
-	httpServer.POST(sv+"/UpdatePrice", func(ctx *gin.Context) {
-		req := new(acourse.PaymentUpdatePriceRequest)
-		err := ctx.BindJSON(req)
-		if err != nil {
-			handleError(ctx, httperror.BadRequestWith(err))
-			return
+	mux.HandleFunc(sv+"/UpdatePrice", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			req := new(acourse.PaymentUpdatePriceRequest)
+			err := bindJSON(r, req)
+			if err != nil {
+				handleError(w, httperror.BadRequestWith(err))
+				return
+			}
+			res, err := s.UpdatePrice(makeServiceContext(r), req)
+			if err != nil {
+				handleError(w, err)
+				return
+			}
+			handleOK(w, res)
 		}
-		_, err = s.UpdatePrice(makeServiceContext(ctx.Request), req)
-		if err != nil {
-			handleError(ctx, err)
-			return
-		}
-		handleSuccess(ctx)
 	})
 }
 
 // RegisterCourseServiceClient registers a Course service client to http server
-func RegisterCourseServiceClient(httpServer *gin.Engine, s acourse.CourseServiceClient) {
+func RegisterCourseServiceClient(mux *http.ServeMux, s acourse.CourseServiceClient) {
 	sv := "/acourse.CourseService"
 
-	httpServer.POST(sv+"/ListCourses", func(ctx *gin.Context) {
-		req := new(acourse.ListRequest)
-		err := ctx.BindJSON(req)
-		if err != nil {
-			handleError(ctx, httperror.BadRequestWith(err))
-			return
+	mux.HandleFunc(sv+"/ListCourses", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			req := new(acourse.ListRequest)
+			err := bindJSON(r, req)
+			if err != nil {
+				handleError(w, httperror.BadRequestWith(err))
+				return
+			}
+			res, err := s.ListCourses(makeServiceContext(r), req)
+			if err != nil {
+				handleError(w, err)
+				return
+			}
+			handleOK(w, res)
 		}
-		res, err := s.ListCourses(makeServiceContext(ctx.Request), req)
-		if err != nil {
-			handleError(ctx, err)
-			return
-		}
-		handleOK(ctx, res)
 	})
 
-	httpServer.POST(sv+"/ListPublicCourses", func(ctx *gin.Context) {
-		req := new(acourse.ListRequest)
-		err := ctx.BindJSON(req)
-		if err != nil {
-			handleError(ctx, httperror.BadRequestWith(err))
-			return
+	mux.HandleFunc(sv+"/ListPublicCourses", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			req := new(acourse.ListRequest)
+			err := bindJSON(r, req)
+			if err != nil {
+				handleError(w, httperror.BadRequestWith(err))
+				return
+			}
+			res, err := s.ListPublicCourses(makeServiceContext(r), req)
+			if err != nil {
+				handleError(w, err)
+				return
+			}
+			handleOK(w, res)
 		}
-		res, err := s.ListPublicCourses(makeServiceContext(ctx.Request), req)
-		if err != nil {
-			handleError(ctx, err)
-			return
-		}
-		handleOK(ctx, res)
 	})
 
-	httpServer.POST(sv+"/ListOwnCourses", func(ctx *gin.Context) {
-		req := new(acourse.UserIDRequest)
-		err := ctx.BindJSON(req)
-		if err != nil {
-			handleError(ctx, httperror.BadRequestWith(err))
-			return
+	mux.HandleFunc(sv+"/ListOwnCourses", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			req := new(acourse.UserIDRequest)
+			err := bindJSON(r, req)
+			if err != nil {
+				handleError(w, httperror.BadRequestWith(err))
+				return
+			}
+			res, err := s.ListOwnCourses(makeServiceContext(r), req)
+			if err != nil {
+				handleError(w, err)
+				return
+			}
+			handleOK(w, res)
 		}
-		res, err := s.ListOwnCourses(makeServiceContext(ctx.Request), req)
-		if err != nil {
-			handleError(ctx, err)
-			return
-		}
-		handleOK(ctx, res)
 	})
 
-	httpServer.POST(sv+"/ListEnrolledCourses", func(ctx *gin.Context) {
-		req := new(acourse.UserIDRequest)
-		err := ctx.BindJSON(req)
-		if err != nil {
-			handleError(ctx, httperror.BadRequestWith(err))
-			return
+	mux.HandleFunc(sv+"/ListEnrolledCourses", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			req := new(acourse.UserIDRequest)
+			err := bindJSON(r, req)
+			if err != nil {
+				handleError(w, httperror.BadRequestWith(err))
+				return
+			}
+			res, err := s.ListEnrolledCourses(makeServiceContext(r), req)
+			if err != nil {
+				handleError(w, err)
+				return
+			}
+			handleOK(w, res)
 		}
-		res, err := s.ListEnrolledCourses(makeServiceContext(ctx.Request), req)
-		if err != nil {
-			handleError(ctx, err)
-			return
-		}
-		handleOK(ctx, res)
 	})
 
-	httpServer.POST(sv+"/GetCourse", func(ctx *gin.Context) {
-		req := new(acourse.CourseIDRequest)
-		err := ctx.BindJSON(req)
-		if err != nil {
-			handleError(ctx, httperror.BadRequestWith(err))
-			return
+	mux.HandleFunc(sv+"/GetCourse", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			req := new(acourse.CourseIDRequest)
+			err := bindJSON(r, req)
+			if err != nil {
+				handleError(w, httperror.BadRequestWith(err))
+				return
+			}
+			res, err := s.GetCourse(makeServiceContext(r), req)
+			if err != nil {
+				handleError(w, err)
+				return
+			}
+			handleOK(w, res)
 		}
-		res, err := s.GetCourse(makeServiceContext(ctx.Request), req)
-		if err != nil {
-			handleError(ctx, err)
-			return
-		}
-		handleOK(ctx, res)
 	})
 
-	httpServer.POST(sv+"/CreateCourse", func(ctx *gin.Context) {
-		req := new(acourse.Course)
-		err := ctx.BindJSON(req)
-		if err != nil {
-			handleError(ctx, httperror.BadRequestWith(err))
-			return
+	mux.HandleFunc(sv+"/CreateCourse", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			req := new(acourse.Course)
+			err := bindJSON(r, req)
+			if err != nil {
+				handleError(w, httperror.BadRequestWith(err))
+				return
+			}
+			res, err := s.CreateCourse(makeServiceContext(r), req)
+			if err != nil {
+				handleError(w, err)
+				return
+			}
+			handleOK(w, res)
 		}
-		res, err := s.CreateCourse(makeServiceContext(ctx.Request), req)
-		if err != nil {
-			handleError(ctx, err)
-			return
-		}
-		handleOK(ctx, res)
 	})
 
-	httpServer.POST(sv+"/UpdateCourse", func(ctx *gin.Context) {
-		req := new(acourse.Course)
-		err := ctx.BindJSON(req)
-		if err != nil {
-			handleError(ctx, httperror.BadRequestWith(err))
-			return
+	mux.HandleFunc(sv+"/UpdateCourse", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			req := new(acourse.Course)
+			err := bindJSON(r, req)
+			if err != nil {
+				handleError(w, httperror.BadRequestWith(err))
+				return
+			}
+			res, err := s.UpdateCourse(makeServiceContext(r), req)
+			if err != nil {
+				handleError(w, err)
+				return
+			}
+			handleOK(w, res)
 		}
-		_, err = s.UpdateCourse(makeServiceContext(ctx.Request), req)
-		if err != nil {
-			handleError(ctx, err)
-			return
-		}
-		handleSuccess(ctx)
 	})
 
-	httpServer.POST(sv+"/EnrollCourse", func(ctx *gin.Context) {
-		req := new(acourse.EnrollRequest)
-		err := ctx.BindJSON(req)
-		if err != nil {
-			handleError(ctx, httperror.BadRequestWith(err))
-			return
+	mux.HandleFunc(sv+"/EnrollCourse", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			req := new(acourse.EnrollRequest)
+			err := bindJSON(r, req)
+			if err != nil {
+				handleError(w, httperror.BadRequestWith(err))
+				return
+			}
+			res, err := s.EnrollCourse(makeServiceContext(r), req)
+			if err != nil {
+				handleError(w, err)
+				return
+			}
+			handleOK(w, res)
 		}
-		_, err = s.EnrollCourse(makeServiceContext(ctx.Request), req)
-		if err != nil {
-			handleError(ctx, err)
-			return
-		}
-		handleSuccess(ctx)
 	})
 
-	httpServer.POST(sv+"/AttendCourse", func(ctx *gin.Context) {
-		req := new(acourse.CourseIDRequest)
-		err := ctx.BindJSON(req)
-		if err != nil {
-			handleError(ctx, httperror.BadRequestWith(err))
-			return
+	mux.HandleFunc(sv+"/AttendCourse", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			req := new(acourse.CourseIDRequest)
+			err := bindJSON(r, req)
+			if err != nil {
+				handleError(w, httperror.BadRequestWith(err))
+				return
+			}
+			res, err := s.AttendCourse(makeServiceContext(r), req)
+			if err != nil {
+				handleError(w, err)
+				return
+			}
+			handleOK(w, res)
 		}
-		_, err = s.AttendCourse(makeServiceContext(ctx.Request), req)
-		if err != nil {
-			handleError(ctx, err)
-			return
-		}
-		handleSuccess(ctx)
 	})
 
-	httpServer.POST(sv+"/OpenAttend", func(ctx *gin.Context) {
-		req := new(acourse.CourseIDRequest)
-		err := ctx.BindJSON(req)
-		if err != nil {
-			handleError(ctx, httperror.BadRequestWith(err))
-			return
+	mux.HandleFunc(sv+"/OpenAttend", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			req := new(acourse.CourseIDRequest)
+			err := bindJSON(r, req)
+			if err != nil {
+				handleError(w, httperror.BadRequestWith(err))
+				return
+			}
+			res, err := s.OpenAttend(makeServiceContext(r), req)
+			if err != nil {
+				handleError(w, err)
+				return
+			}
+			handleOK(w, res)
 		}
-		_, err = s.OpenAttend(makeServiceContext(ctx.Request), req)
-		if err != nil {
-			handleError(ctx, err)
-			return
-		}
-		handleSuccess(ctx)
 	})
 
-	httpServer.POST(sv+"/CloseAttend", func(ctx *gin.Context) {
-		req := new(acourse.CourseIDRequest)
-		err := ctx.BindJSON(req)
-		if err != nil {
-			handleError(ctx, httperror.BadRequestWith(err))
-			return
+	mux.HandleFunc(sv+"/CloseAttend", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			req := new(acourse.CourseIDRequest)
+			err := bindJSON(r, req)
+			if err != nil {
+				handleError(w, httperror.BadRequestWith(err))
+				return
+			}
+			res, err := s.CloseAttend(makeServiceContext(r), req)
+			if err != nil {
+				handleError(w, err)
+				return
+			}
+			handleOK(w, res)
 		}
-		_, err = s.CloseAttend(makeServiceContext(ctx.Request), req)
-		if err != nil {
-			handleError(ctx, err)
-			return
-		}
-		handleSuccess(ctx)
 	})
 }
 
 // RegisterAssignmentServiceClient registers s Assignment service client to http server
-func RegisterAssignmentServiceClient(httpServer *gin.Engine, s acourse.AssignmentServiceClient) {
+func RegisterAssignmentServiceClient(mux *http.ServeMux, s acourse.AssignmentServiceClient) {
 	sv := "/acourse.AssignmentService"
 
-	httpServer.POST(sv+"/CreateAssignment", func(ctx *gin.Context) {
-		req := new(acourse.Assignment)
-		err := ctx.BindJSON(req)
-		if err != nil {
-			handleError(ctx, httperror.BadRequestWith(err))
-			return
+	mux.HandleFunc(sv+"/CreateAssignment", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			req := new(acourse.Assignment)
+			err := bindJSON(r, req)
+			if err != nil {
+				handleError(w, httperror.BadRequestWith(err))
+				return
+			}
+			res, err := s.CreateAssignment(makeServiceContext(r), req)
+			if err != nil {
+				handleError(w, err)
+				return
+			}
+			handleOK(w, res)
 		}
-		res, err := s.CreateAssignment(makeServiceContext(ctx.Request), req)
-		if err != nil {
-			handleError(ctx, err)
-			return
-		}
-		handleOK(ctx, res)
 	})
 
-	httpServer.POST(sv+"/UpdateAssignment", func(ctx *gin.Context) {
-		req := new(acourse.Assignment)
-		err := ctx.BindJSON(req)
-		if err != nil {
-			handleError(ctx, httperror.BadRequestWith(err))
-			return
+	mux.HandleFunc(sv+"/UpdateAssignment", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			req := new(acourse.Assignment)
+			err := bindJSON(r, req)
+			if err != nil {
+				handleError(w, httperror.BadRequestWith(err))
+				return
+			}
+			res, err := s.UpdateAssignment(makeServiceContext(r), req)
+			if err != nil {
+				handleError(w, err)
+				return
+			}
+			handleOK(w, res)
 		}
-		res, err := s.UpdateAssignment(makeServiceContext(ctx.Request), req)
-		if err != nil {
-			handleError(ctx, err)
-			return
-		}
-		handleOK(ctx, res)
 	})
 
-	httpServer.POST(sv+"/OpenAssignment", func(ctx *gin.Context) {
-		req := new(acourse.AssignmentIDRequest)
-		err := ctx.BindJSON(req)
-		if err != nil {
-			handleError(ctx, httperror.BadRequestWith(err))
-			return
+	mux.HandleFunc(sv+"/OpenAssignment", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			req := new(acourse.AssignmentIDRequest)
+			err := bindJSON(r, req)
+			if err != nil {
+				handleError(w, httperror.BadRequestWith(err))
+				return
+			}
+			res, err := s.OpenAssignment(makeServiceContext(r), req)
+			if err != nil {
+				handleError(w, err)
+				return
+			}
+			handleOK(w, res)
 		}
-		res, err := s.OpenAssignment(makeServiceContext(ctx.Request), req)
-		if err != nil {
-			handleError(ctx, err)
-			return
-		}
-		handleOK(ctx, res)
 	})
 
-	httpServer.POST(sv+"/CloseAssignment", func(ctx *gin.Context) {
-		req := new(acourse.AssignmentIDRequest)
-		err := ctx.BindJSON(req)
-		if err != nil {
-			handleError(ctx, httperror.BadRequestWith(err))
-			return
+	mux.HandleFunc(sv+"/CloseAssignment", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			req := new(acourse.AssignmentIDRequest)
+			err := bindJSON(r, req)
+			if err != nil {
+				handleError(w, httperror.BadRequestWith(err))
+				return
+			}
+			res, err := s.CloseAssignment(makeServiceContext(r), req)
+			if err != nil {
+				handleError(w, err)
+				return
+			}
+			handleOK(w, res)
 		}
-		res, err := s.CloseAssignment(makeServiceContext(ctx.Request), req)
-		if err != nil {
-			handleError(ctx, err)
-			return
-		}
-		handleOK(ctx, res)
 	})
 
-	httpServer.POST(sv+"/ListAssignments", func(ctx *gin.Context) {
-		req := new(acourse.CourseIDRequest)
-		err := ctx.BindJSON(req)
-		if err != nil {
-			handleError(ctx, httperror.BadRequestWith(err))
-			return
+	mux.HandleFunc(sv+"/ListAssignments", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			req := new(acourse.CourseIDRequest)
+			err := bindJSON(r, req)
+			if err != nil {
+				handleError(w, httperror.BadRequestWith(err))
+				return
+			}
+			res, err := s.ListAssignments(makeServiceContext(r), req)
+			if err != nil {
+				handleError(w, err)
+				return
+			}
+			handleOK(w, res)
 		}
-		res, err := s.ListAssignments(makeServiceContext(ctx.Request), req)
-		if err != nil {
-			handleError(ctx, err)
-			return
-		}
-		handleOK(ctx, res)
 	})
 
-	httpServer.POST(sv+"/DeleteAssignment", func(ctx *gin.Context) {
-		req := new(acourse.AssignmentIDRequest)
-		err := ctx.BindJSON(req)
-		if err != nil {
-			handleError(ctx, httperror.BadRequestWith(err))
-			return
+	mux.HandleFunc(sv+"/DeleteAssignment", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			req := new(acourse.AssignmentIDRequest)
+			err := bindJSON(r, req)
+			if err != nil {
+				handleError(w, httperror.BadRequestWith(err))
+				return
+			}
+			res, err := s.DeleteAssignment(makeServiceContext(r), req)
+			if err != nil {
+				handleError(w, err)
+				return
+			}
+			handleOK(w, res)
 		}
-		res, err := s.DeleteAssignment(makeServiceContext(ctx.Request), req)
-		if err != nil {
-			handleError(ctx, err)
-			return
-		}
-		handleOK(ctx, res)
 	})
 
-	httpServer.POST(sv+"/SubmitUserAssignment", func(ctx *gin.Context) {
-		req := new(acourse.UserAssignment)
-		err := ctx.BindJSON(req)
-		if err != nil {
-			handleError(ctx, httperror.BadRequestWith(err))
-			return
+	mux.HandleFunc(sv+"/SubmitUserAssignment", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			req := new(acourse.UserAssignment)
+			err := bindJSON(r, req)
+			if err != nil {
+				handleError(w, httperror.BadRequestWith(err))
+				return
+			}
+			res, err := s.SubmitUserAssignment(makeServiceContext(r), req)
+			if err != nil {
+				handleError(w, err)
+				return
+			}
+			handleOK(w, res)
 		}
-		res, err := s.SubmitUserAssignment(makeServiceContext(ctx.Request), req)
-		if err != nil {
-			handleError(ctx, err)
-			return
-		}
-		handleOK(ctx, res)
 	})
 
-	httpServer.POST(sv+"/DeleteUserAssignment", func(ctx *gin.Context) {
-		req := new(acourse.UserAssignmentIDRequest)
-		err := ctx.BindJSON(req)
-		if err != nil {
-			handleError(ctx, httperror.BadRequestWith(err))
-			return
+	mux.HandleFunc(sv+"/DeleteUserAssignment", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			req := new(acourse.UserAssignmentIDRequest)
+			err := bindJSON(r, req)
+			if err != nil {
+				handleError(w, httperror.BadRequestWith(err))
+				return
+			}
+			res, err := s.DeleteUserAssignment(makeServiceContext(r), req)
+			if err != nil {
+				handleError(w, err)
+				return
+			}
+			handleOK(w, res)
 		}
-		res, err := s.DeleteUserAssignment(makeServiceContext(ctx.Request), req)
-		if err != nil {
-			handleError(ctx, err)
-			return
-		}
-		handleOK(ctx, res)
 	})
 
-	httpServer.POST(sv+"/GetUserAssignments", func(ctx *gin.Context) {
-		req := new(acourse.AssignmentIDsRequest)
-		err := ctx.BindJSON(req)
-		if err != nil {
-			handleError(ctx, httperror.BadRequestWith(err))
-			return
+	mux.HandleFunc(sv+"/GetUserAssignments", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			req := new(acourse.AssignmentIDsRequest)
+			err := bindJSON(r, req)
+			if err != nil {
+				handleError(w, httperror.BadRequestWith(err))
+				return
+			}
+			res, err := s.GetUserAssignments(makeServiceContext(r), req)
+			if err != nil {
+				handleError(w, err)
+				return
+			}
+			handleOK(w, res)
 		}
-		res, err := s.GetUserAssignments(makeServiceContext(ctx.Request), req)
-		if err != nil {
-			handleError(ctx, err)
-			return
-		}
-		handleOK(ctx, res)
 	})
 }
