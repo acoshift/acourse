@@ -1,9 +1,13 @@
 package model
 
+import (
+	"github.com/acoshift/ds"
+)
+
 // Enroll model
 type Enroll struct {
-	Base
-	Stampable
+	ds.StringIDModel
+	ds.StampModel
 	UserID   string
 	CourseID string
 }

@@ -1,10 +1,10 @@
 package email
 
 import (
+	"context"
 	"log"
 
 	"github.com/acoshift/acourse/pkg/acourse"
-	_context "golang.org/x/net/context"
 	"gopkg.in/gomail.v2"
 )
 
@@ -36,7 +36,7 @@ type Config struct {
 }
 
 // Send sends an email
-func (s *service) Send(ctx _context.Context, req *acourse.Email) (*acourse.Empty, error) {
+func (s *service) Send(ctx context.Context, req *acourse.Email) (*acourse.Empty, error) {
 	if len(req.GetTo()) == 0 {
 		return new(acourse.Empty), nil
 	}

@@ -11,7 +11,6 @@ import (
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/acourse/pkg/store"
 	"github.com/acoshift/go-firebase-admin"
-	_context "golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 )
@@ -42,7 +41,7 @@ type service struct {
 	email acourse.EmailServiceClient
 }
 
-func (s *service) listPayments(ctx _context.Context, opts ...store.PaymentListOption) (*acourse.PaymentsResponse, error) {
+func (s *service) listPayments(ctx context.Context, opts ...store.PaymentListOption) (*acourse.PaymentsResponse, error) {
 	userID, ok := ctx.Value(acourse.KeyUserID).(string)
 	if !ok || userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
@@ -92,15 +91,15 @@ func (s *service) listPayments(ctx _context.Context, opts ...store.PaymentListOp
 	}, nil
 }
 
-func (s *service) ListWaitingPayments(ctx _context.Context, req *acourse.ListRequest) (*acourse.PaymentsResponse, error) {
+func (s *service) ListWaitingPayments(ctx context.Context, req *acourse.ListRequest) (*acourse.PaymentsResponse, error) {
 	return s.listPayments(ctx, store.PaymentListOptionStatus(model.PaymentStatusWaiting))
 }
 
-func (s *service) ListHistoryPayments(ctx _context.Context, req *acourse.ListRequest) (*acourse.PaymentsResponse, error) {
+func (s *service) ListHistoryPayments(ctx context.Context, req *acourse.ListRequest) (*acourse.PaymentsResponse, error) {
 	return s.listPayments(ctx)
 }
 
-func (s *service) ApprovePayments(ctx _context.Context, req *acourse.PaymentIDsRequest) (*acourse.Empty, error) {
+func (s *service) ApprovePayments(ctx context.Context, req *acourse.PaymentIDsRequest) (*acourse.Empty, error) {
 	userID, ok := ctx.Value(acourse.KeyUserID).(string)
 	if !ok || userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
@@ -142,7 +141,7 @@ func (s *service) ApprovePayments(ctx _context.Context, req *acourse.PaymentIDsR
 	return new(acourse.Empty), nil
 }
 
-func (s *service) RejectPayments(ctx _context.Context, req *acourse.PaymentIDsRequest) (*acourse.Empty, error) {
+func (s *service) RejectPayments(ctx context.Context, req *acourse.PaymentIDsRequest) (*acourse.Empty, error) {
 	userID, ok := ctx.Value(acourse.KeyUserID).(string)
 	if !ok || userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
@@ -248,7 +247,7 @@ https://acourse.io`
 	}
 }
 
-func (s *service) UpdatePrice(ctx _context.Context, req *acourse.PaymentUpdatePriceRequest) (*acourse.Empty, error) {
+func (s *service) UpdatePrice(ctx context.Context, req *acourse.PaymentUpdatePriceRequest) (*acourse.Empty, error) {
 	userID, ok := ctx.Value(acourse.KeyUserID).(string)
 	if !ok || userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")

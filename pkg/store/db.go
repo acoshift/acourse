@@ -6,6 +6,7 @@ import (
 
 	"cloud.google.com/go/datastore"
 	"cloud.google.com/go/storage"
+	"github.com/acoshift/ds"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	oauthjwt "golang.org/x/oauth2/jwt"
@@ -14,7 +15,7 @@ import (
 
 // DB type
 type DB struct {
-	client    *datastore.Client
+	client    *ds.Client
 	publicKey *rsa.PublicKey
 }
 
@@ -55,7 +56,7 @@ func NewDB(options ...Option) *DB {
 
 	db := DB{}
 
-	db.client, err = datastore.NewClient(ctx, opts.ProjectID, option.WithTokenSource(ts))
+	db.client, err = ds.NewClient(ctx, opts.ProjectID, option.WithTokenSource(ts))
 	if err != nil {
 		panic(err)
 	}

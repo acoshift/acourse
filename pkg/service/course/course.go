@@ -7,7 +7,6 @@ import (
 	"github.com/acoshift/acourse/pkg/acourse"
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/acourse/pkg/store"
-	_context "golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 )
@@ -41,7 +40,7 @@ type service struct {
 	store Store
 }
 
-func (s *service) listCourses(ctx _context.Context, opts ...store.CourseListOption) (*acourse.CoursesResponse, error) {
+func (s *service) listCourses(ctx context.Context, opts ...store.CourseListOption) (*acourse.CoursesResponse, error) {
 	courses, err := s.store.CourseList(ctx, opts...)
 	if err != nil {
 		return nil, err
@@ -78,11 +77,11 @@ func (s *service) listCourses(ctx _context.Context, opts ...store.CourseListOpti
 	}, nil
 }
 
-func (s *service) ListPublicCourses(ctx _context.Context, req *acourse.ListRequest) (*acourse.CoursesResponse, error) {
+func (s *service) ListPublicCourses(ctx context.Context, req *acourse.ListRequest) (*acourse.CoursesResponse, error) {
 	return s.listCourses(ctx, store.CourseListOptionPublic(true))
 }
 
-func (s *service) ListCourses(ctx _context.Context, req *acourse.ListRequest) (*acourse.CoursesResponse, error) {
+func (s *service) ListCourses(ctx context.Context, req *acourse.ListRequest) (*acourse.CoursesResponse, error) {
 	userID, ok := ctx.Value(acourse.KeyUserID).(string)
 	if !ok || userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
@@ -97,7 +96,7 @@ func (s *service) ListCourses(ctx _context.Context, req *acourse.ListRequest) (*
 	return s.listCourses(ctx)
 }
 
-func (s *service) ListOwnCourses(ctx _context.Context, req *acourse.UserIDRequest) (*acourse.CoursesResponse, error) {
+func (s *service) ListOwnCourses(ctx context.Context, req *acourse.UserIDRequest) (*acourse.CoursesResponse, error) {
 	userID, _ := ctx.Value(acourse.KeyUserID).(string)
 
 	if req.GetUserId() == "" {
@@ -115,7 +114,7 @@ func (s *service) ListOwnCourses(ctx _context.Context, req *acourse.UserIDReques
 	return s.listCourses(ctx, opt...)
 }
 
-func (s *service) ListEnrolledCourses(ctx _context.Context, req *acourse.UserIDRequest) (*acourse.CoursesResponse, error) {
+func (s *service) ListEnrolledCourses(ctx context.Context, req *acourse.UserIDRequest) (*acourse.CoursesResponse, error) {
 	userID, ok := ctx.Value(acourse.KeyUserID).(string)
 	if !ok || userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
@@ -178,7 +177,7 @@ func (s *service) ListEnrolledCourses(ctx _context.Context, req *acourse.UserIDR
 	}, nil
 }
 
-func (s *service) GetCourse(ctx _context.Context, req *acourse.CourseIDRequest) (*acourse.CourseResponse, error) {
+func (s *service) GetCourse(ctx context.Context, req *acourse.CourseIDRequest) (*acourse.CourseResponse, error) {
 	userID, _ := ctx.Value(acourse.KeyUserID).(string)
 
 	// try get by id first
@@ -246,8 +245,8 @@ func (s *service) GetCourse(ctx _context.Context, req *acourse.CourseIDRequest) 
 
 	// filter out private fields
 	course = &model.Course{
-		Base:             course.Base,
-		Stampable:        course.Stampable,
+		StringIDModel:    course.StringIDModel,
+		StampModel:       course.StampModel,
 		Title:            course.Title,
 		ShortDescription: course.ShortDescription,
 		Description:      course.Description,
@@ -273,7 +272,7 @@ func (s *service) GetCourse(ctx _context.Context, req *acourse.CourseIDRequest) 
 	}, nil
 }
 
-func (s *service) CreateCourse(ctx _context.Context, req *acourse.Course) (*acourse.Course, error) {
+func (s *service) CreateCourse(ctx context.Context, req *acourse.Course) (*acourse.Course, error) {
 	userID, ok := ctx.Value(acourse.KeyUserID).(string)
 	if !ok || userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
@@ -316,7 +315,7 @@ func (s *service) CreateCourse(ctx _context.Context, req *acourse.Course) (*acou
 	return acourse.ToCourse(course), nil
 }
 
-func (s *service) UpdateCourse(ctx _context.Context, req *acourse.Course) (*acourse.Empty, error) {
+func (s *service) UpdateCourse(ctx context.Context, req *acourse.Course) (*acourse.Empty, error) {
 	userID, ok := ctx.Value(acourse.KeyUserID).(string)
 	if !ok || userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
@@ -363,7 +362,7 @@ func (s *service) UpdateCourse(ctx _context.Context, req *acourse.Course) (*acou
 	return new(acourse.Empty), nil
 }
 
-func (s *service) EnrollCourse(ctx _context.Context, req *acourse.EnrollRequest) (*acourse.Empty, error) {
+func (s *service) EnrollCourse(ctx context.Context, req *acourse.EnrollRequest) (*acourse.Empty, error) {
 	userID, ok := ctx.Value(acourse.KeyUserID).(string)
 	if !ok || userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
@@ -445,7 +444,7 @@ func (s *service) EnrollCourse(ctx _context.Context, req *acourse.EnrollRequest)
 	return new(acourse.Empty), nil
 }
 
-func (s *service) AttendCourse(ctx _context.Context, req *acourse.CourseIDRequest) (*acourse.Empty, error) {
+func (s *service) AttendCourse(ctx context.Context, req *acourse.CourseIDRequest) (*acourse.Empty, error) {
 	userID, ok := ctx.Value(acourse.KeyUserID).(string)
 	if !ok || userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
@@ -485,7 +484,7 @@ func (s *service) AttendCourse(ctx _context.Context, req *acourse.CourseIDReques
 	return new(acourse.Empty), nil
 }
 
-func (s *service) changeAttend(ctx _context.Context, req *acourse.CourseIDRequest, value bool) (*acourse.Empty, error) {
+func (s *service) changeAttend(ctx context.Context, req *acourse.CourseIDRequest, value bool) (*acourse.Empty, error) {
 	userID, ok := ctx.Value(acourse.KeyUserID).(string)
 	if !ok || userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
@@ -515,10 +514,10 @@ func (s *service) changeAttend(ctx _context.Context, req *acourse.CourseIDReques
 	return new(acourse.Empty), nil
 }
 
-func (s *service) OpenAttend(ctx _context.Context, req *acourse.CourseIDRequest) (*acourse.Empty, error) {
+func (s *service) OpenAttend(ctx context.Context, req *acourse.CourseIDRequest) (*acourse.Empty, error) {
 	return s.changeAttend(ctx, req, true)
 }
 
-func (s *service) CloseAttend(ctx _context.Context, req *acourse.CourseIDRequest) (*acourse.Empty, error) {
+func (s *service) CloseAttend(ctx context.Context, req *acourse.CourseIDRequest) (*acourse.Empty, error) {
 	return s.changeAttend(ctx, req, false)
 }

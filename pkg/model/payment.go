@@ -2,12 +2,14 @@ package model
 
 import (
 	"time"
+
+	"github.com/acoshift/ds"
 )
 
 // Payment model
 type Payment struct {
-	Base
-	Stampable
+	ds.StringIDModel
+	ds.StampModel
 	UserID        string
 	CourseID      string
 	OriginalPrice float64 `datastore:",noindex"`

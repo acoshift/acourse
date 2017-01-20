@@ -2,12 +2,14 @@ package model
 
 import (
 	"time"
+
+	"github.com/acoshift/ds"
 )
 
 // Course model
 type Course struct {
-	Base
-	Stampable
+	ds.StringIDModel
+	ds.StampModel
 	Title            string `datastore:",noindex"`
 	ShortDescription string `datastore:",noindex"`
 	Description      string `datastore:",noindex"` // Markdown

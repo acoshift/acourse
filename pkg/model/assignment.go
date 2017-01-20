@@ -1,9 +1,13 @@
 package model
 
+import (
+	"github.com/acoshift/ds"
+)
+
 // Assignment model
 type Assignment struct {
-	Base
-	Stampable
+	ds.StringIDModel
+	ds.StampModel
 	CourseID    string
 	Title       string `datastore:",noindex"`
 	Description string `datastore:",noindex"`
@@ -15,8 +19,8 @@ type Assignments []*Assignment
 
 // UserAssignment model
 type UserAssignment struct {
-	Base
-	Stampable
+	ds.StringIDModel
+	ds.StampModel
 	AssignmentID string
 	UserID       string
 	URL          string `datastore:",noindex"`

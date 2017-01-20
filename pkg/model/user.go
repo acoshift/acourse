@@ -1,9 +1,13 @@
 package model
 
+import (
+	"github.com/acoshift/ds"
+)
+
 // User model
 type User struct {
-	Base
-	Stampable
+	ds.StringIDModel
+	ds.StampModel
 	Username string
 	Name     string `datastore:",noindex"`
 	Photo    string `datastore:",noindex"`

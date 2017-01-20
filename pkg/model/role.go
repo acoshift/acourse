@@ -1,9 +1,13 @@
 package model
 
+import (
+	"github.com/acoshift/ds"
+)
+
 // Role model store user's role
 type Role struct {
-	Base
-	Stampable
+	ds.StringIDModel
+	ds.StampModel
 
 	// roles
 	Admin      bool
