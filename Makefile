@@ -1,11 +1,13 @@
 # commands
 
+GO=go1.8rc2
+
 deploy: clean dep ui pre-build config-prod build docker push hook
 
 clean: clean-ui clean-build
 
 dev:
-	env CONFIG=private/config.stag.yaml go run cmd/acourse/main.go
+	env CONFIG=private/config.stag.yaml $(GO) run cmd/acourse/main.go
 
 indexes: project
 	gcloud datastore create-indexes index.yaml
@@ -23,10 +25,10 @@ local: clean-ui
 	rm -rf public/static
 
 dep:
-	go get -v github.com/acoshift/acourse/cmd/acourse
+	$(GO) get -v github.com/acoshift/acourse/cmd/acourse
 
 re-dep:
-	go get -u -v github.com/acoshift/acourse/cmd/acourse
+	$(GO) get -u -v github.com/acoshift/acourse/cmd/acourse
 
 # steps
 # do not manually call step
@@ -49,7 +51,7 @@ project:
 
 .PHONY: build
 build:
-	env GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o .build/acourse -a -ldflags '-s' github.com/acoshift/acourse/cmd/acourse
+	env GOOS=linux GOARCH=amd64 CGO_ENABLED=0 $(GO) build -o .build/acourse -a -ldflags '-s' github.com/acoshift/acourse/cmd/acourse
 
 config-stag:
 	cp private/config.stag.yaml .build/config.yaml

@@ -5,7 +5,6 @@ import (
 
 	"github.com/acoshift/acourse/pkg/acourse"
 	"github.com/acoshift/acourse/pkg/model"
-	_context "golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 )
@@ -27,7 +26,7 @@ type userServiceServer struct {
 	store Store
 }
 
-func (s *userServiceServer) GetUser(ctx _context.Context, req *acourse.GetUserRequest) (*acourse.GetUserResponse, error) {
+func (s *userServiceServer) GetUser(ctx context.Context, req *acourse.GetUserRequest) (*acourse.GetUserResponse, error) {
 	users, err := s.store.UserGetMulti(ctx, req.GetUserIds())
 	if err != nil {
 		return nil, err
@@ -35,7 +34,7 @@ func (s *userServiceServer) GetUser(ctx _context.Context, req *acourse.GetUserRe
 	return &acourse.GetUserResponse{Users: acourse.ToUsers(users)}, nil
 }
 
-func (s *userServiceServer) GetMe(ctx _context.Context, req *acourse.Empty) (*acourse.GetMeResponse, error) {
+func (s *userServiceServer) GetMe(ctx context.Context, req *acourse.Empty) (*acourse.GetMeResponse, error) {
 	userID, ok := ctx.Value(acourse.KeyUserID).(string)
 	if !ok || userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
@@ -54,7 +53,7 @@ func (s *userServiceServer) GetMe(ctx _context.Context, req *acourse.Empty) (*ac
 	}, nil
 }
 
-func (s *userServiceServer) UpdateMe(ctx _context.Context, req *acourse.User) (*acourse.Empty, error) {
+func (s *userServiceServer) UpdateMe(ctx context.Context, req *acourse.User) (*acourse.Empty, error) {
 	userID, ok := ctx.Value(acourse.KeyUserID).(string)
 	if !ok || userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
