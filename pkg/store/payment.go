@@ -39,7 +39,7 @@ func (c *DB) PaymentList(ctx context.Context, opts ...PaymentListOption) (model.
 
 	qs = append(qs, ds.Order("CreatedAt"))
 
-	err := c.client.Query(ctx, &model.Payment{}, &xs, qs...)
+	err := c.client.Query(ctx, kindPayment, &xs, qs...)
 	err = ds.IgnoreFieldMismatch(err)
 	if err != nil {
 		return nil, err
@@ -49,12 +49,12 @@ func (c *DB) PaymentList(ctx context.Context, opts ...PaymentListOption) (model.
 
 // PaymentSave saves a payment to database
 func (c *DB) PaymentSave(ctx context.Context, x *model.Payment) error {
-	return c.client.Save(ctx, x)
+	return c.client.Save(ctx, kindPayment, x)
 }
 
 // PaymentSaveMulti saves multiple payments to database
 func (c *DB) PaymentSaveMulti(ctx context.Context, payments model.Payments) error {
-	err := c.client.SaveMulti(ctx, payments)
+	err := c.client.SaveMulti(ctx, kindPayment, payments)
 	if err != nil {
 		return err
 	}
@@ -64,7 +64,7 @@ func (c *DB) PaymentSaveMulti(ctx context.Context, payments model.Payments) erro
 // PaymentGet retrieves a payment from database
 func (c *DB) PaymentGet(ctx context.Context, paymentID string) (*model.Payment, error) {
 	var x model.Payment
-	err := c.client.GetByID(ctx, paymentID, &x)
+	err := c.client.GetByStringID(ctx, kindPayment, paymentID, &x)
 	err = ds.IgnoreFieldMismatch(err)
 	if ds.NotFound(err) {
 		return nil, nil
@@ -78,7 +78,7 @@ func (c *DB) PaymentGet(ctx context.Context, paymentID string) (*model.Payment, 
 // PaymentFind finds a payment with user id and course id
 func (c *DB) PaymentFind(ctx context.Context, userID, courseID string, status model.PaymentStatus) (*model.Payment, error) {
 	var x model.Payment
-	err := c.client.QueryFirst(ctx, &x,
+	err := c.client.QueryFirst(ctx, kindPayment, &x,
 		ds.Filter("UserID =", userID),
 		ds.Filter("CourseID =", courseID),
 		ds.Filter("Status =", string(status)),
@@ -100,7 +100,7 @@ func (c *DB) PaymentGetMulti(ctx context.Context, paymentIDs []string) (model.Pa
 	}
 
 	payments := make([]*model.Payment, len(paymentIDs))
-	err := c.client.GetByIDs(ctx, paymentIDs, &model.Payment{}, &payments)
+	err := c.client.GetByStringIDs(ctx, kindPayment, paymentIDs, &payments)
 	err = ds.IgnoreFieldMismatch(err)
 	if err != nil {
 		return nil, err

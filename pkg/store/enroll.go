@@ -15,7 +15,7 @@ var cacheEnrollCount = gotcha.New()
 func (c *DB) EnrollFind(ctx context.Context, userID, courseID string) (*model.Enroll, error) {
 	var x model.Enroll
 
-	err := c.client.QueryFirst(ctx, &x,
+	err := c.client.QueryFirst(ctx, kindEnroll, &x,
 		ds.Filter("UserID =", userID),
 		ds.Filter("CourseID =", courseID),
 	)
@@ -33,7 +33,7 @@ func (c *DB) EnrollFind(ctx context.Context, userID, courseID string) (*model.En
 func (c *DB) EnrollListByUserID(ctx context.Context, userID string) (model.Enrolls, error) {
 	var xs []*model.Enroll
 
-	err := c.client.Query(ctx, &model.Enroll{}, &xs,
+	err := c.client.Query(ctx, kindEnroll, &xs,
 		ds.Filter("UserID =", userID),
 	)
 	if err != nil {
@@ -48,7 +48,7 @@ func (c *DB) EnrollSave(ctx context.Context, x *model.Enroll) error {
 	// TODO: race condition
 	// TODO: use keysonly query
 	var t model.Enroll
-	err := c.client.QueryFirst(ctx, &t,
+	err := c.client.QueryFirst(ctx, kindEnroll, &t,
 		ds.Filter("UserID =", x.UserID),
 		ds.Filter("CourseID =", x.CourseID),
 	)
@@ -56,7 +56,7 @@ func (c *DB) EnrollSave(ctx context.Context, x *model.Enroll) error {
 		return ErrConflict("enroll already exists")
 	}
 
-	err = c.client.Save(ctx, x)
+	err = c.client.Save(ctx, kindEnroll, x)
 	if err != nil {
 		return err
 	}
@@ -71,7 +71,7 @@ func (c *DB) EnrollCourseCount(ctx context.Context, courseID string) (int, error
 		return cache.(int), nil
 	}
 
-	keys, err := c.client.QueryKeys(ctx, &model.Enroll{}, ds.Filter("CourseID =", courseID))
+	keys, err := c.client.QueryKeys(ctx, kindEnroll, ds.Filter("CourseID =", courseID))
 	if err != nil {
 		return 0, err
 	}
@@ -85,10 +85,9 @@ func (c *DB) EnrollCourseCount(ctx context.Context, courseID string) (int, error
 func (c *DB) EnrollSaveMulti(ctx context.Context, enrolls []*model.Enroll) error {
 	// TODO: change to ds
 	keys := make([]*datastore.Key, 0, len(enrolls))
-	kind := (&model.Enroll{}).Kind()
 	for _, enroll := range enrolls {
 		enroll.Stamp()
-		keys = append(keys, datastore.IncompleteKey(kind, nil))
+		keys = append(keys, datastore.IncompleteKey(kindEnroll, nil))
 	}
 
 	var pKeys []*datastore.PendingKey
@@ -97,7 +96,7 @@ func (c *DB) EnrollSaveMulti(ctx context.Context, enrolls []*model.Enroll) error
 		var t model.Enroll
 		var err error
 		for _, enroll := range enrolls {
-			err = c.client.QueryFirst(ctx, &t,
+			err = c.client.QueryFirst(ctx, kindEnroll, &t,
 				ds.Filter("UserID =", enroll.UserID),
 				ds.Filter("CourseID =", enroll.CourseID),
 				ds.Transaction(tx),

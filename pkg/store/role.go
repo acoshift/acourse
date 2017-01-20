@@ -9,8 +9,6 @@ import (
 	"github.com/acoshift/gotcha"
 )
 
-const kindRole = "Role"
-
 var cacheRole = gotcha.New()
 
 func (c *DB) initRole() {
@@ -55,7 +53,7 @@ func (c *DB) RoleSave(ctx context.Context, x *model.Role) error {
 	if x.Key() == nil {
 		return ErrInvalidID
 	}
-	err := c.client.Save(ctx, x)
+	err := c.client.Save(ctx, kindRole, x)
 	if err != nil {
 		return err
 	}
@@ -66,7 +64,7 @@ func (c *DB) RoleSave(ctx context.Context, x *model.Role) error {
 // RoleList retrieves all role in database
 func (c *DB) RoleList(ctx context.Context) ([]*model.Role, error) {
 	var xs []*model.Role
-	err := c.client.Query(ctx, &model.Role{}, &xs)
+	err := c.client.Query(ctx, kindRole, &xs)
 	if err != nil {
 		return nil, err
 	}

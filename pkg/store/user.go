@@ -39,7 +39,7 @@ func (c *DB) UserGet(ctx context.Context, userID string) (*model.User, error) {
 	var err error
 	var x model.User
 
-	err = c.client.GetByName(ctx, userID, &x)
+	err = c.client.GetByName(ctx, kindUser, userID, &x)
 	err = ds.IgnoreFieldMismatch(err)
 	if ds.NotFound(err) {
 		return nil, nil
@@ -75,7 +75,7 @@ func (c *DB) UserGetMulti(ctx context.Context, userIDs []string) (model.Users, e
 	}
 
 	xs := make([]*model.User, len(ids))
-	err := c.client.GetByNames(ctx, ids, &model.User{}, xs)
+	err := c.client.GetByNames(ctx, kindUser, ids, xs)
 	err = ds.IgnoreNotFound(err)
 	err = ds.IgnoreFieldMismatch(err)
 	if err != nil {
@@ -85,7 +85,7 @@ func (c *DB) UserGetMulti(ctx context.Context, userIDs []string) (model.Users, e
 	for i, x := range xs {
 		if x == nil {
 			x = &model.User{}
-			x.SetNameKey(x, ids[i])
+			x.SetNameKey(kindUser, ids[i])
 		}
 		users = append(users, x)
 		cacheUser.Set(x.ID, x)
@@ -102,7 +102,7 @@ func (c *DB) UserMustGet(ctx context.Context, userID string) (*model.User, error
 	}
 	if x == nil {
 		x = &model.User{}
-		x.SetNameKey(x, userID)
+		x.SetNameKey(kindUser, userID)
 	}
 	return x, nil
 }
@@ -111,7 +111,7 @@ func (c *DB) UserMustGet(ctx context.Context, userID string) (*model.User, error
 func (c *DB) UserFindUsername(ctx context.Context, username string) (*model.User, error) {
 	var x model.User
 
-	err := c.client.QueryFirst(ctx, &x, ds.Filter("Username =", username))
+	err := c.client.QueryFirst(ctx, kindUser, &x, ds.Filter("Username =", username))
 	err = ds.IgnoreFieldMismatch(err)
 	if ds.NotFound(err) {
 		return nil, nil
@@ -139,7 +139,7 @@ func (c *DB) UserSave(ctx context.Context, x *model.User) error {
 		}
 	}
 
-	err := c.client.Save(ctx, x)
+	err := c.client.Save(ctx, kindUser, x)
 	cacheUser.Unset(x.ID)
 	return err
 }
@@ -155,12 +155,12 @@ func (c *DB) UserCreateAll(ctx context.Context, userIDs []string, xs []*model.Us
 		if userIDs[i] == "" {
 			return ErrInvalidID
 		}
-		x.SetNameKey(&model.User{}, userIDs[i])
+		x.SetNameKey(kindUser, userIDs[i])
 	}
 
 	// TODO: check duplicated username
 
-	err := c.client.SaveMulti(ctx, xs)
+	err := c.client.SaveMulti(ctx, kindUser, xs)
 	if err != nil {
 		return err
 	}
@@ -172,7 +172,7 @@ func (c *DB) UserCreate(ctx context.Context, userID string, x *model.User) error
 	if userID == "" {
 		return ErrInvalidID
 	}
-	x.SetNameKey(x, userID)
+	x.SetNameKey(kindUser, userID)
 	err := c.UserSave(ctx, x)
 	if err != nil {
 		return err
@@ -184,7 +184,7 @@ func (c *DB) UserCreate(ctx context.Context, userID string, x *model.User) error
 // UserList retrieves all users
 func (c *DB) UserList(ctx context.Context) ([]*model.User, error) {
 	var xs []*model.User
-	err := c.client.Query(ctx, &model.User{}, &xs)
+	err := c.client.Query(ctx, kindUser, &xs)
 	err = ds.IgnoreFieldMismatch(err)
 	if err != nil {
 		return nil, err

@@ -8,7 +8,7 @@ import (
 
 // Course model
 type Course struct {
-	ds.Model
+	ds.StringIDModel
 	ds.StampModel
 	Title            string `datastore:",noindex"`
 	ShortDescription string `datastore:",noindex"`
@@ -25,9 +25,6 @@ type Course struct {
 	Contents         CourseContents `datastore:",noindex"`
 	EnrollDetail     string         `datastore:",noindex"`
 }
-
-// Kind implements Kind interface
-func (*Course) Kind() string { return "Course" }
 
 // Courses model
 type Courses []*Course

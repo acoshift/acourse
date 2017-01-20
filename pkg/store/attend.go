@@ -11,7 +11,7 @@ import (
 // AttendFind finds attends for given user id and course id
 func (c *DB) AttendFind(ctx context.Context, userID, courseID string) (*model.Attend, error) {
 	var x model.Attend
-	err := c.client.QueryFirst(ctx, &x,
+	err := c.client.QueryFirst(ctx, kindAttend, &x,
 		ds.Filter("UserID =", userID),
 		ds.Filter("CourseID =", courseID),
 		ds.CreateAfter(time.Now().Add(-6*time.Hour), true),
@@ -28,5 +28,5 @@ func (c *DB) AttendFind(ctx context.Context, userID, courseID string) (*model.At
 
 // AttendSave saves attend to database
 func (c *DB) AttendSave(ctx context.Context, x *model.Attend) error {
-	return c.client.Save(ctx, x)
+	return c.client.Save(ctx, kindAttend, x)
 }
