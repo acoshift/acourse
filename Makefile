@@ -68,8 +68,8 @@ docker:
 	cd .build && docker build -t acourse .
 
 push:
-	docker tag acourse b.gcr.io/acoshift/acourse
-	gcloud docker -- push b.gcr.io/acoshift/acourse
+	docker tag acourse gcr.io/acourse-d9d0a/acourse
+	gcloud docker -- push gcr.io/acourse-d9d0a/acourse
 
 hook:
 	./private/hook.sh
