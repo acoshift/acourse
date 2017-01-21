@@ -21,7 +21,7 @@ func (c *DB) initRole() {
 			}
 			cacheRole.Purge()
 			for _, x := range xs {
-				cacheRole.Set(x.ID, x)
+				cacheRole.Set(x.GetID(), x)
 			}
 			log.Println("Cached Roles")
 			time.Sleep(time.Hour)
@@ -57,7 +57,7 @@ func (c *DB) RoleSave(ctx context.Context, x *model.Role) error {
 	if err != nil {
 		return err
 	}
-	cacheRole.Unset(x.ID)
+	cacheRole.Unset(x.GetID())
 	return nil
 }
 

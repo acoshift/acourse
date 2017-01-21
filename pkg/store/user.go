@@ -22,7 +22,7 @@ func (c *DB) initUser() {
 			}
 			cacheUser.Purge()
 			for _, x := range xs {
-				cacheUser.Set(x.ID, x)
+				cacheUser.Set(x.GetID(), x)
 			}
 			log.Println("Cached Users")
 			time.Sleep(time.Hour * 2)
@@ -88,7 +88,7 @@ func (c *DB) UserGetMulti(ctx context.Context, userIDs []string) (model.Users, e
 			x.SetNameKey(kindUser, ids[i])
 		}
 		users = append(users, x)
-		cacheUser.Set(x.ID, x)
+		cacheUser.Set(x.GetID(), x)
 	}
 	return users, nil
 }
@@ -134,13 +134,13 @@ func (c *DB) UserSave(ctx context.Context, x *model.User) error {
 		if err != nil {
 			return err
 		}
-		if u != nil && x.ID != u.ID {
+		if u != nil && x.GetID() != u.GetID() {
 			return ErrConflict("username already exists")
 		}
 	}
 
 	err := c.client.Save(ctx, kindUser, x)
-	cacheUser.Unset(x.ID)
+	cacheUser.Unset(x.GetID())
 	return err
 }
 
@@ -177,7 +177,7 @@ func (c *DB) UserCreate(ctx context.Context, userID string, x *model.User) error
 	if err != nil {
 		return err
 	}
-	cacheUser.Set(x.ID, x)
+	cacheUser.Set(x.GetID(), x)
 	return nil
 }
 
