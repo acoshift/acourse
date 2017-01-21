@@ -15,7 +15,6 @@ Acoshift's course system [Link](https://acourse.io)
 ### Backend
 
 - Go
-- Gin
 - gRPC
 - Protocol Buffers
 - Firebase Authentication
