@@ -183,6 +183,9 @@ func (s *service) SubmitUserAssignment(ctx context.Context, req *acourse.UserAss
 	if assignment == nil {
 		return nil, grpc.Errorf(codes.NotFound, "assignment not found")
 	}
+	if !assignment.Open {
+		return nil, grpc.Errorf(codes.PermissionDenied, "assignment not open")
+	}
 
 	enroll, err := s.store.EnrollFind(ctx, userID, assignment.CourseID)
 	if err != nil {
