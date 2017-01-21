@@ -100,7 +100,7 @@ func (c *DB) PaymentGetMulti(ctx context.Context, paymentIDs []string) (model.Pa
 	}
 
 	payments := make([]*model.Payment, len(paymentIDs))
-	err := c.client.GetByStringIDs(ctx, kindPayment, paymentIDs, &payments)
+	err := c.client.GetByStringIDs(ctx, kindPayment, paymentIDs, payments)
 	err = ds.IgnoreFieldMismatch(err)
 	if err != nil {
 		return nil, err
