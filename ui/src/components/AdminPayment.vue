@@ -96,7 +96,6 @@ export default {
       let price = +window.prompt(`Change ${x.course.title} price from ${x.course.price || 0} to...`)
       if (!price) return
       price = +price
-      console.log(price)
       if (!isFinite(price)) return
       Loader.start('updatePrice')
       Payment.updatePrice(x.id, price)

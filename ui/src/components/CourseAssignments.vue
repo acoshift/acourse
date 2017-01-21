@@ -35,7 +35,6 @@ export default {
         .map(map((x) => x.id))
         .flatMap((ids) => Assignment.getUserAssignments(ids))
         .do(() => Loader.stop('assignment'))
-        .do(console.log)
     }
   },
   methods: {
