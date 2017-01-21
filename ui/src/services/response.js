@@ -27,9 +27,12 @@ const payments = (res) => map(res.payments, (payment) => ({
 
 const assignments = (res) => res.assignments
 
+const userAssignments = (res) => res.userAssignments
+
 export default {
   course,
   courses,
   payments,
-  assignments
+  assignments,
+  userAssignments
 }

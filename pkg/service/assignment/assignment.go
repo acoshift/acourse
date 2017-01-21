@@ -242,7 +242,6 @@ func (s *service) GetUserAssignments(ctx context.Context, req *acourse.Assignmen
 	if err != nil {
 		return nil, err
 	}
-
 	userAssignments := make(model.UserAssignments, 0)
 	for _, assignment := range assignments {
 		// TODO: need refactor

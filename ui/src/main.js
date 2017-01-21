@@ -21,6 +21,7 @@ import 'rxjs/add/operator/catch'
 import 'rxjs/add/operator/finally'
 import 'rxjs/add/operator/share'
 import 'rxjs/add/operator/skip'
+import 'rxjs/add/operator/pluck'
 
 import 'semantic-ui-css/components/accordion.min.js'
 import 'semantic-ui-css/components/checkbox.min.js'

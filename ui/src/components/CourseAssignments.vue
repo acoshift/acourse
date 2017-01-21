@@ -1,46 +1,60 @@
 <template lang="pug">
   .ui.segment(v-if="course")
-    .ui.segment(v-for="(x, i) in course.assignments")
-      h4.ui.header {{ x.title }}
+    .ui.segment(v-for="(x, i) in assignments")
+      h4.ui.header {{i+1}}. {{ x.title }}
       div(v-html="marked(x.description)")
-      // div(v-if="userAssignments")
-      //   div(v-for="(y, i) in userAssignments[x.id]")
-      //     a(target="_bank", :href="y.url") {{ i }}
-      //     br
+      div(v-for="y in findUserAssignments(x.id)")
+        a(target="_bank", :href="y.url") {{ y.id }} ({{ y.createdAt | date('YYYY/MM/DD HH:mm') }})
+        br
       .ui.basic.segment
-        .ui.green.button(v-if="x.open", @click="selectFile(i)") Upload
+        .ui.green.button(v-if="x.open", @click="selectFile(x.id)") Upload
 </template>
 
 <script>
-import { Course, Me, Loader, Document } from 'services'
+import { Course, Loader, Document, Assignment } from 'services'
+import map from 'lodash/fp/map'
+import filter from 'lodash/filter'
 
 export default {
   data () {
     return {
-      courseId: this.$route.params.id,
       select: 0
     }
   },
   subscriptions () {
-    Loader
-    // Loader.start('assignments')
     return {
       course: this.$$route
-        .flatMap((route) => Course.get(route.params.id))
-      // userAssignments: Me.getCourseAssignments(this.courseId).do(() => Loader.stop('assignments'))
+        .flatMap((route) => Course.get(route.params.id)),
+      assignments: this.$watchAsObservable('course')
+        .pluck('newValue')
+        .filter((x) => !!x)
+        .flatMap((course) => Assignment.list(course.id)),
+      userAssignments: this.$watchAsObservable('assignments')
+        .pluck('newValue')
+        .do(() => Loader.start('assignment'))
+        .map(map((x) => x.id))
+        .flatMap((ids) => Assignment.getUserAssignments(ids))
+        .do(() => Loader.stop('assignment'))
+        .do(console.log)
     }
   },
   methods: {
     selectFile (select) {
       this.select = select
       Document.uploadModal.open('*/*')
-        .flatMap((file) => Me.submitCourseAssignment(this.courseId, this.select, file.downloadURL))
+        .flatMap((file) => Assignment.submitUserAssignment(this.select, file.downloadURL))
         .subscribe(
-          null,
+          () => {
+            this.assignments = { ...this.assignments }
+          },
           (err) => {
             Document.openErrorModal('Upload Error', err && err.message || err)
           }
         )
+    },
+    findUserAssignments (assignmentId) {
+      if (!this.userAssignments) return null
+      return filter(this.userAssignments, (x) => x.assignmentId === assignmentId)
     }
   }
 }
