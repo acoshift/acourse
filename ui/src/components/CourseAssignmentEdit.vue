@@ -4,23 +4,26 @@
       .ui.teal.button(@click="openAssignmentModal") Add Assignment
       .ui.divider
       .ui.stackable.grid
-        .two.column.row(v-for="x in assignments")
+        .two.column.row(v-for="(x, i) in assignments")
           .column
-            | {{ x.title }}
-            span ({{ x.users.length }})
+            h3 {{i + 1}}. {{ x.title }}
+            div(v-html="marked(x.description)")
           .action.column
             .ui.red.button(v-if="x.open", @click="closeAssignment(x)") Close
             .ui.blue.button(v-else, @click="openAssignment(x)") Open
-            .ui.green.button Edit
+            // .ui.green.button Edit
     .ui.small.modal(ref="assignmentModal")
       .header Add Assignment
       .content
         .ui.form
           .field
             label Title
-            input(v-model="assignmentCode")
-          .ui.fluid.blue.button(@click="submitAssignmentCode") OK
-    .ui.segment
+            input(v-model="newAssignment.title")
+          .field
+            label Description
+            textarea(v-model="newAssignment.description")
+          .ui.fluid.blue.button(@click="createAssignment") Create
+    // .ui.segment
       .ui.styled.fluid.accordion
         div(v-for="x in assignments")
           .title
@@ -47,13 +50,8 @@
 <script>
 import { Loader, User, Assignment } from 'services'
 import UserAvatar from './UserAvatar'
-import flow from 'lodash/fp/flow'
-import map from 'lodash/fp/map'
-import keys from 'lodash/fp/keys'
-import forEach from 'lodash/fp/forEach'
-import isEmpty from 'lodash/fp/isEmpty'
-import filter from 'lodash/fp/filter'
 
+User
 export default {
   components: {
     UserAvatar
@@ -61,37 +59,49 @@ export default {
   data () {
     return {
       courseId: this.$route.params.id,
-      assignmentCode: '',
-      assignments: null
+      newAssignment: {
+        title: '',
+        description: ''
+      },
+      refresh: 0
+    }
+  },
+  subscriptions () {
+    return {
+      assignments: this.$watchAsObservable('refresh')
+        .do(() => Loader.start('assignment'))
+        .flatMap(() => Assignment.list(this.courseId))
+        .do(() => Loader.stop('assignment'))
     }
   },
   created () {
-    Loader.start('assignment')
-    this.$subscribeTo(Assignment.get(this.courseId),
-      (assignments) => {
-        Loader.stop('assignment')
-        this.assignments = flow(
-          keys,
-          map((id) => ({
-            id,
-            ...assignments.code[id],
-            users: flow(
-              keys,
-              map((x) => ({
-                id: x,
-                files: assignments.user[x][id]
-              })),
-              filter((x) => !isEmpty(x.files)),
-              forEach((x) => User.inject(x))
-            )(assignments.user)
-          }))
-        )(assignments.code)
-        setTimeout(() => {
-          this.$nextTick(() => {
-            $('.accordion').accordion()
-          })
-        }, 500)
-      })
+    this.refresh++
+    // Loader.start('assignment')
+    // this.$subscribeTo(Assignment.get(this.courseId),
+    //   (assignments) => {
+    //     Loader.stop('assignment')
+    //     this.assignments = flow(
+    //       keys,
+    //       map((id) => ({
+    //         id,
+    //         ...assignments.code[id],
+    //         users: flow(
+    //           keys,
+    //           map((x) => ({
+    //             id: x,
+    //             files: assignments.user[x][id]
+    //           })),
+    //           filter((x) => !isEmpty(x.files)),
+    //           forEach((x) => User.inject(x))
+    //         )(assignments.user)
+    //       }))
+    //     )(assignments.code)
+    //     setTimeout(() => {
+    //       this.$nextTick(() => {
+    //         $('.accordion').accordion()
+    //       })
+    //     }, 500)
+    //   })
   },
   updated () {
     this.$nextTick(() => {
@@ -102,19 +112,30 @@ export default {
     openAssignmentModal () {
       $(this.$refs.assignmentModal).modal('show')
     },
-    submitAssignmentCode () {
-      Assignment.addCode(this.courseId, { title: this.assignmentCode })
+    createAssignment () {
+      Assignment.create({ ...this.newAssignment, courseId: this.courseId })
         .subscribe(
           () => {
+            this.newAssignment = {
+              title: '',
+              description: ''
+            }
             $(this.$refs.assignmentModal).modal('hide')
+            this.refresh++
           }
         )
     },
     openAssignment (x) {
-      Assignment.open(this.courseId, x.id, true).subscribe()
+      Assignment.open(x.id)
+        .subscribe(
+          () => this.refresh++
+        )
     },
     closeAssignment (x) {
-      Assignment.open(this.courseId, x.id, false).subscribe()
+      Assignment.close(x.id)
+        .subscribe(
+          () => this.refresh++
+        )
     }
   }
 }

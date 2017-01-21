@@ -5,7 +5,6 @@ import (
 
 	"github.com/acoshift/acourse/pkg/acourse"
 	"github.com/acoshift/acourse/pkg/model"
-	"github.com/acoshift/acourse/pkg/store"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 )
@@ -27,7 +26,7 @@ type Store interface {
 	UserAssignmentSave(context.Context, *model.UserAssignment) error
 	UserAssignmentGet(context.Context, string) (*model.UserAssignment, error)
 	UserAssignmentDelete(context.Context, string) error
-	Query(context.Context, string, interface{}, ...store.Query) error
+	UserAssignmentList(context.Context, string, string) (model.UserAssignments, error)
 }
 
 type service struct {
@@ -58,6 +57,7 @@ func (s *service) CreateAssignment(ctx context.Context, req *acourse.Assignment)
 	}
 
 	assignment := &model.Assignment{
+		CourseID:    req.GetCourseId(),
 		Title:       req.GetTitle(),
 		Description: req.GetDescription(),
 		Open:        req.GetOpen(),
@@ -136,8 +136,7 @@ func (s *service) CloseAssignment(ctx context.Context, req *acourse.AssignmentID
 func (s *service) ListAssignments(ctx context.Context, req *acourse.CourseIDRequest) (*acourse.AssignmentsResponse, error) {
 	// TODO: check is owner or enrolled
 
-	var assignments model.Assignments
-	err := s.store.Query(ctx, "Assignment", &assignments, store.QueryCourseID(req.GetCourseId()))
+	assignments, err := s.store.AssignmentList(ctx, req.GetCourseId())
 	if err != nil {
 		return nil, err
 	}
@@ -246,9 +245,8 @@ func (s *service) GetUserAssignments(ctx context.Context, req *acourse.Assignmen
 
 	userAssignments := make(model.UserAssignments, 0)
 	for _, assignment := range assignments {
-		var tmp model.UserAssignments
 		// TODO: need refactor
-		err := s.store.Query(ctx, "UserAssignment", &userAssignments, store.QueryUserID(userID), store.QueryAssignmentID(assignment.ID))
+		tmp, err := s.store.UserAssignmentList(ctx, assignment.ID, userID)
 		if err != nil {
 			return nil, err
 		}

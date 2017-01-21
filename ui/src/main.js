@@ -35,6 +35,7 @@ import App from './App'
 import './filters'
 import { Firebase } from 'services'
 import router from './router'
+import marked from 'marked'
 
 Raven
   .config('https://fda9f1b21cd04a4585b9f9051b37a466@sentry.io/103020')
@@ -45,6 +46,15 @@ VueRouteRx.use(router)
 Vue.use(VueRx, { Observable, Subscription })
 Vue.use(VueRouteRx, { BehaviorSubject })
 Firebase.init()
+
+Vue.mixin({
+  methods: {
+    marked (data) {
+      if (!data) return ''
+      return marked(data, { sanitize: true })
+    }
+  }
+})
 
 /* eslint-disable no-new */
 new Vue({

@@ -13,6 +13,7 @@ import (
 	"github.com/acoshift/acourse/pkg/app"
 	"github.com/acoshift/acourse/pkg/ctrl/health"
 	"github.com/acoshift/acourse/pkg/ctrl/render"
+	"github.com/acoshift/acourse/pkg/service/assignment"
 	"github.com/acoshift/acourse/pkg/service/course"
 	"github.com/acoshift/acourse/pkg/service/email"
 	"github.com/acoshift/acourse/pkg/service/payment"
@@ -182,12 +183,14 @@ func main() {
 	courseServiceClient := acourse.NewCourseServiceClient(conn)
 	emailServiceClient := acourse.NewEmailServiceClient(conn)
 	paymentServiceClient := acourse.NewPaymentServiceClient(conn)
+	assignmentServiceClient := acourse.NewAssignmentServiceClient(conn)
 
 	// register service clients to http server
 	app.RegisterUserServiceClient(mux, userServiceClient)
 	app.RegisterCourseServiceClient(mux, courseServiceClient)
 	// app.RegisterEmailServiceClient(mux, emailService) // do not expose email service to the world right now
 	app.RegisterPaymentServiceClient(mux, paymentServiceClient)
+	app.RegisterAssignmentServiceClient(mux, assignmentServiceClient)
 
 	// mount controllers
 	app.MountHealthController(mux, health.New())
@@ -210,6 +213,7 @@ func main() {
 			User:     cfg.Email.User,
 			Password: cfg.Email.Password,
 		}))
+		acourse.RegisterAssignmentServiceServer(grpcServer, assignment.New(db))
 		if err = grpcServer.Serve(grpcListener); err != nil {
 			log.Fatal(err)
 		}

@@ -85,3 +85,17 @@ func (c *DB) UserAssignmentGetMulti(ctx context.Context, userAssignmentIDs []str
 	}
 	return xs, nil
 }
+
+// UserAssignmentList retrieves user assignments
+func (c *DB) UserAssignmentList(ctx context.Context, assignmentID, userID string) (model.UserAssignments, error) {
+	var xs model.UserAssignments
+	err := c.client.Query(ctx, kindAssignment, &xs,
+		ds.Filter("AssignmentID =", assignmentID),
+		ds.Filter("UserID =", userID),
+	)
+	err = ds.IgnoreFieldMismatch(err)
+	if err != nil {
+		return nil, err
+	}
+	return xs, nil
+}

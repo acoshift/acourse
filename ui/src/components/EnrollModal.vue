@@ -14,7 +14,6 @@
 
 <script>
 import { Document, Course } from 'services'
-import marked from 'marked'
 
 export default {
   props: {
@@ -37,7 +36,7 @@ export default {
     },
     detail () {
       if (!this.course.enrollDetail) return ''
-      return marked(this.course.enrollDetail, { sanitize: true })
+      return this.marked(this.course.enrollDetail)
     }
   },
   methods: {

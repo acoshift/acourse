@@ -25,8 +25,11 @@ const payments = (res) => map(res.payments, (payment) => ({
   course: find(res.courses, { id: payment.courseId })
 }))
 
+const assignments = (res) => res.assignments
+
 export default {
   course,
   courses,
-  payments
+  payments,
+  assignments
 }

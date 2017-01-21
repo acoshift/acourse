@@ -13,7 +13,6 @@
 
 <script>
 import { Course, Me, Loader, Document } from 'services'
-import marked from 'marked'
 
 export default {
   data () {
@@ -42,10 +41,6 @@ export default {
             Document.openErrorModal('Upload Error', err && err.message || err)
           }
         )
-    },
-    marked (data) {
-      if (!data) return ''
-      return marked(data)
     }
   }
 }
