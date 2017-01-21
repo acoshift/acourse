@@ -9,7 +9,7 @@ func UniqueIDs(in []string) []string {
 	for _, id := range in {
 		idMap[id] = true
 	}
-	res := make([]string, len(idMap))
+	res := make([]string, 0, len(idMap))
 	for id := range idMap {
 		res = append(res, id)
 	}
