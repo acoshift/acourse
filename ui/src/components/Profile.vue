@@ -5,6 +5,9 @@
       .ui.right.aligned.basic.segment
         router-link.ui.green.edit.button(to='/profile/edit') Edit
       .ui.basic.segment
+        h4.ui.header User ID
+        p(v-if="currentUser") {{ currentUser.id }}
+      .ui.basic.segment
         h4.ui.header Link Accounts
         .ui.google.plus.button(v-if='!isLinkedGoogle', @click='linkGoogle')
           i.google.plus.icon
