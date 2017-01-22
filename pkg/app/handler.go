@@ -2,6 +2,7 @@ package app
 
 import (
 	"encoding/json"
+	"io"
 	"log"
 	"net/http"
 
@@ -29,9 +30,11 @@ func handleJSON(w http.ResponseWriter, status int, v interface{}) {
 	}
 }
 
+const maxBodySize = 1 << (10 * 2)
+
 func bindJSON(r *http.Request, dst interface{}) error {
 	defer r.Body.Close()
-	return json.NewDecoder(r.Body).Decode(dst)
+	return json.NewDecoder(io.LimitReader(r.Body, maxBodySize)).Decode(dst)
 }
 
 func handleOK(w http.ResponseWriter, v interface{}) {
