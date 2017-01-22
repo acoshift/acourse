@@ -39,8 +39,11 @@ type Config struct {
 		User     string `yaml:"user"`
 		Password string `yaml:"password"`
 	} `yaml:"email"`
-	ServiceAccountString string `yaml:"serviceAccount"`
-	ServiceAccount       []byte `yaml:"-"`
+	Firebase struct {
+		ProjectID      string `yaml:"projectId"`
+		ServiceAccount string `yaml:"serviceAccount"`
+	} `yaml:"firebase"`
+	ServiceAccount string `yaml:"serviceAccount"`
 }
 
 // LoadConfig loads config from file
@@ -54,7 +57,6 @@ func LoadConfig(filename string) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	cfg.ServiceAccount = []byte(cfg.ServiceAccountString)
 	return &cfg, nil
 }
 
@@ -135,15 +137,15 @@ func main() {
 	}
 
 	firApp, err := admin.InitializeApp(admin.AppOptions{
-		ProjectID:      cfg.ProjectID,
-		ServiceAccount: cfg.ServiceAccount,
+		ProjectID:      cfg.Firebase.ProjectID,
+		ServiceAccount: []byte(cfg.Firebase.ServiceAccount),
 	})
 	if err != nil {
 		return
 	}
 	firAuth := firApp.Auth()
 
-	db := store.NewDB(store.ProjectID(cfg.ProjectID), store.ServiceAccount(cfg.ServiceAccount))
+	db := store.NewDB(store.ProjectID(cfg.ProjectID), store.ServiceAccount([]byte(cfg.ServiceAccount)))
 
 	httpServer := chain(
 		logger,
