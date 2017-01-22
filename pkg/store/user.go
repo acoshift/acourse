@@ -22,7 +22,7 @@ func (c *DB) initUser() {
 			}
 			cacheUser.Purge()
 			for _, x := range xs {
-				cacheUser.Set(x.GetID(), x)
+				cacheUser.Set(x.ID(), x)
 			}
 			log.Println("Cached Users")
 			time.Sleep(time.Hour * 2)
@@ -85,10 +85,10 @@ func (c *DB) UserGetMulti(ctx context.Context, userIDs []string) (model.Users, e
 	for i, x := range xs {
 		if x == nil {
 			x = &model.User{}
-			x.SetNameKey(kindUser, ids[i])
+			x.SetNameID(kindUser, ids[i])
 		}
 		users = append(users, x)
-		cacheUser.Set(x.GetID(), x)
+		cacheUser.Set(x.ID(), x)
 	}
 	return users, nil
 }
@@ -102,7 +102,7 @@ func (c *DB) UserMustGet(ctx context.Context, userID string) (*model.User, error
 	}
 	if x == nil {
 		x = &model.User{}
-		x.SetNameKey(kindUser, userID)
+		x.SetNameID(kindUser, userID)
 	}
 	return x, nil
 }
@@ -134,13 +134,13 @@ func (c *DB) UserSave(ctx context.Context, x *model.User) error {
 		if err != nil {
 			return err
 		}
-		if u != nil && x.GetID() != u.GetID() {
+		if u != nil && x.ID() != u.ID() {
 			return ErrConflict("username already exists")
 		}
 	}
 
 	err := c.client.Save(ctx, kindUser, x)
-	cacheUser.Unset(x.GetID())
+	cacheUser.Unset(x.ID())
 	return err
 }
 
@@ -155,7 +155,7 @@ func (c *DB) UserCreateAll(ctx context.Context, userIDs []string, xs []*model.Us
 		if userIDs[i] == "" {
 			return ErrInvalidID
 		}
-		x.SetNameKey(kindUser, userIDs[i])
+		x.SetNameID(kindUser, userIDs[i])
 	}
 
 	// TODO: check duplicated username
@@ -172,12 +172,12 @@ func (c *DB) UserCreate(ctx context.Context, userID string, x *model.User) error
 	if userID == "" {
 		return ErrInvalidID
 	}
-	x.SetNameKey(kindUser, userID)
+	x.SetNameID(kindUser, userID)
 	err := c.UserSave(ctx, x)
 	if err != nil {
 		return err
 	}
-	cacheUser.Set(x.GetID(), x)
+	cacheUser.Set(x.ID(), x)
 	return nil
 }
 

@@ -197,7 +197,7 @@ func (s *service) SubmitUserAssignment(ctx context.Context, req *acourse.UserAss
 
 	// create model
 	userAssignment := &model.UserAssignment{
-		AssignmentID: assignment.GetID(),
+		AssignmentID: assignment.ID(),
 		UserID:       userID,
 		URL:          req.GetUrl(),
 	}
@@ -248,7 +248,7 @@ func (s *service) GetUserAssignments(ctx context.Context, req *acourse.Assignmen
 	userAssignments := make(model.UserAssignments, 0)
 	for _, assignment := range assignments {
 		// TODO: need refactor
-		tmp, err := s.store.UserAssignmentList(ctx, assignment.GetID(), userID)
+		tmp, err := s.store.UserAssignmentList(ctx, assignment.ID(), userID)
 		if err != nil {
 			return nil, err
 		}

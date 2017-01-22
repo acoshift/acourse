@@ -94,7 +94,7 @@ func (c *DB) CourseGet(ctx context.Context, courseID string) (*model.Course, err
 func (c *DB) CourseSave(ctx context.Context, x *model.Course) error {
 	// Check duplicate URL
 	if x.URL != "" {
-		if t, err := c.CourseFind(ctx, x.URL); (t != nil && t.GetID() != x.GetID()) || err != nil {
+		if t, err := c.CourseFind(ctx, x.URL); (t != nil && t.ID() != x.ID()) || err != nil {
 			if err != nil {
 				return err
 			}
@@ -107,7 +107,7 @@ func (c *DB) CourseSave(ctx context.Context, x *model.Course) error {
 		return err
 	}
 
-	cacheCourse.Unset(x.GetID())
+	cacheCourse.Unset(x.ID())
 	return nil
 }
 
@@ -174,7 +174,7 @@ func (c *DB) CourseFind(ctx context.Context, courseURL string) (*model.Course, e
 	if err != nil {
 		return nil, err
 	}
-	cacheCourseURL.SetTTL(courseURL, x.GetID(), time.Minute*5)
+	cacheCourseURL.SetTTL(courseURL, x.ID(), time.Minute*5)
 	return &x, nil
 }
 
@@ -223,7 +223,7 @@ func (c *DB) CourseGetMulti(ctx context.Context, courseIDs []string) (model.Cour
 			continue
 		}
 		courses = append(courses, x)
-		cacheCourse.SetTTL(x.GetID(), x, time.Minute)
+		cacheCourse.SetTTL(x.ID(), x, time.Minute)
 	}
 	return courses, nil
 }

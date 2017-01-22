@@ -211,7 +211,7 @@ func (s *service) sendApprovedNotification(payments []*model.Payment) {
 			user.Name,
 			course.Title,
 			course.Title,
-			payment.GetID(),
+			payment.ID(),
 			course.Title,
 			payment.Price,
 			payment.CreatedAt.Format(time.RFC822),

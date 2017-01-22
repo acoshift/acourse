@@ -9,7 +9,7 @@ import (
 // ToUser builds an User message from an User model
 func ToUser(x *model.User) *User {
 	return &User{
-		Id:       x.GetID(),
+		Id:       x.ID(),
 		Username: x.Username,
 		Name:     x.Name,
 		Photo:    x.Photo,
@@ -29,7 +29,7 @@ func ToUsers(xs model.Users) []*User {
 // ToUserTiny builds an User tiny message from an User model
 func ToUserTiny(x *model.User) *UserTiny {
 	return &UserTiny{
-		Id:       x.GetID(),
+		Id:       x.ID(),
 		Username: x.Username,
 		Name:     x.Username,
 		Photo:    x.Photo,
@@ -60,7 +60,7 @@ func formatTime(t time.Time) string {
 // ToPayment builds a Payment message from Payment model
 func ToPayment(x *model.Payment) *Payment {
 	return &Payment{
-		Id:            x.GetID(),
+		Id:            x.ID(),
 		CreatedAt:     formatTime(x.CreatedAt),
 		UpdatedAt:     formatTime(x.UpdatedAt),
 		UserId:        x.UserID,
@@ -86,7 +86,7 @@ func ToPayments(xs model.Payments) []*Payment {
 // ToCourse builds a Course message from Course model
 func ToCourse(x *model.Course) *Course {
 	r := &Course{
-		Id:               x.GetID(),
+		Id:               x.ID(),
 		CreatedAt:        formatTime(x.CreatedAt),
 		UpdatedAt:        formatTime(x.UpdatedAt),
 		Title:            x.Title,
@@ -135,7 +135,7 @@ func ToCourses(xs model.Courses) []*Course {
 // ToCourseSmall builds a Course small message from a Course model
 func ToCourseSmall(x *model.Course) *CourseSmall {
 	return &CourseSmall{
-		Id:               x.GetID(),
+		Id:               x.ID(),
 		Title:            x.Title,
 		ShortDescription: x.ShortDescription,
 		Photo:            x.Photo,
@@ -163,7 +163,7 @@ func ToCoursesSmall(xs model.Courses) []*CourseSmall {
 // ToCourseTiny builds a Course tiny message from Course model
 func ToCourseTiny(x *model.Course) *CourseTiny {
 	return &CourseTiny{
-		Id:    x.GetID(),
+		Id:    x.ID(),
 		Title: x.Title,
 	}
 }
@@ -180,7 +180,7 @@ func ToCoursesTiny(xs model.Courses) []*CourseTiny {
 // ToAssignment builds an Assignment message from an Assignment model
 func ToAssignment(x *model.Assignment) *Assignment {
 	return &Assignment{
-		Id:          x.GetID(),
+		Id:          x.ID(),
 		CreatedAt:   formatTime(x.CreatedAt),
 		UpdatedAt:   formatTime(x.UpdatedAt),
 		Title:       x.Title,
@@ -201,7 +201,7 @@ func ToAssignments(xs model.Assignments) []*Assignment {
 // ToUserAssignment buildss an UserAssignment message from an UserAssignment model
 func ToUserAssignment(x *model.UserAssignment) *UserAssignment {
 	return &UserAssignment{
-		Id:           x.GetID(),
+		Id:           x.ID(),
 		CreatedAt:    formatTime(x.CreatedAt),
 		UpdatedAt:    formatTime(x.UpdatedAt),
 		AssignmentId: x.AssignmentID,
