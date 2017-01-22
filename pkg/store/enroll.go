@@ -56,7 +56,7 @@ func (c *DB) EnrollSave(ctx context.Context, x *model.Enroll) error {
 		return ErrConflict("enroll already exists")
 	}
 
-	err = c.client.Save(ctx, kindEnroll, x)
+	err = c.client.SaveModel(ctx, kindEnroll, x)
 	if err != nil {
 		return err
 	}

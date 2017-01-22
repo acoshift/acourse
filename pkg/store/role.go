@@ -53,7 +53,7 @@ func (c *DB) RoleSave(ctx context.Context, x *model.Role) error {
 	if x.Key() == nil {
 		return ErrInvalidID
 	}
-	err := c.client.Save(ctx, kindRole, x)
+	err := c.client.SaveModel(ctx, kindRole, x)
 	if err != nil {
 		return err
 	}

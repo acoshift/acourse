@@ -139,7 +139,7 @@ func (c *DB) UserSave(ctx context.Context, x *model.User) error {
 		}
 	}
 
-	err := c.client.Save(ctx, kindUser, x)
+	err := c.client.SaveModel(ctx, kindUser, x)
 	cacheUser.Unset(x.ID())
 	return err
 }
@@ -160,7 +160,7 @@ func (c *DB) UserCreateAll(ctx context.Context, userIDs []string, xs []*model.Us
 
 	// TODO: check duplicated username
 
-	err := c.client.SaveMulti(ctx, kindUser, xs)
+	err := c.client.SaveModels(ctx, kindUser, xs)
 	if err != nil {
 		return err
 	}

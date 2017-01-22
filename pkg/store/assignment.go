@@ -44,7 +44,7 @@ func (c *DB) AssignmentGetMulti(ctx context.Context, assignmentIDs []string) (mo
 
 // AssignmentSave saves assignment to database
 func (c *DB) AssignmentSave(ctx context.Context, x *model.Assignment) error {
-	return c.client.Save(ctx, kindAssignment, x)
+	return c.client.SaveModel(ctx, kindAssignment, x)
 }
 
 // AssignmentDelete deletes assignment from database
@@ -54,7 +54,7 @@ func (c *DB) AssignmentDelete(ctx context.Context, assignmentID string) error {
 
 // UserAssignmentSave saves user assignment to database
 func (c *DB) UserAssignmentSave(ctx context.Context, x *model.UserAssignment) error {
-	return c.client.Save(ctx, kindUserAssignment, x)
+	return c.client.SaveModel(ctx, kindUserAssignment, x)
 }
 
 // UserAssignmentGet retrieves an User Assignment from database

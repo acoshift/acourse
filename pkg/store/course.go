@@ -102,7 +102,7 @@ func (c *DB) CourseSave(ctx context.Context, x *model.Course) error {
 		}
 	}
 
-	err := c.client.Save(ctx, kindCourse, x)
+	err := c.client.SaveModel(ctx, kindCourse, x)
 	if err != nil {
 		return err
 	}

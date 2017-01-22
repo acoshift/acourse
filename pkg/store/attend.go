@@ -28,5 +28,5 @@ func (c *DB) AttendFind(ctx context.Context, userID, courseID string) (*model.At
 
 // AttendSave saves attend to database
 func (c *DB) AttendSave(ctx context.Context, x *model.Attend) error {
-	return c.client.Save(ctx, kindAttend, x)
+	return c.client.SaveModel(ctx, kindAttend, x)
 }

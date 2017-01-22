@@ -49,12 +49,12 @@ func (c *DB) PaymentList(ctx context.Context, opts ...PaymentListOption) (model.
 
 // PaymentSave saves a payment to database
 func (c *DB) PaymentSave(ctx context.Context, x *model.Payment) error {
-	return c.client.Save(ctx, kindPayment, x)
+	return c.client.SaveModel(ctx, kindPayment, x)
 }
 
 // PaymentSaveMulti saves multiple payments to database
 func (c *DB) PaymentSaveMulti(ctx context.Context, payments model.Payments) error {
-	err := c.client.SaveMulti(ctx, kindPayment, payments)
+	err := c.client.SaveModels(ctx, kindPayment, payments)
 	if err != nil {
 		return err
 	}
