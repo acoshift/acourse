@@ -41,17 +41,25 @@ type service struct {
 	email acourse.EmailServiceClient
 }
 
-func (s *service) listPayments(ctx context.Context, opts ...store.PaymentListOption) (*acourse.PaymentsResponse, error) {
+func (s *service) validateUser(ctx context.Context) error {
 	userID, ok := ctx.Value(acourse.KeyUserID).(string)
 	if !ok || userID == "" {
-		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
+		return grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
 	role, err := s.store.RoleGet(ctx, userID)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if !role.Admin {
-		return nil, grpc.Errorf(codes.PermissionDenied, "permission denied")
+		return grpc.Errorf(codes.PermissionDenied, "permission denied")
+	}
+	return nil
+}
+
+func (s *service) listPayments(ctx context.Context, opts ...store.PaymentListOption) (*acourse.PaymentsResponse, error) {
+	err := s.validateUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 
 	payments, err := s.store.PaymentList(ctx, opts...)
@@ -100,16 +108,9 @@ func (s *service) ListHistoryPayments(ctx context.Context, req *acourse.ListRequ
 }
 
 func (s *service) ApprovePayments(ctx context.Context, req *acourse.PaymentIDsRequest) (*acourse.Empty, error) {
-	userID, ok := ctx.Value(acourse.KeyUserID).(string)
-	if !ok || userID == "" {
-		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
-	}
-	role, err := s.store.RoleGet(ctx, userID)
+	err := s.validateUser(ctx)
 	if err != nil {
 		return nil, err
-	}
-	if !role.Admin {
-		return nil, grpc.Errorf(codes.PermissionDenied, "permission denied")
 	}
 
 	payments, err := s.store.PaymentGetMulti(ctx, app.UniqueIDs(req.GetPaymentIds()))
@@ -142,16 +143,9 @@ func (s *service) ApprovePayments(ctx context.Context, req *acourse.PaymentIDsRe
 }
 
 func (s *service) RejectPayments(ctx context.Context, req *acourse.PaymentIDsRequest) (*acourse.Empty, error) {
-	userID, ok := ctx.Value(acourse.KeyUserID).(string)
-	if !ok || userID == "" {
-		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
-	}
-	role, err := s.store.RoleGet(ctx, userID)
+	err := s.validateUser(ctx)
 	if err != nil {
 		return nil, err
-	}
-	if !role.Admin {
-		return nil, grpc.Errorf(codes.PermissionDenied, "permission denied")
 	}
 
 	payments, err := s.store.PaymentGetMulti(ctx, app.UniqueIDs(req.GetPaymentIds()))
@@ -167,6 +161,8 @@ func (s *service) RejectPayments(ctx context.Context, req *acourse.PaymentIDsReq
 	if err != nil {
 		return nil, err
 	}
+
+	go s.sendRejectNotification(payments)
 
 	return new(acourse.Empty), nil
 }
@@ -214,8 +210,8 @@ func (s *service) sendApprovedNotification(payments []*model.Payment) {
 			payment.ID(),
 			course.Title,
 			payment.Price,
-			payment.CreatedAt.Format(time.RFC822),
-			payment.At.Format(time.RFC822),
+			payment.CreatedAt.In(timeLocal).Format(time.RFC822),
+			payment.At.In(timeLocal).Format(time.RFC822),
 			user.Name,
 			userInfo.Email,
 		)
@@ -247,18 +243,74 @@ https://acourse.io`
 	}
 }
 
-func (s *service) UpdatePrice(ctx context.Context, req *acourse.PaymentUpdatePriceRequest) (*acourse.Empty, error) {
-	userID, ok := ctx.Value(acourse.KeyUserID).(string)
-	if !ok || userID == "" {
-		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
-	}
+func (s *service) sendRejectNotification(payments []*model.Payment) {
+	ctx := context.Background()
+	for _, payment := range payments {
+		course, err := s.store.CourseGet(ctx, payment.CourseID)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+		userInfo, err := s.auth.GetAccountInfoByUID(payment.UserID)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+		if userInfo.Email == "" {
+			log.Println("User don't have email")
+			continue
+		}
+		user, err := s.store.UserMustGet(ctx, payment.UserID)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+		if user.Name == "" {
+			user.Name = "Anonymous"
+		}
+		if course.URL == "" {
+			course.URL = course.ID()
+		}
+		body := fmt.Sprintf(`สวัสดีครับคุณ %s,<br>
+<br>
+ตามที่ท่านได้ upload file เพื่อใช้ในการสมัครหลักสูตร "%s" เมื่อเวลา %s<br>
+<br>
+ทางทีมงาน acourse.io ขอเรียนแจ้งให้ทราบว่าคำขอของคุณถูกปฏิเสธ โดยอาจจะเกิดจากสาเหตุใด สาเหตุหนึ่ง ตามรายละเอียดด้านล่าง<br>
+<br>
+1.รูปภาพที่ upload ไม่ตรงกับสิ่งที่ระบุไว้ เช่น<br>
+- สำหรับ Course free ไม่มีมัดจำ - รูปภาพต้องเป็นรูป screenshot จากการแชร์ link ของ course "https://acourse.io/course/%s" ไปยัง timeline facebook ของตนเองเท่านั้น<br>
+- สำหรับ Course ประเภทอื่นๆ ให้ลองอ่านรายละเอียดของรูปภาพที่จำเป็นต้องใช้ในการ upload ให้ครบถ้วนและปฏิบัติตามให้ถูกต้อง<br>
+<br>
+2. จำนวนเงินที่ระบุไม่ตรงกับจำนวนเงินที่โอนจริง<br>
+- ในกรณีที่ Course มีส่วนลด ให้ระบุยอดที่โอนเป็นตัวเลขที่ตรงกับยอดโอน เท่านั้น (ไม่ใช่ตัวเลขราคาเต็มของ Course)<br>
+- ในกรณีที่จ่ายผ่าน 3rd party เช่น eventpop ให้ใส่ตามราคาบัตร ไม่รวมค่าบริการอื่น ๆ เช่นค่า fee ของ eventpop<br>
+<br>
+ถ้าติดขัดหรือสงสัยตรงไหนเพิ่มเติม ท่านสามารถ reply email นี้เพื่อสอบถามเพิ่มเติมได้ครับ<br>
+<br>
+ขอบคุณมากครับ<br>
+ทีมงาน acourse.io
+`,
+			user.Name,
+			course.Title,
+			payment.CreatedAt.In(timeLocal).Format(time.RFC822),
+			course.URL,
+		)
 
-	role, err := s.store.RoleGet(ctx, userID)
+		_, err = s.email.Send(context.Background(), &acourse.Email{
+			To:      []string{userInfo.Email},
+			Subject: fmt.Sprintf("คำขอเพื่อเรียนหลักสูตร %s ได้รับการปฏิเสธ", course.Title),
+			Body:    body,
+		})
+		if err != nil {
+			log.Println(err)
+		}
+	}
+}
+
+func (s *service) UpdatePrice(ctx context.Context, req *acourse.PaymentUpdatePriceRequest) (*acourse.Empty, error) {
+	err := s.validateUser(ctx)
 	if err != nil {
 		return nil, err
-	}
-	if !role.Admin {
-		return nil, grpc.Errorf(codes.PermissionDenied, "permission denied")
 	}
 
 	if req.GetPaymentId() == "" {
@@ -300,4 +352,14 @@ func StartNotification(s Store, email acourse.EmailServiceClient) {
 			}
 		}
 	}()
+}
+
+var timeLocal *time.Location
+
+func init() {
+	var err error
+	timeLocal, err = time.LoadLocation("Asia/Bangkok")
+	if err != nil {
+		timeLocal = time.UTC
+	}
 }
