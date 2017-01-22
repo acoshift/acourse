@@ -1,6 +1,8 @@
 # commands
 
 GO=go1.8rc2
+PROJECT=acourse-156413
+# PROJECT=acourse-d9d0a
 
 deploy: clean dep ui pre-build config-prod build docker push hook
 
@@ -48,7 +50,7 @@ ui: clean-ui
 	rm -rf public/static
 
 project:
-	gcloud config set project acourse-d9d0a
+	gcloud config set project $(PROJECT)
 
 .PHONY: build
 build:
