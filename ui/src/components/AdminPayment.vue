@@ -94,7 +94,7 @@ export default {
     },
     editPrice (x) {
       let price = +window.prompt(`Change ${x.course.title} price from ${x.course.price || 0} to...`)
-      if (!price) return
+      if (!price && price !== 0) return
       price = +price
       if (!isFinite(price)) return
       Loader.start('updatePrice')
