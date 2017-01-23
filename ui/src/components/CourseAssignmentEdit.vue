@@ -1,7 +1,7 @@
 <template lang="pug">
   div
     .ui.segment(style="padding-bottom: 2rem;")
-      .ui.teal.button(@click="openAssignmentModal") Add Assignment
+      .ui.teal.button(@click="createAssignment") Add Assignment
       .ui.divider
       .ui.stackable.grid
         .two.column.row(v-for="(x, i) in assignments")
@@ -11,18 +11,23 @@
           .action.column
             .ui.red.button(v-if="x.open", @click="closeAssignment(x)") Close
             .ui.blue.button(v-else, @click="openAssignment(x)") Open
-            // .ui.green.button Edit
+            .ui.green.button(@click="editAssignment(x)") Edit
     .ui.small.modal(ref="assignmentModal")
-      .header Add Assignment
+      .header
+        span(v-if="assignment.id") Edit
+        span(v-else) Add
+        | &nbsp;Assignment
       .content
         .ui.form
           .field
             label Title
-            input(v-model="newAssignment.title")
+            input(v-model="assignment.title")
           .field
-            label Description
-            textarea(v-model="newAssignment.description")
-          .ui.fluid.blue.button(@click="createAssignment") Create
+            label Description (markdown)
+            textarea(v-model="assignment.description")
+          .ui.fluid.blue.button(@click="submitAssignment")
+            span(v-if="assignment.id") Edit
+            span(v-else) Create
     // .ui.segment
       .ui.styled.fluid.accordion
         div(v-for="x in assignments")
@@ -59,7 +64,8 @@ export default {
   data () {
     return {
       courseId: this.$route.params.id,
-      newAssignment: {
+      assignment: {
+        id: '',
         title: '',
         description: ''
       },
@@ -112,11 +118,14 @@ export default {
     openAssignmentModal () {
       $(this.$refs.assignmentModal).modal('show')
     },
-    createAssignment () {
-      Assignment.create({ ...this.newAssignment, courseId: this.courseId })
+    submitAssignment () {
+      ;(this.assignment.id
+        ? Assignment.update(this.assignment)
+        : Assignment.create({ ...this.assignment, courseId: this.courseId }))
         .subscribe(
           () => {
-            this.newAssignment = {
+            this.assignment = {
+              id: '',
               title: '',
               description: ''
             }
@@ -136,6 +145,22 @@ export default {
         .subscribe(
           () => this.refresh++
         )
+    },
+    createAssignment () {
+      this.assignment = {
+        id: '',
+        title: '',
+        description: ''
+      }
+      this.openAssignmentModal()
+    },
+    editAssignment (x) {
+      this.assignment = {
+        id: x.id,
+        title: x.title,
+        description: x.description
+      }
+      this.openAssignmentModal()
     }
   }
 }

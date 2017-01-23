@@ -76,16 +76,16 @@ func (s *service) UpdateAssignment(ctx context.Context, req *acourse.Assignment)
 	if !ok || userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
-	if err := s.isCourseOwner(ctx, req.GetCourseId(), userID); err != nil {
-		return nil, err
-	}
-
 	assignment, err := s.store.AssignmentGet(ctx, req.GetId())
 	if err != nil {
 		return nil, err
 	}
 	if assignment == nil {
 		return nil, grpc.Errorf(codes.NotFound, "assignment not found")
+	}
+
+	if err := s.isCourseOwner(ctx, assignment.CourseID, userID); err != nil {
+		return nil, err
 	}
 
 	assignment.Title = req.GetTitle()

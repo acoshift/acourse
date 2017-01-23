@@ -12,6 +12,12 @@ const create = ({ courseId, title, description }) => RPC.invoke(sv + '/CreateAss
   description
 })
 
+const update = ({ id, title, description }) => RPC.invoke(sv + '/UpdateAssignment', {
+  id,
+  title,
+  description
+})
+
 const open = (assignmentId) => RPC.invoke(sv + '/OpenAssignment', { assignmentId })
 const close = (assignmentId) => RPC.invoke(sv + '/CloseAssignment', { assignmentId })
 
@@ -28,6 +34,7 @@ const submitUserAssignment = (assignmentId, url) => RPC.invoke(sv + '/SubmitUser
 export default {
   list,
   create,
+  update,
   open,
   close,
   getUserAssignments,
