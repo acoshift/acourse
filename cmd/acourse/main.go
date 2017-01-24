@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net"
@@ -11,7 +10,6 @@ import (
 	"time"
 
 	"cloud.google.com/go/datastore"
-
 	"cloud.google.com/go/pubsub"
 	"cloud.google.com/go/storage"
 	"github.com/acoshift/acourse/pkg/acourse"
@@ -27,7 +25,6 @@ import (
 	"github.com/acoshift/cors"
 	"github.com/acoshift/ds"
 	"github.com/acoshift/go-firebase-admin"
-	"github.com/google/uuid"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 	"google.golang.org/grpc"
@@ -68,60 +65,6 @@ func LoadConfig(filename string) (*Config, error) {
 	return &cfg, nil
 }
 
-type loggerWriter struct {
-	http.ResponseWriter
-	header int
-}
-
-func (w *loggerWriter) WriteHeader(header int) {
-	w.header = header
-	w.ResponseWriter.WriteHeader(header)
-}
-
-func logger(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
-		path := r.URL.Path
-		tw := &loggerWriter{w, 0}
-		ip := r.Header.Get("X-Real-IP")
-		if ip == "" {
-			ip = r.RemoteAddr
-		}
-		h.ServeHTTP(tw, r)
-		end := time.Now()
-		fmt.Printf("%v | %3d | %13v | %s | %s | %s | %s\n",
-			end.Format(time.RFC3339),
-			tw.header,
-			end.Sub(start),
-			ip,
-			w.Header().Get("X-Request-ID"),
-			r.Method,
-			path,
-		)
-	})
-}
-
-func recovery(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		defer func() {
-			if e := recover(); e != nil {
-				log.Println(e)
-				w.WriteHeader(http.StatusInternalServerError)
-				fmt.Fprintf(w, "%v", e)
-			}
-		}()
-		h.ServeHTTP(w, r)
-	})
-}
-
-func requestID(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		rid := uuid.New().String()
-		w.Header().Set("X-Request-ID", rid)
-		h.ServeHTTP(w, r)
-	})
-}
-
 func chain(hs ...func(http.Handler) http.Handler) func(http.Handler) http.Handler {
 	return func(h http.Handler) http.Handler {
 		for i := len(hs); i > 0; i-- {
@@ -132,7 +75,7 @@ func chain(hs ...func(http.Handler) http.Handler) func(http.Handler) http.Handle
 }
 
 func main() {
-	grpclog.SetLogger(app.NewLogger())
+	grpclog.SetLogger(app.NewNoFatalLogger())
 
 	configFile := os.Getenv("CONFIG")
 	if configFile == "" {
@@ -171,9 +114,9 @@ func main() {
 	}
 
 	httpServer := chain(
-		logger,
-		requestID,
-		recovery,
+		app.Logger,
+		app.RequestID,
+		app.Recovery,
 		cors.New(cors.Config{
 			AllowCredentials: false,
 			AllowOrigins: []string{
