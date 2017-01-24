@@ -3,7 +3,8 @@ syntax = "proto3";
 package acourse;
 
 service UserService {
-  rpc GetUser(GetUserRequest) returns (GetUserResponse) {}
+  rpc GetUser(UserIDRequest) returns (User) {}
+  rpc GetUsers(UserIDsRequest) returns (UsersResponse) {}
   rpc GetMe(Empty) returns (GetMeResponse) {}
   rpc UpdateMe(User) returns (Empty) {}
   rpc GetRole(UserIDRequest) returns (Role) {}
@@ -48,11 +49,15 @@ service AssignmentService {
   rpc ListUserAssignments(CourseIDRequest) returns (UserAssignmentsResponse) {}
 }
 
-message GetUserRequest {
+message UserIDRequest {
+  string userId = 1;
+}
+
+message UserIDsRequest {
   repeated string userIds = 1;
 }
 
-message GetUserResponse {
+message UsersResponse {
   repeated User users = 1;
 }
 
@@ -68,7 +73,7 @@ message ListRequest {
 
 message PaymentsResponse {
   repeated Payment payments = 1;
-  repeated UserTiny users = 2;
+  repeated User users = 2;
   repeated CourseTiny courses = 3;
 }
 
@@ -83,12 +88,8 @@ message PaymentUpdatePriceRequest {
 
 message CoursesResponse {
   repeated CourseSmall courses = 1;
-  repeated UserTiny users = 2;
+  repeated User users = 2;
   repeated EnrollCount enrollCounts = 3;
-}
-
-message UserIDRequest {
-  string userId = 1;
 }
 
 message CourseIDRequest {
@@ -104,7 +105,7 @@ message EnrollRequest {
 
 message CourseResponse {
   Course course = 1;
-  UserTiny user = 2;
+  User user = 2;
   bool enrolled = 3;
   bool owned = 4;
   bool purchase = 5;
@@ -119,13 +120,6 @@ message User {
   string name = 3;
   string photo = 4;
   string aboutMe = 5;
-}
-
-message UserTiny {
-  string id = 1;
-  string username = 2;
-  string name = 3;
-  string photo = 4;
 }
 
 message Role {

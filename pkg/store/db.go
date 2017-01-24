@@ -61,7 +61,5 @@ func NewDB(options ...Option) *DB {
 		panic(err)
 	}
 
-	db.initUser()
-
 	return &db
 }

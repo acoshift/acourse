@@ -20,7 +20,6 @@ func New(store Store, user acourse.UserServiceClient) acourse.CourseServiceServe
 // Store is the store interface for course service
 type Store interface {
 	CourseList(context.Context, ...store.CourseListOption) (model.Courses, error)
-	UserGetMulti(context.Context, []string) (model.Users, error)
 	EnrollCourseCount(context.Context, string) (int, error)
 	EnrollListByUserID(context.Context, string) (model.Enrolls, error)
 	CourseGetAllByIDs(context.Context, []string) (model.Courses, error)
@@ -31,7 +30,6 @@ type Store interface {
 	PaymentSave(context.Context, *model.Payment) error
 	CourseSave(context.Context, *model.Course) error
 	CourseFind(context.Context, string) (*model.Course, error)
-	UserMustGet(context.Context, string) (*model.User, error)
 	AttendFind(context.Context, string, string) (*model.Attend, error)
 	AttendSave(context.Context, *model.Attend) error
 }
@@ -55,10 +53,11 @@ func (s *service) listCourses(ctx context.Context, opts ...store.CourseListOptio
 	for id := range userIDMap {
 		userIDs = append(userIDs, id)
 	}
-	users, err := s.store.UserGetMulti(ctx, userIDs)
+	usersResp, err := s.user.GetUsers(ctx, &acourse.UserIDsRequest{UserIds: userIDs})
 	if err != nil {
 		return nil, err
 	}
+	users := usersResp.GetUsers()
 
 	enrollCounts := make([]*acourse.EnrollCount, len(courses))
 	for i, course := range courses {
@@ -155,10 +154,11 @@ func (s *service) ListEnrolledCourses(ctx context.Context, req *acourse.UserIDRe
 	for id := range userIDMap {
 		userIDs = append(userIDs, id)
 	}
-	users, err := s.store.UserGetMulti(ctx, userIDs)
+	usersResp, err := s.user.GetUsers(ctx, &acourse.UserIDsRequest{UserIds: userIDs})
 	if err != nil {
 		return nil, err
 	}
+	users := usersResp.GetUsers()
 
 	enrollCounts := make([]*acourse.EnrollCount, len(courses))
 	for i, course := range courses {
@@ -198,7 +198,7 @@ func (s *service) GetCourse(ctx context.Context, req *acourse.CourseIDRequest) (
 	}
 
 	// get course owner
-	owner, err := s.store.UserMustGet(ctx, course.Owner)
+	owner, err := s.user.GetUser(ctx, &acourse.UserIDRequest{UserId: course.Owner})
 	if err != nil {
 		return nil, err
 	}

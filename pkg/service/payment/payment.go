@@ -21,8 +21,6 @@ type Store interface {
 	PaymentList(context.Context, ...store.PaymentListOption) (model.Payments, error)
 	PaymentGetMulti(context.Context, []string) (model.Payments, error)
 	PaymentSaveMulti(context.Context, model.Payments) error
-	UserGetMulti(context.Context, []string) (model.Users, error)
-	UserMustGet(context.Context, string) (*model.User, error)
 	CourseGet(context.Context, string) (*model.Course, error)
 	CourseGetMulti(context.Context, []string) (model.Courses, error)
 	EnrollSaveMulti(context.Context, []*model.Enroll) error
@@ -68,6 +66,10 @@ func (s *service) listPayments(ctx context.Context, opts ...store.PaymentListOpt
 		return nil, err
 	}
 
+	if len(payments) == 0 {
+		return &acourse.PaymentsResponse{}, nil
+	}
+
 	userIDMap := map[string]bool{}
 	courseIDMap := map[string]bool{}
 	for _, payment := range payments {
@@ -83,10 +85,11 @@ func (s *service) listPayments(ctx context.Context, opts ...store.PaymentListOpt
 		courseIDs = append(courseIDs, courseID)
 	}
 
-	users, err := s.store.UserGetMulti(ctx, userIDs)
+	usersResp, err := s.user.GetUsers(ctx, &acourse.UserIDsRequest{UserIds: userIDs})
 	if err != nil {
 		return nil, err
 	}
+	users := usersResp.GetUsers()
 
 	courses, err := s.store.CourseGetMulti(ctx, courseIDs)
 	if err != nil {
@@ -185,7 +188,7 @@ func (s *service) sendApprovedNotification(payments []*model.Payment) {
 			log.Println("User don't have email")
 			continue
 		}
-		user, err := s.store.UserMustGet(ctx, payment.UserID)
+		user, err := s.user.GetUser(ctx, &acourse.UserIDRequest{UserId: payment.UserID})
 		if err != nil {
 			log.Println(err)
 			continue
@@ -261,7 +264,7 @@ func (s *service) sendRejectNotification(payments []*model.Payment) {
 			log.Println("User don't have email")
 			continue
 		}
-		user, err := s.store.UserMustGet(ctx, payment.UserID)
+		user, err := s.user.GetUser(ctx, &acourse.UserIDRequest{UserId: payment.UserID})
 		if err != nil {
 			log.Println(err)
 			continue

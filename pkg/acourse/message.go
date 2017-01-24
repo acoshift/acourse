@@ -6,30 +6,10 @@ import (
 	"github.com/acoshift/acourse/pkg/model"
 )
 
-// ToUser builds an User message from an User model
-func ToUser(x *model.User) *User {
-	return &User{
-		Id:       x.ID(),
-		Username: x.Username,
-		Name:     x.Name,
-		Photo:    x.Photo,
-		AboutMe:  x.AboutMe,
-	}
-}
-
-// ToUsers builds repeated User message from User models
-func ToUsers(xs model.Users) []*User {
-	rs := make([]*User, len(xs))
-	for i, x := range xs {
-		rs[i] = ToUser(x)
-	}
-	return rs
-}
-
 // ToUserTiny builds an User tiny message from an User model
-func ToUserTiny(x *model.User) *UserTiny {
-	return &UserTiny{
-		Id:       x.ID(),
+func ToUserTiny(x *User) *User {
+	return &User{
+		Id:       x.Id,
 		Username: x.Username,
 		Name:     x.Username,
 		Photo:    x.Photo,
@@ -37,8 +17,8 @@ func ToUserTiny(x *model.User) *UserTiny {
 }
 
 // ToUsersTiny builds repeated User tiny message from User models
-func ToUsersTiny(xs model.Users) []*UserTiny {
-	rs := make([]*UserTiny, len(xs))
+func ToUsersTiny(xs []*User) []*User {
+	rs := make([]*User, len(xs))
 	for i, x := range xs {
 		rs[i] = ToUserTiny(x)
 	}

@@ -7,5 +7,6 @@ import (
 
 // Errors
 var (
-	ErrUserIDRequired = grpc.Errorf(codes.InvalidArgument, "user: id required")
+	ErrUserIDRequired   = grpc.Errorf(codes.InvalidArgument, "user: id required")
+	ErrUserNameConflict = grpc.Errorf(codes.AlreadyExists, "user: user name already exists")
 )

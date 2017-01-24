@@ -2,40 +2,159 @@ package user
 
 import (
 	"context"
+	"log"
+	"time"
 
 	"github.com/acoshift/acourse/pkg/acourse"
 	"github.com/acoshift/acourse/pkg/internal"
-	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/ds"
+	"github.com/acoshift/gotcha"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 )
 
 // New creates new User service server
-func New(store Store, client *ds.Client) acourse.UserServiceServer {
-	s := &service{client, store}
+func New(client *ds.Client) acourse.UserServiceServer {
+	s := &service{client}
 	go s.startCacheRole()
 	return s
 }
 
-// Store is the store interface for user service
-type Store interface {
-	UserGetMulti(context.Context, []string) (model.Users, error)
-	UserMustGet(context.Context, string) (*model.User, error)
-	UserSave(context.Context, *model.User) error
-}
-
 type service struct {
 	client *ds.Client
-	store  Store
 }
 
-func (s *service) GetUser(ctx context.Context, req *acourse.GetUserRequest) (*acourse.GetUserResponse, error) {
-	users, err := s.store.UserGetMulti(ctx, req.GetUserIds())
+var cacheUser = gotcha.New()
+
+func (s *service) startCacheUser() {
+	ctx := context.Background()
+	for {
+		var xs []*user
+		err := s.client.Query(ctx, kindUser, &xs)
+		if err != nil {
+			time.Sleep(time.Minute * 10)
+			continue
+		}
+		cacheUser.Purge()
+		for _, x := range xs {
+			cacheUser.Set(x.ID(), x)
+		}
+		log.Println("Cached Users")
+		time.Sleep(time.Hour * 2)
+	}
+}
+
+func (s *service) getUser(ctx context.Context, userID string) (*user, error) {
+	if c := cacheUser.Get(userID); c != nil {
+		return c.(*user), nil
+	}
+
+	var x user
+	err := s.client.GetByName(ctx, kindUser, userID, &x)
+	err = ds.IgnoreFieldMismatch(err)
 	if err != nil {
 		return nil, err
 	}
-	return &acourse.GetUserResponse{Users: acourse.ToUsers(users)}, nil
+	cacheUser.Set(userID, &x)
+	return &x, nil
+}
+
+func (s *service) mustGetUser(ctx context.Context, userID string) (*user, error) {
+	x, err := s.getUser(ctx, userID)
+	err = ds.IgnoreNotFound(err)
+	if err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+func (s *service) findUser(ctx context.Context, username string) (*user, error) {
+	var x user
+	err := s.client.QueryFirst(ctx, kindUser, &x, ds.Filter("Username =", username))
+	err = ds.IgnoreFieldMismatch(err)
+	if err != nil {
+		return nil, err
+	}
+	return &x, nil
+}
+
+func (s *service) saveUser(ctx context.Context, x *user) error {
+	if x.Key() == nil {
+		return ErrUserIDRequired
+	}
+
+	// check duplicated username
+	if x.Username != "" {
+		u, err := s.findUser(ctx, x.Username)
+		if !ds.NotFound(err) && err != nil {
+			return err
+		}
+		if u != nil && x.ID() != u.ID() {
+			return ErrUserNameConflict
+		}
+	}
+
+	err := s.client.SaveModel(ctx, "", x)
+	if err != nil {
+		return err
+	}
+	cacheUser.Set(x.ID(), x)
+	return nil
+}
+
+func (s *service) GetUser(ctx context.Context, req *acourse.UserIDRequest) (*acourse.User, error) {
+	if req.GetUserId() == "" {
+		return nil, ErrUserIDRequired
+	}
+
+	x, err := s.mustGetUser(ctx, req.GetUserId())
+	if err != nil {
+		return nil, err
+	}
+	return toUser(x), nil
+}
+
+func (s *service) GetUsers(ctx context.Context, req *acourse.UserIDsRequest) (*acourse.UsersResponse, error) {
+	userIDs := req.GetUserIds()
+	l := len(userIDs)
+
+	if l == 0 {
+		return nil, ErrUserIDRequired
+	}
+
+	xs := make([]*user, 0, l)
+	ids := make([]string, 0, l)
+
+	// try get in cache first
+	for _, id := range userIDs {
+		if c := cacheUser.Get(id); c != nil {
+			xs = append(xs, c.(*user))
+		} else {
+			ids = append(ids, id)
+		}
+	}
+
+	if len(ids) == 0 {
+		return &acourse.UsersResponse{Users: toUsers(xs)}, nil
+	}
+
+	var ts []*user
+	err := s.client.GetByNames(ctx, kindUser, ids, &ts)
+	err = ds.IgnoreNotFound(err)
+	err = ds.IgnoreFieldMismatch(err)
+	if err != nil {
+		return nil, err
+	}
+
+	for i, x := range ts {
+		if x == nil {
+			x = &user{}
+			x.SetNameID(kindUser, ids[i])
+		}
+		xs = append(xs, x)
+		cacheUser.Set(x.ID(), x)
+	}
+	return &acourse.UsersResponse{Users: toUsers(xs)}, nil
 }
 
 func (s *service) GetMe(ctx context.Context, req *acourse.Empty) (*acourse.GetMeResponse, error) {
@@ -43,7 +162,7 @@ func (s *service) GetMe(ctx context.Context, req *acourse.Empty) (*acourse.GetMe
 	if userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
-	user, err := s.store.UserMustGet(ctx, userID)
+	user, err := s.mustGetUser(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +171,7 @@ func (s *service) GetMe(ctx context.Context, req *acourse.Empty) (*acourse.GetMe
 		return nil, err
 	}
 	return &acourse.GetMeResponse{
-		User: acourse.ToUser(user),
+		User: toUser(user),
 		Role: role,
 	}, nil
 }
@@ -62,16 +181,16 @@ func (s *service) UpdateMe(ctx context.Context, req *acourse.User) (*acourse.Emp
 	if userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
-	user, err := s.store.UserMustGet(ctx, userID)
+	x, err := s.mustGetUser(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
-	user.Username = req.GetUsername()
-	user.Name = req.GetName()
-	user.Photo = req.GetPhoto()
-	user.AboutMe = req.GetAboutMe()
+	x.Username = req.GetUsername()
+	x.Name = req.GetName()
+	x.Photo = req.GetPhoto()
+	x.AboutMe = req.GetAboutMe()
 
-	err = s.store.UserSave(ctx, user)
+	err = s.saveUser(ctx, x)
 	if err != nil {
 		return nil, err
 	}
