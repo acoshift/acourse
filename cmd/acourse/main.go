@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -9,6 +10,10 @@ import (
 	"os"
 	"time"
 
+	"cloud.google.com/go/datastore"
+
+	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/storage"
 	"github.com/acoshift/acourse/pkg/acourse"
 	"github.com/acoshift/acourse/pkg/app"
 	"github.com/acoshift/acourse/pkg/ctrl/health"
@@ -20,8 +25,11 @@ import (
 	"github.com/acoshift/acourse/pkg/service/user"
 	"github.com/acoshift/acourse/pkg/store"
 	"github.com/acoshift/cors"
+	"github.com/acoshift/ds"
 	"github.com/acoshift/go-firebase-admin"
 	"github.com/google/uuid"
+	"golang.org/x/oauth2/google"
+	"google.golang.org/api/option"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/grpclog"
 	"gopkg.in/yaml.v2"
@@ -133,7 +141,7 @@ func main() {
 
 	cfg, err := LoadConfig(configFile)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	firApp, err := admin.InitializeApp(admin.AppOptions{
@@ -146,6 +154,21 @@ func main() {
 	firAuth := firApp.Auth()
 
 	db := store.NewDB(store.ProjectID(cfg.ProjectID), store.ServiceAccount([]byte(cfg.ServiceAccount)))
+
+	jwtConfig, err := google.JWTConfigFromJSON([]byte(cfg.ServiceAccount),
+		datastore.ScopeDatastore,
+		pubsub.ScopePubSub,
+		storage.ScopeFullControl,
+	)
+	if err != nil {
+		panic(err)
+	}
+	tokenSource := jwtConfig.TokenSource(context.Background())
+
+	client, err := ds.NewClient(context.Background(), cfg.ProjectID, option.WithTokenSource(tokenSource))
+	if err != nil {
+		panic(err)
+	}
 
 	httpServer := chain(
 		logger,
@@ -177,7 +200,7 @@ func main() {
 	// create service clients
 	conn, err := grpc.Dial("127.0.0.1:8081", grpc.WithInsecure())
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	userServiceClient := acourse.NewUserServiceClient(conn)
 	courseServiceClient := acourse.NewCourseServiceClient(conn)
@@ -200,12 +223,12 @@ func main() {
 	go func() {
 		grpcListener, err := net.Listen("tcp", ":8081")
 		if err != nil {
-			log.Fatal(err)
+			panic(err)
 		}
 		grpcServer := grpc.NewServer(grpc.UnaryInterceptor(app.UnaryInterceptors))
-		acourse.RegisterUserServiceServer(grpcServer, user.New(db))
-		acourse.RegisterCourseServiceServer(grpcServer, course.New(db))
-		acourse.RegisterPaymentServiceServer(grpcServer, payment.New(db, firAuth, emailServiceClient))
+		acourse.RegisterUserServiceServer(grpcServer, user.New(db, client))
+		acourse.RegisterCourseServiceServer(grpcServer, course.New(db, userServiceClient))
+		acourse.RegisterPaymentServiceServer(grpcServer, payment.New(db, userServiceClient, firAuth, emailServiceClient))
 		acourse.RegisterEmailServiceServer(grpcServer, email.New(email.Config{
 			From:     cfg.Email.From,
 			Server:   cfg.Email.Server,
@@ -214,9 +237,7 @@ func main() {
 			Password: cfg.Email.Password,
 		}))
 		acourse.RegisterAssignmentServiceServer(grpcServer, assignment.New(db))
-		if err = grpcServer.Serve(grpcListener); err != nil {
-			log.Fatal(err)
-		}
+		log.Fatal(grpcServer.Serve(grpcListener))
 	}()
 
 	if !cfg.Debug {

@@ -45,14 +45,6 @@ func ToUsersTiny(xs model.Users) []*UserTiny {
 	return rs
 }
 
-// ToRole builds a Role message from Role model
-func ToRole(x *model.Role) *Role {
-	return &Role{
-		Admin:      x.Admin,
-		Instructor: x.Instructor,
-	}
-}
-
 func formatTime(t time.Time) string {
 	return t.Format(time.RFC3339)
 }

@@ -6,6 +6,7 @@ service UserService {
   rpc GetUser(GetUserRequest) returns (GetUserResponse) {}
   rpc GetMe(Empty) returns (GetMeResponse) {}
   rpc UpdateMe(User) returns (Empty) {}
+  rpc GetRole(UserIDRequest) returns (Role) {}
 }
 
 service EmailService {

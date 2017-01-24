@@ -26,18 +26,18 @@ type Store interface {
 	CourseGet(context.Context, string) (*model.Course, error)
 	CourseGetMulti(context.Context, []string) (model.Courses, error)
 	EnrollSaveMulti(context.Context, []*model.Enroll) error
-	RoleGet(context.Context, string) (*model.Role, error)
 	PaymentGet(context.Context, string) (*model.Payment, error)
 	PaymentSave(context.Context, *model.Payment) error
 }
 
 // New creates new payment service
-func New(store Store, auth *admin.Auth, email acourse.EmailServiceClient) acourse.PaymentServiceServer {
-	return &service{store, auth, email}
+func New(store Store, user acourse.UserServiceClient, auth *admin.Auth, email acourse.EmailServiceClient) acourse.PaymentServiceServer {
+	return &service{store, user, auth, email}
 }
 
 type service struct {
 	store Store
+	user  acourse.UserServiceClient
 	auth  *admin.Auth
 	email acourse.EmailServiceClient
 }
@@ -47,7 +47,7 @@ func (s *service) validateUser(ctx context.Context) error {
 	if userID == "" {
 		return grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
-	role, err := s.store.RoleGet(ctx, userID)
+	role, err := s.user.GetRole(ctx, &acourse.UserIDRequest{UserId: userID})
 	if err != nil {
 		return err
 	}

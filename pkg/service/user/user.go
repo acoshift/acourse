@@ -6,13 +6,16 @@ import (
 	"github.com/acoshift/acourse/pkg/acourse"
 	"github.com/acoshift/acourse/pkg/internal"
 	"github.com/acoshift/acourse/pkg/model"
+	"github.com/acoshift/ds"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 )
 
 // New creates new User service server
-func New(store Store) acourse.UserServiceServer {
-	return &userServiceServer{store}
+func New(store Store, client *ds.Client) acourse.UserServiceServer {
+	s := &service{client, store}
+	go s.startCacheRole()
+	return s
 }
 
 // Store is the store interface for user service
@@ -20,14 +23,14 @@ type Store interface {
 	UserGetMulti(context.Context, []string) (model.Users, error)
 	UserMustGet(context.Context, string) (*model.User, error)
 	UserSave(context.Context, *model.User) error
-	RoleGet(context.Context, string) (*model.Role, error)
 }
 
-type userServiceServer struct {
-	store Store
+type service struct {
+	client *ds.Client
+	store  Store
 }
 
-func (s *userServiceServer) GetUser(ctx context.Context, req *acourse.GetUserRequest) (*acourse.GetUserResponse, error) {
+func (s *service) GetUser(ctx context.Context, req *acourse.GetUserRequest) (*acourse.GetUserResponse, error) {
 	users, err := s.store.UserGetMulti(ctx, req.GetUserIds())
 	if err != nil {
 		return nil, err
@@ -35,7 +38,7 @@ func (s *userServiceServer) GetUser(ctx context.Context, req *acourse.GetUserReq
 	return &acourse.GetUserResponse{Users: acourse.ToUsers(users)}, nil
 }
 
-func (s *userServiceServer) GetMe(ctx context.Context, req *acourse.Empty) (*acourse.GetMeResponse, error) {
+func (s *service) GetMe(ctx context.Context, req *acourse.Empty) (*acourse.GetMeResponse, error) {
 	userID := internal.GetUserID(ctx)
 	if userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
@@ -44,17 +47,17 @@ func (s *userServiceServer) GetMe(ctx context.Context, req *acourse.Empty) (*aco
 	if err != nil {
 		return nil, err
 	}
-	role, err := s.store.RoleGet(ctx, userID)
+	role, err := s.GetRole(ctx, &acourse.UserIDRequest{UserId: userID})
 	if err != nil {
 		return nil, err
 	}
 	return &acourse.GetMeResponse{
 		User: acourse.ToUser(user),
-		Role: acourse.ToRole(role),
+		Role: role,
 	}, nil
 }
 
-func (s *userServiceServer) UpdateMe(ctx context.Context, req *acourse.User) (*acourse.Empty, error) {
+func (s *service) UpdateMe(ctx context.Context, req *acourse.User) (*acourse.Empty, error) {
 	userID := internal.GetUserID(ctx)
 	if userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
