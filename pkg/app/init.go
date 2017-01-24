@@ -25,9 +25,8 @@ var (
 )
 
 // InitService inits service
-func InitService(auth *admin.Auth) (err error) {
+func InitService(auth *admin.Auth) {
 	firAuth = auth
-	return
 }
 
 func validateHeaderToken(header string) (string, error) {

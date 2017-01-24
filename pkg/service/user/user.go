@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/acoshift/acourse/pkg/acourse"
+	"github.com/acoshift/acourse/pkg/internal"
 	"github.com/acoshift/acourse/pkg/model"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -35,8 +36,8 @@ func (s *userServiceServer) GetUser(ctx context.Context, req *acourse.GetUserReq
 }
 
 func (s *userServiceServer) GetMe(ctx context.Context, req *acourse.Empty) (*acourse.GetMeResponse, error) {
-	userID, ok := ctx.Value(acourse.KeyUserID).(string)
-	if !ok || userID == "" {
+	userID := internal.GetUserID(ctx)
+	if userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
 	user, err := s.store.UserMustGet(ctx, userID)
@@ -54,8 +55,8 @@ func (s *userServiceServer) GetMe(ctx context.Context, req *acourse.Empty) (*aco
 }
 
 func (s *userServiceServer) UpdateMe(ctx context.Context, req *acourse.User) (*acourse.Empty, error) {
-	userID, ok := ctx.Value(acourse.KeyUserID).(string)
-	if !ok || userID == "" {
+	userID := internal.GetUserID(ctx)
+	if userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
 	user, err := s.store.UserMustGet(ctx, userID)

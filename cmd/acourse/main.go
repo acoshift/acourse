@@ -141,7 +141,7 @@ func main() {
 		ServiceAccount: []byte(cfg.Firebase.ServiceAccount),
 	})
 	if err != nil {
-		return
+		panic(err)
 	}
 	firAuth := firApp.Auth()
 
@@ -172,9 +172,7 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	if err := app.InitService(firAuth); err != nil {
-		log.Fatal(err)
-	}
+	app.InitService(firAuth)
 
 	// create service clients
 	conn, err := grpc.Dial("127.0.0.1:8081", grpc.WithInsecure())

@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/acoshift/acourse/pkg/acourse"
+	"github.com/acoshift/acourse/pkg/internal"
 	"github.com/acoshift/acourse/pkg/model"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -48,8 +49,8 @@ func (s *service) isCourseOwner(ctx context.Context, courseID, userID string) er
 }
 
 func (s *service) CreateAssignment(ctx context.Context, req *acourse.Assignment) (*acourse.Assignment, error) {
-	userID, ok := ctx.Value(acourse.KeyUserID).(string)
-	if !ok || userID == "" {
+	userID := internal.GetUserID(ctx)
+	if userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
 	if err := s.isCourseOwner(ctx, req.GetCourseId(), userID); err != nil {
@@ -72,8 +73,8 @@ func (s *service) CreateAssignment(ctx context.Context, req *acourse.Assignment)
 }
 
 func (s *service) UpdateAssignment(ctx context.Context, req *acourse.Assignment) (*acourse.Empty, error) {
-	userID, ok := ctx.Value(acourse.KeyUserID).(string)
-	if !ok || userID == "" {
+	userID := internal.GetUserID(ctx)
+	if userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
 	assignment, err := s.store.AssignmentGet(ctx, req.GetId())
@@ -84,7 +85,8 @@ func (s *service) UpdateAssignment(ctx context.Context, req *acourse.Assignment)
 		return nil, grpc.Errorf(codes.NotFound, "assignment not found")
 	}
 
-	if err := s.isCourseOwner(ctx, assignment.CourseID, userID); err != nil {
+	err = s.isCourseOwner(ctx, assignment.CourseID, userID)
+	if err != nil {
 		return nil, err
 	}
 
@@ -99,8 +101,8 @@ func (s *service) UpdateAssignment(ctx context.Context, req *acourse.Assignment)
 }
 
 func (s *service) changeOpenAssignment(ctx context.Context, req *acourse.AssignmentIDRequest, open bool) (*acourse.Empty, error) {
-	userID, ok := ctx.Value(acourse.KeyUserID).(string)
-	if !ok || userID == "" {
+	userID := internal.GetUserID(ctx)
+	if userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
 
@@ -112,7 +114,8 @@ func (s *service) changeOpenAssignment(ctx context.Context, req *acourse.Assignm
 		return nil, grpc.Errorf(codes.NotFound, "assignment not found")
 	}
 
-	if err := s.isCourseOwner(ctx, assignment.CourseID, userID); err != nil {
+	err = s.isCourseOwner(ctx, assignment.CourseID, userID)
+	if err != nil {
 		return nil, err
 	}
 
@@ -146,8 +149,8 @@ func (s *service) ListAssignments(ctx context.Context, req *acourse.CourseIDRequ
 }
 
 func (s *service) DeleteAssignment(ctx context.Context, req *acourse.AssignmentIDRequest) (*acourse.Empty, error) {
-	userID, ok := ctx.Value(acourse.KeyUserID).(string)
-	if !ok || userID == "" {
+	userID := internal.GetUserID(ctx)
+	if userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
 
@@ -159,7 +162,8 @@ func (s *service) DeleteAssignment(ctx context.Context, req *acourse.AssignmentI
 		return nil, grpc.Errorf(codes.NotFound, "assignment not found")
 	}
 
-	if err := s.isCourseOwner(ctx, assignment.CourseID, userID); err != nil {
+	err = s.isCourseOwner(ctx, assignment.CourseID, userID)
+	if err != nil {
 		return nil, err
 	}
 
@@ -171,8 +175,8 @@ func (s *service) DeleteAssignment(ctx context.Context, req *acourse.AssignmentI
 }
 
 func (s *service) SubmitUserAssignment(ctx context.Context, req *acourse.UserAssignment) (*acourse.UserAssignment, error) {
-	userID, ok := ctx.Value(acourse.KeyUserID).(string)
-	if !ok || userID == "" {
+	userID := internal.GetUserID(ctx)
+	if userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
 
@@ -211,8 +215,8 @@ func (s *service) SubmitUserAssignment(ctx context.Context, req *acourse.UserAss
 }
 
 func (s *service) DeleteUserAssignment(ctx context.Context, req *acourse.UserAssignmentIDRequest) (*acourse.Empty, error) {
-	userID, ok := ctx.Value(acourse.KeyUserID).(string)
-	if !ok || userID == "" {
+	userID := internal.GetUserID(ctx)
+	if userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
 
@@ -236,8 +240,8 @@ func (s *service) DeleteUserAssignment(ctx context.Context, req *acourse.UserAss
 }
 
 func (s *service) GetUserAssignments(ctx context.Context, req *acourse.AssignmentIDsRequest) (*acourse.UserAssignmentsResponse, error) {
-	userID, ok := ctx.Value(acourse.KeyUserID).(string)
-	if !ok || userID == "" {
+	userID := internal.GetUserID(ctx)
+	if userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
 
@@ -261,8 +265,8 @@ func (s *service) GetUserAssignments(ctx context.Context, req *acourse.Assignmen
 }
 
 func (s *service) ListUserAssignments(ctx context.Context, req *acourse.CourseIDRequest) (*acourse.UserAssignmentsResponse, error) {
-	userID, ok := ctx.Value(acourse.KeyUserID).(string)
-	if !ok || userID == "" {
+	userID := internal.GetUserID(ctx)
+	if userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
 

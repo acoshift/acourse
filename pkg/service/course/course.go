@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/acoshift/acourse/pkg/acourse"
+	"github.com/acoshift/acourse/pkg/internal"
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/acourse/pkg/store"
 	"google.golang.org/grpc"
@@ -82,8 +83,8 @@ func (s *service) ListPublicCourses(ctx context.Context, req *acourse.ListReques
 }
 
 func (s *service) ListCourses(ctx context.Context, req *acourse.ListRequest) (*acourse.CoursesResponse, error) {
-	userID, ok := ctx.Value(acourse.KeyUserID).(string)
-	if !ok || userID == "" {
+	userID := internal.GetUserID(ctx)
+	if userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
 	role, err := s.store.RoleGet(ctx, userID)
@@ -97,7 +98,7 @@ func (s *service) ListCourses(ctx context.Context, req *acourse.ListRequest) (*a
 }
 
 func (s *service) ListOwnCourses(ctx context.Context, req *acourse.UserIDRequest) (*acourse.CoursesResponse, error) {
-	userID, _ := ctx.Value(acourse.KeyUserID).(string)
+	userID := internal.GetUserID(ctx)
 
 	if req.GetUserId() == "" {
 		return nil, grpc.Errorf(codes.InvalidArgument, "invalid user id")
@@ -115,8 +116,8 @@ func (s *service) ListOwnCourses(ctx context.Context, req *acourse.UserIDRequest
 }
 
 func (s *service) ListEnrolledCourses(ctx context.Context, req *acourse.UserIDRequest) (*acourse.CoursesResponse, error) {
-	userID, ok := ctx.Value(acourse.KeyUserID).(string)
-	if !ok || userID == "" {
+	userID := internal.GetUserID(ctx)
+	if userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
 
@@ -178,7 +179,7 @@ func (s *service) ListEnrolledCourses(ctx context.Context, req *acourse.UserIDRe
 }
 
 func (s *service) GetCourse(ctx context.Context, req *acourse.CourseIDRequest) (*acourse.CourseResponse, error) {
-	userID, _ := ctx.Value(acourse.KeyUserID).(string)
+	userID := internal.GetUserID(ctx)
 
 	// try get by id first
 	course, err := s.store.CourseGet(ctx, req.GetCourseId())
@@ -273,8 +274,8 @@ func (s *service) GetCourse(ctx context.Context, req *acourse.CourseIDRequest) (
 }
 
 func (s *service) CreateCourse(ctx context.Context, req *acourse.Course) (*acourse.Course, error) {
-	userID, ok := ctx.Value(acourse.KeyUserID).(string)
-	if !ok || userID == "" {
+	userID := internal.GetUserID(ctx)
+	if userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
 	role, err := s.store.RoleGet(ctx, userID)
@@ -316,8 +317,8 @@ func (s *service) CreateCourse(ctx context.Context, req *acourse.Course) (*acour
 }
 
 func (s *service) UpdateCourse(ctx context.Context, req *acourse.Course) (*acourse.Empty, error) {
-	userID, ok := ctx.Value(acourse.KeyUserID).(string)
-	if !ok || userID == "" {
+	userID := internal.GetUserID(ctx)
+	if userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
 
@@ -363,8 +364,8 @@ func (s *service) UpdateCourse(ctx context.Context, req *acourse.Course) (*acour
 }
 
 func (s *service) EnrollCourse(ctx context.Context, req *acourse.EnrollRequest) (*acourse.Empty, error) {
-	userID, ok := ctx.Value(acourse.KeyUserID).(string)
-	if !ok || userID == "" {
+	userID := internal.GetUserID(ctx)
+	if userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
 
@@ -445,8 +446,8 @@ func (s *service) EnrollCourse(ctx context.Context, req *acourse.EnrollRequest) 
 }
 
 func (s *service) AttendCourse(ctx context.Context, req *acourse.CourseIDRequest) (*acourse.Empty, error) {
-	userID, ok := ctx.Value(acourse.KeyUserID).(string)
-	if !ok || userID == "" {
+	userID := internal.GetUserID(ctx)
+	if userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
 
@@ -485,8 +486,8 @@ func (s *service) AttendCourse(ctx context.Context, req *acourse.CourseIDRequest
 }
 
 func (s *service) changeAttend(ctx context.Context, req *acourse.CourseIDRequest, value bool) (*acourse.Empty, error) {
-	userID, ok := ctx.Value(acourse.KeyUserID).(string)
-	if !ok || userID == "" {
+	userID := internal.GetUserID(ctx)
+	if userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
 

@@ -8,6 +8,7 @@ import (
 
 	"github.com/acoshift/acourse/pkg/acourse"
 	"github.com/acoshift/acourse/pkg/app"
+	"github.com/acoshift/acourse/pkg/internal"
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/acourse/pkg/store"
 	"github.com/acoshift/go-firebase-admin"
@@ -42,8 +43,8 @@ type service struct {
 }
 
 func (s *service) validateUser(ctx context.Context) error {
-	userID, ok := ctx.Value(acourse.KeyUserID).(string)
-	if !ok || userID == "" {
+	userID := internal.GetUserID(ctx)
+	if userID == "" {
 		return grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
 	role, err := s.store.RoleGet(ctx, userID)

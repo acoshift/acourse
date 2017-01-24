@@ -2,7 +2,8 @@ package app
 
 import (
 	"context"
-	"github.com/acoshift/acourse/pkg/acourse"
+
+	"github.com/acoshift/acourse/pkg/internal"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -34,7 +35,7 @@ func AuthUnaryInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 	if err != nil {
 		return nil, grpc.Errorf(codes.InvalidArgument, "invalid autorization header")
 	}
-	rctx := context.WithValue(ctx, acourse.KeyUserID, userID)
+	rctx := internal.WithUserID(ctx, userID)
 	return handler(rctx, req)
 }
 
