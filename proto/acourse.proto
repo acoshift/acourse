@@ -44,6 +44,7 @@ service AssignmentService {
   rpc SubmitUserAssignment(UserAssignment) returns (UserAssignment) {}
   rpc DeleteUserAssignment(UserAssignmentIDRequest) returns (Empty) {}
   rpc GetUserAssignments(AssignmentIDsRequest) returns (UserAssignmentsResponse) {}
+  rpc ListUserAssignments(CourseIDRequest) returns (UserAssignmentsResponse) {}
 }
 
 message GetUserRequest {

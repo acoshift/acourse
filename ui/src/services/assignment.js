@@ -31,6 +31,11 @@ const submitUserAssignment = (assignmentId, url) => RPC.invoke(sv + '/SubmitUser
   url
 })
 
+const listUserAssignments = (courseId) => RPC.invoke(sv + '/ListUserAssignments', {
+  courseId
+})
+  .map(response.userAssignments)
+
 export default {
   list,
   create,
@@ -38,6 +43,7 @@ export default {
   open,
   close,
   getUserAssignments,
-  submitUserAssignment
+  submitUserAssignment,
+  listUserAssignments
 }
 

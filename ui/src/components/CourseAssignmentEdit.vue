@@ -28,22 +28,23 @@
           .ui.fluid.blue.button(@click="submitAssignment")
             span(v-if="assignment.id") Edit
             span(v-else) Create
-    // .ui.segment
+    .ui.segment
       .ui.styled.fluid.accordion
         div(v-for="x in assignments")
           .title
             .dropdown.icon
             | {{ x.title }}
-            span ({{ x.users.length }})
+            // span ({{ x.users.length }})
           .ui.content
             .ui.stackable.grid
-              .two.column.row(v-for="u in x.users")
+              .two.column.row(v-for="(y, z) in groupUser(userAssignmentsFor(x.id))")
                 .column
-                  UserAvatar(:user="u")
+                  span {{ z }}
+                  // UserAvatar(:user="u")
                 .column
-                  div(v-for="(a, f) in u.files")
-                    span {{ a.timestamp | date('YYYY/MM/DD HH:mm') }}
-                    a(:href="a.url", target="_blank") {{ f }}
+                  div(v-for="f in y")
+                    span {{ f.createdAt | date('YYYY/MM/DD HH:mm') }}
+                    a(:href="f.url", target="_blank") &nbsp;Link
 </template>
 
 <style scoped>
@@ -55,6 +56,8 @@
 <script>
 import { Loader, User, Assignment } from 'services'
 import UserAvatar from './UserAvatar'
+import filter from 'lodash/filter'
+import groupBy from 'lodash/groupBy'
 
 User
 export default {
@@ -77,7 +80,8 @@ export default {
       assignments: this.$watchAsObservable('refresh')
         .do(() => Loader.start('assignment'))
         .flatMap(() => Assignment.list(this.courseId))
-        .do(() => Loader.stop('assignment'))
+        .do(() => Loader.stop('assignment')),
+      userAssignments: Assignment.listUserAssignments(this.courseId)
     }
   },
   created () {
@@ -161,6 +165,13 @@ export default {
         description: x.description
       }
       this.openAssignmentModal()
+    },
+    userAssignmentsFor (assignmentId) {
+      return filter(this.userAssignments, (x) => x.assignmentId === assignmentId)
+    },
+    groupUser (userAssignments) {
+      // console.log(userAssignments)
+      return groupBy(userAssignments, 'userId')
     }
   }
 }

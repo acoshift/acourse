@@ -259,3 +259,41 @@ func (s *service) GetUserAssignments(ctx context.Context, req *acourse.Assignmen
 		UserAssignments: acourse.ToUserAssignments(userAssignments),
 	}, nil
 }
+
+func (s *service) ListUserAssignments(ctx context.Context, req *acourse.CourseIDRequest) (*acourse.UserAssignmentsResponse, error) {
+	userID, ok := ctx.Value(acourse.KeyUserID).(string)
+	if !ok || userID == "" {
+		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
+	}
+
+	course, err := s.store.CourseGet(ctx, req.GetCourseId())
+	if err != nil {
+		return nil, err
+	}
+	if course == nil {
+		return nil, grpc.Errorf(codes.NotFound, "course not found")
+	}
+
+	if course.Owner != userID {
+		return nil, grpc.Errorf(codes.PermissionDenied, "only instructor can list user assignments")
+	}
+
+	assignments, err := s.store.AssignmentList(ctx, course.ID())
+	if err != nil {
+		return nil, err
+	}
+
+	userAssignments := model.UserAssignments{}
+
+	for _, assignment := range assignments {
+		temp, err := s.store.UserAssignmentList(ctx, assignment.ID(), "")
+		if err != nil {
+			return nil, err
+		}
+		userAssignments = append(userAssignments, temp...)
+	}
+
+	return &acourse.UserAssignmentsResponse{
+		UserAssignments: acourse.ToUserAssignments(userAssignments),
+	}, nil
+}
