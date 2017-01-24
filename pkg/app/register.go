@@ -32,7 +32,7 @@ func RegisterUserServiceClient(mux *http.ServeMux, s acourse.UserServiceClient) 
 			}
 			res, err := s.GetUser(makeServiceContext(r), req)
 			if err != nil {
-				handleError(w, err)
+				handleError(w, httperror.GRPC(err))
 				return
 			}
 			handleOK(w, res)
@@ -43,7 +43,7 @@ func RegisterUserServiceClient(mux *http.ServeMux, s acourse.UserServiceClient) 
 		if r.Method == http.MethodPost {
 			res, err := s.GetMe(makeServiceContext(r), new(acourse.Empty))
 			if err != nil {
-				handleError(w, err)
+				handleError(w, httperror.GRPC(err))
 				return
 			}
 			handleOK(w, res)
@@ -60,7 +60,7 @@ func RegisterUserServiceClient(mux *http.ServeMux, s acourse.UserServiceClient) 
 			}
 			res, err := s.UpdateMe(makeServiceContext(r), req)
 			if err != nil {
-				handleError(w, err)
+				handleError(w, httperror.GRPC(err))
 				return
 			}
 			handleOK(w, res)
@@ -82,7 +82,7 @@ func RegisterEmailServiceClient(mux *http.ServeMux, s acourse.EmailServiceClient
 			}
 			res, err := s.Send(makeServiceContext(r), req)
 			if err != nil {
-				handleError(w, err)
+				handleError(w, httperror.GRPC(err))
 				return
 			}
 			handleOK(w, res)
@@ -104,7 +104,7 @@ func RegisterPaymentServiceClient(mux *http.ServeMux, s acourse.PaymentServiceCl
 			}
 			res, err := s.ListWaitingPayments(makeServiceContext(r), req)
 			if err != nil {
-				handleError(w, err)
+				handleError(w, httperror.GRPC(err))
 				return
 			}
 			handleOK(w, res)
@@ -121,7 +121,7 @@ func RegisterPaymentServiceClient(mux *http.ServeMux, s acourse.PaymentServiceCl
 			}
 			res, err := s.ListHistoryPayments(makeServiceContext(r), req)
 			if err != nil {
-				handleError(w, err)
+				handleError(w, httperror.GRPC(err))
 				return
 			}
 			handleOK(w, res)
@@ -138,7 +138,7 @@ func RegisterPaymentServiceClient(mux *http.ServeMux, s acourse.PaymentServiceCl
 			}
 			res, err := s.ApprovePayments(makeServiceContext(r), req)
 			if err != nil {
-				handleError(w, err)
+				handleError(w, httperror.GRPC(err))
 				return
 			}
 			handleOK(w, res)
@@ -155,7 +155,7 @@ func RegisterPaymentServiceClient(mux *http.ServeMux, s acourse.PaymentServiceCl
 			}
 			res, err := s.RejectPayments(makeServiceContext(r), req)
 			if err != nil {
-				handleError(w, err)
+				handleError(w, httperror.GRPC(err))
 				return
 			}
 			handleOK(w, res)
@@ -172,7 +172,7 @@ func RegisterPaymentServiceClient(mux *http.ServeMux, s acourse.PaymentServiceCl
 			}
 			res, err := s.UpdatePrice(makeServiceContext(r), req)
 			if err != nil {
-				handleError(w, err)
+				handleError(w, httperror.GRPC(err))
 				return
 			}
 			handleOK(w, res)
@@ -194,7 +194,7 @@ func RegisterCourseServiceClient(mux *http.ServeMux, s acourse.CourseServiceClie
 			}
 			res, err := s.ListCourses(makeServiceContext(r), req)
 			if err != nil {
-				handleError(w, err)
+				handleError(w, httperror.GRPC(err))
 				return
 			}
 			handleOK(w, res)
@@ -211,7 +211,7 @@ func RegisterCourseServiceClient(mux *http.ServeMux, s acourse.CourseServiceClie
 			}
 			res, err := s.ListPublicCourses(makeServiceContext(r), req)
 			if err != nil {
-				handleError(w, err)
+				handleError(w, httperror.GRPC(err))
 				return
 			}
 			handleOK(w, res)
@@ -228,7 +228,7 @@ func RegisterCourseServiceClient(mux *http.ServeMux, s acourse.CourseServiceClie
 			}
 			res, err := s.ListOwnCourses(makeServiceContext(r), req)
 			if err != nil {
-				handleError(w, err)
+				handleError(w, httperror.GRPC(err))
 				return
 			}
 			handleOK(w, res)
@@ -245,7 +245,7 @@ func RegisterCourseServiceClient(mux *http.ServeMux, s acourse.CourseServiceClie
 			}
 			res, err := s.ListEnrolledCourses(makeServiceContext(r), req)
 			if err != nil {
-				handleError(w, err)
+				handleError(w, httperror.GRPC(err))
 				return
 			}
 			handleOK(w, res)
@@ -262,7 +262,7 @@ func RegisterCourseServiceClient(mux *http.ServeMux, s acourse.CourseServiceClie
 			}
 			res, err := s.GetCourse(makeServiceContext(r), req)
 			if err != nil {
-				handleError(w, err)
+				handleError(w, httperror.GRPC(err))
 				return
 			}
 			handleOK(w, res)
@@ -279,7 +279,7 @@ func RegisterCourseServiceClient(mux *http.ServeMux, s acourse.CourseServiceClie
 			}
 			res, err := s.CreateCourse(makeServiceContext(r), req)
 			if err != nil {
-				handleError(w, err)
+				handleError(w, httperror.GRPC(err))
 				return
 			}
 			handleOK(w, res)
@@ -296,7 +296,7 @@ func RegisterCourseServiceClient(mux *http.ServeMux, s acourse.CourseServiceClie
 			}
 			res, err := s.UpdateCourse(makeServiceContext(r), req)
 			if err != nil {
-				handleError(w, err)
+				handleError(w, httperror.GRPC(err))
 				return
 			}
 			handleOK(w, res)
@@ -313,7 +313,7 @@ func RegisterCourseServiceClient(mux *http.ServeMux, s acourse.CourseServiceClie
 			}
 			res, err := s.EnrollCourse(makeServiceContext(r), req)
 			if err != nil {
-				handleError(w, err)
+				handleError(w, httperror.GRPC(err))
 				return
 			}
 			handleOK(w, res)
@@ -330,7 +330,7 @@ func RegisterCourseServiceClient(mux *http.ServeMux, s acourse.CourseServiceClie
 			}
 			res, err := s.AttendCourse(makeServiceContext(r), req)
 			if err != nil {
-				handleError(w, err)
+				handleError(w, httperror.GRPC(err))
 				return
 			}
 			handleOK(w, res)
@@ -347,7 +347,7 @@ func RegisterCourseServiceClient(mux *http.ServeMux, s acourse.CourseServiceClie
 			}
 			res, err := s.OpenAttend(makeServiceContext(r), req)
 			if err != nil {
-				handleError(w, err)
+				handleError(w, httperror.GRPC(err))
 				return
 			}
 			handleOK(w, res)
@@ -364,7 +364,7 @@ func RegisterCourseServiceClient(mux *http.ServeMux, s acourse.CourseServiceClie
 			}
 			res, err := s.CloseAttend(makeServiceContext(r), req)
 			if err != nil {
-				handleError(w, err)
+				handleError(w, httperror.GRPC(err))
 				return
 			}
 			handleOK(w, res)
@@ -386,7 +386,7 @@ func RegisterAssignmentServiceClient(mux *http.ServeMux, s acourse.AssignmentSer
 			}
 			res, err := s.CreateAssignment(makeServiceContext(r), req)
 			if err != nil {
-				handleError(w, err)
+				handleError(w, httperror.GRPC(err))
 				return
 			}
 			handleOK(w, res)
@@ -403,7 +403,7 @@ func RegisterAssignmentServiceClient(mux *http.ServeMux, s acourse.AssignmentSer
 			}
 			res, err := s.UpdateAssignment(makeServiceContext(r), req)
 			if err != nil {
-				handleError(w, err)
+				handleError(w, httperror.GRPC(err))
 				return
 			}
 			handleOK(w, res)
@@ -420,7 +420,7 @@ func RegisterAssignmentServiceClient(mux *http.ServeMux, s acourse.AssignmentSer
 			}
 			res, err := s.OpenAssignment(makeServiceContext(r), req)
 			if err != nil {
-				handleError(w, err)
+				handleError(w, httperror.GRPC(err))
 				return
 			}
 			handleOK(w, res)
@@ -437,7 +437,7 @@ func RegisterAssignmentServiceClient(mux *http.ServeMux, s acourse.AssignmentSer
 			}
 			res, err := s.CloseAssignment(makeServiceContext(r), req)
 			if err != nil {
-				handleError(w, err)
+				handleError(w, httperror.GRPC(err))
 				return
 			}
 			handleOK(w, res)
@@ -454,7 +454,7 @@ func RegisterAssignmentServiceClient(mux *http.ServeMux, s acourse.AssignmentSer
 			}
 			res, err := s.ListAssignments(makeServiceContext(r), req)
 			if err != nil {
-				handleError(w, err)
+				handleError(w, httperror.GRPC(err))
 				return
 			}
 			handleOK(w, res)
@@ -471,7 +471,7 @@ func RegisterAssignmentServiceClient(mux *http.ServeMux, s acourse.AssignmentSer
 			}
 			res, err := s.DeleteAssignment(makeServiceContext(r), req)
 			if err != nil {
-				handleError(w, err)
+				handleError(w, httperror.GRPC(err))
 				return
 			}
 			handleOK(w, res)
@@ -488,7 +488,7 @@ func RegisterAssignmentServiceClient(mux *http.ServeMux, s acourse.AssignmentSer
 			}
 			res, err := s.SubmitUserAssignment(makeServiceContext(r), req)
 			if err != nil {
-				handleError(w, err)
+				handleError(w, httperror.GRPC(err))
 				return
 			}
 			handleOK(w, res)
@@ -505,7 +505,7 @@ func RegisterAssignmentServiceClient(mux *http.ServeMux, s acourse.AssignmentSer
 			}
 			res, err := s.DeleteUserAssignment(makeServiceContext(r), req)
 			if err != nil {
-				handleError(w, err)
+				handleError(w, httperror.GRPC(err))
 				return
 			}
 			handleOK(w, res)
@@ -522,7 +522,7 @@ func RegisterAssignmentServiceClient(mux *http.ServeMux, s acourse.AssignmentSer
 			}
 			res, err := s.GetUserAssignments(makeServiceContext(r), req)
 			if err != nil {
-				handleError(w, err)
+				handleError(w, httperror.GRPC(err))
 				return
 			}
 			handleOK(w, res)
