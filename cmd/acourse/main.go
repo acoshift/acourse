@@ -31,6 +31,10 @@ import (
 type Config struct {
 	Debug     bool   `yaml:"debug"`
 	Port      string `yaml:"port"`
+	TLSPort   string `yaml:"tlsPort"`
+	TLSCert   string `yaml:"tlsCert"`
+	TLSKey    string `yaml:"tlsKey"`
+	Domain    string `yaml:"domain"`
 	ProjectID string `yaml:"projectId"`
 	Email     struct {
 		From     string `yaml:"from"`
@@ -225,7 +229,25 @@ func main() {
 		go payment.StartNotification(db, emailServiceClient)
 	}
 
+	serverHandler := httpServer(mux)
 	addr := net.JoinHostPort("0.0.0.0", cfg.Port)
-	log.Printf("Listening on %s", addr)
-	log.Fatal(http.ListenAndServe(addr, httpServer(mux)))
+
+	if cfg.TLSPort != "" {
+		tlsAddr := net.JoinHostPort("0.0.0.0", cfg.TLSPort)
+		go func() {
+			log.Printf("Listening Redirect on %s", addr)
+			log.Fatal(http.ListenAndServe(addr, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				t := "https://" + cfg.Domain + r.URL.Path
+				if len(r.URL.RawQuery) > 0 {
+					t += "?" + r.URL.RawQuery
+				}
+				http.Redirect(w, r, t, http.StatusPermanentRedirect)
+			})))
+		}()
+		log.Printf("Listening TLS on %s", tlsAddr)
+		log.Fatal(http.ListenAndServeTLS(tlsAddr, cfg.TLSCert, cfg.TLSKey, serverHandler))
+	} else {
+		log.Printf("Listening on %s", addr)
+		log.Fatal(http.ListenAndServe(addr, serverHandler))
+	}
 }

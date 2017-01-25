@@ -6,6 +6,8 @@ PROJECT=acourse-156413
 
 deploy: clean dep ui pre-build config-prod build docker push hook
 
+deploy-docker: clean dep ui pre-build config-prod build docker push
+
 clean: clean-ui clean-build
 
 dev:
@@ -68,6 +70,8 @@ pre-build:
 	cp -rf public .build/
 	cp -rf templates .build/
 	cp Dockerfile .build/
+	cp private/acourse_io.crt .build/
+	cp private/acourse_io.key .build/
 
 docker:
 	cd .build && docker build -t acourse .
@@ -81,3 +85,6 @@ hook:
 
 fix:
 	$(GO) tool fix -force context .
+
+rolling-update:
+	kubectl rolling-update acourse --image gcr.io/acourse-d9d0a/acourse --image-pull-policy Always
