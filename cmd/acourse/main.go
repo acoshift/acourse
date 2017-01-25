@@ -175,7 +175,7 @@ func main() {
 		grpcServer := grpc.NewServer(grpc.UnaryInterceptor(app.UnaryInterceptors))
 		acourse.RegisterUserServiceServer(grpcServer, user.New(client))
 		acourse.RegisterCourseServiceServer(grpcServer, course.New(db, userServiceClient))
-		acourse.RegisterPaymentServiceServer(grpcServer, payment.New(db, userServiceClient, firAuth, emailServiceClient))
+		acourse.RegisterPaymentServiceServer(grpcServer, payment.New(db, client, userServiceClient, firAuth, emailServiceClient))
 		acourse.RegisterEmailServiceServer(grpcServer, email.New(email.Config{
 			From:     cfg.Email.From,
 			Server:   cfg.Email.Server,
@@ -188,7 +188,7 @@ func main() {
 	}()
 
 	if !cfg.Debug {
-		go payment.StartNotification(db, emailServiceClient)
+		go payment.StartNotification(client, emailServiceClient)
 	}
 
 	serverHandler := httpServer(mux)

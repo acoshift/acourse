@@ -7,10 +7,9 @@ import (
 	"time"
 
 	"github.com/acoshift/acourse/pkg/acourse"
-	"github.com/acoshift/acourse/pkg/app"
 	"github.com/acoshift/acourse/pkg/internal"
 	"github.com/acoshift/acourse/pkg/model"
-	"github.com/acoshift/acourse/pkg/store"
+	"github.com/acoshift/ds"
 	"github.com/acoshift/go-firebase-admin"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -18,26 +17,22 @@ import (
 
 // Store is the payment store
 type Store interface {
-	PaymentList(context.Context, ...store.PaymentListOption) (model.Payments, error)
-	PaymentGetMulti(context.Context, []string) (model.Payments, error)
-	PaymentSaveMulti(context.Context, model.Payments) error
 	CourseGet(context.Context, string) (*model.Course, error)
 	CourseGetMulti(context.Context, []string) (model.Courses, error)
 	EnrollSaveMulti(context.Context, []*model.Enroll) error
-	PaymentGet(context.Context, string) (*model.Payment, error)
-	PaymentSave(context.Context, *model.Payment) error
 }
 
 // New creates new payment service
-func New(store Store, user acourse.UserServiceClient, auth *admin.Auth, email acourse.EmailServiceClient) acourse.PaymentServiceServer {
-	return &service{store, user, auth, email}
+func New(store Store, client *ds.Client, user acourse.UserServiceClient, auth *admin.Auth, email acourse.EmailServiceClient) acourse.PaymentServiceServer {
+	return &service{store, client, user, auth, email}
 }
 
 type service struct {
-	store Store
-	user  acourse.UserServiceClient
-	auth  *admin.Auth
-	email acourse.EmailServiceClient
+	store  Store
+	client *ds.Client
+	user   acourse.UserServiceClient
+	auth   *admin.Auth
+	email  acourse.EmailServiceClient
 }
 
 func (s *service) validateUser(ctx context.Context) error {
@@ -55,19 +50,20 @@ func (s *service) validateUser(ctx context.Context) error {
 	return nil
 }
 
-func (s *service) listPayments(ctx context.Context, opts ...store.PaymentListOption) (*acourse.PaymentsResponse, error) {
+func (s *service) listPayments(ctx context.Context, opts ...ds.Query) (*acourse.PaymentsResponse, error) {
 	err := s.validateUser(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	payments, err := s.store.PaymentList(ctx, opts...)
+	var payments []*payment
+	err = s.client.Query(ctx, kindPayment, &payments, opts...)
+	err = ds.IgnoreFieldMismatch(err)
+	if ds.NotFound(err) {
+		return &acourse.PaymentsResponse{}, nil
+	}
 	if err != nil {
 		return nil, err
-	}
-
-	if len(payments) == 0 {
-		return &acourse.PaymentsResponse{}, nil
 	}
 
 	userIDMap := map[string]bool{}
@@ -97,14 +93,14 @@ func (s *service) listPayments(ctx context.Context, opts ...store.PaymentListOpt
 	}
 
 	return &acourse.PaymentsResponse{
-		Payments: acourse.ToPayments(payments),
+		Payments: toPayments(payments),
 		Users:    acourse.ToUsersTiny(users),
 		Courses:  acourse.ToCoursesTiny(courses),
 	}, nil
 }
 
 func (s *service) ListWaitingPayments(ctx context.Context, req *acourse.ListRequest) (*acourse.PaymentsResponse, error) {
-	return s.listPayments(ctx, store.PaymentListOptionStatus(model.PaymentStatusWaiting))
+	return s.listPayments(ctx, ds.Filter("Status =", statusWaiting))
 }
 
 func (s *service) ListHistoryPayments(ctx context.Context, req *acourse.ListRequest) (*acourse.PaymentsResponse, error) {
@@ -117,7 +113,9 @@ func (s *service) ApprovePayments(ctx context.Context, req *acourse.PaymentIDsRe
 		return nil, err
 	}
 
-	payments, err := s.store.PaymentGetMulti(ctx, app.UniqueIDs(req.GetPaymentIds()))
+	var payments []*payment
+	err = s.client.GetByStringIDs(ctx, kindPayment, req.GetPaymentIds(), &payments)
+	err = ds.IgnoreFieldMismatch(err)
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +134,7 @@ func (s *service) ApprovePayments(ctx context.Context, req *acourse.PaymentIDsRe
 		return nil, err
 	}
 
-	err = s.store.PaymentSaveMulti(ctx, payments)
+	err = s.client.SaveModels(ctx, "", payments)
 	if err != nil {
 		return nil, err
 	}
@@ -152,7 +150,9 @@ func (s *service) RejectPayments(ctx context.Context, req *acourse.PaymentIDsReq
 		return nil, err
 	}
 
-	payments, err := s.store.PaymentGetMulti(ctx, app.UniqueIDs(req.GetPaymentIds()))
+	var payments []*payment
+	err = s.client.GetByStringIDs(ctx, kindPayment, req.GetPaymentIds(), &payments)
+	err = ds.IgnoreFieldMismatch(err)
 	if err != nil {
 		return nil, err
 	}
@@ -161,7 +161,7 @@ func (s *service) RejectPayments(ctx context.Context, req *acourse.PaymentIDsReq
 		payment.Reject()
 	}
 
-	err = s.store.PaymentSaveMulti(ctx, payments)
+	err = s.client.SaveModels(ctx, "", payments)
 	if err != nil {
 		return nil, err
 	}
@@ -171,7 +171,7 @@ func (s *service) RejectPayments(ctx context.Context, req *acourse.PaymentIDsReq
 	return new(acourse.Empty), nil
 }
 
-func (s *service) sendApprovedNotification(payments []*model.Payment) {
+func (s *service) sendApprovedNotification(payments []*payment) {
 	ctx := context.Background()
 	for _, payment := range payments {
 		course, err := s.store.CourseGet(ctx, payment.CourseID)
@@ -247,7 +247,7 @@ https://acourse.io`
 	}
 }
 
-func (s *service) sendRejectNotification(payments []*model.Payment) {
+func (s *service) sendRejectNotification(payments []*payment) {
 	ctx := context.Background()
 	for _, payment := range payments {
 		course, err := s.store.CourseGet(ctx, payment.CourseID)
@@ -321,13 +321,18 @@ func (s *service) UpdatePrice(ctx context.Context, req *acourse.PaymentUpdatePri
 		return nil, grpc.Errorf(codes.InvalidArgument, "payment id required")
 	}
 
-	payment, err := s.store.PaymentGet(ctx, req.GetPaymentId())
+	var x payment
+	err = s.client.GetByStringID(ctx, kindPayment, req.GetPaymentId(), &x)
+	err = ds.IgnoreFieldMismatch(err)
+	if ds.NotFound(err) {
+		return nil, ErrPaymentNotFound
+	}
 	if err != nil {
 		return nil, err
 	}
-	payment.Price = req.GetPrice()
+	x.Price = req.GetPrice()
 
-	err = s.store.PaymentSave(ctx, payment)
+	err = s.client.SaveModel(ctx, "", &x)
 	if err != nil {
 		return nil, err
 	}
@@ -336,16 +341,19 @@ func (s *service) UpdatePrice(ctx context.Context, req *acourse.PaymentUpdatePri
 }
 
 // StartNotification starts payment notification
-func StartNotification(s Store, email acourse.EmailServiceClient) {
+func StartNotification(client *ds.Client, email acourse.EmailServiceClient) {
+	ctx := context.Background()
 	go func() {
 		for {
 			time.Sleep(6 * time.Hour)
 
 			// check is any payments have status waiting
 			log.Println("Run Notification Payment")
-			payments, err := s.PaymentList(context.Background(), store.PaymentListOptionStatus(model.PaymentStatusWaiting))
+			var payments []*payment
+			err := client.Query(ctx, kindPayment, &payments, ds.Filter("Status =", statusWaiting))
+			err = ds.IgnoreFieldMismatch(err)
 			if err == nil && len(payments) > 0 {
-				_, err = email.Send(context.Background(), &acourse.Email{
+				_, err = email.Send(ctx, &acourse.Email{
 					To:      []string{"acoshift@gmail.com", "k.chalermsook@gmail.com"},
 					Subject: "Acourse - Payment Received",
 					Body:    fmt.Sprintf("%d payments pending", len(payments)),
