@@ -39,3 +39,30 @@ func toAssignments(xs []*assignment) []*acourse.Assignment {
 	}
 	return rs
 }
+
+type userAssignment struct {
+	ds.StringIDModel
+	ds.StampModel
+	AssignmentID string
+	UserID       string
+	URL          string `datastore:",noindex"`
+}
+
+func toUserAssignment(x *userAssignment) *acourse.UserAssignment {
+	return &acourse.UserAssignment{
+		Id:           x.ID(),
+		CreatedAt:    x.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:    x.UpdatedAt.Format(time.RFC3339),
+		AssignmentId: x.AssignmentID,
+		UserId:       x.UserID,
+		Url:          x.URL,
+	}
+}
+
+func toUserAssignments(xs []*userAssignment) []*acourse.UserAssignment {
+	rs := make([]*acourse.UserAssignment, len(xs))
+	for i, x := range xs {
+		rs[i] = toUserAssignment(x)
+	}
+	return rs
+}

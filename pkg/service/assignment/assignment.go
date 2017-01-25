@@ -20,10 +20,6 @@ func New(store Store, client *ds.Client) acourse.AssignmentServiceServer {
 type Store interface {
 	CourseGet(context.Context, string) (*model.Course, error)
 	EnrollFind(context.Context, string, string) (*model.Enroll, error)
-	UserAssignmentSave(context.Context, *model.UserAssignment) error
-	UserAssignmentGet(context.Context, string) (*model.UserAssignment, error)
-	UserAssignmentDelete(context.Context, string) error
-	UserAssignmentList(context.Context, string, string) (model.UserAssignments, error)
 }
 
 type service struct {
@@ -209,18 +205,18 @@ func (s *service) SubmitUserAssignment(ctx context.Context, req *acourse.UserAss
 	}
 
 	// create model
-	userAssignment := &model.UserAssignment{
+	userAssignment := &userAssignment{
 		AssignmentID: x.ID(),
 		UserID:       userID,
 		URL:          req.GetUrl(),
 	}
 
-	err = s.store.UserAssignmentSave(ctx, userAssignment)
+	err = s.client.SaveModel(ctx, kindUserAssignment, userAssignment)
 	if err != nil {
 		return nil, err
 	}
 
-	return acourse.ToUserAssignment(userAssignment), nil
+	return toUserAssignment(userAssignment), nil
 }
 
 func (s *service) DeleteUserAssignment(ctx context.Context, req *acourse.UserAssignmentIDRequest) (*acourse.Empty, error) {
@@ -229,19 +225,21 @@ func (s *service) DeleteUserAssignment(ctx context.Context, req *acourse.UserAss
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
 
-	userAssignment, err := s.store.UserAssignmentGet(ctx, req.GetId())
+	var x userAssignment
+	err := s.client.GetByStringID(ctx, kindUserAssignment, req.GetId(), &x)
+	err = ds.IgnoreFieldMismatch(err)
+	if ds.NotFound(err) {
+		return nil, ErrUserAssignmentNotFound
+	}
 	if err != nil {
 		return nil, err
 	}
-	if userAssignment == nil {
-		return nil, grpc.Errorf(codes.NotFound, "user assignment not found")
+
+	if x.UserID != userID {
+		return nil, ErrPermissionDenied
 	}
 
-	if userAssignment.UserID != userID {
-		return nil, grpc.Errorf(codes.PermissionDenied, "can not delete this user assignment")
-	}
-
-	err = s.store.UserAssignmentDelete(ctx, req.GetId())
+	err = s.client.DeleteByStringID(ctx, kindUserAssignment, req.GetId())
 	if err != nil {
 		return nil, err
 	}
@@ -260,18 +258,23 @@ func (s *service) GetUserAssignments(ctx context.Context, req *acourse.Assignmen
 	if err != nil {
 		return nil, err
 	}
-	userAssignments := make(model.UserAssignments, 0)
+	xs := make([]*userAssignment, 0)
 	for _, assignment := range assignments {
 		// TODO: need refactor
-		tmp, err := s.store.UserAssignmentList(ctx, assignment.ID(), userID)
+		var tmp []*userAssignment
+		err := s.client.Query(ctx, kindUserAssignment, &tmp,
+			ds.Filter("AssignmentID =", assignment.ID()),
+			ds.Filter("UserID =", userID),
+		)
+		err = ds.IgnoreFieldMismatch(err)
 		if err != nil {
 			return nil, err
 		}
-		userAssignments = append(userAssignments, tmp...)
+		xs = append(xs, tmp...)
 	}
 
 	return &acourse.UserAssignmentsResponse{
-		UserAssignments: acourse.ToUserAssignments(userAssignments),
+		UserAssignments: toUserAssignments(xs),
 	}, nil
 }
 
@@ -293,7 +296,7 @@ func (s *service) ListUserAssignments(ctx context.Context, req *acourse.CourseID
 		return nil, grpc.Errorf(codes.PermissionDenied, "only instructor can list user assignments")
 	}
 
-	var xs []*assignment
+	var assignments []*assignment
 	err = s.client.Query(ctx, kindAssignment, ds.Filter("CourseID =", course.ID()))
 	err = ds.IgnoreFieldMismatch(err)
 	err = ds.IgnoreNotFound(err)
@@ -301,17 +304,21 @@ func (s *service) ListUserAssignments(ctx context.Context, req *acourse.CourseID
 		return nil, err
 	}
 
-	userAssignments := model.UserAssignments{}
+	xs := make([]*userAssignment, 0)
 
-	for _, x := range xs {
-		temp, err := s.store.UserAssignmentList(ctx, x.ID(), "")
+	for _, assignment := range assignments {
+		var tmp []*userAssignment
+		err := s.client.Query(ctx, kindUserAssignment, &tmp,
+			ds.Filter("AssignmentID =", assignment.ID()),
+		)
+		err = ds.IgnoreFieldMismatch(err)
 		if err != nil {
 			return nil, err
 		}
-		userAssignments = append(userAssignments, temp...)
+		xs = append(xs, tmp...)
 	}
 
 	return &acourse.UserAssignmentsResponse{
-		UserAssignments: acourse.ToUserAssignments(userAssignments),
+		UserAssignments: toUserAssignments(xs),
 	}, nil
 }

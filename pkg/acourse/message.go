@@ -148,24 +148,3 @@ func ToCoursesTiny(xs model.Courses) []*CourseTiny {
 	}
 	return rs
 }
-
-// ToUserAssignment buildss an UserAssignment message from an UserAssignment model
-func ToUserAssignment(x *model.UserAssignment) *UserAssignment {
-	return &UserAssignment{
-		Id:           x.ID(),
-		CreatedAt:    formatTime(x.CreatedAt),
-		UpdatedAt:    formatTime(x.UpdatedAt),
-		AssignmentId: x.AssignmentID,
-		UserId:       x.UserID,
-		Url:          x.URL,
-	}
-}
-
-// ToUserAssignments builds repeated UserAssignment message from UserAssignment models
-func ToUserAssignments(xs model.UserAssignments) []*UserAssignment {
-	rs := make([]*UserAssignment, len(xs))
-	for i, x := range xs {
-		rs[i] = ToUserAssignment(x)
-	}
-	return rs
-}
