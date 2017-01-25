@@ -11,5 +11,8 @@ ADD acourse /
 COPY config.yaml /
 COPY templates /templates
 COPY public /public
-EXPOSE 8080
+COPY acourse_io.crt /
+COPY acourse_io.key /
+EXPOSE 80
+EXPOSE 443
 ENTRYPOINT ["/acourse"]
