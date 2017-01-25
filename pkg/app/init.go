@@ -9,15 +9,6 @@ import (
 	"github.com/acoshift/httperror"
 )
 
-// ContextKey is the key for app's context
-type ContextKey int
-
-// Predefined context keys
-const (
-	KeyCurrentUserID ContextKey = iota
-	KeyRequestID
-)
-
 var (
 	firAuth *admin.Auth
 
