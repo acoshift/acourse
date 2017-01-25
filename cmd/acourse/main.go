@@ -179,7 +179,7 @@ func main() {
 			User:     cfg.Email.User,
 			Password: cfg.Email.Password,
 		}))
-		acourse.RegisterAssignmentServiceServer(grpcServer, assignment.New(db))
+		acourse.RegisterAssignmentServiceServer(grpcServer, assignment.New(db, client))
 		log.Fatal(grpcServer.Serve(grpcListener))
 	}()
 

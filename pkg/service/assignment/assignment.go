@@ -6,23 +6,19 @@ import (
 	"github.com/acoshift/acourse/pkg/acourse"
 	"github.com/acoshift/acourse/pkg/internal"
 	"github.com/acoshift/acourse/pkg/model"
+	"github.com/acoshift/ds"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 )
 
 // New creates new assignment service server
-func New(store Store) acourse.AssignmentServiceServer {
-	return &service{store}
+func New(store Store, client *ds.Client) acourse.AssignmentServiceServer {
+	return &service{store, client}
 }
 
 // Store is the store interface for assignment service
 type Store interface {
 	CourseGet(context.Context, string) (*model.Course, error)
-	AssignmentGet(context.Context, string) (*model.Assignment, error)
-	AssignmentSave(context.Context, *model.Assignment) error
-	AssignmentList(context.Context, string) (model.Assignments, error)
-	AssignmentDelete(context.Context, string) error
-	AssignmentGetMulti(context.Context, []string) (model.Assignments, error)
 	EnrollFind(context.Context, string, string) (*model.Enroll, error)
 	UserAssignmentSave(context.Context, *model.UserAssignment) error
 	UserAssignmentGet(context.Context, string) (*model.UserAssignment, error)
@@ -31,7 +27,8 @@ type Store interface {
 }
 
 type service struct {
-	store Store
+	store  Store
+	client *ds.Client
 }
 
 func (s *service) isCourseOwner(ctx context.Context, courseID, userID string) error {
@@ -57,7 +54,7 @@ func (s *service) CreateAssignment(ctx context.Context, req *acourse.Assignment)
 		return nil, err
 	}
 
-	assignment := &model.Assignment{
+	x := assignment{
 		CourseID:    req.GetCourseId(),
 		Title:       req.GetTitle(),
 		Description: req.GetDescription(),
@@ -65,11 +62,11 @@ func (s *service) CreateAssignment(ctx context.Context, req *acourse.Assignment)
 	}
 
 	// save model
-	err := s.store.AssignmentSave(ctx, assignment)
+	err := s.client.SaveModel(ctx, kindAssignment, &x)
 	if err != nil {
 		return nil, err
 	}
-	return acourse.ToAssignment(assignment), nil
+	return toAssignment(&x), nil
 }
 
 func (s *service) UpdateAssignment(ctx context.Context, req *acourse.Assignment) (*acourse.Empty, error) {
@@ -77,23 +74,26 @@ func (s *service) UpdateAssignment(ctx context.Context, req *acourse.Assignment)
 	if userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
-	assignment, err := s.store.AssignmentGet(ctx, req.GetId())
+
+	var x assignment
+	err := s.client.GetByStringID(ctx, kindAssignment, req.GetId(), &x)
+	err = ds.IgnoreFieldMismatch(err)
+	if ds.NotFound(err) {
+		return nil, ErrAssignmentNotFound
+	}
 	if err != nil {
 		return nil, err
 	}
-	if assignment == nil {
-		return nil, grpc.Errorf(codes.NotFound, "assignment not found")
-	}
 
-	err = s.isCourseOwner(ctx, assignment.CourseID, userID)
+	err = s.isCourseOwner(ctx, x.CourseID, userID)
 	if err != nil {
 		return nil, err
 	}
 
-	assignment.Title = req.GetTitle()
-	assignment.Description = req.GetDescription()
+	x.Title = req.GetTitle()
+	x.Description = req.GetDescription()
 
-	err = s.store.AssignmentSave(ctx, assignment)
+	err = s.client.SaveModel(ctx, "", &x)
 	if err != nil {
 		return nil, err
 	}
@@ -106,22 +106,24 @@ func (s *service) changeOpenAssignment(ctx context.Context, req *acourse.Assignm
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
 
-	assignment, err := s.store.AssignmentGet(ctx, req.GetAssignmentId())
+	var x assignment
+	err := s.client.GetByStringID(ctx, kindAssignment, req.GetAssignmentId(), &x)
+	err = ds.IgnoreFieldMismatch(err)
+	if ds.NotFound(err) {
+		return nil, ErrAssignmentNotFound
+	}
 	if err != nil {
 		return nil, err
 	}
-	if assignment == nil {
-		return nil, grpc.Errorf(codes.NotFound, "assignment not found")
-	}
 
-	err = s.isCourseOwner(ctx, assignment.CourseID, userID)
+	err = s.isCourseOwner(ctx, x.CourseID, userID)
 	if err != nil {
 		return nil, err
 	}
 
-	assignment.Open = open
+	x.Open = open
 
-	err = s.store.AssignmentSave(ctx, assignment)
+	err = s.client.SaveModel(ctx, "", &x)
 	if err != nil {
 		return nil, err
 	}
@@ -139,12 +141,15 @@ func (s *service) CloseAssignment(ctx context.Context, req *acourse.AssignmentID
 func (s *service) ListAssignments(ctx context.Context, req *acourse.CourseIDRequest) (*acourse.AssignmentsResponse, error) {
 	// TODO: check is owner or enrolled
 
-	assignments, err := s.store.AssignmentList(ctx, req.GetCourseId())
+	var xs []*assignment
+	err := s.client.Query(ctx, kindAssignment, &xs, ds.Filter("CourseID =", req.GetCourseId()))
+	err = ds.IgnoreFieldMismatch(err)
+	err = ds.IgnoreNotFound(err)
 	if err != nil {
 		return nil, err
 	}
 	return &acourse.AssignmentsResponse{
-		Assignments: acourse.ToAssignments(assignments),
+		Assignments: toAssignments(xs),
 	}, nil
 }
 
@@ -154,20 +159,22 @@ func (s *service) DeleteAssignment(ctx context.Context, req *acourse.AssignmentI
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
 
-	assignment, err := s.store.AssignmentGet(ctx, req.GetAssignmentId())
-	if err != nil {
-		return nil, err
+	var x assignment
+	err := s.client.GetByStringID(ctx, kindAssignment, req.GetAssignmentId(), &x)
+	err = ds.IgnoreFieldMismatch(err)
+	if ds.NotFound(err) {
+		return nil, ErrAssignmentNotFound
 	}
-	if assignment == nil {
-		return nil, grpc.Errorf(codes.NotFound, "assignment not found")
-	}
-
-	err = s.isCourseOwner(ctx, assignment.CourseID, userID)
 	if err != nil {
 		return nil, err
 	}
 
-	err = s.store.AssignmentDelete(ctx, req.GetAssignmentId())
+	err = s.isCourseOwner(ctx, x.CourseID, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.client.DeleteByStringID(ctx, kindAssignment, req.GetAssignmentId())
 	if err != nil {
 		return nil, err
 	}
@@ -180,18 +187,20 @@ func (s *service) SubmitUserAssignment(ctx context.Context, req *acourse.UserAss
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
 
-	assignment, err := s.store.AssignmentGet(ctx, req.GetAssignmentId())
+	var x assignment
+	err := s.client.GetByStringID(ctx, kindAssignment, req.GetAssignmentId(), &x)
+	err = ds.IgnoreFieldMismatch(err)
+	if ds.NotFound(err) {
+		return nil, ErrAssignmentNotFound
+	}
 	if err != nil {
 		return nil, err
 	}
-	if assignment == nil {
-		return nil, grpc.Errorf(codes.NotFound, "assignment not found")
-	}
-	if !assignment.Open {
-		return nil, grpc.Errorf(codes.PermissionDenied, "assignment not open")
+	if !x.Open {
+		return nil, ErrAssignmentNotOpen
 	}
 
-	enroll, err := s.store.EnrollFind(ctx, userID, assignment.CourseID)
+	enroll, err := s.store.EnrollFind(ctx, userID, x.CourseID)
 	if err != nil {
 		return nil, err
 	}
@@ -201,7 +210,7 @@ func (s *service) SubmitUserAssignment(ctx context.Context, req *acourse.UserAss
 
 	// create model
 	userAssignment := &model.UserAssignment{
-		AssignmentID: assignment.ID(),
+		AssignmentID: x.ID(),
 		UserID:       userID,
 		URL:          req.GetUrl(),
 	}
@@ -245,7 +254,9 @@ func (s *service) GetUserAssignments(ctx context.Context, req *acourse.Assignmen
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
 
-	assignments, err := s.store.AssignmentGetMulti(ctx, req.GetAssignmentIds())
+	var assignments []*assignment
+	err := s.client.GetByStringIDs(ctx, kindAssignment, req.GetAssignmentIds(), &assignments)
+	err = ds.IgnoreFieldMismatch(err)
 	if err != nil {
 		return nil, err
 	}
@@ -282,15 +293,18 @@ func (s *service) ListUserAssignments(ctx context.Context, req *acourse.CourseID
 		return nil, grpc.Errorf(codes.PermissionDenied, "only instructor can list user assignments")
 	}
 
-	assignments, err := s.store.AssignmentList(ctx, course.ID())
+	var xs []*assignment
+	err = s.client.Query(ctx, kindAssignment, ds.Filter("CourseID =", course.ID()))
+	err = ds.IgnoreFieldMismatch(err)
+	err = ds.IgnoreNotFound(err)
 	if err != nil {
 		return nil, err
 	}
 
 	userAssignments := model.UserAssignments{}
 
-	for _, assignment := range assignments {
-		temp, err := s.store.UserAssignmentList(ctx, assignment.ID(), "")
+	for _, x := range xs {
+		temp, err := s.store.UserAssignmentList(ctx, x.ID(), "")
 		if err != nil {
 			return nil, err
 		}
