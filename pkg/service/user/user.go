@@ -17,6 +17,7 @@ import (
 func New(client *ds.Client) acourse.UserServiceServer {
 	s := &service{client}
 	go s.startCacheRole()
+	go s.startCacheUser()
 	return s
 }
 
