@@ -201,11 +201,7 @@ func main() {
 		go func() {
 			log.Printf("Listening Redirect on %s", addr)
 			log.Fatal(http.ListenAndServe(addr, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				t := "https://" + cfg.Domain + r.URL.Path
-				if len(r.URL.RawQuery) > 0 {
-					t += "?" + r.URL.RawQuery
-				}
-				http.Redirect(w, r, t, http.StatusPermanentRedirect)
+				http.Redirect(w, r, "https://"+cfg.Domain, http.StatusPermanentRedirect)
 			})))
 		}()
 		tlsConfig := &tls.Config{
