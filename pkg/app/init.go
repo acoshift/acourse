@@ -9,15 +9,6 @@ import (
 	"github.com/acoshift/httperror"
 )
 
-// ContextKey is the key for app's context
-type ContextKey int
-
-// Predefined context keys
-const (
-	KeyCurrentUserID ContextKey = iota
-	KeyRequestID
-)
-
 var (
 	firAuth *admin.Auth
 
@@ -25,9 +16,8 @@ var (
 )
 
 // InitService inits service
-func InitService(auth *admin.Auth) (err error) {
+func InitService(auth *admin.Auth) {
 	firAuth = auth
-	return
 }
 
 func validateHeaderToken(header string) (string, error) {

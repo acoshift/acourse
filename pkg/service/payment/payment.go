@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/acoshift/acourse/pkg/acourse"
-	"github.com/acoshift/acourse/pkg/app"
+	"github.com/acoshift/acourse/pkg/internal"
 	"github.com/acoshift/acourse/pkg/model"
-	"github.com/acoshift/acourse/pkg/store"
+	"github.com/acoshift/ds"
 	"github.com/acoshift/go-firebase-admin"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -17,36 +17,30 @@ import (
 
 // Store is the payment store
 type Store interface {
-	PaymentList(context.Context, ...store.PaymentListOption) (model.Payments, error)
-	PaymentGetMulti(context.Context, []string) (model.Payments, error)
-	PaymentSaveMulti(context.Context, model.Payments) error
-	UserGetMulti(context.Context, []string) (model.Users, error)
-	UserMustGet(context.Context, string) (*model.User, error)
 	CourseGet(context.Context, string) (*model.Course, error)
 	CourseGetMulti(context.Context, []string) (model.Courses, error)
 	EnrollSaveMulti(context.Context, []*model.Enroll) error
-	RoleGet(context.Context, string) (*model.Role, error)
-	PaymentGet(context.Context, string) (*model.Payment, error)
-	PaymentSave(context.Context, *model.Payment) error
 }
 
 // New creates new payment service
-func New(store Store, auth *admin.Auth, email acourse.EmailServiceClient) acourse.PaymentServiceServer {
-	return &service{store, auth, email}
+func New(store Store, client *ds.Client, user acourse.UserServiceClient, auth *admin.Auth, email acourse.EmailServiceClient) acourse.PaymentServiceServer {
+	return &service{store, client, user, auth, email}
 }
 
 type service struct {
-	store Store
-	auth  *admin.Auth
-	email acourse.EmailServiceClient
+	store  Store
+	client *ds.Client
+	user   acourse.UserServiceClient
+	auth   *admin.Auth
+	email  acourse.EmailServiceClient
 }
 
 func (s *service) validateUser(ctx context.Context) error {
-	userID, ok := ctx.Value(acourse.KeyUserID).(string)
-	if !ok || userID == "" {
+	userID := internal.GetUserID(ctx)
+	if userID == "" {
 		return grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
-	role, err := s.store.RoleGet(ctx, userID)
+	role, err := s.user.GetRole(ctx, &acourse.UserIDRequest{UserId: userID})
 	if err != nil {
 		return err
 	}
@@ -56,13 +50,18 @@ func (s *service) validateUser(ctx context.Context) error {
 	return nil
 }
 
-func (s *service) listPayments(ctx context.Context, opts ...store.PaymentListOption) (*acourse.PaymentsResponse, error) {
+func (s *service) listPayments(ctx context.Context, opts ...ds.Query) (*acourse.PaymentsResponse, error) {
 	err := s.validateUser(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	payments, err := s.store.PaymentList(ctx, opts...)
+	var payments []*payment
+	err = s.client.Query(ctx, kindPayment, &payments, opts...)
+	err = ds.IgnoreFieldMismatch(err)
+	if ds.NotFound(err) {
+		return &acourse.PaymentsResponse{}, nil
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -82,10 +81,11 @@ func (s *service) listPayments(ctx context.Context, opts ...store.PaymentListOpt
 		courseIDs = append(courseIDs, courseID)
 	}
 
-	users, err := s.store.UserGetMulti(ctx, userIDs)
+	usersResp, err := s.user.GetUsers(ctx, &acourse.UserIDsRequest{UserIds: userIDs})
 	if err != nil {
 		return nil, err
 	}
+	users := usersResp.GetUsers()
 
 	courses, err := s.store.CourseGetMulti(ctx, courseIDs)
 	if err != nil {
@@ -93,14 +93,14 @@ func (s *service) listPayments(ctx context.Context, opts ...store.PaymentListOpt
 	}
 
 	return &acourse.PaymentsResponse{
-		Payments: acourse.ToPayments(payments),
+		Payments: toPayments(payments),
 		Users:    acourse.ToUsersTiny(users),
 		Courses:  acourse.ToCoursesTiny(courses),
 	}, nil
 }
 
 func (s *service) ListWaitingPayments(ctx context.Context, req *acourse.ListRequest) (*acourse.PaymentsResponse, error) {
-	return s.listPayments(ctx, store.PaymentListOptionStatus(model.PaymentStatusWaiting))
+	return s.listPayments(ctx, ds.Filter("Status =", statusWaiting))
 }
 
 func (s *service) ListHistoryPayments(ctx context.Context, req *acourse.ListRequest) (*acourse.PaymentsResponse, error) {
@@ -113,7 +113,9 @@ func (s *service) ApprovePayments(ctx context.Context, req *acourse.PaymentIDsRe
 		return nil, err
 	}
 
-	payments, err := s.store.PaymentGetMulti(ctx, app.UniqueIDs(req.GetPaymentIds()))
+	var payments []*payment
+	err = s.client.GetByStringIDs(ctx, kindPayment, req.GetPaymentIds(), &payments)
+	err = ds.IgnoreFieldMismatch(err)
 	if err != nil {
 		return nil, err
 	}
@@ -132,7 +134,7 @@ func (s *service) ApprovePayments(ctx context.Context, req *acourse.PaymentIDsRe
 		return nil, err
 	}
 
-	err = s.store.PaymentSaveMulti(ctx, payments)
+	err = s.client.SaveModels(ctx, "", payments)
 	if err != nil {
 		return nil, err
 	}
@@ -148,7 +150,9 @@ func (s *service) RejectPayments(ctx context.Context, req *acourse.PaymentIDsReq
 		return nil, err
 	}
 
-	payments, err := s.store.PaymentGetMulti(ctx, app.UniqueIDs(req.GetPaymentIds()))
+	var payments []*payment
+	err = s.client.GetByStringIDs(ctx, kindPayment, req.GetPaymentIds(), &payments)
+	err = ds.IgnoreFieldMismatch(err)
 	if err != nil {
 		return nil, err
 	}
@@ -157,7 +161,7 @@ func (s *service) RejectPayments(ctx context.Context, req *acourse.PaymentIDsReq
 		payment.Reject()
 	}
 
-	err = s.store.PaymentSaveMulti(ctx, payments)
+	err = s.client.SaveModels(ctx, "", payments)
 	if err != nil {
 		return nil, err
 	}
@@ -167,32 +171,29 @@ func (s *service) RejectPayments(ctx context.Context, req *acourse.PaymentIDsReq
 	return new(acourse.Empty), nil
 }
 
-func (s *service) sendApprovedNotification(payments []*model.Payment) {
-	ctx := context.Background()
-	for _, payment := range payments {
-		course, err := s.store.CourseGet(ctx, payment.CourseID)
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-		userInfo, err := s.auth.GetAccountInfoByUID(payment.UserID)
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-		if userInfo.Email == "" {
-			log.Println("User don't have email")
-			continue
-		}
-		user, err := s.store.UserMustGet(ctx, payment.UserID)
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-		if user.Name == "" {
-			user.Name = "Anonymous"
-		}
-		body := fmt.Sprintf(`สวัสดีครับคุณ %s,<br>
+func (s *service) processApprovedPayment(payment *payment) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
+	defer cancel()
+	course, err := s.store.CourseGet(ctx, payment.CourseID)
+	if err != nil {
+		return err
+	}
+	userInfo, err := s.auth.GetAccountInfoByUID(payment.UserID)
+	if err != nil {
+		return err
+	}
+	if userInfo.Email == "" {
+		log.Println("User don't have email")
+		return nil
+	}
+	user, err := s.user.GetUser(ctx, &acourse.UserIDRequest{UserId: payment.UserID})
+	if err != nil {
+		return err
+	}
+	if user.Name == "" {
+		user.Name = "Anonymous"
+	}
+	body := fmt.Sprintf(`สวัสดีครับคุณ %s,<br>
 <br>
 อีเมล์ฉบับนี้ยืนยันว่าท่านได้รับการอนุมัติการชำระเงินสำหรับหลักสูตร "%s" เสร็จสิ้น ท่านสามารถทำการ login เข้าสู่ Website Acourse แล้วเข้าเรียนหลักสูตร "%s" ได้ทันที<br>
 <br>
@@ -204,74 +205,68 @@ func (s *service) sendApprovedNotification(payments []*model.Payment) {
 ชื่อผู้ชำระเงิน: %s<br>
 อีเมล์ผู้ชำระเงิน: %s<br>
 `,
-			user.Name,
-			course.Title,
-			course.Title,
-			payment.ID(),
-			course.Title,
-			payment.Price,
-			payment.CreatedAt.In(timeLocal).Format(time.RFC822),
-			payment.At.In(timeLocal).Format(time.RFC822),
-			user.Name,
-			userInfo.Email,
-		)
+		user.Name,
+		course.Title,
+		course.Title,
+		payment.ID(),
+		course.Title,
+		payment.Price,
+		payment.CreatedAt.In(timeLocal).Format(time.RFC822),
+		payment.At.In(timeLocal).Format(time.RFC822),
+		user.Name,
+		userInfo.Email,
+	)
 
-		// 	if course.Type == model.CourseTypeVideo {
-		// 		body += `----------------------
-		// สนใจรับ Certificate หลังจบ Course <a href=''> เกี่ยวกับ ACertificate </a>
+	// 	if course.Type == model.CourseTypeVideo {
+	// 		body += `----------------------
+	// สนใจรับ Certificate หลังจบ Course <a href=''> เกี่ยวกับ ACertificate </a>
 
-		// ท่านสามารถเพิ่มเงินจำนวน 600 บาท (จำนวน ชม. x 30 บาท  ) เพื่อได้รับ ACertificate หลังจากทำการส่งการบ้านครบถ้วน เพื่อใช้เป็นหลักฐานอ้างอิงกับ <a href=''>บริษัท Partner ของเรา</a>
+	// ท่านสามารถเพิ่มเงินจำนวน 600 บาท (จำนวน ชม. x 30 บาท  ) เพื่อได้รับ ACertificate หลังจากทำการส่งการบ้านครบถ้วน เพื่อใช้เป็นหลักฐานอ้างอิงกับ <a href=''>บริษัท Partner ของเรา</a>
 
-		// ท่านสามารถสั่ง ACertificate ได้โดยโอนเงินจำนวน xxx บาท มาที่ บัญชีธนาคาร (ฝาก north เติมบัญชีตามหน้าเว็บ) แล้ว reply email นี้พร้อมแนบหลักฐานการโอนเงิน และเขียนว่า 'สั่งซื้อ certificate'
-		// `
-		// 	}
+	// ท่านสามารถสั่ง ACertificate ได้โดยโอนเงินจำนวน xxx บาท มาที่ บัญชีธนาคาร (ฝาก north เติมบัญชีตามหน้าเว็บ) แล้ว reply email นี้พร้อมแนบหลักฐานการโอนเงิน และเขียนว่า 'สั่งซื้อ certificate'
+	// `
+	// 	}
 
-		body += `----------------------<br>
+	body += `----------------------<br>
 ขอบคุณที่ร่วมเรียนกับเราครับ<br>
 Krissada Chalermsook (Oak)<br>
 Founder/CEO Acourse.io<br>
 https://acourse.io`
 
-		_, err = s.email.Send(context.Background(), &acourse.Email{
-			To:      []string{userInfo.Email},
-			Subject: fmt.Sprintf("ยืนยันการชำระเงิน หลักสูตร %s", course.Title),
-			Body:    body,
-		})
-		if err != nil {
-			log.Println(err)
-		}
-	}
+	_, err = s.email.Send(ctx, &acourse.Email{
+		To:      []string{userInfo.Email},
+		Subject: fmt.Sprintf("ยืนยันการชำระเงิน หลักสูตร %s", course.Title),
+		Body:    body,
+	})
+	return err
 }
 
-func (s *service) sendRejectNotification(payments []*model.Payment) {
-	ctx := context.Background()
-	for _, payment := range payments {
-		course, err := s.store.CourseGet(ctx, payment.CourseID)
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-		userInfo, err := s.auth.GetAccountInfoByUID(payment.UserID)
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-		if userInfo.Email == "" {
-			log.Println("User don't have email")
-			continue
-		}
-		user, err := s.store.UserMustGet(ctx, payment.UserID)
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-		if user.Name == "" {
-			user.Name = "Anonymous"
-		}
-		if course.URL == "" {
-			course.URL = course.ID()
-		}
-		body := fmt.Sprintf(`สวัสดีครับคุณ %s,<br>
+func (s *service) processRejectedPayment(payment *payment) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
+	defer cancel()
+	course, err := s.store.CourseGet(ctx, payment.CourseID)
+	if err != nil {
+		return err
+	}
+	userInfo, err := s.auth.GetAccountInfoByUID(payment.UserID)
+	if err != nil {
+		return err
+	}
+	if userInfo.Email == "" {
+		log.Println("User don't have email")
+		return nil
+	}
+	user, err := s.user.GetUser(ctx, &acourse.UserIDRequest{UserId: payment.UserID})
+	if err != nil {
+		return err
+	}
+	if user.Name == "" {
+		user.Name = "Anonymous"
+	}
+	if course.URL == "" {
+		course.URL = course.ID()
+	}
+	body := fmt.Sprintf(`สวัสดีครับคุณ %s,<br>
 <br>
 ตามที่ท่านได้ upload file เพื่อใช้ในการสมัครหลักสูตร "%s" เมื่อเวลา %s<br>
 <br>
@@ -290,17 +285,32 @@ func (s *service) sendRejectNotification(payments []*model.Payment) {
 ขอบคุณมากครับ<br>
 ทีมงาน acourse.io
 `,
-			user.Name,
-			course.Title,
-			payment.CreatedAt.In(timeLocal).Format(time.RFC822),
-			course.URL,
-		)
+		user.Name,
+		course.Title,
+		payment.CreatedAt.In(timeLocal).Format(time.RFC822),
+		course.URL,
+	)
 
-		_, err = s.email.Send(context.Background(), &acourse.Email{
-			To:      []string{userInfo.Email},
-			Subject: fmt.Sprintf("คำขอเพื่อเรียนหลักสูตร %s ได้รับการปฏิเสธ", course.Title),
-			Body:    body,
-		})
+	_, err = s.email.Send(ctx, &acourse.Email{
+		To:      []string{userInfo.Email},
+		Subject: fmt.Sprintf("คำขอเพื่อเรียนหลักสูตร %s ได้รับการปฏิเสธ", course.Title),
+		Body:    body,
+	})
+	return err
+}
+
+func (s *service) sendApprovedNotification(payments []*payment) {
+	for _, payment := range payments {
+		err := s.processApprovedPayment(payment)
+		if err != nil {
+			log.Println(err)
+		}
+	}
+}
+
+func (s *service) sendRejectNotification(payments []*payment) {
+	for _, payment := range payments {
+		err := s.processRejectedPayment(payment)
 		if err != nil {
 			log.Println(err)
 		}
@@ -317,13 +327,18 @@ func (s *service) UpdatePrice(ctx context.Context, req *acourse.PaymentUpdatePri
 		return nil, grpc.Errorf(codes.InvalidArgument, "payment id required")
 	}
 
-	payment, err := s.store.PaymentGet(ctx, req.GetPaymentId())
+	var x payment
+	err = s.client.GetByStringID(ctx, kindPayment, req.GetPaymentId(), &x)
+	err = ds.IgnoreFieldMismatch(err)
+	if ds.NotFound(err) {
+		return nil, ErrPaymentNotFound
+	}
 	if err != nil {
 		return nil, err
 	}
-	payment.Price = req.GetPrice()
+	x.Price = req.GetPrice()
 
-	err = s.store.PaymentSave(ctx, payment)
+	err = s.client.SaveModel(ctx, "", &x)
 	if err != nil {
 		return nil, err
 	}
@@ -332,16 +347,19 @@ func (s *service) UpdatePrice(ctx context.Context, req *acourse.PaymentUpdatePri
 }
 
 // StartNotification starts payment notification
-func StartNotification(s Store, email acourse.EmailServiceClient) {
+func StartNotification(client *ds.Client, email acourse.EmailServiceClient) {
+	ctx := context.Background()
 	go func() {
 		for {
 			time.Sleep(6 * time.Hour)
 
 			// check is any payments have status waiting
 			log.Println("Run Notification Payment")
-			payments, err := s.PaymentList(context.Background(), store.PaymentListOptionStatus(model.PaymentStatusWaiting))
+			var payments []*payment
+			err := client.Query(ctx, kindPayment, &payments, ds.Filter("Status =", statusWaiting))
+			err = ds.IgnoreFieldMismatch(err)
 			if err == nil && len(payments) > 0 {
-				_, err = email.Send(context.Background(), &acourse.Email{
+				_, err = email.Send(ctx, &acourse.Email{
 					To:      []string{"acoshift@gmail.com", "k.chalermsook@gmail.com"},
 					Subject: "Acourse - Payment Received",
 					Body:    fmt.Sprintf("%d payments pending", len(payments)),

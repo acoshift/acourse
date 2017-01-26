@@ -1,7 +1,8 @@
 package main
 
 import (
-	"fmt"
+	"context"
+	"crypto/tls"
 	"io/ioutil"
 	"log"
 	"net"
@@ -9,6 +10,9 @@ import (
 	"os"
 	"time"
 
+	"cloud.google.com/go/datastore"
+	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/storage"
 	"github.com/acoshift/acourse/pkg/acourse"
 	"github.com/acoshift/acourse/pkg/app"
 	"github.com/acoshift/acourse/pkg/ctrl/health"
@@ -20,8 +24,10 @@ import (
 	"github.com/acoshift/acourse/pkg/service/user"
 	"github.com/acoshift/acourse/pkg/store"
 	"github.com/acoshift/cors"
+	"github.com/acoshift/ds"
 	"github.com/acoshift/go-firebase-admin"
-	"github.com/google/uuid"
+	"golang.org/x/oauth2/google"
+	"google.golang.org/api/option"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/grpclog"
 	"gopkg.in/yaml.v2"
@@ -64,60 +70,6 @@ func LoadConfig(filename string) (*Config, error) {
 	return &cfg, nil
 }
 
-type loggerWriter struct {
-	http.ResponseWriter
-	header int
-}
-
-func (w *loggerWriter) WriteHeader(header int) {
-	w.header = header
-	w.ResponseWriter.WriteHeader(header)
-}
-
-func logger(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
-		path := r.URL.Path
-		tw := &loggerWriter{w, 0}
-		ip := r.Header.Get("X-Real-IP")
-		if ip == "" {
-			ip = r.RemoteAddr
-		}
-		h.ServeHTTP(tw, r)
-		end := time.Now()
-		fmt.Printf("%v | %3d | %13v | %s | %s | %s | %s\n",
-			end.Format(time.RFC3339),
-			tw.header,
-			end.Sub(start),
-			ip,
-			w.Header().Get("X-Request-ID"),
-			r.Method,
-			path,
-		)
-	})
-}
-
-func recovery(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		defer func() {
-			if e := recover(); e != nil {
-				log.Println(e)
-				w.WriteHeader(http.StatusInternalServerError)
-				fmt.Fprintf(w, "%v", e)
-			}
-		}()
-		h.ServeHTTP(w, r)
-	})
-}
-
-func requestID(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		rid := uuid.New().String()
-		w.Header().Set("X-Request-ID", rid)
-		h.ServeHTTP(w, r)
-	})
-}
-
 func chain(hs ...func(http.Handler) http.Handler) func(http.Handler) http.Handler {
 	return func(h http.Handler) http.Handler {
 		for i := len(hs); i > 0; i-- {
@@ -128,7 +80,7 @@ func chain(hs ...func(http.Handler) http.Handler) func(http.Handler) http.Handle
 }
 
 func main() {
-	grpclog.SetLogger(app.NewLogger())
+	grpclog.SetLogger(app.NewNoFatalLogger())
 
 	configFile := os.Getenv("CONFIG")
 	if configFile == "" {
@@ -137,7 +89,7 @@ func main() {
 
 	cfg, err := LoadConfig(configFile)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	firApp, err := admin.InitializeApp(admin.AppOptions{
@@ -145,16 +97,32 @@ func main() {
 		ServiceAccount: []byte(cfg.Firebase.ServiceAccount),
 	})
 	if err != nil {
-		return
+		panic(err)
 	}
 	firAuth := firApp.Auth()
 
 	db := store.NewDB(store.ProjectID(cfg.ProjectID), store.ServiceAccount([]byte(cfg.ServiceAccount)))
 
+	jwtConfig, err := google.JWTConfigFromJSON([]byte(cfg.ServiceAccount),
+		datastore.ScopeDatastore,
+		pubsub.ScopePubSub,
+		storage.ScopeFullControl,
+	)
+	if err != nil {
+		panic(err)
+	}
+	tokenSource := jwtConfig.TokenSource(context.Background())
+
+	client, err := ds.NewClient(context.Background(), cfg.ProjectID, option.WithTokenSource(tokenSource))
+	if err != nil {
+		panic(err)
+	}
+
 	httpServer := chain(
-		logger,
-		requestID,
-		recovery,
+		app.Logger,
+		app.RequestID,
+		app.HSTS,
+		app.Recovery,
 		cors.New(cors.Config{
 			AllowCredentials: false,
 			AllowOrigins: []string{
@@ -176,14 +144,12 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	if err := app.InitService(firAuth); err != nil {
-		log.Fatal(err)
-	}
+	app.InitService(firAuth)
 
 	// create service clients
 	conn, err := grpc.Dial("127.0.0.1:8081", grpc.WithInsecure())
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	userServiceClient := acourse.NewUserServiceClient(conn)
 	courseServiceClient := acourse.NewCourseServiceClient(conn)
@@ -206,12 +172,12 @@ func main() {
 	go func() {
 		grpcListener, err := net.Listen("tcp", ":8081")
 		if err != nil {
-			log.Fatal(err)
+			panic(err)
 		}
 		grpcServer := grpc.NewServer(grpc.UnaryInterceptor(app.UnaryInterceptors))
-		acourse.RegisterUserServiceServer(grpcServer, user.New(db))
-		acourse.RegisterCourseServiceServer(grpcServer, course.New(db))
-		acourse.RegisterPaymentServiceServer(grpcServer, payment.New(db, firAuth, emailServiceClient))
+		acourse.RegisterUserServiceServer(grpcServer, user.New(client))
+		acourse.RegisterCourseServiceServer(grpcServer, course.New(db, userServiceClient))
+		acourse.RegisterPaymentServiceServer(grpcServer, payment.New(db, client, userServiceClient, firAuth, emailServiceClient))
 		acourse.RegisterEmailServiceServer(grpcServer, email.New(email.Config{
 			From:     cfg.Email.From,
 			Server:   cfg.Email.Server,
@@ -219,14 +185,12 @@ func main() {
 			User:     cfg.Email.User,
 			Password: cfg.Email.Password,
 		}))
-		acourse.RegisterAssignmentServiceServer(grpcServer, assignment.New(db))
-		if err = grpcServer.Serve(grpcListener); err != nil {
-			log.Fatal(err)
-		}
+		acourse.RegisterAssignmentServiceServer(grpcServer, assignment.New(db, client))
+		log.Fatal(grpcServer.Serve(grpcListener))
 	}()
 
 	if !cfg.Debug {
-		go payment.StartNotification(db, emailServiceClient)
+		go payment.StartNotification(client, emailServiceClient)
 	}
 
 	serverHandler := httpServer(mux)
@@ -244,8 +208,25 @@ func main() {
 				http.Redirect(w, r, t, http.StatusPermanentRedirect)
 			})))
 		}()
+		tlsConfig := &tls.Config{
+			MinVersion:               tls.VersionTLS12,
+			CurvePreferences:         []tls.CurveID{tls.CurveP521, tls.CurveP384, tls.CurveP256},
+			PreferServerCipherSuites: true,
+			CipherSuites: []uint16{
+				tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+				tls.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
+				tls.TLS_RSA_WITH_AES_256_GCM_SHA384,
+				tls.TLS_RSA_WITH_AES_256_CBC_SHA,
+			},
+		}
+		tlsServer := &http.Server{
+			Addr:         tlsAddr,
+			Handler:      serverHandler,
+			TLSConfig:    tlsConfig,
+			TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0),
+		}
 		log.Printf("Listening TLS on %s", tlsAddr)
-		log.Fatal(http.ListenAndServeTLS(tlsAddr, cfg.TLSCert, cfg.TLSKey, serverHandler))
+		log.Fatal(tlsServer.ListenAndServeTLS(cfg.TLSCert, cfg.TLSKey))
 	} else {
 		log.Printf("Listening on %s", addr)
 		log.Fatal(http.ListenAndServe(addr, serverHandler))

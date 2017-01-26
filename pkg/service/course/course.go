@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/acoshift/acourse/pkg/acourse"
+	"github.com/acoshift/acourse/pkg/internal"
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/acourse/pkg/store"
 	"google.golang.org/grpc"
@@ -12,16 +13,14 @@ import (
 )
 
 // New creates new course service
-func New(store Store) acourse.CourseServiceServer {
-	return &service{store}
+func New(store Store, user acourse.UserServiceClient) acourse.CourseServiceServer {
+	return &service{store, user}
 }
 
 // Store is the store interface for course service
 type Store interface {
 	CourseList(context.Context, ...store.CourseListOption) (model.Courses, error)
-	UserGetMulti(context.Context, []string) (model.Users, error)
 	EnrollCourseCount(context.Context, string) (int, error)
-	RoleGet(context.Context, string) (*model.Role, error)
 	EnrollListByUserID(context.Context, string) (model.Enrolls, error)
 	CourseGetAllByIDs(context.Context, []string) (model.Courses, error)
 	CourseGet(context.Context, string) (*model.Course, error)
@@ -31,13 +30,13 @@ type Store interface {
 	PaymentSave(context.Context, *model.Payment) error
 	CourseSave(context.Context, *model.Course) error
 	CourseFind(context.Context, string) (*model.Course, error)
-	UserMustGet(context.Context, string) (*model.User, error)
 	AttendFind(context.Context, string, string) (*model.Attend, error)
 	AttendSave(context.Context, *model.Attend) error
 }
 
 type service struct {
 	store Store
+	user  acourse.UserServiceClient
 }
 
 func (s *service) listCourses(ctx context.Context, opts ...store.CourseListOption) (*acourse.CoursesResponse, error) {
@@ -54,10 +53,11 @@ func (s *service) listCourses(ctx context.Context, opts ...store.CourseListOptio
 	for id := range userIDMap {
 		userIDs = append(userIDs, id)
 	}
-	users, err := s.store.UserGetMulti(ctx, userIDs)
+	usersResp, err := s.user.GetUsers(ctx, &acourse.UserIDsRequest{UserIds: userIDs})
 	if err != nil {
 		return nil, err
 	}
+	users := usersResp.GetUsers()
 
 	enrollCounts := make([]*acourse.EnrollCount, len(courses))
 	for i, course := range courses {
@@ -82,11 +82,11 @@ func (s *service) ListPublicCourses(ctx context.Context, req *acourse.ListReques
 }
 
 func (s *service) ListCourses(ctx context.Context, req *acourse.ListRequest) (*acourse.CoursesResponse, error) {
-	userID, ok := ctx.Value(acourse.KeyUserID).(string)
-	if !ok || userID == "" {
+	userID := internal.GetUserID(ctx)
+	if userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
-	role, err := s.store.RoleGet(ctx, userID)
+	role, err := s.user.GetRole(ctx, &acourse.UserIDRequest{UserId: userID})
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +97,7 @@ func (s *service) ListCourses(ctx context.Context, req *acourse.ListRequest) (*a
 }
 
 func (s *service) ListOwnCourses(ctx context.Context, req *acourse.UserIDRequest) (*acourse.CoursesResponse, error) {
-	userID, _ := ctx.Value(acourse.KeyUserID).(string)
+	userID := internal.GetUserID(ctx)
 
 	if req.GetUserId() == "" {
 		return nil, grpc.Errorf(codes.InvalidArgument, "invalid user id")
@@ -115,8 +115,8 @@ func (s *service) ListOwnCourses(ctx context.Context, req *acourse.UserIDRequest
 }
 
 func (s *service) ListEnrolledCourses(ctx context.Context, req *acourse.UserIDRequest) (*acourse.CoursesResponse, error) {
-	userID, ok := ctx.Value(acourse.KeyUserID).(string)
-	if !ok || userID == "" {
+	userID := internal.GetUserID(ctx)
+	if userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
 
@@ -126,7 +126,7 @@ func (s *service) ListEnrolledCourses(ctx context.Context, req *acourse.UserIDRe
 
 	// only admin allow for get other user enrolled courses
 	if req.GetUserId() != userID {
-		role, err := s.store.RoleGet(ctx, userID)
+		role, err := s.user.GetRole(ctx, &acourse.UserIDRequest{UserId: userID})
 		if err != nil {
 			return nil, err
 		}
@@ -154,10 +154,11 @@ func (s *service) ListEnrolledCourses(ctx context.Context, req *acourse.UserIDRe
 	for id := range userIDMap {
 		userIDs = append(userIDs, id)
 	}
-	users, err := s.store.UserGetMulti(ctx, userIDs)
+	usersResp, err := s.user.GetUsers(ctx, &acourse.UserIDsRequest{UserIds: userIDs})
 	if err != nil {
 		return nil, err
 	}
+	users := usersResp.GetUsers()
 
 	enrollCounts := make([]*acourse.EnrollCount, len(courses))
 	for i, course := range courses {
@@ -178,7 +179,7 @@ func (s *service) ListEnrolledCourses(ctx context.Context, req *acourse.UserIDRe
 }
 
 func (s *service) GetCourse(ctx context.Context, req *acourse.CourseIDRequest) (*acourse.CourseResponse, error) {
-	userID, _ := ctx.Value(acourse.KeyUserID).(string)
+	userID := internal.GetUserID(ctx)
 
 	// try get by id first
 	course, err := s.store.CourseGet(ctx, req.GetCourseId())
@@ -197,7 +198,7 @@ func (s *service) GetCourse(ctx context.Context, req *acourse.CourseIDRequest) (
 	}
 
 	// get course owner
-	owner, err := s.store.UserMustGet(ctx, course.Owner)
+	owner, err := s.user.GetUser(ctx, &acourse.UserIDRequest{UserId: course.Owner})
 	if err != nil {
 		return nil, err
 	}
@@ -229,7 +230,7 @@ func (s *service) GetCourse(ctx context.Context, req *acourse.CourseIDRequest) (
 		return nil, err
 	}
 
-	role, err := s.store.RoleGet(ctx, userID)
+	role, err := s.user.GetRole(ctx, &acourse.UserIDRequest{UserId: userID})
 	if err != nil {
 		return nil, err
 	}
@@ -273,11 +274,11 @@ func (s *service) GetCourse(ctx context.Context, req *acourse.CourseIDRequest) (
 }
 
 func (s *service) CreateCourse(ctx context.Context, req *acourse.Course) (*acourse.Course, error) {
-	userID, ok := ctx.Value(acourse.KeyUserID).(string)
-	if !ok || userID == "" {
+	userID := internal.GetUserID(ctx)
+	if userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
-	role, err := s.store.RoleGet(ctx, userID)
+	role, err := s.user.GetRole(ctx, &acourse.UserIDRequest{UserId: userID})
 	if err != nil {
 		return nil, err
 	}
@@ -316,8 +317,8 @@ func (s *service) CreateCourse(ctx context.Context, req *acourse.Course) (*acour
 }
 
 func (s *service) UpdateCourse(ctx context.Context, req *acourse.Course) (*acourse.Empty, error) {
-	userID, ok := ctx.Value(acourse.KeyUserID).(string)
-	if !ok || userID == "" {
+	userID := internal.GetUserID(ctx)
+	if userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
 
@@ -328,7 +329,7 @@ func (s *service) UpdateCourse(ctx context.Context, req *acourse.Course) (*acour
 	if course == nil {
 		return nil, grpc.Errorf(codes.NotFound, "course not found")
 	}
-	role, err := s.store.RoleGet(ctx, userID)
+	role, err := s.user.GetRole(ctx, &acourse.UserIDRequest{UserId: userID})
 	if err != nil {
 		return nil, err
 	}
@@ -363,8 +364,8 @@ func (s *service) UpdateCourse(ctx context.Context, req *acourse.Course) (*acour
 }
 
 func (s *service) EnrollCourse(ctx context.Context, req *acourse.EnrollRequest) (*acourse.Empty, error) {
-	userID, ok := ctx.Value(acourse.KeyUserID).(string)
-	if !ok || userID == "" {
+	userID := internal.GetUserID(ctx)
+	if userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
 
@@ -445,8 +446,8 @@ func (s *service) EnrollCourse(ctx context.Context, req *acourse.EnrollRequest) 
 }
 
 func (s *service) AttendCourse(ctx context.Context, req *acourse.CourseIDRequest) (*acourse.Empty, error) {
-	userID, ok := ctx.Value(acourse.KeyUserID).(string)
-	if !ok || userID == "" {
+	userID := internal.GetUserID(ctx)
+	if userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
 
@@ -485,8 +486,8 @@ func (s *service) AttendCourse(ctx context.Context, req *acourse.CourseIDRequest
 }
 
 func (s *service) changeAttend(ctx context.Context, req *acourse.CourseIDRequest, value bool) (*acourse.Empty, error) {
-	userID, ok := ctx.Value(acourse.KeyUserID).(string)
-	if !ok || userID == "" {
+	userID := internal.GetUserID(ctx)
+	if userID == "" {
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
 

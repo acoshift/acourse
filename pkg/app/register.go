@@ -15,7 +15,7 @@ func makeServiceContext(r *http.Request) context.Context {
 	if v := header.Get("Authorization"); v != "" {
 		md = metadata.Join(md, metadata.Pairs("authorization", v))
 	}
-	return metadata.NewContext(context.Background(), md)
+	return metadata.NewContext(r.Context(), md)
 }
 
 // RegisterUserServiceClient registers a User service client to http server
@@ -27,13 +27,32 @@ func RegisterUserServiceClient(mux *http.ServeMux, s acourse.UserServiceClient) 
 			handleError(w, httperror.MethodNotAllowed)
 			return
 		}
-		req := new(acourse.GetUserRequest)
+		req := new(acourse.UserIDRequest)
 		err := bindJSON(r, req)
 		if err != nil {
 			handleError(w, httperror.BadRequestWith(err))
 			return
 		}
 		res, err := s.GetUser(makeServiceContext(r), req)
+		if err != nil {
+			handleError(w, httperror.GRPC(err))
+			return
+		}
+		handleOK(w, res)
+	})
+
+	mux.HandleFunc(sv+"/GetUsers", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			handleError(w, httperror.MethodNotAllowed)
+			return
+		}
+		req := new(acourse.UserIDsRequest)
+		err := bindJSON(r, req)
+		if err != nil {
+			handleError(w, httperror.BadRequestWith(err))
+			return
+		}
+		res, err := s.GetUsers(makeServiceContext(r), req)
 		if err != nil {
 			handleError(w, httperror.GRPC(err))
 			return
