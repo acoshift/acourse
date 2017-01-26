@@ -297,7 +297,7 @@ func (s *service) ListUserAssignments(ctx context.Context, req *acourse.CourseID
 	}
 
 	var assignments []*assignment
-	err = s.client.Query(ctx, kindAssignment, ds.Filter("CourseID =", course.ID()))
+	err = s.client.Query(ctx, kindAssignment, &assignments, ds.Filter("CourseID =", course.ID()))
 	err = ds.IgnoreFieldMismatch(err)
 	err = ds.IgnoreNotFound(err)
 	if err != nil {

@@ -59,7 +59,7 @@ func (s *service) listPayments(ctx context.Context, opts ...ds.Query) (*acourse.
 	var payments []*payment
 	err = s.client.Query(ctx, kindPayment, &payments, opts...)
 	err = ds.IgnoreFieldMismatch(err)
-	if ds.NotFound(err) {
+	if ds.NotFound(err) || len(payments) == 0 {
 		return &acourse.PaymentsResponse{}, nil
 	}
 	if err != nil {
