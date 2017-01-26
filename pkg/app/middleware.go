@@ -1,22 +1,55 @@
 package app
 
 import (
+	"bufio"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"time"
 
 	"github.com/google/uuid"
 )
 
-type loggerWriter struct {
+type responseWriter struct {
 	http.ResponseWriter
 	header int
 }
 
-func (w *loggerWriter) WriteHeader(header int) {
+func (w *responseWriter) WriteHeader(header int) {
 	w.header = header
 	w.ResponseWriter.WriteHeader(header)
+}
+
+// Push implements Pusher interface
+func (w *responseWriter) Push(target string, opts *http.PushOptions) error {
+	if w, ok := w.ResponseWriter.(http.Pusher); ok {
+		return w.Push(target, opts)
+	}
+	return http.ErrNotSupported
+}
+
+// Flush implements Flusher interface
+func (w *responseWriter) Flush() {
+	if w, ok := w.ResponseWriter.(http.Flusher); ok {
+		w.Flush()
+	}
+}
+
+// CloseNotify implements CloseNotifier interface
+func (w *responseWriter) CloseNotify() <-chan bool {
+	if w, ok := w.ResponseWriter.(http.CloseNotifier); ok {
+		return w.CloseNotify()
+	}
+	return nil
+}
+
+// Hijack implements Hijacker interface
+func (w *responseWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
+	if w, ok := w.ResponseWriter.(http.Hijacker); ok {
+		return w.Hijack()
+	}
+	return nil, nil, http.ErrNotSupported
 }
 
 // Logger middleware
@@ -24,7 +57,7 @@ func Logger(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 		path := r.URL.Path
-		tw := &loggerWriter{w, 0}
+		tw := &responseWriter{w, 0}
 		ip := r.Header.Get("X-Real-IP")
 		if ip == "" {
 			ip = r.RemoteAddr

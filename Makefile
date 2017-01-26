@@ -1,6 +1,6 @@
 # commands
 
-GO=go1.8rc2
+GO=go
 PROJECT=acourse-156413
 # PROJECT=acourse-d9d0a
 

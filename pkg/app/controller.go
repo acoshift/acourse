@@ -83,6 +83,10 @@ func MountRenderController(mux *http.ServeMux, c RenderController) {
 			return
 		}
 
+		// TODO: implement pusher
+		// if p, ok := w.(http.Pusher); ok {
+
+		// }
 		ctx, err := NewRenderIndexContext(r)
 		if err != nil {
 			handleError(w, err)
