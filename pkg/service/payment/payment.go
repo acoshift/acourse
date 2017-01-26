@@ -100,7 +100,7 @@ func (s *service) listPayments(ctx context.Context, opts ...ds.Query) (*acourse.
 }
 
 func (s *service) ListWaitingPayments(ctx context.Context, req *acourse.ListRequest) (*acourse.PaymentsResponse, error) {
-	return s.listPayments(ctx, ds.Filter("Status =", statusWaiting))
+	return s.listPayments(ctx, ds.Filter("Status =", string(statusWaiting)))
 }
 
 func (s *service) ListHistoryPayments(ctx context.Context, req *acourse.ListRequest) (*acourse.PaymentsResponse, error) {
@@ -356,7 +356,7 @@ func StartNotification(client *ds.Client, email acourse.EmailServiceClient) {
 			// check is any payments have status waiting
 			log.Println("Run Notification Payment")
 			var payments []*payment
-			err := client.Query(ctx, kindPayment, &payments, ds.Filter("Status =", statusWaiting))
+			err := client.Query(ctx, kindPayment, &payments, ds.Filter("Status =", string(statusWaiting)))
 			err = ds.IgnoreFieldMismatch(err)
 			if err == nil && len(payments) > 0 {
 				_, err = email.Send(ctx, &acourse.Email{
