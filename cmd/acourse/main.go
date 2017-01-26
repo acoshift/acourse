@@ -201,7 +201,7 @@ func main() {
 		go func() {
 			log.Printf("Listening Redirect on %s", addr)
 			log.Fatal(http.ListenAndServe(addr, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				http.Redirect(w, r, "https://"+cfg.Domain, http.StatusPermanentRedirect)
+				http.Redirect(w, r, "https://"+cfg.Domain, http.StatusMovedPermanently)
 			})))
 		}()
 		tlsConfig := &tls.Config{
@@ -216,10 +216,9 @@ func main() {
 			},
 		}
 		tlsServer := &http.Server{
-			Addr:         tlsAddr,
-			Handler:      serverHandler,
-			TLSConfig:    tlsConfig,
-			TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0),
+			Addr:      tlsAddr,
+			Handler:   serverHandler,
+			TLSConfig: tlsConfig,
 		}
 		log.Printf("Listening TLS on %s", tlsAddr)
 		log.Fatal(tlsServer.ListenAndServeTLS(cfg.TLSCert, cfg.TLSKey))
