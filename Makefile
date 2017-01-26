@@ -88,3 +88,7 @@ fix:
 
 rolling-update:
 	kubectl rolling-update acourse --image gcr.io/acourse-d9d0a/acourse --image-pull-policy Always
+
+kube:
+	gcloud container clusters get-credentials cluster-1 --zone asia-northeast1-a --project acourse-d9d0a
+	kubectl proxy
