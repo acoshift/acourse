@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"io/ioutil"
 	"log"
 	"net"
@@ -120,6 +121,7 @@ func main() {
 	httpServer := chain(
 		app.Logger,
 		app.RequestID,
+		app.HSTS,
 		app.Recovery,
 		cors.New(cors.Config{
 			AllowCredentials: false,
@@ -206,8 +208,25 @@ func main() {
 				http.Redirect(w, r, t, http.StatusPermanentRedirect)
 			})))
 		}()
+		tlsConfig := &tls.Config{
+			MinVersion:               tls.VersionTLS12,
+			CurvePreferences:         []tls.CurveID{tls.CurveP521, tls.CurveP384, tls.CurveP256},
+			PreferServerCipherSuites: true,
+			CipherSuites: []uint16{
+				tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+				tls.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
+				tls.TLS_RSA_WITH_AES_256_GCM_SHA384,
+				tls.TLS_RSA_WITH_AES_256_CBC_SHA,
+			},
+		}
+		tlsServer := &http.Server{
+			Addr:         tlsAddr,
+			Handler:      serverHandler,
+			TLSConfig:    tlsConfig,
+			TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0),
+		}
 		log.Printf("Listening TLS on %s", tlsAddr)
-		log.Fatal(http.ListenAndServeTLS(tlsAddr, cfg.TLSCert, cfg.TLSKey, serverHandler))
+		log.Fatal(tlsServer.ListenAndServeTLS(cfg.TLSCert, cfg.TLSKey))
 	} else {
 		log.Printf("Listening on %s", addr)
 		log.Fatal(http.ListenAndServe(addr, serverHandler))
