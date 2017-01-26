@@ -171,32 +171,29 @@ func (s *service) RejectPayments(ctx context.Context, req *acourse.PaymentIDsReq
 	return new(acourse.Empty), nil
 }
 
-func (s *service) sendApprovedNotification(payments []*payment) {
-	ctx := context.Background()
-	for _, payment := range payments {
-		course, err := s.store.CourseGet(ctx, payment.CourseID)
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-		userInfo, err := s.auth.GetAccountInfoByUID(payment.UserID)
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-		if userInfo.Email == "" {
-			log.Println("User don't have email")
-			continue
-		}
-		user, err := s.user.GetUser(ctx, &acourse.UserIDRequest{UserId: payment.UserID})
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-		if user.Name == "" {
-			user.Name = "Anonymous"
-		}
-		body := fmt.Sprintf(`สวัสดีครับคุณ %s,<br>
+func (s *service) processApprovedPayment(payment *payment) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
+	defer cancel()
+	course, err := s.store.CourseGet(ctx, payment.CourseID)
+	if err != nil {
+		return err
+	}
+	userInfo, err := s.auth.GetAccountInfoByUID(payment.UserID)
+	if err != nil {
+		return err
+	}
+	if userInfo.Email == "" {
+		log.Println("User don't have email")
+		return nil
+	}
+	user, err := s.user.GetUser(ctx, &acourse.UserIDRequest{UserId: payment.UserID})
+	if err != nil {
+		return err
+	}
+	if user.Name == "" {
+		user.Name = "Anonymous"
+	}
+	body := fmt.Sprintf(`สวัสดีครับคุณ %s,<br>
 <br>
 อีเมล์ฉบับนี้ยืนยันว่าท่านได้รับการอนุมัติการชำระเงินสำหรับหลักสูตร "%s" เสร็จสิ้น ท่านสามารถทำการ login เข้าสู่ Website Acourse แล้วเข้าเรียนหลักสูตร "%s" ได้ทันที<br>
 <br>
@@ -208,74 +205,68 @@ func (s *service) sendApprovedNotification(payments []*payment) {
 ชื่อผู้ชำระเงิน: %s<br>
 อีเมล์ผู้ชำระเงิน: %s<br>
 `,
-			user.Name,
-			course.Title,
-			course.Title,
-			payment.ID(),
-			course.Title,
-			payment.Price,
-			payment.CreatedAt.In(timeLocal).Format(time.RFC822),
-			payment.At.In(timeLocal).Format(time.RFC822),
-			user.Name,
-			userInfo.Email,
-		)
+		user.Name,
+		course.Title,
+		course.Title,
+		payment.ID(),
+		course.Title,
+		payment.Price,
+		payment.CreatedAt.In(timeLocal).Format(time.RFC822),
+		payment.At.In(timeLocal).Format(time.RFC822),
+		user.Name,
+		userInfo.Email,
+	)
 
-		// 	if course.Type == model.CourseTypeVideo {
-		// 		body += `----------------------
-		// สนใจรับ Certificate หลังจบ Course <a href=''> เกี่ยวกับ ACertificate </a>
+	// 	if course.Type == model.CourseTypeVideo {
+	// 		body += `----------------------
+	// สนใจรับ Certificate หลังจบ Course <a href=''> เกี่ยวกับ ACertificate </a>
 
-		// ท่านสามารถเพิ่มเงินจำนวน 600 บาท (จำนวน ชม. x 30 บาท  ) เพื่อได้รับ ACertificate หลังจากทำการส่งการบ้านครบถ้วน เพื่อใช้เป็นหลักฐานอ้างอิงกับ <a href=''>บริษัท Partner ของเรา</a>
+	// ท่านสามารถเพิ่มเงินจำนวน 600 บาท (จำนวน ชม. x 30 บาท  ) เพื่อได้รับ ACertificate หลังจากทำการส่งการบ้านครบถ้วน เพื่อใช้เป็นหลักฐานอ้างอิงกับ <a href=''>บริษัท Partner ของเรา</a>
 
-		// ท่านสามารถสั่ง ACertificate ได้โดยโอนเงินจำนวน xxx บาท มาที่ บัญชีธนาคาร (ฝาก north เติมบัญชีตามหน้าเว็บ) แล้ว reply email นี้พร้อมแนบหลักฐานการโอนเงิน และเขียนว่า 'สั่งซื้อ certificate'
-		// `
-		// 	}
+	// ท่านสามารถสั่ง ACertificate ได้โดยโอนเงินจำนวน xxx บาท มาที่ บัญชีธนาคาร (ฝาก north เติมบัญชีตามหน้าเว็บ) แล้ว reply email นี้พร้อมแนบหลักฐานการโอนเงิน และเขียนว่า 'สั่งซื้อ certificate'
+	// `
+	// 	}
 
-		body += `----------------------<br>
+	body += `----------------------<br>
 ขอบคุณที่ร่วมเรียนกับเราครับ<br>
 Krissada Chalermsook (Oak)<br>
 Founder/CEO Acourse.io<br>
 https://acourse.io`
 
-		_, err = s.email.Send(context.Background(), &acourse.Email{
-			To:      []string{userInfo.Email},
-			Subject: fmt.Sprintf("ยืนยันการชำระเงิน หลักสูตร %s", course.Title),
-			Body:    body,
-		})
-		if err != nil {
-			log.Println(err)
-		}
-	}
+	_, err = s.email.Send(ctx, &acourse.Email{
+		To:      []string{userInfo.Email},
+		Subject: fmt.Sprintf("ยืนยันการชำระเงิน หลักสูตร %s", course.Title),
+		Body:    body,
+	})
+	return err
 }
 
-func (s *service) sendRejectNotification(payments []*payment) {
-	ctx := context.Background()
-	for _, payment := range payments {
-		course, err := s.store.CourseGet(ctx, payment.CourseID)
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-		userInfo, err := s.auth.GetAccountInfoByUID(payment.UserID)
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-		if userInfo.Email == "" {
-			log.Println("User don't have email")
-			continue
-		}
-		user, err := s.user.GetUser(ctx, &acourse.UserIDRequest{UserId: payment.UserID})
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-		if user.Name == "" {
-			user.Name = "Anonymous"
-		}
-		if course.URL == "" {
-			course.URL = course.ID()
-		}
-		body := fmt.Sprintf(`สวัสดีครับคุณ %s,<br>
+func (s *service) processRejectedPayment(payment *payment) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
+	defer cancel()
+	course, err := s.store.CourseGet(ctx, payment.CourseID)
+	if err != nil {
+		return err
+	}
+	userInfo, err := s.auth.GetAccountInfoByUID(payment.UserID)
+	if err != nil {
+		return err
+	}
+	if userInfo.Email == "" {
+		log.Println("User don't have email")
+		return nil
+	}
+	user, err := s.user.GetUser(ctx, &acourse.UserIDRequest{UserId: payment.UserID})
+	if err != nil {
+		return err
+	}
+	if user.Name == "" {
+		user.Name = "Anonymous"
+	}
+	if course.URL == "" {
+		course.URL = course.ID()
+	}
+	body := fmt.Sprintf(`สวัสดีครับคุณ %s,<br>
 <br>
 ตามที่ท่านได้ upload file เพื่อใช้ในการสมัครหลักสูตร "%s" เมื่อเวลา %s<br>
 <br>
@@ -294,17 +285,32 @@ func (s *service) sendRejectNotification(payments []*payment) {
 ขอบคุณมากครับ<br>
 ทีมงาน acourse.io
 `,
-			user.Name,
-			course.Title,
-			payment.CreatedAt.In(timeLocal).Format(time.RFC822),
-			course.URL,
-		)
+		user.Name,
+		course.Title,
+		payment.CreatedAt.In(timeLocal).Format(time.RFC822),
+		course.URL,
+	)
 
-		_, err = s.email.Send(context.Background(), &acourse.Email{
-			To:      []string{userInfo.Email},
-			Subject: fmt.Sprintf("คำขอเพื่อเรียนหลักสูตร %s ได้รับการปฏิเสธ", course.Title),
-			Body:    body,
-		})
+	_, err = s.email.Send(ctx, &acourse.Email{
+		To:      []string{userInfo.Email},
+		Subject: fmt.Sprintf("คำขอเพื่อเรียนหลักสูตร %s ได้รับการปฏิเสธ", course.Title),
+		Body:    body,
+	})
+	return err
+}
+
+func (s *service) sendApprovedNotification(payments []*payment) {
+	for _, payment := range payments {
+		err := s.processApprovedPayment(payment)
+		if err != nil {
+			log.Println(err)
+		}
+	}
+}
+
+func (s *service) sendRejectNotification(payments []*payment) {
+	for _, payment := range payments {
+		err := s.processRejectedPayment(payment)
 		if err != nil {
 			log.Println(err)
 		}

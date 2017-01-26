@@ -15,7 +15,7 @@ func makeServiceContext(r *http.Request) context.Context {
 	if v := header.Get("Authorization"); v != "" {
 		md = metadata.Join(md, metadata.Pairs("authorization", v))
 	}
-	return metadata.NewContext(context.Background(), md)
+	return metadata.NewContext(r.Context(), md)
 }
 
 // RegisterUserServiceClient registers a User service client to http server
