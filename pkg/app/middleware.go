@@ -101,7 +101,7 @@ func RequestID(h http.Handler) http.Handler {
 // HSTS middleware
 func HSTS(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Add("Strict-Transport-Security", "max-age=63072000; preload") // ; includeSubDomains
+		w.Header().Add("Strict-Transport-Security", "max-age=63072000; preload; includeSubDomains")
 		h.ServeHTTP(w, r)
 	})
 }

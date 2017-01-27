@@ -25,6 +25,7 @@ import (
 	"github.com/acoshift/cors"
 	"github.com/acoshift/ds"
 	"github.com/acoshift/go-firebase-admin"
+	"github.com/acoshift/gzip"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 	"google.golang.org/grpc"
@@ -140,6 +141,7 @@ func main() {
 			},
 			MaxAge: 12 * time.Hour,
 		}),
+		gzip.New(gzip.Config{Level: gzip.DefaultCompression}),
 	)
 
 	mux := http.NewServeMux()
