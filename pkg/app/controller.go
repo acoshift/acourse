@@ -77,8 +77,12 @@ func MountRenderController(mux *http.ServeMux, c RenderController) {
 		}
 
 		if p, ok := w.(http.Pusher); ok {
+			opt := &http.PushOptions{
+				Method: http.MethodGet,
+				Header: r.Header,
+			}
 			for _, t := range pushList {
-				p.Push(t, nil)
+				p.Push(t, opt)
 			}
 		}
 
