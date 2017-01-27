@@ -1,3 +1,5 @@
+import 'es6-promise/auto'
+
 import Vue from 'vue'
 import VueRx from 'vue-rx'
 import VueRouteRx from 'vue-route-rx'
