@@ -16,7 +16,6 @@ import (
 // New creates new User service server
 func New(client *ds.Client) acourse.UserServiceServer {
 	s := &service{client}
-	go s.startCacheRole()
 	go s.startCacheUser()
 	return s
 }
@@ -62,6 +61,9 @@ func (s *service) getUser(ctx context.Context, userID string) (*user, error) {
 
 func (s *service) mustGetUser(ctx context.Context, userID string) (*user, error) {
 	x, err := s.getUser(ctx, userID)
+	if ds.NotFound(err) {
+		x.SetNameID(kindUser, userID)
+	}
 	err = ds.IgnoreNotFound(err)
 	if err != nil {
 		return nil, err
@@ -80,7 +82,7 @@ func (s *service) findUser(ctx context.Context, username string) (*user, error) 
 }
 
 func (s *service) saveUser(ctx context.Context, x *user) error {
-	if x.Key() == nil {
+	if x.GetKey() == nil {
 		return ErrUserIDRequired
 	}
 
@@ -141,6 +143,7 @@ func (s *service) GetUsers(ctx context.Context, req *acourse.UserIDsRequest) (*a
 
 	var ts []*user
 	err := s.client.GetByNames(ctx, kindUser, ids, &ts)
+	ds.SetNameIDs(kindUser, ids, ts)
 	err = ds.IgnoreNotFound(err)
 	err = ds.IgnoreFieldMismatch(err)
 	if err != nil {
