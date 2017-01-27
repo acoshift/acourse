@@ -33,7 +33,7 @@ func (s *service) startCacheRole() {
 
 func (s *service) GetRole(ctx context.Context, req *acourse.UserIDRequest) (*acourse.Role, error) {
 	if req.GetUserId() == "" {
-		return nil, ErrUserIDRequired
+		return &acourse.Role{}, nil
 	}
 
 	x, _ := cacheRole.Get(req.GetUserId()).(*role)
