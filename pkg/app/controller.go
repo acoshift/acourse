@@ -1,6 +1,7 @@
 package app
 
 import (
+	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
@@ -57,12 +58,30 @@ func MountRenderController(mux *http.ServeMux, c RenderController) {
 		http.ServeFile(w, r, "public/acourse-120.png")
 	})
 
+	pushList := []string{}
+	{
+		dirs := []string{"js", "css"}
+		for _, d := range dirs {
+			fl, _ := ioutil.ReadDir("public/" + d)
+			for _, f := range fl {
+				pushList = append(pushList, "/static/"+d+"/"+f.Name())
+			}
+		}
+	}
+
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasPrefix(r.URL.Path, "/static") {
 			w.Header().Set("Cache-Control", "public, max-age=31536000")
 			http.StripPrefix("/static", http.FileServer(&fileFS{http.Dir("public")})).ServeHTTP(w, r)
 			return
 		}
+
+		if p, ok := w.(http.Pusher); ok {
+			for _, t := range pushList {
+				p.Push(t, nil)
+			}
+		}
+
 		if strings.HasPrefix(r.URL.Path, "/course/") && !strings.Contains(r.URL.Path[8:], "/") {
 			http.StripPrefix("/course/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				ctx, err := NewRenderCourseContext(r)
@@ -83,10 +102,6 @@ func MountRenderController(mux *http.ServeMux, c RenderController) {
 			return
 		}
 
-		// TODO: implement pusher
-		// if p, ok := w.(http.Pusher); ok {
-
-		// }
 		ctx, err := NewRenderIndexContext(r)
 		if err != nil {
 			handleError(w, err)
