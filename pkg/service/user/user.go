@@ -106,11 +106,11 @@ func (s *service) saveUser(ctx context.Context, x *user) error {
 }
 
 func (s *service) GetUser(ctx context.Context, req *acourse.UserIDRequest) (*acourse.User, error) {
-	if req.GetUserId() == "" {
+	if len(req.UserId) == 0 {
 		return nil, ErrUserIDRequired
 	}
 
-	x, err := s.mustGetUser(ctx, req.GetUserId())
+	x, err := s.mustGetUser(ctx, req.UserId)
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +118,7 @@ func (s *service) GetUser(ctx context.Context, req *acourse.UserIDRequest) (*aco
 }
 
 func (s *service) GetUsers(ctx context.Context, req *acourse.UserIDsRequest) (*acourse.UsersResponse, error) {
-	userIDs := req.GetUserIds()
+	userIDs := req.UserIds
 	l := len(userIDs)
 
 	if l == 0 {
@@ -189,10 +189,10 @@ func (s *service) UpdateMe(ctx context.Context, req *acourse.User) (*acourse.Emp
 	if err != nil {
 		return nil, err
 	}
-	x.Username = req.GetUsername()
-	x.Name = req.GetName()
-	x.Photo = req.GetPhoto()
-	x.AboutMe = req.GetAboutMe()
+	x.Username = req.Username
+	x.Name = req.Name
+	x.Photo = req.Photo
+	x.AboutMe = req.AboutMe
 
 	err = s.saveUser(ctx, x)
 	if err != nil {
