@@ -118,10 +118,14 @@ func main() {
 		panic(err)
 	}
 
-	httpServer := chain(
+	middlewares := []func(http.Handler) http.Handler{
 		app.Logger,
 		app.RequestID,
-		app.HSTS,
+	}
+	if len(cfg.TLSPort) > 0 {
+		middlewares = append(middlewares, app.HSTS)
+	}
+	middlewares = append(middlewares,
 		app.Recovery,
 		cors.New(cors.Config{
 			AllowCredentials: false,
@@ -143,6 +147,8 @@ func main() {
 		}),
 		gzip.New(gzip.Config{Level: gzip.DefaultCompression}),
 	)
+
+	httpServer := chain(middlewares...)
 
 	mux := http.NewServeMux()
 
