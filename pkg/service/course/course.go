@@ -13,8 +13,8 @@ import (
 )
 
 // New creates new course service
-func New(store Store, user acourse.UserServiceClient) acourse.CourseServiceServer {
-	return &service{store, user}
+func New(store Store, user acourse.UserServiceClient, payment acourse.PaymentServiceClient) acourse.CourseServiceServer {
+	return &service{store, user, payment}
 }
 
 // Store is the store interface for course service
@@ -25,9 +25,7 @@ type Store interface {
 	CourseGetAllByIDs(context.Context, []string) (model.Courses, error)
 	CourseGet(context.Context, string) (*model.Course, error)
 	EnrollFind(context.Context, string, string) (*model.Enroll, error)
-	PaymentFind(context.Context, string, string, model.PaymentStatus) (*model.Payment, error)
 	EnrollSave(context.Context, *model.Enroll) error
-	PaymentSave(context.Context, *model.Payment) error
 	CourseSave(context.Context, *model.Course) error
 	CourseFind(context.Context, string) (*model.Course, error)
 	AttendFind(context.Context, string, string) (*model.Attend, error)
@@ -35,8 +33,9 @@ type Store interface {
 }
 
 type service struct {
-	store Store
-	user  acourse.UserServiceClient
+	store   Store
+	user    acourse.UserServiceClient
+	payment acourse.PaymentServiceClient
 }
 
 func (s *service) listCourses(ctx context.Context, opts ...store.CourseListOption) (*acourse.CoursesResponse, error) {
@@ -99,15 +98,15 @@ func (s *service) ListCourses(ctx context.Context, req *acourse.ListRequest) (*a
 func (s *service) ListOwnCourses(ctx context.Context, req *acourse.UserIDRequest) (*acourse.CoursesResponse, error) {
 	userID := internal.GetUserID(ctx)
 
-	if req.GetUserId() == "" {
+	if len(req.UserId) == 0 {
 		return nil, grpc.Errorf(codes.InvalidArgument, "invalid user id")
 	}
 
 	opt := make([]store.CourseListOption, 0, 3)
-	opt = append(opt, store.CourseListOptionOwner(req.GetUserId()))
+	opt = append(opt, store.CourseListOptionOwner(req.UserId))
 
 	// if not sign in, get only public courses
-	if userID == "" {
+	if len(userID) == 0 {
 		opt = append(opt, store.CourseListOptionPublic(true))
 	}
 
@@ -182,13 +181,13 @@ func (s *service) GetCourse(ctx context.Context, req *acourse.CourseIDRequest) (
 	userID := internal.GetUserID(ctx)
 
 	// try get by id first
-	course, err := s.store.CourseGet(ctx, req.GetCourseId())
+	course, err := s.store.CourseGet(ctx, req.CourseId)
 	if err != nil {
 		return nil, err
 	}
 	// try get by url
 	if course == nil {
-		course, err = s.store.CourseFind(ctx, req.GetCourseId())
+		course, err = s.store.CourseFind(ctx, req.CourseId)
 		if err != nil {
 			return nil, err
 		}
@@ -225,9 +224,16 @@ func (s *service) GetCourse(ctx context.Context, req *acourse.CourseIDRequest) (
 	}
 
 	// check waiting payment
-	payment, err := s.store.PaymentFind(ctx, userID, course.ID(), model.PaymentStatusWaiting)
-	if err != nil {
-		return nil, err
+	var payment *acourse.Payment
+	if userID != "" {
+		payment, err = s.payment.FindPayment(ctx, &acourse.PaymentFindRequest{
+			UserId:   userID,
+			CourseId: course.ID(),
+			Status:   "waiting",
+		})
+		if err != nil && grpc.Code(err) != codes.NotFound {
+			return nil, err
+		}
 	}
 
 	role, err := s.user.GetRole(ctx, &acourse.UserIDRequest{UserId: userID})
@@ -369,11 +375,11 @@ func (s *service) EnrollCourse(ctx context.Context, req *acourse.EnrollRequest) 
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
 
-	if req.GetCourseId() == "" {
+	if req.CourseId == "" {
 		return nil, grpc.Errorf(codes.InvalidArgument, "course id required")
 	}
 
-	course, err := s.store.CourseGet(ctx, req.GetCourseId())
+	course, err := s.store.CourseGet(ctx, req.CourseId)
 	if err != nil {
 		return nil, err
 	}
@@ -387,7 +393,7 @@ func (s *service) EnrollCourse(ctx context.Context, req *acourse.EnrollRequest) 
 	}
 
 	// check is user already enroll
-	enroll, err := s.store.EnrollFind(ctx, userID, req.GetCourseId())
+	enroll, err := s.store.EnrollFind(ctx, userID, req.CourseId)
 	if err != nil {
 		return nil, err
 	}
@@ -397,11 +403,15 @@ func (s *service) EnrollCourse(ctx context.Context, req *acourse.EnrollRequest) 
 	}
 
 	// check is user already send waiting payment
-	payment, err := s.store.PaymentFind(ctx, userID, req.GetCourseId(), model.PaymentStatusWaiting)
-	if err != nil {
+	_, err = s.payment.FindPayment(ctx, &acourse.PaymentFindRequest{
+		UserId:   userID,
+		CourseId: req.CourseId,
+		Status:   "waiting",
+	})
+	if err != nil && grpc.Code(err) != codes.NotFound {
 		return nil, err
 	}
-	if payment != nil {
+	if err == nil {
 		// user already send payment
 		return nil, grpc.Errorf(codes.FailedPrecondition, "wait admin to review your current payment before send another payment for this course")
 	}
@@ -417,7 +427,7 @@ func (s *service) EnrollCourse(ctx context.Context, req *acourse.EnrollRequest) 
 	if originalPrice == 0.0 {
 		enroll = &model.Enroll{
 			UserID:   userID,
-			CourseID: req.GetCourseId(),
+			CourseID: req.CourseId,
 		}
 		err = s.store.EnrollSave(ctx, enroll)
 		if err != nil {
@@ -427,17 +437,15 @@ func (s *service) EnrollCourse(ctx context.Context, req *acourse.EnrollRequest) 
 	}
 
 	// create payment
-	payment = &model.Payment{
-		CourseID:      req.GetCourseId(),
-		UserID:        userID,
+	_, err = s.payment.CreatePayment(ctx, &acourse.Payment{
+		CourseId:      req.CourseId,
+		UserId:        userID,
 		OriginalPrice: originalPrice,
-		Price:         req.GetPrice(),
-		Code:          req.GetCode(),
-		URL:           req.GetUrl(),
-		Status:        model.PaymentStatusWaiting,
-	}
-
-	err = s.store.PaymentSave(ctx, payment)
+		Price:         req.Price,
+		Code:          req.Code,
+		Url:           req.Url,
+		Status:        "waiting",
+	})
 	if err != nil {
 		return nil, err
 	}

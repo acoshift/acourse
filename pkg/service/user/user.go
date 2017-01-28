@@ -122,7 +122,7 @@ func (s *service) GetUsers(ctx context.Context, req *acourse.UserIDsRequest) (*a
 	l := len(userIDs)
 
 	if l == 0 {
-		return nil, ErrUserIDRequired
+		return &acourse.UsersResponse{}, nil
 	}
 
 	xs := make([]*user, 0, l)

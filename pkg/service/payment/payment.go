@@ -346,6 +346,41 @@ func (s *service) UpdatePrice(ctx context.Context, req *acourse.PaymentUpdatePri
 	return new(acourse.Empty), nil
 }
 
+func (s *service) FindPayment(ctx context.Context, req *acourse.PaymentFindRequest) (*acourse.Payment, error) {
+	var x payment
+	err := s.client.QueryFirst(ctx, kindPayment, &x,
+		ds.Filter("UserID =", req.GetUserId()),
+		ds.Filter("CourseID =", req.GetCourseId()),
+		ds.Filter("Status =", req.GetStatus()),
+	)
+	err = ds.IgnoreFieldMismatch(err)
+	if ds.NotFound(err) {
+		return nil, ErrPaymentNotFound
+	}
+	if err != nil {
+		return nil, err
+	}
+	return toPayment(&x), nil
+}
+
+func (s *service) CreatePayment(ctx context.Context, req *acourse.Payment) (*acourse.Empty, error) {
+	x := payment{
+		CourseID:      req.CourseId,
+		UserID:        req.UserId,
+		OriginalPrice: req.OriginalPrice,
+		Price:         req.Price,
+		Code:          req.Code,
+		URL:           req.Url,
+		Status:        status(req.Status),
+	}
+
+	err := s.client.SaveModel(ctx, kindPayment, &x)
+	if err != nil {
+		return nil, err
+	}
+	return new(acourse.Empty), nil
+}
+
 // StartNotification starts payment notification
 func StartNotification(client *ds.Client, email acourse.EmailServiceClient) {
 	ctx := context.Background()

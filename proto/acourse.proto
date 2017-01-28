@@ -20,6 +20,8 @@ service PaymentService {
   rpc ApprovePayments(PaymentIDsRequest) returns (Empty) {}
   rpc RejectPayments(PaymentIDsRequest) returns (Empty) {}
   rpc UpdatePrice(PaymentUpdatePriceRequest) returns (Empty) {}
+  rpc FindPayment(PaymentFindRequest) returns (Payment) {}
+  rpc CreatePayment(Payment) returns (Empty) {}
 }
 
 service CourseService {
@@ -201,6 +203,12 @@ message Payment {
   string url = 9;
   string status = 10;
   string at = 11;
+}
+
+message PaymentFindRequest {
+  string userId = 1;
+  string courseId = 2;
+  string status = 3;
 }
 
 message EnrollCount {
