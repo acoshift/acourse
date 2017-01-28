@@ -2,13 +2,11 @@ package user
 
 import (
 	"context"
-	"log"
-	"time"
 
 	"github.com/acoshift/acourse/pkg/acourse"
+	"github.com/acoshift/acourse/pkg/app"
 	"github.com/acoshift/acourse/pkg/internal"
 	"github.com/acoshift/ds"
-	"github.com/acoshift/gotcha"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 )
@@ -16,7 +14,6 @@ import (
 // New creates new User service server
 func New(client *ds.Client) acourse.UserServiceServer {
 	s := &service{client}
-	go s.startCacheUser()
 	return s
 }
 
@@ -24,38 +21,13 @@ type service struct {
 	client *ds.Client
 }
 
-var cacheUser = gotcha.New()
-
-func (s *service) startCacheUser() {
-	ctx := context.Background()
-	for {
-		var xs []*user
-		err := s.client.Query(ctx, kindUser, &xs)
-		if err != nil {
-			time.Sleep(time.Minute * 10)
-			continue
-		}
-		cacheUser.Purge()
-		for _, x := range xs {
-			cacheUser.Set(x.ID(), x)
-		}
-		log.Println("Cached Users")
-		time.Sleep(time.Hour * 2)
-	}
-}
-
 func (s *service) getUser(ctx context.Context, userID string) (*user, error) {
-	if c := cacheUser.Get(userID); c != nil {
-		return c.(*user), nil
-	}
-
 	var x user
 	err := s.client.GetByName(ctx, kindUser, userID, &x)
 	err = ds.IgnoreFieldMismatch(err)
 	if err != nil {
 		return nil, err
 	}
-	cacheUser.Set(userID, &x)
 	return &x, nil
 }
 
@@ -101,7 +73,6 @@ func (s *service) saveUser(ctx context.Context, x *user) error {
 	if err != nil {
 		return err
 	}
-	cacheUser.Set(x.ID(), x)
 	return nil
 }
 
@@ -118,45 +89,26 @@ func (s *service) GetUser(ctx context.Context, req *acourse.UserIDRequest) (*aco
 }
 
 func (s *service) GetUsers(ctx context.Context, req *acourse.UserIDsRequest) (*acourse.UsersResponse, error) {
-	userIDs := req.UserIds
-	l := len(userIDs)
-
-	if l == 0 {
+	ids := req.UserIds
+	if len(ids) == 0 {
 		return &acourse.UsersResponse{}, nil
 	}
 
-	xs := make([]*user, 0, l)
-	ids := make([]string, 0, l)
+	ids = app.UniqueIDs(ids)
 
-	// try get in cache first
-	for _, id := range userIDs {
-		if c := cacheUser.Get(id); c != nil {
-			xs = append(xs, c.(*user))
-		} else {
-			ids = append(ids, id)
-		}
-	}
-
-	if len(ids) == 0 {
-		return &acourse.UsersResponse{Users: toUsers(xs)}, nil
-	}
-
-	var ts []*user
-	err := s.client.GetByNames(ctx, kindUser, ids, &ts)
-	ds.SetNameIDs(kindUser, ids, ts)
+	var xs []*user
+	err := s.client.GetByNames(ctx, kindUser, ids, &xs)
 	err = ds.IgnoreNotFound(err)
 	err = ds.IgnoreFieldMismatch(err)
 	if err != nil {
 		return nil, err
 	}
 
-	for i, x := range ts {
-		if x == nil {
-			x = &user{}
-			x.SetNameID(kindUser, ids[i])
+	for i := range xs {
+		if xs[i] == nil {
+			xs[i] = &user{}
+			xs[i].SetNameID(kindUser, ids[i])
 		}
-		xs = append(xs, x)
-		cacheUser.Set(x.ID(), x)
 	}
 	return &acourse.UsersResponse{Users: toUsers(xs)}, nil
 }
