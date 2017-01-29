@@ -1,16 +1,16 @@
-package model
+package course
 
 import (
 	"github.com/acoshift/ds"
 )
 
-// Attend model
-type Attend struct {
+type attend struct {
 	ds.StringIDModel
 	ds.StampModel
 	UserID   string
 	CourseID string
 }
 
-// Attends type
-type Attends []*Attend
+const (
+	kindAttend = "Attend"
+)

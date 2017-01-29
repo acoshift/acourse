@@ -8,13 +8,14 @@ import (
 	"github.com/acoshift/acourse/pkg/internal"
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/acourse/pkg/store"
+	"github.com/acoshift/ds"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 )
 
 // New creates new course service
-func New(store Store, user acourse.UserServiceClient, payment acourse.PaymentServiceClient) acourse.CourseServiceServer {
-	return &service{store, user, payment}
+func New(store Store, client *ds.Client, user acourse.UserServiceClient, payment acourse.PaymentServiceClient) acourse.CourseServiceServer {
+	return &service{store, client, user, payment}
 }
 
 // Store is the store interface for course service
@@ -28,12 +29,11 @@ type Store interface {
 	EnrollSave(context.Context, *model.Enroll) error
 	CourseSave(context.Context, *model.Course) error
 	CourseFind(context.Context, string) (*model.Course, error)
-	AttendFind(context.Context, string, string) (*model.Attend, error)
-	AttendSave(context.Context, *model.Attend) error
 }
 
 type service struct {
 	store   Store
+	client  *ds.Client
 	user    acourse.UserServiceClient
 	payment acourse.PaymentServiceClient
 }
@@ -208,8 +208,8 @@ func (s *service) GetCourse(ctx context.Context, req *acourse.CourseIDRequest) (
 		return nil, err
 	}
 	if enroll != nil || course.Owner == userID {
-		var attend *model.Attend
-		attend, err = s.store.AttendFind(ctx, userID, course.ID())
+		var attend *attend
+		attend, err = s.findAttend(ctx, userID, course.ID())
 		if err != nil {
 			return nil, err
 		}
@@ -477,15 +477,15 @@ func (s *service) AttendCourse(ctx context.Context, req *acourse.CourseIDRequest
 	}
 
 	// check is user already attend
-	attend, err := s.store.AttendFind(ctx, userID, course.ID())
+	att, err := s.findAttend(ctx, userID, course.ID())
 	if err != nil {
 		return nil, err
 	}
-	if attend != nil {
+	if att != nil {
 		return nil, grpc.Errorf(codes.AlreadyExists, "already attend in last 6 hr")
 	}
 
-	err = s.store.AttendSave(ctx, &model.Attend{UserID: userID, CourseID: course.ID()})
+	err = s.saveAttend(ctx, &attend{UserID: userID, CourseID: course.ID()})
 	if err != nil {
 		return nil, err
 	}
