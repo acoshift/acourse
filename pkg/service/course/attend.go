@@ -18,7 +18,7 @@ func (s *service) findAttend(ctx context.Context, userID, courseID string) (*att
 	err := s.client.QueryFirst(ctx, kindAttend, &x,
 		ds.Filter("UserID =", userID),
 		ds.Filter("CourseID =", courseID),
-		ds.CreateAfter(time.Now().Add(-6*time.Hour), true),
+		ds.CreateAfter(time.Now().Add(-8*time.Hour), true),
 	)
 	err = ds.IgnoreFieldMismatch(err)
 	if ds.NotFound(err) {

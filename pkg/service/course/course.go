@@ -489,11 +489,14 @@ func (s *service) AttendCourse(ctx context.Context, req *acourse.CourseIDRequest
 
 	// check is user already attend
 	attend, err := s.findAttend(ctx, userID, course.ID())
+	if grpc.Code(err) == codes.NotFound {
+		err = nil
+	}
 	if err != nil {
 		return nil, err
 	}
 	if attend != nil {
-		return nil, grpc.Errorf(codes.AlreadyExists, "already attend in last 6 hr")
+		return nil, grpc.Errorf(codes.AlreadyExists, "already attend in last 8 hr")
 	}
 
 	err = s.saveAttend(ctx, &attendModel{UserID: userID, CourseID: course.ID()})
