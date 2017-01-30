@@ -17,6 +17,6 @@ export default {
       .map(orderBy(['createdAt'], ['desc']))
   },
   upload (id, file) {
-    return Firebase.upload(`user/${id}/${Date.now()}`, file)
+    return Firebase.upload(`user/${id}/${Date.now()}-${file.name}`, file)
   }
 }
