@@ -12,19 +12,19 @@ import (
 )
 
 // New creates new assignment service server
-func New(store Store, client *ds.Client) acourse.AssignmentServiceServer {
-	return &service{store, client}
+func New(store Store, client *ds.Client, course acourse.CourseServiceClient) acourse.AssignmentServiceServer {
+	return &service{store, client, course}
 }
 
 // Store is the store interface for assignment service
 type Store interface {
 	CourseGet(context.Context, string) (*model.Course, error)
-	EnrollFind(context.Context, string, string) (*model.Enroll, error)
 }
 
 type service struct {
 	store  Store
 	client *ds.Client
+	course acourse.CourseServiceClient
 }
 
 func (s *service) isCourseOwner(ctx context.Context, courseID, userID string) error {
@@ -196,7 +196,7 @@ func (s *service) SubmitUserAssignment(ctx context.Context, req *acourse.UserAss
 		return nil, ErrAssignmentNotOpen
 	}
 
-	enroll, err := s.store.EnrollFind(ctx, userID, x.CourseID)
+	enroll, err := s.course.FindEnroll(ctx, &acourse.EnrollFindRequest{UserId: userID, CourseId: x.CourseID})
 	if err != nil {
 		return nil, err
 	}

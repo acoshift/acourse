@@ -21,12 +21,8 @@ func New(store Store, client *ds.Client, user acourse.UserServiceClient, payment
 // Store is the store interface for course service
 type Store interface {
 	CourseList(context.Context, ...store.CourseListOption) (model.Courses, error)
-	EnrollCourseCount(context.Context, string) (int, error)
-	EnrollListByUserID(context.Context, string) (model.Enrolls, error)
 	CourseGetAllByIDs(context.Context, []string) (model.Courses, error)
 	CourseGet(context.Context, string) (*model.Course, error)
-	EnrollFind(context.Context, string, string) (*model.Enroll, error)
-	EnrollSave(context.Context, *model.Enroll) error
 	CourseSave(context.Context, *model.Course) error
 	CourseFind(context.Context, string) (*model.Course, error)
 }
@@ -45,8 +41,8 @@ func (s *service) listCourses(ctx context.Context, opts ...store.CourseListOptio
 	}
 	// get owners
 	userIDMap := map[string]bool{}
-	for _, course := range courses {
-		userIDMap[course.Owner] = true
+	for _, x := range courses {
+		userIDMap[x.Owner] = true
 	}
 	userIDs := make([]string, 0, len(userIDMap))
 	for id := range userIDMap {
@@ -58,16 +54,22 @@ func (s *service) listCourses(ctx context.Context, opts ...store.CourseListOptio
 	}
 	users := usersResp.GetUsers()
 
-	enrollCounts := make([]*acourse.EnrollCount, len(courses))
-	for i, course := range courses {
-		c, err := s.store.EnrollCourseCount(ctx, course.ID())
-		if err != nil {
-			return nil, err
-		}
-		enrollCounts[i] = &acourse.EnrollCount{
-			CourseId: course.ID(),
-			Count:    int32(c),
-		}
+	enrollCounts := make([]*acourse.EnrollCount, 0, len(courses))
+	enrollResult := make(chan *acourse.EnrollCount)
+	for i, x := range courses {
+		go func(i int, x *model.Course) {
+			c, err := s.countEnroll(ctx, x.ID())
+			if err != nil {
+				panic(err)
+			}
+			enrollResult <- &acourse.EnrollCount{
+				CourseId: x.ID(),
+				Count:    int32(c),
+			}
+		}(i, x)
+	}
+	for range courses {
+		enrollCounts = append(enrollCounts, <-enrollResult)
 	}
 	return &acourse.CoursesResponse{
 		Courses:      acourse.ToCoursesSmall(courses),
@@ -134,7 +136,7 @@ func (s *service) ListEnrolledCourses(ctx context.Context, req *acourse.UserIDRe
 		}
 	}
 
-	enrolls, err := s.store.EnrollListByUserID(ctx, req.GetUserId())
+	enrolls, err := s.listEnrollByUserID(ctx, req.GetUserId())
 	if err != nil {
 		return nil, err
 	}
@@ -161,7 +163,7 @@ func (s *service) ListEnrolledCourses(ctx context.Context, req *acourse.UserIDRe
 
 	enrollCounts := make([]*acourse.EnrollCount, len(courses))
 	for i, course := range courses {
-		c, err := s.store.EnrollCourseCount(ctx, course.ID())
+		c, err := s.countEnroll(ctx, course.ID())
 		if err != nil {
 			return nil, err
 		}
@@ -203,12 +205,12 @@ func (s *service) GetCourse(ctx context.Context, req *acourse.CourseIDRequest) (
 	}
 
 	// check is user enrolled
-	enroll, err := s.store.EnrollFind(ctx, userID, course.ID())
+	enroll, err := s.FindEnroll(ctx, &acourse.EnrollFindRequest{UserId: userID, CourseId: course.ID()})
 	if err != nil {
 		return nil, err
 	}
 	if enroll != nil || course.Owner == userID {
-		var attend *attend
+		var attend *attendModel
 		attend, err = s.findAttend(ctx, userID, course.ID())
 		if err != nil {
 			return nil, err
@@ -393,7 +395,7 @@ func (s *service) EnrollCourse(ctx context.Context, req *acourse.EnrollRequest) 
 	}
 
 	// check is user already enroll
-	enroll, err := s.store.EnrollFind(ctx, userID, req.CourseId)
+	enroll, err := s.FindEnroll(ctx, &acourse.EnrollFindRequest{UserId: userID, CourseId: req.GetCourseId()})
 	if err != nil {
 		return nil, err
 	}
@@ -425,11 +427,11 @@ func (s *service) EnrollCourse(ctx context.Context, req *acourse.EnrollRequest) 
 
 	// auto enroll if course free
 	if originalPrice == 0.0 {
-		enroll = &model.Enroll{
+		enroll := &enrollModel{
 			UserID:   userID,
 			CourseID: req.CourseId,
 		}
-		err = s.store.EnrollSave(ctx, enroll)
+		err = s.saveEnroll(ctx, enroll)
 		if err != nil {
 			return nil, err
 		}
@@ -468,7 +470,7 @@ func (s *service) AttendCourse(ctx context.Context, req *acourse.CourseIDRequest
 	}
 
 	// user must enrolled in this course
-	enroll, err := s.store.EnrollFind(ctx, userID, course.ID())
+	enroll, err := s.FindEnroll(ctx, &acourse.EnrollFindRequest{UserId: userID, CourseId: course.ID()})
 	if err != nil {
 		return nil, err
 	}
@@ -477,15 +479,15 @@ func (s *service) AttendCourse(ctx context.Context, req *acourse.CourseIDRequest
 	}
 
 	// check is user already attend
-	att, err := s.findAttend(ctx, userID, course.ID())
+	attend, err := s.findAttend(ctx, userID, course.ID())
 	if err != nil {
 		return nil, err
 	}
-	if att != nil {
+	if attend != nil {
 		return nil, grpc.Errorf(codes.AlreadyExists, "already attend in last 6 hr")
 	}
 
-	err = s.saveAttend(ctx, &attend{UserID: userID, CourseID: course.ID()})
+	err = s.saveAttend(ctx, &attendModel{UserID: userID, CourseID: course.ID()})
 	if err != nil {
 		return nil, err
 	}

@@ -4,7 +4,14 @@ import (
 	"github.com/acoshift/ds"
 )
 
-type attend struct {
+type attendModel struct {
+	ds.StringIDModel
+	ds.StampModel
+	UserID   string
+	CourseID string
+}
+
+type enrollModel struct {
 	ds.StringIDModel
 	ds.StampModel
 	UserID   string
@@ -13,4 +20,5 @@ type attend struct {
 
 const (
 	kindAttend = "Attend"
+	kindEnroll = "Enroll"
 )

@@ -7,8 +7,8 @@ import (
 	"github.com/acoshift/ds"
 )
 
-func (s *service) findAttend(ctx context.Context, userID, courseID string) (*attend, error) {
-	var x attend
+func (s *service) findAttend(ctx context.Context, userID, courseID string) (*attendModel, error) {
+	var x attendModel
 	err := s.client.QueryFirst(ctx, kindAttend, &x,
 		ds.Filter("UserID =", userID),
 		ds.Filter("CourseID =", courseID),
@@ -24,6 +24,6 @@ func (s *service) findAttend(ctx context.Context, userID, courseID string) (*att
 	return &x, nil
 }
 
-func (s *service) saveAttend(ctx context.Context, x *attend) error {
+func (s *service) saveAttend(ctx context.Context, x *attendModel) error {
 	return s.client.SaveModel(ctx, kindAttend, x)
 }

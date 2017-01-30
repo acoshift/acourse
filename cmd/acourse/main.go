@@ -185,7 +185,7 @@ func main() {
 		grpcServer := grpc.NewServer(grpc.UnaryInterceptor(app.UnaryInterceptors))
 		acourse.RegisterUserServiceServer(grpcServer, user.New(client))
 		acourse.RegisterCourseServiceServer(grpcServer, course.New(db, client, userServiceClient, paymentServiceClient))
-		acourse.RegisterPaymentServiceServer(grpcServer, payment.New(db, client, userServiceClient, firAuth, emailServiceClient))
+		acourse.RegisterPaymentServiceServer(grpcServer, payment.New(db, client, userServiceClient, courseServiceClient, firAuth, emailServiceClient))
 		acourse.RegisterEmailServiceServer(grpcServer, email.New(email.Config{
 			From:     cfg.Email.From,
 			Server:   cfg.Email.Server,
@@ -193,7 +193,7 @@ func main() {
 			User:     cfg.Email.User,
 			Password: cfg.Email.Password,
 		}))
-		acourse.RegisterAssignmentServiceServer(grpcServer, assignment.New(db, client))
+		acourse.RegisterAssignmentServiceServer(grpcServer, assignment.New(db, client, courseServiceClient))
 		log.Fatal(grpcServer.Serve(grpcListener))
 	}()
 

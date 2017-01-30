@@ -9,7 +9,7 @@ import (
 
 const kindPayment = "Payment"
 
-type payment struct {
+type paymentModel struct {
 	ds.StringIDModel
 	ds.StampModel
 	UserID        string
@@ -31,18 +31,18 @@ const (
 )
 
 // Approve approves a payment
-func (x *payment) Approve() {
+func (x *paymentModel) Approve() {
 	x.Status = statusApproved
 	x.At = time.Now()
 }
 
 // Reject rejects a payment
-func (x *payment) Reject() {
+func (x *paymentModel) Reject() {
 	x.Status = statusRejected
 	x.At = time.Now()
 }
 
-func toPayment(x *payment) *acourse.Payment {
+func toPayment(x *paymentModel) *acourse.Payment {
 	return &acourse.Payment{
 		Id:            x.ID(),
 		CreatedAt:     x.CreatedAt.Format(time.RFC3339),
@@ -58,7 +58,7 @@ func toPayment(x *payment) *acourse.Payment {
 	}
 }
 
-func toPayments(xs []*payment) []*acourse.Payment {
+func toPayments(xs []*paymentModel) []*acourse.Payment {
 	rs := make([]*acourse.Payment, len(xs))
 	for i, x := range xs {
 		rs[i] = toPayment(x)

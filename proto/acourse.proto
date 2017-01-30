@@ -36,6 +36,8 @@ service CourseService {
   rpc AttendCourse(CourseIDRequest) returns (Empty) {}
   rpc OpenAttend(CourseIDRequest) returns (Empty) {}
   rpc CloseAttend(CourseIDRequest) returns (Empty) {}
+  rpc CreateEnrolls(EnrollsRequest) returns (Empty) {}
+  rpc FindEnroll(EnrollFindRequest) returns (Enroll) {}
 }
 
 service AssignmentService {
@@ -253,4 +255,18 @@ message UserAssignmentsResponse {
 
 message UserAssignmentIDRequest {
   string id = 1;
+}
+
+message Enroll {
+  string UserID = 1;
+	string CourseID = 2;
+}
+
+message EnrollsRequest {
+  repeated Enroll enrolls = 1;
+}
+
+message EnrollFindRequest {
+  string userId = 1;
+  string courseId = 2;
 }
