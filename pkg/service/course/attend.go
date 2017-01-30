@@ -5,6 +5,12 @@ import (
 	"time"
 
 	"github.com/acoshift/ds"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+)
+
+var (
+	errAttendNotFound = grpc.Errorf(codes.NotFound, "course: attend not found")
 )
 
 func (s *service) findAttend(ctx context.Context, userID, courseID string) (*attendModel, error) {
@@ -16,7 +22,7 @@ func (s *service) findAttend(ctx context.Context, userID, courseID string) (*att
 	)
 	err = ds.IgnoreFieldMismatch(err)
 	if ds.NotFound(err) {
-		return nil, nil
+		return nil, errAttendNotFound
 	}
 	if err != nil {
 		return nil, err

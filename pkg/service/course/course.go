@@ -206,6 +206,9 @@ func (s *service) GetCourse(ctx context.Context, req *acourse.CourseIDRequest) (
 
 	// check is user enrolled
 	enroll, err := s.FindEnroll(ctx, &acourse.EnrollFindRequest{UserId: userID, CourseId: course.ID()})
+	if grpc.Code(err) == codes.NotFound {
+		err = nil
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -396,6 +399,9 @@ func (s *service) EnrollCourse(ctx context.Context, req *acourse.EnrollRequest) 
 
 	// check is user already enroll
 	enroll, err := s.FindEnroll(ctx, &acourse.EnrollFindRequest{UserId: userID, CourseId: req.GetCourseId()})
+	if grpc.Code(err) == codes.NotFound {
+		err = nil
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -471,6 +477,9 @@ func (s *service) AttendCourse(ctx context.Context, req *acourse.CourseIDRequest
 
 	// user must enrolled in this course
 	enroll, err := s.FindEnroll(ctx, &acourse.EnrollFindRequest{UserId: userID, CourseId: course.ID()})
+	if grpc.Code(err) == codes.NotFound {
+		err = nil
+	}
 	if err != nil {
 		return nil, err
 	}

@@ -12,7 +12,8 @@ import (
 )
 
 var (
-	errEnrollAlreadyExists = grpc.Errorf(codes.AlreadyExists, "enroll already exists")
+	errEnrollAlreadyExists = grpc.Errorf(codes.AlreadyExists, "course: enroll already exists")
+	errEnrollNotFound      = grpc.Errorf(codes.NotFound, "course: enroll not found")
 )
 
 func (s *service) countEnroll(ctx context.Context, courseID string) (int, error) {
@@ -37,7 +38,7 @@ func (s *service) FindEnroll(ctx context.Context, req *acourse.EnrollFindRequest
 	)
 
 	if ds.NotFound(err) {
-		return nil, nil
+		return nil, errEnrollNotFound
 	}
 	if err != nil {
 		return nil, err

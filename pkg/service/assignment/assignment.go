@@ -196,12 +196,12 @@ func (s *service) SubmitUserAssignment(ctx context.Context, req *acourse.UserAss
 		return nil, ErrAssignmentNotOpen
 	}
 
-	enroll, err := s.course.FindEnroll(ctx, &acourse.EnrollFindRequest{UserId: userID, CourseId: x.CourseID})
+	_, err = s.course.FindEnroll(ctx, &acourse.EnrollFindRequest{UserId: userID, CourseId: x.CourseID})
+	if grpc.Code(err) == codes.NotFound {
+		return nil, grpc.Errorf(codes.PermissionDenied, "can not submit user assignment for this course")
+	}
 	if err != nil {
 		return nil, err
-	}
-	if enroll == nil {
-		return nil, grpc.Errorf(codes.PermissionDenied, "can not submit user assignment for this course")
 	}
 
 	// create model
