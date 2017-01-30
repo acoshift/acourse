@@ -215,6 +215,9 @@ func (s *service) GetCourse(ctx context.Context, req *acourse.CourseIDRequest) (
 	if enroll != nil || course.Owner == userID {
 		var attend *attendModel
 		attend, err = s.findAttend(ctx, userID, course.ID())
+		if grpc.Code(err) == codes.NotFound {
+			err = nil
+		}
 		if err != nil {
 			return nil, err
 		}
