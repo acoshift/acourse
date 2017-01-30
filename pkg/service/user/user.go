@@ -34,6 +34,7 @@ func (s *service) getUser(ctx context.Context, userID string) (*user, error) {
 func (s *service) mustGetUser(ctx context.Context, userID string) (*user, error) {
 	x, err := s.getUser(ctx, userID)
 	if ds.NotFound(err) {
+		x = &user{}
 		x.SetNameID(kindUser, userID)
 	}
 	err = ds.IgnoreNotFound(err)
