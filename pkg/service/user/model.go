@@ -5,7 +5,7 @@ import (
 	"github.com/acoshift/ds"
 )
 
-type user struct {
+type userModel struct {
 	ds.StringIDModel
 	ds.StampModel
 	Username string
@@ -14,7 +14,7 @@ type user struct {
 	AboutMe  string `datastore:",noindex"`
 }
 
-type role struct {
+type roleModel struct {
 	ds.StringIDModel
 	ds.StampModel
 
@@ -28,7 +28,7 @@ const (
 	kindRole = "Role"
 )
 
-func toUser(x *user) *acourse.User {
+func toUser(x *userModel) *acourse.User {
 	return &acourse.User{
 		Id:       x.ID(),
 		Username: x.Username,
@@ -38,7 +38,7 @@ func toUser(x *user) *acourse.User {
 	}
 }
 
-func toUsers(xs []*user) []*acourse.User {
+func toUsers(xs []*userModel) []*acourse.User {
 	rs := make([]*acourse.User, len(xs))
 	for i, x := range xs {
 		rs[i] = toUser(x)

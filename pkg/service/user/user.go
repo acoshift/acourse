@@ -21,8 +21,8 @@ type service struct {
 	client *ds.Client
 }
 
-func (s *service) getUser(ctx context.Context, userID string) (*user, error) {
-	var x user
+func (s *service) getUser(ctx context.Context, userID string) (*userModel, error) {
+	var x userModel
 	err := s.client.GetByName(ctx, kindUser, userID, &x)
 	err = ds.IgnoreFieldMismatch(err)
 	if err != nil {
@@ -31,10 +31,10 @@ func (s *service) getUser(ctx context.Context, userID string) (*user, error) {
 	return &x, nil
 }
 
-func (s *service) mustGetUser(ctx context.Context, userID string) (*user, error) {
+func (s *service) mustGetUser(ctx context.Context, userID string) (*userModel, error) {
 	x, err := s.getUser(ctx, userID)
 	if ds.NotFound(err) {
-		x = &user{}
+		x = &userModel{}
 		x.SetNameID(kindUser, userID)
 	}
 	err = ds.IgnoreNotFound(err)
@@ -44,8 +44,8 @@ func (s *service) mustGetUser(ctx context.Context, userID string) (*user, error)
 	return x, nil
 }
 
-func (s *service) findUser(ctx context.Context, username string) (*user, error) {
-	var x user
+func (s *service) findUser(ctx context.Context, username string) (*userModel, error) {
+	var x userModel
 	err := s.client.QueryFirst(ctx, kindUser, &x, ds.Filter("Username =", username))
 	err = ds.IgnoreFieldMismatch(err)
 	if err != nil {
@@ -54,7 +54,7 @@ func (s *service) findUser(ctx context.Context, username string) (*user, error) 
 	return &x, nil
 }
 
-func (s *service) saveUser(ctx context.Context, x *user) error {
+func (s *service) saveUser(ctx context.Context, x *userModel) error {
 	if x.GetKey() == nil {
 		return ErrUserIDRequired
 	}
@@ -97,7 +97,7 @@ func (s *service) GetUsers(ctx context.Context, req *acourse.UserIDsRequest) (*a
 
 	ids = app.UniqueIDs(ids)
 
-	var xs []*user
+	var xs []*userModel
 	err := s.client.GetByNames(ctx, kindUser, ids, &xs)
 	err = ds.IgnoreNotFound(err)
 	err = ds.IgnoreFieldMismatch(err)
@@ -107,7 +107,7 @@ func (s *service) GetUsers(ctx context.Context, req *acourse.UserIDsRequest) (*a
 
 	for i := range xs {
 		if xs[i] == nil {
-			xs[i] = &user{}
+			xs[i] = &userModel{}
 			xs[i].SetNameID(kindUser, ids[i])
 		}
 	}

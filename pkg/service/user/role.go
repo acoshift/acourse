@@ -11,7 +11,7 @@ func (s *service) GetRole(ctx context.Context, req *acourse.UserIDRequest) (*aco
 		return &acourse.Role{}, nil
 	}
 
-	var x role
+	var x roleModel
 	s.client.GetByName(ctx, kindRole, req.GetUserId(), &x)
 
 	return &acourse.Role{
