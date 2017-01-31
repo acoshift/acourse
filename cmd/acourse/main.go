@@ -177,7 +177,7 @@ func main() {
 
 	// mount controllers
 	app.MountHealthController(mux, health.New())
-	app.MountRenderController(mux, render.New(db, courseServiceClient))
+	app.MountRenderController(mux, render.New(courseServiceClient))
 
 	// run grpc server
 	go func() {

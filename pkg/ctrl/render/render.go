@@ -6,18 +6,16 @@ import (
 
 	"github.com/acoshift/acourse/pkg/acourse"
 	"github.com/acoshift/acourse/pkg/app"
-	"github.com/acoshift/acourse/pkg/store"
 	"github.com/acoshift/gotcha"
 )
 
 // New creates new render controller
-func New(db *store.DB, courseService acourse.CourseServiceClient) app.RenderController {
-	return &renderController{db, courseService}
+func New(courseService acourse.CourseServiceClient) app.RenderController {
+	return &renderController{courseService}
 }
 
 // renderController implements RenderController interface
 type renderController struct {
-	db            *store.DB
 	courseService acourse.CourseServiceClient
 }
 
