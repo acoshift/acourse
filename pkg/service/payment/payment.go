@@ -178,7 +178,7 @@ func (s *service) processApprovedPayment(payment *paymentModel) error {
 	if err != nil {
 		return err
 	}
-	userInfo, err := s.auth.GetAccountInfoByUID(payment.UserID)
+	userInfo, err := s.auth.GetUser(payment.UserID)
 	if err != nil {
 		return err
 	}
@@ -248,7 +248,7 @@ func (s *service) processRejectedPayment(payment *paymentModel) error {
 	if err != nil {
 		return err
 	}
-	userInfo, err := s.auth.GetAccountInfoByUID(payment.UserID)
+	userInfo, err := s.auth.GetUser(payment.UserID)
 	if err != nil {
 		return err
 	}

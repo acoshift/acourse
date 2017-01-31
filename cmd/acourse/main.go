@@ -89,7 +89,7 @@ func main() {
 
 	cfg, err := LoadConfig(configFile)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	firApp, err := admin.InitializeApp(admin.AppOptions{
@@ -97,9 +97,12 @@ func main() {
 		ServiceAccount: []byte(cfg.Firebase.ServiceAccount),
 	})
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
-	firAuth := firApp.Auth()
+	firAuth, err := firApp.Auth()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	db := store.NewDB(store.ProjectID(cfg.ProjectID), store.ServiceAccount([]byte(cfg.ServiceAccount)))
 
@@ -109,13 +112,13 @@ func main() {
 		storage.ScopeFullControl,
 	)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	tokenSource := jwtConfig.TokenSource(context.Background())
 
 	client, err := ds.NewClient(context.Background(), cfg.ProjectID, option.WithTokenSource(tokenSource))
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	middlewares := []func(http.Handler) http.Handler{
@@ -157,7 +160,7 @@ func main() {
 	// create service clients
 	conn, err := grpc.Dial("127.0.0.1:8081", grpc.WithInsecure())
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	userServiceClient := acourse.NewUserServiceClient(conn)
 	courseServiceClient := acourse.NewCourseServiceClient(conn)
@@ -180,7 +183,7 @@ func main() {
 	go func() {
 		grpcListener, err := net.Listen("tcp", ":8081")
 		if err != nil {
-			panic(err)
+			log.Fatal(err)
 		}
 		grpcServer := grpc.NewServer(grpc.UnaryInterceptor(app.UnaryInterceptors))
 		acourse.RegisterUserServiceServer(grpcServer, user.New(client))
