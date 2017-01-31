@@ -362,7 +362,7 @@ func (s *service) UpdateCourse(ctx context.Context, req *acourse.Course) (*acour
 	}
 	course.Options.Assignment = req.GetOptions().GetAssignment()
 
-	err = s.client.SaveModel(ctx, "", course)
+	err = s.client.SaveModel(ctx, "", &course)
 	if err != nil {
 		return nil, err
 	}
@@ -545,4 +545,24 @@ func (s *service) OpenAttend(ctx context.Context, req *acourse.CourseIDRequest) 
 
 func (s *service) CloseAttend(ctx context.Context, req *acourse.CourseIDRequest) (*acourse.Empty, error) {
 	return s.changeAttend(ctx, req, false)
+}
+
+func (s *service) saveCourse(ctx context.Context, course *courseModel) error {
+	var err error
+	// Check duplicate URL
+	if len(course.URL) > 0 {
+		var t courseModel
+		err = s.client.QueryFirst(ctx, kindCourse, &t, ds.Filter("URL =", course.URL))
+		err = ds.IgnoreFieldMismatch(err)
+		if !ds.NotFound(err) && t.ID() != course.ID() {
+			return errCourseURLExists
+		}
+	}
+
+	err = s.client.SaveModel(ctx, kindCourse, course)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

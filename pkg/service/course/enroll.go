@@ -12,6 +12,7 @@ import (
 
 var (
 	errCourseNotFound      = grpc.Errorf(codes.NotFound, "course: not found")
+	errCourseURLExists     = grpc.Errorf(codes.AlreadyExists, "course: url already exists")
 	errEnrollAlreadyExists = grpc.Errorf(codes.AlreadyExists, "course: enroll already exists")
 	errEnrollNotFound      = grpc.Errorf(codes.NotFound, "course: enroll not found")
 )

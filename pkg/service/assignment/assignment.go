@@ -5,37 +5,27 @@ import (
 
 	"github.com/acoshift/acourse/pkg/acourse"
 	"github.com/acoshift/acourse/pkg/internal"
-	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/ds"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 )
 
 // New creates new assignment service server
-func New(store Store, client *ds.Client, course acourse.CourseServiceClient) acourse.AssignmentServiceServer {
-	return &service{store, client, course}
-}
-
-// Store is the store interface for assignment service
-type Store interface {
-	CourseGet(context.Context, string) (*model.Course, error)
+func New(client *ds.Client, course acourse.CourseServiceClient) acourse.AssignmentServiceServer {
+	return &service{client, course}
 }
 
 type service struct {
-	store  Store
 	client *ds.Client
 	course acourse.CourseServiceClient
 }
 
 func (s *service) isCourseOwner(ctx context.Context, courseID, userID string) error {
-	course, err := s.store.CourseGet(ctx, courseID)
+	course, err := s.course.GetCourse(ctx, &acourse.CourseIDRequest{CourseId: courseID})
 	if err != nil {
 		return err
 	}
-	if course == nil {
-		return grpc.Errorf(codes.NotFound, "course not found")
-	}
-	if course.Owner != userID {
+	if course.GetCourse().GetOwner() != userID {
 		return grpc.Errorf(codes.PermissionDenied, "only course owner can create assignment")
 	}
 	return nil
@@ -284,20 +274,17 @@ func (s *service) ListUserAssignments(ctx context.Context, req *acourse.CourseID
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
 
-	course, err := s.store.CourseGet(ctx, req.GetCourseId())
+	course, err := s.course.GetCourse(ctx, &acourse.CourseIDRequest{CourseId: req.GetCourseId()})
 	if err != nil {
 		return nil, err
 	}
-	if course == nil {
-		return nil, grpc.Errorf(codes.NotFound, "course not found")
-	}
 
-	if course.Owner != userID {
+	if course.GetCourse().GetOwner() != userID {
 		return nil, grpc.Errorf(codes.PermissionDenied, "only instructor can list user assignments")
 	}
 
 	var assignments []*assignment
-	err = s.client.Query(ctx, kindAssignment, &assignments, ds.Filter("CourseID =", course.ID()))
+	err = s.client.Query(ctx, kindAssignment, &assignments, ds.Filter("CourseID =", course.GetCourse().GetId()))
 	err = ds.IgnoreFieldMismatch(err)
 	err = ds.IgnoreNotFound(err)
 	if err != nil {
