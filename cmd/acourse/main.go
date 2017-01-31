@@ -187,7 +187,7 @@ func main() {
 		}
 		grpcServer := grpc.NewServer(grpc.UnaryInterceptor(app.UnaryInterceptors))
 		acourse.RegisterUserServiceServer(grpcServer, user.New(client))
-		acourse.RegisterCourseServiceServer(grpcServer, course.New(db, client, userServiceClient, paymentServiceClient))
+		acourse.RegisterCourseServiceServer(grpcServer, course.New(client, userServiceClient, paymentServiceClient))
 		acourse.RegisterPaymentServiceServer(grpcServer, payment.New(db, client, userServiceClient, courseServiceClient, firAuth, emailServiceClient))
 		acourse.RegisterEmailServiceServer(grpcServer, email.New(email.Config{
 			From:     cfg.Email.From,

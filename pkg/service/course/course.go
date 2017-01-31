@@ -6,36 +6,26 @@ import (
 
 	"github.com/acoshift/acourse/pkg/acourse"
 	"github.com/acoshift/acourse/pkg/internal"
-	"github.com/acoshift/acourse/pkg/model"
-	"github.com/acoshift/acourse/pkg/store"
 	"github.com/acoshift/ds"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 )
 
 // New creates new course service
-func New(store Store, client *ds.Client, user acourse.UserServiceClient, payment acourse.PaymentServiceClient) acourse.CourseServiceServer {
-	return &service{store, client, user, payment}
-}
-
-// Store is the store interface for course service
-type Store interface {
-	CourseList(context.Context, ...store.CourseListOption) (model.Courses, error)
-	CourseGetAllByIDs(context.Context, []string) (model.Courses, error)
-	CourseGet(context.Context, string) (*model.Course, error)
-	CourseSave(context.Context, *model.Course) error
-	CourseFind(context.Context, string) (*model.Course, error)
+func New(client *ds.Client, user acourse.UserServiceClient, payment acourse.PaymentServiceClient) acourse.CourseServiceServer {
+	return &service{client, user, payment}
 }
 
 type service struct {
-	store   Store
 	client  *ds.Client
 	user    acourse.UserServiceClient
 	payment acourse.PaymentServiceClient
 }
 
-func (s *service) listCourses(ctx context.Context, opts ...store.CourseListOption) (*acourse.CoursesResponse, error) {
-	courses, err := s.store.CourseList(ctx, opts...)
+func (s *service) listCourses(ctx context.Context, qs ...ds.Query) (*acourse.CoursesResponse, error) {
+	var courses courseModels
+	err := s.client.Query(ctx, kindCourse, &courses, qs...)
+	err = ds.IgnoreFieldMismatch(err)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +47,7 @@ func (s *service) listCourses(ctx context.Context, opts ...store.CourseListOptio
 	enrollCounts := make([]*acourse.EnrollCount, 0, len(courses))
 	enrollResult := make(chan *acourse.EnrollCount)
 	for i, x := range courses {
-		go func(i int, x *model.Course) {
+		go func(i int, x *courseModel) {
 			c, err := s.countEnroll(ctx, x.ID())
 			if err != nil {
 				panic(err)
@@ -72,14 +62,14 @@ func (s *service) listCourses(ctx context.Context, opts ...store.CourseListOptio
 		enrollCounts = append(enrollCounts, <-enrollResult)
 	}
 	return &acourse.CoursesResponse{
-		Courses:      acourse.ToCoursesSmall(courses),
+		Courses:      acourse.ToCoursesSmall(toCourses(courses)),
 		Users:        acourse.ToUsersTiny(users),
 		EnrollCounts: enrollCounts,
 	}, nil
 }
 
 func (s *service) ListPublicCourses(ctx context.Context, req *acourse.ListRequest) (*acourse.CoursesResponse, error) {
-	return s.listCourses(ctx, store.CourseListOptionPublic(true))
+	return s.listCourses(ctx, ds.Filter("Options.Public =", true))
 }
 
 func (s *service) ListCourses(ctx context.Context, req *acourse.ListRequest) (*acourse.CoursesResponse, error) {
@@ -104,15 +94,15 @@ func (s *service) ListOwnCourses(ctx context.Context, req *acourse.UserIDRequest
 		return nil, grpc.Errorf(codes.InvalidArgument, "invalid user id")
 	}
 
-	opt := make([]store.CourseListOption, 0, 3)
-	opt = append(opt, store.CourseListOptionOwner(req.UserId))
+	qs := make([]ds.Query, 0, 3)
+	qs = append(qs, ds.Filter("Owner =", req.UserId))
 
 	// if not sign in, get only public courses
 	if len(userID) == 0 {
-		opt = append(opt, store.CourseListOptionPublic(true))
+		qs = append(qs, ds.Filter("Options.Public =", true))
 	}
 
-	return s.listCourses(ctx, opt...)
+	return s.listCourses(ctx, qs...)
 }
 
 func (s *service) ListEnrolledCourses(ctx context.Context, req *acourse.UserIDRequest) (*acourse.CoursesResponse, error) {
@@ -144,7 +134,9 @@ func (s *service) ListEnrolledCourses(ctx context.Context, req *acourse.UserIDRe
 	for i, e := range enrolls {
 		ids[i] = e.CourseID
 	}
-	courses, err := s.store.CourseGetAllByIDs(ctx, ids)
+	var courses courseModels
+	err = s.client.GetByStringIDs(ctx, kindCourse, ids, &courses)
+	err = ds.IgnoreFieldMismatch(err)
 
 	// get owners
 	userIDMap := map[string]bool{}
@@ -173,7 +165,7 @@ func (s *service) ListEnrolledCourses(ctx context.Context, req *acourse.UserIDRe
 		}
 	}
 	return &acourse.CoursesResponse{
-		Courses:      acourse.ToCoursesSmall(courses),
+		Courses:      acourse.ToCoursesSmall(toCourses(courses)),
 		Users:        acourse.ToUsersTiny(users),
 		EnrollCounts: enrollCounts,
 	}, nil
@@ -182,20 +174,19 @@ func (s *service) ListEnrolledCourses(ctx context.Context, req *acourse.UserIDRe
 func (s *service) GetCourse(ctx context.Context, req *acourse.CourseIDRequest) (*acourse.CourseResponse, error) {
 	userID := internal.GetUserID(ctx)
 
+	var course courseModel
+
 	// try get by id first
-	course, err := s.store.CourseGet(ctx, req.CourseId)
+	err := s.client.GetByStringID(ctx, kindCourse, req.GetCourseId(), &course)
+	if ds.NotFound(err) {
+		err = s.client.QueryFirst(ctx, kindCourse, &course, ds.Filter("URL =", req.GetCourseId()))
+	}
+	err = ds.IgnoreFieldMismatch(err)
+	if ds.NotFound(err) {
+		return nil, errCourseNotFound
+	}
 	if err != nil {
 		return nil, err
-	}
-	// try get by url
-	if course == nil {
-		course, err = s.store.CourseFind(ctx, req.CourseId)
-		if err != nil {
-			return nil, err
-		}
-	}
-	if course == nil {
-		return nil, grpc.Errorf(codes.NotFound, "course not found")
 	}
 
 	// get course owner
@@ -223,7 +214,7 @@ func (s *service) GetCourse(ctx context.Context, req *acourse.CourseIDRequest) (
 		}
 
 		return &acourse.CourseResponse{
-			Course:   acourse.ToCourse(course),
+			Course:   toCourse(&course),
 			User:     acourse.ToUserTiny(owner),
 			Enrolled: enroll != nil,
 			Owned:    course.Owner == userID,
@@ -251,7 +242,7 @@ func (s *service) GetCourse(ctx context.Context, req *acourse.CourseIDRequest) (
 
 	if role.Admin {
 		return &acourse.CourseResponse{
-			Course:   acourse.ToCourse(course),
+			Course:   toCourse(&course),
 			User:     acourse.ToUserTiny(owner),
 			Enrolled: enroll != nil,
 			Purchase: payment != nil,
@@ -259,7 +250,7 @@ func (s *service) GetCourse(ctx context.Context, req *acourse.CourseIDRequest) (
 	}
 
 	// filter out private fields
-	course = &model.Course{
+	course = courseModel{
 		StringIDModel:    course.StringIDModel,
 		StampModel:       course.StampModel,
 		Title:            course.Title,
@@ -272,7 +263,7 @@ func (s *service) GetCourse(ctx context.Context, req *acourse.CourseIDRequest) (
 		Type:             course.Type,
 		Price:            course.Price,
 		DiscountedPrice:  course.DiscountedPrice,
-		Options: model.CourseOption{
+		Options: courseOption{
 			Public:   course.Options.Public,
 			Discount: course.Options.Discount,
 			Enroll:   course.Options.Enroll,
@@ -281,7 +272,7 @@ func (s *service) GetCourse(ctx context.Context, req *acourse.CourseIDRequest) (
 	}
 
 	return &acourse.CourseResponse{
-		Course:   acourse.ToCourse(course),
+		Course:   toCourse(&course),
 		User:     acourse.ToUserTiny(owner),
 		Purchase: payment != nil,
 	}, nil
@@ -300,21 +291,21 @@ func (s *service) CreateCourse(ctx context.Context, req *acourse.Course) (*acour
 		return nil, grpc.Errorf(codes.PermissionDenied, "don't have permission to create course")
 	}
 
-	course := &model.Course{
+	course := &courseModel{
 		Title:            req.GetTitle(),
 		ShortDescription: req.GetShortDescription(),
 		Description:      req.GetDescription(),
 		Photo:            req.GetPhoto(),
 		Video:            req.GetVideo(),
 		Owner:            userID,
-		Options: model.CourseOption{
+		Options: courseOption{
 			Assignment: req.GetOptions().GetAssignment(),
 		},
 	}
 	course.Start, _ = time.Parse(time.RFC3339, req.GetStart())
-	course.Contents = make(model.CourseContents, len(req.GetContents()))
+	course.Contents = make(courseContents, len(req.GetContents()))
 	for i, c := range req.GetContents() {
-		course.Contents[i] = model.CourseContent{
+		course.Contents[i] = courseContent{
 			Title:       c.GetTitle(),
 			Description: c.GetDescription(),
 			Video:       c.GetVideo(),
@@ -322,12 +313,12 @@ func (s *service) CreateCourse(ctx context.Context, req *acourse.Course) (*acour
 		}
 	}
 
-	err = s.store.CourseSave(ctx, course)
+	err = s.client.SaveModel(ctx, kindCourse, course)
 	if err != nil {
 		return nil, err
 	}
 
-	return acourse.ToCourse(course), nil
+	return toCourse(course), nil
 }
 
 func (s *service) UpdateCourse(ctx context.Context, req *acourse.Course) (*acourse.Empty, error) {
@@ -336,12 +327,14 @@ func (s *service) UpdateCourse(ctx context.Context, req *acourse.Course) (*acour
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
 
-	course, err := s.store.CourseGet(ctx, req.GetId())
+	var course courseModel
+	err := s.client.GetByStringID(ctx, kindCourse, req.GetId(), &course)
+	err = ds.IgnoreFieldMismatch(err)
+	if ds.NotFound(err) {
+		return nil, errCourseNotFound
+	}
 	if err != nil {
 		return nil, err
-	}
-	if course == nil {
-		return nil, grpc.Errorf(codes.NotFound, "course not found")
 	}
 	role, err := s.user.GetRole(ctx, &acourse.UserIDRequest{UserId: userID})
 	if err != nil {
@@ -358,9 +351,9 @@ func (s *service) UpdateCourse(ctx context.Context, req *acourse.Course) (*acour
 	course.Photo = req.GetPhoto()
 	course.Start, _ = time.Parse(time.RFC3339, req.GetStart())
 	course.Video = req.GetVideo()
-	course.Contents = make(model.CourseContents, len(req.GetContents()))
+	course.Contents = make(courseContents, len(req.GetContents()))
 	for i, c := range req.GetContents() {
-		course.Contents[i] = model.CourseContent{
+		course.Contents[i] = courseContent{
 			Title:       c.GetTitle(),
 			Description: c.GetDescription(),
 			Video:       c.GetVideo(),
@@ -369,7 +362,7 @@ func (s *service) UpdateCourse(ctx context.Context, req *acourse.Course) (*acour
 	}
 	course.Options.Assignment = req.GetOptions().GetAssignment()
 
-	err = s.store.CourseSave(ctx, course)
+	err = s.client.SaveModel(ctx, "", course)
 	if err != nil {
 		return nil, err
 	}
@@ -387,12 +380,14 @@ func (s *service) EnrollCourse(ctx context.Context, req *acourse.EnrollRequest) 
 		return nil, grpc.Errorf(codes.InvalidArgument, "course id required")
 	}
 
-	course, err := s.store.CourseGet(ctx, req.CourseId)
+	var course courseModel
+	err := s.client.GetByStringID(ctx, kindCourse, req.GetCourseId(), &course)
+	err = ds.IgnoreFieldMismatch(err)
+	if ds.NotFound(err) {
+		return nil, errCourseNotFound
+	}
 	if err != nil {
 		return nil, err
-	}
-	if course == nil {
-		return nil, grpc.Errorf(codes.NotFound, "course not found")
 	}
 
 	// owner can not enroll
@@ -470,12 +465,14 @@ func (s *service) AttendCourse(ctx context.Context, req *acourse.CourseIDRequest
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
 
-	course, err := s.store.CourseGet(ctx, req.GetCourseId())
+	var course courseModel
+	err := s.client.GetByStringID(ctx, kindCourse, req.GetCourseId(), &course)
+	err = ds.IgnoreFieldMismatch(err)
+	if ds.NotFound(err) {
+		return nil, errCourseNotFound
+	}
 	if err != nil {
 		return nil, err
-	}
-	if course == nil {
-		return nil, grpc.Errorf(codes.NotFound, "course not found")
 	}
 
 	// user must enrolled in this course
@@ -516,12 +513,14 @@ func (s *service) changeAttend(ctx context.Context, req *acourse.CourseIDRequest
 		return nil, grpc.Errorf(codes.Unauthenticated, "authorization required")
 	}
 
-	course, err := s.store.CourseGet(ctx, req.GetCourseId())
+	var course courseModel
+	err := s.client.GetByStringID(ctx, kindCourse, req.GetCourseId(), &course)
+	err = ds.IgnoreFieldMismatch(err)
+	if ds.NotFound(err) {
+		return nil, errCourseNotFound
+	}
 	if err != nil {
 		return nil, err
-	}
-	if course == nil {
-		return nil, grpc.Errorf(codes.NotFound, "course not found")
 	}
 
 	if course.Owner != userID {
@@ -530,7 +529,7 @@ func (s *service) changeAttend(ctx context.Context, req *acourse.CourseIDRequest
 
 	course.Options.Attend = value
 
-	err = s.store.CourseSave(ctx, course)
+	err = s.client.SaveModel(ctx, "", &course)
 	if err != nil {
 		return nil, err
 	}
