@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"cloud.google.com/go/datastore"
-	"github.com/acoshift/acourse.tmp/pkg/model"
 	"github.com/acoshift/acourse/pkg/acourse"
 	"github.com/acoshift/ds"
 	"google.golang.org/grpc"
@@ -62,7 +61,7 @@ func (s *service) listEnrollByUserID(ctx context.Context, userID string) ([]*enr
 func (s *service) saveEnroll(ctx context.Context, x *enrollModel) error {
 	// TODO: race condition
 	// TODO: use keysonly query
-	var t model.Enroll
+	var t enrollModel
 	err := s.client.QueryFirst(ctx, kindEnroll, &t,
 		ds.Filter("UserID =", x.UserID),
 		ds.Filter("CourseID =", x.CourseID),
