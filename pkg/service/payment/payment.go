@@ -17,7 +17,6 @@ import (
 
 // Store is the payment store
 type Store interface {
-	CourseGet(context.Context, string) (*model.Course, error)
 	CourseGetMulti(context.Context, []string) (model.Courses, error)
 }
 
@@ -174,10 +173,11 @@ func (s *service) RejectPayments(ctx context.Context, req *acourse.PaymentIDsReq
 func (s *service) processApprovedPayment(payment *paymentModel) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 	defer cancel()
-	course, err := s.store.CourseGet(ctx, payment.CourseID)
+	courseResp, err := s.course.GetCourse(ctx, &acourse.CourseIDRequest{CourseId: payment.CourseID})
 	if err != nil {
 		return err
 	}
+	course := courseResp.GetCourse()
 	userInfo, err := s.auth.GetUser(payment.UserID)
 	if err != nil {
 		return err
@@ -244,10 +244,11 @@ https://acourse.io`
 func (s *service) processRejectedPayment(payment *paymentModel) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 	defer cancel()
-	course, err := s.store.CourseGet(ctx, payment.CourseID)
+	courseResp, err := s.course.GetCourse(ctx, &acourse.CourseIDRequest{CourseId: payment.CourseID})
 	if err != nil {
 		return err
 	}
+	course := courseResp.GetCourse()
 	userInfo, err := s.auth.GetUser(payment.UserID)
 	if err != nil {
 		return err
@@ -263,8 +264,8 @@ func (s *service) processRejectedPayment(payment *paymentModel) error {
 	if user.Name == "" {
 		user.Name = "Anonymous"
 	}
-	if course.URL == "" {
-		course.URL = course.ID()
+	if len(course.Url) == 0 {
+		course.Url = course.Id
 	}
 	body := fmt.Sprintf(`สวัสดีครับคุณ %s,<br>
 <br>
@@ -288,7 +289,7 @@ func (s *service) processRejectedPayment(payment *paymentModel) error {
 		user.Name,
 		course.Title,
 		payment.CreatedAt.In(timeLocal).Format(time.RFC822),
-		course.URL,
+		course.Url,
 	)
 
 	_, err = s.email.Send(ctx, &acourse.Email{
