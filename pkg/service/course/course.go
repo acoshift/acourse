@@ -278,6 +278,16 @@ func (s *service) GetCourse(ctx context.Context, req *acourse.CourseIDRequest) (
 	}, nil
 }
 
+func (s *service) GetCourses(ctx context.Context, req *acourse.CourseIDsRequest) (*acourse.CoursesResponse, error) {
+	var courses []*courseModel
+	err := s.client.GetByStringIDs(ctx, kindCourse, req.GetCourseIds(), &courses)
+	err = ds.IgnoreFieldMismatch(err)
+	if err != nil {
+		return nil, err
+	}
+	return &acourse.CoursesResponse{Courses: acourse.ToCoursesSmall(toCourses(courses))}, nil
+}
+
 func (s *service) CreateCourse(ctx context.Context, req *acourse.Course) (*acourse.Course, error) {
 	userID := internal.GetUserID(ctx)
 	if userID == "" {

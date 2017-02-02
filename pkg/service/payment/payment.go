@@ -8,25 +8,18 @@ import (
 
 	"github.com/acoshift/acourse/pkg/acourse"
 	"github.com/acoshift/acourse/pkg/internal"
-	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/ds"
 	"github.com/acoshift/go-firebase-admin"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 )
 
-// Store is the payment store
-type Store interface {
-	CourseGetMulti(context.Context, []string) (model.Courses, error)
-}
-
 // New creates new payment service
-func New(store Store, client *ds.Client, user acourse.UserServiceClient, course acourse.CourseServiceClient, auth *admin.Auth, email acourse.EmailServiceClient) acourse.PaymentServiceServer {
-	return &service{store, client, user, course, auth, email}
+func New(client *ds.Client, user acourse.UserServiceClient, course acourse.CourseServiceClient, auth *admin.Auth, email acourse.EmailServiceClient) acourse.PaymentServiceServer {
+	return &service{client, user, course, auth, email}
 }
 
 type service struct {
-	store  Store
 	client *ds.Client
 	user   acourse.UserServiceClient
 	course acourse.CourseServiceClient
@@ -86,15 +79,23 @@ func (s *service) listPayments(ctx context.Context, opts ...ds.Query) (*acourse.
 	}
 	users := usersResp.GetUsers()
 
-	courses, err := s.store.CourseGetMulti(ctx, courseIDs)
+	courses, err := s.course.GetCourses(ctx, &acourse.CourseIDsRequest{CourseIds: courseIDs})
 	if err != nil {
 		return nil, err
+	}
+
+	coursesTiny := make([]*acourse.CourseTiny, len(courses.Courses))
+	for i, course := range courses.Courses {
+		coursesTiny[i] = &acourse.CourseTiny{
+			Id:    course.GetId(),
+			Title: course.GetTitle(),
+		}
 	}
 
 	return &acourse.PaymentsResponse{
 		Payments: toPayments(payments),
 		Users:    acourse.ToUsersTiny(users),
-		Courses:  acourse.ToCoursesTiny(courses),
+		Courses:  coursesTiny,
 	}, nil
 }
 

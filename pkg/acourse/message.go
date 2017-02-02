@@ -105,20 +105,3 @@ func ToCoursesSmall(xs []*Course) []*CourseSmall {
 	}
 	return rs
 }
-
-// ToCourseTiny builds a Course tiny message from Course model
-func ToCourseTiny(x *model.Course) *CourseTiny {
-	return &CourseTiny{
-		Id:    x.ID(),
-		Title: x.Title,
-	}
-}
-
-// ToCoursesTiny builds repeated Course tiny message from Course models
-func ToCoursesTiny(xs model.Courses) []*CourseTiny {
-	rs := make([]*CourseTiny, len(xs))
-	for i, x := range xs {
-		rs[i] = ToCourseTiny(x)
-	}
-	return rs
-}

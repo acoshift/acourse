@@ -30,6 +30,7 @@ service CourseService {
   rpc ListOwnCourses(UserIDRequest) returns (CoursesResponse) {}
   rpc ListEnrolledCourses(UserIDRequest) returns (CoursesResponse) {}
   rpc GetCourse(CourseIDRequest) returns (CourseResponse) {}
+  rpc GetCourses(CourseIDsRequest) returns (CoursesResponse) {}
   rpc CreateCourse(Course) returns (Course) {}
   rpc UpdateCourse(Course) returns (Empty) {}
   rpc EnrollCourse(EnrollRequest) returns (Empty) {}
@@ -98,6 +99,10 @@ message CoursesResponse {
 
 message CourseIDRequest {
   string courseId = 1;
+}
+
+message CourseIDsRequest {
+  repeated string courseIds = 1;
 }
 
 message EnrollRequest {

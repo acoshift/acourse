@@ -21,7 +21,6 @@ import (
 	"github.com/acoshift/acourse/pkg/service/email"
 	"github.com/acoshift/acourse/pkg/service/payment"
 	"github.com/acoshift/acourse/pkg/service/user"
-	"github.com/acoshift/acourse/pkg/store"
 	"github.com/acoshift/cors"
 	"github.com/acoshift/ds"
 	"github.com/acoshift/go-firebase-admin"
@@ -104,8 +103,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	db := store.NewDB(store.ProjectID(cfg.ProjectID), store.ServiceAccount([]byte(cfg.ServiceAccount)))
-
 	jwtConfig, err := google.JWTConfigFromJSON([]byte(cfg.ServiceAccount),
 		datastore.ScopeDatastore,
 		pubsub.ScopePubSub,
@@ -187,7 +184,7 @@ func main() {
 		grpcServer := grpc.NewServer(grpc.UnaryInterceptor(app.UnaryInterceptors))
 		acourse.RegisterUserServiceServer(grpcServer, user.New(client))
 		acourse.RegisterCourseServiceServer(grpcServer, course.New(client, userServiceClient, paymentServiceClient))
-		acourse.RegisterPaymentServiceServer(grpcServer, payment.New(db, client, userServiceClient, courseServiceClient, firAuth, emailServiceClient))
+		acourse.RegisterPaymentServiceServer(grpcServer, payment.New(client, userServiceClient, courseServiceClient, firAuth, emailServiceClient))
 		acourse.RegisterEmailServiceServer(grpcServer, email.New(email.Config{
 			From:     cfg.Email.From,
 			Server:   cfg.Email.Server,
