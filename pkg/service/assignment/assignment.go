@@ -216,7 +216,7 @@ func (s *service) DeleteUserAssignment(ctx context.Context, req *acourse.UserAss
 	}
 
 	var x userAssignment
-	err := s.client.GetByStringID(ctx, kindUserAssignment, req.GetId(), &x)
+	err := s.client.GetByStringID(ctx, kindUserAssignment, req.GetUserAssignmentId(), &x)
 	err = ds.IgnoreFieldMismatch(err)
 	if ds.NotFound(err) {
 		return nil, ErrUserAssignmentNotFound
@@ -229,7 +229,7 @@ func (s *service) DeleteUserAssignment(ctx context.Context, req *acourse.UserAss
 		return nil, ErrPermissionDenied
 	}
 
-	err = s.client.DeleteByStringID(ctx, kindUserAssignment, req.GetId())
+	err = s.client.DeleteByStringID(ctx, kindUserAssignment, req.GetUserAssignmentId())
 	if err != nil {
 		return nil, err
 	}
