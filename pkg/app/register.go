@@ -93,30 +93,6 @@ func RegisterUserServiceClient(mux *http.ServeMux, s acourse.UserServiceClient) 
 	})
 }
 
-// RegisterEmailServiceClient registers a Email service client to http server
-func RegisterEmailServiceClient(mux *http.ServeMux, s acourse.EmailServiceClient) {
-	sv := "/acourse.EmailService"
-
-	mux.HandleFunc(sv+"/Send", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			handleError(w, httperror.MethodNotAllowed)
-			return
-		}
-		req := new(acourse.Email)
-		err := bindJSON(r, req)
-		if err != nil {
-			handleError(w, httperror.BadRequestWith(err))
-			return
-		}
-		res, err := s.Send(makeServiceContext(r), req)
-		if err != nil {
-			handleError(w, httperror.GRPC(err))
-			return
-		}
-		handleOK(w, res)
-	})
-}
-
 // RegisterPaymentServiceClient registers a Payment service client to http server
 func RegisterPaymentServiceClient(mux *http.ServeMux, s acourse.PaymentServiceClient) {
 	sv := "/acourse.PaymentService"

@@ -171,7 +171,6 @@ func main() {
 	// register service clients to http server
 	app.RegisterUserServiceClient(mux, userServiceClient)
 	app.RegisterCourseServiceClient(mux, courseServiceClient)
-	// app.RegisterEmailServiceClient(mux, emailService) // do not expose email service to the world right now
 	app.RegisterPaymentServiceClient(mux, paymentServiceClient)
 	app.RegisterAssignmentServiceClient(mux, assignmentServiceClient)
 
