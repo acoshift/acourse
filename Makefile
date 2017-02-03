@@ -4,9 +4,9 @@ GO=go
 PROJECT=acourse-156413
 # PROJECT=acourse-d9d0a
 
-deploy-docker: clean dep ui pre-build config-prod build docker push
-
 deploy: deploy-docker rolling-update
+
+deploy-docker: clean dep ui pre-build config-prod build docker push
 
 clean: clean-ui clean-build
 
