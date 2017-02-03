@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"time"
 
+	"cloud.google.com/go/trace"
 	"github.com/google/uuid"
 )
 
@@ -104,4 +105,15 @@ func HSTS(h http.Handler) http.Handler {
 		w.Header().Add("Strict-Transport-Security", "max-age=63072000; preload; includeSubDomains")
 		h.ServeHTTP(w, r)
 	})
+}
+
+// Trace middleware
+func Trace(client *trace.Client) func(http.Handler) http.Handler {
+	return func(h http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			span := client.SpanFromRequest(r)
+			defer span.Finish()
+			h.ServeHTTP(w, r)
+		})
+	}
 }

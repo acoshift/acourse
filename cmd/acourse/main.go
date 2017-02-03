@@ -12,6 +12,7 @@ import (
 	"cloud.google.com/go/datastore"
 	"cloud.google.com/go/pubsub"
 	"cloud.google.com/go/storage"
+	"cloud.google.com/go/trace"
 	"github.com/acoshift/acourse/pkg/acourse"
 	"github.com/acoshift/acourse/pkg/app"
 	"github.com/acoshift/acourse/pkg/ctrl/health"
@@ -118,7 +119,13 @@ func main() {
 		log.Fatal(err)
 	}
 
+	traceClient, err := trace.NewClient(context.Background(), cfg.ProjectID, option.WithTokenSource(tokenSource))
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	middlewares := []func(http.Handler) http.Handler{
+		app.Trace(traceClient),
 		app.Logger,
 		app.RequestID,
 	}
