@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
@@ -26,46 +25,9 @@ import (
 	"github.com/acoshift/gzip"
 	"google.golang.org/api/option"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/grpclog"
-	"gopkg.in/yaml.v2"
 )
-
-// Config type
-type Config struct {
-	Debug     bool   `yaml:"debug"`
-	Port      string `yaml:"port"`
-	TLSPort   string `yaml:"tlsPort"`
-	TLSCert   string `yaml:"tlsCert"`
-	TLSKey    string `yaml:"tlsKey"`
-	Domain    string `yaml:"domain"`
-	ProjectID string `yaml:"projectId"`
-	Email     struct {
-		From     string `yaml:"from"`
-		Server   string `yaml:"server"`
-		Port     int    `yaml:"port"`
-		User     string `yaml:"user"`
-		Password string `yaml:"password"`
-	} `yaml:"email"`
-	Firebase struct {
-		ProjectID      string `yaml:"projectId"`
-		ServiceAccount string `yaml:"serviceAccount"`
-	} `yaml:"firebase"`
-	ServiceAccount string `yaml:"serviceAccount"`
-}
-
-// LoadConfig loads config from file
-func LoadConfig(filename string) (*Config, error) {
-	bs, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return nil, err
-	}
-	cfg := Config{}
-	err = yaml.Unmarshal(bs, &cfg)
-	if err != nil {
-		return nil, err
-	}
-	return &cfg, nil
-}
 
 func chain(hs ...func(http.Handler) http.Handler) func(http.Handler) http.Handler {
 	return func(h http.Handler) http.Handler {
@@ -84,7 +46,7 @@ func main() {
 		configFile = "config.yaml"
 	}
 
-	cfg, err := LoadConfig(configFile)
+	cfg, err := app.LoadConfig(configFile)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -120,7 +82,10 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	app.SetLogger(loggerClient.Logger("acourse"))
+
+	if !cfg.Debug {
+		app.SetLogger(loggerClient.Logger("acourse"))
+	}
 
 	middlewares := []func(http.Handler) http.Handler{
 		app.Trace(traceClient),
@@ -160,11 +125,17 @@ func main() {
 	app.InitService(firAuth)
 
 	// create service clients
-	conn, err := grpc.Dial("127.0.0.1:8081", grpc.WithInsecure(), trace.EnableGRPCTracingDialOption)
-	if err != nil {
-		log.Fatal(err)
+	var userServiceClient acourse.UserServiceClient
+	conn, err := grpc.Dial("127.0.0.1:8081", grpc.WithInsecure())
+	if !cfg.Debug {
+		creds, err := credentials.NewServerTLSFromFile(cfg.TLSCert, cfg.TLSKey)
+		if err != nil {
+			log.Fatal(err)
+		}
+		userServiceClient = acourse.NewUserServiceClient(app.MakeServiceConnection(cfg.Services.User, creds))
+	} else {
+		userServiceClient = acourse.NewUserServiceClient(conn)
 	}
-	userServiceClient := acourse.NewUserServiceClient(conn)
 	courseServiceClient := acourse.NewCourseServiceClient(conn)
 	emailServiceClient := acourse.NewEmailServiceClient(conn)
 	paymentServiceClient := acourse.NewPaymentServiceClient(conn)
@@ -187,7 +158,9 @@ func main() {
 			log.Fatal(err)
 		}
 		grpcServer := grpc.NewServer(grpc.UnaryInterceptor(app.UnaryInterceptors))
-		acourse.RegisterUserServiceServer(grpcServer, user.New(client))
+		if cfg.Debug {
+			acourse.RegisterUserServiceServer(grpcServer, user.New(client))
+		}
 		acourse.RegisterCourseServiceServer(grpcServer, course.New(client, userServiceClient, paymentServiceClient))
 		acourse.RegisterPaymentServiceServer(grpcServer, payment.New(client, userServiceClient, courseServiceClient, firAuth, emailServiceClient))
 		acourse.RegisterEmailServiceServer(grpcServer, email.New(email.Config{

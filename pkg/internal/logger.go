@@ -2,17 +2,18 @@ package internal
 
 import (
 	"log"
+	"os"
 
 	"cloud.google.com/go/logging"
 )
 
 // Loggers
 var (
-	InfoLogger      *log.Logger
-	NoticeLogger    *log.Logger
-	WarningLogger   *log.Logger
-	ErrorLogger     *log.Logger
-	EmergencyLogger *log.Logger
+	InfoLogger      = log.New(os.Stderr, "", log.LstdFlags)
+	NoticeLogger    = log.New(os.Stderr, "", log.LstdFlags)
+	WarningLogger   = log.New(os.Stderr, "", log.LstdFlags)
+	ErrorLogger     = log.New(os.Stderr, "", log.LstdFlags)
+	EmergencyLogger = log.New(os.Stderr, "", log.LstdFlags)
 )
 
 // SetLogger sets loggers

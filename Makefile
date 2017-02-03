@@ -6,7 +6,12 @@ PROJECT=acourse-156413
 
 deploy: deploy-docker rolling-update
 
-deploy-docker: clean dep ui pre-build config-prod build docker push
+deploy-docker: clean dep ui pre-build copy-dockerfile copy-ui config-prod build docker push
+
+deploy-user: clean-build dep pre-build copy-docker-service config-prod
+	env GOOS=linux GOARCH=amd64 CGO_ENABLED=0 $(GO) build -o .build/acourse -a -ldflags '-s' github.com/acoshift/acourse/cmd/acourse-user
+	cd .build && docker build -t gcr.io/acourse-d9d0a/acourse-user .
+	gcloud docker -- push gcr.io/acourse-d9d0a/acourse-user
 
 clean: clean-ui clean-build
 
@@ -67,11 +72,20 @@ config-prod:
 pre-build:
 	mkdir -p .build
 	curl https://curl.haxx.se/ca/cacert.pem > .build/cacert.pem
-	cp -rf public .build/
-	cp -rf templates .build/
 	cp Dockerfile .build/
 	cp private/acourse_io.crt .build/
 	cp private/acourse_io.key .build/
+
+copy-dockerfile:
+	cp Dockerfile .build/
+
+copy-docker-service:
+	cp service.Dockerfile .build/Dockerfile
+
+copy-ui:
+	mkdir -p .build
+	cp -rf public .build/
+	cp -rf templates .build/
 
 docker:
 	cd .build && docker build -t acourse .
