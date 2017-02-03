@@ -9,10 +9,7 @@ import (
 	"os"
 	"time"
 
-	"cloud.google.com/go/datastore"
 	"cloud.google.com/go/logging"
-	"cloud.google.com/go/pubsub"
-	"cloud.google.com/go/storage"
 	"cloud.google.com/go/trace"
 	"github.com/acoshift/acourse/pkg/acourse"
 	"github.com/acoshift/acourse/pkg/app"
@@ -27,7 +24,6 @@ import (
 	"github.com/acoshift/ds"
 	"github.com/acoshift/go-firebase-admin"
 	"github.com/acoshift/gzip"
-	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/grpclog"
@@ -105,19 +101,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	jwtConfig, err := google.JWTConfigFromJSON([]byte(cfg.ServiceAccount),
-		datastore.ScopeDatastore,
-		pubsub.ScopePubSub,
-		storage.ScopeFullControl,
-		logging.WriteScope,
-		"https://www.googleapis.com/auth/trace.append",
-		"https://www.googleapis.com/auth/cloud-platform",
-	)
-
+	tokenSource, err := app.MakeTokenSource([]byte(cfg.ServiceAccount))
 	if err != nil {
 		log.Fatal(err)
 	}
-	tokenSource := jwtConfig.TokenSource(context.Background())
 
 	client, err := ds.NewClient(context.Background(), cfg.ProjectID, option.WithTokenSource(tokenSource))
 	if err != nil {
