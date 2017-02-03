@@ -3,9 +3,9 @@ package app
 import (
 	"encoding/json"
 	"io"
-	"log"
 	"net/http"
 
+	"github.com/acoshift/acourse/pkg/internal"
 	"github.com/acoshift/httperror"
 	"github.com/unrolled/render"
 )
@@ -43,7 +43,7 @@ func handleOK(w http.ResponseWriter, v interface{}) {
 
 func handleError(w http.ResponseWriter, r error) {
 	if err, ok := r.(*httperror.Error); ok {
-		log.Println(r)
+		internal.ErrorLogger.Print(err)
 		handleJSON(w, err.Status, &ErrorReply{err})
 	} else {
 		handleError(w, httperror.InternalServerErrorWith(r))

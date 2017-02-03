@@ -2,7 +2,15 @@ package app
 
 import (
 	"log"
+
+	"cloud.google.com/go/logging"
+	"github.com/acoshift/acourse/pkg/internal"
 )
+
+// SetLogger sets internal loggers
+func SetLogger(logger *logging.Logger) {
+	internal.SetLogger(logger)
+}
 
 // NewNoFatalLogger creates new logger
 // TODO: This logger is a heck for grpc fatal

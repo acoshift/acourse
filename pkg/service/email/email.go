@@ -2,9 +2,9 @@ package email
 
 import (
 	"context"
-	"log"
 
 	"github.com/acoshift/acourse/pkg/acourse"
+	"github.com/acoshift/acourse/pkg/internal"
 	"gopkg.in/gomail.v2"
 )
 
@@ -40,7 +40,7 @@ func (s *service) Send(ctx context.Context, req *acourse.Email) (*acourse.Empty,
 	if len(req.GetTo()) == 0 {
 		return new(acourse.Empty), nil
 	}
-	log.Printf("Send mail to %s\n", req.GetTo())
+	internal.InfoLogger.Printf("Send mail to %s\n", req.GetTo())
 
 	m := gomail.NewMessage()
 	m.SetHeader("From", s.config.From)

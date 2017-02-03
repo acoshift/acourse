@@ -3,7 +3,6 @@ package payment
 import (
 	"context"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/acoshift/acourse/pkg/acourse"
@@ -184,7 +183,7 @@ func (s *service) processApprovedPayment(payment *paymentModel) error {
 		return err
 	}
 	if userInfo.Email == "" {
-		log.Println("User don't have email")
+		internal.WarningLogger.Println("User don't have email")
 		return nil
 	}
 	user, err := s.user.GetUser(ctx, &acourse.UserIDRequest{UserId: payment.UserID})
@@ -255,7 +254,7 @@ func (s *service) processRejectedPayment(payment *paymentModel) error {
 		return err
 	}
 	if userInfo.Email == "" {
-		log.Println("User don't have email")
+		internal.WarningLogger.Println("User don't have email")
 		return nil
 	}
 	user, err := s.user.GetUser(ctx, &acourse.UserIDRequest{UserId: payment.UserID})
@@ -305,7 +304,7 @@ func (s *service) sendApprovedNotification(payments []*paymentModel) {
 	for _, payment := range payments {
 		err := s.processApprovedPayment(payment)
 		if err != nil {
-			log.Println(err)
+			internal.ErrorLogger.Printf("PaymentService: sendApprovedNotification: %v", err)
 		}
 	}
 }
@@ -314,7 +313,7 @@ func (s *service) sendRejectNotification(payments []*paymentModel) {
 	for _, payment := range payments {
 		err := s.processRejectedPayment(payment)
 		if err != nil {
-			log.Println(err)
+			internal.ErrorLogger.Printf("PaymentService: sendRejectNotification: %v", err)
 		}
 	}
 }
@@ -391,7 +390,7 @@ func StartNotification(client *ds.Client, email acourse.EmailServiceClient) {
 			time.Sleep(6 * time.Hour)
 
 			// check is any payments have status waiting
-			log.Println("Run Notification Payment")
+			internal.NoticeLogger.Println("PaymentService: Run Notification Payment")
 			var payments []*paymentModel
 			err := client.Query(ctx, kindPayment, &payments, ds.Filter("Status =", string(statusWaiting)))
 			err = ds.IgnoreFieldMismatch(err)
@@ -402,7 +401,7 @@ func StartNotification(client *ds.Client, email acourse.EmailServiceClient) {
 					Body:    fmt.Sprintf("%d payments pending", len(payments)),
 				})
 				if err != nil {
-					log.Println(err)
+					internal.ErrorLogger.Printf("PaymentService: notification payment: %v", err)
 				}
 			}
 		}

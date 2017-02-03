@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/datastore"
+	"cloud.google.com/go/logging"
 	"cloud.google.com/go/pubsub"
 	"cloud.google.com/go/storage"
 	"cloud.google.com/go/trace"
@@ -108,7 +109,11 @@ func main() {
 		datastore.ScopeDatastore,
 		pubsub.ScopePubSub,
 		storage.ScopeFullControl,
+		logging.WriteScope,
+		"https://www.googleapis.com/auth/trace.append",
+		"https://www.googleapis.com/auth/cloud-platform",
 	)
+
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -123,6 +128,12 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	loggerClient, err := logging.NewClient(context.Background(), cfg.ProjectID, option.WithTokenSource(tokenSource))
+	if err != nil {
+		log.Fatal(err)
+	}
+	app.SetLogger(loggerClient.Logger("acourse"))
 
 	middlewares := []func(http.Handler) http.Handler{
 		app.Trace(traceClient),
@@ -162,7 +173,7 @@ func main() {
 	app.InitService(firAuth)
 
 	// create service clients
-	conn, err := grpc.Dial("127.0.0.1:8081", grpc.WithInsecure())
+	conn, err := grpc.Dial("127.0.0.1:8081", grpc.WithInsecure(), trace.EnableGRPCTracingDialOption)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -3,12 +3,12 @@ package app
 import (
 	"bufio"
 	"fmt"
-	"log"
 	"net"
 	"net/http"
 	"time"
 
 	"cloud.google.com/go/trace"
+	"github.com/acoshift/acourse/pkg/internal"
 	"github.com/google/uuid"
 )
 
@@ -65,7 +65,7 @@ func Logger(h http.Handler) http.Handler {
 		}
 		h.ServeHTTP(tw, r)
 		end := time.Now()
-		fmt.Printf("%v | %3d | %13v | %s | %s | %s | %s\n",
+		internal.InfoLogger.Printf("%v | %3d | %13v | %s | %s | %s | %s\n",
 			end.Format(time.RFC3339),
 			tw.header,
 			end.Sub(start),
@@ -82,7 +82,7 @@ func Recovery(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if e := recover(); e != nil {
-				log.Println(e)
+				internal.ErrorLogger.Println(e)
 				w.WriteHeader(http.StatusInternalServerError)
 				fmt.Fprintf(w, "%v", e)
 			}
