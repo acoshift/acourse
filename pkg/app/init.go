@@ -81,8 +81,6 @@ func MakeTokenSource(serviceAccount []byte) (oauth2.TokenSource, error) {
 		pubsub.ScopePubSub,
 		storage.ScopeFullControl,
 		logging.WriteScope,
-		"https://www.googleapis.com/auth/trace.append",
-		"https://www.googleapis.com/auth/cloud-platform",
 	)
 
 	if err != nil {

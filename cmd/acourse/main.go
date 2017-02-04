@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"cloud.google.com/go/logging"
-	"cloud.google.com/go/trace"
 	"github.com/acoshift/acourse/pkg/acourse"
 	"github.com/acoshift/acourse/pkg/app"
 	"github.com/acoshift/acourse/pkg/ctrl/health"
@@ -25,7 +24,6 @@ import (
 	"github.com/acoshift/gzip"
 	"google.golang.org/api/option"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/grpclog"
 )
 
@@ -73,11 +71,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	traceClient, err := trace.NewClient(context.Background(), cfg.ProjectID, option.WithTokenSource(tokenSource))
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	loggerClient, err := logging.NewClient(context.Background(), cfg.ProjectID, option.WithTokenSource(tokenSource))
 	if err != nil {
 		log.Fatal(err)
@@ -88,7 +81,6 @@ func main() {
 	}
 
 	middlewares := []func(http.Handler) http.Handler{
-		app.Trace(traceClient),
 		app.Logger,
 		app.RequestID,
 	}
@@ -128,19 +120,10 @@ func main() {
 	var userServiceClient acourse.UserServiceClient
 	var emailServiceClient acourse.EmailServiceClient
 	conn, err := grpc.Dial("127.0.0.1:8081", grpc.WithInsecure())
-	if !cfg.Debug {
-		creds, err := credentials.NewServerTLSFromFile(cfg.TLSCert, cfg.TLSKey)
-		if err != nil {
-			log.Fatal(err)
-		}
-		userServiceClient = acourse.NewUserServiceClient(app.MakeServiceConnection(cfg.Services.User, creds))
-		emailServiceClient = acourse.NewEmailServiceClient(app.MakeServiceConnection(cfg.Services.Email, creds))
-	} else {
-		userServiceClient = acourse.NewUserServiceClient(conn)
-		emailServiceClient = acourse.NewEmailServiceClient(conn)
-	}
+	userServiceClient = acourse.NewUserServiceClient(conn)
 	courseServiceClient := acourse.NewCourseServiceClient(conn)
 	paymentServiceClient := acourse.NewPaymentServiceClient(conn)
+	emailServiceClient = acourse.NewEmailServiceClient(conn)
 	assignmentServiceClient := acourse.NewAssignmentServiceClient(conn)
 
 	// register service clients to http server
@@ -160,18 +143,16 @@ func main() {
 			log.Fatal(err)
 		}
 		grpcServer := grpc.NewServer(grpc.UnaryInterceptor(app.UnaryInterceptors))
-		if cfg.Debug {
-			acourse.RegisterUserServiceServer(grpcServer, user.New(client))
-			acourse.RegisterEmailServiceServer(grpcServer, email.New(email.Config{
-				From:     cfg.Email.From,
-				Server:   cfg.Email.Server,
-				Port:     cfg.Email.Port,
-				User:     cfg.Email.User,
-				Password: cfg.Email.Password,
-			}))
-		}
+		acourse.RegisterUserServiceServer(grpcServer, user.New(client))
 		acourse.RegisterCourseServiceServer(grpcServer, course.New(client, userServiceClient, paymentServiceClient))
 		acourse.RegisterPaymentServiceServer(grpcServer, payment.New(client, userServiceClient, courseServiceClient, firAuth, emailServiceClient))
+		acourse.RegisterEmailServiceServer(grpcServer, email.New(email.Config{
+			From:     cfg.Email.From,
+			Server:   cfg.Email.Server,
+			Port:     cfg.Email.Port,
+			User:     cfg.Email.User,
+			Password: cfg.Email.Password,
+		}))
 		acourse.RegisterAssignmentServiceServer(grpcServer, assignment.New(client, courseServiceClient))
 		log.Fatal(grpcServer.Serve(grpcListener))
 	}()

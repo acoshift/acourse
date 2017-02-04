@@ -8,16 +8,6 @@ deploy: deploy-docker rolling-update
 
 deploy-docker: clean dep ui pre-build copy-dockerfile copy-ui config-prod build docker push
 
-deploy-user: clean-build dep pre-build copy-docker-service config-prod
-	env GOOS=linux GOARCH=amd64 CGO_ENABLED=0 $(GO) build -o .build/acourse -a -ldflags '-s' github.com/acoshift/acourse/cmd/acourse-user
-	cd .build && docker build -t gcr.io/acourse-d9d0a/acourse-user .
-	gcloud docker -- push gcr.io/acourse-d9d0a/acourse-user
-
-deploy-email: clean-build dep pre-build copy-docker-service config-prod
-	env GOOS=linux GOARCH=amd64 CGO_ENABLED=0 $(GO) build -o .build/acourse -a -ldflags '-s' github.com/acoshift/acourse/cmd/acourse-email
-	cd .build && docker build -t gcr.io/acourse-d9d0a/acourse-email .
-	gcloud docker -- push gcr.io/acourse-d9d0a/acourse-email
-
 clean: clean-ui clean-build
 
 dev:
@@ -83,9 +73,6 @@ pre-build:
 
 copy-dockerfile:
 	cp Dockerfile .build/
-
-copy-docker-service:
-	cp service.Dockerfile .build/Dockerfile
 
 copy-ui:
 	mkdir -p .build
