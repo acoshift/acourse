@@ -38,7 +38,8 @@ type Config struct {
 	Domain    string `yaml:"domain"`
 	ProjectID string `yaml:"projectId"`
 	Services  struct {
-		User string `yaml:"user"`
+		User  string `yaml:"user"`
+		Email string `yaml:"email"`
 	} `yaml:"services"`
 	Email struct {
 		From     string `yaml:"from"`

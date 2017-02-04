@@ -126,6 +126,7 @@ func main() {
 
 	// create service clients
 	var userServiceClient acourse.UserServiceClient
+	var emailServiceClient acourse.EmailServiceClient
 	conn, err := grpc.Dial("127.0.0.1:8081", grpc.WithInsecure())
 	if !cfg.Debug {
 		creds, err := credentials.NewServerTLSFromFile(cfg.TLSCert, cfg.TLSKey)
@@ -133,11 +134,12 @@ func main() {
 			log.Fatal(err)
 		}
 		userServiceClient = acourse.NewUserServiceClient(app.MakeServiceConnection(cfg.Services.User, creds))
+		emailServiceClient = acourse.NewEmailServiceClient(app.MakeServiceConnection(cfg.Services.Email, creds))
 	} else {
 		userServiceClient = acourse.NewUserServiceClient(conn)
+		emailServiceClient = acourse.NewEmailServiceClient(conn)
 	}
 	courseServiceClient := acourse.NewCourseServiceClient(conn)
-	emailServiceClient := acourse.NewEmailServiceClient(conn)
 	paymentServiceClient := acourse.NewPaymentServiceClient(conn)
 	assignmentServiceClient := acourse.NewAssignmentServiceClient(conn)
 
@@ -160,16 +162,16 @@ func main() {
 		grpcServer := grpc.NewServer(grpc.UnaryInterceptor(app.UnaryInterceptors))
 		if cfg.Debug {
 			acourse.RegisterUserServiceServer(grpcServer, user.New(client))
+			acourse.RegisterEmailServiceServer(grpcServer, email.New(email.Config{
+				From:     cfg.Email.From,
+				Server:   cfg.Email.Server,
+				Port:     cfg.Email.Port,
+				User:     cfg.Email.User,
+				Password: cfg.Email.Password,
+			}))
 		}
 		acourse.RegisterCourseServiceServer(grpcServer, course.New(client, userServiceClient, paymentServiceClient))
 		acourse.RegisterPaymentServiceServer(grpcServer, payment.New(client, userServiceClient, courseServiceClient, firAuth, emailServiceClient))
-		acourse.RegisterEmailServiceServer(grpcServer, email.New(email.Config{
-			From:     cfg.Email.From,
-			Server:   cfg.Email.Server,
-			Port:     cfg.Email.Port,
-			User:     cfg.Email.User,
-			Password: cfg.Email.Password,
-		}))
 		acourse.RegisterAssignmentServiceServer(grpcServer, assignment.New(client, courseServiceClient))
 		log.Fatal(grpcServer.Serve(grpcListener))
 	}()

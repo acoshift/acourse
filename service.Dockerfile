@@ -11,6 +11,5 @@ ADD acourse /
 COPY config.yaml /
 COPY acourse_io.crt /
 COPY acourse_io.key /
-EXPOSE 80
 EXPOSE 443
 ENTRYPOINT ["/acourse"]
