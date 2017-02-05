@@ -1,10 +1,10 @@
 package course
 
 import (
-	"context"
 	"time"
 
 	"github.com/acoshift/ds"
+	context "golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 )

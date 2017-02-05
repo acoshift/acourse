@@ -1,7 +1,6 @@
 package payment
 
 import (
-	"context"
 	"fmt"
 	"time"
 
@@ -9,6 +8,7 @@ import (
 	"github.com/acoshift/acourse/pkg/internal"
 	"github.com/acoshift/ds"
 	"github.com/acoshift/go-firebase-admin"
+	context "golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 )
