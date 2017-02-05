@@ -1,10 +1,9 @@
 package email
 
 import (
-	"context"
-
 	"github.com/acoshift/acourse/pkg/acourse"
 	"github.com/acoshift/acourse/pkg/internal"
+	context "golang.org/x/net/context"
 	"gopkg.in/gomail.v2"
 )
 

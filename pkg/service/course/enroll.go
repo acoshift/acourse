@@ -1,11 +1,10 @@
 package course
 
 import (
-	"context"
-
 	"cloud.google.com/go/datastore"
 	"github.com/acoshift/acourse/pkg/acourse"
 	"github.com/acoshift/ds"
+	context "golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 )

@@ -22,7 +22,6 @@ cleanup-indexes: project
 .PHONY: proto
 proto:
 	protoc -I proto/ proto/acourse.proto --go_out=plugins=grpc:pkg/acourse
-	$(MAKE) fix
 
 local: clean-ui
 	$(MAKE) -C ui local
@@ -88,9 +87,6 @@ push:
 
 hook:
 	./private/hook.sh
-
-fix:
-	$(GO) tool fix -force context .
 
 rolling-update:
 	kubectl rolling-update acourse --image gcr.io/acourse-d9d0a/acourse --image-pull-policy Always

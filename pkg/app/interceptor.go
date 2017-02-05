@@ -1,9 +1,8 @@
 package app
 
 import (
-	"context"
-
 	"github.com/acoshift/acourse/pkg/internal"
+	context "golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"

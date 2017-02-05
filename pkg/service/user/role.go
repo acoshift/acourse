@@ -1,9 +1,8 @@
 package user
 
 import (
-	"context"
-
 	"github.com/acoshift/acourse/pkg/acourse"
+	context "golang.org/x/net/context"
 )
 
 func (s *service) GetRole(ctx context.Context, req *acourse.UserIDRequest) (*acourse.Role, error) {
