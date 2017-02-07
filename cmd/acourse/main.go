@@ -173,9 +173,21 @@ func main() {
 			})))
 		}()
 		log.Printf("Listening TLS on %s", tlsAddr)
-		log.Fatal(http.ListenAndServeTLS(tlsAddr, cfg.TLSCert, cfg.TLSKey, serverHandler))
+		srv := &http.Server{
+			Addr:         tlsAddr,
+			ReadTimeout:  time.Minute,
+			WriteTimeout: time.Minute,
+			Handler:      serverHandler,
+		}
+		log.Fatal(srv.ListenAndServeTLS(cfg.TLSCert, cfg.TLSKey))
 	} else {
 		log.Printf("Listening on %s", addr)
-		log.Fatal(http.ListenAndServe(addr, serverHandler))
+		srv := &http.Server{
+			Addr:         addr,
+			ReadTimeout:  30 * time.Second,
+			WriteTimeout: 30 * time.Second,
+			Handler:      serverHandler,
+		}
+		log.Fatal(srv.ListenAndServe())
 	}
 }
