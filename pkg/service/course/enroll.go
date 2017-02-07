@@ -1,7 +1,6 @@
 package course
 
 import (
-	"cloud.google.com/go/datastore"
 	"github.com/acoshift/acourse/pkg/acourse"
 	"github.com/acoshift/ds"
 	context "golang.org/x/net/context"
@@ -104,36 +103,21 @@ func fromEnrolls(xs []*acourse.Enroll) []*enrollModel {
 func (s *service) CreateEnrolls(ctx context.Context, req *acourse.EnrollsRequest) (*acourse.Empty, error) {
 	enrolls := fromEnrolls(req.Enrolls)
 
-	// TODO: change to ds
-	keys := make([]*datastore.Key, 0, len(enrolls))
+	var err error
 	for _, enroll := range enrolls {
-		enroll.Stamp()
-		keys = append(keys, datastore.IncompleteKey(kindEnroll, nil))
-	}
-
-	var pKeys []*datastore.PendingKey
-
-	commit, err := s.client.RunInTransaction(ctx, func(tx *datastore.Transaction) error {
 		var t enrollModel
-		var err error
-		for _, enroll := range enrolls {
-			err = s.client.QueryFirst(ctx, kindEnroll, &t,
-				ds.Filter("UserID =", enroll.UserID),
-				ds.Filter("CourseID =", enroll.CourseID),
-				ds.Transaction(tx),
-			)
-			if err == nil {
-				return errEnrollAlreadyExists
-			}
+		err = s.client.QueryFirst(ctx, kindEnroll, &t,
+			ds.Filter("UserID =", enroll.UserID),
+			ds.Filter("CourseID =", enroll.CourseID),
+		)
+		if t.Key != nil {
+			return nil, errEnrollAlreadyExists
 		}
-
-		pKeys, err = tx.PutMulti(keys, enrolls)
-		return err
-	})
+	}
+	err = s.client.SaveModels(ctx, kindEnroll, enrolls)
 	if err != nil {
 		return nil, err
 	}
 
-	ds.SetCommitKeys(commit, pKeys, enrolls)
 	return new(acourse.Empty), nil
 }
