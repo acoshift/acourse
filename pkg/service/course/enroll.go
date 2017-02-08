@@ -70,7 +70,7 @@ func (s *service) saveEnroll(ctx context.Context, x *enrollModel) error {
 		return errEnrollAlreadyExists
 	}
 
-	err = s.client.SaveModel(ctx, kindEnroll, x)
+	err = s.client.AllocateModel(ctx, kindEnroll, x)
 	if err != nil {
 		return err
 	}
@@ -114,7 +114,8 @@ func (s *service) CreateEnrolls(ctx context.Context, req *acourse.EnrollsRequest
 			return nil, errEnrollAlreadyExists
 		}
 	}
-	err = s.client.SaveModels(ctx, kindEnroll, enrolls)
+
+	err = s.client.AllocateModels(ctx, kindEnroll, enrolls)
 	if err != nil {
 		return nil, err
 	}

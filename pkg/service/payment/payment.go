@@ -375,7 +375,7 @@ func (s *service) CreatePayment(ctx context.Context, req *acourse.Payment) (*aco
 		Status:        status(req.Status),
 	}
 
-	err := s.client.SaveModel(ctx, kindPayment, &x)
+	err := s.client.AllocateModel(ctx, kindPayment, &x)
 	if err != nil {
 		return nil, err
 	}
