@@ -47,7 +47,7 @@ func (s *service) CreateAssignment(ctx context.Context, req *acourse.Assignment)
 	}
 
 	// save model
-	err := s.client.AllocateModel(ctx, kindAssignment, &x)
+	err := s.client.SaveModel(ctx, kindAssignment, &x)
 	if err != nil {
 		return nil, err
 	}
@@ -200,7 +200,7 @@ func (s *service) SubmitUserAssignment(ctx context.Context, req *acourse.UserAss
 		URL:          req.GetUrl(),
 	}
 
-	err = s.client.AllocateModel(ctx, kindUserAssignment, userAssignment)
+	err = s.client.SaveModel(ctx, kindUserAssignment, userAssignment)
 	if err != nil {
 		return nil, err
 	}

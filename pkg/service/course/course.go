@@ -323,7 +323,7 @@ func (s *service) CreateCourse(ctx context.Context, req *acourse.Course) (*acour
 		}
 	}
 
-	err = s.client.AllocateModel(ctx, kindCourse, course)
+	err = s.client.SaveModel(ctx, kindCourse, course)
 	if err != nil {
 		return nil, err
 	}
