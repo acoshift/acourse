@@ -46,20 +46,23 @@ func (s *service) listCourses(ctx context.Context, qs ...ds.Query) (*acourse.Cou
 
 	enrollCounts := make([]*acourse.EnrollCount, 0, len(courses))
 	enrollResult := make(chan *acourse.EnrollCount)
-	for i, x := range courses {
-		go func(i int, x *courseModel) {
+	for _, x := range courses {
+		x := x
+		go func() {
 			c, err := s.countEnroll(ctx, x.ID())
 			if err != nil {
-				panic(err)
+				enrollResult <- nil
 			}
 			enrollResult <- &acourse.EnrollCount{
 				CourseId: x.ID(),
 				Count:    int32(c),
 			}
-		}(i, x)
+		}()
 	}
 	for range courses {
-		enrollCounts = append(enrollCounts, <-enrollResult)
+		if r := <-enrollResult; r != nil {
+			enrollCounts = append(enrollCounts, r)
+		}
 	}
 	return &acourse.CoursesResponse{
 		Courses:      acourse.ToCoursesSmall(toCourses(courses)),
