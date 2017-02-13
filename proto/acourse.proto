@@ -264,7 +264,7 @@ message UserAssignmentIDRequest {
 
 message Enroll {
   string UserID = 1;
-	string CourseID = 2;
+  string CourseID = 2;
 }
 
 message EnrollsRequest {
