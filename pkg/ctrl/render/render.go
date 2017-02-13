@@ -1,7 +1,6 @@
 package render
 
 import (
-	"context"
 	"time"
 
 	"github.com/acoshift/acourse/pkg/acourse"
@@ -35,11 +34,8 @@ func (c *renderController) Index(ctx *app.RenderIndexContext) (interface{}, erro
 	if cache := cacheRender.Get("index"); cache != nil {
 		res = cache.(*acourse.CoursesResponse)
 	} else {
-		// do not wait for api call
-		go func() {
-			xs, _ := c.courseService.ListPublicCourses(context.Background(), &acourse.ListRequest{})
-			cacheRender.SetTTL("index", xs, time.Second*30)
-		}()
+		res, _ := c.courseService.ListPublicCourses(ctx, &acourse.ListRequest{})
+		cacheRender.SetTTL("index", res, time.Second*30)
 	}
 
 	return &index{
@@ -55,7 +51,7 @@ func (c *renderController) Index(ctx *app.RenderIndexContext) (interface{}, erro
 
 // Course runs course action
 func (c *renderController) Course(ctx *app.RenderCourseContext) (interface{}, error) {
-	response, err := c.courseService.GetCourse(context.Background(), &acourse.CourseIDRequest{CourseId: ctx.CourseID})
+	response, err := c.courseService.GetCourse(ctx, &acourse.CourseIDRequest{CourseId: ctx.CourseID})
 	if err != nil || response == nil {
 		return nil, nil
 	}
