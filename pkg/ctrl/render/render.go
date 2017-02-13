@@ -34,7 +34,7 @@ func (c *renderController) Index(ctx *app.RenderIndexContext) (interface{}, erro
 	if cache := cacheRender.Get("index"); cache != nil {
 		res = cache.(*acourse.CoursesResponse)
 	} else {
-		res, _ := c.courseService.ListPublicCourses(ctx, &acourse.ListRequest{})
+		res, _ = c.courseService.ListPublicCourses(ctx, &acourse.ListRequest{})
 		cacheRender.SetTTL("index", res, time.Second*30)
 	}
 
