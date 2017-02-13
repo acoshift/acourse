@@ -15,14 +15,12 @@ type HealthController interface {
 // MountHealthController mounts a Health controller to the http server
 func MountHealthController(mux *http.ServeMux, c HealthController) {
 	mux.HandleFunc("/_ah/health", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodGet {
-			err := c.Check()
-			if err != nil {
-				handleError(w, err)
-				return
-			}
-			handleSuccess(w)
+		err := c.Check()
+		if err != nil {
+			handleError(w, err)
+			return
 		}
+		handleSuccess(w)
 	})
 }
 
