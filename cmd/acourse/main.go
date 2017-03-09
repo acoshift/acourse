@@ -70,7 +70,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	client.AllocateIncompleteID = true
 
 	loggerClient, err := logging.NewClient(context.Background(), cfg.ProjectID, option.WithTokenSource(tokenSource))
 	if err != nil {
