@@ -31,5 +31,5 @@ func (s *service) findAttend(ctx context.Context, userID, courseID string) (*att
 }
 
 func (s *service) saveAttend(ctx context.Context, x *attendModel) error {
-	return s.client.SaveModel(ctx, kindAttend, x)
+	return s.client.SaveModel(ctx, x)
 }

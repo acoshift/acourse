@@ -21,6 +21,10 @@ type assignment struct {
 	Open        bool   `datastore:",noindex"`
 }
 
+func (x *assignment) NewKey() {
+	x.NewIncomplateKey(kindAssignment, nil)
+}
+
 func toAssignment(x *assignment) *acourse.Assignment {
 	return &acourse.Assignment{
 		Id:          x.ID(),
@@ -46,6 +50,10 @@ type userAssignment struct {
 	AssignmentID string
 	UserID       string
 	URL          string `datastore:",noindex"`
+}
+
+func (x *userAssignment) NewKey() {
+	x.NewIncomplateKey(kindUserAssignment, nil)
 }
 
 func toUserAssignment(x *userAssignment) *acourse.UserAssignment {

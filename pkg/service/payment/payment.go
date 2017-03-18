@@ -133,7 +133,7 @@ func (s *service) ApprovePayments(ctx context.Context, req *acourse.PaymentIDsRe
 		return nil, err
 	}
 
-	err = s.client.SaveModels(ctx, "", payments)
+	err = s.client.SaveModels(ctx, payments)
 	if err != nil {
 		return nil, err
 	}
@@ -160,7 +160,7 @@ func (s *service) RejectPayments(ctx context.Context, req *acourse.PaymentIDsReq
 		payment.Reject()
 	}
 
-	err = s.client.SaveModels(ctx, "", payments)
+	err = s.client.SaveModels(ctx, payments)
 	if err != nil {
 		return nil, err
 	}
@@ -339,7 +339,7 @@ func (s *service) UpdatePrice(ctx context.Context, req *acourse.PaymentUpdatePri
 	}
 	x.Price = req.GetPrice()
 
-	err = s.client.SaveModel(ctx, "", &x)
+	err = s.client.SaveModel(ctx, &x)
 	if err != nil {
 		return nil, err
 	}
@@ -375,7 +375,7 @@ func (s *service) CreatePayment(ctx context.Context, req *acourse.Payment) (*aco
 		Status:        status(req.Status),
 	}
 
-	err := s.client.SaveModel(ctx, kindPayment, &x)
+	err := s.client.SaveModel(ctx, &x)
 	if err != nil {
 		return nil, err
 	}

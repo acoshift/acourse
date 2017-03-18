@@ -14,11 +14,19 @@ type attendModel struct {
 	CourseID string
 }
 
+func (x attendModel) NewKey() {
+	x.NewIncomplateKey(kindAttend, nil)
+}
+
 type enrollModel struct {
 	ds.StringIDModel
 	ds.StampModel
 	UserID   string
 	CourseID string
+}
+
+func (x enrollModel) NewKey() {
+	x.NewIncomplateKey(kindEnroll, nil)
 }
 
 type courseModel struct {
@@ -38,6 +46,10 @@ type courseModel struct {
 	Options          courseOption
 	Contents         courseContents `datastore:",noindex"`
 	EnrollDetail     string         `datastore:",noindex"`
+}
+
+func (x courseModel) NewKey() {
+	x.NewIncomplateKey(kindCourse, nil)
 }
 
 type courseModels []*courseModel

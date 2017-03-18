@@ -69,7 +69,7 @@ func (s *service) saveUser(ctx context.Context, x *userModel) error {
 		}
 	}
 
-	err := s.client.SaveModel(ctx, "", x)
+	err := s.client.SaveModel(ctx, x)
 	if err != nil {
 		return err
 	}

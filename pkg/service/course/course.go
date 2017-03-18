@@ -326,7 +326,7 @@ func (s *service) CreateCourse(ctx context.Context, req *acourse.Course) (*acour
 		}
 	}
 
-	err = s.client.SaveModel(ctx, kindCourse, course)
+	err = s.client.SaveModel(ctx, course)
 	if err != nil {
 		return nil, err
 	}
@@ -375,7 +375,7 @@ func (s *service) UpdateCourse(ctx context.Context, req *acourse.Course) (*acour
 	}
 	course.Options.Assignment = req.GetOptions().GetAssignment()
 
-	err = s.client.SaveModel(ctx, "", &course)
+	err = s.client.SaveModel(ctx, &course)
 	if err != nil {
 		return nil, err
 	}
@@ -542,7 +542,7 @@ func (s *service) changeAttend(ctx context.Context, req *acourse.CourseIDRequest
 
 	course.Options.Attend = value
 
-	err = s.client.SaveModel(ctx, "", &course)
+	err = s.client.SaveModel(ctx, &course)
 	if err != nil {
 		return nil, err
 	}
@@ -572,7 +572,7 @@ func (s *service) saveCourse(ctx context.Context, course *courseModel) error {
 		}
 	}
 
-	err = s.client.SaveModel(ctx, kindCourse, course)
+	err = s.client.SaveModel(ctx, course)
 	if err != nil {
 		return err
 	}

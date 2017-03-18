@@ -22,6 +22,10 @@ type paymentModel struct {
 	At            time.Time
 }
 
+func (x *paymentModel) NewKey() {
+	x.NewIncomplateKey(kindPayment, nil)
+}
+
 type status string
 
 const (

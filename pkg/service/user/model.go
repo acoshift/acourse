@@ -14,6 +14,10 @@ type userModel struct {
 	AboutMe  string `datastore:",noindex"`
 }
 
+func (x *userModel) NewKey() {
+	x.NewIncomplateKey(kindUser, nil)
+}
+
 type roleModel struct {
 	ds.StringIDModel
 	ds.StampModel
