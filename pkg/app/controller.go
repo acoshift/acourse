@@ -17,10 +17,10 @@ func MountHealthController(mux *http.ServeMux, c HealthController) {
 	mux.HandleFunc("/_ah/health", func(w http.ResponseWriter, r *http.Request) {
 		err := c.Check()
 		if err != nil {
-			handleError(w, err)
+			handleError(w, r, err)
 			return
 		}
-		handleSuccess(w)
+		handleSuccess(w, r)
 	})
 }
 
@@ -88,12 +88,12 @@ func MountRenderController(mux *http.ServeMux, c RenderController) {
 			http.StripPrefix("/course/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				ctx, err := NewRenderCourseContext(r)
 				if err != nil {
-					handleError(w, err)
+					handleError(w, r, err)
 					return
 				}
 				res, err := c.Course(ctx)
 				if err != nil {
-					handleError(w, err)
+					handleError(w, r, err)
 					return
 				}
 				if res == nil {
@@ -106,12 +106,12 @@ func MountRenderController(mux *http.ServeMux, c RenderController) {
 
 		ctx, err := NewRenderIndexContext(r)
 		if err != nil {
-			handleError(w, err)
+			handleError(w, r, err)
 			return
 		}
 		res, err := c.Index(ctx)
 		if err != nil {
-			handleError(w, err)
+			handleError(w, r, err)
 			return
 		}
 		handleHTML(w, "index", res)

@@ -6,8 +6,15 @@ import (
 
 	"github.com/acoshift/acourse/pkg/acourse"
 	"github.com/acoshift/httperror"
+	"github.com/acoshift/mount"
 	"google.golang.org/grpc/metadata"
 )
+
+var m = mount.New(mount.Config{
+	Binder:         bindJSON,
+	SuccessHandler: handleOK,
+	ErrorHandler:   handleError,
+})
 
 func makeServiceContext(r *http.Request) context.Context {
 	md := metadata.MD{}
@@ -22,6 +29,9 @@ func makeServiceContext(r *http.Request) context.Context {
 func RegisterUserServiceClient(mux *http.ServeMux, s acourse.UserServiceClient) {
 	sv := "/acourse.UserService"
 
+	mux.HandleFunc(sv+"/GetUser", m.Handler(new(acourse.UserIDRequest), func(ctx context.Context, req interface{}) (interface{}, error) {
+		return s.GetUser(makeServiceContext(ctx), req.(*acourse.UserIDRequest))
+	}))
 	mux.HandleFunc(sv+"/GetUser", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			handleError(w, httperror.MethodNotAllowed)

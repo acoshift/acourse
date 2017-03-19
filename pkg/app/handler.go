@@ -33,25 +33,24 @@ func handleJSON(w http.ResponseWriter, status int, v interface{}) {
 const maxBodySize = 1 << (10 * 2)
 
 func bindJSON(r *http.Request, dst interface{}) error {
-	defer r.Body.Close()
 	return json.NewDecoder(io.LimitReader(r.Body, maxBodySize)).Decode(dst)
 }
 
-func handleOK(w http.ResponseWriter, v interface{}) {
+func handleOK(w http.ResponseWriter, r *http.Request, v interface{}) {
 	handleJSON(w, http.StatusOK, v)
 }
 
-func handleError(w http.ResponseWriter, r error) {
-	if err, ok := r.(*httperror.Error); ok {
+func handleError(w http.ResponseWriter, r *http.Request, e error) {
+	if err, ok := e.(*httperror.Error); ok {
 		internal.ErrorLogger.Print(err)
 		handleJSON(w, err.Status, &ErrorReply{err})
 	} else {
-		handleError(w, httperror.InternalServerErrorWith(r))
+		handleError(w, r, httperror.InternalServerErrorWith(e))
 	}
 }
 
-func handleSuccess(w http.ResponseWriter) {
-	handleOK(w, success)
+func handleSuccess(w http.ResponseWriter, r *http.Request) {
+	handleOK(w, r, success)
 }
 
 func handleHTML(w http.ResponseWriter, name string, binding interface{}) {
