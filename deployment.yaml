@@ -1,0 +1,40 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: acourse
+  labels:
+    app: acourse
+spec:
+  replicas: 1
+  selector:
+    matchedLabels:
+      app: acourse
+  template:
+    metadata:
+      name: acourse
+      labels:
+        app: acourse
+    spec:
+      containers:
+      - name: acourse
+        image: gcr.io/acoshift-1362/acourse
+        ports:
+        - containerPort: 80
+        readinessProbe:
+          httpGet:
+            path: /__/health
+            port: 80
+          periodSeconds: 10
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 10
+        imagePullPolicy: Always
+        securityContext:
+          privileged: false
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
