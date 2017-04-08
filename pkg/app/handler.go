@@ -8,6 +8,8 @@ import (
 	"github.com/acoshift/acourse/pkg/internal"
 	"github.com/acoshift/httperror"
 	"github.com/unrolled/render"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 )
 
 // ErrorReply is the error response
@@ -41,12 +43,16 @@ func handleOK(w http.ResponseWriter, r *http.Request, v interface{}) {
 }
 
 func handleError(w http.ResponseWriter, r *http.Request, e error) {
+	if grpc.Code(e) != codes.Unknown {
+		handleError(w, r, httperror.GRPC(e))
+		return
+	}
 	if err, ok := e.(*httperror.Error); ok {
 		internal.ErrorLogger.Print(err)
 		handleJSON(w, err.Status, &ErrorReply{err})
-	} else {
-		handleError(w, r, httperror.InternalServerErrorWith(e))
+		return
 	}
+	handleError(w, r, httperror.InternalServerErrorWith(e))
 }
 
 func handleSuccess(w http.ResponseWriter, r *http.Request) {
