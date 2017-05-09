@@ -54,3 +54,8 @@ func GetPrimaryDB() redis.Conn {
 func GetSecondaryDB() redis.Conn {
 	return secondaryPool.Get()
 }
+
+// GetSecondaryPool returns secondary redis pool
+func GetSecondaryPool() *redis.Pool {
+	return secondaryPool
+}
