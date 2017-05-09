@@ -2,7 +2,7 @@
 prefix
 - acourse::
 
-; aof start
+; primary start - should be aof
 define
 - u ; user
 - c ; course
@@ -79,10 +79,12 @@ p :: hash
 p:t0 :: zset
 p:t1 :: zset
 
-; aof end
+; primary end
 
-; rdb start
+; secondary start - should be rdb
 define
 - s ; session
 
 s:{sessId} :: binary ; session data
+
+; secondary end
