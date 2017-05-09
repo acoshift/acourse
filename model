@@ -1,6 +1,6 @@
 ; this file contains model definition
 prefix
-- acourse::
+- acr::
 
 ; primary start - should be aof
 define
@@ -24,7 +24,11 @@ u :: hash
   - email
   - aboutMe
 
-u:o:{type} :: hash ; oauth2's provider, type: google, facebook, github
+u:username :: hash
+- {username} ; map to user id
+u:email :: hash
+- {email} ; map to user id
+u:provider:{type} :: hash ; oauth2's provider, type: google, facebook, github
 - {uid} ;; provider's user id map to user id
 
 u:t0 :: zset
