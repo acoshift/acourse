@@ -1,0 +1,88 @@
+; this file contains model definition
+prefix
+- acourse::
+
+; aof start
+define
+- u ; user
+- c ; course
+- p ; payment
+- t0 ; createdAt
+- t1 ; updatedAt
+
+; id counter
+id:u :: int
+id:c :: int
+id:p :: int
+
+; user data
+u :: hash
+- {id} :: binary
+  - username
+  - password
+  - name
+  - email
+  - aboutMe
+
+u:o:{type} :: hash ; oauth2's provider, type: google, facebook, github
+- {uid} ;; provider's user id map to user id
+
+u:t0 :: zset
+u:t1 :: zset
+
+u:{id}:e :: zset ; user's enrolled course
+u:{id}:c :: set ; user's course
+u:{id}:p :: zset ; user's payment
+
+u:admin :: set
+u:instructor :: set
+
+; course data
+c :: hash
+- {id} :: binary
+  - title
+  - shortDesc
+  - desc
+  - image
+  - owner
+  - start
+  - url
+  - type ; live, video, ebook
+  - video
+  - price
+  - discount
+  - contents
+    - title
+    - desc
+    - video
+    - url
+  - enrollDetail
+
+c:public :: set
+c:enroll :: set
+c:attend :: set
+c:assignment :: set
+c:discount :: set
+
+c:url :: hash
+- {url} ; map to course id
+
+c:t0 :: zset
+c:t1 :: zset
+
+c:{id}:u :: zset ; enrolled users
+
+; payment data
+p :: hash
+- {id}
+
+p:t0 :: zset
+p:t1 :: zset
+
+; aof end
+
+; rdb start
+define
+- s ; session
+
+s:{sessId} :: binary ; session data
