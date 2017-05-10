@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/acoshift/acourse/pkg/internal"
+	"github.com/acoshift/acourse/pkg/view"
 	"github.com/acoshift/flash"
 	"github.com/acoshift/gzip"
 	"github.com/acoshift/middleware"
@@ -20,6 +21,7 @@ func init() {
 	mux := http.NewServeMux()
 
 	mux.Handle("/", wrapFunc(getIndex, nil))
+	mux.Handle("/favicon.ico", fileHandler("static/favicon.ico"))
 	mux.Handle("/signin", mustNotSignedIn(wrapFunc(getSignIn, postSignIn)))
 	mux.Handle("/signout", mustSignedIn(wrapFunc(getSignOut, nil)))
 	mux.Handle("/profile", mustSignedIn(wrapFunc(getProfile, nil)))
@@ -60,12 +62,27 @@ func wrapFunc(get, post http.HandlerFunc) http.Handler {
 	})
 }
 
+func fileHandler(name string) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, name)
+	})
+}
+
+var defaultPage = view.Page{
+	Title: "Acourse",
+	Desc:  "Online courses for everyone",
+	Image: "https://storage.googleapis.com/acourse/static/62b9eb0e-3668-4f9f-86b7-a11349938f7a.jpg",
+	URL:   "https://acourse.io",
+}
+
 func getIndex(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
 		http.NotFound(w, r)
 		return
 	}
-	fmt.Fprint(w, "index")
+	view.Index(w, r, &view.IndexData{
+		Page: &defaultPage,
+	})
 }
 
 func getSignIn(w http.ResponseWriter, r *http.Request) {
