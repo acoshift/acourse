@@ -86,11 +86,13 @@ func getIndex(w http.ResponseWriter, r *http.Request) {
 }
 
 func getSignIn(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "signIn")
+	view.SignIn(w, r, &view.AuthData{
+		Page: &defaultPage,
+	})
 }
 
 func postSignIn(w http.ResponseWriter, r *http.Request) {
-
+	http.Redirect(w, r, r.RequestURI, http.StatusFound)
 }
 
 func getSignOut(w http.ResponseWriter, r *http.Request) {

@@ -10,11 +10,13 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/acoshift/acourse/pkg/internal"
 	"github.com/acoshift/header"
 	"github.com/tdewolff/minify"
 	"github.com/tdewolff/minify/css"
 	"github.com/tdewolff/minify/html"
 	"github.com/tdewolff/minify/js"
+	"golang.org/x/net/xsrftoken"
 )
 
 const templateDir = "template"
@@ -36,6 +38,7 @@ func init() {
 	m.AddFunc("text/javascript", js.Minify)
 
 	parseTemplate(keyIndex, []string{"index.tmpl", "layout.tmpl"})
+	parseTemplate(keySignIn, []string{"signin.tmpl", "auth.tmpl", "layout.tmpl"})
 }
 
 func joinTemplateDir(files []string) []string {
@@ -52,6 +55,9 @@ func parseTemplate(key interface{}, set []string) {
 	t.Funcs(template.FuncMap{
 		"templateName": func() string {
 			return templateName
+		},
+		"xsrf": func(action string) string {
+			return xsrftoken.Generate(internal.GetXSRFSecret(), "", action)
 		},
 	})
 	_, err := t.ParseFiles(joinTemplateDir(set)...)

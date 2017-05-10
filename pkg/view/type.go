@@ -12,3 +12,8 @@ type Page struct {
 type IndexData struct {
 	*Page
 }
+
+// AuthData type
+type AuthData struct {
+	*Page
+}

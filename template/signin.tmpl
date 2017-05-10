@@ -1,0 +1,14 @@
+{{define "auth-body"}}
+<form method="POST">
+  <input name="xsrf" value="{{xsrf "signin"}}">
+  <label>Username or Email:</label>
+  <input name="user">
+  <label>Password</label>
+  <input name="password">
+  <button type="submit">Sign In</button>
+</form>
+<p>Or Sign in with</p>
+<button>Google</button>
+<button>Facebook</button>
+<button>Github</button>
+{{end}}
