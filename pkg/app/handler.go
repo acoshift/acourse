@@ -20,10 +20,10 @@ func init() {
 	mux := http.NewServeMux()
 
 	mux.Handle("/", wrapFunc(getIndex, nil))
-	mux.Handle("/signin", wrapFunc(getSignIn, postSignIn))
-	mux.Handle("/signout", wrapFunc(getSignOut, nil))
-	mux.Handle("/profile", wrapFunc(getProfile, nil))
-	mux.Handle("/profile/edit", wrapFunc(getProfileEdit, postProfileEdit))
+	mux.Handle("/signin", mustNotSignedIn(wrapFunc(getSignIn, postSignIn)))
+	mux.Handle("/signout", mustSignedIn(wrapFunc(getSignOut, nil)))
+	mux.Handle("/profile", mustSignedIn(wrapFunc(getProfile, nil)))
+	mux.Handle("/profile/edit", mustSignedIn(wrapFunc(getProfileEdit, postProfileEdit)))
 	mux.Handle("/user/", http.StripPrefix("/user", wrapFunc(getUser, nil)))
 	mux.Handle("/course/", http.StripPrefix("/course", wrapFunc(getCourse, nil)))
 
@@ -95,9 +95,19 @@ func postProfileEdit(w http.ResponseWriter, r *http.Request) {
 }
 
 func getUser(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "user", r.URL)
+	id := extractPathID(r.URL)
+	if len(id) == 0 {
+		http.NotFound(w, r)
+		return
+	}
+	fmt.Fprint(w, "user: ", id)
 }
 
 func getCourse(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "course", r.URL)
+	id := extractPathID(r.URL)
+	if len(id) == 0 {
+		http.NotFound(w, r)
+		return
+	}
+	fmt.Fprint(w, "course: ", id)
 }

@@ -16,6 +16,7 @@ var (
 	redisSecondaryAddr = config.String("redis_secondary_addr")
 	redisSecondaryDB   = config.Int("redis_secondary_db")
 	redisSecondaryPass = config.String("redis_secondary_pass")
+	xsrfSecret         = config.String("xsrf_secret")
 )
 
 var (
@@ -58,4 +59,9 @@ func GetSecondaryDB() redis.Conn {
 // GetSecondaryPool returns secondary redis pool
 func GetSecondaryPool() *redis.Pool {
 	return secondaryPool
+}
+
+// GetXSRFSecret returns xsrf secret
+func GetXSRFSecret() string {
+	return xsrfSecret
 }
