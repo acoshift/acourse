@@ -166,3 +166,19 @@ func GetUserFromProvider(c redis.Conn, provider string, providerUserID string) (
 	}
 	return GetUser(c, userID)
 }
+
+// IsUserAdmin returns true if given user id is an admin
+func IsUserAdmin(c redis.Conn, userID string) (bool, error) {
+	if len(userID) == 0 {
+		return false, nil
+	}
+	return redis.Bool(c.Do("SISMEMBER", key("u", "admin"), userID))
+}
+
+// IsUserInstructor returns true if given user id is an instructor
+func IsUserInstructor(c redis.Conn, userID string) (bool, error) {
+	if len(userID) == 0 {
+		return false, nil
+	}
+	return redis.Bool(c.Do("SISMEMBER", key("u", "instructor"), userID))
+}

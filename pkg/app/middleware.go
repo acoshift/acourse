@@ -5,6 +5,8 @@ import (
 
 	"net/url"
 
+	"github.com/acoshift/acourse/pkg/internal"
+	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/session"
 )
 
@@ -47,6 +49,24 @@ func mustNotSignedIn(h http.Handler) http.Handler {
 		if len(id) > 0 {
 			http.Redirect(w, r, "/", http.StatusFound)
 			return
+		}
+		h.ServeHTTP(w, r)
+	})
+}
+
+func onlyAdmin(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		s := session.Get(r.Context())
+		id, _ := s.Get(keyUserID).(string)
+		c := internal.GetPrimaryDB()
+		defer c.Close()
+		b, err := model.IsUserAdmin(c, id)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		if !b {
+			http.Error(w, "Forbidden", http.StatusForbidden)
 		}
 		h.ServeHTTP(w, r)
 	})

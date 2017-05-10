@@ -31,6 +31,10 @@ func init() {
 	mux.Handle("/user/", http.StripPrefix("/user", wrapFunc(getUser, nil)))
 	mux.Handle("/course/", http.StripPrefix("/course", wrapFunc(getCourse, nil)))
 
+	admin := http.NewServeMux()
+	// TODO: add admin route
+	mux.Handle("/admin", onlyAdmin(admin))
+
 	Handler = middleware.Chain(
 		recovery,
 		gzip.New(gzip.Config{Level: gzip.DefaultCompression}),
