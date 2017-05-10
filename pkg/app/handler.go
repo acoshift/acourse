@@ -192,7 +192,8 @@ func getSignInCallback(w http.ResponseWriter, r *http.Request) {
 
 func getSignUp(w http.ResponseWriter, r *http.Request) {
 	view.SignUp(w, r, &view.AuthData{
-		Page: &defaultPage,
+		Page:  &defaultPage,
+		Flash: flash.Get(r.Context()),
 	})
 }
 
