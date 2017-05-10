@@ -61,6 +61,9 @@ func parseTemplate(key interface{}, set []string) {
 		"xsrf": func(action string) string {
 			return xsrftoken.Generate(internal.GetXSRFSecret(), "", action)
 		},
+		"me": func() interface{} {
+			return nil
+		},
 	})
 	_, err := t.ParseFiles(joinTemplateDir(set)...)
 	if err != nil {
@@ -89,10 +92,19 @@ func render(w http.ResponseWriter, r *http.Request, key, data interface{}) {
 		t = templates[key]
 	}
 
+	ctx := r.Context()
+
+	// inject template funcs
+	tp := t.Funcs(template.FuncMap{
+		"me": func() interface{} {
+			return internal.GetUser(ctx)
+		},
+	})
+
 	w.Header().Set(header.ContentType, "text/html; charset=utf-8")
 	w.Header().Set(header.CacheControl, "no-cache, no-store, must-revalidate, max-age=0")
 	pipe := &bytes.Buffer{}
-	err := t.Execute(pipe, data)
+	err := tp.Execute(pipe, data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

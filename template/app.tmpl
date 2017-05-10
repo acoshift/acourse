@@ -1,5 +1,10 @@
 {{define "body"}}
   <p>Navbar here</p>
+  {{if me}}
+    <p>{{me.Username}}</p>
+  {{else}}
+    <a href="/signin">Sign In</a>
+  {{end}}
   <h1>App Layout</h1>
   {{template "app-body" $}}
 {{end}}

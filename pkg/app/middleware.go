@@ -54,19 +54,45 @@ func mustNotSignedIn(h http.Handler) http.Handler {
 	})
 }
 
+func fetchUser(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		s := session.Get(ctx)
+		id, _ := s.Get(keyUserID).(string)
+		if len(id) > 0 {
+			c := internal.GetPrimaryDB()
+			u, err := model.GetUser(c, id)
+			c.Close()
+			if err == nil {
+				r = r.WithContext(internal.WithUser(ctx, u))
+			}
+		}
+		h.ServeHTTP(w, r)
+	})
+}
+
 func onlyAdmin(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		s := session.Get(r.Context())
-		id, _ := s.Get(keyUserID).(string)
-		c := internal.GetPrimaryDB()
-		defer c.Close()
-		b, err := model.IsUserAdmin(c, id)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+		// s := session.Get(r.Context())
+		// id, _ := s.Get(keyUserID).(string)
+		// c := internal.GetPrimaryDB()
+		// defer c.Close()
+		// b, err := model.IsUserAdmin(c, id)
+		// if err != nil {
+		// 	http.Error(w, err.Error(), http.StatusInternalServerError)
+		// 	return
+		// }
+		// if !b {
+		// 	http.Error(w, "Forbidden", http.StatusForbidden)
+		// }
+		u, _ := internal.GetUser(r.Context()).(*model.User)
+		if u == nil {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
-		if !b {
+		if !u.Role().Admin {
 			http.Error(w, "Forbidden", http.StatusForbidden)
+			return
 		}
 		h.ServeHTTP(w, r)
 	})

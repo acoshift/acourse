@@ -20,7 +20,7 @@ type Course struct {
 	Image        string
 	UserID       string
 	Start        time.Time
-	URL          string
+	URL          string // MUST not parsable to int
 	Type         CourseType
 	Price        float64
 	Discount     float64
@@ -213,7 +213,17 @@ func GetCourseFromURL(c redis.Conn, url string) (*Course, error) {
 	return GetCourse(c, userID)
 }
 
+// GetCourFromIDOrURL gets course from id if given v can parse to int,
+// otherwise get from url
+func GetCourFromIDOrURL(c redis.Conn, v string) (*Course, error) {
+	if _, err := strconv.Atoi(v); err == nil {
+		return GetCourse(c, v)
+	}
+	return GetCourseFromURL(c, v)
+}
+
 // ListPublicCourses lists public course sort by created at desc
+// TODO: add pagination
 func ListPublicCourses(c redis.Conn) ([]*Course, error) {
 	c.Send("MULTI")
 	c.Send("ZINTERSTORE", key("result"), 2, key("c", "t0"), key("c", "public"), "WEIGHTS", 1, 0)

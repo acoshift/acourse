@@ -34,6 +34,9 @@ func (x *User) ID() string {
 
 // Role returns user role
 func (x *User) Role() *UserRole {
+	if x.role == nil {
+		x.role = &UserRole{}
+	}
 	return x.role
 }
 
@@ -171,17 +174,17 @@ func GetUserFromProvider(c redis.Conn, provider string, providerUserID string) (
 }
 
 // IsUserAdmin returns true if given user id is an admin
-func IsUserAdmin(c redis.Conn, userID string) (bool, error) {
-	if len(userID) == 0 {
-		return false, nil
-	}
-	return redis.Bool(c.Do("SISMEMBER", key("u", "admin"), userID))
-}
+// func IsUserAdmin(c redis.Conn, userID string) (bool, error) {
+// 	if len(userID) == 0 {
+// 		return false, nil
+// 	}
+// 	return redis.Bool(c.Do("SISMEMBER", key("u", "admin"), userID))
+// }
 
-// IsUserInstructor returns true if given user id is an instructor
-func IsUserInstructor(c redis.Conn, userID string) (bool, error) {
-	if len(userID) == 0 {
-		return false, nil
-	}
-	return redis.Bool(c.Do("SISMEMBER", key("u", "instructor"), userID))
-}
+// // IsUserInstructor returns true if given user id is an instructor
+// func IsUserInstructor(c redis.Conn, userID string) (bool, error) {
+// 	if len(userID) == 0 {
+// 		return false, nil
+// 	}
+// 	return redis.Bool(c.Do("SISMEMBER", key("u", "instructor"), userID))
+// }

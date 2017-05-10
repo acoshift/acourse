@@ -48,6 +48,7 @@ func init() {
 			Store:    sRedis.New(internal.GetSecondaryPool(), "acr:s:"),
 		}),
 		flash.Middleware(),
+		fetchUser,
 	)(mux)
 }
 
