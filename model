@@ -83,8 +83,12 @@ p :: hash
   userId ; owner
   courseId
   image
+  code
+  price
+  originalPrice
   createdAt
   updatedAt
+  at
 
 p:t0 :: zset
 p:t1 :: zset

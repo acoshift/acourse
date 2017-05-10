@@ -21,7 +21,7 @@ type Course struct {
 	UserID       string
 	Start        time.Time
 	URL          string // MUST not parsable to int
-	Type         CourseType
+	Type         int
 	Price        float64
 	Discount     float64
 	Contents     []*CourseContent
@@ -30,12 +30,9 @@ type Course struct {
 	UpdatedAt    time.Time
 }
 
-// CourseType type
-type CourseType int
-
-// CourseType values
+// Course type values
 const (
-	_ CourseType = iota
+	_ = iota
 	Live
 	Video
 	EBook

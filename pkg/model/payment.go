@@ -10,21 +10,22 @@ import (
 
 // Payment model
 type Payment struct {
-	id        string
-	UserID    string
-	CourseID  string
-	Image     string
-	Status    PaymentStatus
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	id            string
+	UserID        string
+	CourseID      string
+	Image         string
+	Price         float64
+	OriginalPrice float64
+	Code          string
+	Status        int
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+	At            time.Time
 }
-
-// PaymentStatus type
-type PaymentStatus int
 
 // PaymentStatus values
 const (
-	Pending PaymentStatus = iota
+	Pending = iota
 	Accepted
 	Rejected
 )

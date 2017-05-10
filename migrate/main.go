@@ -22,7 +22,7 @@ func main() {
 	var users []*userModel
 	var roles []*roleModel
 	var courses []*courseModel
-	// var payments []*paymentModel
+	var payments []*paymentModel
 	// var attends []*attendModel
 	// var enrolls []*enrollModel
 	// var assignments []*assignment
@@ -31,7 +31,7 @@ func main() {
 	must(client.Query(ctx, "User", &users))
 	must(client.Query(ctx, "Role", &roles))
 	must(client.Query(ctx, "Course", &courses))
-	// must(client.Query(ctx, "Payment", &payments))
+	must(client.Query(ctx, "Payment", &payments))
 	// must(client.Query(ctx, "Attend", &attends))
 	// must(client.Query(ctx, "Enroll", &enrolls))
 	// must(client.Query(ctx, "Assignment", &assignments))
@@ -44,6 +44,15 @@ func main() {
 			}
 		}
 		return &roleModel{}
+	}
+
+	findCourse := func(courseID string) *courseModel {
+		for _, p := range courses {
+			if p.ID() == courseID {
+				return p
+			}
+		}
+		return nil
 	}
 
 	// save users and create mapper
@@ -102,6 +111,35 @@ func main() {
 		}
 		must(x.Save(conn))
 		p.newID = x.ID()
+	}
+
+	// save payments
+	for _, p := range payments {
+		c := findCourse(p.CourseID)
+		if c == nil {
+			log.Println("course not found")
+			continue
+		}
+		x := model.Payment{
+			CourseID:      c.newID,
+			UserID:        p.UserID,
+			CreatedAt:     p.CreatedAt,
+			UpdatedAt:     p.UpdatedAt,
+			Image:         p.URL,
+			Price:         p.Price,
+			OriginalPrice: p.OriginalPrice,
+			At:            p.At,
+			Code:          p.Code,
+		}
+		switch p.Status {
+		case statusWaiting:
+			x.Status = model.Pending
+		case statusApproved:
+			x.Status = model.Accepted
+		case statusRejected:
+			x.Status = model.Rejected
+		}
+		must(x.Save(conn))
 	}
 }
 
