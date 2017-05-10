@@ -47,6 +47,11 @@ func main() {
 		case CourseTypeEbook:
 			x.Type = model.EBook
 		}
+		x.Option().Public = p.Options.Public
+		x.Option().Enroll = p.Options.Enroll
+		x.Option().Attend = p.Options.Attend
+		x.Option().Assignment = p.Options.Assignment
+		x.Option().Discount = p.Options.Discount
 		for _, c := range p.Contents {
 			x.Contents = append(x.Contents, &model.CourseContent{
 				Title:       c.Title,

@@ -42,6 +42,12 @@ func (x *Payment) save(c redis.Conn) {
 		c.Send("ZADD", key("p", "t0"), n, x.id)
 		c.Send("ZADD", key("u", x.UserID, "p"), n, x.id)
 		c.Send("SADD", key("c", x.CourseID, "p"), n, x.id)
+	} else {
+		// TODO: remove after migrate
+		n := x.CreatedAt.UnixNano()
+		c.Send("ZADD", key("p", "t0"), n, x.id)
+		c.Send("ZADD", key("u", x.UserID, "p"), n, x.id)
+		c.Send("SADD", key("c", x.CourseID, "p"), n, x.id)
 	}
 
 	c.Send("ZADD", key("p", "t1"), x.UpdatedAt.UnixNano(), x.id)

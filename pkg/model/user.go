@@ -54,6 +54,8 @@ func (x *User) Save(c redis.Conn) error {
 	if x.CreatedAt.IsZero() {
 		x.CreatedAt = x.UpdatedAt
 		c.Send("ZADD", key("u", "t0"), x.CreatedAt.UnixNano(), x.id)
+	} else {
+		c.Send("ZADD", key("u", "t0"), x.CreatedAt.UnixNano(), x.id) // TODO: remove after migrate
 	}
 
 	c.Send("ZADD", key("u", "t1"), x.UpdatedAt.UnixNano(), x.id)

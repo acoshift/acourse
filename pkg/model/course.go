@@ -65,6 +65,9 @@ func (x *Course) ID() string {
 
 // Option returns course option
 func (x *Course) Option() *CourseOption {
+	if x.option == nil {
+		x.option = &CourseOption{}
+	}
 	return x.option
 }
 
@@ -90,6 +93,8 @@ func (x *Course) Save(c redis.Conn) error {
 	if x.CreatedAt.IsZero() {
 		x.CreatedAt = x.UpdatedAt
 		c.Send("ZADD", key("c", "t0"), x.CreatedAt.UnixNano(), x.id)
+	} else {
+		c.Send("ZADD", key("c", "t0"), x.CreatedAt.UnixNano(), x.id) // TODO: remove after migrate
 	}
 
 	c.Send("ZADD", key("c", "t1"), x.UpdatedAt.UnixNano(), x.id)
@@ -206,4 +211,17 @@ func GetCourseFromURL(c redis.Conn, url string) (*Course, error) {
 		return nil, err
 	}
 	return GetCourse(c, userID)
+}
+
+// ListPublicCourses lists public course sort by created at desc
+func ListPublicCourses(c redis.Conn) ([]*Course, error) {
+	c.Send("MULTI")
+	c.Send("ZINTERSTORE", key("result"), 2, key("c", "t0"), key("c", "public"), "WEIGHTS", 1, 0)
+	c.Send("ZREVRANGE", key("result"), 0, -1)
+	reply, err := redis.Values(c.Do("EXEC"))
+	if err != nil {
+		return nil, err
+	}
+	courseIDs, _ := redis.Strings(reply[1], nil)
+	return GetCourses(c, courseIDs)
 }

@@ -87,8 +87,16 @@ func getIndex(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
+	c := internal.GetPrimaryDB()
+	defer c.Close()
+	courses, err := model.ListPublicCourses(c)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	view.Index(w, r, &view.IndexData{
-		Page: &defaultPage,
+		Page:    &defaultPage,
+		Courses: courses,
 	})
 }
 
