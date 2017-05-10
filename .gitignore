@@ -1,3 +1,5 @@
 .DS_Store
 vendor/
 config/service_account
+node_modules/
+static/style.css
