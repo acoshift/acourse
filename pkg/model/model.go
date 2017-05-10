@@ -8,6 +8,11 @@ import (
 	"strconv"
 )
 
+func init() {
+	gob.Register(CourseType(0))
+	gob.Register(&CourseContent{})
+}
+
 const prefix = "acr:"
 
 // key generate key from given data

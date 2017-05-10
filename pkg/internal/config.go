@@ -46,6 +46,10 @@ var (
 	}
 )
 
+func init() {
+	time.Local = time.UTC
+}
+
 // GetPrimaryDB returns primary redis connection from pool, use for store app data
 func GetPrimaryDB() redis.Conn {
 	return primaryPool.Get()

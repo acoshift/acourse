@@ -38,6 +38,7 @@ u:{id}:e :: zset ; user's enrolled course
 u:{id}:c :: set ; user's course
 u:{id}:p :: zset ; user's payment
 
+u:all :: set
 u:admin :: set
 u:instructor :: set
 
@@ -58,10 +59,11 @@ c :: hash
   - contents
     - title
     - desc
-    - video
-    - url
+    - youtubeId
+    - downloadURL
   - enrollDetail
 
+c:all :: set
 c:public :: set
 c:enroll :: set
 c:attend :: set
