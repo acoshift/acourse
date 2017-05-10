@@ -37,7 +37,7 @@ func init() {
 	m.AddFunc("text/css", css.Minify)
 	m.AddFunc("text/javascript", js.Minify)
 
-	parseTemplate(keyIndex, []string{"index.tmpl", "layout.tmpl"})
+	parseTemplate(keyIndex, []string{"index.tmpl", "app.tmpl", "layout.tmpl", "component/course-card.tmpl"})
 	parseTemplate(keySignIn, []string{"signin.tmpl", "auth.tmpl", "layout.tmpl"})
 	parseTemplate(keySignUp, []string{"signup.tmpl", "auth.tmpl", "layout.tmpl"})
 }

@@ -35,6 +35,7 @@ func init() {
 		gzip.New(gzip.Config{Level: gzip.DefaultCompression}),
 		session.Middleware(session.Config{
 			Name:     "sess",
+			Entropy:  32,
 			Path:     "/",
 			MaxAge:   10 * 24 * time.Hour,
 			HTTPOnly: true,

@@ -1,5 +1,9 @@
 package view
 
+import (
+	"github.com/acoshift/acourse/pkg/model"
+)
+
 // Page type provides layout data like title, description, and og
 type Page struct {
 	Title string
@@ -11,6 +15,7 @@ type Page struct {
 // IndexData type
 type IndexData struct {
 	*Page
+	Courses []*model.Course
 }
 
 // AuthData type
