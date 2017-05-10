@@ -13,6 +13,7 @@ import (
 	"github.com/acoshift/acourse/pkg/internal"
 	"github.com/acoshift/flash"
 	"github.com/acoshift/header"
+	humanize "github.com/dustin/go-humanize"
 	"github.com/tdewolff/minify"
 	"github.com/tdewolff/minify/css"
 	"github.com/tdewolff/minify/html"
@@ -61,6 +62,9 @@ func parseTemplate(key interface{}, set []string) {
 		},
 		"xsrf": func(action string) string {
 			return xsrftoken.Generate(internal.GetXSRFSecret(), "", action)
+		},
+		"currency": func(v float64) string {
+			return humanize.FormatFloat("#,###.##", v)
 		},
 		"me": func() interface{} {
 			return nil

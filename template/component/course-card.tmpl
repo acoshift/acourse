@@ -1,7 +1,18 @@
 {{define "course-card"}}
 <a href="/course/{{.URL}}">
-  Course Card Component
+  <img src="{{.Image}}">
   <h4>{{.Title}}</h4>
   <p>{{.ShortDesc}}</p>
+  <p>Student: {{.EnrollCount}}</p>
+
+  {{if le .Price 0.0}}
+    <p>FREE</p>
+  {{else}}
+    <p class="{{if .Option.Discount}}line{{end}}">{{.Price | currency}}</p>
+  {{end}}
+  {{if .Option.Discount}}
+    <p>{{.Discount | currency}}</p>
+  {{end}}
 </a>
+<hr>
 {{end}}

@@ -1,9 +1,8 @@
 package model
 
 import (
-	"time"
-
 	"strconv"
+	"time"
 
 	"github.com/garyburd/redigo/redis"
 )
@@ -12,7 +11,7 @@ import (
 type Course struct {
 	id           string
 	option       *CourseOption
-	studentCount int
+	enrollCount  int
 	oldURL       string
 	Title        string
 	ShortDesc    string
@@ -68,9 +67,9 @@ func (x *Course) Option() *CourseOption {
 	return x.option
 }
 
-// StudentCount returns student count
-func (x *Course) StudentCount() int {
-	return x.studentCount
+// EnrollCount returns count of enrolled user
+func (x *Course) EnrollCount() int {
+	return x.enrollCount
 }
 
 // Save saves course
@@ -183,7 +182,7 @@ func GetCourses(c redis.Conn, courseIDs []string) ([]*Course, error) {
 		x.option.Attend, _ = redis.Bool(c.Receive())
 		x.option.Assignment, _ = redis.Bool(c.Receive())
 		x.option.Discount, _ = redis.Bool(c.Receive())
-		x.studentCount, _ = redis.Int(c.Receive())
+		x.enrollCount, _ = redis.Int(c.Receive())
 		x.id = courseID
 		xs[i] = &x
 	}
