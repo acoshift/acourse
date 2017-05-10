@@ -3,12 +3,12 @@ prefix
 - acr::
 
 ; primary start - should be aof
-define
-- u ; user
-- c ; course
-- p ; payment
-- t0 ; createdAt
-- t1 ; updatedAt
+; define
+; - u ; user
+; - c ; course
+; - p ; payment
+; - t0 ; createdAt
+; - t1 ; updatedAt
 
 ; id counter
 id:u :: int
