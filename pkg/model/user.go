@@ -1,6 +1,7 @@
 package model
 
 import (
+	"strings"
 	"time"
 
 	"github.com/garyburd/redigo/redis"
@@ -143,6 +144,15 @@ func GetUserFromEmail(c redis.Conn, email string) (*User, error) {
 		return nil, err
 	}
 	return GetUser(c, userID)
+}
+
+// GetUserFromEmailOrUsername gets user from email if given input contains '@'
+// otherwise get user from username
+func GetUserFromEmailOrUsername(c redis.Conn, user string) (*User, error) {
+	if strings.Contains(user, "@") {
+		return GetUserFromEmail(c, user)
+	}
+	return GetUserFromUsername(c, user)
 }
 
 // GetUserFromProvider gets user from provider

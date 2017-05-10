@@ -10,6 +10,8 @@ import (
 type Course struct {
 	id           string
 	option       *CourseOption
+	studentCount int
+	oldURL       string
 	Title        string
 	ShortDesc    string
 	Desc         string
@@ -64,6 +66,11 @@ func (x *Course) Option() *CourseOption {
 	return x.option
 }
 
+// StudentCount returns student count
+func (x *Course) StudentCount() int {
+	return x.studentCount
+}
+
 // Save saves course
 func (x *Course) Save(c redis.Conn) error {
 	var err error
@@ -85,6 +92,16 @@ func (x *Course) Save(c redis.Conn) error {
 
 	c.Send("ZADD", key("c", "t1"), x.UpdatedAt.UnixNano(), x.id)
 	c.Send("HSET", key("c"), x.id, enc(x))
+
+	if x.oldURL != x.URL {
+		// url updated
+		if len(x.oldURL) > 0 {
+			c.Send("HDEL", key("c", "url", x.id))
+		}
+		if len(x.URL) > 0 {
+			c.Send("HSET", key("c", "url", x.id), x.URL)
+		}
+	}
 
 	if x.option != nil {
 		if x.option.Public {
@@ -128,6 +145,7 @@ func GetCourses(c redis.Conn, courseIDs []string) ([]*Course, error) {
 		c.Send("SISMEMBER", key("c", "attend"), courseID)
 		c.Send("SISMEMBER", key("c", "assignment"), courseID)
 		c.Send("SISMEMBER", key("c", "discount"), courseID)
+		c.Send("ZCARD", key("c", courseID, "u"), courseID)
 	}
 	c.Flush()
 	for i := range courseIDs {
@@ -150,12 +168,14 @@ func GetCourses(c redis.Conn, courseIDs []string) ([]*Course, error) {
 		if err != nil {
 			return nil, err
 		}
+		x.oldURL = x.URL
 		x.option = &CourseOption{}
 		x.option.Public, _ = redis.Bool(c.Receive())
 		x.option.Enroll, _ = redis.Bool(c.Receive())
 		x.option.Attend, _ = redis.Bool(c.Receive())
 		x.option.Assignment, _ = redis.Bool(c.Receive())
 		x.option.Discount, _ = redis.Bool(c.Receive())
+		x.studentCount, _ = redis.Int(c.Receive())
 		xs[i] = &x
 	}
 	return xs, nil
