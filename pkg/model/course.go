@@ -194,7 +194,7 @@ func GetCourse(c redis.Conn, courseID string) (*Course, error) {
 func GetCourseFromURL(c redis.Conn, url string) (*Course, error) {
 	userID, err := redis.String(c.Do("HGET", key("c", "url"), url))
 	if err == redis.ErrNil {
-		return nil, nil
+		return nil, ErrNotFound
 	}
 	if err != nil {
 		return nil, err

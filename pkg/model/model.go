@@ -3,6 +3,7 @@ package model
 import (
 	"bytes"
 	"encoding/gob"
+	"errors"
 	"fmt"
 	"log"
 	"strconv"
@@ -13,6 +14,11 @@ func init() {
 	gob.Register(&CourseContent{})
 	gob.Register(PaymentStatus(0))
 }
+
+// Errors
+var (
+	ErrNotFound = errors.New("not found")
+)
 
 const prefix = "acr:"
 

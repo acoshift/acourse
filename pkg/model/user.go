@@ -126,7 +126,7 @@ func GetUser(c redis.Conn, userID string) (*User, error) {
 func GetUserFromUsername(c redis.Conn, username string) (*User, error) {
 	userID, err := redis.String(c.Do("HGET", key("u", "username"), username))
 	if err == redis.ErrNil {
-		return nil, nil
+		return nil, ErrNotFound
 	}
 	if err != nil {
 		return nil, err
@@ -138,7 +138,7 @@ func GetUserFromUsername(c redis.Conn, username string) (*User, error) {
 func GetUserFromEmail(c redis.Conn, email string) (*User, error) {
 	userID, err := redis.String(c.Do("HGET", key("u", "email"), email))
 	if err == redis.ErrNil {
-		return nil, nil
+		return nil, ErrNotFound
 	}
 	if err != nil {
 		return nil, err
@@ -159,7 +159,7 @@ func GetUserFromEmailOrUsername(c redis.Conn, user string) (*User, error) {
 func GetUserFromProvider(c redis.Conn, provider string, providerUserID string) (*User, error) {
 	userID, err := redis.String(c.Do("HGET", key("u", "provider", provider), providerUserID))
 	if err == redis.ErrNil {
-		return nil, nil
+		return nil, ErrNotFound
 	}
 	if err != nil {
 		return nil, err

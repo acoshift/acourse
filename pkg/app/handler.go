@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/acoshift/acourse/pkg/internal"
+	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/acourse/pkg/view"
 	"github.com/acoshift/flash"
 	"github.com/acoshift/gzip"
@@ -89,12 +90,64 @@ func getIndex(w http.ResponseWriter, r *http.Request) {
 
 func getSignIn(w http.ResponseWriter, r *http.Request) {
 	view.SignIn(w, r, &view.AuthData{
-		Page: &defaultPage,
+		Page:  &defaultPage,
+		Flash: flash.Get(r.Context()),
 	})
 }
 
 func postSignIn(w http.ResponseWriter, r *http.Request) {
-	defer back(w, r)
+	ctx := r.Context()
+	f := flash.Get(ctx)
+
+	if !verifyXSRF(r.FormValue("X"), "", "signin") {
+		f.Add("Errors", "invalid xsrf token")
+		back(w, r)
+		return
+	}
+
+	user := r.FormValue("User")
+	if len(user) == 0 {
+		f.Add("Errors", "user required")
+	}
+	pass := r.FormValue("Password")
+	if len(pass) == 0 {
+		f.Add("Errors", "password required")
+	}
+	if f.Has("Errors") {
+		f.Set("User", user)
+		back(w, r)
+		return
+	}
+
+	c := internal.GetPrimaryDB()
+	defer c.Close()
+
+	u, err := model.GetUserFromEmailOrUsername(c, user)
+	if err == model.ErrNotFound {
+		f.Add("Errors", "wrong email/username or password")
+		back(w, r)
+		return
+	}
+	if err != nil {
+		f.Add("Errors", err.Error())
+		back(w, r)
+		return
+	}
+	if !verifyPassword(u.Password, pass) {
+		f.Add("Errors", "wrong email/username or password")
+		back(w, r)
+		return
+	}
+
+	s := session.Get(ctx)
+	s.Set(keyUserID, u.ID())
+
+	rURL := r.FormValue("r")
+	if len(rURL) == 0 {
+		rURL = "/"
+	}
+
+	http.Redirect(w, r, rURL, http.StatusSeeOther)
 }
 
 func getSignUp(w http.ResponseWriter, r *http.Request) {

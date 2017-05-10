@@ -1,11 +1,21 @@
 {{define "auth-body"}}
 <form method="POST">
-  <input name="xsrf" value="{{xsrf "signin"}}">
-  <label>Username or Email:</label>
-  <input name="user">
+  <input name="X" type="hidden" value="{{xsrf "signin"}}">
+  <label>Email or username:</label>
+  <input name="User">
   <label>Password</label>
-  <input name="password">
+  <input name="Password" type="password">
   <button type="submit">Sign In</button>
+  {{if .Flash.Errors}}
+    <div>
+      <h4>Error</h4>
+      <ul>
+        {{range .Flash.Errors}}
+          <li>{{.}}</li>
+        {{end}}
+      </ul>
+    </div>
+  {{end}}
 </form>
 <p>Or Sign in with</p>
 <button>Google</button>

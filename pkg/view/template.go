@@ -11,6 +11,7 @@ import (
 	"sync"
 
 	"github.com/acoshift/acourse/pkg/internal"
+	"github.com/acoshift/flash"
 	"github.com/acoshift/header"
 	"github.com/tdewolff/minify"
 	"github.com/tdewolff/minify/css"
@@ -100,4 +101,6 @@ func render(w http.ResponseWriter, r *http.Request, key, data interface{}) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+	f := flash.Get(r.Context())
+	f.Clear()
 }

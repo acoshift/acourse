@@ -2,6 +2,7 @@ package view
 
 import (
 	"github.com/acoshift/acourse/pkg/model"
+	"github.com/acoshift/flash"
 )
 
 // Page type provides layout data like title, description, and og
@@ -21,4 +22,5 @@ type IndexData struct {
 // AuthData type
 type AuthData struct {
 	*Page
+	flash.Flash
 }
