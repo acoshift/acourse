@@ -9,8 +9,10 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/acoshift/acourse/pkg/internal"
+	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/flash"
 	"github.com/acoshift/header"
 	humanize "github.com/dustin/go-humanize"
@@ -27,6 +29,7 @@ var (
 	m         = minify.New()
 	muExecute = &sync.Mutex{}
 	templates = make(map[interface{}]*templateStruct)
+	loc       *time.Location
 )
 
 type templateStruct struct {
@@ -35,6 +38,12 @@ type templateStruct struct {
 }
 
 func init() {
+	var err error
+	loc, err = time.LoadLocation("Asia/Bangkok")
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	m.AddFunc("text/html", html.Minify)
 	m.AddFunc("text/css", css.Minify)
 	m.AddFunc("text/javascript", js.Minify)
@@ -69,6 +78,33 @@ func parseTemplate(key interface{}, set []string) {
 		},
 		"me": func() interface{} {
 			return nil
+		},
+		"courseType": func(v int) string {
+			switch v {
+			case model.Live:
+				return "Live"
+			case model.Video:
+				return "Video"
+			case model.EBook:
+				return "eBook"
+			default:
+				return ""
+			}
+		},
+		"date": func(v time.Time) string {
+			return v.In(loc).Format("02/01/2006")
+		},
+		"dateTime": func(v time.Time) string {
+			return v.In(loc).Format("02/01/2006 15:04:05")
+		},
+		"live": func() int {
+			return model.Live
+		},
+		"video": func() int {
+			return model.Video
+		},
+		"eBook": func() int {
+			return model.EBook
 		},
 	})
 	_, err := t.ParseFiles(joinTemplateDir(set)...)
