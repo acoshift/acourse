@@ -83,6 +83,7 @@ c:t0 :: zset
 c:t1 :: zset
 
 c:{id}:u :: zset ; enrolled users
+c:{id}:p :: set ; course payment
 
 ; payment data
 p :: hash
@@ -95,5 +96,6 @@ p :: hash
 
 p:t0 :: zset
 p:t1 :: zset
+p:all :: set
 
 s:{sessId} :: string ; session data binary
