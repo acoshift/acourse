@@ -1,33 +1,37 @@
 ; this file contains model definition
-prefix
-- acr::
 
-; primary start - should be aof
+; prefix
+;   acr::
 ; define
-; - u ; user
-; - c ; course
-; - p ; payment
-; - t0 ; createdAt
-; - t1 ; updatedAt
+;   u: user
+;   c: course
+;   p: payment
+;   t0: createdAt
+;   t1: updatedAt
+;   s: session
 
 ; id counter
-id:u :: int
-id:c :: int
-id:p :: int
+id:u :: string ; int
+id:c :: string ; int
+id:p :: string ; int
 
 ; user data
 u :: hash
-- {id} :: binary
-  - username
-  - password
-  - name
-  - email
-  - aboutMe
+- {id} :: string ; binary
+  username
+  password
+  name
+  email
+  aboutMe
+  createdAt
+  updatedAt
 
 u:username :: hash
 - {username} ; map to user id
+
 u:email :: hash
 - {email} ; map to user id
+
 u:provider:{type} :: hash ; oauth2's provider, type: google, facebook, github
 - {uid} ;; provider's user id map to user id
 
@@ -44,24 +48,26 @@ u:instructor :: set
 
 ; course data
 c :: hash
-- {id} :: binary
-  - title
-  - shortDesc
-  - desc
-  - image
-  - owner
-  - start
-  - url
-  - type ; live, video, ebook
-  - video
-  - price
-  - discount
-  - contents
-    - title
-    - desc
-    - youtubeId
-    - downloadURL
-  - enrollDetail
+- {id} :: string ; binary
+  title
+  shortDesc
+  desc
+  image
+  userId ; owner
+  start
+  url
+  type ; live, video, ebook
+  video
+  price
+  discount
+  contents
+    title
+    desc
+    youtubeId
+    downloadURL
+  enrollDetail
+  createdAt
+  updatedAt
 
 c:all :: set
 c:public :: set
@@ -81,16 +87,13 @@ c:{id}:u :: zset ; enrolled users
 ; payment data
 p :: hash
 - {id}
+  userId ; owner
+  courseId
+  image
+  createdAt
+  updatedAt
 
 p:t0 :: zset
 p:t1 :: zset
 
-; primary end
-
-; secondary start - should be rdb
-define
-- s ; session
-
-s:{sessId} :: binary ; session data
-
-; secondary end
+s:{sessId} :: string ; session data binary

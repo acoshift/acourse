@@ -11,6 +11,7 @@ import (
 func init() {
 	gob.Register(CourseType(0))
 	gob.Register(&CourseContent{})
+	gob.Register(PaymentStatus(0))
 }
 
 const prefix = "acr:"

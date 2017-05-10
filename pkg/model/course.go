@@ -16,7 +16,7 @@ type Course struct {
 	ShortDesc    string
 	Desc         string
 	Image        string
-	Owner        string
+	UserID       string
 	Start        time.Time
 	URL          string
 	Type         CourseType
