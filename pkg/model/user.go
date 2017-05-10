@@ -1,6 +1,7 @@
 package model
 
 import (
+	"strconv"
 	"strings"
 	"time"
 
@@ -38,12 +39,12 @@ func (x *User) Role() *UserRole {
 
 // Save saves user
 func (x *User) Save(c redis.Conn) error {
-	var err error
 	if len(x.id) == 0 {
-		x.id, err = redis.String(c.Do("INCR", key("id", "u")))
+		id, err := redis.Int64(c.Do("INCR", key("id", "u")))
 		if err != nil {
 			return err
 		}
+		x.id = strconv.FormatInt(id, 10)
 	}
 
 	c.Send("MULTI")
@@ -71,7 +72,7 @@ func (x *User) Save(c redis.Conn) error {
 		}
 	}
 
-	_, err = c.Do("EXEC")
+	_, err := c.Do("EXEC")
 	if err != nil {
 		return err
 	}

@@ -3,6 +3,8 @@ package model
 import (
 	"time"
 
+	"strconv"
+
 	"github.com/garyburd/redigo/redis"
 )
 
@@ -73,12 +75,12 @@ func (x *Course) StudentCount() int {
 
 // Save saves course
 func (x *Course) Save(c redis.Conn) error {
-	var err error
 	if len(x.id) == 0 {
-		x.id, err = redis.String(c.Do("INCR", key("id", "c")))
+		id, err := redis.Int64(c.Do("INCR", key("id", "c")))
 		if err != nil {
 			return err
 		}
+		x.id = strconv.FormatInt(id, 10)
 	}
 
 	c.Send("MULTI")
@@ -96,10 +98,10 @@ func (x *Course) Save(c redis.Conn) error {
 	if x.oldURL != x.URL {
 		// url updated
 		if len(x.oldURL) > 0 {
-			c.Send("HDEL", key("c", "url", x.id))
+			c.Send("HDEL", key("c", "url"), x.id)
 		}
 		if len(x.URL) > 0 {
-			c.Send("HSET", key("c", "url", x.id), x.URL)
+			c.Send("HSET", key("c", "url"), x.id, x.URL)
 		}
 	}
 
@@ -129,6 +131,10 @@ func (x *Course) Save(c redis.Conn) error {
 		} else {
 			c.Send("SREM", key("c", "discount"), x.id)
 		}
+	}
+	_, err := c.Do("EXEC")
+	if err != nil {
+		return err
 	}
 
 	return nil

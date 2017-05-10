@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/garyburd/redigo/redis"
@@ -58,10 +59,11 @@ func (x *Payment) Save(c redis.Conn) error {
 
 	var err error
 	if len(x.id) == 0 {
-		x.id, err = redis.String(c.Do("INCR", key("id", "p")))
+		id, err := redis.Int64(c.Do("INCR", key("id", "p")))
 		if err != nil {
 			return err
 		}
+		x.id = strconv.FormatInt(id, 10)
 	}
 
 	c.Send("MULTI")
