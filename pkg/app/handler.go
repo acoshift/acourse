@@ -207,7 +207,14 @@ func getSignOut(w http.ResponseWriter, r *http.Request) {
 }
 
 func getProfile(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "profile")
+	user, _ := internal.GetUser(r.Context()).(*model.User)
+
+	page := defaultPage
+	page.Title = user.Username + " | " + page.Title
+
+	view.Profile(w, r, &view.ProfileData{
+		Page: &page,
+	})
 }
 
 func getProfileEdit(w http.ResponseWriter, r *http.Request) {

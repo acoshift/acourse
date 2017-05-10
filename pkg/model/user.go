@@ -12,7 +12,6 @@ type User struct {
 	id        string
 	role      *UserRole
 	Username  string
-	Password  string
 	Name      string
 	AboutMe   string
 	Image     string

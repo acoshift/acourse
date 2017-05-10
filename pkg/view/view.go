@@ -30,3 +30,8 @@ func SignIn(w http.ResponseWriter, r *http.Request, data *AuthData) {
 func SignUp(w http.ResponseWriter, r *http.Request, data *AuthData) {
 	render(w, r, keySignUp, data)
 }
+
+// Profile renders profile view
+func Profile(w http.ResponseWriter, r *http.Request, data *ProfileData) {
+	render(w, r, keyProfile, data)
+}

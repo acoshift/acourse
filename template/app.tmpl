@@ -1,7 +1,9 @@
 {{define "body"}}
+  <a href="/"><img src="https://storage.googleapis.com/acourse/static/24540ce5-cc7d-4886-a680-eca24be60fe1.png"></a>
   <p>Navbar here</p>
   {{if me}}
     <p>{{me.Username}}</p>
+    <a href="/profile">Profile</a>
     <a href="/signout">Sign Out</a>
   {{else}}
     <a href="/signin">Sign In</a>

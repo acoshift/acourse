@@ -24,3 +24,9 @@ type AuthData struct {
 	*Page
 	flash.Flash
 }
+
+// ProfileData type
+type ProfileData struct {
+	*Page
+	flash.Flash
+}
