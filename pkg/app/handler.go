@@ -33,8 +33,8 @@ func init() {
 	mux.Handle("/signout", mustSignedIn(wrapFunc(getSignOut, nil)))
 	mux.Handle("/profile", mustSignedIn(wrapFunc(getProfile, nil)))
 	mux.Handle("/profile/edit", mustSignedIn(wrapFunc(getProfileEdit, postProfileEdit)))
-	mux.Handle("/user/", http.StripPrefix("/user", wrapFunc(getUser, nil)))
-	mux.Handle("/course/", http.StripPrefix("/course", wrapFunc(getCourse, nil)))
+	// mux.Handle("/user/", http.StripPrefix("/user", wrapFunc(getUser, nil)))
+	mux.Handle("/course/", http.StripPrefix("/course", &courseCtrl{}))
 
 	admin := http.NewServeMux()
 	// TODO: add admin route
@@ -226,20 +226,70 @@ func postProfileEdit(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func getUser(w http.ResponseWriter, r *http.Request) {
-	id := extractPathID(r.URL)
+// func getUser(w http.ResponseWriter, r *http.Request) {
+// 	ps := extractURL(r.URL)
+// 	id := ps[0]
+// 	if len(id) == 0 {
+// 		http.NotFound(w, r)
+// 		return
+// 	}
+// 	fmt.Fprint(w, "user: ", id)
+// }
+
+type courseCtrl struct{}
+
+func (*courseCtrl) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	ps := extractURL(r.URL)
+	if len(ps) == 0 {
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
+	if len(ps) == 1 {
+		ps = append(ps, "")
+	}
+	if len(ps) > 2 && len(ps[2]) == 0 {
+		ps = ps[:2]
+	}
+	if len(ps) > 2 {
+		http.NotFound(w, r)
+		return
+	}
+	id := ps[0]
 	if len(id) == 0 {
 		http.NotFound(w, r)
 		return
 	}
-	fmt.Fprint(w, "user: ", id)
+	switch ps[1] {
+	case "":
+		if r.Method == http.MethodGet || r.Method == http.MethodHead {
+			getCourse(w, r, id)
+			return
+		}
+	case "edit":
+		if r.Method == http.MethodGet || r.Method == http.MethodHead {
+			getCourseEdit(w, r, id)
+			return
+		}
+		if r.Method == http.MethodPost {
+			postCourseEdit(w, r, id)
+			return
+		}
+	default:
+		http.NotFound(w, r)
+		return
+	}
+	status := http.StatusMethodNotAllowed
+	http.Error(w, http.StatusText(status), status)
 }
 
-func getCourse(w http.ResponseWriter, r *http.Request) {
-	id := extractPathID(r.URL)
-	if len(id) == 0 {
-		http.NotFound(w, r)
-		return
-	}
+func getCourse(w http.ResponseWriter, r *http.Request, id string) {
 	fmt.Fprint(w, "course: ", id)
+}
+
+func getCourseEdit(w http.ResponseWriter, r *http.Request, id string) {
+	fmt.Fprint(w, "course edit: ", id)
+}
+
+func postCourseEdit(w http.ResponseWriter, r *http.Request, id string) {
+	fmt.Fprint(w, "course edit: ", id)
 }

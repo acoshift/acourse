@@ -43,6 +43,7 @@ func init() {
 	parseTemplate(keySignIn, []string{"signin.tmpl", "auth.tmpl", "layout.tmpl"})
 	parseTemplate(keySignUp, []string{"signup.tmpl", "auth.tmpl", "layout.tmpl"})
 	parseTemplate(keyProfile, []string{"profile.tmpl", "app.tmpl", "layout.tmpl", "component/user-profile.tmpl"})
+	parseTemplate(keyProfile, []string{"course.tmpl", "app.tmpl", "layout.tmpl"})
 }
 
 func joinTemplateDir(files []string) []string {

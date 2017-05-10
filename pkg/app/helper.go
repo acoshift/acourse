@@ -10,12 +10,12 @@ import (
 	"golang.org/x/net/xsrftoken"
 )
 
-func extractPathID(u *url.URL) string {
+func extractURL(u *url.URL) []string {
 	ps := strings.Split(u.Path[1:], "/")
 	if len(ps) == 0 {
-		return ""
+		return nil
 	}
-	return ps[0]
+	return ps
 }
 
 func verifyXSRF(token, userID, action string) bool {

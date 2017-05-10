@@ -30,3 +30,9 @@ type ProfileData struct {
 	*Page
 	flash.Flash
 }
+
+// CourseData type
+type CourseData struct {
+	*Page
+	Course *model.Course
+}

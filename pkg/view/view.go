@@ -35,3 +35,8 @@ func SignUp(w http.ResponseWriter, r *http.Request, data *AuthData) {
 func Profile(w http.ResponseWriter, r *http.Request, data *ProfileData) {
 	render(w, r, keyProfile, data)
 }
+
+// Course renders course view
+func Course(w http.ResponseWriter, r *http.Request, data *CourseData) {
+	render(w, r, keyCourse, data)
+}
