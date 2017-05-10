@@ -2,7 +2,6 @@ package app
 
 import (
 	"net/http"
-
 	"net/url"
 
 	"github.com/acoshift/acourse/pkg/internal"
@@ -63,9 +62,11 @@ func fetchUser(h http.Handler) http.Handler {
 			c := internal.GetPrimaryDB()
 			u, err := model.GetUser(c, id)
 			c.Close()
-			if err == nil {
-				r = r.WithContext(internal.WithUser(ctx, u))
+			if err == model.ErrNotFound {
+				u = &model.User{}
+				u.SetID(id)
 			}
+			r = r.WithContext(internal.WithUser(ctx, u))
 		}
 		h.ServeHTTP(w, r)
 	})

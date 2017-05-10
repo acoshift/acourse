@@ -19,9 +19,49 @@ var conn, _ = redis.Dial("tcp", "localhost:6379", redis.DialDatabase(4))
 func main() {
 	time.Local = time.UTC
 
-	var courses []*Course
+	var users []*userModel
+	var roles []*roleModel
+	var courses []*courseModel
+	// var payments []*paymentModel
+	// var attends []*attendModel
+	// var enrolls []*enrollModel
+	// var assignments []*assignment
+	// var userAssignments []*userAssignment
 
+	must(client.Query(ctx, "User", &users))
+	must(client.Query(ctx, "Role", &roles))
 	must(client.Query(ctx, "Course", &courses))
+	// must(client.Query(ctx, "Payment", &payments))
+	// must(client.Query(ctx, "Attend", &attends))
+	// must(client.Query(ctx, "Enroll", &enrolls))
+	// must(client.Query(ctx, "Assignment", &assignments))
+	// must(client.Query(ctx, "UserAssignment", &userAssignments))
+
+	findRole := func(userID string) *roleModel {
+		for _, p := range roles {
+			if p.ID() == userID {
+				return p
+			}
+		}
+		return &roleModel{}
+	}
+
+	// save users and create mapper
+	for _, p := range users {
+		r := findRole(p.ID())
+		x := model.User{
+			Username:  p.Username,
+			Image:     p.Photo,
+			AboutMe:   p.AboutMe,
+			CreatedAt: p.CreatedAt,
+			UpdatedAt: p.UpdatedAt,
+		}
+		x.Role().Admin = r.Admin
+		x.Role().Instructor = r.Instructor
+
+		x.SetID(p.ID())
+		must(x.Save(conn))
+	}
 
 	// save course and create mapper
 	for _, p := range courses {
@@ -71,8 +111,25 @@ func must(err error) {
 	}
 }
 
-// Course model
-type Course struct {
+type userModel struct {
+	ds.StringIDModel
+	ds.StampModel
+	Username string
+	Name     string `datastore:",noindex"`
+	Photo    string `datastore:",noindex"`
+	AboutMe  string `datastore:",noindex"`
+}
+
+type roleModel struct {
+	ds.StringIDModel
+	ds.StampModel
+
+	// roles
+	Admin      bool
+	Instructor bool
+}
+
+type courseModel struct {
 	newID string
 
 	ds.StringIDModel
@@ -84,20 +141,18 @@ type Course struct {
 	Owner            string
 	Start            time.Time
 	URL              string
-	Type             CourseType
+	Type             courseType
 	Video            string `datastore:",noindex"` // Cover Video
 	Price            float64
 	DiscountedPrice  float64
-	Options          CourseOption
-	Contents         CourseContents `datastore:",noindex"`
+	Options          courseOption
+	Contents         courseContents `datastore:",noindex"`
 	EnrollDetail     string         `datastore:",noindex"`
 }
 
-// Courses model
-type Courses []*Course
+type courseModels []*courseModel
 
-// CourseOption type
-type CourseOption struct {
+type courseOption struct {
 	Public     bool
 	Enroll     bool `datastore:",noindex"`
 	Attend     bool `datastore:",noindex"`
@@ -105,23 +160,78 @@ type CourseOption struct {
 	Discount   bool
 }
 
-// CourseContent type
-type CourseContent struct {
+type courseContent struct {
 	Title       string `datastore:",noindex"`
 	Description string `datastore:",noindex"` // Markdown
 	Video       string `datastore:",noindex"` // Youtube ID
 	DownloadURL string `datastore:",noindex"` // Video download link
 }
 
-// CourseContents type
-type CourseContents []CourseContent
+type courseContents []courseContent
 
-// CourseType type
-type CourseType string
+type courseType string
 
 // CourseType
 const (
-	CourseTypeLive  CourseType = "live"
-	CourseTypeVideo CourseType = "video"
-	CourseTypeEbook CourseType = "ebook"
+	CourseTypeLive  courseType = "live"
+	CourseTypeVideo courseType = "video"
+	CourseTypeEbook courseType = "ebook"
 )
+
+type paymentModel struct {
+	newID string
+
+	ds.StringIDModel
+	ds.StampModel
+	UserID        string
+	CourseID      string
+	OriginalPrice float64 `datastore:",noindex"`
+	Price         float64 `datastore:",noindex"`
+	Code          string
+	URL           string `datastore:",noindex"`
+	Status        status
+	At            time.Time
+}
+
+type status string
+
+const (
+	statusWaiting  status = "waiting"
+	statusApproved status = "approved"
+	statusRejected status = "rejected"
+)
+
+type attendModel struct {
+	ds.StringIDModel
+	ds.StampModel
+	UserID   string
+	CourseID string
+}
+
+type enrollModel struct {
+	ds.StringIDModel
+	ds.StampModel
+	UserID   string
+	CourseID string
+}
+
+type assignment struct {
+	newID string
+
+	ds.StringIDModel
+	ds.StampModel
+	CourseID    string
+	Title       string `datastore:",noindex"`
+	Description string `datastore:",noindex"`
+	Open        bool   `datastore:",noindex"`
+}
+
+type userAssignment struct {
+	newID string
+
+	ds.StringIDModel
+	ds.StampModel
+	AssignmentID string
+	UserID       string
+	URL          string `datastore:",noindex"`
+}

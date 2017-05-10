@@ -23,6 +23,7 @@ u :: hash
   name
   email
   aboutMe
+  image
   createdAt
   updatedAt
 

@@ -1,8 +1,7 @@
 package model
 
 import (
-	"strconv"
-	"strings"
+	"fmt"
 	"time"
 
 	"github.com/garyburd/redigo/redis"
@@ -10,13 +9,14 @@ import (
 
 // User model
 type User struct {
-	id        string
-	role      *UserRole
-	Username  string
-	Password  string
-	Name      string
-	Email     string
+	id       string
+	role     *UserRole
+	Username string
+	Password string
+	Name     string
+	// Email     string
 	AboutMe   string
+	Image     string
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
@@ -25,6 +25,11 @@ type User struct {
 type UserRole struct {
 	Admin      bool
 	Instructor bool
+}
+
+// SetID sets user id
+func (x *User) SetID(id string) {
+	x.id = id
 }
 
 // ID returns user id
@@ -43,12 +48,15 @@ func (x *User) Role() *UserRole {
 // Save saves user
 func (x *User) Save(c redis.Conn) error {
 	if len(x.id) == 0 {
-		id, err := redis.Int64(c.Do("INCR", key("id", "u")))
-		if err != nil {
-			return err
-		}
-		x.id = strconv.FormatInt(id, 10)
+		return fmt.Errorf("invalid id")
 	}
+	// if len(x.id) == 0 {
+	// 	id, err := redis.Int64(c.Do("INCR", key("id", "u")))
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	x.id = strconv.FormatInt(id, 10)
+	// }
 
 	c.Send("MULTI")
 	c.Send("SADD", key("u", "all"), x.id)
@@ -141,25 +149,25 @@ func GetUserFromUsername(c redis.Conn, username string) (*User, error) {
 }
 
 // GetUserFromEmail gets user from email
-func GetUserFromEmail(c redis.Conn, email string) (*User, error) {
-	userID, err := redis.String(c.Do("HGET", key("u", "email"), email))
-	if err == redis.ErrNil {
-		return nil, ErrNotFound
-	}
-	if err != nil {
-		return nil, err
-	}
-	return GetUser(c, userID)
-}
+// func GetUserFromEmail(c redis.Conn, email string) (*User, error) {
+// 	userID, err := redis.String(c.Do("HGET", key("u", "email"), email))
+// 	if err == redis.ErrNil {
+// 		return nil, ErrNotFound
+// 	}
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return GetUser(c, userID)
+// }
 
 // GetUserFromEmailOrUsername gets user from email if given input contains '@'
 // otherwise get user from username
-func GetUserFromEmailOrUsername(c redis.Conn, user string) (*User, error) {
-	if strings.Contains(user, "@") {
-		return GetUserFromEmail(c, user)
-	}
-	return GetUserFromUsername(c, user)
-}
+// func GetUserFromEmailOrUsername(c redis.Conn, user string) (*User, error) {
+// 	if strings.Contains(user, "@") {
+// 		return GetUserFromEmail(c, user)
+// 	}
+// 	return GetUserFromUsername(c, user)
+// }
 
 // GetUserFromProvider gets user from provider
 func GetUserFromProvider(c redis.Conn, provider string, providerUserID string) (*User, error) {

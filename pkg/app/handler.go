@@ -1,6 +1,7 @@
 package app
 
 import (
+	"encoding/gob"
 	"fmt"
 	"net/http"
 	"time"
@@ -19,6 +20,8 @@ import (
 var Handler http.Handler
 
 func init() {
+	gob.Register(sessionKey(0))
+
 	mux := http.NewServeMux()
 
 	mux.Handle("/", wrapFunc(getIndex, nil))
@@ -45,7 +48,7 @@ func init() {
 			MaxAge:   10 * 24 * time.Hour,
 			HTTPOnly: true,
 			Secure:   session.PreferSecure,
-			Store:    sRedis.New(internal.GetSecondaryPool(), "acr:s:"),
+			Store:    sRedis.New(internal.GetSecondaryPool(), "acr::s:"),
 		}),
 		flash.Middleware(),
 		fetchUser,
@@ -118,42 +121,44 @@ func postSignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := r.FormValue("User")
-	if len(user) == 0 {
-		f.Add("Errors", "user required")
+	email := r.FormValue("Email")
+	if len(email) == 0 {
+		f.Add("Errors", "email required")
 	}
 	pass := r.FormValue("Password")
 	if len(pass) == 0 {
 		f.Add("Errors", "password required")
 	}
 	if f.Has("Errors") {
-		f.Set("User", user)
+		f.Set("Email", email)
 		back(w, r)
 		return
 	}
 
-	c := internal.GetPrimaryDB()
-	defer c.Close()
+	// c := internal.GetPrimaryDB()
+	// defer c.Close()
 
-	u, err := model.GetUserFromEmailOrUsername(c, user)
-	if err == model.ErrNotFound {
-		f.Add("Errors", "wrong email/username or password")
-		back(w, r)
-		return
-	}
+	userID, err := internal.SignInUser(email, pass)
+	// u, err := model.GetUserFromEmailOrUsername(c, user)
+	// if err == model.ErrNotFound {
+	// 	f.Add("Errors", "wrong email or password")
+	// 	back(w, r)
+	// 	return
+	// }
 	if err != nil {
 		f.Add("Errors", err.Error())
 		back(w, r)
 		return
 	}
-	if !verifyPassword(u.Password, pass) {
-		f.Add("Errors", "wrong email/username or password")
-		back(w, r)
-		return
-	}
+	// if !verifyPassword(u.Password, pass) {
+	// 	f.Add("Errors", "wrong email or password")
+	// 	back(w, r)
+	// 	return
+	// }
 
 	s := session.Get(ctx)
-	s.Set(keyUserID, u.ID())
+	// s.Set(keyUserID, u.ID())
+	s.Set(keyUserID, userID)
 
 	rURL := r.FormValue("r")
 	if len(rURL) == 0 {

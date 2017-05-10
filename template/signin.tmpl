@@ -1,8 +1,8 @@
 {{define "auth-body"}}
 <form method="POST">
   <input name="X" type="hidden" value="{{xsrf "signin"}}">
-  <label>Email or username:</label>
-  <input name="User">
+  <label>Email:</label>
+  <input name="Email" value="{{.Flash.Get "User"}}">
   <label>Password</label>
   <input name="Password" type="password">
   <button type="submit">Sign In</button>
