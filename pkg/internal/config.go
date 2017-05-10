@@ -5,6 +5,8 @@ import (
 	"log"
 	"time"
 
+	"crypto/rand"
+
 	"github.com/acoshift/configfile"
 	"github.com/garyburd/redigo/redis"
 	"golang.org/x/oauth2/google"
@@ -22,6 +24,7 @@ var (
 	redisSecondaryPass = config.String("redis_secondary_pass")
 	xsrfSecret         = config.String("xsrf_secret")
 	serviceAccount     = config.Bytes("service_account")
+	baseURL            = config.String("base_url")
 )
 
 var (
@@ -57,12 +60,7 @@ func init() {
 
 	ctx := context.Background()
 
-	scopes := []string{
-		identitytoolkit.CloudPlatformScope,
-		identitytoolkit.FirebaseScope,
-	}
-
-	gconf, err := google.JWTConfigFromJSON(serviceAccount, scopes...)
+	gconf, err := google.JWTConfigFromJSON(serviceAccount, identitytoolkit.CloudPlatformScope)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -95,11 +93,43 @@ func GetXSRFSecret() string {
 
 // SignInUser sign in user
 func SignInUser(email, password string) (string, error) {
-	req := gitClient.VerifyPassword(&identitytoolkit.IdentitytoolkitRelyingpartyVerifyPasswordRequest{
+	resp, err := gitClient.VerifyPassword(&identitytoolkit.IdentitytoolkitRelyingpartyVerifyPasswordRequest{
 		Email:    email,
 		Password: password,
-	})
-	resp, err := req.Do()
+	}).Do()
+	if err != nil {
+		return "", err
+	}
+	return resp.LocalId, nil
+}
+
+func generateSessionID() string {
+	b := make([]byte, 24)
+	rand.Read(b)
+	return string(b)
+}
+
+// SignInUserProvider sign in user with provider
+func SignInUserProvider(provider string) (redirectURI string, sessionID string, err error) {
+	sessID := generateSessionID()
+	resp, err := gitClient.CreateAuthUri(&identitytoolkit.IdentitytoolkitRelyingpartyCreateAuthUriRequest{
+		ProviderId:   provider,
+		ContinueUri:  baseURL + "/openid/callback",
+		AuthFlowType: "CODE_FLOW",
+		SessionId:    sessID,
+	}).Do()
+	if err != nil {
+		return "", "", err
+	}
+	return resp.AuthUri, sessID, nil
+}
+
+// SignInUserProviderCallback sign in user with provider callback uri
+func SignInUserProviderCallback(callbackURI string, sessID string) (string, error) {
+	resp, err := gitClient.VerifyAssertion(&identitytoolkit.IdentitytoolkitRelyingpartyVerifyAssertionRequest{
+		RequestUri: baseURL + callbackURI,
+		SessionId:  sessID,
+	}).Do()
 	if err != nil {
 		return "", err
 	}

@@ -159,7 +159,7 @@ func GetCourses(c redis.Conn, courseIDs []string) ([]*Course, error) {
 		c.Send("ZCARD", key("c", courseID, "u"), courseID)
 	}
 	c.Flush()
-	for i := range courseIDs {
+	for i, courseID := range courseIDs {
 		exists, _ := redis.Bool(c.Receive())
 		if !exists {
 			c.Receive()
@@ -187,6 +187,7 @@ func GetCourses(c redis.Conn, courseIDs []string) ([]*Course, error) {
 		x.option.Assignment, _ = redis.Bool(c.Receive())
 		x.option.Discount, _ = redis.Bool(c.Receive())
 		x.studentCount, _ = redis.Int(c.Receive())
+		x.id = courseID
 		xs[i] = &x
 	}
 	return xs, nil

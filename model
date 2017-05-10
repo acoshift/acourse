@@ -11,7 +11,6 @@
 ;   s: session
 
 ; id counter
-id:u :: string ; int
 id:c :: string ; int
 id:p :: string ; int
 
@@ -19,9 +18,7 @@ id:p :: string ; int
 u :: hash
 - {id} :: string ; binary
   username
-  password
   name
-  email
   aboutMe
   image
   createdAt
@@ -29,12 +26,6 @@ u :: hash
 
 u:username :: hash
 - {username} ; map to user id
-
-u:email :: hash
-- {email} ; map to user id
-
-u:provider:{type} :: hash ; oauth2's provider, type: google, facebook, github
-- {uid} ;; provider's user id map to user id
 
 u:t0 :: zset
 u:t1 :: zset

@@ -27,6 +27,8 @@ func init() {
 	mux.Handle("/", wrapFunc(getIndex, nil))
 	mux.Handle("/favicon.ico", fileHandler("static/favicon.ico"))
 	mux.Handle("/signin", mustNotSignedIn(wrapFunc(getSignIn, postSignIn)))
+	mux.Handle("/openid", mustNotSignedIn(wrapFunc(getSignInProvider, nil)))
+	mux.Handle("/openid/callback", mustNotSignedIn(wrapFunc(getSignInCallback, nil)))
 	mux.Handle("/signup", mustNotSignedIn(wrapFunc(getSignUp, postSignUp)))
 	mux.Handle("/signout", mustSignedIn(wrapFunc(getSignOut, nil)))
 	mux.Handle("/profile", mustSignedIn(wrapFunc(getProfile, nil)))
@@ -135,29 +137,14 @@ func postSignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// c := internal.GetPrimaryDB()
-	// defer c.Close()
-
 	userID, err := internal.SignInUser(email, pass)
-	// u, err := model.GetUserFromEmailOrUsername(c, user)
-	// if err == model.ErrNotFound {
-	// 	f.Add("Errors", "wrong email or password")
-	// 	back(w, r)
-	// 	return
-	// }
 	if err != nil {
 		f.Add("Errors", err.Error())
 		back(w, r)
 		return
 	}
-	// if !verifyPassword(u.Password, pass) {
-	// 	f.Add("Errors", "wrong email or password")
-	// 	back(w, r)
-	// 	return
-	// }
 
 	s := session.Get(ctx)
-	// s.Set(keyUserID, u.ID())
 	s.Set(keyUserID, userID)
 
 	rURL := r.FormValue("r")
@@ -166,6 +153,41 @@ func postSignIn(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Redirect(w, r, rURL, http.StatusSeeOther)
+}
+
+var allowProvider = map[string]bool{
+	"google.com":   true,
+	"facebook.com": true,
+	"github.com":   true,
+}
+
+func getSignInProvider(w http.ResponseWriter, r *http.Request) {
+	p := r.FormValue("p")
+	if !allowProvider[p] {
+		http.Error(w, "provider not allowed", http.StatusBadRequest)
+		return
+	}
+	redirectURL, sessID, err := internal.SignInUserProvider(p)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	s := session.Get(r.Context())
+	s.Set(keyOpenIDSessionID, sessID)
+	http.Redirect(w, r, redirectURL, http.StatusSeeOther)
+}
+
+func getSignInCallback(w http.ResponseWriter, r *http.Request) {
+	s := session.Get(r.Context())
+	sessID, _ := s.Get(keyOpenIDSessionID).(string)
+	s.Del(keyOpenIDSessionID)
+	userID, err := internal.SignInUserProviderCallback(r.RequestURI, sessID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	s.Set(keyUserID, userID)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func getSignUp(w http.ResponseWriter, r *http.Request) {
