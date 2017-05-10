@@ -23,6 +23,7 @@ func init() {
 	mux.Handle("/", wrapFunc(getIndex, nil))
 	mux.Handle("/favicon.ico", fileHandler("static/favicon.ico"))
 	mux.Handle("/signin", mustNotSignedIn(wrapFunc(getSignIn, postSignIn)))
+	mux.Handle("/signup", mustNotSignedIn(wrapFunc(getSignUp, postSignUp)))
 	mux.Handle("/signout", mustSignedIn(wrapFunc(getSignOut, nil)))
 	mux.Handle("/profile", mustSignedIn(wrapFunc(getProfile, nil)))
 	mux.Handle("/profile/edit", mustSignedIn(wrapFunc(getProfileEdit, postProfileEdit)))
@@ -92,13 +93,23 @@ func getSignIn(w http.ResponseWriter, r *http.Request) {
 }
 
 func postSignIn(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, r.RequestURI, http.StatusFound)
+	defer back(w, r)
+}
+
+func getSignUp(w http.ResponseWriter, r *http.Request) {
+	view.SignUp(w, r, &view.AuthData{
+		Page: &defaultPage,
+	})
+}
+
+func postSignUp(w http.ResponseWriter, r *http.Request) {
+	defer back(w, r)
 }
 
 func getSignOut(w http.ResponseWriter, r *http.Request) {
 	s := session.Get(r.Context())
 	s.Del(keyUserID)
-	http.Redirect(w, r, "/", http.StatusFound)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func getProfile(w http.ResponseWriter, r *http.Request) {

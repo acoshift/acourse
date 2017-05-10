@@ -39,6 +39,7 @@ func init() {
 
 	parseTemplate(keyIndex, []string{"index.tmpl", "layout.tmpl"})
 	parseTemplate(keySignIn, []string{"signin.tmpl", "auth.tmpl", "layout.tmpl"})
+	parseTemplate(keySignUp, []string{"signup.tmpl", "auth.tmpl", "layout.tmpl"})
 }
 
 func joinTemplateDir(files []string) []string {
@@ -88,6 +89,7 @@ func render(w http.ResponseWriter, r *http.Request, key, data interface{}) {
 	}
 
 	w.Header().Set(header.ContentType, "text/html; charset=utf-8")
+	w.Header().Set(header.CacheControl, "no-cache, no-store, must-revalidate, max-age=0")
 	pipe := &bytes.Buffer{}
 	err := t.Execute(pipe, data)
 	if err != nil {

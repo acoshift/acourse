@@ -1,6 +1,7 @@
 package app
 
 import (
+	"net/http"
 	"net/url"
 	"strings"
 
@@ -18,4 +19,8 @@ func extractPathID(u *url.URL) string {
 
 func verifyXSRF(token, userID, action string) bool {
 	return xsrftoken.Valid(token, internal.GetXSRFSecret(), userID, action)
+}
+
+func back(w http.ResponseWriter, r *http.Request) {
+	http.Redirect(w, r, r.RequestURI, http.StatusSeeOther)
 }
