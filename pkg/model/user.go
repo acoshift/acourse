@@ -13,6 +13,7 @@ type User struct {
 	role      *UserRole
 	Username  string
 	Name      string
+	Email     string
 	AboutMe   string
 	Image     string
 	CreatedAt time.Time

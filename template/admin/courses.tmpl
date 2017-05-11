@@ -1,3 +1,42 @@
 {{define "app-body"}}
 Coures
+<table>
+  <thead>
+    <th>ID</th>
+    <th>Image</th>
+    <th>Title</th>
+    <th>Owner</th>
+    <th>Type</th>
+    <th>Price</th>
+    <th>Discount</th>
+    <th>Created At</th>
+    <th>Updated At</th>
+  </thead>
+  <tbody>
+    {{range .Courses}}
+      <tr>
+        <td>{{.ID}}</td>
+        <td><img src="{{.Image}}"></td>
+        <td>{{.Title}}</td>
+        <td>{{.UserID}}</td>
+        <td>{{.Type | courseType}}</td>
+        <td>
+          {{.Price | currency}}
+          {{if .Option.Discount}}
+            ({{.Discount}})
+          {{end}}
+        </td>
+        <td>
+          {{if .Option.Discount}}
+            Yes
+          {{else}}
+            No
+          {{end}}
+        </td>
+        <td>{{.CreatedAt | dateTime}}</td>
+        <td>{{.UpdatedAt | dateTime}}</td>
+      </tr>
+    {{end}}
+  </tbody>
+</table>
 {{end}}

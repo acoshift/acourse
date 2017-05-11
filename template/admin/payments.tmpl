@@ -1,3 +1,27 @@
 {{define "app-body"}}
 Payments
+<table>
+  <thead>
+    <th>ID</th>
+    <!--<th>Image</th>
+    <th>Username</th>
+    <th>Name</th>
+    <th>Email</th>-->
+    <th>Created At</th>
+    <th>Updated At</th>
+  </thead>
+  <tbody>
+    {{range .Payments}}
+      <tr>
+        <td>{{.ID}}</td>
+        <!--<td><img src="{{.Image}}"></td>
+        <td></td>
+        <td></td>
+        <td></td>-->
+        <td>{{.CreatedAt | dateTime}}</td>
+        <td>{{.UpdatedAt | dateTime}}</td>
+      </tr>
+    {{end}}
+  </tbody>
+</table>
 {{end}}

@@ -74,18 +74,6 @@ func fetchUser(h http.Handler) http.Handler {
 
 func onlyAdmin(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// s := session.Get(r.Context())
-		// id, _ := s.Get(keyUserID).(string)
-		// c := internal.GetPrimaryDB()
-		// defer c.Close()
-		// b, err := model.IsUserAdmin(c, id)
-		// if err != nil {
-		// 	http.Error(w, err.Error(), http.StatusInternalServerError)
-		// 	return
-		// }
-		// if !b {
-		// 	http.Error(w, "Forbidden", http.StatusForbidden)
-		// }
 		u, _ := internal.GetUser(r.Context()).(*model.User)
 		if u == nil {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)

@@ -48,7 +48,7 @@ func init() {
 	admin.GET("/payments", http.HandlerFunc(getAdminPayments))
 
 	mux.Handle("/", r)
-	mux.Handle("/admin", onlyAdmin(admin))
+	mux.Handle("/admin/", http.StripPrefix("/admin", onlyAdmin(admin)))
 
 	Handler = middleware.Chain(
 		recovery,

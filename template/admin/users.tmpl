@@ -1,3 +1,27 @@
 {{define "app-body"}}
 Users
+<table>
+  <thead>
+    <th>ID</th>
+    <th>Image</th>
+    <th>Username</th>
+    <th>Name</th>
+    <th>Email</th>
+    <th>Created At</th>
+    <th>Updated At</th>
+  </thead>
+  <tbody>
+    {{range .Users}}
+      <tr>
+        <td>{{.ID}}</td>
+        <td><img src="{{.Image}}"></td>
+        <td>{{.Username}}</td>
+        <td>{{.Name}}</td>
+        <td>{{.Email}}</td>
+        <td>{{.CreatedAt | dateTime}}</td>
+        <td>{{.UpdatedAt | dateTime}}</td>
+      </tr>
+    {{end}}
+  </tbody>
+</table>
 {{end}}
