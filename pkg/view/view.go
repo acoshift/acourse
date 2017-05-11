@@ -14,6 +14,9 @@ const (
 	keyUser
 	keyCourse
 	keyCourseEdit
+	keyAdminUsers
+	keyAdminCourses
+	keyAdminPayments
 )
 
 // Index renders index view
@@ -39,4 +42,19 @@ func Profile(w http.ResponseWriter, r *http.Request, data *ProfileData) {
 // Course renders course view
 func Course(w http.ResponseWriter, r *http.Request, data *CourseData) {
 	render(w, r, keyCourse, data)
+}
+
+// AdminUsers renders admin users view
+func AdminUsers(w http.ResponseWriter, r *http.Request, data *AdminUsersData) {
+	render(w, r, keyAdminUsers, data)
+}
+
+// AdminCourses renders admin courses view
+func AdminCourses(w http.ResponseWriter, r *http.Request, data *AdminCoursesData) {
+	render(w, r, keyAdminCourses, data)
+}
+
+// AdminPayments renders admin payments view
+func AdminPayments(w http.ResponseWriter, r *http.Request, data *AdminPaymentsData) {
+	render(w, r, keyAdminPayments, data)
 }

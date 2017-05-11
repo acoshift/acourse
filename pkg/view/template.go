@@ -15,7 +15,7 @@ import (
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/flash"
 	"github.com/acoshift/header"
-	humanize "github.com/dustin/go-humanize"
+	"github.com/dustin/go-humanize"
 	"github.com/tdewolff/minify"
 	"github.com/tdewolff/minify/css"
 	"github.com/tdewolff/minify/html"
@@ -58,6 +58,9 @@ func init() {
 		"component/enrolled-course-card.tmpl",
 	})
 	parseTemplate(keyCourse, []string{"course.tmpl", "app.tmpl", "layout.tmpl"})
+	parseTemplate(keyAdminUsers, []string{"admin/users.tmpl", "app.tmpl", "layout.tmpl"})
+	parseTemplate(keyAdminCourses, []string{"admin/courses.tmpl", "app.tmpl", "layout.tmpl"})
+	parseTemplate(keyAdminPayments, []string{"admin/payments.tmpl", "app.tmpl", "layout.tmpl"})
 }
 
 func joinTemplateDir(files []string) []string {

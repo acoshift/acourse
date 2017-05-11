@@ -38,3 +38,21 @@ type CourseData struct {
 	*Page
 	Course *model.Course
 }
+
+// AdminUsersData type
+type AdminUsersData struct {
+	*Page
+	Users []*model.User
+}
+
+// AdminCoursesData type
+type AdminCoursesData struct {
+	*Page
+	Courses []*model.Course
+}
+
+// AdminPaymentsData type
+type AdminPaymentsData struct {
+	*Page
+	Payments []*model.Payment
+}

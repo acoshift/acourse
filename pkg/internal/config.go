@@ -2,10 +2,9 @@ package internal
 
 import (
 	"context"
+	"crypto/rand"
 	"log"
 	"time"
-
-	"crypto/rand"
 
 	"github.com/acoshift/configfile"
 	"github.com/garyburd/redigo/redis"

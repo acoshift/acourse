@@ -4,6 +4,11 @@
   {{if me}}
     <p>{{me.Username}}</p>
     <a href="/profile">Profile</a>
+    {{if me.Role.Admin}}
+      <a href="/admin/users">Users</a>
+      <a href="/admin/courses">Courses</a>
+      <a href="/admin/payments">Payments</a>
+    {{end}}
     <a href="/signout">Sign Out</a>
   {{else}}
     <a href="/signin">Sign In</a>

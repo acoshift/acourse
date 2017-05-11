@@ -42,8 +42,10 @@ func init() {
 	r.GET("/course/:courseID/edit", http.HandlerFunc(getCourseEdit))
 	r.POST("/course/:courseID/edit", http.HandlerFunc(postCourseEdit))
 
-	admin := http.NewServeMux()
-	// TODO: add admin route
+	admin := httprouter.New()
+	admin.GET("/users", http.HandlerFunc(getAdminUsers))
+	admin.GET("/courses", http.HandlerFunc(getAdminCourses))
+	admin.GET("/payments", http.HandlerFunc(getAdminPayments))
 
 	mux.Handle("/", r)
 	mux.Handle("/admin", onlyAdmin(admin))
@@ -244,4 +246,22 @@ func getCourseEdit(w http.ResponseWriter, r *http.Request) {
 func postCourseEdit(w http.ResponseWriter, r *http.Request) {
 	id := httprouter.GetParam(r.Context(), "courseID")
 	fmt.Fprint(w, "course edit: ", id)
+}
+
+func getAdminUsers(w http.ResponseWriter, r *http.Request) {
+	view.AdminUsers(w, r, &view.AdminUsersData{
+		Page: &defaultPage,
+	})
+}
+
+func getAdminCourses(w http.ResponseWriter, r *http.Request) {
+	view.AdminCourses(w, r, &view.AdminCoursesData{
+		Page: &defaultPage,
+	})
+}
+
+func getAdminPayments(w http.ResponseWriter, r *http.Request) {
+	view.AdminPayments(w, r, &view.AdminPaymentsData{
+		Page: &defaultPage,
+	})
 }
