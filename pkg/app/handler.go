@@ -237,7 +237,26 @@ func postProfileEdit(w http.ResponseWriter, r *http.Request) {
 
 func getCourse(w http.ResponseWriter, r *http.Request) {
 	id := httprouter.GetParam(r.Context(), "courseID")
-	fmt.Fprint(w, "course: ", id)
+	c := internal.GetPrimaryDB()
+	defer c.Close()
+	course, err := model.GetCourFromIDOrURL(c, id)
+	if err == model.ErrNotFound {
+		http.NotFound(w, r)
+		return
+	}
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	page := defaultPage
+	page.Title = course.Title + " | " + page.Title
+	page.Desc = course.Desc
+	page.Image = course.Image
+	// TODO: page.URL
+	view.Course(w, r, &view.CourseData{
+		Page:   &page,
+		Course: course,
+	})
 }
 
 func getCourseEdit(w http.ResponseWriter, r *http.Request) {

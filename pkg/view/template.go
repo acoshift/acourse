@@ -123,6 +123,9 @@ func parseTemplate(key interface{}, set []string) {
 		"rejected": func() int {
 			return model.Rejected
 		},
+		"html": func(v string) template.HTML {
+			return template.HTML(v)
+		},
 	})
 	_, err := t.ParseFiles(joinTemplateDir(set)...)
 	if err != nil {

@@ -1,3 +1,12 @@
 {{define "app-body"}}
-<h1>Course</h1>
+<h3>Course > {{.Course.Title}}</h3>
+<img src="{{.Course.Image}}">
+<h4>Course Detail</h4>
+{{if not .Course.Start.IsZero}}
+<p>Start At: {{.Course.Start | dateTime}}</p>
+{{end}}
+<hr>
+<div>
+  {{.Course.Desc | html}}
+</div>
 {{end}}
