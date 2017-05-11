@@ -2,21 +2,11 @@ package app
 
 import (
 	"net/http"
-	"net/url"
-	"strings"
 
 	"github.com/acoshift/acourse/pkg/internal"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/net/xsrftoken"
 )
-
-func extractURL(u *url.URL) []string {
-	ps := strings.Split(u.Path[1:], "/")
-	if len(ps) == 0 {
-		return nil
-	}
-	return ps
-}
 
 func verifyXSRF(token, userID, action string) bool {
 	return xsrftoken.Valid(token, internal.GetXSRFSecret(), userID, action)

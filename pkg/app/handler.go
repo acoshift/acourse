@@ -11,6 +11,7 @@ import (
 	"github.com/acoshift/acourse/pkg/view"
 	"github.com/acoshift/flash"
 	"github.com/acoshift/gzip"
+	"github.com/acoshift/httprouter"
 	"github.com/acoshift/middleware"
 	"github.com/acoshift/session"
 	sRedis "github.com/acoshift/session/store/redis"
@@ -24,20 +25,27 @@ func init() {
 
 	mux := http.NewServeMux()
 
-	mux.Handle("/", wrapFunc(getIndex, nil))
-	mux.Handle("/favicon.ico", fileHandler("static/favicon.ico"))
-	mux.Handle("/signin", mustNotSignedIn(wrapFunc(getSignIn, postSignIn)))
-	mux.Handle("/openid", mustNotSignedIn(wrapFunc(getSignInProvider, nil)))
-	mux.Handle("/openid/callback", mustNotSignedIn(wrapFunc(getSignInCallback, nil)))
-	mux.Handle("/signup", mustNotSignedIn(wrapFunc(getSignUp, postSignUp)))
-	mux.Handle("/signout", mustSignedIn(wrapFunc(getSignOut, nil)))
-	mux.Handle("/profile", mustSignedIn(wrapFunc(getProfile, nil)))
-	mux.Handle("/profile/edit", mustSignedIn(wrapFunc(getProfileEdit, postProfileEdit)))
-	// mux.Handle("/user/", http.StripPrefix("/user", wrapFunc(getUser, nil)))
-	mux.Handle("/course/", http.StripPrefix("/course", &courseCtrl{}))
+	r := httprouter.New()
+	r.GET("/", http.HandlerFunc(getIndex))
+	r.GET("/favicon.ico", fileHandler("static/favicon.ico"))
+	r.GET("/signin", mustNotSignedIn(http.HandlerFunc(getSignIn)))
+	r.POST("/signin", mustNotSignedIn(http.HandlerFunc(postSignIn)))
+	r.GET("/openid", mustNotSignedIn(http.HandlerFunc(getSignInProvider)))
+	r.GET("/openid/callback", mustNotSignedIn(http.HandlerFunc(getSignInCallback)))
+	r.GET("/signup", mustNotSignedIn(http.HandlerFunc(getSignUp)))
+	r.POST("/signup", mustNotSignedIn(http.HandlerFunc(postSignUp)))
+	r.GET("/signout", mustSignedIn(http.HandlerFunc(getSignOut)))
+	r.GET("/profile", mustSignedIn(http.HandlerFunc(getProfile)))
+	r.GET("/profile/edit", mustSignedIn(http.HandlerFunc(getProfileEdit)))
+	r.POST("/profile/edit", mustSignedIn(http.HandlerFunc(postProfileEdit)))
+	r.GET("/course/:courseID", http.HandlerFunc(getCourse))
+	r.GET("/course/:courseID/edit", http.HandlerFunc(getCourseEdit))
+	r.POST("/course/:courseID/edit", http.HandlerFunc(postCourseEdit))
 
 	admin := http.NewServeMux()
 	// TODO: add admin route
+
+	mux.Handle("/", r)
 	mux.Handle("/admin", onlyAdmin(admin))
 
 	Handler = middleware.Chain(
@@ -55,24 +63,6 @@ func init() {
 		flash.Middleware(),
 		fetchUser,
 	)(mux)
-}
-
-func wrapFunc(get, post http.HandlerFunc) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		switch r.Method {
-		case http.MethodGet, http.MethodHead:
-			if get != nil {
-				get.ServeHTTP(w, r)
-				return
-			}
-		case http.MethodPost:
-			if post != nil {
-				post.ServeHTTP(w, r)
-				return
-			}
-		}
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-	})
 }
 
 func fileHandler(name string) http.Handler {
@@ -241,70 +231,17 @@ func postProfileEdit(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// func getUser(w http.ResponseWriter, r *http.Request) {
-// 	ps := extractURL(r.URL)
-// 	id := ps[0]
-// 	if len(id) == 0 {
-// 		http.NotFound(w, r)
-// 		return
-// 	}
-// 	fmt.Fprint(w, "user: ", id)
-// }
-
-type courseCtrl struct{}
-
-func (*courseCtrl) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	ps := extractURL(r.URL)
-	if len(ps) == 0 {
-		http.Redirect(w, r, "/", http.StatusFound)
-		return
-	}
-	if len(ps) == 1 {
-		ps = append(ps, "")
-	}
-	if len(ps) > 2 && len(ps[2]) == 0 {
-		ps = ps[:2]
-	}
-	if len(ps) > 2 {
-		http.NotFound(w, r)
-		return
-	}
-	id := ps[0]
-	if len(id) == 0 {
-		http.NotFound(w, r)
-		return
-	}
-	switch ps[1] {
-	case "":
-		if r.Method == http.MethodGet || r.Method == http.MethodHead {
-			getCourse(w, r, id)
-			return
-		}
-	case "edit":
-		if r.Method == http.MethodGet || r.Method == http.MethodHead {
-			getCourseEdit(w, r, id)
-			return
-		}
-		if r.Method == http.MethodPost {
-			postCourseEdit(w, r, id)
-			return
-		}
-	default:
-		http.NotFound(w, r)
-		return
-	}
-	status := http.StatusMethodNotAllowed
-	http.Error(w, http.StatusText(status), status)
-}
-
-func getCourse(w http.ResponseWriter, r *http.Request, id string) {
+func getCourse(w http.ResponseWriter, r *http.Request) {
+	id := httprouter.ByName(r.Context(), "courseID")
 	fmt.Fprint(w, "course: ", id)
 }
 
-func getCourseEdit(w http.ResponseWriter, r *http.Request, id string) {
+func getCourseEdit(w http.ResponseWriter, r *http.Request) {
+	id := httprouter.ByName(r.Context(), "courseID")
 	fmt.Fprint(w, "course edit: ", id)
 }
 
-func postCourseEdit(w http.ResponseWriter, r *http.Request, id string) {
+func postCourseEdit(w http.ResponseWriter, r *http.Request) {
+	id := httprouter.ByName(r.Context(), "courseID")
 	fmt.Fprint(w, "course edit: ", id)
 }
