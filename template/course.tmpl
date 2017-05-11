@@ -3,7 +3,7 @@
 <img src="{{.Course.Image}}">
 <h4>Course Detail</h4>
 {{if not .Course.Start.IsZero}}
-<p>Start At: {{.Course.Start | dateTime}}</p>
+<p>Start At: {{.Course.Start | date}}</p>
 {{end}}
 <hr>
 <div>
