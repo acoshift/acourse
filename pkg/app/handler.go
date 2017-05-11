@@ -232,16 +232,16 @@ func postProfileEdit(w http.ResponseWriter, r *http.Request) {
 }
 
 func getCourse(w http.ResponseWriter, r *http.Request) {
-	id := httprouter.ByName(r.Context(), "courseID")
+	id := httprouter.GetByName(r.Context(), "courseID")
 	fmt.Fprint(w, "course: ", id)
 }
 
 func getCourseEdit(w http.ResponseWriter, r *http.Request) {
-	id := httprouter.ByName(r.Context(), "courseID")
+	id := httprouter.GetByName(r.Context(), "courseID")
 	fmt.Fprint(w, "course edit: ", id)
 }
 
 func postCourseEdit(w http.ResponseWriter, r *http.Request) {
-	id := httprouter.ByName(r.Context(), "courseID")
+	id := httprouter.GetByName(r.Context(), "courseID")
 	fmt.Fprint(w, "course edit: ", id)
 }
