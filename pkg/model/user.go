@@ -143,9 +143,9 @@ func GetUserFromUsername(c redis.Conn, username string) (*User, error) {
 // ListUsers lists users
 // TODO: pagination
 func ListUsers(c redis.Conn) ([]*User, error) {
-	userID, err := redis.Strings(c.Do("ZREVRANGE", key("u", "t0"), 0, -1))
+	userIDs, err := redis.Strings(c.Do("ZREVRANGE", key("u", "t0"), 0, -1))
 	if err != nil {
 		return nil, err
 	}
-	return GetUsers(c, userID)
+	return GetUsers(c, userIDs)
 }

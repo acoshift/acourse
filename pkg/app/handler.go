@@ -266,8 +266,17 @@ func getAdminUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func getAdminCourses(w http.ResponseWriter, r *http.Request) {
+	c := internal.GetPrimaryDB()
+	defer c.Close()
+	courses, err := model.ListCourses(c)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	c.Close()
 	view.AdminCourses(w, r, &view.AdminCoursesData{
-		Page: &defaultPage,
+		Page:    &defaultPage,
+		Courses: courses,
 	})
 }
 

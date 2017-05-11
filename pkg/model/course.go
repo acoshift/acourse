@@ -219,6 +219,16 @@ func GetCourFromIDOrURL(c redis.Conn, v string) (*Course, error) {
 	return GetCourseFromURL(c, v)
 }
 
+// ListCourses lists courses
+// TODO: pagination
+func ListCourses(c redis.Conn) ([]*Course, error) {
+	courseIDs, err := redis.Strings(c.Do("ZREVRANGE", key("c", "t0"), 0, -1))
+	if err != nil {
+		return nil, err
+	}
+	return GetCourses(c, courseIDs)
+}
+
 // ListPublicCourses lists public course sort by created at desc
 // TODO: add pagination
 func ListPublicCourses(c redis.Conn) ([]*Course, error) {
