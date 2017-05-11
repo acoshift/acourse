@@ -210,11 +210,26 @@ func getSignOut(w http.ResponseWriter, r *http.Request) {
 func getProfile(w http.ResponseWriter, r *http.Request) {
 	user, _ := internal.GetUser(r.Context()).(*model.User)
 
+	c := internal.GetPrimaryDB()
+	defer c.Close()
+	ownCourses, err := model.ListOwnCourses(c, user.ID())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	enrolledCourses, err := model.ListEnrolledCourses(c, user.ID())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	page := defaultPage
 	page.Title = user.Username + " | " + page.Title
 
 	view.Profile(w, r, &view.ProfileData{
-		Page: &page,
+		Page:            &page,
+		OwnCourses:      ownCourses,
+		EnrolledCourses: enrolledCourses,
 	})
 }
 

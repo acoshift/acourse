@@ -29,6 +29,8 @@ type AuthData struct {
 type ProfileData struct {
 	*Page
 	flash.Flash
+	OwnCourses      []*model.Course
+	EnrolledCourses []*model.Course
 }
 
 // CourseData type

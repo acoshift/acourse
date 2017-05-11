@@ -2,5 +2,15 @@
 <div>
   {{template "user-profile" me}}
   <a href="/profile/edit">Edit</a>
+  <hr>
+  <h4>My Own Courses</h4>
+  {{range .OwnCourses}}
+    {{template "own-course-card" .}}
+  {{end}}
+  <hr>
+  <h4>Enrolled Courses</h4>
+  {{range .EnrolledCourses}}
+    {{template "enrolled-course-card" .}}
+  {{end}}
 </div>
 {{end}}

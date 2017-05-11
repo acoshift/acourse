@@ -1,0 +1,13 @@
+{{define "own-course-card"}}
+<a href="/course/{{.URL}}">
+  <img src="{{.Image}}">
+  <h4>{{.Title}}</h4>
+  <p>{{.Type | courseType}}</p>
+  {{if eq .Type live}}
+    <p>{{.Start | date}}</p>
+  {{end}}
+  <p>{{.ShortDesc}}</p>
+  <p>Student: {{.EnrollCount}}</p>
+</a>
+<hr>
+{{end}}
