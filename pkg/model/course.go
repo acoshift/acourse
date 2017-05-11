@@ -232,3 +232,27 @@ func ListPublicCourses(c redis.Conn) ([]*Course, error) {
 	courseIDs, _ := redis.Strings(reply[1], nil)
 	return GetCourses(c, courseIDs)
 }
+
+// ListOwnCourses lists courses that owned by given user
+// TODO: add pagination
+func ListOwnCourses(c redis.Conn, userID string) ([]*Course, error) {
+	c.Send("MULTI")
+	c.Send("ZINTERSTORE", key("result"), 2, key("c", "t0"), key("u", userID, "c"), "WEIGHTS", 1, 0)
+	c.Send("ZREVRANGE", key("result"), 0, -1)
+	reply, err := redis.Values(c.Do("EXEC"))
+	if err != nil {
+		return nil, err
+	}
+	courseIDs, _ := redis.Strings(reply[1], nil)
+	return GetCourses(c, courseIDs)
+}
+
+// ListEnrolledCourses lists courses that enrolled by given user
+// TODO: add pagination
+func ListEnrolledCourses(c redis.Conn, userID string) ([]*Course, error) {
+	courseIDs, err := redis.Strings(c.Do("ZREVRANGE", key("u", userID, "e"), 0, -1))
+	if err != nil {
+		return nil, err
+	}
+	return GetCourses(c, courseIDs)
+}
