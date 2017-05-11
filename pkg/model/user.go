@@ -139,15 +139,3 @@ func GetUserFromUsername(c redis.Conn, username string) (*User, error) {
 	}
 	return GetUser(c, userID)
 }
-
-// GetUserFromProvider gets user from provider
-func GetUserFromProvider(c redis.Conn, provider string, providerUserID string) (*User, error) {
-	userID, err := redis.String(c.Do("HGET", key("u", "provider", provider), providerUserID))
-	if err == redis.ErrNil {
-		return nil, ErrNotFound
-	}
-	if err != nil {
-		return nil, err
-	}
-	return GetUser(c, userID)
-}
