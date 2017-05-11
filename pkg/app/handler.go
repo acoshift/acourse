@@ -92,6 +92,7 @@ func getIndex(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	c.Close()
 	view.Index(w, r, &view.IndexData{
 		Page:    &defaultPage,
 		Courses: courses,
@@ -214,6 +215,7 @@ func getProfile(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	c.Close()
 
 	page := defaultPage
 	page.Title = user.Username + " | " + page.Title
@@ -249,8 +251,17 @@ func postCourseEdit(w http.ResponseWriter, r *http.Request) {
 }
 
 func getAdminUsers(w http.ResponseWriter, r *http.Request) {
+	c := internal.GetPrimaryDB()
+	defer c.Close()
+	users, err := model.ListUsers(c)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	c.Close()
 	view.AdminUsers(w, r, &view.AdminUsersData{
-		Page: &defaultPage,
+		Page:  &defaultPage,
+		Users: users,
 	})
 }
 
