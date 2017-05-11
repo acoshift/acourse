@@ -11,6 +11,7 @@ import (
 type Course struct {
 	id           string
 	option       *CourseOption
+	owner        *User
 	enrollCount  int
 	oldURL       string
 	Title        string
@@ -65,6 +66,11 @@ func (x *Course) Option() *CourseOption {
 		x.option = &CourseOption{}
 	}
 	return x.option
+}
+
+// Owner returns course user if fetched
+func (x *Course) Owner() *User {
+	return x.owner
 }
 
 // EnrollCount returns count of enrolled user
