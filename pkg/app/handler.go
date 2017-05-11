@@ -281,7 +281,16 @@ func getAdminCourses(w http.ResponseWriter, r *http.Request) {
 }
 
 func getAdminPayments(w http.ResponseWriter, r *http.Request) {
+	c := internal.GetPrimaryDB()
+	defer c.Close()
+	payments, err := model.ListPayments(c)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	c.Close()
 	view.AdminPayments(w, r, &view.AdminPaymentsData{
-		Page: &defaultPage,
+		Page:     &defaultPage,
+		Payments: payments,
 	})
 }

@@ -120,3 +120,51 @@ func (x *Payment) Reject(c redis.Conn) error {
 	}
 	return nil
 }
+
+// GetPayments gets payments
+func GetPayments(c redis.Conn, paymentIDs []string) ([]*Payment, error) {
+	xs := make([]*Payment, len(paymentIDs))
+	for _, paymentID := range paymentIDs {
+		c.Send("SISMEMBER", key("p", "all"), paymentID)
+		c.Send("HGET", key("p"), paymentID)
+	}
+	c.Flush()
+	for i, paymentID := range paymentIDs {
+		exists, _ := redis.Bool(c.Receive())
+		if !exists {
+			c.Receive()
+			continue
+		}
+		var x Payment
+		b, err := redis.Bytes(c.Receive())
+		if err != nil {
+			return nil, err
+		}
+		err = dec(b, &x)
+		if err != nil {
+			return nil, err
+		}
+		x.id = paymentID
+		xs[i] = &x
+	}
+	return xs, nil
+}
+
+// GetPayment gets payment from given id
+func GetPayment(c redis.Conn, paymentID string) (*Payment, error) {
+	xs, err := GetPayments(c, []string{paymentID})
+	if err != nil {
+		return nil, err
+	}
+	return xs[0], nil
+}
+
+// ListPayments lists payments
+// TODO: pagination
+func ListPayments(c redis.Conn) ([]*Payment, error) {
+	paymentIDs, err := redis.Strings(c.Do("ZREVRANGE", key("p", "t0"), 0, -1))
+	if err != nil {
+		return nil, err
+	}
+	return GetPayments(c, paymentIDs)
+}
