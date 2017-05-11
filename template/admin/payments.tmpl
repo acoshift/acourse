@@ -1,4 +1,6 @@
 {{define "app-body"}}
+{{$xsrfAccept := xsrf "payment-accept"}}
+{{$xsrfReject := xsrf "payment-reject"}}
 Payments
 <table>
   <thead>
@@ -7,8 +9,10 @@ Payments
     <th>Username</th>
     <th>Name</th>
     <th>Email</th>-->
+    <th>Status</th>
     <th>Created At</th>
     <th>Updated At</th>
+    <th>Actions</th>
   </thead>
   <tbody>
     {{range .Payments}}
@@ -18,8 +22,21 @@ Payments
         <td></td>
         <td></td>
         <td></td>-->
+        <td>
+          {{if eq .Status pending}}
+            Pending
+          {{else if eq .Status accepted}}
+            Accepted
+          {{else if eq .Status rejected}}
+            Rejected
+          {{end}}
+        </td>
         <td>{{.CreatedAt | dateTime}}</td>
         <td>{{.UpdatedAt | dateTime}}</td>
+        <td>
+          <a href="?id={{.ID}}&action=accept&x={{$xsrfAccept}}">Accept</a>
+          <a href="?id={{.ID}}&action=reject&x={{$xsrfReject}}">Reject</a>
+        </td>
       </tr>
     {{end}}
   </tbody>

@@ -114,6 +114,15 @@ func parseTemplate(key interface{}, set []string) {
 		"eBook": func() int {
 			return model.EBook
 		},
+		"pending": func() int {
+			return model.Pending
+		},
+		"accepted": func() int {
+			return model.Accepted
+		},
+		"rejected": func() int {
+			return model.Rejected
+		},
 	})
 	_, err := t.ParseFiles(joinTemplateDir(set)...)
 	if err != nil {

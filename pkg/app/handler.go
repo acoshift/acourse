@@ -283,6 +283,31 @@ func getAdminCourses(w http.ResponseWriter, r *http.Request) {
 func getAdminPayments(w http.ResponseWriter, r *http.Request) {
 	c := internal.GetPrimaryDB()
 	defer c.Close()
+
+	action := r.FormValue("action")
+	if len(action) > 0 {
+		defer http.Redirect(w, r, "/admin/payments", http.StatusSeeOther)
+		user, _ := internal.GetUser(r.Context()).(*model.User)
+		id := r.FormValue("id")
+		if len(id) == 0 {
+			return
+		}
+		if action == "accept" && verifyXSRF(r.FormValue("x"), user.ID(), "payment-accept") {
+			x, err := model.GetPayment(c, id)
+			if err != nil {
+				return
+			}
+			x.Accept(c)
+		} else if action == "reject" && verifyXSRF(r.FormValue("x"), user.ID(), "payment-reject") {
+			x, err := model.GetPayment(c, id)
+			if err != nil {
+				return
+			}
+			x.Reject(c)
+		}
+		return
+	}
+
 	payments, err := model.ListPayments(c)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
