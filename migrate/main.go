@@ -42,16 +42,17 @@ func main() {
 	var courses []*courseModel
 	var payments []*paymentModel
 	// var attends []*attendModel
-	// var enrolls []*enrollModel
+	var enrolls []*enrollModel
 	// var assignments []*assignment
 	// var userAssignments []*userAssignment
 
+	log.Println("load old database")
 	must(client.Query(ctx, "User", &users))
 	must(client.Query(ctx, "Role", &roles))
-	must(client.Query(ctx, "Course", &courses))
-	must(client.Query(ctx, "Payment", &payments))
+	must(client.Query(ctx, "Course", &courses, ds.Order("CreatedAt")))
+	must(client.Query(ctx, "Payment", &payments, ds.Order("CreatedAt")))
 	// must(client.Query(ctx, "Attend", &attends))
-	// must(client.Query(ctx, "Enroll", &enrolls))
+	must(client.Query(ctx, "Enroll", &enrolls))
 	// must(client.Query(ctx, "Assignment", &assignments))
 	// must(client.Query(ctx, "UserAssignment", &userAssignments))
 
@@ -88,6 +89,7 @@ func main() {
 	}
 
 	// save users and create mapper
+	log.Println("migrate users")
 	for _, p := range respUser.Users {
 		u := findUser(p.LocalId)
 		r := findRole(p.LocalId)
@@ -109,6 +111,7 @@ func main() {
 	}
 
 	// save course and create mapper
+	log.Println("migrate courses")
 	for _, p := range courses {
 		x := model.Course{
 			CreatedAt:    p.CreatedAt,
@@ -154,6 +157,7 @@ func main() {
 	}
 
 	// save payments
+	log.Println("migrate payments")
 	for _, p := range payments {
 		c := findCourse(p.CourseID)
 		if c == nil {
@@ -180,6 +184,13 @@ func main() {
 			x.Status = model.Rejected
 		}
 		must(x.Save(conn))
+	}
+
+	// save enrolls
+	log.Println("migrate enrolls")
+	for _, p := range enrolls {
+		c := findCourse(p.CourseID)
+		must(model.Enroll(conn, p.UserID, c.newID))
 	}
 }
 

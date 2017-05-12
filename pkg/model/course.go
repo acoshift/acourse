@@ -165,7 +165,7 @@ func GetCourses(c redis.Conn, courseIDs []string) ([]*Course, error) {
 		c.Send("SISMEMBER", key("c", "attend"), courseID)
 		c.Send("SISMEMBER", key("c", "assignment"), courseID)
 		c.Send("SISMEMBER", key("c", "discount"), courseID)
-		c.Send("ZCARD", key("c", courseID, "u"), courseID)
+		c.Send("ZCARD", key("c", courseID, "u"))
 	}
 	c.Flush()
 	for i, courseID := range courseIDs {
