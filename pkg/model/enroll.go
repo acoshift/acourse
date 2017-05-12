@@ -22,3 +22,15 @@ func Enroll(c redis.Conn, userID, courseID string) error {
 	}
 	return nil
 }
+
+// IsEnrolled returns true if user enrolled a given course
+func IsEnrolled(c redis.Conn, userID, courseID string) (bool, error) {
+	_, err := c.Do("ZSCORE", key("c", courseID, "u"), userID)
+	if err == redis.ErrNil {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}

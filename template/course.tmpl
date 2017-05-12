@@ -10,26 +10,28 @@
   {{.Course.Desc | html}}
 </div>
 <hr>
-<div>
-  Course Contents
-  {{range $i, $x := .Course.Contents}}
-    <div>
-      <h4>{{incr $i}}. {{.Title}}</h4>
-      {{if .VideoID}}
-        <div class="video">
-          <iframe
-            width="560" height="315"
-            frameborder="0" scrolling="no" allowfullscreen
-            src="https://www.youtube.com/embed/{{.VideoID}}?rel=0&hd=1">
-          </iframe>
-        </div>
-      {{end}}
-      {{.Desc | html}}
-      {{if .DownloadURL}}
-        <a href="{{.DownloadURL}}" target="_blank">Download</a>
-      {{end}}
-      <hr>
-    </div>
-  {{end}}
-</div>
+{{if .Enrolled}}
+  <div>
+    Course Contents
+    {{range $i, $x := .Course.Contents}}
+      <div>
+        <h4>{{incr $i}}. {{.Title}}</h4>
+        {{if .VideoID}}
+          <div class="video">
+            <iframe
+              width="560" height="315"
+              frameborder="0" scrolling="no" allowfullscreen
+              src="https://www.youtube.com/embed/{{.VideoID}}?rel=0&hd=1">
+            </iframe>
+          </div>
+        {{end}}
+        {{.Desc | html}}
+        {{if .DownloadURL}}
+          <a href="{{.DownloadURL}}" target="_blank">Download</a>
+        {{end}}
+        <hr>
+      </div>
+    {{end}}
+  </div>
+{{end}}
 {{end}}

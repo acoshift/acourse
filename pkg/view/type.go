@@ -36,7 +36,8 @@ type ProfileData struct {
 // CourseData type
 type CourseData struct {
 	*Page
-	Course *model.Course
+	Course   *model.Course
+	Enrolled bool
 }
 
 // AdminUsersData type

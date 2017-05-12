@@ -90,6 +90,11 @@ func GetXSRFSecret() string {
 	return xsrfSecret
 }
 
+// GetBaseURL returns base url
+func GetBaseURL() string {
+	return baseURL
+}
+
 // SignInUser sign in user with email and password
 func SignInUser(email, password string) (string, error) {
 	resp, err := gitClient.VerifyPassword(&identitytoolkit.IdentitytoolkitRelyingpartyVerifyPasswordRequest{

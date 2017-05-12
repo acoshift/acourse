@@ -4,6 +4,7 @@ import (
 	"encoding/gob"
 	"fmt"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/acoshift/acourse/pkg/internal"
@@ -236,7 +237,9 @@ func postProfileEdit(w http.ResponseWriter, r *http.Request) {
 }
 
 func getCourse(w http.ResponseWriter, r *http.Request) {
-	id := httprouter.GetParam(r.Context(), "courseID")
+	ctx := r.Context()
+	user, _ := internal.GetUser(ctx).(*model.User)
+	id := httprouter.GetParam(ctx, "courseID")
 	c := internal.GetPrimaryDB()
 	defer c.Close()
 	course, err := model.GetCourFromIDOrURL(c, id)
@@ -248,14 +251,26 @@ func getCourse(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	if len(course.URL) == 0 {
+		course.URL = course.ID()
+	}
+	enrolled := false
+	if user != nil {
+		enrolled, err = model.IsEnrolled(c, user.ID(), course.ID())
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
 	page := defaultPage
 	page.Title = course.Title + " | " + page.Title
 	page.Desc = course.Desc
 	page.Image = course.Image
-	// TODO: page.URL
+	page.URL = internal.GetBaseURL() + "/course/" + url.PathEscape(course.URL)
 	view.Course(w, r, &view.CourseData{
-		Page:   &page,
-		Course: course,
+		Page:     &page,
+		Course:   course,
+		Enrolled: enrolled,
 	})
 }
 
