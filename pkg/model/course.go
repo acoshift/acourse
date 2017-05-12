@@ -115,7 +115,7 @@ func (x *Course) Save(c redis.Conn) error {
 			c.Send("HDEL", key("c", "url"), x.id)
 		}
 		if len(x.URL) > 0 {
-			c.Send("HSET", key("c", "url"), x.id, x.URL)
+			c.Send("HSET", key("c", "url"), x.URL, x.id)
 		}
 	}
 
