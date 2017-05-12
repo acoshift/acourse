@@ -5,7 +5,11 @@ import (
 	"log"
 	"time"
 
+	"golang.org/x/oauth2/google"
+	identitytoolkit "google.golang.org/api/identitytoolkit/v3"
+
 	"github.com/acoshift/acourse/pkg/model"
+	"github.com/acoshift/configfile"
 	"github.com/acoshift/ds"
 	"github.com/garyburd/redigo/redis"
 )
@@ -15,9 +19,23 @@ var ctx = context.Background()
 var client, _ = ds.NewClient(ctx, "acourse-156413")
 var conn, _ = redis.Dial("tcp", "localhost:6379", redis.DialDatabase(4))
 
+var config = configfile.NewReader("../config")
+var serviceAccount = config.Bytes("service_account")
+
 // migrate all data from datastore and firebase to redis
 func main() {
 	time.Local = time.UTC
+	ctx := context.Background()
+
+	gconf, err := google.JWTConfigFromJSON(serviceAccount, identitytoolkit.CloudPlatformScope)
+	if err != nil {
+		log.Fatal(err)
+	}
+	gitService, err := identitytoolkit.New(gconf.Client(ctx))
+	if err != nil {
+		log.Fatal(err)
+	}
+	gitClient := gitService.Relyingparty
 
 	var users []*userModel
 	var roles []*roleModel
@@ -55,20 +73,38 @@ func main() {
 		return nil
 	}
 
+	respUser, err := gitClient.DownloadAccount(&identitytoolkit.IdentitytoolkitRelyingpartyDownloadAccountRequest{
+		MaxResults: 5000,
+	}).Do()
+	must(err)
+
+	findUser := func(userID string) *userModel {
+		for _, p := range users {
+			if p.ID() == userID {
+				return p
+			}
+		}
+		return &userModel{}
+	}
+
 	// save users and create mapper
-	for _, p := range users {
-		r := findRole(p.ID())
+	for _, p := range respUser.Users {
+		u := findUser(p.LocalId)
+		r := findRole(p.LocalId)
 		x := model.User{
-			Username:  p.Username,
-			Image:     p.Photo,
-			AboutMe:   p.AboutMe,
-			CreatedAt: p.CreatedAt,
-			UpdatedAt: p.UpdatedAt,
+			Username:  u.Username,
+			Image:     u.Photo,
+			AboutMe:   u.AboutMe,
+			Email:     p.Email,
+			CreatedAt: time.Unix(0, p.CreatedAt),
+			UpdatedAt: u.UpdatedAt,
+		}
+		if len(x.Name) == 0 {
+			x.Name = p.DisplayName
 		}
 		x.Role().Admin = r.Admin
 		x.Role().Instructor = r.Instructor
-
-		x.SetID(p.ID())
+		x.SetID(p.LocalId)
 		must(x.Save(conn))
 	}
 
@@ -81,7 +117,7 @@ func main() {
 			ShortDesc:    p.ShortDescription,
 			Desc:         p.Description,
 			Image:        p.Photo,
-			UserID:       p.Owner, // TODO: must map from user
+			UserID:       p.Owner,
 			Start:        p.Start,
 			URL:          p.URL,
 			Price:        p.Price,
@@ -102,12 +138,16 @@ func main() {
 		x.Option().Assignment = p.Options.Assignment
 		x.Option().Discount = p.Options.Discount
 		for _, c := range p.Contents {
-			x.Contents = append(x.Contents, &model.CourseContent{
+			t := model.CourseContent{
 				Title:       c.Title,
 				Desc:        c.Description,
-				YoutubeID:   c.Video,
+				VideoID:     c.Video,
 				DownloadURL: c.DownloadURL,
-			})
+			}
+			if len(p.Video) > 0 {
+				t.VideoType = model.Youtube
+			}
+			x.Contents = append(x.Contents, &t)
 		}
 		must(x.Save(conn))
 		p.newID = x.ID()

@@ -55,7 +55,8 @@ c :: hash
   contents
     title
     desc
-    youtubeId
+    videoId
+    videoType
     downloadURL
   enrollDetail
   createdAt

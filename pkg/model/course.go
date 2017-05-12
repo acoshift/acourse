@@ -38,11 +38,18 @@ const (
 	EBook
 )
 
+// Video type values
+const (
+	_ = iota
+	Youtube
+)
+
 // CourseContent type
 type CourseContent struct {
 	Title       string
 	Desc        string
-	YoutubeID   string
+	VideoID     string
+	VideoType   int
 	DownloadURL string
 }
 

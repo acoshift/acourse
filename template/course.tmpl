@@ -15,7 +15,7 @@
   {{range $i, $x := .Course.Contents}}
     <div>
       <h4>{{incr $i}}. {{.Title}}</h4>
-      {{if .YoutubeID}}
+      {{if .VideoID}}
         <div class="video">
           <iframe
             width="560" height="315"
