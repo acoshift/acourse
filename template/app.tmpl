@@ -1,21 +1,26 @@
 {{define "body"}}
-  <a href="/"><img src="https://storage.googleapis.com/acourse/static/24540ce5-cc7d-4886-a680-eca24be60fe1.png"></a>
-  <p>Navbar here</p>
-  {{if me}}
-    <p>{{me.Username}}</p>
-    <a href="/profile">Profile</a>
-    {{if me.Role.Admin}}
-      <a href="/admin/users">Users</a>
-      <a href="/admin/courses">Courses</a>
-      <a href="/admin/payments/pending">Pending Payments</a>
-      <a href="/admin/payments/history">History Payments</a>
+  <div id="navbar">
+    <a href="/">
+      <img height="100%" src="https://storage.googleapis.com/acourse/static/24540ce5-cc7d-4886-a680-eca24be60fe1.png">
+    </a>
+    {{if me}}
+      <p>{{me.Username}}</p>
+      <a href="/profile">Profile</a>
+      {{if me.Role.Admin}}
+        <a href="/admin/users">Users</a>
+        <a href="/admin/courses">Courses</a>
+        <a href="/admin/payments/pending">Pending Payments</a>
+        <a href="/admin/payments/history">History Payments</a>
+      {{end}}
+      <a href="/signout">Sign Out</a>
+    {{else}}
+      <a href="/signin">Sign In</a>
     {{end}}
-    <a href="/signout">Sign Out</a>
-  {{else}}
-    <a href="/signin">Sign In</a>
-  {{end}}
+  </div>
+
   <h1>App Layout</h1>
   {{template "app-body" $}}
+
   <footer>Made with <span>❤️</span>&nbsp;&nbsp;by <a href="https://moonrhythm.info" target="_blank">Moon Rhythm</a></footer>
 {{end}}
 
@@ -25,6 +30,12 @@
 
 
 {{define "style"}}
+  <style>
+    #navbar {
+      display: flex;
+      height: 80px;
+    }
+  </style>
   {{template "app-style" $}}
 {{end}}
 
