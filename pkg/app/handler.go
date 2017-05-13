@@ -28,6 +28,7 @@ func init() {
 
 	r := httprouter.New()
 	r.GET("/", http.HandlerFunc(getIndex))
+	r.ServeFiles("/~/*filepath", http.Dir("static"))
 	r.GET("/favicon.ico", fileHandler("static/favicon.ico"))
 	r.GET("/signin", mustNotSignedIn(http.HandlerFunc(getSignIn)))
 	r.POST("/signin", mustNotSignedIn(http.HandlerFunc(postSignIn)))
