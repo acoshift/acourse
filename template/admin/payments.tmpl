@@ -34,8 +34,10 @@ Payments
         <td>{{.CreatedAt | dateTime}}</td>
         <td>{{.UpdatedAt | dateTime}}</td>
         <td>
-          <a href="?id={{.ID}}&action=accept&x={{$xsrfAccept}}">Accept</a>
-          <a href="?id={{.ID}}&action=reject&x={{$xsrfReject}}">Reject</a>
+          {{if eq .Status pending}}
+            <a href="?id={{.ID}}&action=accept&x={{$xsrfAccept}}">Accept</a>
+            <a href="?id={{.ID}}&action=reject&x={{$xsrfReject}}">Reject</a>
+          {{end}}
         </td>
       </tr>
     {{end}}

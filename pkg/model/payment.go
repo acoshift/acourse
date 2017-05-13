@@ -173,3 +173,17 @@ func ListPayments(c redis.Conn) ([]*Payment, error) {
 	}
 	return GetPayments(c, paymentIDs)
 }
+
+// ListPendingPayments lists pending payments
+// TODO: pagination
+func ListPendingPayments(c redis.Conn) ([]*Payment, error) {
+	c.Send("MULTI")
+	c.Send("ZINTERSTORE", key("result"), 2, key("p", "t0"), key("p", "pending"), "WEIGHTS", 1, 0)
+	c.Send("ZREVRANGE", key("result"), 0, -1)
+	reply, err := redis.Values(c.Do("EXEC"))
+	if err != nil {
+		return nil, err
+	}
+	paymentIDs, _ := redis.Strings(reply[1], nil)
+	return GetPayments(c, paymentIDs)
+}

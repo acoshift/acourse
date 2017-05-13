@@ -16,6 +16,7 @@ import (
 	"github.com/acoshift/middleware"
 	"github.com/acoshift/session"
 	sRedis "github.com/acoshift/session/store/redis"
+	"github.com/garyburd/redigo/redis"
 )
 
 // Handler returns app's handler
@@ -46,7 +47,8 @@ func init() {
 	admin := httprouter.New()
 	admin.GET("/users", http.HandlerFunc(getAdminUsers))
 	admin.GET("/courses", http.HandlerFunc(getAdminCourses))
-	admin.GET("/payments", http.HandlerFunc(getAdminPayments))
+	admin.GET("/payments/pending", http.HandlerFunc(getAdminPendingPayments))
+	admin.GET("/payments/history", http.HandlerFunc(getAdminHistoryPayments))
 
 	mux.Handle("/", r)
 	mux.Handle("/admin/", http.StripPrefix("/admin", onlyAdmin(admin)))
@@ -355,7 +357,7 @@ func getAdminCourses(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func getAdminPayments(w http.ResponseWriter, r *http.Request) {
+func getAdminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter func(redis.Conn) ([]*model.Payment, error)) {
 	c := internal.GetPrimaryDB()
 	defer c.Close()
 
@@ -383,7 +385,7 @@ func getAdminPayments(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	payments, err := model.ListPayments(c)
+	payments, err := paymentsGetter(c)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -393,4 +395,12 @@ func getAdminPayments(w http.ResponseWriter, r *http.Request) {
 		Page:     &defaultPage,
 		Payments: payments,
 	})
+}
+
+func getAdminPendingPayments(w http.ResponseWriter, r *http.Request) {
+	getAdminPayments(w, r, model.ListPendingPayments)
+}
+
+func getAdminHistoryPayments(w http.ResponseWriter, r *http.Request) {
+	getAdminPayments(w, r, model.ListPayments)
 }
