@@ -12,6 +12,7 @@ type Assignment struct {
 	id        string
 	Title     string
 	Desc      string
+	Open      bool
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }

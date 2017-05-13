@@ -43,7 +43,7 @@ func main() {
 	var payments []*paymentModel
 	// var attends []*attendModel
 	var enrolls []*enrollModel
-	// var assignments []*assignment
+	var assignments []*assignment
 	// var userAssignments []*userAssignment
 
 	log.Println("load old database")
@@ -53,7 +53,7 @@ func main() {
 	must(client.Query(ctx, "Payment", &payments, ds.Order("CreatedAt")))
 	// must(client.Query(ctx, "Attend", &attends))
 	must(client.Query(ctx, "Enroll", &enrolls))
-	// must(client.Query(ctx, "Assignment", &assignments))
+	must(client.Query(ctx, "Assignment", &assignments, ds.Order("CreatedAt")))
 	// must(client.Query(ctx, "UserAssignment", &userAssignments))
 
 	findRole := func(userID string) *roleModel {
@@ -109,6 +109,20 @@ func main() {
 		x.Role().Instructor = r.Instructor
 		x.SetID(p.LocalId)
 		must(x.Save(conn))
+	}
+
+	log.Println("migrate assignments")
+	for _, p := range assignments {
+		x := model.Assignment{
+			CreatedAt: p.CreatedAt,
+			UpdatedAt: p.UpdatedAt,
+			Title:     p.Title,
+			Desc:      p.Description,
+			Open:      p.Open,
+		}
+		must(x.Save(conn))
+		c := findCourse(p.CourseID)
+		c.assignments = append(c.assignments, x.ID())
 	}
 
 	// save course and create mapper
@@ -220,7 +234,8 @@ type roleModel struct {
 }
 
 type courseModel struct {
-	newID string
+	newID       string
+	assignments []string
 
 	ds.StringIDModel
 	ds.StampModel
