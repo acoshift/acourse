@@ -39,6 +39,11 @@ func Profile(w http.ResponseWriter, r *http.Request, data *ProfileData) {
 	render(w, r, keyProfile, data)
 }
 
+// ProfileEdit renders profile edit view
+func ProfileEdit(w http.ResponseWriter, r *http.Request, data *ProfileEditData) {
+	render(w, r, keyProfileEdit, data)
+}
+
 // Course renders course view
 func Course(w http.ResponseWriter, r *http.Request, data *CourseData) {
 	render(w, r, keyCourse, data)

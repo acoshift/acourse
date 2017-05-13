@@ -1,0 +1,24 @@
+{{define "app-body"}}
+<div>
+  <form method="POST">
+    <input type="hidden" name="X" value="{{xsrf "profile-edit"}}">
+    <label>Username</label>
+    <input name="Username" value="{{.Flash.Get "Username"}}">
+    <label>Name</label>
+    <input name="Name" value="{{.Flash.Get "Name"}}">
+    <label>About Me</label>
+    <input name="AboutMe" value="{{.Flash.Get "AboutMe"}}">
+    <button type="submit">Save</button>
+    {{if .Flash.Errors}}
+      <div>
+        <ul>
+          {{range .Flash.Errors}}
+            <li>{{.}}</li>
+          {{end}}
+        </ul>
+      </div>
+    {{end}}
+  </form>
+  <a href="/profile">Cancel</a>
+</div>
+{{end}}

@@ -229,11 +229,51 @@ func getProfile(w http.ResponseWriter, r *http.Request) {
 }
 
 func getProfileEdit(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "profile edit")
+	ctx := r.Context()
+	user, _ := internal.GetUser(ctx).(*model.User)
+	f := flash.Get(ctx)
+	if !f.Has("Username") {
+		f.Set("Username", user.Username)
+	}
+	if !f.Has("Name") {
+		f.Set("Name", user.Name)
+	}
+	if !f.Has("AboutMe") {
+		f.Set("AboutMe", user.AboutMe)
+	}
+	page := defaultPage
+	page.Title = user.Username + " | " + page.Title
+	view.ProfileEdit(w, r, &view.ProfileEditData{
+		Page:  &page,
+		Flash: f,
+	})
 }
 
 func postProfileEdit(w http.ResponseWriter, r *http.Request) {
-
+	defer back(w, r)
+	ctx := r.Context()
+	user, _ := internal.GetUser(ctx).(*model.User)
+	f := flash.Get(ctx)
+	if !verifyXSRF(r.FormValue("X"), user.ID(), "profile-edit") {
+		f.Add("Errors", "invalid xsrf token")
+		return
+	}
+	username := r.FormValue("Username")
+	name := r.FormValue("Name")
+	aboutMe := r.FormValue("AboutMe")
+	user.Username = username
+	user.Name = name
+	user.AboutMe = aboutMe
+	f.Set("Username", username)
+	f.Set("Name", name)
+	f.Set("AboutMe", aboutMe)
+	c := internal.GetPrimaryDB()
+	defer c.Close()
+	err := user.Save(c)
+	if err != nil {
+		f.Add("Errors", err.Error())
+		return
+	}
 }
 
 func getCourse(w http.ResponseWriter, r *http.Request) {

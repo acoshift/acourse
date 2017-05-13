@@ -33,6 +33,12 @@ type ProfileData struct {
 	EnrolledCourses []*model.Course
 }
 
+// ProfileEditData type
+type ProfileEditData struct {
+	*Page
+	flash.Flash
+}
+
 // CourseData type
 type CourseData struct {
 	*Page

@@ -57,6 +57,7 @@ func init() {
 		"component/own-course-card.tmpl",
 		"component/enrolled-course-card.tmpl",
 	})
+	parseTemplate(keyProfileEdit, []string{"profile-edit.tmpl", "app.tmpl", "layout.tmpl"})
 	parseTemplate(keyCourse, []string{"course.tmpl", "app.tmpl", "layout.tmpl"})
 	parseTemplate(keyAdminUsers, []string{"admin/users.tmpl", "app.tmpl", "layout.tmpl"})
 	parseTemplate(keyAdminCourses, []string{"admin/courses.tmpl", "app.tmpl", "layout.tmpl"})

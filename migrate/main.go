@@ -95,6 +95,7 @@ func main() {
 		r := findRole(p.LocalId)
 		x := model.User{
 			Username:  u.Username,
+			Name:      u.Name,
 			Image:     u.Photo,
 			AboutMe:   u.AboutMe,
 			Email:     p.Email,
