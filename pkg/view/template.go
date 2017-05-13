@@ -160,12 +160,20 @@ func render(w http.ResponseWriter, r *http.Request, key, data interface{}) {
 
 	ctx := r.Context()
 
+	me, _ := internal.GetUser(ctx).(*model.User)
+	tp := t.Template
+
 	// inject template funcs
-	tp := t.Funcs(template.FuncMap{
-		"me": func() interface{} {
-			return internal.GetUser(ctx)
-		},
-	})
+	if me != nil {
+		tp = tp.Funcs(template.FuncMap{
+			"me": func() interface{} {
+				return me
+			},
+			"xsrf": func(action string) string {
+				return xsrftoken.Generate(internal.GetXSRFSecret(), me.ID(), action)
+			},
+		})
+	}
 
 	w.Header().Set(header.ContentType, "text/html; charset=utf-8")
 	w.Header().Set(header.CacheControl, "no-cache, no-store, must-revalidate, max-age=0")

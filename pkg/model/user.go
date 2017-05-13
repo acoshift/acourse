@@ -9,15 +9,16 @@ import (
 
 // User model
 type User struct {
-	id        string
-	role      *UserRole
-	Username  string
-	Name      string
-	Email     string
-	AboutMe   string
-	Image     string
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	id          string
+	role        *UserRole
+	oldUsername string
+	Username    string
+	Name        string
+	Email       string
+	AboutMe     string
+	Image       string
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
 }
 
 // UserRole type
@@ -50,6 +51,20 @@ func (x *User) Save(c redis.Conn) error {
 		return fmt.Errorf("invalid id")
 	}
 
+	c.Do("WATCH", key("u", "username"))
+	// verify is new username duplicate
+	{
+		uID, err := redis.String(c.Do("HGET", key("u", "username"), x.Username))
+		if err != redis.ErrNil && err != nil {
+			c.Do("UNWATCH")
+			return err
+		}
+		if len(uID) > 0 && x.id != uID {
+			c.Do("UNWATCH")
+			return fmt.Errorf("username already exists")
+		}
+	}
+
 	c.Send("MULTI")
 	c.Send("SADD", key("u", "all"), x.id)
 
@@ -74,6 +89,14 @@ func (x *User) Save(c redis.Conn) error {
 			c.Send("SADD", key("u", "instructor"), x.id)
 		} else {
 			c.Send("SREM", key("u", "instructor"), x.id)
+		}
+	}
+	if x.oldUsername != x.Username {
+		if len(x.oldUsername) > 0 {
+			c.Send("HDEL", key("u", "username"), x.oldUsername)
+		}
+		if len(x.Username) > 0 {
+			c.Send("HSET", key("u", "username"), x.Username, x.id)
 		}
 	}
 
@@ -114,6 +137,7 @@ func GetUsers(c redis.Conn, userIDs []string) ([]*User, error) {
 		x.role = &UserRole{}
 		x.role.Admin, _ = redis.Bool(c.Receive())
 		x.role.Instructor, _ = redis.Bool(c.Receive())
+		x.oldUsername = x.Username
 		x.id = userID
 		xs[i] = &x
 	}

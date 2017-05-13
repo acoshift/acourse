@@ -274,6 +274,7 @@ func postProfileEdit(w http.ResponseWriter, r *http.Request) {
 		f.Add("Errors", err.Error())
 		return
 	}
+	http.Redirect(w, r, "/profile", http.StatusSeeOther)
 }
 
 func getCourse(w http.ResponseWriter, r *http.Request) {
