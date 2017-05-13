@@ -1,22 +1,31 @@
 {{define "course-card"}}
-<a href="/course/{{.URL}}">
-  <img src="{{.Image}}">
-  <h4>{{.Title}}</h4>
-  <p>{{.Type | courseType}}</p>
-  {{if eq .Type live}}
-    <p>{{.Start | date}}</p>
-  {{end}}
-  <p>{{.ShortDesc}}</p>
-  <p>Student: {{.EnrollCount}}</p>
+  <a href="/course/{{.URL}}">
+    <div id="course-card">
+      <img src="{{.Image}}" width="100%">
+      <h4>{{.Title}}</h4>
+      <p>{{.Type | courseType}}</p>
+      {{if eq .Type live}}
+        <p>{{.Start | date}}</p>
+      {{end}}
+      <p>{{.ShortDesc}}</p>
+      <p>Student: {{.EnrollCount}}</p>
 
-  {{if le .Price 0.0}}
-    <p>FREE</p>
-  {{else}}
-    <p class="{{if .Option.Discount}}line{{end}}">{{.Price | currency}}</p>
-  {{end}}
-  {{if .Option.Discount}}
-    <p>{{.Discount | currency}}</p>
-  {{end}}
-</a>
-<hr>
+      {{if le .Price 0.0}}
+        <p>FREE</p>
+      {{else}}
+        <p class="{{if .Option.Discount}}line{{end}}">{{.Price | currency}}</p>
+      {{end}}
+      {{if .Option.Discount}}
+        <p>{{.Discount | currency}}</p>
+      {{end}}
+    </div>
+  </a>
+{{end}}
+
+{{define "course-card-style"}}
+<style>
+  #course-card {
+    width: 200px;
+  }
+</style>
 {{end}}

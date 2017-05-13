@@ -1,7 +1,21 @@
 {{define "app-body"}}
-<p>Hello</p>
-<h3>Courses</h3>
-{{range .Courses}}
-  {{template "course-card" .}}
+  <div id="home">
+    <p>Hello</p>
+    <h3>Courses</h3>
+    {{range .Courses}}
+      {{template "course-card" .}}
+    {{end}}
+  </div>
 {{end}}
+
+{{define "app-script"}}
+<script>
+  console.log('HELLO FROM HOME')
+</script>
+{{end}}
+
+{{define "app-style"}}
+  {{template "course-card-style"}}
+  <style>
+  </style>
 {{end}}

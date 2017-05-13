@@ -1,0 +1,55 @@
+// Use rscss System na
+@import './config.scss';
+
+// Color
+._main-text-color {
+  color: $color-main;
+}
+._accent-text-color {
+  color: $color-accent;
+}
+._main-bg-color {
+  background-color: $color-main;
+}
+._accent-bg-color {
+  background-color: $color-accent;
+}
+
+// Size
+._full-width {
+  width: 100% !important;
+}
+._full-height {
+  height: 100% !important;
+}
+._full {
+  @extend ._full-width;
+  @extend ._full-height;
+}
+
+// Display
+._flex {
+  display: flex !important;
+}
+._flex-row {
+  @extend ._flex;
+}
+._flex-column {
+  @extend ._flex;
+  flex-direction: column;
+}
+
+// Position
+._align-center {
+  text-align: center !important;
+}
+._align-left {
+  text-align: left !important;
+}
+._align-right {
+  text-align: right !important;
+}
+._flex-align-middle {
+  justify-content: center;
+  align-items: center;
+}
