@@ -2,7 +2,6 @@ package app
 
 import (
 	"encoding/gob"
-	"fmt"
 	"net/http"
 	"net/url"
 	"time"
@@ -40,6 +39,8 @@ func init() {
 	r.GET("/profile", mustSignedIn(http.HandlerFunc(getProfile)))
 	r.GET("/profile/edit", mustSignedIn(http.HandlerFunc(getProfileEdit)))
 	r.POST("/profile/edit", mustSignedIn(http.HandlerFunc(postProfileEdit)))
+	r.GET("/create-course", http.HandlerFunc(getCourseCreate))
+	r.POST("/create-course", http.HandlerFunc(postCourseCreate))
 	r.GET("/course/:courseID", http.HandlerFunc(getCourse))
 	r.GET("/course/:courseID/edit", http.HandlerFunc(getCourseEdit))
 	r.POST("/course/:courseID/edit", http.HandlerFunc(postCourseEdit))
@@ -317,14 +318,43 @@ func getCourse(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func getCourseCreate(w http.ResponseWriter, r *http.Request) {
+	page := defaultPage
+	page.Title = "Create new Course | " + page.Title
+	view.CourseCreate(w, r, &view.CourseCreateData{
+		Page: &page,
+	})
+}
+
+func postCourseCreate(w http.ResponseWriter, r *http.Request) {
+
+}
+
 func getCourseEdit(w http.ResponseWriter, r *http.Request) {
-	id := httprouter.GetParam(r.Context(), "courseID")
-	fmt.Fprint(w, "course edit: ", id)
+	ctx := r.Context()
+	page := defaultPage
+	page.Title = "Edit Course | " + page.Title
+
+	courseID := httprouter.GetParam(ctx, "courseID")
+
+	c := internal.GetPrimaryDB()
+	defer c.Close()
+	course, err := model.GetCourFromIDOrURL(c, courseID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	view.CourseEdit(w, r, &view.CourseEditData{
+		Page:   &page,
+		Course: course,
+	})
 }
 
 func postCourseEdit(w http.ResponseWriter, r *http.Request) {
-	id := httprouter.GetParam(r.Context(), "courseID")
-	fmt.Fprint(w, "course edit: ", id)
+	ctx := r.Context()
+	id := httprouter.GetParam(ctx, "courseID")
+	http.Redirect(w, r, "/course/"+id, http.StatusSeeOther)
 }
 
 func getAdminUsers(w http.ResponseWriter, r *http.Request) {

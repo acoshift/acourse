@@ -46,6 +46,19 @@ type CourseData struct {
 	Enrolled bool
 }
 
+// CourseCreateData type
+type CourseCreateData struct {
+	*Page
+	flash.Flash
+}
+
+// CourseEditData type
+type CourseEditData struct {
+	*Page
+	flash.Flash
+	Course *model.Course
+}
+
 // AdminUsersData type
 type AdminUsersData struct {
 	*Page
