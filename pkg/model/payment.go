@@ -75,6 +75,11 @@ func (x *Payment) Save(c redis.Conn) error {
 
 	c.Send("MULTI")
 	c.Send("SADD", key("p", "all"), x.id)
+	if x.Status == Pending {
+		c.Send("SADD", key("p", "pending"), x.id)
+	} else {
+		c.Send("SREM", key("p", "pending"), x.id)
+	}
 	x.save(c)
 	_, err = c.Do("EXEC")
 	if err != nil {

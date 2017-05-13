@@ -94,5 +94,6 @@ p :: hash
 p:t0 :: zset
 p:t1 :: zset
 p:all :: set
+p:pending :: set
 
 s:{sessId} :: string ; session data binary
