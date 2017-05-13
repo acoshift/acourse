@@ -5,6 +5,9 @@
   <a href="/profile/edit">Edit</a>
   <hr>
   <h4>My Own Courses</h4>
+    {{if me.Role.Instructor}}
+      <a href="/create-course">Create new Course</a>
+    {{end}}
   {{range .OwnCourses}}
     {{template "own-course-card" .}}
   {{end}}

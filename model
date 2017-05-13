@@ -13,6 +13,7 @@
 ; id counter
 id:c :: string ; int
 id:p :: string ; int
+id:a :: string ; int
 
 ; user data
 u :: hash
@@ -59,6 +60,7 @@ c :: hash
     videoType
     downloadURL
   enrollDetail
+  assignmentIds
   createdAt
   updatedAt
 
@@ -95,5 +97,13 @@ p:t0 :: zset
 p:t1 :: zset
 p:all :: set
 p:pending :: set
+
+; assignment data
+a :: hash
+- {id}
+  title
+  desc
+  createdAt
+  updatedAt
 
 s:{sessId} :: string ; session data binary

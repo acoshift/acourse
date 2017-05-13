@@ -9,25 +9,26 @@ import (
 
 // Course model
 type Course struct {
-	id           string
-	option       *CourseOption
-	owner        *User
-	enrollCount  int
-	oldURL       string
-	Title        string
-	ShortDesc    string
-	Desc         string
-	Image        string
-	UserID       string
-	Start        time.Time
-	URL          string // MUST not parsable to int
-	Type         int
-	Price        float64
-	Discount     float64
-	Contents     []*CourseContent
-	EnrollDetail string
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
+	id            string
+	option        *CourseOption
+	owner         *User
+	enrollCount   int
+	oldURL        string
+	Title         string
+	ShortDesc     string
+	Desc          string
+	Image         string
+	UserID        string
+	Start         time.Time
+	URL           string // MUST not parsable to int
+	Type          int
+	Price         float64
+	Discount      float64
+	Contents      []*CourseContent
+	EnrollDetail  string
+	AssignmentIDs []string
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
 }
 
 // Course type values
