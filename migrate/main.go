@@ -193,8 +193,12 @@ func main() {
 		if !p.Start.IsZero() {
 			st = &p.Start
 		}
+		var url *string
+		if len(p.URL) > 0 {
+			url = &p.URL
+		}
 		var id int64
-		err = stmt.QueryRow(p.Owner, p.Title, p.ShortDescription, p.Description, p.Photo, st, p.URL, tp, p.Price, p.DiscountedPrice, p.EnrollDetail, p.CreatedAt, p.UpdatedAt).Scan(&id)
+		err = stmt.QueryRow(p.Owner, p.Title, p.ShortDescription, p.Description, p.Photo, st, url, tp, p.Price, p.DiscountedPrice, p.EnrollDetail, p.CreatedAt, p.UpdatedAt).Scan(&id)
 		must(err)
 		p.newID = id
 
