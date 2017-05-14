@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"log"
 	"time"
 
@@ -12,6 +13,7 @@ import (
 	"github.com/acoshift/configfile"
 	"github.com/acoshift/ds"
 	"github.com/garyburd/redigo/redis"
+	_ "github.com/lib/pq"
 )
 
 var ctx = context.Background()
@@ -21,6 +23,7 @@ var conn, _ = redis.Dial("tcp", "localhost:6379", redis.DialDatabase(4))
 
 var config = configfile.NewReader("../config")
 var serviceAccount = config.Bytes("service_account")
+var sqlURL = config.String("sql_url")
 
 // migrate all data from datastore and firebase to redis
 func main() {
@@ -37,42 +40,36 @@ func main() {
 	}
 	gitClient := gitService.Relyingparty
 
+	db, err := sql.Open("postgres", sqlURL)
+	must(err)
+
 	var users []*userModel
 	var roles []*roleModel
 	var courses []*courseModel
-	var payments []*paymentModel
+	// var payments []*paymentModel
 	// var attends []*attendModel
-	var enrolls []*enrollModel
-	var assignments []*assignment
+	// var enrolls []*enrollModel
+	// var assignments []*assignment
 	// var userAssignments []*userAssignment
 
 	log.Println("load old database")
 	must(client.Query(ctx, "User", &users))
 	must(client.Query(ctx, "Role", &roles))
-	must(client.Query(ctx, "Course", &courses, ds.Order("CreatedAt")))
-	must(client.Query(ctx, "Payment", &payments, ds.Order("CreatedAt")))
+	must(client.Query(ctx, "Course", &courses))
+	// must(client.Query(ctx, "Payment", &payments, ds.Order("CreatedAt")))
 	// must(client.Query(ctx, "Attend", &attends))
-	must(client.Query(ctx, "Enroll", &enrolls))
-	must(client.Query(ctx, "Assignment", &assignments, ds.Order("CreatedAt")))
+	// must(client.Query(ctx, "Enroll", &enrolls))
+	// must(client.Query(ctx, "Assignment", &assignments, ds.Order("CreatedAt")))
 	// must(client.Query(ctx, "UserAssignment", &userAssignments))
 
-	findRole := func(userID string) *roleModel {
-		for _, p := range roles {
-			if p.ID() == userID {
-				return p
-			}
-		}
-		return &roleModel{}
-	}
-
-	findCourse := func(courseID string) *courseModel {
-		for _, p := range courses {
-			if p.ID() == courseID {
-				return p
-			}
-		}
-		return nil
-	}
+	// findCourse := func(courseID string) *courseModel {
+	// 	for _, p := range courses {
+	// 		if p.ID() == courseID {
+	// 			return p
+	// 		}
+	// 	}
+	// 	return nil
+	// }
 
 	respUser, err := gitClient.DownloadAccount(&identitytoolkit.IdentitytoolkitRelyingpartyDownloadAccountRequest{
 		MaxResults: 5000,
@@ -88,125 +85,181 @@ func main() {
 		return &userModel{}
 	}
 
+	db.Exec("DELETE FROM payments;")
+	db.Exec("DELETE FROM user_assignments;")
+	db.Exec("DELETE FROM course_assignments;")
+	db.Exec("DELETE FROM course_contents;")
+	db.Exec("DELETE FROM course_options;")
+	db.Exec("DELETE FROM courses;")
+	db.Exec("DELETE FROM roles;")
+	db.Exec("DELETE FROM users;")
+
 	// save users and create mapper
 	log.Println("migrate users")
+	stmt, err := db.Prepare(`
+		INSERT INTO users
+			(id, username, name, image, about_me, email, created_at, updated_at)
+		VALUES
+			($1, $2, $3, $4, $5, $6, $7, $8);
+	`)
+	must(err)
 	for _, p := range respUser.Users {
 		u := findUser(p.LocalId)
-		r := findRole(p.LocalId)
 		x := model.User{
+			ID:        p.LocalId,
 			Username:  u.Username,
 			Name:      u.Name,
 			Image:     u.Photo,
 			AboutMe:   u.AboutMe,
 			Email:     p.Email,
-			CreatedAt: time.Unix(0, p.CreatedAt),
+			CreatedAt: time.Unix(0, p.CreatedAt*1000000),
 			UpdatedAt: u.UpdatedAt,
 		}
-		if len(x.Name) == 0 {
-			x.Name = p.DisplayName
+		id := p.LocalId
+		username := u.Username
+		if len(username) == 0 {
+			username = id
 		}
-		x.Role().Admin = r.Admin
-		x.Role().Instructor = r.Instructor
-		x.SetID(p.LocalId)
-		must(x.Save(conn))
+		name := u.Name
+		if len(name) == 0 {
+			name = p.DisplayName
+		}
+		image := u.Photo
+		aboutMe := u.AboutMe
+		createdAt := time.Unix(0, p.CreatedAt*1000000)
+		updatedAt := u.UpdatedAt
+		if updatedAt.IsZero() {
+			updatedAt = time.Now()
+		}
+		if createdAt.IsZero() {
+			createdAt = updatedAt
+		}
+		var email *string
+		if len(x.Email) > 0 {
+			email = &x.Email
+		}
+		_, err = stmt.Exec(id, username, name, image, aboutMe, email, createdAt, updatedAt)
+		must(err)
 	}
 
-	log.Println("migrate assignments")
-	for _, p := range assignments {
-		x := model.Assignment{
-			CreatedAt: p.CreatedAt,
-			UpdatedAt: p.UpdatedAt,
-			Title:     p.Title,
-			Desc:      p.Description,
-			Open:      p.Open,
-		}
-		must(x.Save(conn))
-		c := findCourse(p.CourseID)
-		c.assignments = append(c.assignments, x.ID())
+	log.Println("migrate role")
+	stmt, err = db.Prepare(`
+		INSERT INTO roles
+			(id, admin, instructor, created_at, updated_at)
+		VALUES
+			($1, $2, $3, $4, $5);
+	`)
+	must(err)
+	for _, p := range roles {
+		_, err = stmt.Exec(p.ID(), p.Admin, p.Instructor, p.CreatedAt, p.UpdatedAt)
+		must(err)
 	}
 
 	// save course and create mapper
 	log.Println("migrate courses")
+	stmt, err = db.Prepare(`
+		INSERT INTO courses
+			(user_id, title, short_desc, long_desc, image, start, url, type, price, discount, enroll_detail, created_at, updated_at)
+		VALUES
+			($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+		RETURNING id;
+	`)
+	must(err)
+	stmt2, err := db.Prepare(`
+		INSERT INTO course_options
+			(id, public, enroll, attend, assignment, discount)
+		VALUES
+			($1, $2, $3, $4, $5, $6);
+	`)
+	must(err)
+	stmt3, err := db.Prepare(`
+		INSERT INTO course_contents
+			(course_id, title, long_desc, video_id, video_type, download_url)
+		VALUES
+			($1, $2, $3, $4, $5, $6);
+	`)
+	must(err)
 	for _, p := range courses {
-		x := model.Course{
-			CreatedAt:    p.CreatedAt,
-			UpdatedAt:    p.UpdatedAt,
-			Title:        p.Title,
-			ShortDesc:    p.ShortDescription,
-			Desc:         p.Description,
-			Image:        p.Photo,
-			UserID:       p.Owner,
-			Start:        p.Start,
-			URL:          p.URL,
-			Price:        p.Price,
-			Discount:     p.DiscountedPrice,
-			EnrollDetail: p.EnrollDetail,
-		}
+		var tp int
 		switch p.Type {
 		case CourseTypeLive:
-			x.Type = model.Live
+			tp = model.Live
 		case CourseTypeVideo:
-			x.Type = model.Video
+			tp = model.Video
 		case CourseTypeEbook:
-			x.Type = model.EBook
+			tp = model.EBook
 		}
-		x.Option().Public = p.Options.Public
-		x.Option().Enroll = p.Options.Enroll
-		x.Option().Attend = p.Options.Attend
-		x.Option().Assignment = p.Options.Assignment
-		x.Option().Discount = p.Options.Discount
+		var st *time.Time
+		if !p.Start.IsZero() {
+			st = &p.Start
+		}
+		var id int64
+		err = stmt.QueryRow(p.Owner, p.Title, p.ShortDescription, p.Description, p.Photo, st, p.URL, tp, p.Price, p.DiscountedPrice, p.EnrollDetail, p.CreatedAt, p.UpdatedAt).Scan(&id)
+		must(err)
+		p.newID = id
+
+		_, err = stmt2.Exec(id, p.Options.Public, p.Options.Enroll, p.Options.Attend, p.Options.Assignment, p.Options.Discount)
+		must(err)
 		for _, c := range p.Contents {
-			t := model.CourseContent{
-				Title:       c.Title,
-				Desc:        c.Description,
-				VideoID:     c.Video,
-				DownloadURL: c.DownloadURL,
-			}
+			var vt int
 			if len(p.Video) > 0 {
-				t.VideoType = model.Youtube
+				vt = model.Youtube
 			}
-			x.Contents = append(x.Contents, &t)
+			_, err = stmt3.Exec(id, c.Title, c.Description, c.Video, vt, c.DownloadURL)
+			must(err)
 		}
-		must(x.Save(conn))
-		p.newID = x.ID()
 	}
 
-	// save payments
-	log.Println("migrate payments")
-	for _, p := range payments {
-		c := findCourse(p.CourseID)
-		if c == nil {
-			log.Println("course not found")
-			continue
-		}
-		x := model.Payment{
-			CourseID:      c.newID,
-			UserID:        p.UserID,
-			CreatedAt:     p.CreatedAt,
-			UpdatedAt:     p.UpdatedAt,
-			Image:         p.URL,
-			Price:         p.Price,
-			OriginalPrice: p.OriginalPrice,
-			At:            p.At,
-			Code:          p.Code,
-		}
-		switch p.Status {
-		case statusWaiting:
-			x.Status = model.Pending
-		case statusApproved:
-			x.Status = model.Accepted
-		case statusRejected:
-			x.Status = model.Rejected
-		}
-		must(x.Save(conn))
-	}
+	// log.Println("migrate assignments")
+	// for _, p := range assignments {
+	// 	x := model.Assignment{
+	// 		CreatedAt: p.CreatedAt,
+	// 		UpdatedAt: p.UpdatedAt,
+	// 		Title:     p.Title,
+	// 		Desc:      p.Description,
+	// 		Open:      p.Open,
+	// 	}
+	// 	must(x.Save(conn))
+	// 	c := findCourse(p.CourseID)
+	// 	c.assignments = append(c.assignments, x.ID())
+	// }
 
-	// save enrolls
-	log.Println("migrate enrolls")
-	for _, p := range enrolls {
-		c := findCourse(p.CourseID)
-		must(model.Enroll(conn, p.UserID, c.newID))
-	}
+	// // save payments
+	// log.Println("migrate payments")
+	// for _, p := range payments {
+	// 	c := findCourse(p.CourseID)
+	// 	if c == nil {
+	// 		log.Println("course not found")
+	// 		continue
+	// 	}
+	// 	x := model.Payment{
+	// 		CourseID:      c.newID,
+	// 		UserID:        p.UserID,
+	// 		CreatedAt:     p.CreatedAt,
+	// 		UpdatedAt:     p.UpdatedAt,
+	// 		Image:         p.URL,
+	// 		Price:         p.Price,
+	// 		OriginalPrice: p.OriginalPrice,
+	// 		At:            p.At,
+	// 		Code:          p.Code,
+	// 	}
+	// 	switch p.Status {
+	// 	case statusWaiting:
+	// 		x.Status = model.Pending
+	// 	case statusApproved:
+	// 		x.Status = model.Accepted
+	// 	case statusRejected:
+	// 		x.Status = model.Rejected
+	// 	}
+	// 	must(x.Save(conn))
+	// }
+
+	// // save enrolls
+	// log.Println("migrate enrolls")
+	// for _, p := range enrolls {
+	// 	c := findCourse(p.CourseID)
+	// 	must(model.Enroll(conn, p.UserID, c.newID))
+	// }
 }
 
 func must(err error) {
@@ -234,7 +287,7 @@ type roleModel struct {
 }
 
 type courseModel struct {
-	newID       string
+	newID       int64
 	assignments []string
 
 	ds.StringIDModel
@@ -284,8 +337,6 @@ const (
 )
 
 type paymentModel struct {
-	newID string
-
 	ds.StringIDModel
 	ds.StampModel
 	UserID        string
@@ -321,7 +372,7 @@ type enrollModel struct {
 }
 
 type assignment struct {
-	newID string
+	newID int64
 
 	ds.StringIDModel
 	ds.StampModel
@@ -332,8 +383,6 @@ type assignment struct {
 }
 
 type userAssignment struct {
-	newID string
-
 	ds.StringIDModel
 	ds.StampModel
 	AssignmentID string

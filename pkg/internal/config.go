@@ -24,6 +24,7 @@ var (
 	xsrfSecret         = config.String("xsrf_secret")
 	serviceAccount     = config.Bytes("service_account")
 	baseURL            = config.String("base_url")
+	sqlURL             = config.String("sql_url")
 )
 
 var (
