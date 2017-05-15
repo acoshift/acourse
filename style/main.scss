@@ -3,8 +3,14 @@
 @import 'helper';
 @import 'grid';
 
-.line {
-  text-decoration: black;
+div {
+  color: #525c65;
+  font-family: $main-fontface;  
+}
+p {
+  color: #525c65;
+  font-family: $secondary-fontface;
+  margin: 0;
 }
 
 // TODO: fix this
