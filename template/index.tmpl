@@ -1,10 +1,12 @@
 {{define "app-body"}}
   <div id="home">
-    <p>Hello</p>
-    <h3>Courses</h3>
+    <div class="grid-container row">
     {{range .Courses}}
-      {{template "course-card" .}}
+      <div class="col-xs-3">
+        {{template "course-card" .}}
+      </div>
     {{end}}
+    </div>
   </div>
 {{end}}
 
@@ -17,5 +19,8 @@
 {{define "app-style"}}
   {{template "course-card-style"}}
   <style>
+    #home {
+      padding-top: 64px;
+    }
   </style>
 {{end}}

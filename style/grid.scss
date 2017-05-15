@@ -295,7 +295,7 @@ $sm: 768px;
   .show-sm-upper {
     display: flex !important;
   }
-  .fw-container {
+  .grid-container {
     width: $sm - 20px;
   }
 
@@ -536,7 +536,7 @@ $sm: 768px;
     display: none !important;
   }
 
-  .fw-container {
+  .grid-container {
     width: $md - 20px;
   }
 
@@ -770,7 +770,7 @@ $sm: 768px;
 }
 
 @media only screen and (min-width: $lg) {
-  .fw-container {
+  .grid-container {
     width: $lg - 20px;
   }
 
