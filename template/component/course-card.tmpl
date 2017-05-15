@@ -13,16 +13,21 @@
           {{end}}
         </div>
         <p class="course-description">{{.ShortDesc}}</p>
-        <p>Student: {{.EnrollCount}}</p>
-
-        {{if le .Price 0.0}}
-          <p>FREE</p>
-        {{else}}
-          <p class="{{if .Option.Discount}}line{{end}}">{{.Price | currency}}</p>
-        {{end}}
-        {{if .Option.Discount}}
-          <p>{{.Discount | currency}}</p>
-        {{end}}
+        <div class="course-bottom">
+          <div class="course-student">
+            <i class="fa fa-user"></i>&nbsp {{.EnrollCount}}
+          </div>
+          <div class="course-price">
+            {{if le .Price 0.0}}
+              <p>FREE</p>
+            {{else}}
+              <p class="{{if .Option.Discount}}line{{end}}">{{.Price | currency}}</p>
+            {{end}}
+            {{if .Option.Discount}}
+              <p>{{.Discount | currency}}</p>
+            {{end}}
+          </div>
+        </div>
       </div>
     </div>
 {{end}}
@@ -33,6 +38,7 @@
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
+    margin-bottom: 16px;
     background-color: white;
     border-radius: 5px;
     overflow: hidden;
@@ -54,6 +60,7 @@
   }
 
   #course-card .course-name {
+    font-weight: 600;
     margin-bottom: 8px;
   }
   #course-card .course-type {
@@ -87,6 +94,10 @@
     font-size: 15px;
     line-height: 22px;
     margin-bottom: 16px;
+  }
+  #course-card .course-bottom {
+    display: flex;
+    justify-content: space-between;
   }
 </style>
 {{end}}
