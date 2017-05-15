@@ -14,7 +14,7 @@ import (
 	"github.com/acoshift/httprouter"
 	"github.com/acoshift/middleware"
 	"github.com/acoshift/session"
-	sRedis "github.com/acoshift/session/store/redis"
+	sSQL "github.com/acoshift/session/store/sql"
 	"github.com/garyburd/redigo/redis"
 )
 
@@ -65,7 +65,7 @@ func init() {
 			MaxAge:   10 * 24 * time.Hour,
 			HTTPOnly: true,
 			Secure:   session.PreferSecure,
-			Store:    sRedis.New(internal.GetSecondaryPool(), "acr::s:"),
+			Store:    sSQL.New(internal.GetDB(), "sessions"),
 		}),
 		flash.Middleware(),
 		fetchUser,
@@ -90,7 +90,7 @@ func getIndex(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	c := internal.GetPrimaryDB()
+	c := internal.GetRedisDB()
 	defer c.Close()
 	courses, err := model.ListPublicCourses(c)
 	if err != nil {
@@ -208,14 +208,14 @@ func getSignOut(w http.ResponseWriter, r *http.Request) {
 func getProfile(w http.ResponseWriter, r *http.Request) {
 	user, _ := internal.GetUser(r.Context()).(*model.User)
 
-	c := internal.GetPrimaryDB()
+	c := internal.GetRedisDB()
 	defer c.Close()
-	ownCourses, err := model.ListOwnCourses(c, user.ID())
+	ownCourses, err := model.ListOwnCourses(c, user.ID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	enrolledCourses, err := model.ListEnrolledCourses(c, user.ID())
+	enrolledCourses, err := model.ListEnrolledCourses(c, user.ID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -258,7 +258,7 @@ func postProfileEdit(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	user, _ := internal.GetUser(ctx).(*model.User)
 	f := flash.Get(ctx)
-	if !verifyXSRF(r.FormValue("X"), user.ID(), "profile-edit") {
+	if !verifyXSRF(r.FormValue("X"), user.ID, "profile-edit") {
 		f.Add("Errors", "invalid xsrf token")
 		return
 	}
@@ -271,7 +271,7 @@ func postProfileEdit(w http.ResponseWriter, r *http.Request) {
 	f.Set("Username", username)
 	f.Set("Name", name)
 	f.Set("AboutMe", aboutMe)
-	c := internal.GetPrimaryDB()
+	c := internal.GetRedisDB()
 	defer c.Close()
 	err := user.Save(c)
 	if err != nil {
@@ -285,7 +285,7 @@ func getCourse(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	user, _ := internal.GetUser(ctx).(*model.User)
 	id := httprouter.GetParam(ctx, "courseID")
-	c := internal.GetPrimaryDB()
+	c := internal.GetRedisDB()
 	defer c.Close()
 	course, err := model.GetCourFromIDOrURL(c, id)
 	if err == model.ErrNotFound {
@@ -301,7 +301,7 @@ func getCourse(w http.ResponseWriter, r *http.Request) {
 	}
 	enrolled := false
 	if user != nil {
-		enrolled, err = model.IsEnrolled(c, user.ID(), course.ID())
+		enrolled, err = model.IsEnrolled(c, user.ID, course.ID)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -338,7 +338,7 @@ func getCourseEdit(w http.ResponseWriter, r *http.Request) {
 
 	courseID := httprouter.GetParam(ctx, "courseID")
 
-	c := internal.GetPrimaryDB()
+	c := internal.GetRedisDB()
 	defer c.Close()
 	course, err := model.GetCourFromIDOrURL(c, courseID)
 	if err != nil {
@@ -359,7 +359,7 @@ func postCourseEdit(w http.ResponseWriter, r *http.Request) {
 }
 
 func getAdminUsers(w http.ResponseWriter, r *http.Request) {
-	c := internal.GetPrimaryDB()
+	c := internal.GetRedisDB()
 	defer c.Close()
 	users, err := model.ListUsers(c)
 	if err != nil {
@@ -374,7 +374,7 @@ func getAdminUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func getAdminCourses(w http.ResponseWriter, r *http.Request) {
-	c := internal.GetPrimaryDB()
+	c := internal.GetRedisDB()
 	defer c.Close()
 	courses, err := model.ListCourses(c)
 	if err != nil {
@@ -389,7 +389,7 @@ func getAdminCourses(w http.ResponseWriter, r *http.Request) {
 }
 
 func getAdminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter func(redis.Conn) ([]*model.Payment, error)) {
-	c := internal.GetPrimaryDB()
+	c := internal.GetRedisDB()
 	defer c.Close()
 
 	action := r.FormValue("action")

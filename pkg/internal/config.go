@@ -3,6 +3,7 @@ package internal
 import (
 	"context"
 	"crypto/rand"
+	"database/sql"
 	"log"
 	"time"
 
@@ -15,44 +16,30 @@ import (
 var config = configfile.NewReader("config")
 
 var (
-	redisPrimaryAddr   = config.String("redis_primary_addr")
-	redisPrimaryDB     = config.Int("redis_primary_db")
-	redisPrimaryPass   = config.String("redis_primary_pass")
-	redisSecondaryAddr = config.String("redis_secondary_addr")
-	redisSecondaryDB   = config.Int("redis_secondary_db")
-	redisSecondaryPass = config.String("redis_secondary_pass")
-	xsrfSecret         = config.String("xsrf_secret")
-	serviceAccount     = config.Bytes("service_account")
-	baseURL            = config.String("base_url")
-	sqlURL             = config.String("sql_url")
+	redisAddr      = config.String("redis_addr")
+	redisDB        = config.Int("redis_db")
+	redisPass      = config.String("redis_pass")
+	xsrfSecret     = config.String("xsrf_secret")
+	serviceAccount = config.Bytes("service_account")
+	baseURL        = config.String("base_url")
+	sqlURL         = config.String("sql_url")
 )
 
 var (
-	primaryPool = &redis.Pool{
-		IdleTimeout: 10 * time.Minute,
+	redisPool = &redis.Pool{
+		IdleTimeout: 30 * time.Minute,
 		MaxIdle:     10,
 		MaxActive:   100,
 		Wait:        true,
 		Dial: func() (redis.Conn, error) {
-			return redis.Dial("tcp", redisPrimaryAddr,
-				redis.DialDatabase(redisPrimaryDB),
-				redis.DialPassword(redisPrimaryPass),
-			)
-		},
-	}
-	secondaryPool = &redis.Pool{
-		IdleTimeout: 10 * time.Minute,
-		MaxIdle:     10,
-		MaxActive:   100,
-		Wait:        true,
-		Dial: func() (redis.Conn, error) {
-			return redis.Dial("tcp", redisSecondaryAddr,
-				redis.DialDatabase(redisSecondaryDB),
-				redis.DialPassword(redisSecondaryPass),
+			return redis.Dial("tcp", redisAddr,
+				redis.DialDatabase(redisDB),
+				redis.DialPassword(redisPass),
 			)
 		},
 	}
 	gitClient *identitytoolkit.RelyingpartyService
+	db        *sql.DB
 )
 
 func init() {
@@ -69,21 +56,26 @@ func init() {
 		log.Fatal(err)
 	}
 	gitClient = gitService.Relyingparty
+
+	db, err = sql.Open("postgres", sqlURL)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
-// GetPrimaryDB returns primary redis connection from pool, use for store app data
-func GetPrimaryDB() redis.Conn {
-	return primaryPool.Get()
+// GetDB returns sql db
+func GetDB() *sql.DB {
+	return db
 }
 
-// GetSecondaryDB returns secondary redis connection from pool, use for store session
-func GetSecondaryDB() redis.Conn {
-	return secondaryPool.Get()
+// GetRedisDB returns redis connection from pool
+func GetRedisDB() redis.Conn {
+	return redisPool.Get()
 }
 
-// GetSecondaryPool returns secondary redis pool
-func GetSecondaryPool() *redis.Pool {
-	return secondaryPool
+// GetRedisPool returns redis pool
+func GetRedisPool() *redis.Pool {
+	return redisPool
 }
 
 // GetXSRFSecret returns xsrf secret

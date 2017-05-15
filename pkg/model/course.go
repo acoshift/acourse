@@ -9,7 +9,7 @@ import (
 
 // Course model
 type Course struct {
-	id            string
+	ID            string
 	option        *CourseOption
 	owner         *User
 	enrollCount   int
@@ -61,11 +61,6 @@ type CourseOption struct {
 	Attend     bool
 	Assignment bool
 	Discount   bool
-}
-
-// ID returns course id
-func (x *Course) ID() string {
-	return x.id
 }
 
 // Option returns course option

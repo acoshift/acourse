@@ -1,11 +1,15 @@
 package model
 
-import "time"
+import (
+	"time"
+
+	"github.com/acoshift/acourse/pkg/internal"
+)
 
 // User model
 type User struct {
 	ID          string
-	role        *UserRole
+	Role        UserRole
 	oldUsername string
 	Username    string
 	Name        string
@@ -22,13 +26,24 @@ type UserRole struct {
 	Instructor bool
 }
 
-// Role returns user role
-func (x *User) Role() *UserRole {
-	if x.role == nil {
-		x.role = &UserRole{}
-	}
-	return x.role
-}
+var (
+	getUsersStmt, _ = internal.GetDB().Prepare(`
+		SELECT
+			users.id,
+			users.name,
+			users.email,
+			users.about_me,
+			users.image,
+			users.created_at,
+			users.updated_at,
+			roles.admin,
+			roles.instructor
+		FROM users
+		LEFT JOIN roles
+		ON users.id = roles.id
+		WHERE users.id IN $1;
+	`)
+)
 
 // Save saves user
 // func (x *User) Save(c redis.Conn) error {
@@ -92,51 +107,32 @@ func (x *User) Role() *UserRole {
 // 	return nil
 // }
 
-// // GetUsers gets users
-// func GetUsers(c redis.Conn, userIDs []string) ([]*User, error) {
-// 	xs := make([]*User, len(userIDs))
-// 	for _, userID := range userIDs {
-// 		c.Send("SISMEMBER", key("u", "all"), userID)
-// 		c.Send("HGET", key("u"), userID)
-// 		c.Send("SISMEMBER", key("u", "admin"), userID)
-// 		c.Send("SISMEMBER", key("u", "instructor"), userID)
-// 	}
-// 	c.Flush()
-// 	for i, userID := range userIDs {
-// 		exists, _ := redis.Bool(c.Receive())
-// 		if !exists {
-// 			c.Receive()
-// 			c.Receive()
-// 			c.Receive()
-// 			continue
-// 		}
-// 		var x User
-// 		b, err := redis.Bytes(c.Receive())
-// 		if err != nil {
-// 			return nil, err
-// 		}
-// 		err = dec(b, &x)
-// 		if err != nil {
-// 			return nil, err
-// 		}
-// 		x.role = &UserRole{}
-// 		x.role.Admin, _ = redis.Bool(c.Receive())
-// 		x.role.Instructor, _ = redis.Bool(c.Receive())
-// 		x.oldUsername = x.Username
-// 		x.id = userID
-// 		xs[i] = &x
-// 	}
-// 	return xs, nil
-// }
+// GetUsers gets users
+func GetUsers(userIDs []string) ([]*User, error) {
+	xs := make([]*User, 0, len(userIDs))
+	rows, err := getUsersStmt.Query(userIDs)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var x User
+		err = rows.Scan(&x.ID, &x.Name, &x.Email, &x.AboutMe, &x.Image, &x.CreatedAt, &x.UpdatedAt, &x.Role.Admin, &x.Role.Instructor)
+		if err != nil {
+			return nil, err
+		}
+		xs = append(xs, &x)
+	}
+	return xs, nil
+}
 
-// // GetUser gets user from id
-// func GetUser(c redis.Conn, userID string) (*User, error) {
-// 	xs, err := GetUsers(c, []string{userID})
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return xs[0], nil
-// }
+// GetUser gets user from id
+func GetUser(userID string) (*User, error) {
+	xs, err := GetUsers([]string{userID})
+	if err != nil {
+		return nil, err
+	}
+	return xs[0], nil
+}
 
 // // GetUserFromUsername gets user from username
 // func GetUserFromUsername(c redis.Conn, username string) (*User, error) {
