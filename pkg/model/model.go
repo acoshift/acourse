@@ -13,6 +13,8 @@ func init() {
 	gob.Register(&CourseContent{})
 }
 
+type scanFunc func(...interface{}) error
+
 // Errors
 var (
 	ErrNotFound = errors.New("not found")

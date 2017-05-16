@@ -8,17 +8,12 @@ import (
 
 // UserAssignment model
 type UserAssignment struct {
-	id          string
+	ID          int64
 	UserID      string
 	CourseID    string
 	DownloadURL string
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
-}
-
-// ID returns user assignment id
-func (x *UserAssignment) ID() string {
-	return x.id
 }
 
 // GetUserAssignments gets user assignments

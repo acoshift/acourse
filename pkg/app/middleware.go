@@ -3,6 +3,7 @@ package app
 import (
 	"net/http"
 	"net/url"
+	"runtime/debug"
 
 	"github.com/acoshift/acourse/pkg/internal"
 	"github.com/acoshift/acourse/pkg/model"
@@ -22,6 +23,7 @@ func recovery(h http.Handler) http.Handler {
 				default:
 					p = "unknown"
 				}
+				debug.PrintStack()
 				http.Error(w, p, http.StatusInternalServerError)
 			}
 		}()
@@ -59,12 +61,10 @@ func fetchUser(h http.Handler) http.Handler {
 		s := session.Get(ctx)
 		id, _ := s.Get(keyUserID).(string)
 		if len(id) > 0 {
-			c := internal.GetPrimaryDB()
-			u, err := model.GetUser(c, id)
-			c.Close()
+			u, err := model.GetUser(id)
 			if err == model.ErrNotFound {
 				u = &model.User{}
-				u.SetID(id)
+				u.ID = id
 			}
 			r = r.WithContext(internal.WithUser(ctx, u))
 		}
@@ -79,7 +79,7 @@ func onlyAdmin(h http.Handler) http.Handler {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
-		if !u.Role().Admin {
+		if !u.Role.Admin {
 			http.Error(w, "Forbidden", http.StatusForbidden)
 			return
 		}
