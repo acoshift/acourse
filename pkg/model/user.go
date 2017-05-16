@@ -45,15 +45,15 @@ const selectUsers = `
 
 var (
 	getUsersStmt, _ = internal.GetDB().Prepare(selectUsers + `
-		WHERE users.id IN $1;
+		WHERE users.id IN ?;
 	`)
 
 	getUserStmt, _ = internal.GetDB().Prepare(selectUsers + `
-		WHERE users.id = $1;
+		WHERE users.id = ?;
 	`)
 
 	getUserFromUsernameStmt, _ = internal.GetDB().Prepare(selectUsers + `
-		WHERE users.username = $1;
+		WHERE users.username = ?;
 	`)
 
 	listUsersStmt, _ = internal.GetDB().Prepare(selectUsers + `
@@ -64,7 +64,7 @@ var (
 		UPSERT INTO users
 			(id, name, username, about_me, image, updated_at)
 		VALUES
-			($1, $2, $3, $4, $5, now());
+			(?, ?, ?, ?, ?, now());
 	`)
 )
 

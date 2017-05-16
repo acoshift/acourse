@@ -99,7 +99,7 @@ func (x *Payment) Accept(c redis.Conn) error {
 	}
 	x.Status = Accepted
 	c.Send("MULTI")
-	enroll(c, x.UserID, x.CourseID)
+	// enroll(c, x.UserID, x.CourseID)
 	x.save(c)
 	_, err := c.Do("EXEC")
 	if err != nil {

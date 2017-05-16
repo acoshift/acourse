@@ -87,7 +87,8 @@ CREATE TABLE enrolls (
   user_id STRING NOT NULL REFERENCES users (id),
   course_id INT NOT NULL REFERENCES courses (id),
   created_at TIMESTAMP NOT NULL DEFAULT now(),
-  INDEX (user_id, course_id, created_at)
+  INDEX (user_id, course_id, created_at),
+  UNIQUE (user_id, course_id)
 );
 
 CREATE TABLE attends (

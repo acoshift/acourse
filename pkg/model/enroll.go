@@ -1,22 +1,22 @@
 package model
 
 import (
-	"time"
-
+	"github.com/acoshift/acourse/pkg/internal"
 	"github.com/garyburd/redigo/redis"
 )
 
-func enroll(c redis.Conn, userID, courseID string) {
-	now := time.Now().UnixNano()
-	c.Send("ZADD", key("u", userID, "e"), now, courseID)
-	c.Send("ZADD", key("c", courseID, "u"), now, userID)
-}
+var (
+	enrollStmt, _ = internal.GetDB().Prepare(`
+		INSERT INTO enrolls
+			(user_id, course_id)
+		VALUES
+			(?, ?);
+	`)
+)
 
 // Enroll an user to a course
-func Enroll(c redis.Conn, userID, courseID string) error {
-	c.Send("MULTI")
-	enroll(c, userID, courseID)
-	_, err := c.Do("EXEC")
+func Enroll(userID string, courseID int64) error {
+	_, err := enrollStmt.Exec(userID, courseID)
 	if err != nil {
 		return err
 	}

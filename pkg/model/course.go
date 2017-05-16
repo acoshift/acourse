@@ -69,7 +69,8 @@ func (x *Course) EnrollCount() int {
 	return x.enrollCount
 }
 
-const selectCourses = `
+const (
+	selectCourses = `
 	SELECT
 		courses.id,
 		courses.title,
@@ -93,18 +94,19 @@ const selectCourses = `
 		LEFT JOIN course_options
 		ON courses.id = course_options.id
 `
+)
 
 var (
 	getCourseStmt, _ = internal.GetDB().Prepare(selectCourses + `
-		WHERE courses.id = $1;
+		WHERE courses.id = ?;
 	`)
 
 	getCoursesStmt, _ = internal.GetDB().Prepare(selectCourses + `
-		WHERE courses.id IN $1;
+		WHERE courses.id IN ?;
 	`)
 
 	getCourseFromURLStmt, _ = internal.GetDB().Prepare(selectCourses + `
-		WHERE courses.url = $1;
+		WHERE courses.url = ?;
 	`)
 
 	getCourseContentsStmt, _ = internal.GetDB().Prepare(`
@@ -119,7 +121,7 @@ var (
 		FROM courses
 			INNER JOIN course_contents
 			ON courses.id = course_contents.course_id,
-		WHERE courses.id IN $1;
+		WHERE courses.id IN ?;
 	`)
 
 	listCoursesStmt, _ = internal.GetDB().Prepare(selectCourses + `
@@ -132,20 +134,44 @@ var (
 	`)
 
 	listCoursesOwnStmt, _ = internal.GetDB().Prepare(selectCourses + `
-		WHERE courses.user_id = $1
+		WHERE courses.user_id = ?
 		ORDER BY courses.created_at DESC;
 	`)
 
 	listCoursesEnrolledStmt, _ = internal.GetDB().Prepare(selectCourses + `
 		INNER JOIN enrolls ON courses.id = enrolls.course_id
-		WHERE enrolls.user_id = $1
+		WHERE enrolls.user_id = ?
 		ORDER BY enrolls.created_at DESC;
+	`)
+
+	saveCourseStmt, _ = internal.GetDB().Prepare(`
+		UPSERT INTO courses
+			(id, user_id, title, short_desc, long_desc, image, start, url, type, price, discount, enroll_detail, updated_at)
+		VALUES
+			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now());
+	`)
+
+	saveCourseOptionStmt, _ = internal.GetDB().Prepare(`
+		UPSERT INTO course_options
+			(id, public, enroll, attend, assignment, discount)
+		VALUES
+			(?, ?, ?, ?, ?, ?);
 	`)
 )
 
 // Save saves course
 func (x *Course) Save() error {
-
+	tx, err := internal.GetDB().Begin()
+	if err != nil {
+		return err
+	}
+	tx.Stmt(saveCourseStmt).Exec(x.ID, x.UserID, x.Title, x.ShortDesc, x.Desc, x.Image, x.Start, x.URL, x.Type, x.Price, x.Discount, x.EnrollDetail)
+	tx.Stmt(saveCourseOptionStmt).Exec(x.ID, x.Option.Public, x.Option.Enroll, x.Option.Attend, x.Option.Assignment, x.Option.Discount)
+	// TODO: save contents
+	err = tx.Commit()
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
