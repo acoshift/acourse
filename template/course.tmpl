@@ -1,37 +1,139 @@
 {{define "app-body"}}
-<h3>Course > {{.Course.Title}}</h3>
-<img src="{{.Course.Image}}">
-<h4>Course Detail</h4>
-{{if not .Course.Start.IsZero}}
-<p>Start At: {{.Course.Start | date}}</p>
-{{end}}
-<hr>
-<div>
-  {{.Course.Desc | html}}
-</div>
-<hr>
-{{if .Enrolled}}
-  <div>
-    Course Contents
-    {{range $i, $x := .Course.Contents}}
-      <div>
-        <h4>{{incr $i}}. {{.Title}}</h4>
-        {{if .VideoID}}
-          <div class="video">
-            <iframe
-              width="560" height="315"
-              frameborder="0" scrolling="no" allowfullscreen
-              src="https://www.youtube.com/embed/{{.VideoID}}?rel=0&hd=1">
-            </iframe>
+  <div id="course" class="page-pattern">
+    <div class="grid-container">
+      <div class="course-detail-container col-xs-12 _flex-column">
+      
+      {{if .Enrolled}}
+        <div>
+          <div class="video-container row">
+            <div class="col-xs-12 col-md-8 video-player-container">
+              <div class="video-player">
+                {{range $i, $x := .Course.Contents}}
+                  {{if .VideoID}}
+                    <div class="video" v-if="selectedItem === {{$i}}">
+                      <iframe
+                        width="560" height="315"
+                        frameborder="0" scrolling="no" allowfullscreen
+                        src="https://www.youtube.com/embed/{{.VideoID}}?rel=0&hd=1">
+                      </iframe>
+                    </div>
+                    {{.Desc | html}}
+                  {{end}}
+
+                  {{if .DownloadURL}}
+                    <a href="{{.DownloadURL}}" target="_blank">Download</a>
+                  {{end}}
+
+                {{end}}
+              </div>
+            </div>
+
+            <div class="col-xs-12 col-md-4 playlist-container _flex-column">
+              <div class="playlist-title _text-bold">
+                {{ len .Course.Contents }} Video
+              </div>
+              <div class="playlist">
+              {{range $i, $x := .Course.Contents}}
+                <div 
+                  class="list"
+                  :class="{active: selectedItem === {{$i}} }"
+                  @click="selectedItem = {{$i}}">
+                  {{incr $i}}. {{.Title}}
+                </div>
+              {{end}}
+              </div>
+            </div>
           </div>
-        {{end}}
-        {{.Desc | html}}
-        {{if .DownloadURL}}
-          <a href="{{.DownloadURL}}" target="_blank">Download</a>
-        {{end}}
-        <hr>
+        </div>
+      {{end}}
+
+      <h3>Course ${ 1+ 2 }> {{.Course.Title}}</h3>
+      <img src="{{.Course.Image}}">
+      <h4>Course Detail</h4>
+      {{if not .Course.Start.IsZero}}
+      <p>Start At: {{.Course.Start | date}}</p>
+      {{end}}
+      <hr>
+      <div>
+        {{.Course.Desc | html}}
       </div>
-    {{end}}
+      <hr>
+      
+      </div>
+    </div>
   </div>
 {{end}}
+
+{{define "app-script"}}
+<script>
+  new Vue({
+    el: '#course',
+    name: 'CourseDetail',
+    delimiters: ['${', '}'],
+    data () {
+      return {
+        selectedItem: 0
+      }
+    }
+  })
+</script>
+{{end}}
+
+{{define "app-style"}}
+  <style>
+    #course {
+      position: relative;
+      z-index: 1;
+      padding-top: 48px;
+    }
+    .course-detail-container {
+      padding-top: 32px;
+      background-color: white;
+    }
+    .video-container .playlist-title {
+      padding: 8px;
+      background: #f1f4f4;
+    }
+    .video-container .playlist {
+      flex: 1;
+      padding-right: 12px;
+      overflow: auto;
+      background: #f1f4f4;
+    }
+    .video-container .playlist .list {
+      padding: 10px 12px;
+      cursor: pointer;
+      border-top-right-radius: 5px;
+      border-bottom-right-radius: 5px;
+    }
+    .video-container .playlist .list:hover,
+    .video-container .playlist .list.active {
+      background: white;
+    }
+    .video-container .playlist .list.active {
+      font-weight: 600;
+    }
+    .video-player-container {
+      padding-right: 0;
+    }
+    .playlist-container {
+      height: 400px;
+      padding-left: 0;
+    }
+    @media only screen and (min-width: 768px) {
+      .playlist-container {
+        height: 400px;
+      }
+    }
+    @media only screen and (min-width: 970px) {
+      .playlist-container {
+        height: 369px;
+      }
+    }
+    @media only screen and (min-width: 1170px) {
+      .playlist-container {
+        height: 444px;
+      }
+    }
+  </style>
 {{end}}
