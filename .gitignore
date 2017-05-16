@@ -3,3 +3,4 @@ vendor/
 config/service_account
 node_modules/
 static/style.css
+private/
