@@ -39,8 +39,8 @@ const selectUsers = `
 		roles.admin,
 		roles.instructor
 	FROM users
-	LEFT JOIN roles
-	ON users.id = roles.id
+		LEFT JOIN roles
+		ON users.id = roles.id
 `
 
 var (
@@ -57,7 +57,7 @@ var (
 	`)
 
 	listUsersStmt, _ = internal.GetDB().Prepare(selectUsers + `
-		ORDER BY created_at DESC;
+		ORDER BY users.created_at DESC;
 	`)
 
 	saveUserStmt, _ = internal.GetDB().Prepare(`
@@ -80,12 +80,8 @@ func (x *User) Save() error {
 	return nil
 }
 
-func scanUser(scan func(...interface{}) error, x *User) error {
-	err := scan(&x.ID, &x.Name, &x.Username, &x.Email, &x.AboutMe, &x.Image, &x.CreatedAt, &x.UpdatedAt, &x.Role.Admin, &x.Role.Instructor)
-	if err != nil {
-		return err
-	}
-	return nil
+func scanUser(scan scanFunc, x *User) error {
+	return scan(&x.ID, &x.Name, &x.Username, &x.Email, &x.AboutMe, &x.Image, &x.CreatedAt, &x.UpdatedAt, &x.Role.Admin, &x.Role.Instructor)
 }
 
 // GetUsers gets users

@@ -4,14 +4,14 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/garyburd/redigo/redis"
+	"github.com/acoshift/acourse/pkg/internal"
 )
 
 // Course model
 type Course struct {
-	ID            string
-	option        *CourseOption
-	owner         *User
+	ID            int64
+	Option        CourseOption
+	Owner         User
 	enrollCount   int
 	oldURL        string
 	Title         string
@@ -47,6 +47,7 @@ const (
 
 // CourseContent type
 type CourseContent struct {
+	ID          int64
 	Title       string
 	Desc        string
 	VideoID     string
@@ -63,215 +64,222 @@ type CourseOption struct {
 	Discount   bool
 }
 
-// Option returns course option
-func (x *Course) Option() *CourseOption {
-	if x.option == nil {
-		x.option = &CourseOption{}
-	}
-	return x.option
-}
-
-// Owner returns course user if fetched
-func (x *Course) Owner() *User {
-	return x.owner
-}
-
 // EnrollCount returns count of enrolled user
 func (x *Course) EnrollCount() int {
 	return x.enrollCount
 }
 
+const selectCourses = `
+	SELECT
+		courses.id,
+		courses.title,
+		courses.short_desc,
+		courses.long_desc,
+		courses.image,
+		courses.start,
+		courses.url,
+		courses.type,
+		courses.price,
+		courses.discount,
+		courses.enroll_detail,
+		courses.created_at,
+		courses.updated_at,
+		course_options.public,
+		course_options.enroll,
+		course_options.attend,
+		course_options.assignment,
+		course_options.discount
+	FROM courses
+		LEFT JOIN course_options
+		ON courses.id = course_options.id
+`
+
+var (
+	getCourseStmt, _ = internal.GetDB().Prepare(selectCourses + `
+		WHERE courses.id = $1;
+	`)
+
+	getCoursesStmt, _ = internal.GetDB().Prepare(selectCourses + `
+		WHERE courses.id IN $1;
+	`)
+
+	getCourseFromURLStmt, _ = internal.GetDB().Prepare(selectCourses + `
+		WHERE courses.url = $1;
+	`)
+
+	getCourseContentsStmt, _ = internal.GetDB().Prepare(`
+		SELECT
+			courses.id,
+			course_contents.id,
+			course_contents.title,
+			course_contents.long_desc,
+			course_contents.video_id,
+			course_contents.video_type,
+			course_contents.download_url
+		FROM courses
+			INNER JOIN course_contents
+			ON courses.id = course_contents.course_id,
+		WHERE courses.id IN $1;
+	`)
+
+	listCoursesStmt, _ = internal.GetDB().Prepare(selectCourses + `
+		ORDER BY courses.created_at DESC;
+	`)
+
+	listCoursesPublicStmt, _ = internal.GetDB().Prepare(selectCourses + `
+		WHERE course_options.public = true
+		ORDER BY courses.created_at DESC;
+	`)
+
+	listCoursesOwnStmt, _ = internal.GetDB().Prepare(selectCourses + `
+		WHERE courses.user_id = $1
+		ORDER BY courses.created_at DESC;
+	`)
+
+	listCoursesEnrolledStmt, _ = internal.GetDB().Prepare(selectCourses + `
+		INNER JOIN enrolls ON courses.id = enrolls.course_id
+		WHERE enrolls.user_id = $1
+		ORDER BY enrolls.created_at DESC;
+	`)
+)
+
 // Save saves course
-func (x *Course) Save(c redis.Conn) error {
-	if len(x.id) == 0 {
-		id, err := redis.Int64(c.Do("INCR", key("id", "c")))
-		if err != nil {
-			return err
-		}
-		x.id = strconv.FormatInt(id, 10)
-	}
-
-	c.Send("MULTI")
-	c.Send("SADD", key("c", "all"), x.id)
-
-	x.UpdatedAt = time.Now()
-	if x.CreatedAt.IsZero() {
-		x.CreatedAt = x.UpdatedAt
-		c.Send("ZADD", key("c", "t0"), x.CreatedAt.UnixNano(), x.id)
-	} else {
-		c.Send("ZADD", key("c", "t0"), x.CreatedAt.UnixNano(), x.id) // TODO: remove after migrate
-	}
-
-	c.Send("ZADD", key("c", "t1"), x.UpdatedAt.UnixNano(), x.id)
-	c.Send("HSET", key("c"), x.id, enc(x))
-
-	if x.oldURL != x.URL {
-		// url updated
-		if len(x.oldURL) > 0 {
-			c.Send("HDEL", key("c", "url"), x.id)
-		}
-		if len(x.URL) > 0 {
-			c.Send("HSET", key("c", "url"), x.URL, x.id)
-		}
-	}
-
-	if x.option != nil {
-		if x.option.Public {
-			c.Send("SADD", key("c", "public"), x.id)
-		} else {
-			c.Send("SREM", key("c", "public"), x.id)
-		}
-		if x.option.Enroll {
-			c.Send("SADD", key("c", "enroll"), x.id)
-		} else {
-			c.Send("SREM", key("c", "enroll"), x.id)
-		}
-		if x.option.Attend {
-			c.Send("SADD", key("c", "attend"), x.id)
-		} else {
-			c.Send("SREM", key("c", "attend"), x.id)
-		}
-		if x.option.Assignment {
-			c.Send("SADD", key("c", "assignment"), x.id)
-		} else {
-			c.Send("SREM", key("c", "assignment"), x.id)
-		}
-		if x.option.Discount {
-			c.Send("SADD", key("c", "discount"), x.id)
-		} else {
-			c.Send("SREM", key("c", "discount"), x.id)
-		}
-	}
-	_, err := c.Do("EXEC")
-	if err != nil {
-		return err
-	}
+func (x *Course) Save() error {
 
 	return nil
 }
 
+func scanCourse(scan scanFunc, x *Course) error {
+	return scan(&x.ID,
+		&x.Title, &x.ShortDesc, &x.Desc, &x.Image, &x.Start, &x.URL, &x.Type, &x.Price, &x.Discount, &x.EnrollDetail,
+		&x.CreatedAt, &x.UpdatedAt,
+		&x.Option.Public, &x.Option.Enroll, &x.Option.Attend, &x.Option.Assignment, &x.Option.Discount,
+	)
+}
+
+func scanCourseContent(scan scanFunc, courseID *int64, x *CourseContent) error {
+	return scan(courseID, &x.ID, &x.Title, &x.Desc, &x.VideoID, &x.VideoType, &x.DownloadURL)
+}
+
 // GetCourses gets courses
-func GetCourses(c redis.Conn, courseIDs []string) ([]*Course, error) {
-	xs := make([]*Course, len(courseIDs))
-	for _, courseID := range courseIDs {
-		c.Send("SISMEMBER", key("c", "all"), courseID)
-		c.Send("HGET", key("c"), courseID)
-		c.Send("SISMEMBER", key("c", "public"), courseID)
-		c.Send("SISMEMBER", key("c", "enroll"), courseID)
-		c.Send("SISMEMBER", key("c", "attend"), courseID)
-		c.Send("SISMEMBER", key("c", "assignment"), courseID)
-		c.Send("SISMEMBER", key("c", "discount"), courseID)
-		c.Send("ZCARD", key("c", courseID, "u"))
+func GetCourses(courseIDs []int64) ([]*Course, error) {
+	xs := make([]*Course, 0, len(courseIDs))
+	rows, err := getCoursesStmt.Query(courseIDs)
+	if err != nil {
+		return nil, err
 	}
-	c.Flush()
-	for i, courseID := range courseIDs {
-		exists, _ := redis.Bool(c.Receive())
-		if !exists {
-			c.Receive()
-			c.Receive()
-			c.Receive()
-			c.Receive()
-			c.Receive()
-			c.Receive()
-			continue
-		}
+	for rows.Next() {
 		var x Course
-		b, err := redis.Bytes(c.Receive())
+		err = scanCourse(rows.Scan, &x)
 		if err != nil {
 			return nil, err
 		}
-		err = dec(b, &x)
-		if err != nil {
-			return nil, err
-		}
-		x.oldURL = x.URL
-		x.option = &CourseOption{}
-		x.option.Public, _ = redis.Bool(c.Receive())
-		x.option.Enroll, _ = redis.Bool(c.Receive())
-		x.option.Attend, _ = redis.Bool(c.Receive())
-		x.option.Assignment, _ = redis.Bool(c.Receive())
-		x.option.Discount, _ = redis.Bool(c.Receive())
-		x.enrollCount, _ = redis.Int(c.Receive())
-		x.id = courseID
-		xs[i] = &x
+		xs = append(xs, &x)
 	}
 	return xs, nil
 }
 
 // GetCourse gets course
-func GetCourse(c redis.Conn, courseID string) (*Course, error) {
-	xs, err := GetCourses(c, []string{courseID})
+func GetCourse(courseID int64) (*Course, error) {
+	var x Course
+	err := scanCourse(getCourseStmt.QueryRow(courseID).Scan, &x)
 	if err != nil {
 		return nil, err
 	}
-	return xs[0], nil
+	return &x, nil
 }
 
 // GetCourseFromURL gets course from url
-func GetCourseFromURL(c redis.Conn, url string) (*Course, error) {
-	userID, err := redis.String(c.Do("HGET", key("c", "url"), url))
-	if err == redis.ErrNil {
-		return nil, ErrNotFound
-	}
+func GetCourseFromURL(url string) (*Course, error) {
+	var x Course
+	err := scanCourse(getCourseFromURLStmt.QueryRow(url).Scan, &x)
 	if err != nil {
 		return nil, err
 	}
-	return GetCourse(c, userID)
+	return &x, nil
 }
 
 // GetCourFromIDOrURL gets course from id if given v can parse to int,
 // otherwise get from url
-func GetCourFromIDOrURL(c redis.Conn, v string) (*Course, error) {
-	if _, err := strconv.Atoi(v); err == nil {
-		return GetCourse(c, v)
+func GetCourFromIDOrURL(v string) (*Course, error) {
+	if id, err := strconv.ParseInt(v, 10, 64); err == nil {
+		return GetCourse(id)
 	}
-	return GetCourseFromURL(c, v)
+	return GetCourseFromURL(v)
 }
 
 // ListCourses lists courses
 // TODO: pagination
-func ListCourses(c redis.Conn) ([]*Course, error) {
-	courseIDs, err := redis.Strings(c.Do("ZREVRANGE", key("c", "t0"), 0, -1))
+func ListCourses() ([]*Course, error) {
+	xs := make([]*Course, 0)
+	rows, err := listCoursesStmt.Query()
 	if err != nil {
 		return nil, err
 	}
-	return GetCourses(c, courseIDs)
+	for rows.Next() {
+		var x Course
+		err = scanCourse(rows.Scan, &x)
+		if err != nil {
+			return nil, err
+		}
+		xs = append(xs, &x)
+	}
+	return xs, nil
 }
 
 // ListPublicCourses lists public course sort by created at desc
 // TODO: add pagination
-func ListPublicCourses(c redis.Conn) ([]*Course, error) {
-	c.Send("MULTI")
-	c.Send("ZINTERSTORE", key("result"), 2, key("c", "t0"), key("c", "public"), "WEIGHTS", 1, 0)
-	c.Send("ZREVRANGE", key("result"), 0, -1)
-	reply, err := redis.Values(c.Do("EXEC"))
+func ListPublicCourses() ([]*Course, error) {
+	xs := make([]*Course, 0)
+	rows, err := listCoursesPublicStmt.Query()
 	if err != nil {
 		return nil, err
 	}
-	courseIDs, _ := redis.Strings(reply[1], nil)
-	return GetCourses(c, courseIDs)
+	for rows.Next() {
+		var x Course
+		err = scanCourse(rows.Scan, &x)
+		if err != nil {
+			return nil, err
+		}
+		xs = append(xs, &x)
+	}
+	return xs, nil
 }
 
 // ListOwnCourses lists courses that owned by given user
 // TODO: add pagination
-func ListOwnCourses(c redis.Conn, userID string) ([]*Course, error) {
-	c.Send("MULTI")
-	c.Send("ZINTERSTORE", key("result"), 2, key("c", "t0"), key("u", userID, "c"), "WEIGHTS", 1, 0)
-	c.Send("ZREVRANGE", key("result"), 0, -1)
-	reply, err := redis.Values(c.Do("EXEC"))
+func ListOwnCourses(userID string) ([]*Course, error) {
+	xs := make([]*Course, 0)
+	rows, err := listCoursesOwnStmt.Query(userID)
 	if err != nil {
 		return nil, err
 	}
-	courseIDs, _ := redis.Strings(reply[1], nil)
-	return GetCourses(c, courseIDs)
+	for rows.Next() {
+		var x Course
+		err = scanCourse(rows.Scan, &x)
+		if err != nil {
+			return nil, err
+		}
+		xs = append(xs, &x)
+	}
+	return xs, nil
 }
 
 // ListEnrolledCourses lists courses that enrolled by given user
 // TODO: add pagination
-func ListEnrolledCourses(c redis.Conn, userID string) ([]*Course, error) {
-	courseIDs, err := redis.Strings(c.Do("ZREVRANGE", key("u", userID, "e"), 0, -1))
+func ListEnrolledCourses(userID string) ([]*Course, error) {
+	xs := make([]*Course, 0)
+	rows, err := listCoursesEnrolledStmt.Query(userID)
 	if err != nil {
 		return nil, err
 	}
-	return GetCourses(c, courseIDs)
+	for rows.Next() {
+		var x Course
+		err = scanCourse(rows.Scan, &x)
+		if err != nil {
+			return nil, err
+		}
+		xs = append(xs, &x)
+	}
+	return xs, nil
 }
