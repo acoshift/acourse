@@ -1,5 +1,14 @@
 $color-main: red;
 $color-accent: blue;
 
-$main-fontface: 'Kanit', sans-serif;
-$secondary-fontface: 'Arial', serif;
+$text-color-main: #525c65;
+$text-color-secondary: #999999;
+// $text-color-accent: #525c65;
+
+// $navbar-color: linear-gradient(-135deg,#6f95d3 0,#3ea9d0 100%);
+$navbar-color: linear-gradient(-135deg,#03b9a8 0,#3ea9d0 100%);
+
+$main-background-color: #f4f5f7;
+
+$main-fontface: 'Kanit', sans-serif; 
+$secondary-fontface: 'Arial', serif; // Use for paragraph

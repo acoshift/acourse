@@ -1,8 +1,8 @@
 {{define "app-body"}}
-  <div id="home">
+  <div id="home" class="page-pattern">
     <div class="grid-container row">
     {{range .Courses}}
-      <div class="col-xs-3">
+      <div class="col-xs-3 _flex-row _main-strech">
         {{template "course-card" .}}
       </div>
     {{end}}
@@ -20,7 +20,9 @@
   {{template "course-card-style"}}
   <style>
     #home {
-      padding-top: 64px;
+      position: relative;
+      z-index: 1;
+      padding-top: 48px;
     }
   </style>
 {{end}}

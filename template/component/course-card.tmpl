@@ -7,24 +7,26 @@
       <div class="course-detail">
         <div class="course-name">{{.Title}}</div>
         <div class="course-type-container">
-          <div class="course-type {{.Type | courseType}}">{{.Type | courseType}}</div>
+          <div class="course-type {{.Type | courseType}} _text-thin">{{.Type | courseType}}</div>
           {{if eq .Type live}}
             <div class="live-date">Start at {{.Start | date}}</div>
           {{end}}
         </div>
         <p class="course-description">{{.ShortDesc}}</p>
         <div class="course-bottom">
-          <div class="course-student">
+          <div class="course-student _color-secondary">
             <i class="fa fa-user"></i>&nbsp {{.EnrollCount}}
           </div>
           <div class="course-price">
             {{if le .Price 0.0}}
-              <p>FREE</p>
+              <p class="_text-bold">FREE</p>
             {{else}}
-              <p class="{{if .Option.Discount}}line{{end}}">{{.Price | currency}}</p>
-            {{end}}
-            {{if .Option.Discount}}
-              <p>{{.Discount | currency}}</p>
+              <p class="{{if .Option.Discount}}discount _text-thin _color-secondary{{else}}_text-bold{{end}}">
+                ฿ {{.Price | currency}}
+                {{if .Option.Discount}}
+                  <p class="_text-bold">&nbsp฿ {{.Discount | currency}}</p>
+                {{end}}
+              </p>
             {{end}}
           </div>
         </div>
@@ -38,11 +40,17 @@
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
+    align-self: stretch;
     margin-bottom: 16px;
     background-color: white;
-    border-radius: 5px;
+    border-radius: 6px;
     overflow: hidden;
-    border: 1px solid #f1f1f1;
+    transition: 0.16s all ease;
+    cursor: pointer;
+  }
+  #course-card:hover {
+    box-shadow: 0 15px 20px rgba(0, 0, 0, 0.12);
+    transform: translate(0, -4px);
   }
   #course-card .course-cover {
     flex-basis: 160px;
@@ -54,12 +62,14 @@
   }
   #course-card .course-detail {
     display: flex;
+    flex: 1;
     flex-direction: column;
     justify-content: flex-start;
-    padding: 12px 8px;
+    padding: 12px 16px 16px 16px;
   }
 
   #course-card .course-name {
+    font-size: 17px;
     font-weight: 600;
     margin-bottom: 8px;
   }
@@ -69,7 +79,6 @@
     border-radius: 3px;
     padding: 2px 8px;
     font-size: 14px;
-    font-weight: 200;
   }
   #course-card .course-type.Live {
     background-color: #ff4e4e;
@@ -83,7 +92,7 @@
   #course-card .live-date {
     margin-left: 8px;
     font-weight: 200;
-    font-size: 14px;
+    font-size: 13px;
     color: gray;
     display: inline-block;
   }
@@ -91,9 +100,18 @@
     margin-bottom: 16px;
   }
   #course-card .course-description {
+    flex: 1;
     font-size: 15px;
     line-height: 22px;
     margin-bottom: 16px;
+  }
+  #course-card .course-price .discount {
+    text-decoration: line-through;
+    font-weight: 100;
+    font-size: 13px;
+  }
+  #course-card .course-price .discounted-price {
+    
   }
   #course-card .course-bottom {
     display: flex;

@@ -14,6 +14,9 @@
 ._accent-bg-color {
   background-color: $color-accent;
 }
+._main-background-color {
+  background: $main-background-color;
+}
 
 // Size
 ._full-width {
@@ -38,6 +41,12 @@
   @extend ._flex;
   flex-direction: column;
 }
+._main-strech {
+  justify-content: stretch;
+}
+._cross-strech {
+  align-items: stretch;
+}
 
 // Position
 ._align-center {
@@ -49,7 +58,17 @@
 ._align-right {
   text-align: right !important;
 }
-._flex-align-middle {
-  justify-content: center;
-  align-items: center;
+
+// Text 
+._text-bold {
+  font-weight: 700;
+}
+._text-thin {
+  font-weight: 100;
+}
+._color-main {
+  color: $text-color-main;
+}
+._color-secondary {
+  color: $text-color-secondary;
 }
