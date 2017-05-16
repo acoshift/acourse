@@ -172,7 +172,7 @@ func render(w http.ResponseWriter, r *http.Request, key, data interface{}) {
 				return me
 			},
 			"xsrf": func(action string) string {
-				return xsrftoken.Generate(internal.GetXSRFSecret(), me.ID(), action)
+				return xsrftoken.Generate(internal.GetXSRFSecret(), me.ID, action)
 			},
 		})
 	}

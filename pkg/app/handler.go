@@ -4,6 +4,7 @@ import (
 	"encoding/gob"
 	"net/http"
 	"net/url"
+	"strconv"
 	"time"
 
 	"github.com/acoshift/acourse/pkg/internal"
@@ -15,7 +16,6 @@ import (
 	"github.com/acoshift/middleware"
 	"github.com/acoshift/session"
 	sSQL "github.com/acoshift/session/store/sql"
-	"github.com/garyburd/redigo/redis"
 )
 
 // Handler returns app's handler
@@ -90,14 +90,11 @@ func getIndex(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	c := internal.GetRedisDB()
-	defer c.Close()
-	courses, err := model.ListPublicCourses(c)
+	courses, err := model.ListPublicCourses()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	c.Close()
 	view.Index(w, r, &view.IndexData{
 		Page:    &defaultPage,
 		Courses: courses,
@@ -208,19 +205,16 @@ func getSignOut(w http.ResponseWriter, r *http.Request) {
 func getProfile(w http.ResponseWriter, r *http.Request) {
 	user, _ := internal.GetUser(r.Context()).(*model.User)
 
-	c := internal.GetRedisDB()
-	defer c.Close()
-	ownCourses, err := model.ListOwnCourses(c, user.ID)
+	ownCourses, err := model.ListOwnCourses(user.ID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	enrolledCourses, err := model.ListEnrolledCourses(c, user.ID)
+	enrolledCourses, err := model.ListEnrolledCourses(user.ID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	c.Close()
 
 	page := defaultPage
 	page.Title = user.Username + " | " + page.Title
@@ -271,9 +265,7 @@ func postProfileEdit(w http.ResponseWriter, r *http.Request) {
 	f.Set("Username", username)
 	f.Set("Name", name)
 	f.Set("AboutMe", aboutMe)
-	c := internal.GetRedisDB()
-	defer c.Close()
-	err := user.Save(c)
+	err := user.Save()
 	if err != nil {
 		f.Add("Errors", err.Error())
 		return
@@ -285,9 +277,7 @@ func getCourse(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	user, _ := internal.GetUser(ctx).(*model.User)
 	id := httprouter.GetParam(ctx, "courseID")
-	c := internal.GetRedisDB()
-	defer c.Close()
-	course, err := model.GetCourFromIDOrURL(c, id)
+	course, err := model.GetCourFromIDOrURL(id)
 	if err == model.ErrNotFound {
 		http.NotFound(w, r)
 		return
@@ -297,11 +287,11 @@ func getCourse(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if len(course.URL) == 0 {
-		course.URL = course.ID()
+		course.URL = strconv.FormatInt(course.ID, 10)
 	}
 	enrolled := false
 	if user != nil {
-		enrolled, err = model.IsEnrolled(c, user.ID, course.ID)
+		enrolled, err = model.IsEnrolled(user.ID, course.ID)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -337,10 +327,7 @@ func getCourseEdit(w http.ResponseWriter, r *http.Request) {
 	page.Title = "Edit Course | " + page.Title
 
 	courseID := httprouter.GetParam(ctx, "courseID")
-
-	c := internal.GetRedisDB()
-	defer c.Close()
-	course, err := model.GetCourFromIDOrURL(c, courseID)
+	course, err := model.GetCourFromIDOrURL(courseID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -359,14 +346,11 @@ func postCourseEdit(w http.ResponseWriter, r *http.Request) {
 }
 
 func getAdminUsers(w http.ResponseWriter, r *http.Request) {
-	c := internal.GetRedisDB()
-	defer c.Close()
-	users, err := model.ListUsers(c)
+	users, err := model.ListUsers()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	c.Close()
 	view.AdminUsers(w, r, &view.AdminUsersData{
 		Page:  &defaultPage,
 		Users: users,
@@ -374,24 +358,18 @@ func getAdminUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func getAdminCourses(w http.ResponseWriter, r *http.Request) {
-	c := internal.GetRedisDB()
-	defer c.Close()
-	courses, err := model.ListCourses(c)
+	courses, err := model.ListCourses()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	c.Close()
 	view.AdminCourses(w, r, &view.AdminCoursesData{
 		Page:    &defaultPage,
 		Courses: courses,
 	})
 }
 
-func getAdminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter func(redis.Conn) ([]*model.Payment, error)) {
-	c := internal.GetRedisDB()
-	defer c.Close()
-
+func getAdminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter func() ([]*model.Payment, error)) {
 	action := r.FormValue("action")
 	if len(action) > 0 {
 		defer http.Redirect(w, r, "/admin/payments", http.StatusSeeOther)
@@ -400,28 +378,27 @@ func getAdminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter fun
 		if len(id) == 0 {
 			return
 		}
-		if action == "accept" && verifyXSRF(r.FormValue("x"), user.ID(), "payment-accept") {
-			x, err := model.GetPayment(c, id)
+		if action == "accept" && verifyXSRF(r.FormValue("x"), user.ID, "payment-accept") {
+			x, err := model.GetPayment(id)
 			if err != nil {
 				return
 			}
-			x.Accept(c)
-		} else if action == "reject" && verifyXSRF(r.FormValue("x"), user.ID(), "payment-reject") {
-			x, err := model.GetPayment(c, id)
+			x.Accept()
+		} else if action == "reject" && verifyXSRF(r.FormValue("x"), user.ID, "payment-reject") {
+			x, err := model.GetPayment(id)
 			if err != nil {
 				return
 			}
-			x.Reject(c)
+			x.Reject()
 		}
 		return
 	}
 
-	payments, err := paymentsGetter(c)
+	payments, err := paymentsGetter()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	c.Close()
 	view.AdminPayments(w, r, &view.AdminPaymentsData{
 		Page:     &defaultPage,
 		Payments: payments,

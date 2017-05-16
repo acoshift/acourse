@@ -45,15 +45,15 @@ const selectUsers = `
 
 var (
 	getUsersStmt, _ = internal.GetDB().Prepare(selectUsers + `
-		WHERE users.id IN ?;
+		WHERE users.id IN $1;
 	`)
 
 	getUserStmt, _ = internal.GetDB().Prepare(selectUsers + `
-		WHERE users.id = ?;
+		WHERE users.id = $1;
 	`)
 
 	getUserFromUsernameStmt, _ = internal.GetDB().Prepare(selectUsers + `
-		WHERE users.username = ?;
+		WHERE users.username = $1;
 	`)
 
 	listUsersStmt, _ = internal.GetDB().Prepare(selectUsers + `
@@ -64,7 +64,7 @@ var (
 		UPSERT INTO users
 			(id, name, username, about_me, image, updated_at)
 		VALUES
-			(?, ?, ?, ?, ?, now());
+			($1, $2, $3, $4, $5, now());
 	`)
 )
 
@@ -81,7 +81,22 @@ func (x *User) Save() error {
 }
 
 func scanUser(scan scanFunc, x *User) error {
-	return scan(&x.ID, &x.Name, &x.Username, &x.Email, &x.AboutMe, &x.Image, &x.CreatedAt, &x.UpdatedAt, &x.Role.Admin, &x.Role.Instructor)
+	var admin, instructor *bool
+	var email *string
+	err := scan(&x.ID, &x.Name, &x.Username, &email, &x.AboutMe, &x.Image, &x.CreatedAt, &x.UpdatedAt, &admin, &instructor)
+	if err != nil {
+		return err
+	}
+	if email != nil {
+		x.Email = *email
+	}
+	if admin != nil {
+		x.Role.Admin = *admin
+	}
+	if instructor != nil {
+		x.Role.Instructor = *instructor
+	}
+	return nil
 }
 
 // GetUsers gets users

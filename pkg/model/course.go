@@ -13,7 +13,6 @@ type Course struct {
 	Option        CourseOption
 	Owner         User
 	enrollCount   int
-	oldURL        string
 	Title         string
 	ShortDesc     string
 	Desc          string
@@ -98,15 +97,15 @@ const (
 
 var (
 	getCourseStmt, _ = internal.GetDB().Prepare(selectCourses + `
-		WHERE courses.id = ?;
+		WHERE courses.id = $1;
 	`)
 
 	getCoursesStmt, _ = internal.GetDB().Prepare(selectCourses + `
-		WHERE courses.id IN ?;
+		WHERE courses.id IN $1;
 	`)
 
 	getCourseFromURLStmt, _ = internal.GetDB().Prepare(selectCourses + `
-		WHERE courses.url = ?;
+		WHERE courses.url = $1;
 	`)
 
 	getCourseContentsStmt, _ = internal.GetDB().Prepare(`
@@ -121,7 +120,7 @@ var (
 		FROM courses
 			INNER JOIN course_contents
 			ON courses.id = course_contents.course_id,
-		WHERE courses.id IN ?;
+		WHERE courses.id IN $1;
 	`)
 
 	listCoursesStmt, _ = internal.GetDB().Prepare(selectCourses + `
@@ -134,13 +133,13 @@ var (
 	`)
 
 	listCoursesOwnStmt, _ = internal.GetDB().Prepare(selectCourses + `
-		WHERE courses.user_id = ?
+		WHERE courses.user_id = $1
 		ORDER BY courses.created_at DESC;
 	`)
 
 	listCoursesEnrolledStmt, _ = internal.GetDB().Prepare(selectCourses + `
 		INNER JOIN enrolls ON courses.id = enrolls.course_id
-		WHERE enrolls.user_id = ?
+		WHERE enrolls.user_id = $1
 		ORDER BY enrolls.created_at DESC;
 	`)
 
@@ -148,14 +147,14 @@ var (
 		UPSERT INTO courses
 			(id, user_id, title, short_desc, long_desc, image, start, url, type, price, discount, enroll_detail, updated_at)
 		VALUES
-			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now());
+			($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, now());
 	`)
 
 	saveCourseOptionStmt, _ = internal.GetDB().Prepare(`
 		UPSERT INTO course_options
 			(id, public, enroll, attend, assignment, discount)
 		VALUES
-			(?, ?, ?, ?, ?, ?);
+			($1, $2, $3, $4, $5, %6);
 	`)
 )
 
@@ -176,11 +175,23 @@ func (x *Course) Save() error {
 }
 
 func scanCourse(scan scanFunc, x *Course) error {
-	return scan(&x.ID,
-		&x.Title, &x.ShortDesc, &x.Desc, &x.Image, &x.Start, &x.URL, &x.Type, &x.Price, &x.Discount, &x.EnrollDetail,
+	var start *time.Time
+	var u *string
+	err := scan(&x.ID,
+		&x.Title, &x.ShortDesc, &x.Desc, &x.Image, &start, &u, &x.Type, &x.Price, &x.Discount, &x.EnrollDetail,
 		&x.CreatedAt, &x.UpdatedAt,
 		&x.Option.Public, &x.Option.Enroll, &x.Option.Attend, &x.Option.Assignment, &x.Option.Discount,
 	)
+	if err != nil {
+		return err
+	}
+	if start != nil {
+		x.Start = *start
+	}
+	if u != nil {
+		x.URL = *u
+	}
+	return nil
 }
 
 func scanCourseContent(scan scanFunc, courseID *int64, x *CourseContent) error {

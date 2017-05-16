@@ -9,6 +9,7 @@ import (
 
 	"github.com/acoshift/configfile"
 	"github.com/garyburd/redigo/redis"
+	_ "github.com/lib/pq"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/identitytoolkit/v3"
 )

@@ -1,16 +1,13 @@
 package model
 
-import (
-	"github.com/acoshift/acourse/pkg/internal"
-	"github.com/garyburd/redigo/redis"
-)
+import "github.com/acoshift/acourse/pkg/internal"
 
 var (
 	enrollStmt, _ = internal.GetDB().Prepare(`
 		INSERT INTO enrolls
 			(user_id, course_id)
 		VALUES
-			(?, ?);
+			($1, $2);
 	`)
 )
 
@@ -24,13 +21,6 @@ func Enroll(userID string, courseID int64) error {
 }
 
 // IsEnrolled returns true if user enrolled a given course
-func IsEnrolled(c redis.Conn, userID, courseID string) (bool, error) {
-	_, err := c.Do("ZSCORE", key("c", courseID, "u"), userID)
-	if err == redis.ErrNil {
-		return false, nil
-	}
-	if err != nil {
-		return false, err
-	}
+func IsEnrolled(userID string, courseID int64) (bool, error) {
 	return true, nil
 }
