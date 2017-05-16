@@ -1,19 +1,88 @@
 {{define "body"}}
-  <a href="/"><img src="https://storage.googleapis.com/acourse/static/24540ce5-cc7d-4886-a680-eca24be60fe1.png"></a>
-  <p>Navbar here</p>
-  {{if me}}
-    <p>{{me.Username}}</p>
-    <a href="/profile">Profile</a>
-    {{if me.Role.Admin}}
-      <a href="/admin/users">Users</a>
-      <a href="/admin/courses">Courses</a>
-      <a href="/admin/payments/pending">Pending Payments</a>
-      <a href="/admin/payments/history">History Payments</a>
-    {{end}}
-    <a href="/signout">Sign Out</a>
-  {{else}}
-    <a href="/signin">Sign In</a>
-  {{end}}
-  <h1>App Layout</h1>
-  {{template "app-body" $}}
+  <div id="navbar" class="navbar-color">
+    <div class="navbar-container grid-container">
+      <a href="/">
+        <img class="logo" src="/~/img/acourse-logo-white.png">
+      </a>
+      <div>
+      {{if me}}
+        <p>{{me.Username}}</p>
+        <a href="/profile">Profile</a>
+        {{if me.Role.Admin}}
+          <a href="/admin/users">Users</a>
+          <a href="/admin/courses">Courses</a>
+          <a href="/admin/payments/pending">Pending Payments</a>
+          <a href="/admin/payments/history">History Payments</a>
+        {{end}}
+        <a href="/signout">Sign Out</a>
+      {{else}}
+        <a href="/signin">Sign In</a>
+      {{end}}
+      </div>
+    </div>
+  </div>
+
+  <div class="app-container _main-background-color">
+    {{template "app-body" $}}
+  </div>
+
+  <footer>
+    Made with <span>❤️</span>&nbsp;&nbsp;by 
+    <a href="https://moonrhythm.info" target="_blank">Moon Rhythm</a>
+  </footer>
 {{end}}
+
+{{define "script"}}
+  {{template "app-script" $}}
+  <script>
+    // Navbar scroll event
+    let didScroll;
+    let lastScrollTop = 0;
+    let delta = 5;
+    let navbarHeight = $('#navbar').outerHeight();
+
+    $(window).scroll(function(event){
+      didScroll = true;
+    });
+
+    setInterval(function() {
+      if (didScroll) {
+        hasScrolled();
+        didScroll = false;
+      }
+    }, 250);
+
+    function hasScrolled() {
+      var st = $(this).scrollTop();
+      
+      if(Math.abs(lastScrollTop - st) <= delta)
+        return;
+
+      if (st > lastScrollTop && st > navbarHeight){
+        $('#navbar').removeClass('nav-down').addClass('nav-up');
+      } else {
+        if(st + $(window).height() < $(document).height()) {
+          $('#navbar').removeClass('nav-up').addClass('nav-down');
+        }
+      }
+      lastScrollTop = st;
+    }
+  </script>
+{{end}}
+
+
+{{define "style"}}
+  {{template "app-style" $}}
+  <style>
+    footer {
+      padding: 32px;
+      backface-visibility: hidden;
+      background-color: #292d35;
+      color: #484d56;
+    }
+    .app-container {
+      padding-top: 80px;
+    }
+  </style>
+{{end}}
+

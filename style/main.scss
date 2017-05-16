@@ -1,17 +1,63 @@
-body {
-  padding: 0;
+@import 'normalize';
+@import 'config';
+@import 'helper';
+@import 'grid';
+@import 'navbar';
+
+div {
+  color: $text-color-main;
+  font-family: $main-fontface;
+  font-weight: 300;
+}
+p {
+  color: $text-color-main;
+  font-family: $secondary-fontface;
   margin: 0;
 }
-
-.line {
-  text-decoration: black;
+.navbar-color {
+  background: $navbar-color;
 }
+.page-pattern {
+  position: relative;
+  &:before {
+    content: '';
+    width: 100%;
+    height: 600px;
+    z-index: -1000;
+    background: linear-gradient(to bottom right, #F7F7F7, #EAFBFF);
+    transform-origin: left bottom;
+    position: absolute;
+    top: 15%;
+    left: 0;
+    -webkit-transform: skew(0deg, -15deg);
+    -moz-transform: skew(0deg, -15deg);
+    -ms-transform: skew(0deg, -15deg);
+    -o-transform: skew(0deg, -15deg);
+    transform: skew(0deg, -15deg);
+  }
+  &:after {
+    content: '';
+    width: 100%;
+    height: 500px;
+    z-index: -1000;
+    background: rgba(145,218,238,0.1);
+    transform-origin: bottom right;
+    position: absolute;
+    top: 32%;
+    left: 0;
+    -webkit-transform: skew(0deg, 15deg);
+    -moz-transform: skew(0deg, 15deg);
+    -ms-transform: skew(0deg, 15deg);
+    -o-transform: skew(0deg, 15deg);
+    transform: skew(0deg, 15deg);
+  }
+}
+
 
 // TODO: fix this
 .video {
   position: relative;
 	padding-bottom: 56.25%; /* 16:9 */
-	padding-top: 25px;
 	height: 0;
 
   & > iframe {

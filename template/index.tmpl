@@ -1,7 +1,26 @@
 {{define "app-body"}}
-<p>Hello</p>
-<h3>Courses</h3>
-{{range .Courses}}
-  {{template "course-card" .}}
+  <div id="home" class="page-pattern">
+    <div class="grid-container row">
+    {{range .Courses}}
+      <div class="col-xs-3 _flex-row _main-strech">
+        {{template "course-card" .}}
+      </div>
+    {{end}}
+    </div>
+  </div>
 {{end}}
+
+{{define "app-script"}}
+{{end}}
+
+{{define "app-style"}}
+  {{template "course-card-style"}}
+  <style>
+    #home {
+      position: relative;
+      z-index: 1;
+      padding-top: 48px;
+      padding-bottom: 48px;
+    }
+  </style>
 {{end}}
