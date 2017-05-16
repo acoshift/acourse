@@ -1,6 +1,7 @@
 package model
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/acoshift/acourse/pkg/internal"
@@ -8,16 +9,15 @@ import (
 
 // User model
 type User struct {
-	ID          string
-	Role        UserRole
-	oldUsername string
-	Username    string
-	Name        string
-	Email       string
-	AboutMe     string
-	Image       string
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	ID        string
+	Role      UserRole
+	Username  string
+	Name      string
+	Email     string
+	AboutMe   string
+	Image     string
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 // UserRole type
@@ -26,86 +26,67 @@ type UserRole struct {
 	Instructor bool
 }
 
+const selectUsers = `
+	SELECT
+		users.id,
+		users.name,
+		users.username,
+		users.email,
+		users.about_me,
+		users.image,
+		users.created_at,
+		users.updated_at,
+		roles.admin,
+		roles.instructor
+	FROM users
+	LEFT JOIN roles
+	ON users.id = roles.id
+`
+
 var (
-	getUsersStmt, _ = internal.GetDB().Prepare(`
-		SELECT
-			users.id,
-			users.name,
-			users.email,
-			users.about_me,
-			users.image,
-			users.created_at,
-			users.updated_at,
-			roles.admin,
-			roles.instructor
-		FROM users
-		LEFT JOIN roles
-		ON users.id = roles.id
+	getUsersStmt, _ = internal.GetDB().Prepare(selectUsers + `
 		WHERE users.id IN $1;
+	`)
+
+	getUserStmt, _ = internal.GetDB().Prepare(selectUsers + `
+		WHERE users.id = $1;
+	`)
+
+	getUserFromUsernameStmt, _ = internal.GetDB().Prepare(selectUsers + `
+		WHERE users.username = $1;
+	`)
+
+	listUsersStmt, _ = internal.GetDB().Prepare(selectUsers + `
+		ORDER BY created_at DESC;
+	`)
+
+	saveUserStmt, _ = internal.GetDB().Prepare(`
+		UPSERT INTO users
+			(id, name, username, about_me, image, updated_at)
+		VALUES
+			($1, $2, $3, $4, $5, now());
 	`)
 )
 
 // Save saves user
-// func (x *User) Save(c redis.Conn) error {
-// 	if len(x.ID) == 0 {
-// 		return fmt.Errorf("invalid id")
-// 	}
+func (x *User) Save() error {
+	if len(x.ID) == 0 {
+		return fmt.Errorf("invalid id")
+	}
+	_, err := saveUserStmt.Exec(x.ID, x.Name, x.Username, x.AboutMe, x.Image)
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
-// 	c.Do("WATCH", key("u", "username"))
-// 	// verify is new username duplicate
-// 	{
-// 		uID, err := redis.String(c.Do("HGET", key("u", "username"), x.Username))
-// 		if err != redis.ErrNil && err != nil {
-// 			c.Do("UNWATCH")
-// 			return err
-// 		}
-// 		if len(uID) > 0 && x.ID != uID {
-// 			c.Do("UNWATCH")
-// 			return fmt.Errorf("username already exists")
-// 		}
-// 	}
-
-// 	c.Send("MULTI")
-// 	c.Send("SADD", key("u", "all"), x.id)
-
-// 	x.UpdatedAt = time.Now()
-// 	if x.CreatedAt.IsZero() {
-// 		x.CreatedAt = x.UpdatedAt
-// 		c.Send("ZADD", key("u", "t0"), x.CreatedAt.UnixNano(), x.id)
-// 	} else {
-// 		c.Send("ZADD", key("u", "t0"), x.CreatedAt.UnixNano(), x.id) // TODO: remove after migrate
-// 	}
-
-// 	c.Send("ZADD", key("u", "t1"), x.UpdatedAt.UnixNano(), x.id)
-// 	c.Send("HSET", key("u"), x.id, enc(x))
-
-// 	if x.role != nil {
-// 		if x.role.Admin {
-// 			c.Send("SADD", key("u", "admin"), x.id)
-// 		} else {
-// 			c.Send("SREM", key("u", "admin"), x.id)
-// 		}
-// 		if x.role.Instructor {
-// 			c.Send("SADD", key("u", "instructor"), x.id)
-// 		} else {
-// 			c.Send("SREM", key("u", "instructor"), x.id)
-// 		}
-// 	}
-// 	if x.oldUsername != x.Username {
-// 		if len(x.oldUsername) > 0 {
-// 			c.Send("HDEL", key("u", "username"), x.oldUsername)
-// 		}
-// 		if len(x.Username) > 0 {
-// 			c.Send("HSET", key("u", "username"), x.Username, x.id)
-// 		}
-// 	}
-
-// 	_, err := c.Do("EXEC")
-// 	if err != nil {
-// 		return err
-// 	}
-// 	return nil
-// }
+func scanUser(scan func(...interface{}) error, x *User) error {
+	err := scan(&x.ID, &x.Name, &x.Username, &x.Email, &x.AboutMe, &x.Image, &x.CreatedAt, &x.UpdatedAt, &x.Role.Admin, &x.Role.Instructor)
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
 // GetUsers gets users
 func GetUsers(userIDs []string) ([]*User, error) {
@@ -116,7 +97,7 @@ func GetUsers(userIDs []string) ([]*User, error) {
 	}
 	for rows.Next() {
 		var x User
-		err = rows.Scan(&x.ID, &x.Name, &x.Email, &x.AboutMe, &x.Image, &x.CreatedAt, &x.UpdatedAt, &x.Role.Admin, &x.Role.Instructor)
+		err = scanUser(rows.Scan, &x)
 		if err != nil {
 			return nil, err
 		}
@@ -127,31 +108,39 @@ func GetUsers(userIDs []string) ([]*User, error) {
 
 // GetUser gets user from id
 func GetUser(userID string) (*User, error) {
-	xs, err := GetUsers([]string{userID})
+	var x User
+	err := scanUser(getUserStmt.QueryRow(userID).Scan, &x)
 	if err != nil {
 		return nil, err
 	}
-	return xs[0], nil
+	return &x, nil
 }
 
-// // GetUserFromUsername gets user from username
-// func GetUserFromUsername(c redis.Conn, username string) (*User, error) {
-// 	userID, err := redis.String(c.Do("HGET", key("u", "username"), username))
-// 	if err == redis.ErrNil {
-// 		return nil, ErrNotFound
-// 	}
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return GetUser(c, userID)
-// }
+// GetUserFromUsername gets user from username
+func GetUserFromUsername(username string) (*User, error) {
+	var x User
+	err := scanUser(getUserFromUsernameStmt.QueryRow(username).Scan, &x)
+	if err != nil {
+		return nil, err
+	}
+	return &x, nil
+}
 
-// // ListUsers lists users
-// // TODO: pagination
-// func ListUsers(c redis.Conn) ([]*User, error) {
-// 	userIDs, err := redis.Strings(c.Do("ZREVRANGE", key("u", "t0"), 0, -1))
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return GetUsers(c, userIDs)
-// }
+// ListUsers lists users
+// TODO: pagination
+func ListUsers() ([]*User, error) {
+	xs := make([]*User, 0)
+	rows, err := listUsersStmt.Query()
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var x User
+		err = scanUser(rows.Scan, &x)
+		if err != nil {
+			return nil, err
+		}
+		xs = append(xs, &x)
+	}
+	return xs, nil
+}
