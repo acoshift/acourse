@@ -6,7 +6,7 @@ create table sessions (
   k text,
   v blob,
   e timestamp,
-  primary key k,
+  primary key (k),
   index (e)
 );
 
@@ -125,14 +125,14 @@ create table enrolls (
   created_at timestamp not null default now(),
   primary key (user_id, course_id),
   foreign key (user_id) references users (id),
-  foreign key (course_id) references courses (id)
+  foreign key (course_id) references courses (id),
   index (created_at),
   index (user_id, created_at),
-  index (course_id, created_at),
+  index (course_id, created_at)
 );
 
 create table attends (
-  id serial primary key not null,
+  id serial,
   user_id string,
   course_id int,
   created_at timestamp not null default now(),
