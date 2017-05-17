@@ -14,9 +14,13 @@ p {
   font-family: $secondary-fontface;
   margin: 0;
 }
+a {
+  text-decoration: none;
+}
 .navbar-color {
   background: $navbar-color;
 }
+
 .page-pattern {
   position: relative;
   &:before {

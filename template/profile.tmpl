@@ -1,25 +1,84 @@
 {{define "app-body"}}
-<div>
-  {{template "user-profile" me}}
-  <p>User ID: {{me.ID}}</p>
-  <a href="/profile/edit">Edit</a>
-  <hr>
-  <h4>My Own Courses</h4>
-    {{if me.Role.Instructor}}
-      <a href="/create-course">Create new Course</a>
-    {{end}}
-  {{range .OwnCourses}}
-    {{template "own-course-card" .}}
-  {{end}}
-  <hr>
-  <h4>Enrolled Courses</h4>
-  {{range .EnrolledCourses}}
-    {{template "enrolled-course-card" .}}
-  {{end}}
+<div id="profile" class="page-pattern">
+  <div class="profile-container grid-container">
+    <div class="row _cross-start">
+
+      <div class="user-profile col-xs-12 col-md-3 _flex-column _main-start">
+        {{template "user-profile" me}}
+        <p>User ID: {{me.ID}}</p>
+        <a href="/profile/edit">Edit</a>
+      </div>
+
+      <div class="user-dashboard col-xs-12 col-md-9  _flex-column">
+        {{if me.Role.Instructor}}
+          <div class="col-xs-12 _flex-row _main-space-between _cross-center">
+            <h3>My Own Courses</h3>
+            <a href="/create-course">
+              <div class="button-default">Create new Course</div>
+            </a>
+          </div>
+          
+          <div class="row">
+            {{range .OwnCourses}}
+              <div class="col-xs-12 col-md-4 _flex-row _main-strech">
+                {{template "own-course-card" .}}
+              </div>
+            {{end}}
+          </div>
+          {{end}}
+          <h3 class="col-xs-12">Enrolled Courses</h3>
+          <div class="row">
+            {{range .EnrolledCourses}}
+            <div class="col-xs-12 col-md-4 _flex-row _main-strech">
+              {{template "enrolled-course-card" .}}
+            </div>
+            {{end}}
+          </div>
+      </div>
+
+    </div>
+      
+  </div>
 </div>
 {{end}}
 
 {{define "app-style"}}
+  {{template "enrolled-course-card-style"}}
+  {{template "own-course-card-style"}}
+  <style>
+    #profile {
+      z-index: 1;
+      padding-top: 48px;
+      padding-bottom: 48px;
+    }
+    #profile .user-profile {
+      background: white;
+      border-radius: 5px;
+      margin-bottom: 16px;
+    }
+    #profile .user-dashboard {
+      padding: 0px 16px;
+    }
+    .button-default {
+      background-color: #02b7e9;
+      box-shadow: 8px 10px 20px 0 rgba(46,61,73,0.15);
+      transition: all 0.3s ease 0s;
+      font-weight: 400;
+      background-color: #02b3e4;
+      color: #fff;
+      padding: 12px 16px;
+      border-radius: 5px;
+    }
+    .button-default:hover {
+      box-shadow: 2px 4px 8px 0 rgba(46,61,73,0.2);
+    }
+    @media only screen and (min-width: 768px) {
+      #profile .user-dashboard {
+        padding: 24px;
+        padding-top: 0;
+      }
+    }
+  </style>
 {{end}}
 
 

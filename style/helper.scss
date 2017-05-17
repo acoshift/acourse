@@ -47,7 +47,21 @@
 ._cross-strech {
   align-items: stretch;
 }
-
+._main-start {
+  justify-content: flex-start;
+}
+._cross-start {
+  align-items: flex-start;
+}
+._main-center {
+  justify-content: center;
+}
+._cross-center {
+  align-items: center;
+}
+._main-space-between {
+  justify-content: space-between;
+}
 // Position
 ._align-center {
   text-align: center !important;
