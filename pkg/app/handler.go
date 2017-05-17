@@ -328,7 +328,7 @@ func getCourse(w http.ResponseWriter, r *http.Request) {
 	}
 	page := defaultPage
 	page.Title = course.Title + " | " + page.Title
-	page.Desc = course.Desc
+	page.Desc = course.ShortDesc
 	page.Image = course.Image
 	page.URL = internal.GetBaseURL() + "/course/" + url.PathEscape(course.URL)
 	view.Course(w, r, &view.CourseData{
