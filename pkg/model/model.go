@@ -2,6 +2,7 @@ package model
 
 import (
 	"bytes"
+	"database/sql"
 	"encoding/gob"
 	"errors"
 	"fmt"
@@ -54,4 +55,11 @@ func enc(x interface{}) []byte {
 		log.Println("enc:", err)
 	}
 	return b.Bytes()
+}
+
+func mustStmt(stmt *sql.Stmt, err error) *sql.Stmt {
+	if err != nil {
+		log.Fatal(err)
+	}
+	return stmt
 }

@@ -59,36 +59,36 @@ const (
 )
 
 var (
-	getPaymentStmt, _ = internal.GetDB().Prepare(selectPayment + `
+	getPaymentStmt = mustStmt(internal.GetDB().Prepare(selectPayment + `
 		WHERE payments.id = $1;
-	`)
+	`))
 
-	getPaymentsStmt, _ = internal.GetDB().Prepare(selectPayment + `
-		WHERE payments.id IN ANY($1);
-	`)
+	getPaymentsStmt = mustStmt(internal.GetDB().Prepare(selectPayment + `
+		WHERE payments.id = ANY($1);
+	`))
 
-	listPaymentsStmt, _ = internal.GetDB().Prepare(selectPayment + `
+	listPaymentsStmt = mustStmt(internal.GetDB().Prepare(selectPayment + `
 		ORDER BY payments.created_at DESC;
-	`)
+	`))
 
-	listPaymentsWithStatusStmt, _ = internal.GetDB().Prepare(selectPayment + `
+	listPaymentsWithStatusStmt = mustStmt(internal.GetDB().Prepare(selectPayment + `
 		WHERE payments.status = ANY($1)
 		ORDER BY payments.created_at DESC;
-	`)
+	`))
 
-	savePaymentStmt, _ = internal.GetDB().Prepare(`
+	savePaymentStmt = mustStmt(internal.GetDB().Prepare(`
 		INSERT INTO payments
 			(user_id, course_id, image, price, original_price, code, status, updated_at)
 		VALUES
 			($1, $2, $3, $4, $5, $6, $7, now())
 		RETURNING id;
-	`)
+	`))
 
-	changePaymentStatusStmt, _ = internal.GetDB().Prepare(`
-		UPDATE INTO payments
+	changePaymentStatusStmt = mustStmt(internal.GetDB().Prepare(`
+		UPDATE payments
 		SET status = $2
 		WHERE id = $1;
-	`)
+	`))
 )
 
 // Save saves payment, allow for create only

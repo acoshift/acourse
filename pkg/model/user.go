@@ -44,28 +44,28 @@ const selectUsers = `
 `
 
 var (
-	getUsersStmt, _ = internal.GetDB().Prepare(selectUsers + `
+	getUsersStmt = mustStmt(internal.GetDB().Prepare(selectUsers + `
 		WHERE users.id = ANY($1);
-	`)
+	`))
 
-	getUserStmt, _ = internal.GetDB().Prepare(selectUsers + `
+	getUserStmt = mustStmt(internal.GetDB().Prepare(selectUsers + `
 		WHERE users.id = $1;
-	`)
+	`))
 
-	getUserFromUsernameStmt, _ = internal.GetDB().Prepare(selectUsers + `
+	getUserFromUsernameStmt = mustStmt(internal.GetDB().Prepare(selectUsers + `
 		WHERE users.username = $1;
-	`)
+	`))
 
-	listUsersStmt, _ = internal.GetDB().Prepare(selectUsers + `
+	listUsersStmt = mustStmt(internal.GetDB().Prepare(selectUsers + `
 		ORDER BY users.created_at DESC;
-	`)
+	`))
 
-	saveUserStmt, _ = internal.GetDB().Prepare(`
+	saveUserStmt = mustStmt(internal.GetDB().Prepare(`
 		UPSERT INTO users
 			(id, name, username, about_me, image, updated_at)
 		VALUES
 			($1, $2, $3, $4, $5, now());
-	`)
+	`))
 )
 
 // Save saves user

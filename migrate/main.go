@@ -178,9 +178,9 @@ func main() {
 	must(err)
 	stmt3, err := db.Prepare(`
 		INSERT INTO course_contents
-			(course_id, title, long_desc, video_id, video_type, download_url)
+			(course_id, index, title, long_desc, video_id, video_type, download_url)
 		VALUES
-			($1, $2, $3, $4, $5, $6);
+			($1, $2, $3, $4, $5, $6, $7);
 	`)
 	must(err)
 	for _, p := range courses {
@@ -208,12 +208,12 @@ func main() {
 
 		_, err = stmt2.Exec(id, p.Options.Public, p.Options.Enroll, p.Options.Attend, p.Options.Assignment, p.Options.Discount)
 		must(err)
-		for _, c := range p.Contents {
+		for i, c := range p.Contents {
 			var vt int
 			if len(p.Video) > 0 {
 				vt = model.Youtube
 			}
-			_, err = stmt3.Exec(id, c.Title, c.Description, c.Video, vt, c.DownloadURL)
+			_, err = stmt3.Exec(id, i, c.Title, c.Description, c.Video, vt, c.DownloadURL)
 			must(err)
 		}
 	}

@@ -3,12 +3,12 @@ package model
 import "github.com/acoshift/acourse/pkg/internal"
 
 var (
-	enrollStmt, _ = internal.GetDB().Prepare(`
+	enrollStmt = mustStmt(internal.GetDB().Prepare(`
 		INSERT INTO enrolls
 			(user_id, course_id)
 		VALUES
 			($1, $2);
-	`)
+	`))
 )
 
 // Enroll an user to a course

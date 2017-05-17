@@ -47,7 +47,6 @@ const (
 
 // CourseContent type
 type CourseContent struct {
-	ID          int64
 	Title       string
 	Desc        string
 	VideoID     string
@@ -92,70 +91,68 @@ const (
 			course_options.discount
 		FROM courses
 			LEFT JOIN course_options ON courses.id = course_options.id
-`
+	`
 )
 
 var (
-	getCourseStmt, _ = internal.GetDB().Prepare(selectCourses + `
+	getCourseStmt = mustStmt(internal.GetDB().Prepare(selectCourses + `
 		WHERE courses.id = $1;
-	`)
+	`))
 
-	getCoursesStmt, _ = internal.GetDB().Prepare(selectCourses + `
+	getCoursesStmt = mustStmt(internal.GetDB().Prepare(selectCourses + `
 		WHERE courses.id = ANY($1);
-	`)
+	`))
 
-	getCourseFromURLStmt, _ = internal.GetDB().Prepare(selectCourses + `
+	getCourseFromURLStmt = mustStmt(internal.GetDB().Prepare(selectCourses + `
 		WHERE courses.url = $1;
-	`)
+	`))
 
-	getCourseContentsStmt, _ = internal.GetDB().Prepare(`
+	getCourseContentsStmt = mustStmt(internal.GetDB().Prepare(`
 		SELECT
-			courses.id,
-			course_contents.id,
 			course_contents.title,
 			course_contents.long_desc,
 			course_contents.video_id,
 			course_contents.video_type,
 			course_contents.download_url
 		FROM courses
-			INNER JOIN course_contents
-			ON courses.id = course_contents.course_id,
-		WHERE courses.id = ANY($1);
-	`)
+			INNER JOIN course_contents ON courses.id = course_contents.course_id
+		WHERE courses.id = $1
+		ORDER BY course_contents.index ASC;
+	`))
 
-	listCoursesStmt, _ = internal.GetDB().Prepare(selectCourses + `
+	listCoursesStmt = mustStmt(internal.GetDB().Prepare(selectCourses + `
 		ORDER BY courses.created_at DESC;
-	`)
+	`))
 
-	listCoursesPublicStmt, _ = internal.GetDB().Prepare(selectCourses + `
+	listCoursesPublicStmt = mustStmt(internal.GetDB().Prepare(selectCourses + `
 		WHERE course_options.public = true
 		ORDER BY courses.created_at DESC;
-	`)
+	`))
 
-	listCoursesOwnStmt, _ = internal.GetDB().Prepare(selectCourses + `
+	listCoursesOwnStmt = mustStmt(internal.GetDB().Prepare(selectCourses + `
 		WHERE courses.user_id = $1
 		ORDER BY courses.created_at DESC;
-	`)
+	`))
 
-	listCoursesEnrolledStmt, _ = internal.GetDB().Prepare(selectCourses + `
+	listCoursesEnrolledStmt = mustStmt(internal.GetDB().Prepare(selectCourses + `
 		INNER JOIN enrolls ON courses.id = enrolls.course_id
 		WHERE enrolls.user_id = $1
 		ORDER BY enrolls.created_at DESC;
-	`)
+	`))
 
-	saveCourseStmt, _ = internal.GetDB().Prepare(`
+	saveCourseStmt = mustStmt(internal.GetDB().Prepare(`
 		UPSERT INTO courses
 			(id, user_id, title, short_desc, long_desc, image, start, url, type, price, discount, enroll_detail, updated_at)
 		VALUES
 			($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, now());
-	`)
+	`))
 
-	saveCourseOptionStmt, _ = internal.GetDB().Prepare(`
+	saveCourseOptionStmt = mustStmt(internal.GetDB().Prepare(`
 		UPSERT INTO course_options
 			(id, public, enroll, attend, assignment, discount)
 		VALUES
-			($1, $2, $3, $4, $5, %6);
-	`)
+			($1, $2, $3, $4, $5, $6);
+	`))
 )
 
 // Save saves course
@@ -206,8 +203,8 @@ func scanCourse(scan scanFunc, x *Course) error {
 	return nil
 }
 
-func scanCourseContent(scan scanFunc, courseID *int64, x *CourseContent) error {
-	return scan(courseID, &x.ID, &x.Title, &x.Desc, &x.VideoID, &x.VideoType, &x.DownloadURL)
+func scanCourseContent(scan scanFunc, x *CourseContent) error {
+	return scan(&x.Title, &x.Desc, &x.VideoID, &x.VideoType, &x.DownloadURL)
 }
 
 // GetCourses gets courses
@@ -235,6 +232,18 @@ func GetCourse(courseID int64) (*Course, error) {
 	if err != nil {
 		return nil, err
 	}
+	rows, err := getCourseContentsStmt.Query(x.ID)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var content CourseContent
+		err = scanCourseContent(rows.Scan, &content)
+		if err != nil {
+			return nil, err
+		}
+		x.Contents = append(x.Contents, &content)
+	}
 	return &x, nil
 }
 
@@ -244,6 +253,18 @@ func GetCourseFromURL(url string) (*Course, error) {
 	err := scanCourse(getCourseFromURLStmt.QueryRow(url).Scan, &x)
 	if err != nil {
 		return nil, err
+	}
+	rows, err := getCourseContentsStmt.Query(x.ID)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var content CourseContent
+		err = scanCourseContent(rows.Scan, &content)
+		if err != nil {
+			return nil, err
+		}
+		x.Contents = append(x.Contents, &content)
 	}
 	return &x, nil
 }
