@@ -13,6 +13,7 @@ import (
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/identitytoolkit/v3"
 	"google.golang.org/api/option"
+	"gopkg.in/gomail.v2"
 )
 
 var config = configfile.NewReader("config")
@@ -26,6 +27,7 @@ var (
 	baseURL        = config.String("base_url")
 	sqlURL         = config.String("sql_url")
 	bucket         = config.String("bucket")
+	emailFrom      = config.String("email_from")
 )
 
 var (
@@ -44,6 +46,12 @@ var (
 	gitClient    *identitytoolkit.RelyingpartyService
 	db           *sql.DB
 	bucketHandle *storage.BucketHandle
+	emailDialer  = gomail.NewPlainDialer(
+		config.String("email_server"),
+		config.Int("email_port"),
+		config.String("email_user"),
+		config.String("email_password"),
+	)
 )
 
 func init() {

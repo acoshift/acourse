@@ -1,4 +1,4 @@
-memo = "6453ed3c95e6c3e8c7034beb18262021b8657ba0004f540800be1e0f57468fc8"
+memo = "f8d44bab369a8fb34c52208c65eeb0ecbc8916974df24d25df959a74e561cb13"
 
 [[projects]]
   branch = "master"
@@ -173,3 +173,15 @@ memo = "6453ed3c95e6c3e8c7034beb18262021b8657ba0004f540800be1e0f57468fc8"
   name = "google.golang.org/grpc"
   packages = [".","codes","credentials","credentials/oauth","grpclog","internal","keepalive","metadata","naming","peer","stats","status","tap","transport"]
   revision = "6914ab1e338c92da4218a23d27fcd03d0ad78d46"
+
+[[projects]]
+  branch = "v3"
+  name = "gopkg.in/alexcesaro/quotedprintable.v3"
+  packages = ["."]
+  revision = "2caba252f4dc53eaf6b553000885530023f54623"
+
+[[projects]]
+  name = "gopkg.in/gomail.v2"
+  packages = ["."]
+  revision = "41f3572897373c5538c50a2402db15db079fa4fd"
+  version = "2.0.0"

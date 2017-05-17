@@ -75,96 +75,73 @@ var (
 		WHERE payments.status = ANY($1)
 		ORDER BY payments.created_at DESC;
 	`)
+
+	savePaymentStmt, _ = internal.GetDB().Prepare(`
+		INSERT INTO payments
+			(user_id, course_id, image, price, original_price, code, status, updated_at)
+		VALUES
+			($1, $2, $3, $4, $5, $6, $7, now())
+		RETURNING id;
+	`)
+
+	changePaymentStatusStmt, _ = internal.GetDB().Prepare(`
+		UPDATE INTO payments
+		SET status = $2
+		WHERE id = $1;
+	`)
 )
 
-func (x *Payment) save() {
-	// x.UpdatedAt = time.Now()
-	// if x.CreatedAt.IsZero() {
-	// 	x.CreatedAt = x.UpdatedAt
-	// 	n := x.CreatedAt.UnixNano()
-	// 	c.Send("ZADD", key("p", "t0"), n, x.id)
-	// 	c.Send("ZADD", key("u", x.UserID, "p"), n, x.id)
-	// 	c.Send("SADD", key("c", x.CourseID, "p"), n, x.id)
-	// } else {
-	// 	// TODO: remove after migrate
-	// 	n := x.CreatedAt.UnixNano()
-	// 	c.Send("ZADD", key("p", "t0"), n, x.id)
-	// 	c.Send("ZADD", key("u", x.UserID, "p"), n, x.id)
-	// 	c.Send("SADD", key("c", x.CourseID, "p"), n, x.id)
-	// }
-
-	// c.Send("ZADD", key("p", "t1"), x.UpdatedAt.UnixNano(), x.id)
-	// c.Send("HSET", key("p"), x.id, enc(x))
-}
-
-// Save saves payment
+// Save saves payment, allow for create only
 func (x *Payment) Save() error {
+	if x.ID > 0 {
+		return fmt.Errorf("payment already created")
+	}
 	if len(x.UserID) == 0 {
 		return fmt.Errorf("invalid user")
 	}
 	if x.CourseID <= 0 {
 		return fmt.Errorf("invalid course")
 	}
-
-	// var err error
-	// if len(x.id) == 0 {
-	// 	id, err := redis.Int64(c.Do("INCR", key("id", "p")))
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	x.id = strconv.FormatInt(id, 10)
-	// }
-
-	// c.Send("MULTI")
-	// c.Send("SADD", key("p", "all"), x.id)
-	// if x.Status == Pending {
-	// 	c.Send("SADD", key("p", "pending"), x.id)
-	// } else {
-	// 	c.Send("SREM", key("p", "pending"), x.id)
-	// }
-	// x.save(c)
-	// _, err = c.Do("EXEC")
-	// if err != nil {
-	// 	return err
-	// }
+	err := savePaymentStmt.QueryRow(x.UserID, x.CourseID, x.Image, x.Price, x.OriginalPrice, x.Code, Pending).Scan(&x.ID)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
-// Accept accepts payment and save
+// Accept accepts a payment and create new enroll
 func (x *Payment) Accept() error {
-	// TODO: accept and reject should run in transaction in `watch`
-	// if len(x.id) == 0 {
-	// 	return fmt.Errorf("invalid payment")
-	// }
-	// if x.Status != Pending {
-	// 	return fmt.Errorf("invalid payment status")
-	// }
-	// x.Status = Accepted
-	// c.Send("MULTI")
-	// // enroll(c, x.UserID, x.CourseID)
-	// x.save(c)
-	// _, err := c.Do("EXEC")
-	// if err != nil {
-	// 	return err
-	// }
+	if x.ID <= 0 {
+		return fmt.Errorf("payment must be save before accept")
+	}
+	tx, err := internal.GetDB().Begin()
+	if err != nil {
+		return err
+	}
+	_, err = tx.Stmt(changePaymentStatusStmt).Exec(x.ID, Accepted)
+	if err != nil {
+		return err
+	}
+	_, err = tx.Stmt(enrollStmt).Exec(x.UserID, x.CourseID)
+	if err != nil {
+		return err
+	}
+	err = tx.Commit()
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
 // Reject rejects a payment
 func (x *Payment) Reject() error {
-	// if len(x.id) == 0 {
-	// 	return fmt.Errorf("invalid payment")
-	// }
-	// if x.Status != Pending {
-	// 	return fmt.Errorf("invalid payment status")
-	// }
-	// x.Status = Rejected
-	// c.Send("MULTI")
-	// x.save(c)
-	// _, err := c.Do("EXEC")
-	// if err != nil {
-	// 	return err
-	// }
+	if x.ID <= 0 {
+		return fmt.Errorf("payment must be save before accept")
+	}
+	_, err := changePaymentStatusStmt.Exec(x.ID, Rejected)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -185,6 +162,8 @@ func scanPayment(scan scanFunc, x *Payment) error {
 	if courseURL != nil {
 		x.Course.URL = *courseURL
 	}
+	x.UserID = x.User.ID
+	x.CourseID = x.Course.ID
 	return nil
 }
 
