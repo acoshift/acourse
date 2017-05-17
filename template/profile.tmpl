@@ -5,8 +5,8 @@
 
       <div class="user-profile col-xs-12 col-md-3 _flex-column _main-start">
         {{template "user-profile" me}}
-        <p>User ID: {{me.ID}}</p>
-        <a href="/profile/edit">Edit</a>
+        <div class="user-id">User ID: {{me.ID}}</div>
+        <a href="/profile/edit"><div class="button-secondary">Edit Profile</div></a>
       </div>
 
       <div class="user-dashboard col-xs-12 col-md-9  _flex-column">
@@ -51,23 +51,50 @@
       padding-top: 48px;
       padding-bottom: 48px;
     }
+
+    #profile #profile-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    #profile #profile-card img {
+      width: 50%;
+    }
+    #profile #profile-card .profile-card-name {
+      font-size: 20px;
+      margin-bottom: 16px;
+    }
+
     #profile .user-profile {
       background: white;
       border-radius: 5px;
       margin-bottom: 16px;
+      padding: 16px;
     }
     #profile .user-dashboard {
-      padding: 0px 16px;
+      padding: 0;
+    }
+    #profile .user-id {
+      margin-bottom: 16px;
     }
     .button-default {
       background-color: #02b7e9;
       box-shadow: 8px 10px 20px 0 rgba(46,61,73,0.15);
       transition: all 0.3s ease 0s;
       font-weight: 400;
-      background-color: #02b3e4;
       color: #fff;
       padding: 12px 16px;
       border-radius: 5px;
+    }
+    .button-secondary {
+      text-align: center;
+      transition: all 0.3s ease 0s;
+      font-weight: 400;
+      color: #494d55;
+      background-color: #fff;
+      border: 2px solid #cdd1d3;
+      padding: 8px 12px;
+      border-radius: 3px;
     }
     .button-default:hover {
       box-shadow: 2px 4px 8px 0 rgba(46,61,73,0.2);
@@ -76,6 +103,14 @@
       #profile .user-dashboard {
         padding: 24px;
         padding-top: 0;
+      }
+    }
+    @media only screen and (max-width: 767px) {
+      #profile {
+        padding-top: 16px;
+      }
+      .button-default {
+        padding: 8px;
       }
     }
   </style>
