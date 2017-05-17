@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/acoshift/acourse/pkg/internal"
@@ -12,6 +13,7 @@ import (
 	"github.com/acoshift/acourse/pkg/view"
 	"github.com/acoshift/flash"
 	"github.com/acoshift/gzip"
+	"github.com/acoshift/header"
 	"github.com/acoshift/httprouter"
 	"github.com/acoshift/middleware"
 	"github.com/acoshift/session"
@@ -248,26 +250,53 @@ func getProfileEdit(w http.ResponseWriter, r *http.Request) {
 }
 
 func postProfileEdit(w http.ResponseWriter, r *http.Request) {
-	defer back(w, r)
 	ctx := r.Context()
 	user, _ := internal.GetUser(ctx).(*model.User)
 	f := flash.Get(ctx)
 	if !verifyXSRF(r.FormValue("X"), user.ID, "profile-edit") {
 		f.Add("Errors", "invalid xsrf token")
+		back(w, r)
 		return
 	}
+	image, info, err := r.FormFile("Image")
+	var imageURL string
+	if err != http.ErrMissingFile {
+		if err != nil {
+			f.Add("Errors", err.Error())
+			back(w, r)
+			return
+		}
+
+		if !strings.Contains(info.Header.Get(header.ContentType), "image") {
+			f.Add("Errors", "file is not an image")
+			back(w, r)
+			return
+		}
+
+		imageURL, err = internal.UploadProfileImage(ctx, image)
+		if err != nil {
+			f.Add("Errors", err.Error())
+			back(w, r)
+			return
+		}
+	}
+
 	username := r.FormValue("Username")
 	name := r.FormValue("Name")
 	aboutMe := r.FormValue("AboutMe")
 	user.Username = username
 	user.Name = name
 	user.AboutMe = aboutMe
+	if len(imageURL) > 0 {
+		user.Image = imageURL
+	}
 	f.Set("Username", username)
 	f.Set("Name", name)
 	f.Set("AboutMe", aboutMe)
-	err := user.Save()
+	err = user.Save()
 	if err != nil {
 		f.Add("Errors", err.Error())
+		back(w, r)
 		return
 	}
 	http.Redirect(w, r, "/profile", http.StatusSeeOther)

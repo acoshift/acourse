@@ -2,16 +2,17 @@ package internal
 
 import (
 	"context"
-	"crypto/rand"
 	"database/sql"
 	"log"
 	"time"
 
+	"cloud.google.com/go/storage"
 	"github.com/acoshift/configfile"
 	"github.com/garyburd/redigo/redis"
 	_ "github.com/lib/pq"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/identitytoolkit/v3"
+	"google.golang.org/api/option"
 )
 
 var config = configfile.NewReader("config")
@@ -24,6 +25,7 @@ var (
 	serviceAccount = config.Bytes("service_account")
 	baseURL        = config.String("base_url")
 	sqlURL         = config.String("sql_url")
+	bucket         = config.String("bucket")
 )
 
 var (
@@ -39,8 +41,9 @@ var (
 			)
 		},
 	}
-	gitClient *identitytoolkit.RelyingpartyService
-	db        *sql.DB
+	gitClient    *identitytoolkit.RelyingpartyService
+	db           *sql.DB
+	bucketHandle *storage.BucketHandle
 )
 
 func init() {
@@ -48,7 +51,7 @@ func init() {
 
 	ctx := context.Background()
 
-	gconf, err := google.JWTConfigFromJSON(serviceAccount, identitytoolkit.CloudPlatformScope)
+	gconf, err := google.JWTConfigFromJSON(serviceAccount, identitytoolkit.CloudPlatformScope, storage.ScopeReadWrite)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -57,6 +60,12 @@ func init() {
 		log.Fatal(err)
 	}
 	gitClient = gitService.Relyingparty
+
+	storageClient, err := storage.NewClient(ctx, option.WithTokenSource(gconf.TokenSource(ctx)))
+	if err != nil {
+		log.Fatal(err)
+	}
+	bucketHandle = storageClient.Bucket(bucket)
 
 	db, err = sql.Open("postgres", sqlURL)
 	if err != nil {
@@ -87,87 +96,4 @@ func GetXSRFSecret() string {
 // GetBaseURL returns base url
 func GetBaseURL() string {
 	return baseURL
-}
-
-// SignInUser sign in user with email and password
-func SignInUser(email, password string) (string, error) {
-	resp, err := gitClient.VerifyPassword(&identitytoolkit.IdentitytoolkitRelyingpartyVerifyPasswordRequest{
-		Email:    email,
-		Password: password,
-	}).Do()
-	if err != nil {
-		return "", err
-	}
-	return resp.LocalId, nil
-}
-
-func generateSessionID() string {
-	b := make([]byte, 24)
-	rand.Read(b)
-	return string(b)
-}
-
-// SignInUserProvider sign in user with open id provider
-func SignInUserProvider(provider string) (redirectURI string, sessionID string, err error) {
-	sessID := generateSessionID()
-	resp, err := gitClient.CreateAuthUri(&identitytoolkit.IdentitytoolkitRelyingpartyCreateAuthUriRequest{
-		ProviderId:   provider,
-		ContinueUri:  baseURL + "/openid/callback",
-		AuthFlowType: "CODE_FLOW",
-		SessionId:    sessID,
-	}).Do()
-	if err != nil {
-		return "", "", err
-	}
-	return resp.AuthUri, sessID, nil
-}
-
-// SignInUserProviderCallback sign in user with open id provider callback
-func SignInUserProviderCallback(callbackURI string, sessID string) (string, error) {
-	resp, err := gitClient.VerifyAssertion(&identitytoolkit.IdentitytoolkitRelyingpartyVerifyAssertionRequest{
-		RequestUri: baseURL + callbackURI,
-		SessionId:  sessID,
-	}).Do()
-	if err != nil {
-		return "", err
-	}
-	return resp.LocalId, nil
-}
-
-// SignUpUser creates new user
-func SignUpUser(email, password string) (string, error) {
-	resp, err := gitClient.SignupNewUser(&identitytoolkit.IdentitytoolkitRelyingpartySignupNewUserRequest{
-		Email:    email,
-		Password: password,
-	}).Do()
-	if err != nil {
-		return "", err
-	}
-	return resp.LocalId, nil
-}
-
-// GetVerifyEmailCode gets out-of-band confirmation code for verify email
-func GetVerifyEmailCode(email string) (string, error) {
-	resp, err := gitClient.GetOobConfirmationCode(&identitytoolkit.Relyingparty{
-		Kind:        "identitytoolkit#relyingparty",
-		RequestType: "VERIFY_EMAIL",
-		Email:       email,
-	}).Do()
-	if err != nil {
-		return "", err
-	}
-	return resp.OobCode, nil
-}
-
-// GetResetPasswordCode gets out-of-band confirmation code for reset password
-func GetResetPasswordCode(email string) (string, error) {
-	resp, err := gitClient.GetOobConfirmationCode(&identitytoolkit.Relyingparty{
-		Kind:        "identitytoolkit#relyingparty",
-		RequestType: "PASSWORD_RESET",
-		Email:       email,
-	}).Do()
-	if err != nil {
-		return "", err
-	}
-	return resp.OobCode, nil
 }

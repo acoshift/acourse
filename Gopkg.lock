@@ -1,9 +1,9 @@
-memo = ""
+memo = "6453ed3c95e6c3e8c7034beb18262021b8657ba0004f540800be1e0f57468fc8"
 
 [[projects]]
   branch = "master"
   name = "cloud.google.com/go"
-  packages = ["datastore","compute/metadata"]
+  packages = ["compute/metadata","datastore","iam","internal","internal/atomiccache","internal/fields","internal/optional","internal/version","storage"]
   revision = "3f0ecb764c477068795883452384645c02f4e458"
 
 [[projects]]
@@ -55,6 +55,12 @@ memo = ""
   revision = "d0e4cf4c6815620da063421701c9851d24600e29"
 
 [[projects]]
+  name = "github.com/disintegration/imaging"
+  packages = ["."]
+  revision = "ac27d1805a555e1754fa177216ee07f4e63c30b5"
+  version = "v1.1.0"
+
+[[projects]]
   branch = "master"
   name = "github.com/dustin/go-humanize"
   packages = ["."]
@@ -63,19 +69,31 @@ memo = ""
 [[projects]]
   branch = "master"
   name = "github.com/garyburd/redigo"
-  packages = ["redis"]
+  packages = ["internal","redis"]
   revision = "0d253a66e6e1349f4581d6d2b300ee434ee2da9f"
 
 [[projects]]
   branch = "master"
   name = "github.com/golang/protobuf"
-  packages = ["proto","ptypes/timestamp","ptypes/wrappers","ptypes/any","protoc-gen-go/descriptor","ptypes/struct"]
+  packages = ["proto","protoc-gen-go/descriptor","ptypes/any","ptypes/struct","ptypes/timestamp","ptypes/wrappers"]
   revision = "2bba0603135d7d7f5cb73b2125beeda19c09f4ef"
+
+[[projects]]
+  name = "github.com/google/uuid"
+  packages = ["."]
+  revision = "064e2069ce9c359c118179501254f67d7d37ba24"
+  version = "0.2"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/googleapis/gax-go"
+  packages = ["."]
+  revision = "9af46dd5a1713e8b5cd71106287eba3cefdde50b"
 
 [[projects]]
   branch = "master"
   name = "github.com/lib/pq"
-  packages = ["."]
+  packages = [".","oid"]
   revision = "2704adc878c21e1329f46f6e56a1c387d788ff94"
 
 [[projects]]
@@ -105,47 +123,53 @@ memo = ""
 [[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
-  packages = ["bcrypt"]
+  packages = ["bcrypt","blowfish"]
   revision = "12c985af8526c1f6f0c463bbfd9d69623d13b323"
 
 [[projects]]
   branch = "master"
+  name = "golang.org/x/image"
+  packages = ["bmp","tiff","tiff/lzw"]
+  revision = "f483456c9f61fd7c1e170033d58ef22ff5ffe291"
+
+[[projects]]
+  branch = "master"
   name = "golang.org/x/net"
-  packages = ["xsrftoken","context","context/ctxhttp","http2","http2/hpack","trace"]
+  packages = ["context","context/ctxhttp","http2","http2/hpack","idna","internal/timeseries","lex/httplex","trace","xsrftoken"]
   revision = "c9b681d35165f1995d6f3034e61f8761d4b90c99"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/oauth2"
-  packages = ["google",".","jwt"]
+  packages = [".","google","internal","jws","jwt"]
   revision = "e7a48207996f497ea86f5736d08d99d45c0b6461"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/text"
-  packages = ["secure/bidirule","unicode/norm"]
+  packages = ["internal/gen","internal/triegen","internal/ucd","secure/bidirule","transform","unicode/bidi","unicode/cldr","unicode/norm","unicode/rangetable"]
   revision = "f4b4367115ec2de254587813edaa901bc1c723a8"
 
 [[projects]]
   branch = "master"
   name = "google.golang.org/api"
-  packages = ["identitytoolkit/v3","iterator","option","transport"]
+  packages = ["gensupport","googleapi","googleapi/internal/uritemplates","googleapi/transport","identitytoolkit/v3","internal","iterator","option","storage/v1","transport"]
   revision = "6b6c96b70c6105ce74c491692dee15df07d5b3aa"
 
 [[projects]]
   branch = "master"
   name = "google.golang.org/appengine"
-  packages = ["urlfetch",".","socket"]
+  packages = [".","internal","internal/app_identity","internal/base","internal/datastore","internal/log","internal/modules","internal/remote_api","internal/socket","internal/urlfetch","socket","urlfetch"]
   revision = "170382fa85b10b94728989dfcf6cc818b335c952"
 
 [[projects]]
   branch = "master"
   name = "google.golang.org/genproto"
-  packages = ["googleapis/rpc/status","googleapis/datastore/v1","googleapis/type/latlng"]
+  packages = ["googleapis/api/annotations","googleapis/datastore/v1","googleapis/iam/v1","googleapis/rpc/status","googleapis/type/latlng"]
   revision = "411e09b969b1170a9f0c467558eb4c4c110d9c77"
 
 [[projects]]
   branch = "master"
   name = "google.golang.org/grpc"
-  packages = [".","naming","credentials","credentials/oauth","codes","metadata"]
+  packages = [".","codes","credentials","credentials/oauth","grpclog","internal","keepalive","metadata","naming","peer","stats","status","tap","transport"]
   revision = "6914ab1e338c92da4218a23d27fcd03d0ad78d46"

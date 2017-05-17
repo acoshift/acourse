@@ -1,11 +1,16 @@
 {{define "app-body"}}
 <div>
-  <form method="POST">
+  <form method="POST" enctype="multipart/form-data">
     <input type="hidden" name="X" value="{{xsrf "profile-edit"}}">
+    <label>Image</label>
+    <input type="file" name="Image">
+    <br>
     <label>Username</label>
     <input name="Username" value="{{.Flash.Get "Username"}}">
+    <br>
     <label>Name</label>
     <input name="Name" value="{{.Flash.Get "Name"}}">
+    <br>
     <label>About Me</label>
     <input name="AboutMe" value="{{.Flash.Get "AboutMe"}}">
     <button type="submit">Save</button>
@@ -21,4 +26,10 @@
   </form>
   <a href="/profile">Cancel</a>
 </div>
+{{end}}
+
+{{define "app-script"}}
+{{end}}
+
+{{define "app-style"}}
 {{end}}
