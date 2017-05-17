@@ -40,7 +40,7 @@ const selectUsers = `
 		roles.admin,
 		roles.instructor
 	FROM users
-		LEFT JOIN roles ON users.id = roles.id
+		LEFT JOIN roles ON users.id = roles.user_id
 `
 
 var (

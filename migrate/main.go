@@ -150,7 +150,7 @@ func main() {
 	log.Println("migrate role")
 	stmt, err = db.Prepare(`
 		INSERT INTO roles
-			(id, admin, instructor, created_at, updated_at)
+			(user_id, admin, instructor, created_at, updated_at)
 		VALUES
 			($1, $2, $3, $4, $5);
 	`)
