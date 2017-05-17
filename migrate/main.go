@@ -178,7 +178,7 @@ func main() {
 	must(err)
 	stmt3, err := db.Prepare(`
 		INSERT INTO course_contents
-			(course_id, index, title, long_desc, video_id, video_type, download_url)
+			(course_id, i, title, long_desc, video_id, video_type, download_url)
 		VALUES
 			($1, $2, $3, $4, $5, $6, $7);
 	`)

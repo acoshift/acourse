@@ -60,14 +60,14 @@ CREATE TABLE course_options (
 
 CREATE TABLE course_contents (
   course_id INT NOT NULL REFERENCES courses (id),
-  index INT NOT NULL,
+  i INT NOT NULL,
   title STRING NOT NULL,
   long_desc STRING NOT NULL,
   video_id STRING DEFAULT NULL,
   video_type INT DEFAULT NULL,
   download_url STRING DEFAULT NULL,
-  INDEX (course_id, index),
-  PRIMARY KEY UNIQUE (course_id, index)
+  INDEX (course_id, i),
+  UNIQUE (course_id, i)
 );
 
 CREATE TABLE assignments (

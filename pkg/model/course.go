@@ -117,7 +117,7 @@ var (
 		FROM courses
 			INNER JOIN course_contents ON courses.id = course_contents.course_id
 		WHERE courses.id = $1
-		ORDER BY course_contents.index ASC;
+		ORDER BY course_contents.i ASC;
 	`))
 
 	listCoursesStmt = mustStmt(internal.GetDB().Prepare(selectCourses + `
