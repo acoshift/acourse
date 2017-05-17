@@ -1,0 +1,52 @@
+@import 'config.scss';
+input[type='email'],
+input[type='number'],
+input[type='password'],
+input[type='search'],
+input[type='tel'],
+input[type='text'],
+input[type='url'],
+input:not([type]),
+textarea,
+select {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  background-color: transparent;
+  border: 1px solid #d1d1d1;
+  border-radius: 3px;
+  box-shadow: none;
+  box-sizing: inherit;
+  padding: 8px 16px;
+}
+input[type='email']:focus,
+input[type='number']:focus,
+input[type='password']:focus,
+input[type='search']:focus,
+input[type='tel']:focus,
+input[type='text']:focus,
+input[type='url']:focus,
+input:not([type]):focus,
+textarea:focus,
+select:focus {
+  border-color: $color-main;
+  outline: 0;
+}
+
+input[type='email'].error,
+input[type='number'].error,
+input[type='password'].error,
+input[type='search'].error,
+input[type='tel'].error,
+input[type='text'].error,
+input[type='url'].error,
+input:not([type]).error,
+textarea.error,
+select.error {
+  border-color: $color-error;
+  outline: 0;
+}
+
+.input-field {
+  margin-bottom: 16px;
+}
