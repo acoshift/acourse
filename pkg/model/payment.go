@@ -3,6 +3,9 @@ package model
 import (
 	"fmt"
 	"time"
+
+	"github.com/acoshift/acourse/pkg/internal"
+	"github.com/lib/pq"
 )
 
 // Payment model
@@ -18,6 +21,9 @@ type Payment struct {
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 	At            time.Time
+
+	User   User
+	Course Course
 }
 
 // PaymentStatus values
@@ -25,6 +31,50 @@ const (
 	Pending = iota
 	Accepted
 	Rejected
+)
+
+const (
+	selectPayment = `
+		SELECT
+			payments.id,
+			payments.image,
+			payments.price,
+			payments.original_price,
+			payments.code,
+			payments.status,
+			payments.created_at,
+			payments.updated_at,
+			payments.at,
+			users.id,
+			users.username,
+			users.image,
+			courses.id,
+			courses.title,
+			courses.image,
+			courses.url
+		FROM payments
+			LEFT JOIN users ON payments.user_id = users.id
+			LEFT JOIN courses ON payments.course_id = courses.id
+	`
+)
+
+var (
+	getPaymentStmt, _ = internal.GetDB().Prepare(selectPayment + `
+		WHERE payments.id = $1;
+	`)
+
+	getPaymentsStmt, _ = internal.GetDB().Prepare(selectPayment + `
+		WHERE payments.id IN ANY($1);
+	`)
+
+	listPaymentsStmt, _ = internal.GetDB().Prepare(selectPayment + `
+		ORDER BY payments.created_at DESC;
+	`)
+
+	listPaymentsWithStatusStmt, _ = internal.GetDB().Prepare(selectPayment + `
+		WHERE payments.status = ANY($1)
+		ORDER BY payments.created_at DESC;
+	`)
 )
 
 func (x *Payment) save() {
@@ -118,68 +168,88 @@ func (x *Payment) Reject() error {
 	return nil
 }
 
+func scanPayment(scan scanFunc, x *Payment) error {
+	var at *time.Time
+	var courseURL *string
+	err := scan(&x.ID,
+		&x.Image, &x.Price, &x.OriginalPrice, &x.Code, &x.Status, &x.CreatedAt, &x.UpdatedAt, &at,
+		&x.User.ID, &x.User.Username, &x.User.Image,
+		&x.Course.ID, &x.Course.Title, &x.Course.Image, &courseURL,
+	)
+	if err != nil {
+		return err
+	}
+	if at != nil {
+		x.At = *at
+	}
+	if courseURL != nil {
+		x.Course.URL = *courseURL
+	}
+	return nil
+}
+
 // GetPayments gets payments
-func GetPayments(paymentIDs []string) ([]*Payment, error) {
-	// xs := make([]*Payment, len(paymentIDs))
-	// for _, paymentID := range paymentIDs {
-	// 	c.Send("SISMEMBER", key("p", "all"), paymentID)
-	// 	c.Send("HGET", key("p"), paymentID)
-	// }
-	// c.Flush()
-	// for i, paymentID := range paymentIDs {
-	// 	exists, _ := redis.Bool(c.Receive())
-	// 	if !exists {
-	// 		c.Receive()
-	// 		continue
-	// 	}
-	// 	var x Payment
-	// 	b, err := redis.Bytes(c.Receive())
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
-	// 	err = dec(b, &x)
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
-	// 	x.id = paymentID
-	// 	xs[i] = &x
-	// }
-	// return xs, nil
-	return nil, nil
+func GetPayments(paymentIDs []int64) ([]*Payment, error) {
+	xs := make([]*Payment, 0, len(paymentIDs))
+	rows, err := getPaymentsStmt.Query(pq.Array(paymentIDs))
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var x Payment
+		err = scanPayment(rows.Scan, &x)
+		if err != nil {
+			return nil, err
+		}
+		xs = append(xs, &x)
+	}
+	return xs, nil
 }
 
 // GetPayment gets payment from given id
-func GetPayment(paymentID string) (*Payment, error) {
-	// xs, err := GetPayments(c, []string{paymentID})
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// return xs[0], nil
-	return nil, nil
+func GetPayment(paymentID int64) (*Payment, error) {
+	var x Payment
+	err := scanPayment(getPaymentStmt.QueryRow(paymentID).Scan, &x)
+	if err != nil {
+		return nil, err
+	}
+	return &x, nil
 }
 
-// ListPayments lists payments
+// ListHistoryPayments lists history payments
 // TODO: pagination
-func ListPayments() ([]*Payment, error) {
-	// paymentIDs, err := redis.Strings(c.Do("ZREVRANGE", key("p", "t0"), 0, -1))
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// return GetPayments(c, paymentIDs)
-	return nil, nil
+func ListHistoryPayments() ([]*Payment, error) {
+	xs := make([]*Payment, 0)
+	rows, err := listPaymentsWithStatusStmt.Query(pq.Array([]int{Accepted, Rejected}))
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var x Payment
+		err = scanPayment(rows.Scan, &x)
+		if err != nil {
+			return nil, err
+		}
+		xs = append(xs, &x)
+	}
+	return xs, nil
 }
 
 // ListPendingPayments lists pending payments
 // TODO: pagination
 func ListPendingPayments() ([]*Payment, error) {
-	// c.Send("MULTI")
-	// c.Send("ZINTERSTORE", key("result"), 2, key("p", "t0"), key("p", "pending"), "WEIGHTS", 1, 0)
-	// c.Send("ZREVRANGE", key("result"), 0, -1)
-	// reply, err := redis.Values(c.Do("EXEC"))
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// paymentIDs, _ := redis.Strings(reply[1], nil)
-	// return GetPayments(c, paymentIDs)
-	return nil, nil
+	xs := make([]*Payment, 0)
+	rows, err := listPaymentsWithStatusStmt.Query(pq.Array([]int{Pending}))
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var x Payment
+		err = scanPayment(rows.Scan, &x)
+		if err != nil {
+			return nil, err
+		}
+		xs = append(xs, &x)
+	}
+	return xs, nil
 }

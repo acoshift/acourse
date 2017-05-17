@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/acoshift/acourse/pkg/internal"
+	"github.com/lib/pq"
 )
 
 // Course model
@@ -70,28 +71,27 @@ func (x *Course) EnrollCount() int {
 
 const (
 	selectCourses = `
-	SELECT
-		courses.id,
-		courses.title,
-		courses.short_desc,
-		courses.long_desc,
-		courses.image,
-		courses.start,
-		courses.url,
-		courses.type,
-		courses.price,
-		courses.discount,
-		courses.enroll_detail,
-		courses.created_at,
-		courses.updated_at,
-		course_options.public,
-		course_options.enroll,
-		course_options.attend,
-		course_options.assignment,
-		course_options.discount
-	FROM courses
-		LEFT JOIN course_options
-		ON courses.id = course_options.id
+		SELECT
+			courses.id,
+			courses.title,
+			courses.short_desc,
+			courses.long_desc,
+			courses.image,
+			courses.start,
+			courses.url,
+			courses.type,
+			courses.price,
+			courses.discount,
+			courses.enroll_detail,
+			courses.created_at,
+			courses.updated_at,
+			course_options.public,
+			course_options.enroll,
+			course_options.attend,
+			course_options.assignment,
+			course_options.discount
+		FROM courses
+			LEFT JOIN course_options ON courses.id = course_options.id
 `
 )
 
@@ -101,7 +101,7 @@ var (
 	`)
 
 	getCoursesStmt, _ = internal.GetDB().Prepare(selectCourses + `
-		WHERE courses.id IN $1;
+		WHERE courses.id = ANY($1);
 	`)
 
 	getCourseFromURLStmt, _ = internal.GetDB().Prepare(selectCourses + `
@@ -120,7 +120,7 @@ var (
 		FROM courses
 			INNER JOIN course_contents
 			ON courses.id = course_contents.course_id,
-		WHERE courses.id IN $1;
+		WHERE courses.id = ANY($1);
 	`)
 
 	listCoursesStmt, _ = internal.GetDB().Prepare(selectCourses + `
@@ -164,7 +164,16 @@ func (x *Course) Save() error {
 	if err != nil {
 		return err
 	}
-	tx.Stmt(saveCourseStmt).Exec(x.ID, x.UserID, x.Title, x.ShortDesc, x.Desc, x.Image, x.Start, x.URL, x.Type, x.Price, x.Discount, x.EnrollDetail)
+	var start *time.Time
+	if !x.Start.IsZero() {
+		start = &x.Start
+	}
+	var url *string
+	if len(x.URL) > 0 && x.URL != strconv.FormatInt(x.ID, 10) {
+		url = &x.URL
+	}
+
+	tx.Stmt(saveCourseStmt).Exec(x.ID, x.UserID, x.Title, x.ShortDesc, x.Desc, x.Image, start, url, x.Type, x.Price, x.Discount, x.EnrollDetail)
 	tx.Stmt(saveCourseOptionStmt).Exec(x.ID, x.Option.Public, x.Option.Enroll, x.Option.Attend, x.Option.Assignment, x.Option.Discount)
 	// TODO: save contents
 	err = tx.Commit()
@@ -191,6 +200,9 @@ func scanCourse(scan scanFunc, x *Course) error {
 	if u != nil {
 		x.URL = *u
 	}
+	if len(x.URL) == 0 {
+		x.URL = strconv.FormatInt(x.ID, 10)
+	}
 	return nil
 }
 
@@ -201,7 +213,7 @@ func scanCourseContent(scan scanFunc, courseID *int64, x *CourseContent) error {
 // GetCourses gets courses
 func GetCourses(courseIDs []int64) ([]*Course, error) {
 	xs := make([]*Course, 0, len(courseIDs))
-	rows, err := getCoursesStmt.Query(courseIDs)
+	rows, err := getCoursesStmt.Query(pq.Array(courseIDs))
 	if err != nil {
 		return nil, err
 	}

@@ -403,8 +403,8 @@ func getAdminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter fun
 	if len(action) > 0 {
 		defer http.Redirect(w, r, "/admin/payments", http.StatusSeeOther)
 		user, _ := internal.GetUser(r.Context()).(*model.User)
-		id := r.FormValue("id")
-		if len(id) == 0 {
+		id, err := strconv.ParseInt(r.FormValue("id"), 10, 64)
+		if err != nil {
 			return
 		}
 		if action == "accept" && verifyXSRF(r.FormValue("x"), user.ID, "payment-accept") {
@@ -439,5 +439,5 @@ func getAdminPendingPayments(w http.ResponseWriter, r *http.Request) {
 }
 
 func getAdminHistoryPayments(w http.ResponseWriter, r *http.Request) {
-	getAdminPayments(w, r, model.ListPayments)
+	getAdminPayments(w, r, model.ListHistoryPayments)
 }

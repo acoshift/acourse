@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/acoshift/acourse/pkg/internal"
+	"github.com/lib/pq"
 )
 
 // User model
@@ -39,13 +40,12 @@ const selectUsers = `
 		roles.admin,
 		roles.instructor
 	FROM users
-		LEFT JOIN roles
-		ON users.id = roles.id
+		LEFT JOIN roles ON users.id = roles.id
 `
 
 var (
 	getUsersStmt, _ = internal.GetDB().Prepare(selectUsers + `
-		WHERE users.id IN $1;
+		WHERE users.id = ANY($1);
 	`)
 
 	getUserStmt, _ = internal.GetDB().Prepare(selectUsers + `
@@ -102,7 +102,7 @@ func scanUser(scan scanFunc, x *User) error {
 // GetUsers gets users
 func GetUsers(userIDs []string) ([]*User, error) {
 	xs := make([]*User, 0, len(userIDs))
-	rows, err := getUsersStmt.Query(userIDs)
+	rows, err := getUsersStmt.Query(pq.Array(userIDs))
 	if err != nil {
 		return nil, err
 	}
