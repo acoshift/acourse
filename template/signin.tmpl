@@ -1,26 +1,41 @@
 {{define "auth-body"}}
-<form method="POST">
-  <input name="X" type="hidden" value="{{xsrf "signin"}}">
-  <label>Email:</label>
-  <input name="Email" value="{{.Flash.Get "User"}}">
-  <label>Password</label>
-  <input name="Password" type="password">
-  <button type="submit">Sign In</button>
-  {{if .Flash.Errors}}
-    <div>
-      <h4>Error</h4>
-      <ul>
-        {{range .Flash.Errors}}
-          <li>{{.}}</li>
-        {{end}}
-      </ul>
-    </div>
-  {{end}}
-</form>
-<p>Or Sign in with</p>
-<a href="/openid?p=google.com">Google</a>
-<a href="/openid?p=facebook.com">Facebook</a>
-<a href="/openid?p=github.com">Github</a>
-<a href="/signup">Sign Up</a>
-<a href="/">Back</a>
+<div id="sign-in" class="page-pattern">
+  <form method="POST">
+    <input name="X" type="hidden" value="{{xsrf "signin"}}">
+    <label>Email:</label>
+    <input name="Email" value="{{.Flash.Get "User"}}">
+    <label>Password</label>
+    <input name="Password" type="password">
+    <button type="submit">Sign In</button>
+    {{if .Flash.Errors}}
+      <div>
+        <h4>Error</h4>
+        <ul>
+          {{range .Flash.Errors}}
+            <li>{{.}}</li>
+          {{end}}
+        </ul>
+      </div>
+    {{end}}
+  </form>
+  <p>Or Sign in with</p>
+  <a href="/openid?p=google.com">Google</a>
+  <a href="/openid?p=facebook.com">Facebook</a>
+  <a href="/openid?p=github.com">Github</a>
+  <a href="/signup">Sign Up</a>
+  <a href="/">Back</a>
+</div>
+{{end}}
+
+{{define "auth-style"}}
+<style>
+  #sign-in {
+    display: flex;
+    position: relative;
+    z-index: 1;
+  }
+</style>
+{{end}}
+
+{{define "auth-script"}}
 {{end}}
