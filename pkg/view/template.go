@@ -135,11 +135,11 @@ func parseTemplate(key interface{}, set []string) {
 	})
 	_, err := t.ParseFiles(joinTemplateDir(set)...)
 	if err != nil {
-		log.Fatalf("internal: parse template %s error; %v", templateName, err)
+		log.Fatalf("view: parse template %s error; %v", templateName, err)
 	}
 	t = t.Lookup("root")
 	if t == nil {
-		log.Fatalf("internal: root template not found in %s", templateName)
+		log.Fatalf("view: root template not found in %s", templateName)
 	}
 	templates[key] = &templateStruct{
 		Template: t,
