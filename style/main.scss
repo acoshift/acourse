@@ -39,9 +39,15 @@ button {
 }
 
 .segment-card {
-  
-}
 
+}
+.segment-header {
+  font-size: 32px;
+  margin-bottom: 32px;
+}
+.block {
+  margin-bottom: 8px;
+}
 .page-pattern {
   position: relative;
   &:before {

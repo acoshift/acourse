@@ -1,31 +1,54 @@
 {{define "auth-body"}}
 <div id="sign-in" class="page-pattern">
-  <div class="segment-card">
-    <form method="POST">
-      <input name="X" type="hidden" value="{{xsrf "signin"}}">
-      <label>Email:</label>
-      <input name="Email" value="{{.Flash.Get "User"}}">
-      <label>Password</label>
-      <input name="Password" type="password">
-      <button type="submit">Sign In</button>
-      {{if .Flash.Errors}}
-        <div>
-          <h4>Error</h4>
-          <ul>
-            {{range .Flash.Errors}}
-              <li>{{.}}</li>
+  <div class="signin-container _flex-column _main-center _cross-center">
+    <div class="_flex-row _main-center">
+      <img class="logo" src="/~/img/acourse-logo.png">
+    </div>
+    <div class="_flex-row _main-center row">
+      <div class="segment-card col-xs-12 col-md-6">
+        <form method="POST">
+          <div class="_flex-column">
+            <div class="segment-header _font-sub _color-accent _align-center">
+              Sign In
+            </div>
+            <input name="X" type="hidden" value="{{xsrf "signin"}}">
+            <div class="input-field _flex-column">
+              <label>Email:</label>
+              <input name="Email" value="{{.Flash.Get "User"}}">
+            </div>
+            <div class="input-field _flex-column">
+              <label>Password</label>
+              <input name="Password" type="password">
+            </div>
+            <div class="_flex-row _main-center">
+              <button class="button-default" type="submit">
+                Sign In
+              </button>
+            </div>
+            {{if .Flash.Errors}}
+              <div class="message error">
+                <ul>
+                  {{range .Flash.Errors}}
+                    <li>{{.}}</li>
+                  {{end}}
+                </ul>
+              </div>
             {{end}}
-          </ul>
-        </div>
-      {{end}}
-    </form>
+            <p class="_align-center block">Or Sign in with</p>
+            <div class="_flex-row _main-center block">
+              <a class="link" href="/openid?p=google.com"><i class="fa fa-google"></i>Google</a>
+              <a class="link" href="/openid?p=facebook.com"><i class="fa fa-facebook"></i>Facebook</a>
+              <a class="link" href="/openid?p=github.com"><i class="fa fa-github"></i>Github</a>
+              <a class="link" href="/signup"><i class="fa fa-envelope"></i>Email</a>
+            </div>
+            <div class="_flex-row _main-center block">
+              <a class="_color-accent" href="/profile">กลับสู่หน้าแรก</a>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
-  <p>Or Sign in with</p>
-  <a href="/openid?p=google.com">Google</a>
-  <a href="/openid?p=facebook.com">Facebook</a>
-  <a href="/openid?p=github.com">Github</a>
-  <a href="/signup">Sign Up</a>
-  <a href="/">Back</a>
 </div>
 {{end}}
 
@@ -37,6 +60,34 @@
     height: 100vh;
     position: relative;
     z-index: 1;
+  }
+  #sign-in .signin-container {
+    flex: 1;
+  }
+  #sign-in .link {
+    padding: 16px;
+    text-align: center;
+    color: gray;
+  }
+  #sign-in .link i {
+    margin-right: 4px;
+  }
+  .segment-card {
+    border-radius: 5px;
+    padding: 24px 16px 16px 16px;
+    background-color: white;
+    box-shadow: 2px 4px 8px 0px rgba(46,61,73,0.2);
+  }
+  .button-default {
+    width: 100%;
+    margin-bottom: 16px;
+  }
+  .logo {
+    margin-bottom: 16px;
+  }
+  .signin-container .row {
+    width: 100%;
+    padding: 12px;
   }
 </style>
 {{end}}

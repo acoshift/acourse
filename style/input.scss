@@ -49,4 +49,9 @@ select.error {
 
 .input-field {
   margin-bottom: 16px;
+  &:not(.inline) {
+    label {
+      margin-bottom: 4px;
+    }
+  }
 }
