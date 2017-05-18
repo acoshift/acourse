@@ -1,33 +1,22 @@
 package app
 
 import (
-	"encoding/gob"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/acoshift/acourse/pkg/internal"
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/acourse/pkg/view"
 	"github.com/acoshift/flash"
-	"github.com/acoshift/gzip"
 	"github.com/acoshift/header"
 	"github.com/acoshift/httprouter"
-	"github.com/acoshift/middleware"
 	"github.com/acoshift/session"
-	sSQL "github.com/acoshift/session/store/sql"
 )
 
-// Handler returns app's handler
-var Handler http.Handler
-
-func init() {
-	gob.Register(sessionKey(0))
-
-	mux := http.NewServeMux()
-
+// Mount mounts app's handlers into mux
+func Mount(mux *http.ServeMux) {
 	r := httprouter.New()
 	r.GET("/", http.HandlerFunc(getIndex))
 	r.ServeFiles("/~/*filepath", http.Dir("static"))
@@ -56,22 +45,6 @@ func init() {
 
 	mux.Handle("/", r)
 	mux.Handle("/admin/", http.StripPrefix("/admin", onlyAdmin(admin)))
-
-	Handler = middleware.Chain(
-		recovery,
-		gzip.New(gzip.Config{Level: gzip.DefaultCompression}),
-		session.Middleware(session.Config{
-			Name:     "sess",
-			Entropy:  32,
-			Path:     "/",
-			MaxAge:   10 * 24 * time.Hour,
-			HTTPOnly: true,
-			Secure:   session.PreferSecure,
-			Store:    sSQL.New(internal.GetDB(), "sessions"),
-		}),
-		flash.Middleware(),
-		fetchUser,
-	)(mux)
 }
 
 func fileHandler(name string) http.Handler {
@@ -134,7 +107,7 @@ func postSignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID, err := internal.SignInUser(email, pass)
+	userID, err := SignInUser(email, pass)
 	if err != nil {
 		f.Add("Errors", err.Error())
 		back(w, r)
@@ -164,7 +137,7 @@ func getSignInProvider(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "provider not allowed", http.StatusBadRequest)
 		return
 	}
-	redirectURL, sessID, err := internal.SignInUserProvider(p)
+	redirectURL, sessID, err := SignInUserProvider(p)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -178,7 +151,7 @@ func getSignInCallback(w http.ResponseWriter, r *http.Request) {
 	s := session.Get(r.Context())
 	sessID, _ := s.Get(keyOpenIDSessionID).(string)
 	s.Del(keyOpenIDSessionID)
-	userID, err := internal.SignInUserProviderCallback(r.RequestURI, sessID)
+	userID, err := SignInUserProviderCallback(r.RequestURI, sessID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -273,7 +246,7 @@ func postProfileEdit(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		imageURL, err = internal.UploadProfileImage(ctx, image)
+		imageURL, err = UploadProfileImage(ctx, image)
 		if err != nil {
 			f.Add("Errors", err.Error())
 			back(w, r)
@@ -330,7 +303,7 @@ func getCourse(w http.ResponseWriter, r *http.Request) {
 	page.Title = course.Title + " | " + page.Title
 	page.Desc = course.ShortDesc
 	page.Image = course.Image
-	page.URL = internal.GetBaseURL() + "/course/" + url.PathEscape(course.URL)
+	page.URL = baseURL + "/course/" + url.PathEscape(course.URL)
 	view.Course(w, r, &view.CourseData{
 		Page:     &page,
 		Course:   course,

@@ -1,9 +1,9 @@
-package internal
+package app
 
 import (
 	"crypto/rand"
 
-	identitytoolkit "google.golang.org/api/identitytoolkit/v3"
+	"google.golang.org/api/identitytoolkit/v3"
 )
 
 // SignInUser sign in user with email and password

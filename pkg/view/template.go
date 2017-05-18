@@ -82,7 +82,7 @@ func parseTemplate(key interface{}, set []string) {
 			return templateName
 		},
 		"xsrf": func(action string) string {
-			return xsrftoken.Generate(internal.GetXSRFSecret(), "", action)
+			return xsrftoken.Generate(xsrfSecret, "", action)
 		},
 		"currency": func(v float64) string {
 			return humanize.FormatFloat("#,###.##", v)
@@ -172,7 +172,7 @@ func render(w http.ResponseWriter, r *http.Request, key, data interface{}) {
 				return me
 			},
 			"xsrf": func(action string) string {
-				return xsrftoken.Generate(internal.GetXSRFSecret(), me.ID, action)
+				return xsrftoken.Generate(xsrfSecret, me.ID, action)
 			},
 		})
 	}

@@ -4,7 +4,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/acoshift/acourse/pkg/internal"
 	"github.com/lib/pq"
 )
 
@@ -94,20 +93,20 @@ const (
 	`
 )
 
-var (
-	getCourseStmt = mustStmt(internal.GetDB().Prepare(selectCourses + `
+const (
+	queryGetCourse = selectCourses + `
 		WHERE courses.id = $1;
-	`))
+	`
 
-	getCoursesStmt = mustStmt(internal.GetDB().Prepare(selectCourses + `
+	queryGetCourses = selectCourses + `
 		WHERE courses.id = ANY($1);
-	`))
+	`
 
-	getCourseFromURLStmt = mustStmt(internal.GetDB().Prepare(selectCourses + `
+	queryGetCourseFromURL = selectCourses + `
 		WHERE courses.url = $1;
-	`))
+	`
 
-	getCourseContentsStmt = mustStmt(internal.GetDB().Prepare(`
+	queryGetCourseContents = `
 		SELECT
 			course_contents.title,
 			course_contents.long_desc,
@@ -118,46 +117,46 @@ var (
 			INNER JOIN course_contents ON courses.id = course_contents.course_id
 		WHERE courses.id = $1
 		ORDER BY course_contents.i ASC;
-	`))
+	`
 
-	listCoursesStmt = mustStmt(internal.GetDB().Prepare(selectCourses + `
+	queryListCourses = selectCourses + `
 		ORDER BY courses.created_at DESC;
-	`))
+	`
 
-	listCoursesPublicStmt = mustStmt(internal.GetDB().Prepare(selectCourses + `
+	queryListCoursesPublic = selectCourses + `
 		WHERE course_options.public = true
 		ORDER BY courses.created_at DESC;
-	`))
+	`
 
-	listCoursesOwnStmt = mustStmt(internal.GetDB().Prepare(selectCourses + `
+	queryListCoursesOwn = selectCourses + `
 		WHERE courses.user_id = $1
 		ORDER BY courses.created_at DESC;
-	`))
+	`
 
-	listCoursesEnrolledStmt = mustStmt(internal.GetDB().Prepare(selectCourses + `
+	queryListCoursesEnrolled = selectCourses + `
 		INNER JOIN enrolls ON courses.id = enrolls.course_id
 		WHERE enrolls.user_id = $1
 		ORDER BY enrolls.created_at DESC;
-	`))
+	`
 
-	saveCourseStmt = mustStmt(internal.GetDB().Prepare(`
+	querySaveCourse = `
 		UPSERT INTO courses
 			(id, user_id, title, short_desc, long_desc, image, start, url, type, price, discount, enroll_detail, updated_at)
 		VALUES
 			($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, now());
-	`))
+	`
 
-	saveCourseOptionStmt = mustStmt(internal.GetDB().Prepare(`
+	querySaveCourseOption = `
 		UPSERT INTO course_options
 			(id, public, enroll, attend, assignment, discount)
 		VALUES
 			($1, $2, $3, $4, $5, $6);
-	`))
+	`
 )
 
 // Save saves course
 func (x *Course) Save() error {
-	tx, err := internal.GetDB().Begin()
+	tx, err := db.Begin()
 	if err != nil {
 		return err
 	}
@@ -170,8 +169,8 @@ func (x *Course) Save() error {
 		url = &x.URL
 	}
 
-	tx.Stmt(saveCourseStmt).Exec(x.ID, x.UserID, x.Title, x.ShortDesc, x.Desc, x.Image, start, url, x.Type, x.Price, x.Discount, x.EnrollDetail)
-	tx.Stmt(saveCourseOptionStmt).Exec(x.ID, x.Option.Public, x.Option.Enroll, x.Option.Attend, x.Option.Assignment, x.Option.Discount)
+	tx.Exec(querySaveCourse, x.ID, x.UserID, x.Title, x.ShortDesc, x.Desc, x.Image, start, url, x.Type, x.Price, x.Discount, x.EnrollDetail)
+	tx.Exec(querySaveCourseOption, x.ID, x.Option.Public, x.Option.Enroll, x.Option.Attend, x.Option.Assignment, x.Option.Discount)
 	// TODO: save contents
 	err = tx.Commit()
 	if err != nil {
@@ -210,7 +209,7 @@ func scanCourseContent(scan scanFunc, x *CourseContent) error {
 // GetCourses gets courses
 func GetCourses(courseIDs []int64) ([]*Course, error) {
 	xs := make([]*Course, 0, len(courseIDs))
-	rows, err := getCoursesStmt.Query(pq.Array(courseIDs))
+	rows, err := db.Query(queryGetCourses, pq.Array(courseIDs))
 	if err != nil {
 		return nil, err
 	}
@@ -228,11 +227,11 @@ func GetCourses(courseIDs []int64) ([]*Course, error) {
 // GetCourse gets course
 func GetCourse(courseID int64) (*Course, error) {
 	var x Course
-	err := scanCourse(getCourseStmt.QueryRow(courseID).Scan, &x)
+	err := scanCourse(db.QueryRow(queryGetCourse, courseID).Scan, &x)
 	if err != nil {
 		return nil, err
 	}
-	rows, err := getCourseContentsStmt.Query(x.ID)
+	rows, err := db.Query(queryGetCourseContents, x.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -250,11 +249,11 @@ func GetCourse(courseID int64) (*Course, error) {
 // GetCourseFromURL gets course from url
 func GetCourseFromURL(url string) (*Course, error) {
 	var x Course
-	err := scanCourse(getCourseFromURLStmt.QueryRow(url).Scan, &x)
+	err := scanCourse(db.QueryRow(queryGetCourseFromURL, url).Scan, &x)
 	if err != nil {
 		return nil, err
 	}
-	rows, err := getCourseContentsStmt.Query(x.ID)
+	rows, err := db.Query(queryGetCourseContents, x.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -282,7 +281,7 @@ func GetCourFromIDOrURL(v string) (*Course, error) {
 // TODO: pagination
 func ListCourses() ([]*Course, error) {
 	xs := make([]*Course, 0)
-	rows, err := listCoursesStmt.Query()
+	rows, err := db.Query(queryListCourses)
 	if err != nil {
 		return nil, err
 	}
@@ -301,7 +300,7 @@ func ListCourses() ([]*Course, error) {
 // TODO: add pagination
 func ListPublicCourses() ([]*Course, error) {
 	xs := make([]*Course, 0)
-	rows, err := listCoursesPublicStmt.Query()
+	rows, err := db.Query(queryListCoursesPublic)
 	if err != nil {
 		return nil, err
 	}
@@ -320,7 +319,7 @@ func ListPublicCourses() ([]*Course, error) {
 // TODO: add pagination
 func ListOwnCourses(userID string) ([]*Course, error) {
 	xs := make([]*Course, 0)
-	rows, err := listCoursesOwnStmt.Query(userID)
+	rows, err := db.Query(queryListCoursesOwn, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -339,7 +338,7 @@ func ListOwnCourses(userID string) ([]*Course, error) {
 // TODO: add pagination
 func ListEnrolledCourses(userID string) ([]*Course, error) {
 	xs := make([]*Course, 0)
-	rows, err := listCoursesEnrolledStmt.Query(userID)
+	rows, err := db.Query(queryListCoursesEnrolled, userID)
 	if err != nil {
 		return nil, err
 	}

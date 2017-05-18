@@ -112,16 +112,6 @@ func main() {
 	must(err)
 	for _, p := range respUser.Users {
 		u := findUser(p.LocalId)
-		x := model.User{
-			ID:        p.LocalId,
-			Username:  u.Username,
-			Name:      u.Name,
-			Image:     u.Photo,
-			AboutMe:   u.AboutMe,
-			Email:     p.Email,
-			CreatedAt: time.Unix(0, p.CreatedAt*1000000),
-			UpdatedAt: u.UpdatedAt,
-		}
 		id := p.LocalId
 		username := u.Username
 		if len(username) == 0 {
@@ -139,10 +129,7 @@ func main() {
 		if createdAt.IsZero() {
 			createdAt = updatedAt
 		}
-		var email *string
-		if len(x.Email) > 0 {
-			email = &x.Email
-		}
+		email := &sql.NullString{String: p.Email, Valid: len(p.Email) > 0}
 		_, err = stmt.Exec(id, username, name, u.Photo, u.AboutMe, email, createdAt, updatedAt)
 		must(err)
 	}
