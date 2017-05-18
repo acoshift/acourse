@@ -25,7 +25,6 @@
 <style>
   #course-card {
     display: flex;
-    flex: 1;
     flex-direction: column;
     justify-content: flex-start;
     align-self: stretch;
@@ -35,9 +34,10 @@
     overflow: hidden;
     transition: 0.16s all ease;
     cursor: pointer;
+    box-shadow: 0 15px 35px rgba(50,50,93,.03), 0 5px 15px rgba(0,0,0,.06);
   }
   #course-card:hover {
-    box-shadow: 0 15px 20px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 15px 35px rgba(50,50,93,.07), 0 5px 15px rgba(0,0,0,.1);
     transform: translate(0, -4px);
   }
   #course-card .course-cover {

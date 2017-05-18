@@ -74,6 +74,12 @@
 }
 
 // Text 
+._font-main {
+  font-family: $main-fontface;
+}
+._font-sub {
+  font-family: $secondary-fontface;
+}
 ._text-bold {
   font-weight: 700;
 }
