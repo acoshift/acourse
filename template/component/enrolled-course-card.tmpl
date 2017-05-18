@@ -1,12 +1,105 @@
 {{define "enrolled-course-card"}}
-<a href="/course/{{.URL}}">
-  <img src="{{.Image}}">
-  <h4>{{.Title}}</h4>
-  <p>{{.Type | courseType}}</p>
-  {{if eq .Type live}}
-    <p>{{.Start | date}}</p>
-  {{end}}
-  <p>{{.ShortDesc}}</p>
-</a>
-<hr>
+<div id="course-card">
+  <a class="course-cover" href="/course/{{.URL}}">
+    <img src="{{.Image}}" width="100%">
+  </a>
+  <div class="course-detail">
+    <div class="course-name">{{.Title}}</div>
+    <div class="course-type-container">
+      <div class="course-type {{.Type | courseType}} _text-thin">{{.Type | courseType}}</div>
+      {{if eq .Type live}}
+        <div class="live-date">Start at {{.Start | date}}</div>
+      {{end}}
+    </div>
+    <p class="course-description">{{.ShortDesc}}</p>
+
+  </div>
+</div>
+{{end}}
+
+{{define "enrolled-course-card-style"}}
+<style>
+  #course-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-self: stretch;
+    margin-bottom: 16px;
+    background-color: white;
+    border-radius: 6px;
+    overflow: hidden;
+    transition: 0.16s all ease;
+    cursor: pointer;
+    box-shadow: 0 15px 35px rgba(50,50,93,.03), 0 5px 15px rgba(0,0,0,.06);
+  }
+  #course-card:hover {
+    box-shadow: 0 15px 35px rgba(50,50,93,.07), 0 5px 15px rgba(0,0,0,.1);
+    transform: translate(0, -4px);
+  }
+  #course-card .course-cover {
+    flex-basis: 160px;
+    height: 160px;
+  }
+  #course-card .course-cover img {
+    height: 100%;
+    object-fit: cover;
+  }
+  #course-card .course-detail {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: 12px 16px 16px 16px;
+  }
+
+  #course-card .course-name {
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  #course-card .course-type {
+    color: white;
+    display: inline-block;
+    border-radius: 3px;
+    padding: 2px 8px;
+    font-size: 14px;
+  }
+  #course-card .course-type.Live {
+    background-color: #ff4e4e;
+  }
+  #course-card .course-type.eBook {
+    background-color: #55da65;
+  }
+  #course-card .course-type.Video {
+    background-color: #594eff;
+  }
+  #course-card .live-date {
+    margin-left: 8px;
+    font-weight: 200;
+    font-size: 13px;
+    color: gray;
+    display: inline-block;
+  }
+  #course-card .course-type-container {
+    margin-bottom: 16px;
+  }
+  #course-card .course-description {
+    flex: 1;
+    font-size: 15px;
+    line-height: 22px;
+    margin-bottom: 16px;
+  }
+  #course-card .course-price .discount {
+    text-decoration: line-through;
+    font-weight: 100;
+    font-size: 13px;
+  }
+  #course-card .course-price .discounted-price {
+    
+  }
+  #course-card .course-bottom {
+    display: flex;
+    justify-content: space-between;
+  }
+</style>
 {{end}}

@@ -1,5 +1,13 @@
 {{define "app-body"}}
-  <div id="home" class="page-pattern">
+  <div id="home">
+    <div class="banner">
+      <div class="grid-container _flex-column _cross-center _main-center">
+        <p class="tag-line _font-sub">acourse.io</p>
+        <p class="sub-tag-line _font-sub _text-thin">
+          เรียนเขียนโค๊ดกับเหล่ามหาเทพ คุณเองก็เทพได้
+        </p>
+      </div>
+    </div>
     <div class="grid-container row">
     {{range .Courses}}
       <div class="col-xs-3 _flex-row _main-strech">
@@ -19,8 +27,25 @@
     #home {
       position: relative;
       z-index: 1;
-      padding-top: 48px;
+      padding-top: 0px;
       padding-bottom: 48px;
+    }
+    #home .banner {
+      display: flex;
+      height: 300px;
+      background-image: url(/~/img/banner.jpg);
+      background-size: cover;
+      margin-bottom: 32px;
+    }
+    #home .tag-line {
+      margin-top: -50px;
+      font-size: 64px;
+      color: white;
+      margin-bottom: 16px;
+    }
+    #home .sub-tag-line {
+      font-size: 20px;
+      color: white;
     }
   </style>
 {{end}}

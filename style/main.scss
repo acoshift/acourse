@@ -3,7 +3,12 @@
 @import 'helper';
 @import 'grid';
 @import 'navbar';
-
+@import 'button';
+@import 'input';
+@import 'message';
+body {
+  -webkit-font-smoothing: antialiased;
+}
 div {
   color: $text-color-main;
   font-family: $main-fontface;
@@ -12,11 +17,25 @@ div {
 p {
   color: $text-color-main;
   font-family: $secondary-fontface;
+  font-weight: 400;
   margin: 0;
+}
+a {
+  text-decoration: none;
+}
+p, h1, h2, h3, h4, h5, h6, div {
+  -webkit-font-smoothing: antialiased;
+}
+label {
+  font-weight: 600;
+}
+button {
+  border: none;
 }
 .navbar-color {
   background: $navbar-color;
 }
+
 .page-pattern {
   position: relative;
   &:before {
@@ -52,7 +71,6 @@ p {
     transform: skew(0deg, 15deg);
   }
 }
-
 
 // TODO: fix this
 .video {

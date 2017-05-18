@@ -1,8 +1,8 @@
 {{define "user-profile"}}
-<div>
-  <h3>{{.Username}}</h3>
+<div id="profile-card">
+  <!-- <h3>{{.Username}}</h3> -->
   <img src="{{.Image}}" onerror="this.src = 'https://storage.googleapis.com/acourse/static/29721bb4-382d-48a3-bdde-95affac3c6bc.svg'">
-  <p>{{.Name}}</p>
-  <p>{{.AboutMe}}</p>
+  <div class="profile-card-name">{{.Name}}</div>
+  <p class="profile-card-detail">{{.AboutMe}}</p>
 </div>
 {{end}}
