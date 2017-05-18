@@ -12,7 +12,7 @@ create table sessions (
 
 create table users (
   id string,
-  username string,
+  username string not null,
   name string not null,
   email string,
   about_me string not null,
@@ -42,7 +42,7 @@ create table roles (
 
 create table courses (
   id serial,
-  user_id string,
+  user_id string not null,
   title string not null,
   short_desc string not null,
   long_desc string not null,
@@ -84,7 +84,7 @@ create table course_options (
 
 create table course_contents (
   course_id int,
-  i int not null,
+  i int,
   title string not null,
   long_desc string not null,
   video_id string default null,
@@ -96,7 +96,7 @@ create table course_contents (
 
 create table assignments (
   id serial,
-  course_id int,
+  course_id int not null,
   title string not null,
   long_desc string not null,
   open bool not null default false,
@@ -109,8 +109,8 @@ create table assignments (
 
 create table user_assignments (
   id serial,
-  user_id string,
-  assignment_id int,
+  user_id string not null,
+  assignment_id int not null,
   download_url string not null,
   created_at timestamp not null default now(),
   primary key (id),
@@ -133,8 +133,8 @@ create table enrolls (
 
 create table attends (
   id serial,
-  user_id string,
-  course_id int,
+  user_id string not null,
+  course_id int not null,
   created_at timestamp not null default now(),
   primary key (id),
   foreign key (user_id) references users (id),
@@ -147,8 +147,8 @@ create table attends (
 
 create table payments (
   id serial,
-  user_id string,
-  course_id int,
+  user_id string not null,
+  course_id int not null,
   image string not null,
   price decimal(9, 2) not null,
   original_price decimal(9, 2) not null,
