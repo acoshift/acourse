@@ -1,33 +1,22 @@
 package app
 
 import (
-	"encoding/gob"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
-	"time"
 
-	"github.com/acoshift/acourse/pkg/internal"
+	"github.com/acoshift/acourse/pkg/appctx"
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/acourse/pkg/view"
 	"github.com/acoshift/flash"
-	"github.com/acoshift/gzip"
 	"github.com/acoshift/header"
 	"github.com/acoshift/httprouter"
-	"github.com/acoshift/middleware"
 	"github.com/acoshift/session"
-	sSQL "github.com/acoshift/session/store/sql"
 )
 
-// Handler returns app's handler
-var Handler http.Handler
-
-func init() {
-	gob.Register(sessionKey(0))
-
-	mux := http.NewServeMux()
-
+// Mount mounts app's handlers into mux
+func Mount(mux *http.ServeMux) {
 	r := httprouter.New()
 	r.GET("/", http.HandlerFunc(getIndex))
 	r.ServeFiles("/~/*filepath", http.Dir("static"))
@@ -56,22 +45,6 @@ func init() {
 
 	mux.Handle("/", r)
 	mux.Handle("/admin/", http.StripPrefix("/admin", onlyAdmin(admin)))
-
-	Handler = middleware.Chain(
-		recovery,
-		gzip.New(gzip.Config{Level: gzip.DefaultCompression}),
-		session.Middleware(session.Config{
-			Name:     "sess",
-			Entropy:  32,
-			Path:     "/",
-			MaxAge:   10 * 24 * time.Hour,
-			HTTPOnly: true,
-			Secure:   session.PreferSecure,
-			Store:    sSQL.New(internal.GetDB(), "sessions"),
-		}),
-		flash.Middleware(),
-		fetchUser,
-	)(mux)
 }
 
 func fileHandler(name string) http.Handler {
@@ -134,7 +107,7 @@ func postSignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID, err := internal.SignInUser(email, pass)
+	userID, err := SignInUser(email, pass)
 	if err != nil {
 		f.Add("Errors", err.Error())
 		back(w, r)
@@ -164,7 +137,7 @@ func getSignInProvider(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "provider not allowed", http.StatusBadRequest)
 		return
 	}
-	redirectURL, sessID, err := internal.SignInUserProvider(p)
+	redirectURL, sessID, err := SignInUserProvider(p)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -178,7 +151,7 @@ func getSignInCallback(w http.ResponseWriter, r *http.Request) {
 	s := session.Get(r.Context())
 	sessID, _ := s.Get(keyOpenIDSessionID).(string)
 	s.Del(keyOpenIDSessionID)
-	userID, err := internal.SignInUserProviderCallback(r.RequestURI, sessID)
+	userID, err := SignInUserProviderCallback(r.RequestURI, sessID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -205,7 +178,7 @@ func getSignOut(w http.ResponseWriter, r *http.Request) {
 }
 
 func getProfile(w http.ResponseWriter, r *http.Request) {
-	user, _ := internal.GetUser(r.Context()).(*model.User)
+	user := appctx.GetUser(r.Context())
 
 	ownCourses, err := model.ListOwnCourses(user.ID)
 	if err != nil {
@@ -230,7 +203,7 @@ func getProfile(w http.ResponseWriter, r *http.Request) {
 
 func getProfileEdit(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	user, _ := internal.GetUser(ctx).(*model.User)
+	user := appctx.GetUser(ctx)
 	f := flash.Get(ctx)
 	if !f.Has("Username") {
 		f.Set("Username", user.Username)
@@ -251,7 +224,7 @@ func getProfileEdit(w http.ResponseWriter, r *http.Request) {
 
 func postProfileEdit(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	user, _ := internal.GetUser(ctx).(*model.User)
+	user := appctx.GetUser(ctx)
 	f := flash.Get(ctx)
 	if !verifyXSRF(r.FormValue("X"), user.ID, "profile-edit") {
 		f.Add("Errors", "invalid xsrf token")
@@ -273,7 +246,7 @@ func postProfileEdit(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		imageURL, err = internal.UploadProfileImage(ctx, image)
+		imageURL, err = UploadProfileImage(ctx, image)
 		if err != nil {
 			f.Add("Errors", err.Error())
 			back(w, r)
@@ -304,7 +277,7 @@ func postProfileEdit(w http.ResponseWriter, r *http.Request) {
 
 func getCourse(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	user, _ := internal.GetUser(ctx).(*model.User)
+	user := appctx.GetUser(ctx)
 	id := httprouter.GetParam(ctx, "courseID")
 	course, err := model.GetCourFromIDOrURL(id)
 	if err == model.ErrNotFound {
@@ -328,9 +301,9 @@ func getCourse(w http.ResponseWriter, r *http.Request) {
 	}
 	page := defaultPage
 	page.Title = course.Title + " | " + page.Title
-	page.Desc = course.Desc
+	page.Desc = course.ShortDesc
 	page.Image = course.Image
-	page.URL = internal.GetBaseURL() + "/course/" + url.PathEscape(course.URL)
+	page.URL = baseURL + "/course/" + url.PathEscape(course.URL)
 	view.Course(w, r, &view.CourseData{
 		Page:     &page,
 		Course:   course,
@@ -402,7 +375,7 @@ func getAdminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter fun
 	action := r.FormValue("action")
 	if len(action) > 0 {
 		defer http.Redirect(w, r, "/admin/payments", http.StatusSeeOther)
-		user, _ := internal.GetUser(r.Context()).(*model.User)
+		user := appctx.GetUser(r.Context())
 		id, err := strconv.ParseInt(r.FormValue("id"), 10, 64)
 		if err != nil {
 			return

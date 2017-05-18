@@ -4,11 +4,35 @@ import (
 	"net/http"
 	"net/url"
 	"runtime/debug"
+	"time"
 
-	"github.com/acoshift/acourse/pkg/internal"
+	"github.com/acoshift/acourse/pkg/appctx"
 	"github.com/acoshift/acourse/pkg/model"
+	"github.com/acoshift/flash"
+	"github.com/acoshift/gzip"
+	"github.com/acoshift/middleware"
 	"github.com/acoshift/session"
+	sSQL "github.com/acoshift/session/store/sql"
 )
+
+// Middleware wraps handlers with app's middleware
+func Middleware(h http.Handler) http.Handler {
+	return middleware.Chain(
+		recovery,
+		gzip.New(gzip.Config{Level: gzip.DefaultCompression}),
+		session.Middleware(session.Config{
+			Name:     "sess",
+			Entropy:  32,
+			Path:     "/",
+			MaxAge:   10 * 24 * time.Hour,
+			HTTPOnly: true,
+			Secure:   session.PreferSecure,
+			Store:    sSQL.New(db, "sessions"),
+		}),
+		flash.Middleware(),
+		fetchUser,
+	)(h)
+}
 
 func recovery(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -66,7 +90,7 @@ func fetchUser(h http.Handler) http.Handler {
 				u = &model.User{}
 				u.ID = id
 			}
-			r = r.WithContext(internal.WithUser(ctx, u))
+			r = r.WithContext(appctx.WithUser(ctx, u))
 		}
 		h.ServeHTTP(w, r)
 	})
@@ -74,7 +98,7 @@ func fetchUser(h http.Handler) http.Handler {
 
 func onlyAdmin(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		u, _ := internal.GetUser(r.Context()).(*model.User)
+		u := appctx.GetUser(r.Context())
 		if u == nil {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return

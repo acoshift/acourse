@@ -20,7 +20,7 @@ var ctx = context.Background()
 var client, _ = ds.NewClient(ctx, "acourse-156413")
 var conn, _ = redis.Dial("tcp", "localhost:6379", redis.DialDatabase(4))
 
-var config = configfile.NewReader("../config")
+var config = configfile.NewReader("config")
 var serviceAccount = config.Bytes("service_account")
 var sqlURL = config.String("sql_url")
 
@@ -93,35 +93,25 @@ func main() {
 		return &userModel{}
 	}
 
-	db.Exec("DELETE FROM payments;")
-	db.Exec("DELETE FROM user_assignments;")
-	db.Exec("DELETE FROM course_assignments;")
-	db.Exec("DELETE FROM course_contents;")
-	db.Exec("DELETE FROM course_options;")
-	db.Exec("DELETE FROM courses;")
-	db.Exec("DELETE FROM roles;")
-	db.Exec("DELETE FROM users;")
+	db.Exec("delete from payments;")
+	db.Exec("delete from user_assignments;")
+	db.Exec("delete from course_assignments;")
+	db.Exec("delete from course_contents;")
+	db.Exec("delete from course_options;")
+	db.Exec("delete from courses;")
+	db.Exec("delete from roles;")
+	db.Exec("delete from users;")
 
 	log.Println("migrate users")
 	stmt, err := db.Prepare(`
-		INSERT INTO users
+		insert into users
 			(id, username, name, image, about_me, email, created_at, updated_at)
-		VALUES
+		values
 			($1, $2, $3, $4, $5, $6, $7, $8);
 	`)
 	must(err)
 	for _, p := range respUser.Users {
 		u := findUser(p.LocalId)
-		x := model.User{
-			ID:        p.LocalId,
-			Username:  u.Username,
-			Name:      u.Name,
-			Image:     u.Photo,
-			AboutMe:   u.AboutMe,
-			Email:     p.Email,
-			CreatedAt: time.Unix(0, p.CreatedAt*1000000),
-			UpdatedAt: u.UpdatedAt,
-		}
 		id := p.LocalId
 		username := u.Username
 		if len(username) == 0 {
@@ -139,19 +129,16 @@ func main() {
 		if createdAt.IsZero() {
 			createdAt = updatedAt
 		}
-		var email *string
-		if len(x.Email) > 0 {
-			email = &x.Email
-		}
+		email := &sql.NullString{String: p.Email, Valid: len(p.Email) > 0}
 		_, err = stmt.Exec(id, username, name, u.Photo, u.AboutMe, email, createdAt, updatedAt)
 		must(err)
 	}
 
 	log.Println("migrate role")
 	stmt, err = db.Prepare(`
-		INSERT INTO roles
-			(id, admin, instructor, created_at, updated_at)
-		VALUES
+		insert into roles
+			(user_id, admin, instructor, created_at, updated_at)
+		values
 			($1, $2, $3, $4, $5);
 	`)
 	must(err)
@@ -162,25 +149,25 @@ func main() {
 
 	log.Println("migrate courses")
 	stmt, err = db.Prepare(`
-		INSERT INTO courses
+		insert into courses
 			(user_id, title, short_desc, long_desc, image, start, url, type, price, discount, enroll_detail, created_at, updated_at)
-		VALUES
+		values
 			($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
-		RETURNING id;
+		returning id;
 	`)
 	must(err)
 	stmt2, err := db.Prepare(`
-		INSERT INTO course_options
+		insert into course_options
 			(id, public, enroll, attend, assignment, discount)
-		VALUES
+		values
 			($1, $2, $3, $4, $5, $6);
 	`)
 	must(err)
 	stmt3, err := db.Prepare(`
-		INSERT INTO course_contents
-			(course_id, title, long_desc, video_id, video_type, download_url)
-		VALUES
-			($1, $2, $3, $4, $5, $6);
+		insert into course_contents
+			(course_id, i, title, long_desc, video_id, video_type, download_url)
+		values
+			($1, $2, $3, $4, $5, $6, $7);
 	`)
 	must(err)
 	for _, p := range courses {
@@ -208,21 +195,21 @@ func main() {
 
 		_, err = stmt2.Exec(id, p.Options.Public, p.Options.Enroll, p.Options.Attend, p.Options.Assignment, p.Options.Discount)
 		must(err)
-		for _, c := range p.Contents {
+		for i, c := range p.Contents {
 			var vt int
 			if len(p.Video) > 0 {
 				vt = model.Youtube
 			}
-			_, err = stmt3.Exec(id, c.Title, c.Description, c.Video, vt, c.DownloadURL)
+			_, err = stmt3.Exec(id, i, c.Title, c.Description, c.Video, vt, c.DownloadURL)
 			must(err)
 		}
 	}
 
 	log.Println("migrate payments")
 	stmt, err = db.Prepare(`
-		INSERT INTO payments
+		insert into payments
 			(user_id, course_id, image, price, original_price, code, status, created_at, updated_at, at)
-		VALUES
+		values
 			($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);
 	`)
 	must(err)
@@ -247,10 +234,10 @@ func main() {
 
 	log.Println("migrate assignments")
 	stmt, err = db.Prepare(`
-		INSERT INTO assignments
+		insert into assignments
 			(course_id, title, long_desc, open, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6)
-		RETURNING id;
+		values ($1, $2, $3, $4, $5, $6)
+		returning id;
 	`)
 	must(err)
 	for _, p := range assignments {
@@ -263,9 +250,9 @@ func main() {
 
 	log.Println("migrate enroll")
 	stmt, err = db.Prepare(`
-		INSERT INTO enrolls
+		insert into enrolls
 			(user_id, course_id, created_at)
-		VALUES
+		values
 			($1, $2, $3);
 	`)
 	must(err)
@@ -277,9 +264,9 @@ func main() {
 
 	log.Println("migrate attend")
 	stmt, err = db.Prepare(`
-		INSERT INTO attends
+		insert into attends
 			(user_id, course_id, created_at)
-		VALUES
+		values
 			($1, $2, $3);
 	`)
 	must(err)
@@ -291,9 +278,9 @@ func main() {
 
 	log.Println("migrate user assignments")
 	stmt, err = db.Prepare(`
-		INSERT INTO user_assignments
+		insert into user_assignments
 			(user_id, assignment_id, download_url, created_at)
-		VALUES
+		values
 			($1, $2, $3, $4);
 	`)
 	must(err)

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/acoshift/acourse/pkg/internal"
 	"github.com/lib/pq"
 )
 
@@ -56,39 +55,37 @@ const (
 			LEFT JOIN users ON payments.user_id = users.id
 			LEFT JOIN courses ON payments.course_id = courses.id
 	`
-)
 
-var (
-	getPaymentStmt, _ = internal.GetDB().Prepare(selectPayment + `
+	queryGetPayment = selectPayment + `
 		WHERE payments.id = $1;
-	`)
+	`
 
-	getPaymentsStmt, _ = internal.GetDB().Prepare(selectPayment + `
-		WHERE payments.id IN ANY($1);
-	`)
+	queryGetPayments = selectPayment + `
+		WHERE payments.id = ANY($1);
+	`
 
-	listPaymentsStmt, _ = internal.GetDB().Prepare(selectPayment + `
+	queryListPayments = selectPayment + `
 		ORDER BY payments.created_at DESC;
-	`)
+	`
 
-	listPaymentsWithStatusStmt, _ = internal.GetDB().Prepare(selectPayment + `
+	queryListPaymentsWithStatus = selectPayment + `
 		WHERE payments.status = ANY($1)
 		ORDER BY payments.created_at DESC;
-	`)
+	`
 
-	savePaymentStmt, _ = internal.GetDB().Prepare(`
+	querySavePayment = `
 		INSERT INTO payments
 			(user_id, course_id, image, price, original_price, code, status, updated_at)
 		VALUES
 			($1, $2, $3, $4, $5, $6, $7, now())
 		RETURNING id;
-	`)
+	`
 
-	changePaymentStatusStmt, _ = internal.GetDB().Prepare(`
-		UPDATE INTO payments
+	queryChangePaymentStatus = `
+		UPDATE payments
 		SET status = $2
 		WHERE id = $1;
-	`)
+	`
 )
 
 // Save saves payment, allow for create only
@@ -102,7 +99,7 @@ func (x *Payment) Save() error {
 	if x.CourseID <= 0 {
 		return fmt.Errorf("invalid course")
 	}
-	err := savePaymentStmt.QueryRow(x.UserID, x.CourseID, x.Image, x.Price, x.OriginalPrice, x.Code, Pending).Scan(&x.ID)
+	err := db.QueryRow(querySavePayment, x.UserID, x.CourseID, x.Image, x.Price, x.OriginalPrice, x.Code, Pending).Scan(&x.ID)
 	if err != nil {
 		return err
 	}
@@ -114,15 +111,15 @@ func (x *Payment) Accept() error {
 	if x.ID <= 0 {
 		return fmt.Errorf("payment must be save before accept")
 	}
-	tx, err := internal.GetDB().Begin()
+	tx, err := db.Begin()
 	if err != nil {
 		return err
 	}
-	_, err = tx.Stmt(changePaymentStatusStmt).Exec(x.ID, Accepted)
+	_, err = tx.Exec(queryChangePaymentStatus, x.ID, Accepted)
 	if err != nil {
 		return err
 	}
-	_, err = tx.Stmt(enrollStmt).Exec(x.UserID, x.CourseID)
+	_, err = tx.Exec(querySaveEnroll, x.UserID, x.CourseID)
 	if err != nil {
 		return err
 	}
@@ -138,7 +135,7 @@ func (x *Payment) Reject() error {
 	if x.ID <= 0 {
 		return fmt.Errorf("payment must be save before accept")
 	}
-	_, err := changePaymentStatusStmt.Exec(x.ID, Rejected)
+	_, err := db.Exec(queryChangePaymentStatus, x.ID, Rejected)
 	if err != nil {
 		return err
 	}
@@ -170,7 +167,7 @@ func scanPayment(scan scanFunc, x *Payment) error {
 // GetPayments gets payments
 func GetPayments(paymentIDs []int64) ([]*Payment, error) {
 	xs := make([]*Payment, 0, len(paymentIDs))
-	rows, err := getPaymentsStmt.Query(pq.Array(paymentIDs))
+	rows, err := db.Query(queryGetPayments, pq.Array(paymentIDs))
 	if err != nil {
 		return nil, err
 	}
@@ -188,7 +185,7 @@ func GetPayments(paymentIDs []int64) ([]*Payment, error) {
 // GetPayment gets payment from given id
 func GetPayment(paymentID int64) (*Payment, error) {
 	var x Payment
-	err := scanPayment(getPaymentStmt.QueryRow(paymentID).Scan, &x)
+	err := scanPayment(db.QueryRow(queryGetPayment, paymentID).Scan, &x)
 	if err != nil {
 		return nil, err
 	}
@@ -199,7 +196,7 @@ func GetPayment(paymentID int64) (*Payment, error) {
 // TODO: pagination
 func ListHistoryPayments() ([]*Payment, error) {
 	xs := make([]*Payment, 0)
-	rows, err := listPaymentsWithStatusStmt.Query(pq.Array([]int{Accepted, Rejected}))
+	rows, err := db.Query(queryListPaymentsWithStatus, pq.Array([]int{Accepted, Rejected}))
 	if err != nil {
 		return nil, err
 	}
@@ -218,7 +215,7 @@ func ListHistoryPayments() ([]*Payment, error) {
 // TODO: pagination
 func ListPendingPayments() ([]*Payment, error) {
 	xs := make([]*Payment, 0)
-	rows, err := listPaymentsWithStatusStmt.Query(pq.Array([]int{Pending}))
+	rows, err := db.Query(queryListPaymentsWithStatus, pq.Array([]int{Pending}))
 	if err != nil {
 		return nil, err
 	}

@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/acoshift/acourse/pkg/internal"
+	"github.com/acoshift/acourse/pkg/appctx"
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/flash"
 	"github.com/acoshift/header"
@@ -82,7 +82,7 @@ func parseTemplate(key interface{}, set []string) {
 			return templateName
 		},
 		"xsrf": func(action string) string {
-			return xsrftoken.Generate(internal.GetXSRFSecret(), "", action)
+			return xsrftoken.Generate(xsrfSecret, "", action)
 		},
 		"currency": func(v float64) string {
 			return humanize.FormatFloat("#,###.##", v)
@@ -135,11 +135,11 @@ func parseTemplate(key interface{}, set []string) {
 	})
 	_, err := t.ParseFiles(joinTemplateDir(set)...)
 	if err != nil {
-		log.Fatalf("internal: parse template %s error; %v", templateName, err)
+		log.Fatalf("view: parse template %s error; %v", templateName, err)
 	}
 	t = t.Lookup("root")
 	if t == nil {
-		log.Fatalf("internal: root template not found in %s", templateName)
+		log.Fatalf("view: root template not found in %s", templateName)
 	}
 	templates[key] = &templateStruct{
 		Template: t,
@@ -162,7 +162,7 @@ func render(w http.ResponseWriter, r *http.Request, key, data interface{}) {
 
 	ctx := r.Context()
 
-	me, _ := internal.GetUser(ctx).(*model.User)
+	me := appctx.GetUser(ctx)
 	tp := t.Template
 
 	// inject template funcs
@@ -172,7 +172,7 @@ func render(w http.ResponseWriter, r *http.Request, key, data interface{}) {
 				return me
 			},
 			"xsrf": func(action string) string {
-				return xsrftoken.Generate(internal.GetXSRFSecret(), me.ID, action)
+				return xsrftoken.Generate(xsrfSecret, me.ID, action)
 			},
 		})
 	}

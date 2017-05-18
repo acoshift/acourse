@@ -11,3 +11,7 @@ style: clean
 
 clean:
 	rm -f static/style.css
+
+.PHONY: migrate
+migrate:
+	go run migrate/main.go

@@ -1,10 +1,10 @@
 package model
 
 import (
+	"database/sql"
 	"fmt"
 	"time"
 
-	"github.com/acoshift/acourse/pkg/internal"
 	"github.com/lib/pq"
 )
 
@@ -27,45 +27,45 @@ type UserRole struct {
 	Instructor bool
 }
 
-const selectUsers = `
-	SELECT
-		users.id,
-		users.name,
-		users.username,
-		users.email,
-		users.about_me,
-		users.image,
-		users.created_at,
-		users.updated_at,
-		roles.admin,
-		roles.instructor
-	FROM users
-		LEFT JOIN roles ON users.id = roles.id
-`
+const (
+	selectUsers = `
+		SELECT
+			users.id,
+			users.name,
+			users.username,
+			users.email,
+			users.about_me,
+			users.image,
+			users.created_at,
+			users.updated_at,
+			roles.admin,
+			roles.instructor
+		FROM users
+			LEFT JOIN roles ON users.id = roles.user_id
+	`
 
-var (
-	getUsersStmt, _ = internal.GetDB().Prepare(selectUsers + `
+	queryGetUsers = selectUsers + `
 		WHERE users.id = ANY($1);
-	`)
+	`
 
-	getUserStmt, _ = internal.GetDB().Prepare(selectUsers + `
+	queryGetUser = selectUsers + `
 		WHERE users.id = $1;
-	`)
+	`
 
-	getUserFromUsernameStmt, _ = internal.GetDB().Prepare(selectUsers + `
+	queryGetUserFromUsername = selectUsers + `
 		WHERE users.username = $1;
-	`)
+	`
 
-	listUsersStmt, _ = internal.GetDB().Prepare(selectUsers + `
+	queryListUsers = selectUsers + `
 		ORDER BY users.created_at DESC;
-	`)
+	`
 
-	saveUserStmt, _ = internal.GetDB().Prepare(`
+	querySaveUser = `
 		UPSERT INTO users
 			(id, name, username, about_me, image, updated_at)
 		VALUES
 			($1, $2, $3, $4, $5, now());
-	`)
+	`
 )
 
 // Save saves user
@@ -73,7 +73,7 @@ func (x *User) Save() error {
 	if len(x.ID) == 0 {
 		return fmt.Errorf("invalid id")
 	}
-	_, err := saveUserStmt.Exec(x.ID, x.Name, x.Username, x.AboutMe, x.Image)
+	_, err := db.Exec(querySaveUser, x.ID, x.Name, x.Username, x.AboutMe, x.Image)
 	if err != nil {
 		return err
 	}
@@ -81,28 +81,22 @@ func (x *User) Save() error {
 }
 
 func scanUser(scan scanFunc, x *User) error {
-	var admin, instructor *bool
-	var email *string
+	var admin, instructor sql.NullBool
+	var email sql.NullString
 	err := scan(&x.ID, &x.Name, &x.Username, &email, &x.AboutMe, &x.Image, &x.CreatedAt, &x.UpdatedAt, &admin, &instructor)
 	if err != nil {
 		return err
 	}
-	if email != nil {
-		x.Email = *email
-	}
-	if admin != nil {
-		x.Role.Admin = *admin
-	}
-	if instructor != nil {
-		x.Role.Instructor = *instructor
-	}
+	x.Email = email.String
+	x.Role.Admin = admin.Bool
+	x.Role.Instructor = instructor.Bool
 	return nil
 }
 
 // GetUsers gets users
 func GetUsers(userIDs []string) ([]*User, error) {
 	xs := make([]*User, 0, len(userIDs))
-	rows, err := getUsersStmt.Query(pq.Array(userIDs))
+	rows, err := db.Query(queryGetUsers, pq.Array(userIDs))
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +114,7 @@ func GetUsers(userIDs []string) ([]*User, error) {
 // GetUser gets user from id
 func GetUser(userID string) (*User, error) {
 	var x User
-	err := scanUser(getUserStmt.QueryRow(userID).Scan, &x)
+	err := scanUser(db.QueryRow(queryGetUser, userID).Scan, &x)
 	if err != nil {
 		return nil, err
 	}
@@ -130,7 +124,7 @@ func GetUser(userID string) (*User, error) {
 // GetUserFromUsername gets user from username
 func GetUserFromUsername(username string) (*User, error) {
 	var x User
-	err := scanUser(getUserFromUsernameStmt.QueryRow(username).Scan, &x)
+	err := scanUser(db.QueryRow(queryGetUserFromUsername, username).Scan, &x)
 	if err != nil {
 		return nil, err
 	}
@@ -141,7 +135,7 @@ func GetUserFromUsername(username string) (*User, error) {
 // TODO: pagination
 func ListUsers() ([]*User, error) {
 	xs := make([]*User, 0)
-	rows, err := listUsersStmt.Query()
+	rows, err := db.Query(queryListUsers)
 	if err != nil {
 		return nil, err
 	}

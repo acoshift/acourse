@@ -1,4 +1,4 @@
-package internal
+package app
 
 import (
 	"bytes"
@@ -30,7 +30,7 @@ func generateFilename() string {
 }
 
 func generateDownloadURL(filename string) string {
-	return fmt.Sprintf("https://storage.googleapis.com/%s/%s", bucket, filename)
+	return fmt.Sprintf("https://storage.googleapis.com/%s/%s", bucketName, filename)
 }
 
 // UploadProfileImage uploads profile image and return url

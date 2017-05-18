@@ -4,14 +4,8 @@ import (
 	"bytes"
 	"encoding/gob"
 	"errors"
-	"fmt"
 	"log"
-	"strconv"
 )
-
-func init() {
-	gob.Register(&CourseContent{})
-}
 
 type scanFunc func(...interface{}) error
 
@@ -19,29 +13,6 @@ type scanFunc func(...interface{}) error
 var (
 	ErrNotFound = errors.New("not found")
 )
-
-const prefix = "acr:"
-
-// key generate key from given data
-func key(xs ...interface{}) string {
-	r := prefix
-	for _, x := range xs {
-		r += ":"
-		switch t := x.(type) {
-		case string:
-			r += t
-		case int:
-			r += strconv.Itoa(t)
-		case int64:
-			r += strconv.FormatInt(t, 10)
-		case fmt.Stringer:
-			r += t.String()
-		default:
-			panic("key: params not support")
-		}
-	}
-	return r
-}
 
 func dec(b []byte, x interface{}) error {
 	return gob.NewDecoder(bytes.NewReader(b)).Decode(x)
