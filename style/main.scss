@@ -6,7 +6,7 @@
 @import 'button';
 @import 'input';
 @import 'message';
-body {
+body, html {
   -webkit-font-smoothing: antialiased;
 }
 div {
@@ -14,26 +14,32 @@ div {
   font-family: $main-fontface;
   font-weight: 300;
 }
+
 p {
   color: $text-color-main;
   font-family: $secondary-fontface;
   font-weight: 400;
   margin: 0;
 }
+
 a {
   text-decoration: none;
 }
+
 p, h1, h2, h3, h4, h5, h6, div {
   -webkit-font-smoothing: antialiased;
 }
+
 label {
   font-weight: 600;
 }
+
 button {
   border: none;
 }
-.navbar-color {
-  background: $navbar-color;
+
+.segment-card {
+  
 }
 
 .page-pattern {
