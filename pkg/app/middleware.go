@@ -6,7 +6,7 @@ import (
 	"runtime/debug"
 	"time"
 
-	"github.com/acoshift/acourse/pkg/internal"
+	"github.com/acoshift/acourse/pkg/appctx"
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/flash"
 	"github.com/acoshift/gzip"
@@ -90,7 +90,7 @@ func fetchUser(h http.Handler) http.Handler {
 				u = &model.User{}
 				u.ID = id
 			}
-			r = r.WithContext(internal.WithUser(ctx, u))
+			r = r.WithContext(appctx.WithUser(ctx, u))
 		}
 		h.ServeHTTP(w, r)
 	})
@@ -98,7 +98,7 @@ func fetchUser(h http.Handler) http.Handler {
 
 func onlyAdmin(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		u, _ := internal.GetUser(r.Context()).(*model.User)
+		u := appctx.GetUser(r.Context())
 		if u == nil {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return

@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/acoshift/acourse/pkg/internal"
+	"github.com/acoshift/acourse/pkg/appctx"
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/flash"
 	"github.com/acoshift/header"
@@ -162,7 +162,7 @@ func render(w http.ResponseWriter, r *http.Request, key, data interface{}) {
 
 	ctx := r.Context()
 
-	me, _ := internal.GetUser(ctx).(*model.User)
+	me := appctx.GetUser(ctx)
 	tp := t.Template
 
 	// inject template funcs

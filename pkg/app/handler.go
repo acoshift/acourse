@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/acoshift/acourse/pkg/internal"
+	"github.com/acoshift/acourse/pkg/appctx"
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/acourse/pkg/view"
 	"github.com/acoshift/flash"
@@ -178,7 +178,7 @@ func getSignOut(w http.ResponseWriter, r *http.Request) {
 }
 
 func getProfile(w http.ResponseWriter, r *http.Request) {
-	user, _ := internal.GetUser(r.Context()).(*model.User)
+	user := appctx.GetUser(r.Context())
 
 	ownCourses, err := model.ListOwnCourses(user.ID)
 	if err != nil {
@@ -203,7 +203,7 @@ func getProfile(w http.ResponseWriter, r *http.Request) {
 
 func getProfileEdit(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	user, _ := internal.GetUser(ctx).(*model.User)
+	user := appctx.GetUser(ctx)
 	f := flash.Get(ctx)
 	if !f.Has("Username") {
 		f.Set("Username", user.Username)
@@ -224,7 +224,7 @@ func getProfileEdit(w http.ResponseWriter, r *http.Request) {
 
 func postProfileEdit(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	user, _ := internal.GetUser(ctx).(*model.User)
+	user := appctx.GetUser(ctx)
 	f := flash.Get(ctx)
 	if !verifyXSRF(r.FormValue("X"), user.ID, "profile-edit") {
 		f.Add("Errors", "invalid xsrf token")
@@ -277,7 +277,7 @@ func postProfileEdit(w http.ResponseWriter, r *http.Request) {
 
 func getCourse(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	user, _ := internal.GetUser(ctx).(*model.User)
+	user := appctx.GetUser(ctx)
 	id := httprouter.GetParam(ctx, "courseID")
 	course, err := model.GetCourFromIDOrURL(id)
 	if err == model.ErrNotFound {
@@ -375,7 +375,7 @@ func getAdminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter fun
 	action := r.FormValue("action")
 	if len(action) > 0 {
 		defer http.Redirect(w, r, "/admin/payments", http.StatusSeeOther)
-		user, _ := internal.GetUser(r.Context()).(*model.User)
+		user := appctx.GetUser(r.Context())
 		id, err := strconv.ParseInt(r.FormValue("id"), 10, 64)
 		if err != nil {
 			return
