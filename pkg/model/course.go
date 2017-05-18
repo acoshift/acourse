@@ -91,9 +91,7 @@ const (
 		FROM courses
 			LEFT JOIN course_options ON courses.id = course_options.id
 	`
-)
 
-const (
 	queryGetCourse = selectCourses + `
 		WHERE courses.id = $1;
 	`
