@@ -69,7 +69,7 @@ func (x *Course) EnrollCount() int {
 
 const (
 	selectCourses = `
-		SELECT
+		select
 			courses.id,
 			courses.title,
 			courses.short_desc,
@@ -88,67 +88,67 @@ const (
 			course_options.attend,
 			course_options.assignment,
 			course_options.discount
-		FROM courses
-			LEFT JOIN course_options ON courses.id = course_options.id
+		from courses
+			left join course_options on courses.id = course_options.id
 	`
 
 	queryGetCourse = selectCourses + `
-		WHERE courses.id = $1;
+		where courses.id = $1
 	`
 
 	queryGetCourses = selectCourses + `
-		WHERE courses.id = ANY($1);
+		where courses.id = any($1)
 	`
 
 	queryGetCourseFromURL = selectCourses + `
-		WHERE courses.url = $1;
+		where courses.url = $1
 	`
 
 	queryGetCourseContents = `
-		SELECT
+		select
 			course_contents.title,
 			course_contents.long_desc,
 			course_contents.video_id,
 			course_contents.video_type,
 			course_contents.download_url
-		FROM courses
-			INNER JOIN course_contents ON courses.id = course_contents.course_id
-		WHERE courses.id = $1
-		ORDER BY course_contents.i ASC;
+		from courses
+			inner join course_contents on courses.id = course_contents.course_id
+		where courses.id = $1
+		order by course_contents.i asc
 	`
 
 	queryListCourses = selectCourses + `
-		ORDER BY courses.created_at DESC;
+		order by courses.created_at desc
 	`
 
 	queryListCoursesPublic = selectCourses + `
-		WHERE course_options.public = true
-		ORDER BY courses.created_at DESC;
+		where course_options.public = true
+		order by courses.created_at desc
 	`
 
 	queryListCoursesOwn = selectCourses + `
-		WHERE courses.user_id = $1
-		ORDER BY courses.created_at DESC;
+		where courses.user_id = $1
+		order by courses.created_at desc
 	`
 
 	queryListCoursesEnrolled = selectCourses + `
-		INNER JOIN enrolls ON courses.id = enrolls.course_id
-		WHERE enrolls.user_id = $1
-		ORDER BY enrolls.created_at DESC;
+		inner join enrolls on courses.id = enrolls.course_id
+		where enrolls.user_id = $1
+		order by enrolls.created_at desc
 	`
 
 	querySaveCourse = `
-		UPSERT INTO courses
+		upsert into courses
 			(id, user_id, title, short_desc, long_desc, image, start, url, type, price, discount, enroll_detail, updated_at)
-		VALUES
-			($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, now());
+		values
+			($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, now())
 	`
 
 	querySaveCourseOption = `
-		UPSERT INTO course_options
+		upsert into course_options
 			(id, public, enroll, attend, assignment, discount)
-		VALUES
-			($1, $2, $3, $4, $5, $6);
+		values
+			($1, $2, $3, $4, $5, $6)
 	`
 )
 

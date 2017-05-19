@@ -2,10 +2,10 @@ package model
 
 const (
 	querySaveEnroll = `
-		INSERT INTO enrolls
+		insert into enrolls
 			(user_id, course_id)
-		VALUES
-			($1, $2);
+		values
+			($1, $2)
 	`
 )
 

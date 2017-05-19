@@ -29,7 +29,7 @@ type UserRole struct {
 
 const (
 	selectUsers = `
-		SELECT
+		select
 			users.id,
 			users.name,
 			users.username,
@@ -40,31 +40,31 @@ const (
 			users.updated_at,
 			roles.admin,
 			roles.instructor
-		FROM users
-			LEFT JOIN roles ON users.id = roles.user_id
+		from users
+			left join roles on users.id = roles.user_id
 	`
 
 	queryGetUsers = selectUsers + `
-		WHERE users.id = ANY($1);
+		where users.id = any($1)
 	`
 
 	queryGetUser = selectUsers + `
-		WHERE users.id = $1;
+		where users.id = $1
 	`
 
 	queryGetUserFromUsername = selectUsers + `
-		WHERE users.username = $1;
+		where users.username = $1
 	`
 
 	queryListUsers = selectUsers + `
-		ORDER BY users.created_at DESC;
+		order by users.created_at desc
 	`
 
 	querySaveUser = `
-		UPSERT INTO users
+		upsert into users
 			(id, name, username, about_me, image, updated_at)
-		VALUES
-			($1, $2, $3, $4, $5, now());
+		values
+			($1, $2, $3, $4, $5, now())
 	`
 )
 
