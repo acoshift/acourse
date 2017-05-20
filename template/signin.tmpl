@@ -1,6 +1,6 @@
 {{define "auth-body"}}
 <div id="sign-in" class="page-pattern">
-  <div class="signin-container grid-container _flex-column _main-center _cross-center">
+  <div class="grid-container _flex-column _main-center _cross-center">
 
     <div class="acourse-block-big">
       <img class="logo" src="/~/img/acourse-logo.png">
@@ -28,7 +28,7 @@
               </button>
             </div>
             {{if .Flash.Errors}}
-              <div class="message error">
+              <div class="acourse-message -error">
                 <ul>
                   {{range .Flash.Errors}}
                     <li>{{.}}</li>

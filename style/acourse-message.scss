@@ -1,8 +1,8 @@
-.message {
+.acourse-message {
   padding: 4px;
   border-radius: 3px;
   margin-bottom: 16px;
-  &.error {
+  &.-error {
     background-color: #fff5f7;
     border: 1px solid #ffced8;
     color: #cd0930;
