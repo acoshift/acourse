@@ -29,6 +29,12 @@
   @extend ._full-width;
   @extend ._full-height;
 }
+._no-padding {
+  padding: 0;
+}
+._no-margin {
+  margin: 0;
+}
 
 // Display
 ._flex {
@@ -41,11 +47,17 @@
   @extend ._flex;
   flex-direction: column;
 }
+._flex-span {
+  flex: 1;
+}
 ._main-strech {
   justify-content: stretch;
 }
 ._cross-strech {
   align-items: stretch;
+}
+._self-strech {
+  align-self: stretch;
 }
 ._main-start {
   justify-content: flex-start;

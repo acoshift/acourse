@@ -1,11 +1,13 @@
 {{define "auth-body"}}
 <div id="sign-in" class="page-pattern">
-  <div class="signin-container _flex-column _main-center _cross-center">
-    <div class="_flex-row _main-center">
+  <div class="signin-container grid-container _flex-column _main-center _cross-center">
+
+    <div>
       <img class="logo" src="/~/img/acourse-logo.png">
     </div>
-    <div class="_flex-row _main-center row">
-      <div class="segment-card col-xs-12 col-md-6">
+
+    <div class="_flex-row _self-strech">
+      <div class="acourse-card col-xs-12 col-sm-12">
         <form method="POST">
           <div class="_flex-column">
             <div class="segment-header _font-sub _color-accent _align-center">
@@ -42,7 +44,7 @@
               <a class="link" href="/signup"><i class="fa fa-envelope"></i>Email</a>
             </div>
             <div class="_flex-row _main-center block">
-              <a class="_color-accent" href="/profile">กลับสู่หน้าแรก</a>
+              <a class="_color-accent" href="/">กลับสู่หน้าแรก</a>
             </div>
           </div>
         </form>
@@ -61,9 +63,6 @@
     position: relative;
     z-index: 1;
   }
-  #sign-in .signin-container {
-    flex: 1;
-  }
   #sign-in .link {
     padding: 16px;
     text-align: center;
@@ -71,12 +70,6 @@
   }
   #sign-in .link i {
     margin-right: 4px;
-  }
-  .segment-card {
-    border-radius: 5px;
-    padding: 24px 16px 16px 16px;
-    background-color: white;
-    box-shadow: 2px 4px 8px 0px rgba(46,61,73,0.2);
   }
   .button-default {
     width: 100%;

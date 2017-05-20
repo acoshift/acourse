@@ -1,11 +1,11 @@
 {{define "course-card"}}
   
-    <div id="course-card">
+    <div id="course-card" class="acourse-card -hover-rise _flex-column">
       <a class="course-cover" href="/course/{{.URL}}">
         <img src="{{.Image}}" width="100%">
       </a>
-      <div class="course-detail">
-        <div class="course-name">{{.Title}}</div>
+      <div class="course-detail acourse-segment _flex-column _flex-span _main-start">
+        <h4>{{.Title}}</h4>
         <div class="course-type-container">
           <div class="course-type {{.Type | courseType}} _text-thin">{{.Type | courseType}}</div>
           {{if eq .Type live}}
@@ -19,12 +19,12 @@
           </div>
           <div class="course-price">
             {{if le .Price 0.0}}
-              <p class="_text-bold">FREE</p>
+              <p class="_text-bold _no-margin">FREE</p>
             {{else}}
               <p class="{{if .Option.Discount}}discount _text-thin _color-secondary{{else}}_text-bold{{end}}">
                 ฿ {{.Price | currency}}
                 {{if .Option.Discount}}
-                  <p class="_text-bold">&nbsp฿ {{.Discount | currency}}</p>
+                  <p class="_text-bold _no-margin">&nbsp฿ {{.Discount | currency}}</p>
                 {{end}}
               </p>
             {{end}}
@@ -36,23 +36,6 @@
 
 {{define "course-card-style"}}
 <style>
-#course-card {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-self: stretch;
-    margin-bottom: 16px;
-    background-color: white;
-    border-radius: 6px;
-    overflow: hidden;
-    transition: 0.16s all ease;
-    cursor: pointer;
-    box-shadow: 0 15px 35px rgba(50,50,93,.03), 0 5px 15px rgba(0,0,0,.06);
-  }
-  #course-card:hover {
-    box-shadow: 0 15px 35px rgba(50,50,93,.07), 0 5px 15px rgba(0,0,0,.1);
-    transform: translate(0, -4px);
-  }
   #course-card .course-cover {
     flex-basis: 160px;
     height: 160px;
@@ -60,13 +43,6 @@
   #course-card .course-cover img {
     height: 100%;
     object-fit: cover;
-  }
-  #course-card .course-detail {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    justify-content: flex-start;
-    padding: 12px 16px 16px 16px;
   }
 
   #course-card .course-name {
