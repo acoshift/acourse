@@ -8,6 +8,8 @@
 @import 'acourse-message';
 @import 'acourse-card';
 @import 'acourse-segment';
+@import 'acourse-label';
+// @import 'acourse-color';
 
 body, html {
   -webkit-font-smoothing: antialiased;
@@ -36,6 +38,25 @@ p, h1, h2, h3, h4, h5, h6, {
   margin: 0 0 8px 0;
   padding: 0;
 }
+h1 {
+
+}
+h2 {
+
+}
+h3 {
+
+}
+h4 {
+  font-size: 17px;
+}
+h5 {
+
+}
+h6 {
+
+}
+
 label {
   font-weight: 600;
 }
@@ -44,15 +65,9 @@ button {
   border: none;
 }
 
-.segment-card {
-
-}
 .segment-header {
   font-size: 32px;
   margin-bottom: 32px;
-}
-.block {
-  margin-bottom: 8px;
 }
 .page-pattern {
   position: relative;

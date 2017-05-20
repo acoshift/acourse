@@ -8,5 +8,9 @@
   &.-hover-rise {
     transition: 0.16s all ease;
     cursor: pointer;
+    &:hover {
+      box-shadow: 0 15px 35px rgba(50,50,93,.07), 0 5px 15px rgba(0,0,0,.1);
+      transform: translate(0, -4px);
+    }
   }
 }

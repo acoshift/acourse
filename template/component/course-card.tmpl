@@ -5,15 +5,20 @@
         <img src="{{.Image}}" width="100%">
       </a>
       <div class="course-detail acourse-segment _flex-column _flex-span _main-start">
+        
         <h4>{{.Title}}</h4>
-        <div class="course-type-container">
-          <div class="course-type {{.Type | courseType}} _text-thin">{{.Type | courseType}}</div>
+        
+        <div class="acourse-block">
+          <div class="acourse-label {{.Type | courseType}} _text-thin">{{.Type | courseType}}</div>
           {{if eq .Type live}}
-            <div class="live-date">Start at {{.Start | date}}</div>
+            <div class="live-date _text-thin _font-size-small">Start at {{.Start | date}}</div>
           {{end}}
         </div>
-        <p class="course-description">{{.ShortDesc}}</p>
-        <div class="course-bottom">
+
+        <div class="acourse-block-big _flex-span _font-sub _font-size-normal">
+          {{.ShortDesc}}
+        </div>
+        <div class="_flex-row _main-space-between">
           <div class="course-student _color-secondary">
             <i class="fa fa-user"></i>&nbsp {{.EnrollCount}}
           </div>
@@ -21,7 +26,7 @@
             {{if le .Price 0.0}}
               <p class="_text-bold _no-margin">FREE</p>
             {{else}}
-              <p class="{{if .Option.Discount}}discount _text-thin _color-secondary{{else}}_text-bold{{end}}">
+              <p class="_no-margin {{if .Option.Discount}}discount _text-thin _color-secondary{{else}}_text-bold{{end}}">
                 ฿ {{.Price | currency}}
                 {{if .Option.Discount}}
                   <p class="_text-bold _no-margin">&nbsp฿ {{.Discount | currency}}</p>
@@ -44,55 +49,24 @@
     height: 100%;
     object-fit: cover;
   }
-
-  #course-card .course-name {
-    font-size: 17px;
-    font-weight: 600;
-    margin-bottom: 8px;
-  }
-  #course-card .course-type {
-    color: white;
-    display: inline-block;
-    border-radius: 3px;
-    padding: 2px 8px;
-    font-size: 14px;
-  }
-  #course-card .course-type.Live {
+  #course-card .acourse-label.Live {
     background-color: #ff4e4e;
   }
-  #course-card .course-type.eBook {
+  #course-card .acourse-label.eBook {
     background-color: #55da65;
   }
-  #course-card .course-type.Video {
+  #course-card .acourse-label.Video {
     background-color: #594eff;
   }
   #course-card .live-date {
     margin-left: 8px;
-    font-weight: 200;
-    font-size: 13px;
     color: gray;
     display: inline-block;
-  }
-  #course-card .course-type-container {
-    margin-bottom: 16px;
-  }
-  #course-card .course-description {
-    flex: 1;
-    font-size: 15px;
-    line-height: 22px;
-    margin-bottom: 16px;
   }
   #course-card .course-price .discount {
     text-decoration: line-through;
     font-weight: 100;
     font-size: 13px;
-  }
-  #course-card .course-price .discounted-price {
-    
-  }
-  #course-card .course-bottom {
-    display: flex;
-    justify-content: space-between;
   }
 </style>
 {{end}}
