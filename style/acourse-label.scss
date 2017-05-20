@@ -4,4 +4,13 @@
   border-radius: 3px;
   padding: 2px 8px;
   font-size: 14px;
+  &.-red {
+    background-color: #ff4e4e;
+  }
+  &.-green {
+    background-color: #55da65;
+  }
+  &.-blue {
+    background-color: #594eff;
+  }
 }

@@ -12,14 +12,16 @@
         <div class="acourse-block">
           <div class="col-xs-12">
             {{if not .Course.Start.IsZero}}
-              <p>Start At: {{.Course.Start | date}}</p>
+              <div class="acourse-label -red">Start At: {{.Course.Start | date}}</div>
             {{end}}
-            <div class="_font-sub course-detail">
+            <!-- TODO Read more-->
+            <div class="course-detail _font-sub">
               {{.Course.Desc | html}}
             </div>
           </div>
         </div>
-      {{if .Enrolled}}
+        
+        {{if .Enrolled}}
 
         <div class="acourse-block">
           <div class="col-xs-12 row">
@@ -36,9 +38,15 @@
                     </div>
                     {{.Desc | html}}
                   {{end}}
-
+                  
+                  <!-- TODO -->
                   {{if .DownloadURL}}
-                    <a href="{{.DownloadURL}}" target="_blank">Download</a>
+                    <a
+                      v-if="selectedItem === {{$i}}"
+                      href="{{.DownloadURL}}"
+                      target="_blank">
+                      Download
+                    </a>
                   {{end}}
 
                 {{end}}
@@ -91,7 +99,9 @@
       z-index: 1;
       padding-top: 48px;
     }
-
+    #course .acourse-header {
+      margin-bottom: 0px;
+    }
     #course .acourse-card {
       margin-bottom: 32px;
     }
