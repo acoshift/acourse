@@ -1,42 +1,41 @@
 {{define "course-card"}}
-  
-    <div id="course-card" class="acourse-card -hover-rise _flex-column">
-      <a class="course-cover" href="/course/{{.URL}}">
-        <img src="{{.Image}}" width="100%">
-      </a>
-      <div class="course-detail acourse-segment _flex-column _flex-span _main-start">
-        
-        <h4>{{.Title}}</h4>
-        
-        <div class="acourse-block">
-          <div class="acourse-label {{.Type | courseType}} _text-thin">{{.Type | courseType}}</div>
-          {{if eq .Type live}}
-            <div class="live-date _text-thin _font-size-small">Start at {{.Start | date}}</div>
-          {{end}}
-        </div>
+  <div id="course-card" class="acourse-card -hover-rise _flex-column">
+    <a class="course-cover" href="/course/{{.URL}}">
+      <img src="{{.Image}}" width="100%">
+    </a>
+    <div class="course-detail acourse-segment _flex-column _flex-span _main-start">
+      
+      <h4>{{.Title}}</h4>
+      
+      <div class="acourse-block">
+        <div class="acourse-label {{.Type | courseType}} _text-thin">{{.Type | courseType}}</div>
+        {{if eq .Type live}}
+          <div class="live-date _text-thin _font-size-small">Start at {{.Start | date}}</div>
+        {{end}}
+      </div>
 
-        <div class="acourse-block-big _flex-span _font-sub _font-size-normal">
-          {{.ShortDesc}}
+      <div class="acourse-block-big _flex-span _font-sub _font-size-normal">
+        {{.ShortDesc}}
+      </div>
+      <div class="_flex-row _main-space-between">
+        <div class="course-student _color-secondary">
+          <i class="fa fa-user"></i>&nbsp {{.EnrollCount}}
         </div>
-        <div class="_flex-row _main-space-between">
-          <div class="course-student _color-secondary">
-            <i class="fa fa-user"></i>&nbsp {{.EnrollCount}}
-          </div>
-          <div class="course-price">
-            {{if le .Price 0.0}}
-              <p class="_text-bold _no-margin">FREE</p>
-            {{else}}
-              <p class="_no-margin {{if .Option.Discount}}discount _text-thin _color-secondary{{else}}_text-bold{{end}}">
-                ฿ {{.Price | currency}}
-                {{if .Option.Discount}}
-                  <p class="_text-bold _no-margin">&nbsp฿ {{.Discount | currency}}</p>
-                {{end}}
-              </p>
-            {{end}}
-          </div>
+        <div class="course-price">
+          {{if le .Price 0.0}}
+            <p class="_text-bold _no-margin">FREE</p>
+          {{else}}
+            <p class="_no-margin {{if .Option.Discount}}discount _text-thin _color-secondary{{else}}_text-bold{{end}}">
+              ฿ {{.Price | currency}}
+              {{if .Option.Discount}}
+                <p class="_text-bold _no-margin">&nbsp฿ {{.Discount | currency}}</p>
+              {{end}}
+            </p>
+          {{end}}
         </div>
       </div>
     </div>
+  </div>
 {{end}}
 
 {{define "course-card-style"}}

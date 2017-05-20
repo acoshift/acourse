@@ -2,15 +2,15 @@
 <div id="sign-in" class="page-pattern">
   <div class="signin-container grid-container _flex-column _main-center _cross-center">
 
-    <div>
+    <div class="acourse-block-big">
       <img class="logo" src="/~/img/acourse-logo.png">
     </div>
 
     <div class="_flex-row _self-strech">
-      <div class="acourse-card col-xs-12 col-sm-12">
+      <div class="acourse-card acourse-segment col-xs-12 col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3">
         <form method="POST">
           <div class="_flex-column">
-            <div class="segment-header _font-sub _color-accent _align-center">
+            <div class="acourse-header _font-sub _color-accent _align-center">
               Sign In
             </div>
             <input name="X" type="hidden" value="{{xsrf "signin"}}">
@@ -23,7 +23,7 @@
               <input name="Password" type="password">
             </div>
             <div class="_flex-row _main-center">
-              <button class="button-default" type="submit">
+              <button class="acourse-button -default acourse-block-big" type="submit">
                 Sign In
               </button>
             </div>
@@ -36,14 +36,14 @@
                 </ul>
               </div>
             {{end}}
-            <p class="_align-center block">Or Sign in with</p>
-            <div class="_flex-row _main-center block">
+            <p class="_align-center acourse-block">Or Sign in with</p>
+            <div class="_flex-row _main-center acourse-block">
               <a class="link" href="/openid?p=google.com"><i class="fa fa-google"></i>Google</a>
               <a class="link" href="/openid?p=facebook.com"><i class="fa fa-facebook"></i>Facebook</a>
               <a class="link" href="/openid?p=github.com"><i class="fa fa-github"></i>Github</a>
               <a class="link" href="/signup"><i class="fa fa-envelope"></i>Email</a>
             </div>
-            <div class="_flex-row _main-center block">
+            <div class="_flex-row _main-center acourse-block">
               <a class="_color-accent" href="/">กลับสู่หน้าแรก</a>
             </div>
           </div>
@@ -64,23 +64,12 @@
     z-index: 1;
   }
   #sign-in .link {
-    padding: 16px;
+    padding: 12px 16px;
     text-align: center;
     color: gray;
   }
   #sign-in .link i {
     margin-right: 4px;
-  }
-  .button-default {
-    width: 100%;
-    margin-bottom: 16px;
-  }
-  .logo {
-    margin-bottom: 16px;
-  }
-  .signin-container .row {
-    width: 100%;
-    padding: 12px;
   }
 </style>
 {{end}}

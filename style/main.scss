@@ -9,7 +9,7 @@
 @import 'acourse-card';
 @import 'acourse-segment';
 @import 'acourse-label';
-// @import 'acourse-color';
+@import 'acourse-typo';
 
 body, html {
   -webkit-font-smoothing: antialiased;
@@ -63,11 +63,6 @@ label {
 
 button {
   border: none;
-}
-
-.segment-header {
-  font-size: 32px;
-  margin-bottom: 32px;
 }
 .page-pattern {
   position: relative;
