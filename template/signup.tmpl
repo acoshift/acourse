@@ -1,24 +1,9 @@
-<!-- <form method="POST">
-  <input name="xsrf" value="{{xsrf "signin"}}">
-  <label>Username or Email:</label>
-  <input name="user">
-  <label>Password</label>
-  <input name="password">
-  <button type="submit">Sign Up</button>
-</form>
-<p>Or Sign up with</p>
-<button>Google</button>
-<button>Facebook</button>
-<button>Github</button>
-<a href="/signin">Back to sign in</a>
-<a href="/">Back</a> -->
-
 {{define "auth-body"}}
 <div id="sign-up" class="page-pattern">
   <div class="grid-container _flex-column _main-center _cross-center">
 
     <div class="acourse-block-big">
-      <img class="logo" src="/~/img/acourse-logo.png">
+      <a href="/"><img class="logo" src="/~/img/acourse-logo.png"></a>
     </div>
 
     <div class="_flex-row _self-strech">
@@ -55,8 +40,14 @@
                 </ul>
               </div>
             {{end}}
+            <p class="_align-center acourse-block">or sign up with</p>
             <div class="_flex-row _main-center acourse-block">
-              <a class="_color-accent" href="/">กลับสู่หน้าแรก</a>
+              <a class="link" href="/openid?p=google.com"><i class="fa fa-google"></i>Google</a>
+              <a class="link" href="/openid?p=facebook.com"><i class="fa fa-facebook"></i>Facebook</a>
+              <a class="link" href="/openid?p=github.com"><i class="fa fa-github"></i>Github</a>
+            </div>
+            <div class="_flex-row _main-center acourse-block">
+               have an account?&nbsp <a class="_color-accent" href="/signin">Sign in</a>
             </div>
           </div>
         </form>
@@ -83,6 +74,8 @@
   #sign-up .link i {
     margin-right: 4px;
   }
+  #sign-up .acourse-card {
+    min-height: 482px;
+  }
 </style>
 {{end}}
-

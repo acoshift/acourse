@@ -3,7 +3,7 @@
   <div class="grid-container _flex-column _main-center _cross-center">
 
     <div class="acourse-block-big">
-      <img class="logo" src="/~/img/acourse-logo.png">
+      <a href="/"><img class="logo" src="/~/img/acourse-logo.png"></a>
     </div>
 
     <div class="_flex-row _self-strech">
@@ -36,16 +36,16 @@
                 </ul>
               </div>
             {{end}}
-            <p class="_align-center acourse-block">Or Sign in with</p>
+            <p class="_align-center acourse-block">or sign in with</p>
             <div class="_flex-row _main-center acourse-block">
               <a class="link" href="/openid?p=google.com"><i class="fa fa-google"></i>Google</a>
               <a class="link" href="/openid?p=facebook.com"><i class="fa fa-facebook"></i>Facebook</a>
               <a class="link" href="/openid?p=github.com"><i class="fa fa-github"></i>Github</a>
               <a class="link" href="/signup"><i class="fa fa-envelope"></i>Email</a>
             </div>
-            <div class="_flex-row _main-center acourse-block">
-              <a class="_color-accent" href="/">กลับสู่หน้าแรก</a>
-            </div>
+            <!--<div class="_flex-row _main-center acourse-block">
+              <a class="_color-accent" href="/">Home</a>
+            </div>-->
           </div>
         </form>
       </div>
@@ -70,6 +70,9 @@
   }
   #sign-in .link i {
     margin-right: 4px;
+  }
+  #sign-in .acourse-card {
+    min-height: 382px;
   }
 </style>
 {{end}}
