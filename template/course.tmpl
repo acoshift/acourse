@@ -141,7 +141,20 @@
       border-right: 1px solid #e3e7ef;
     }
     #course .playlist-container {
-      height: 431px;
+      height: 300px;
+    }
+    @media only screen and (max-width: 767px) {
+      #course {
+        padding: 0;
+        margin: 0;
+      }
+      #course > .grid-container {
+        margin: 0;
+        width: 100%;
+      }
+      #course .acourse-card {
+        margin: 0px;
+      }
     }
     @media only screen and (min-width: 768px) {
       #course .course-image {
