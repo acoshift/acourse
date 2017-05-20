@@ -158,6 +158,7 @@ func (x *Course) Save() error {
 	if err != nil {
 		return err
 	}
+	defer tx.Rollback()
 	var start *time.Time
 	if !x.Start.IsZero() {
 		start = &x.Start
@@ -167,8 +168,14 @@ func (x *Course) Save() error {
 		url = &x.URL
 	}
 
-	tx.Exec(querySaveCourse, x.ID, x.UserID, x.Title, x.ShortDesc, x.Desc, x.Image, start, url, x.Type, x.Price, x.Discount, x.EnrollDetail)
-	tx.Exec(querySaveCourseOption, x.ID, x.Option.Public, x.Option.Enroll, x.Option.Attend, x.Option.Assignment, x.Option.Discount)
+	_, err = tx.Exec(querySaveCourse, x.ID, x.UserID, x.Title, x.ShortDesc, x.Desc, x.Image, start, url, x.Type, x.Price, x.Discount, x.EnrollDetail)
+	if err != nil {
+		return err
+	}
+	_, err = tx.Exec(querySaveCourseOption, x.ID, x.Option.Public, x.Option.Enroll, x.Option.Attend, x.Option.Assignment, x.Option.Discount)
+	if err != nil {
+		return err
+	}
 	// TODO: save contents
 	err = tx.Commit()
 	if err != nil {
@@ -211,6 +218,7 @@ func GetCourses(courseIDs []int64) ([]*Course, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 	for rows.Next() {
 		var x Course
 		err = scanCourse(rows.Scan, &x)
@@ -218,6 +226,9 @@ func GetCourses(courseIDs []int64) ([]*Course, error) {
 			return nil, err
 		}
 		xs = append(xs, &x)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
 	}
 	return xs, nil
 }
@@ -233,6 +244,7 @@ func GetCourse(courseID int64) (*Course, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 	for rows.Next() {
 		var content CourseContent
 		err = scanCourseContent(rows.Scan, &content)
@@ -240,6 +252,9 @@ func GetCourse(courseID int64) (*Course, error) {
 			return nil, err
 		}
 		x.Contents = append(x.Contents, &content)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
 	}
 	return &x, nil
 }
@@ -255,6 +270,7 @@ func GetCourseFromURL(url string) (*Course, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 	for rows.Next() {
 		var content CourseContent
 		err = scanCourseContent(rows.Scan, &content)
@@ -262,6 +278,9 @@ func GetCourseFromURL(url string) (*Course, error) {
 			return nil, err
 		}
 		x.Contents = append(x.Contents, &content)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
 	}
 	return &x, nil
 }
@@ -283,6 +302,7 @@ func ListCourses() ([]*Course, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 	for rows.Next() {
 		var x Course
 		err = scanCourse(rows.Scan, &x)
@@ -290,6 +310,9 @@ func ListCourses() ([]*Course, error) {
 			return nil, err
 		}
 		xs = append(xs, &x)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
 	}
 	return xs, nil
 }
@@ -302,6 +325,7 @@ func ListPublicCourses() ([]*Course, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 	for rows.Next() {
 		var x Course
 		err = scanCourse(rows.Scan, &x)
@@ -309,6 +333,9 @@ func ListPublicCourses() ([]*Course, error) {
 			return nil, err
 		}
 		xs = append(xs, &x)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
 	}
 	return xs, nil
 }
@@ -321,6 +348,7 @@ func ListOwnCourses(userID string) ([]*Course, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 	for rows.Next() {
 		var x Course
 		err = scanCourse(rows.Scan, &x)
@@ -328,6 +356,9 @@ func ListOwnCourses(userID string) ([]*Course, error) {
 			return nil, err
 		}
 		xs = append(xs, &x)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
 	}
 	return xs, nil
 }
@@ -340,6 +371,7 @@ func ListEnrolledCourses(userID string) ([]*Course, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 	for rows.Next() {
 		var x Course
 		err = scanCourse(rows.Scan, &x)
@@ -347,6 +379,9 @@ func ListEnrolledCourses(userID string) ([]*Course, error) {
 			return nil, err
 		}
 		xs = append(xs, &x)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
 	}
 	return xs, nil
 }

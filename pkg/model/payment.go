@@ -115,6 +115,7 @@ func (x *Payment) Accept() error {
 	if err != nil {
 		return err
 	}
+	defer tx.Rollback()
 	_, err = tx.Exec(queryChangePaymentStatus, x.ID, Accepted)
 	if err != nil {
 		return err
@@ -171,6 +172,7 @@ func GetPayments(paymentIDs []int64) ([]*Payment, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 	for rows.Next() {
 		var x Payment
 		err = scanPayment(rows.Scan, &x)
@@ -178,6 +180,9 @@ func GetPayments(paymentIDs []int64) ([]*Payment, error) {
 			return nil, err
 		}
 		xs = append(xs, &x)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
 	}
 	return xs, nil
 }
@@ -200,6 +205,7 @@ func ListHistoryPayments() ([]*Payment, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 	for rows.Next() {
 		var x Payment
 		err = scanPayment(rows.Scan, &x)
@@ -207,6 +213,9 @@ func ListHistoryPayments() ([]*Payment, error) {
 			return nil, err
 		}
 		xs = append(xs, &x)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
 	}
 	return xs, nil
 }
@@ -219,6 +228,7 @@ func ListPendingPayments() ([]*Payment, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 	for rows.Next() {
 		var x Payment
 		err = scanPayment(rows.Scan, &x)
@@ -226,6 +236,9 @@ func ListPendingPayments() ([]*Payment, error) {
 			return nil, err
 		}
 		xs = append(xs, &x)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
 	}
 	return xs, nil
 }

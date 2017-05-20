@@ -100,6 +100,7 @@ func GetUsers(userIDs []string) ([]*User, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 	for rows.Next() {
 		var x User
 		err = scanUser(rows.Scan, &x)
@@ -107,6 +108,9 @@ func GetUsers(userIDs []string) ([]*User, error) {
 			return nil, err
 		}
 		xs = append(xs, &x)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
 	}
 	return xs, nil
 }
@@ -139,6 +143,7 @@ func ListUsers() ([]*User, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 	for rows.Next() {
 		var x User
 		err = scanUser(rows.Scan, &x)
@@ -146,6 +151,9 @@ func ListUsers() ([]*User, error) {
 			return nil, err
 		}
 		xs = append(xs, &x)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
 	}
 	return xs, nil
 }
