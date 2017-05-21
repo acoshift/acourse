@@ -1,8 +1,12 @@
 {{define "user-profile"}}
-<div id="profile-card">
+<div id="profile-card" class="_flex-column _cross-center">
   <!-- <h3>{{.Username}}</h3> -->
-  <img src="{{.Image}}" onerror="this.src = 'https://storage.googleapis.com/acourse/static/29721bb4-382d-48a3-bdde-95affac3c6bc.svg'">
-  <div class="profile-card-name">{{.Name}}</div>
+  <img
+    class="acourse-block-big _round"
+    width="50%"
+    src="{{.Image}}" 
+    onerror="this.src = 'https://storage.googleapis.com/acourse/static/29721bb4-382d-48a3-bdde-95affac3c6bc.svg'">
+  <h3>{{.Name}}</h3>
   <p class="profile-card-detail">{{.AboutMe}}</p>
 </div>
 {{end}}

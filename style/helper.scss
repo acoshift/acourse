@@ -74,6 +74,7 @@
 ._main-space-between {
   justify-content: space-between;
 }
+
 // Position
 ._align-center {
   text-align: center !important;
@@ -118,4 +119,9 @@
 ._font-size-big {
   font-size: 17px;
   line-height: 24px;
+}
+
+// MISC
+._round {
+  border-radius: 50%;
 }

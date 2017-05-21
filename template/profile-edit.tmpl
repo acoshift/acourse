@@ -1,33 +1,38 @@
 {{define "app-body"}}
 <div id="profile-edit" class="page-pattern">
-   <div class="grid-container">
-    <div class="profile-edit-container col-xs-12 col-md-6 col-md-offset-3">
-      <div class="segment-header thin-text _color-accent">
+  <div class="grid-container">
+    
+    <div class="acourse-card acourse-segment col-xs-12 col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3">
+      
+      <div class="acourse-header _color-accent _align-center">
         Edit Profile
       </div>
+      
       <form method="POST" enctype="multipart/form-data">
         <input type="hidden" name="X" value="{{xsrf "profile-edit"}}">
-        <div class="input-field _flex-row _cross-center">
+        <div class="input-field _flex-column">
           <label>Image</label>
           <input id="Image" type="file" name="Image">
         </div>
-        <div class="input-field _flex-row _cross-center">
+        <div class="input-field _flex-column">
           <label>Username</label>
           <input class="error" name="Username" value="{{.Flash.Get "Username"}}">
         </div>
-        <div class="input-field _flex-row _cross-center">
+        <div class="input-field _flex-column">
           <label>Name</label>
           <input name="Name" value="{{.Flash.Get "Name"}}">
         </div>
-        <div class="input-field _flex-row _cross-center">
+        <div class="input-field _flex-column">
           <label>About Me</label>
           <input name="AboutMe" value="{{.Flash.Get "AboutMe"}}">
         </div>
-        <div class="_flex-row _main-center">
-          <button class="button-default" type="submit">
+
+        <div class="acourse-block-big _flex-row _main-center">
+          <button class="acourse-button -default" type="submit">
             Save Profile
           </button>
         </div>
+
         {{if .Flash.Errors}}
           <div class="acourse-message -error">
             <ul>
@@ -37,6 +42,7 @@
             </ul>
           </div>
         {{end}}
+
       </form>
       <div class="_flex-row _main-center">
         <a class="_color-accent" href="/profile">กลับสู่หน้าโปลไฟล์</a>
@@ -54,26 +60,8 @@
   #profile-edit {
     z-index: 1;
     padding-top: 48px;
-    padding-bottom: 48px;
-  }
-  .profile-edit-container {
-    border-radius: 5px;
-    background-color: white;
-    padding: 16px;
-    box-shadow: 2px 4px 8px 0px rgba(46,61,73,0.2);
-  }
-  #profile-edit .input-field label {
-    flex-basis: 100px;
-    text-align: right;
-    margin-right: 12px;
-  }
-  #profile-edit .input-field input {
-    flex: 1;
-    margin-right: 16px;
-  }
-  #profile-edit .button-default {
-    width: 100%;
-    margin-bottom: 16px;
+    padding-bottom: 32px;
+    min-height: calc(100vh - 242px);
   }
 </style>
 {{end}}
