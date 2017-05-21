@@ -4,25 +4,27 @@
 Payments
 <table>
   <thead>
-    <th>ID</th>
-    <!--<th>Image</th>
-    <th>Username</th>
-    <th>Name</th>
-    <th>Email</th>-->
-    <th>Status</th>
-    <th>Created At</th>
-    <th>Updated At</th>
-    <th>Actions</th>
+    <tr>
+      <th>ID</th>
+      <!--<th>Image</th>
+      <th>Username</th>
+      <th>Name</th>
+      <th>Email</th>-->
+      <th>Status</th>
+      <th>Created At</th>
+      <th>Updated At</th>
+      <th>Actions</th>
+    </tr>
   </thead>
   <tbody>
     {{range .Payments}}
       <tr>
-        <td>{{.ID}}</td>
+        <td data-column="ID">{{.ID}}</td>
         <!--<td><img src="{{.Image}}"></td>
         <td></td>
         <td></td>
         <td></td>-->
-        <td>
+        <td data-column="Status">
           {{if eq .Status pending}}
             Pending
           {{else if eq .Status accepted}}
@@ -31,12 +33,14 @@ Payments
             Rejected
           {{end}}
         </td>
-        <td>{{.CreatedAt | dateTime}}</td>
-        <td>{{.UpdatedAt | dateTime}}</td>
-        <td>
+        <td data-column="Created At">{{.CreatedAt | dateTime}}</td>
+        <td data-column="Updated At">{{.UpdatedAt | dateTime}}</td>
+        <td data-column="Actions">
           {{if eq .Status pending}}
             <a href="?id={{.ID}}&action=accept&x={{$xsrfAccept}}">Accept</a>
             <a href="?id={{.ID}}&action=reject&x={{$xsrfReject}}">Reject</a>
+          {{else}}
+            <div>-</div>
           {{end}}
         </td>
       </tr>
