@@ -114,19 +114,26 @@
 ._color-accent {
   color: $text-color-accent;
 }
-._font-size-normal {
-  font-size: 15px;
-  line-height: 22px;
-}
 ._font-size-small {
   font-size: 13px;
   line-height: 21px;
+}
+._font-size-normal {
+  font-size: 15px;
+  line-height: 22px;
 }
 ._font-size-big {
   font-size: 17px;
   line-height: 24px;
 }
-
+._font-size-bigger {
+  font-size: 24px;
+  line-height: 28px;
+}
+._font-size-biggest {
+  font-size: 32px;
+  line-height: 38px;
+}
 // MISC
 ._round {
   border-radius: 50%;

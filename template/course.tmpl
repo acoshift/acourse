@@ -92,20 +92,19 @@
                   </div>
                 </div>
               </div>
-              <div class="acourse-block">
-                <div class="col-xs-12">
-                  <div class="acourse-header">Lecturer</div>
-                  <div class="course-detail _font-sub">
-                    ข้อมูลผู้สอน
-                  </div>
-                </div>
-              </div>
             </div>
 
-            <div class="course-sidebar _flex-column">
+            <div class="course-sidebar _flex-column acourse-block-big">
               <div class="acourse-segment">
                 <div class="col-xs-12">
-                  <div class="acourse-button -positive _text-bold">Enroll Now</div>
+                  <div class="acourse-block _text-bold _font-size-bigger">฿ 1,300</div>
+                  <div class="acourse-button -positive _text-bold acourse-block">Enroll Now</div>
+                  <div>
+                    <div class="acourse-header">Lecturer</div>
+                    <div class="course-detail _font-sub">
+                      ข้อมูลผู้สอน
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -196,6 +195,10 @@
 
     #course .course-sidebar {
       flex-basis: 300px;
+      padding: 0 8px;
+    }
+    #course .course-sidebar > .acourse-segment{
+      background-color: #eff8ff;
     }
     @media only screen and (max-width: 767px) {
       #course {
@@ -216,8 +219,14 @@
       #course .course-sidebar  {
         flex-basis: initial;
       }
-      #course .acourse-segment {
-        padding: 0px;
+      #course .acourse-card > .acourse-segment {
+        padding-left: 0px;
+        padding-right: 0px;
+        padding-top: 0px;
+      }
+      #course .course-sidebar > .acourse-segment {
+        padding-left: 0px;
+        padding-right: 0px;
       }
     }
     @media only screen and (min-width: 768px) {
