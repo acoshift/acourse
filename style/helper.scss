@@ -65,6 +65,12 @@
 ._cross-start {
   align-items: flex-start;
 }
+._main-end {
+  justify-content: flex-end;
+}
+._cross-end {
+  align-items: flex-end;
+}
 ._main-center {
   justify-content: center;
 }
