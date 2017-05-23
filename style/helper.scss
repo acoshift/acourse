@@ -100,10 +100,10 @@
   font-family: $secondary-fontface;
 }
 ._text-bold {
-  font-weight: 700;
+  font-weight: 700 !important;
 }
 ._text-thin {
-  font-weight: 100;
+  font-weight: 100 !important;
 }
 ._color-main {
   color: $text-color-main;

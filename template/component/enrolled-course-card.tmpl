@@ -1,25 +1,27 @@
 {{define "enrolled-course-card"}}
-  <div id="course-card" class="acourse-card -hover-rise _flex-column">
-    <a class="course-cover" href="/course/{{.URL}}">
-      <img src="{{.Image}}" width="100%">
-    </a>
-    <div class="course-detail acourse-segment _flex-column _flex-span _main-start">
-    
-    <h4>{{.Title}}</h4>
-    
-    <div class="acourse-block">
-      <div class="acourse-label {{.Type | courseType}} _text-thin">{{.Type | courseType}}</div>
-      {{if eq .Type live}}
-        <div class="live-date _text-thin _font-size-small">Start at {{.Start | date}}</div>
-      {{end}}
-    </div>
+  <a href="/course/{{.URL}}">
+    <div id="course-card" class="acourse-card -hover-rise _flex-column">
+      <a class="course-cover" href="/course/{{.URL}}">
+        <img src="{{.Image}}" width="100%">
+      </a>
+      <div class="course-detail acourse-segment _flex-column _flex-span _main-start">
+      
+        <h4>{{.Title}}</h4>
+        
+        <div class="acourse-block">
+          <div class="acourse-label {{.Type | courseType}} _text-bold">{{.Type | courseType}}</div>
+          {{if eq .Type live}}
+            <div class="live-date _font-size-small">Start at {{.Start | date}}</div>
+          {{end}}
+        </div>
 
-    <div class="acourse-block-big _flex-span _font-sub _font-size-normal">
-      {{.ShortDesc}}
-    </div>
+        <div class="acourse-block-big _flex-span _font-sub _font-size-normal">
+          {{.ShortDesc}}
+        </div>
 
-  </div>
-</div>
+      </div>
+    </div>
+  </a>
 {{end}}
 
 {{define "enrolled-course-card-style"}}

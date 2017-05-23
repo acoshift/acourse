@@ -7,17 +7,17 @@
       <div class="_flex-row _flex-span _main-end">
       {{if me}}
         <!--<p>{{me.Username}}</p>-->
-        <a class="_flex-row _cross-center _font-sub _text-bold" href="/profile">Profile</a>
+        <a class="link _flex-row _cross-center _font-sub" href="/profile">Profile</a>
         {{if me.Role.Admin}}
-          <a class="_flex-row _cross-center _font-sub _text-bold" href="/admin/users">Users</a>
-          <a class="_flex-row _cross-center _font-sub _text-bold" href="/admin/courses">Courses</a>
-          <a class="_flex-row _cross-center _font-sub _text-bold" href="/admin/payments/pending">Pending Payments</a>
-          <a class="_flex-row _cross-center_font-sub _text-bold" href="/admin/payments/history">History Payments</a>
+          <a class="link _flex-row _cross-center _font-sub" href="/admin/users">Users</a>
+          <a class="link _flex-row _cross-center _font-sub" href="/admin/courses">Courses</a>
+          <a class="link _flex-row _cross-center _font-sub" href="/admin/payments/pending">Pending Payments</a>
+          <a class="link _flex-row _cross-center _font-sub" href="/admin/payments/history">History Payments</a>
         {{end}}
-        <a class="_flex-row _cross-center _font-sub _text-bold" href="/signout">Sign Out</a>
+        <a class="link _flex-row _cross-center _font-sub" href="/signout">Sign Out</a>
       {{else}}
-        <a class="_flex-row _cross-center  _font-sub _text-bold" href="/signin">Sign In</a>
-        <div class="acourse-button -default">Register</div>
+        <a class="link _flex-row _cross-center _font-sub" href="/signin">Sign In</a>
+        <a href="/signup"><div class="acourse-button -default _font-sub">Register</div></a>
       {{end}}
       </div>
     </div>
@@ -94,10 +94,10 @@
       background-color: white;
       transition: top 0.2s ease-in-out;
     }
-    #navbar a {
+    #navbar .link {
       color: #474f57;
       text-decoration: none;
-      padding: 0 32px;
+      padding: 0 16px;
     }
     #navbar.nav-up {
       top: -82px;

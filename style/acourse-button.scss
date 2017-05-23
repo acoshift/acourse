@@ -7,6 +7,7 @@
   font-weight: 400;
   text-align: center;
   transition: all 0.3s ease 0s;
+  width: initial;
 }
 .acourse-button {
   @extend .acourse-button;
@@ -18,6 +19,10 @@
   }
   &.-default {
     background-color: #02b7e9;
+    color: #fff;
+  }
+  &.-positive {
+    background-color: #09dc8e;
     color: #fff;
   }
 }
