@@ -13,7 +13,60 @@
             MENU MENU MENU
           </div>
           -->
+          {{if .Enrolled}}
+          <div class="acourse-block-big">
+            <div class="col-xs-12 row">
+              <div class="video-player-container _no-padding col-xs-12 col-md-8">
+                <div class="video-player">
+                  {{range $i, $x := .Course.Contents}}
+                    {{if .VideoID}}
+                      <div class="video" v-if="selectedItem === {{$i}}">
+                        <iframe
+                          width="560" height="315"
+                          frameborder="0" scrolling="no" allowfullscreen
+                          src="https://www.youtube.com/embed/{{.VideoID}}?rel=0&hd=1">
+                        </iframe>
+                      </div>
+                      {{.Desc | html}}
+                    {{end}}
+                  {{end}}
+                </div>
+              </div>
 
+              <div class="playlist-container _no-padding _flex-column col-xs-12 col-md-4">
+                <div class="playlist-title _text-bold">
+                  {{ len .Course.Contents }} Video
+                </div>
+                <div class="playlist-list">
+                {{range $i, $x := .Course.Contents}}
+                  <div 
+                    class="list"
+                    :class="{active: selectedItem === {{$i}} }"
+                    @click="selectedItem = {{$i}}">
+                    {{incr $i}}. {{.Title}}
+                  </div>
+                {{end}}
+                </div>
+              </div>
+
+              <div class="course-resourse">
+                {{range $i, $x := .Course.Contents}}
+                  <!-- TODO -->
+                  {{if .DownloadURL}}
+                    <a
+                      v-if="selectedItem === {{$i}}"
+                      href="{{.DownloadURL}}"
+                      target="_blank">
+                      Download
+                    </a>
+                  {{end}}
+                {{end}}
+              </div>
+
+            </div>
+          </div>
+          {{end}}
+          
           <div class="course-content _flex-row">
 
             <div class="_flex-column _flex-span">
@@ -29,60 +82,6 @@
                   {{end}}
                 </div>
               </div>
-
-              {{if .Enrolled}}
-              <div class="acourse-block-big">
-                <div class="col-xs-12 row">
-                  <div class="video-player-container _no-padding col-xs-12 col-md-8">
-                    <div class="video-player">
-                      {{range $i, $x := .Course.Contents}}
-                        {{if .VideoID}}
-                          <div class="video" v-if="selectedItem === {{$i}}">
-                            <iframe
-                              width="560" height="315"
-                              frameborder="0" scrolling="no" allowfullscreen
-                              src="https://www.youtube.com/embed/{{.VideoID}}?rel=0&hd=1">
-                            </iframe>
-                          </div>
-                          {{.Desc | html}}
-                        {{end}}
-                      {{end}}
-                    </div>
-                  </div>
-
-                  <div class="playlist-container _no-padding _flex-column col-xs-12 col-md-4">
-                    <div class="playlist-title _text-bold">
-                      {{ len .Course.Contents }} Video
-                    </div>
-                    <div class="playlist-list">
-                    {{range $i, $x := .Course.Contents}}
-                      <div 
-                        class="list"
-                        :class="{active: selectedItem === {{$i}} }"
-                        @click="selectedItem = {{$i}}">
-                        {{incr $i}}. {{.Title}}
-                      </div>
-                    {{end}}
-                    </div>
-                  </div>
-
-                  <div class="course-resourse">
-                    {{range $i, $x := .Course.Contents}}
-                      <!-- TODO -->
-                      {{if .DownloadURL}}
-                        <a
-                          v-if="selectedItem === {{$i}}"
-                          href="{{.DownloadURL}}"
-                          target="_blank">
-                          Download
-                        </a>
-                      {{end}}
-                    {{end}}
-                  </div>
-
-                </div>
-              </div>
-              {{end}}
 
               <div class="acourse-block">
                 <div class="col-xs-12">
