@@ -6,7 +6,7 @@ table {
 }
 /* Zebra striping */
 tr:nth-of-type(odd) { 
-	background: #f7f7f7; 
+	background: white; 
 }
 tr:nth-of-type(even) { 
 	background: white; 
@@ -45,16 +45,13 @@ and also iPads specifically.
 		left: -9999px;
 	}
 	tr { 
-    border: 1px solid #ccc;
-    // border-bottom: 0px;
-    // &:last-child {
-    //   border-bottom: 1px;
-    // }
+    border: 1px solid #d4d4d4;
+    margin-bottom: 8px;
   }
 	td { 
 		/* Behave  like a "row" */
 		border: none;
-		border-bottom: 1px solid #eee; 
+		border-bottom: 1px solid #e3e6e8; 
 		position: relative;
 		padding-left: 50%;
     word-break: break-all;
