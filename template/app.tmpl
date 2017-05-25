@@ -2,21 +2,22 @@
   <div id="navbar" class="navbar-color">
     <div class="navbar-container grid-container">
       <a href="/">
-        <img class="logo" src="/~/img/acourse-logo-white.png">
+        <img class="logo" src="/~/img/acourse-logo-w-2.svg" height="45">
       </a>
-      <div>
+      <div class="_flex-row _flex-span _main-end">
       {{if me}}
-        <p>{{me.Username}}</p>
-        <a href="/profile">Profile</a>
+        <!--<p>{{me.Username}}</p>-->
+        <a class="link _flex-row _cross-center _font-sub" href="/profile">Profile</a>
         {{if me.Role.Admin}}
-          <a href="/admin/users">Users</a>
-          <a href="/admin/courses">Courses</a>
-          <a href="/admin/payments/pending">Pending Payments</a>
-          <a href="/admin/payments/history">History Payments</a>
+          <a class="link _flex-row _cross-center _font-sub" href="/admin/users">Users</a>
+          <a class="link _flex-row _cross-center _font-sub" href="/admin/courses">Courses</a>
+          <a class="link _flex-row _cross-center _font-sub" href="/admin/payments/pending">Pending Payments</a>
+          <a class="link _flex-row _cross-center _font-sub" href="/admin/payments/history">History Payments</a>
         {{end}}
-        <a href="/signout">Sign Out</a>
+        <a class="link _flex-row _cross-center _font-sub" href="/signout">Sign Out</a>
       {{else}}
-        <a href="/signin">Sign In</a>
+        <a class="link _flex-row _cross-center _font-sub" href="/signin">Sign In</a>
+        <a href="/signup"><div class="acourse-button -default _font-sub">Register</div></a>
       {{end}}
       </div>
     </div>
@@ -84,6 +85,35 @@
     }
     .app-container {
       padding-top: 80px;
+    }
+    #navbar {
+      position: fixed;
+      z-index: 100;
+      width: 100%;
+      top: 0;
+      background-color: white;
+      transition: top 0.2s ease-in-out;
+    }
+    #navbar .link {
+      color: #474f57;
+      text-decoration: none;
+      padding: 0 16px;
+    }
+    #navbar.nav-up {
+      top: -82px;
+    }
+    #navbar.nav-down {
+      border-bottom: 1px solid #e7eef1;
+    }
+    #navbar > .navbar-container {
+      position: relative;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 80px;
+    }
+    #navbar .acourse-button {
+      flex-basis: 100px;
     }
   </style>
 {{end}}

@@ -18,7 +18,7 @@
   background: $main-background-color;
 }
 
-// Size
+// Box-Size
 ._full-width {
   width: 100% !important;
 }
@@ -28,6 +28,12 @@
 ._full {
   @extend ._full-width;
   @extend ._full-height;
+}
+._no-padding {
+  padding: 0 !important;
+}
+._no-margin {
+  margin: 0 !important;
 }
 
 // Display
@@ -41,17 +47,29 @@
   @extend ._flex;
   flex-direction: column;
 }
+._flex-span {
+  flex: 1;
+}
 ._main-strech {
   justify-content: stretch;
 }
 ._cross-strech {
   align-items: stretch;
 }
+._self-strech {
+  align-self: stretch;
+}
 ._main-start {
   justify-content: flex-start;
 }
 ._cross-start {
   align-items: flex-start;
+}
+._main-end {
+  justify-content: flex-end;
+}
+._cross-end {
+  align-items: flex-end;
 }
 ._main-center {
   justify-content: center;
@@ -62,6 +80,7 @@
 ._main-space-between {
   justify-content: space-between;
 }
+
 // Position
 ._align-center {
   text-align: center !important;
@@ -81,10 +100,10 @@
   font-family: $secondary-fontface;
 }
 ._text-bold {
-  font-weight: 700;
+  font-weight: 700 !important;
 }
 ._text-thin {
-  font-weight: 100;
+  font-weight: 100 !important;
 }
 ._color-main {
   color: $text-color-main;
@@ -94,4 +113,28 @@
 }
 ._color-accent {
   color: $text-color-accent;
+}
+._font-size-small {
+  font-size: 13px;
+  line-height: 21px;
+}
+._font-size-normal {
+  font-size: 15px;
+  line-height: 22px;
+}
+._font-size-big {
+  font-size: 17px;
+  line-height: 24px;
+}
+._font-size-bigger {
+  font-size: 24px;
+  line-height: 28px;
+}
+._font-size-biggest {
+  font-size: 32px;
+  line-height: 38px;
+}
+// MISC
+._round {
+  border-radius: 50%;
 }

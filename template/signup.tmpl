@@ -1,16 +1,81 @@
 {{define "auth-body"}}
-<form method="POST">
-  <input name="xsrf" value="{{xsrf "signin"}}">
-  <label>Username or Email:</label>
-  <input name="user">
-  <label>Password</label>
-  <input name="password">
-  <button type="submit">Sign Up</button>
-</form>
-<p>Or Sign up with</p>
-<button>Google</button>
-<button>Facebook</button>
-<button>Github</button>
-<a href="/signin">Back to sign in</a>
-<a href="/">Back</a>
+<div id="sign-up" class="page-pattern">
+  <div class="grid-container _flex-column _main-center _cross-center">
+
+    <div class="acourse-block-big">
+      <a href="/"><img class="logo" src="/~/img/acourse-logo.png"></a>
+    </div>
+
+    <div class="_flex-row _self-strech">
+      <div class="acourse-card acourse-segment col-xs-12 col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3">
+        <form method="POST">
+          <div class="_flex-column">
+            <div class="acourse-header _font-sub _color-accent _align-center">
+              Sign Up
+            </div>
+            <input name="xsrf" type="hidden" value="{{xsrf "signup"}}">
+            <div class="input-field _flex-column">
+              <label>Username or Email:</label>
+              <input name="user" type="text" placeholder="Username or Email">
+            </div>
+            <div class="input-field _flex-column">
+              <label>Password</label>
+              <input name="Password" type="password" placeholder="Password">
+            </div>
+            <div class="input-field _flex-column">
+              <label>Confirm Password</label>
+              <input name="Password" type="password" placeholder="Confirm Password">
+            </div>
+            <div class="_flex-row _main-center">
+              <button class="acourse-button -default acourse-block-big" type="submit">
+                Sign Up
+              </button>
+            </div>
+            {{if .Flash.Errors}}
+              <div class="acourse-message -error">
+                <ul>
+                  {{range .Flash.Errors}}
+                    <li>{{.}}</li>
+                  {{end}}
+                </ul>
+              </div>
+            {{end}}
+            <p class="_align-center acourse-block">or sign up with</p>
+            <div class="_flex-row _main-center acourse-block">
+              <a class="link" href="/openid?p=google.com"><i class="fa fa-google"></i>Google</a>
+              <a class="link" href="/openid?p=facebook.com"><i class="fa fa-facebook"></i>Facebook</a>
+              <a class="link" href="/openid?p=github.com"><i class="fa fa-github"></i>Github</a>
+            </div>
+            <div class="_flex-row _main-center acourse-block">
+               have an account?&nbsp <a class="_color-accent" href="/signin">Sign in</a>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{{end}}
+
+{{define "auth-style"}}
+<style>
+  #sign-up {
+    display: flex;
+    width: 100%;
+    height: 100vh;
+    position: relative;
+    z-index: 1;
+  }
+  #sign-up .link {
+    padding: 12px 16px;
+    text-align: center;
+    color: gray;
+  }
+  #sign-up .link i {
+    margin-right: 4px;
+  }
+  #sign-up .acourse-card {
+    min-height: 482px;
+  }
+</style>
 {{end}}

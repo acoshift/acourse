@@ -1,39 +1,67 @@
 @import 'normalize';
 @import 'config';
 @import 'helper';
-@import 'grid';
-@import 'navbar';
-@import 'button';
-@import 'input';
-@import 'message';
-body {
+@import 'acourse-grid';
+@import 'acourse-button';
+@import 'acourse-input';
+@import 'acourse-message';
+@import 'acourse-card';
+@import 'acourse-segment';
+@import 'acourse-label';
+@import 'acourse-typo';
+@import 'acourse-table';
+
+body, html {
   -webkit-font-smoothing: antialiased;
 }
 div {
   color: $text-color-main;
   font-family: $main-fontface;
-  font-weight: 300;
 }
+
 p {
   color: $text-color-main;
   font-family: $secondary-fontface;
   font-weight: 400;
   margin: 0;
 }
+
 a {
   text-decoration: none;
 }
+
 p, h1, h2, h3, h4, h5, h6, div {
   -webkit-font-smoothing: antialiased;
 }
+p, h1, h2, h3, h4, h5, h6, {
+  margin: 0 0 8px 0;
+  padding: 0;
+}
+h1 {
+
+}
+h2 {
+  font-size: 28px;
+}
+h3 {
+  font-size: 22px;
+}
+h4 {
+  font-size: 17px;
+}
+h5 {
+
+}
+h6 {
+
+}
+
 label {
   font-weight: 600;
 }
+
 button {
   border: none;
-}
-.navbar-color {
-  background: $navbar-color;
 }
 
 .page-pattern {
