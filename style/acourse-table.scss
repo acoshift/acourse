@@ -2,7 +2,7 @@
 
 table { 
 	width: 100%;
-	border-collapse: collapse; 
+	border-collapse: collapse;
 }
 /* Zebra striping */
 tr:nth-of-type(odd) { 
@@ -75,7 +75,7 @@ and also iPads specifically.
 		/* Label the data */
 		content: attr(data-column);
 
-		color: #000;
+		color: $color-black;
 		font-weight: bold;
 	}
 

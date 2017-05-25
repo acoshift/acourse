@@ -3,16 +3,11 @@
   border-radius: 4px;
   cursor: pointer;
   user-select: none;
-  color: #fff;
   font-weight: 600;
   text-align: center;
   transition: all 0.3s ease 0s;
   width: initial;
-  box-shadow: 8px 10px 20px 0 rgba(46,61,73,0.15);
   padding: 12px 16px;
-  &:hover {
-    box-shadow: 2px 4px 8px 0 rgba(46,61,73,0.2);
-  }
   &:focus {
     outline: none;
   }
@@ -20,7 +15,11 @@
 
 .acourse-button {
   @extend .acourse-button-base;
-
+  box-shadow: 8px 10px 20px 0 rgba(46,61,73,0.15);
+  &:hover {
+    box-shadow: 2px 4px 8px 0 rgba(46,61,73,0.2);
+  }
+  color: #fff;
   &.-primary {
     background-color: $color-primary;
   }
@@ -36,6 +35,51 @@
   &.-info {
     background-color: $color-info;
   }
+}
+
+.acourse-button-outline {
+  @extend .acourse-button-base;
+  box-shadow: 8px 10px 20px 0 rgba(46,61,73,0.15);
+  &:hover {
+    box-shadow: 2px 4px 8px 0 rgba(46,61,73,0.2);
+  }
+  border: 1px solid #d6d6d6;
+  background-color: white;
+  &.-primary {
+    color: $color-primary;
+    border: 1px solid $color-primary;
+  }
+  &.-positive {
+    color: $color-positive;
+    border: 1px solid $color-positive;
+  }
+  &.-warning {
+    color: $color-warning;
+    border: 1px solid $color-warning;
+  }
+  &.-negative {
+    color: $color-negative;
+    border: 1px solid $color-negative;
+  }
+  &.-info {
+    color: $color-info;
+    border: 1px solid $color-info;
+  }
+  // &.-primary {
+  //   border: 1px solid $color-primary;
+  // }
+  // &.-positive {
+  //   border: 1px solid $color-positive;
+  // }
+  // &.-warning {
+  //   border: 1px solid $color-warning;
+  // }
+  // &.-negative {
+  //   border: 1px solid $color-negative;
+  // }
+  // &.-info {
+  //   border: 1px solid $color-info;
+  // }
 }
 
 .acourse-button-secondary {
