@@ -1,24 +1,83 @@
 // Use rscss System na
 @import './config.scss';
 
-// Color
-._main-text-color {
-  color: $color-main;
-}
-._accent-text-color {
-  color: $color-accent;
-}
-._main-bg-color {
+/*===============================
+  Background Color
+===============================*/
+._bg-color-main {
   background-color: $color-main;
 }
-._accent-bg-color {
+._bg-color-sub {
+  background-color: $color-sub;
+}
+._bg-color-accent {
   background-color: $color-accent;
 }
-._main-background-color {
-  background: $main-background-color;
+._bg-color-primary {
+  background: $color-primary;
+}
+._bg-color-positive {
+  background-color: $color-positive;
+}
+._bg-color-warning {
+  background-color: $color-warning;
+}
+._bg-color-info {
+  background-color: $color-info;
+}
+._bg-color-black {
+  background-color: $color-black;
+}
+._bg-color-dark {
+  background-color: $color-dark;
+}
+._bg-color-light {
+  background-color: $color-light;
+}
+._bg-color-base {
+  background: $color-base;
 }
 
-// Box-Size
+/*===============================
+  Color
+===============================*/
+._color-main {
+  color: $color-main;
+}
+._color-sub {
+  color: $color-sub;
+}
+._color-accent {
+  color: $color-accent;
+}
+._color-primary {
+  background: $color-primary;
+}
+._color-positive {
+  color: $color-positive;
+}
+._color-warning {
+  color: $color-warning;
+}
+._color-info {
+  color: $color-info;
+}
+._color-black {
+  color: $color-black;
+}
+._color-dark {
+  color: $color-dark;
+}
+._color-light {
+  color: $color-light;
+}
+._color-base {
+  background: $color-base;
+}
+
+/*===============================
+  Box Model
+===============================*/
 ._full-width {
   width: 100% !important;
 }
@@ -36,7 +95,9 @@
   margin: 0 !important;
 }
 
-// Display
+/*===============================
+  Flex Display
+===============================*/
 ._flex {
   display: flex !important;
 }
@@ -81,7 +142,9 @@
   justify-content: space-between;
 }
 
-// Position
+/*===============================
+  Align
+===============================*/
 ._align-center {
   text-align: center !important;
 }
@@ -92,28 +155,23 @@
   text-align: right !important;
 }
 
-// Text 
+
+/*===============================
+  Font
+===============================*/
 ._font-main {
   font-family: $main-fontface;
 }
 ._font-sub {
   font-family: $secondary-fontface;
 }
-._text-bold {
+._font-bold {
   font-weight: 700 !important;
 }
-._text-thin {
+._font-thin {
   font-weight: 100 !important;
 }
-._color-main {
-  color: $text-color-main;
-}
-._color-secondary {
-  color: $text-color-secondary;
-}
-._color-accent {
-  color: $text-color-accent;
-}
+
 ._font-size-small {
   font-size: 13px;
   line-height: 21px;
@@ -134,7 +192,10 @@
   font-size: 32px;
   line-height: 38px;
 }
-// MISC
+
+/*===============================
+  MISC.
+===============================*/
 ._round {
   border-radius: 50%;
 }

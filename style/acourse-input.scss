@@ -43,7 +43,7 @@ input[type='url'].error,
 input:not([type]).error,
 textarea.error,
 select.error {
-  border-color: $color-error;
+  border-color: $color-negative;
   outline: 0;
 }
 

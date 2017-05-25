@@ -1,34 +1,43 @@
 @import 'config';
-button:focus {
-  outline: none;
-}
-
-.acourse-button {
+.acourse-button-base {
   border-radius: 4px;
   cursor: pointer;
   user-select: none;
-  font-weight: 400;
+  color: #fff;
+  font-weight: 600;
   text-align: center;
   transition: all 0.3s ease 0s;
   width: initial;
-}
-.acourse-button {
-  @extend .acourse-button;
-  background-color: #02b7e9;
   box-shadow: 8px 10px 20px 0 rgba(46,61,73,0.15);
   padding: 12px 16px;
   &:hover {
     box-shadow: 2px 4px 8px 0 rgba(46,61,73,0.2);
   }
-  &.-default {
-    background-color: #02b7e9;
-    color: #fff;
-  }
-  &.-positive {
-    background-color: #09dc8e;
-    color: #fff;
+  &:focus {
+    outline: none;
   }
 }
+
+.acourse-button {
+  @extend .acourse-button-base;
+
+  &.-primary {
+    background-color: $color-primary;
+  }
+  &.-positive {
+    background-color: $color-positive;
+  }
+  &.-warning {
+    background-color: $color-warning;
+  }
+  &.-negative {
+    background-color: $color-negative;
+  }
+  &.-info {
+    background-color: $color-info;
+  }
+}
+
 .acourse-button-secondary {
   color: #494d55;
   background-color: #fff;

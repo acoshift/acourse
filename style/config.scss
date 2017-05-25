@@ -1,15 +1,23 @@
+//Primary Color
 $color-main: #02b7e9;
-$color-accent: blue;
-$color-error: #d9534f;
+$color-sub: #2F8DFA;
 
-$text-color-main: #525c65;
-$text-color-secondary: #999999;
-$text-color-accent: #02b7e9;
+//Accent Color
+$color-accent: #ff3860;
 
-$navbar-color: linear-gradient(-135deg,#03b9a8 0,#3ea9d0 100%);
+//Semantic Color
+$color-primary: #02b7e9;
+$color-negative: #ff3860;
+$color-positive: #23d160;
+$color-warning: #ffdd57;
+$color-info: #3273dc;
 
-$main-background-color: #f4f5f7;
+//Neutral Color
+$color-black: #363636;
+$color-dark: #565656;
+$color-light: whitesmoke;
+
+$color-base: #f4f5f7;
 
 $main-fontface: 'Source Sans Pro', sans-serif;
-// $main-fontface: 'Kanit', sans-serif; 
 $secondary-fontface: 'Open Sans', san-serif;

@@ -1,22 +1,23 @@
+@import 'config';
+
 table { 
 	width: 100%;
 	border-collapse: collapse; 
 }
-
 /* Zebra striping */
 tr:nth-of-type(odd) { 
 	background: #eee; 
 }
 
 th { 
-	background: #3498db; 
+	background: $color-sub; 
 	color: white; 
 	font-weight: bold; 
 }
 
 td, th { 
 	padding: 10px; 
-	border: 1px solid #ccc; 
+	border: 1px solid gray; 
 	text-align: left; 
 	font-size: 18px;
 }

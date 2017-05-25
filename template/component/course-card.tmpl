@@ -1,7 +1,7 @@
 {{define "course-card"}}
   <a href="/course/{{.Link}}">
     <div id="course-card" class="acourse-card -hover-rise _flex-column">
-      <a class="course-cover" href="/course/{{.Link}}">
+      <a class="course-cover placeholder" href="/course/{{.Link}}">
         <img src="{{.Image}}" width="100%">
       </a>
       <div class="course-detail acourse-segment _flex-column _flex-span _main-start">
@@ -9,7 +9,7 @@
         <h4>{{.Title}}</h4>
 
         <div class="acourse-block">
-          <div class="acourse-label {{.Type | courseType}} _text-bold">{{.Type | courseType}}</div>
+          <div class="acourse-label {{.Type | courseType}} _font-bold">{{.Type | courseType}}</div>
           {{if eq .Type live}}
             <div class="live-date _font-size-small">Start at {{.Start.Time | date}}</div>
           {{end}}
@@ -19,17 +19,17 @@
           {{.ShortDesc}}
         </div>
         <div class="_flex-row _main-space-between">
-          <div class="course-student _color-secondary">
+          <div class="course-student _color-dark">
             <i class="fa fa-user"></i>&nbsp {{.EnrollCount}}
           </div>
           <div class="course-price">
             {{if le .Price 0.0}}
-              <p class="_text-bold _no-margin">FREE</p>
+              <p class="_font-bold _no-margin">FREE</p>
             {{else}}
-              <p class="_no-margin {{if .Option.Discount}}discount _text-thin _color-secondary{{else}}_text-bold{{end}}">
+              <p class="_no-margin {{if .Option.Discount}}discount _font-thin _color-dark{{else}}_font-bold{{end}}">
                 ฿ {{.Price | currency}}
                 {{if .Option.Discount}}
-                  <p class="_text-bold _no-margin">&nbsp฿ {{.Discount | currency}}</p>
+                  <p class="_font-bold _no-margin">&nbsp฿ {{.Discount | currency}}</p>
                 {{end}}
               </p>
             {{end}}
@@ -68,6 +68,10 @@
     text-decoration: line-through;
     font-weight: 100;
     font-size: 13px;
+  }
+  #course-card .placeholder {
+    background-image: url(/~/img/placeholder-img.svg);
+    background-size: cover;
   }
 </style>
 {{end}}
