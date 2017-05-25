@@ -1,0 +1,45 @@
+package redis
+
+import (
+	"time"
+
+	"github.com/acoshift/session"
+	"github.com/garyburd/redigo/redis"
+)
+
+// New creates new redis store
+func New(pool *redis.Pool, prefix string) session.Store {
+	return &redisStore{pool, prefix}
+}
+
+type redisStore struct {
+	pool   *redis.Pool
+	prefix string
+}
+
+func (s *redisStore) Get(key string) ([]byte, error) {
+	c := s.pool.Get()
+	defer c.Close()
+	return redis.Bytes(c.Do("GET", s.prefix+key))
+}
+
+func (s *redisStore) Set(key string, value []byte, ttl time.Duration) error {
+	c := s.pool.Get()
+	defer c.Close()
+	_, err := c.Do("SETEX", s.prefix+key, int64(ttl/time.Second), value)
+	return err
+}
+
+func (s *redisStore) Del(key string) error {
+	c := s.pool.Get()
+	defer c.Close()
+	_, err := c.Do("DEL", s.prefix+key)
+	return err
+}
+
+func (s *redisStore) Exp(key string, ttl time.Duration) error {
+	c := s.pool.Get()
+	defer c.Close()
+	_, err := c.Do("EXPIRE", s.prefix+key, int64(ttl/time.Second))
+	return err
+}
