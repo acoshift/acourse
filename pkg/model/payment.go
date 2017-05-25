@@ -19,7 +19,7 @@ type Payment struct {
 	Status        int
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
-	At            time.Time
+	At            pq.NullTime
 
 	User   User
 	Course Course
@@ -34,7 +34,7 @@ const (
 
 const (
 	selectPayment = `
-		SELECT
+		select
 			payments.id,
 			payments.image,
 			payments.price,
@@ -46,45 +46,46 @@ const (
 			payments.at,
 			users.id,
 			users.username,
+			users.email,
 			users.image,
 			courses.id,
 			courses.title,
 			courses.image,
 			courses.url
-		FROM payments
-			LEFT JOIN users ON payments.user_id = users.id
-			LEFT JOIN courses ON payments.course_id = courses.id
+		from payments
+			left join users on payments.user_id = users.id
+			left join courses on payments.course_id = courses.id
 	`
 
 	queryGetPayment = selectPayment + `
-		WHERE payments.id = $1;
+		where payments.id = $1
 	`
 
 	queryGetPayments = selectPayment + `
-		WHERE payments.id = ANY($1);
+		where payments.id = any($1)
 	`
 
 	queryListPayments = selectPayment + `
-		ORDER BY payments.created_at DESC;
+		order by payments.created_at desc
 	`
 
 	queryListPaymentsWithStatus = selectPayment + `
-		WHERE payments.status = ANY($1)
-		ORDER BY payments.created_at DESC;
+		where payments.status = any($1)
+		order by payments.created_at desc
 	`
 
 	querySavePayment = `
-		INSERT INTO payments
+		insert into payments
 			(user_id, course_id, image, price, original_price, code, status, updated_at)
-		VALUES
+		values
 			($1, $2, $3, $4, $5, $6, $7, now())
-		RETURNING id;
+		returning id
 	`
 
 	queryChangePaymentStatus = `
-		UPDATE payments
-		SET status = $2
-		WHERE id = $1;
+		update payments
+		set status = $2
+		where id = $1
 	`
 )
 
@@ -115,6 +116,7 @@ func (x *Payment) Accept() error {
 	if err != nil {
 		return err
 	}
+	defer tx.Rollback()
 	_, err = tx.Exec(queryChangePaymentStatus, x.ID, Accepted)
 	if err != nil {
 		return err
@@ -143,21 +145,13 @@ func (x *Payment) Reject() error {
 }
 
 func scanPayment(scan scanFunc, x *Payment) error {
-	var at *time.Time
-	var courseURL *string
 	err := scan(&x.ID,
-		&x.Image, &x.Price, &x.OriginalPrice, &x.Code, &x.Status, &x.CreatedAt, &x.UpdatedAt, &at,
-		&x.User.ID, &x.User.Username, &x.User.Image,
-		&x.Course.ID, &x.Course.Title, &x.Course.Image, &courseURL,
+		&x.Image, &x.Price, &x.OriginalPrice, &x.Code, &x.Status, &x.CreatedAt, &x.UpdatedAt, &x.At,
+		&x.User.ID, &x.User.Username, &x.User.Email, &x.User.Image,
+		&x.Course.ID, &x.Course.Title, &x.Course.Image, &x.Course.URL,
 	)
 	if err != nil {
 		return err
-	}
-	if at != nil {
-		x.At = *at
-	}
-	if courseURL != nil {
-		x.Course.URL = *courseURL
 	}
 	x.UserID = x.User.ID
 	x.CourseID = x.Course.ID
@@ -171,6 +165,7 @@ func GetPayments(paymentIDs []int64) ([]*Payment, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 	for rows.Next() {
 		var x Payment
 		err = scanPayment(rows.Scan, &x)
@@ -178,6 +173,9 @@ func GetPayments(paymentIDs []int64) ([]*Payment, error) {
 			return nil, err
 		}
 		xs = append(xs, &x)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
 	}
 	return xs, nil
 }
@@ -200,6 +198,7 @@ func ListHistoryPayments() ([]*Payment, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 	for rows.Next() {
 		var x Payment
 		err = scanPayment(rows.Scan, &x)
@@ -207,6 +206,9 @@ func ListHistoryPayments() ([]*Payment, error) {
 			return nil, err
 		}
 		xs = append(xs, &x)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
 	}
 	return xs, nil
 }
@@ -219,6 +221,7 @@ func ListPendingPayments() ([]*Payment, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 	for rows.Next() {
 		var x Payment
 		err = scanPayment(rows.Scan, &x)
@@ -226,6 +229,9 @@ func ListPendingPayments() ([]*Payment, error) {
 			return nil, err
 		}
 		xs = append(xs, &x)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
 	}
 	return xs, nil
 }

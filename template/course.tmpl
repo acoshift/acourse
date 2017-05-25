@@ -6,7 +6,7 @@
         <div class="">
           <img class="course-img" src="{{.Course.Image}}" width="100%">
         </div>
-        
+
         <div class="acourse-segment">
           <!--
           IF OWNER
@@ -47,7 +47,7 @@
                 </div>
                 <div class="playlist-list">
                 {{range $i, $x := .Course.Contents}}
-                  <div 
+                  <div
                     class="list"
                     :class="{active: selectedItem === {{$i}} }"
                     @click="selectedItem = {{$i}}">
@@ -75,7 +75,7 @@
             </div>
           </div>
           {{end}}
-          
+
           <div class="course-content _flex-row">
 
             <div class="_flex-column _flex-span">
@@ -86,8 +86,8 @@
 
               <div class="acourse-block-bigger">
                 <div class="col-xs-12">
-                  {{if not .Course.Start.IsZero}}
-                    <div class="acourse-label -red">Start At: {{.Course.Start | date}}</div>
+                  {{if not .Course.Start.Time.IsZero}}
+                    <div class="acourse-label -red">Start At: {{.Course.Start.Time | date}}</div>
                   {{end}}
                 </div>
               </div>

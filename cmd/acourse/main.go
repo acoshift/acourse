@@ -30,6 +30,7 @@ func main() {
 
 	// init email
 	err := app.Init(app.Config{
+		ProjectID:      config.String("project_id"),
 		ServiceAccount: config.Bytes("service_account"),
 		BucketName:     config.String("bucket"),
 		EmailServer:    config.String("email_server"),

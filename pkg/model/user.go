@@ -14,7 +14,7 @@ type User struct {
 	Role      UserRole
 	Username  string
 	Name      string
-	Email     string
+	Email     sql.NullString
 	AboutMe   string
 	Image     string
 	CreatedAt time.Time
@@ -23,13 +23,13 @@ type User struct {
 
 // UserRole type
 type UserRole struct {
-	Admin      bool
-	Instructor bool
+	Admin      sql.NullBool
+	Instructor sql.NullBool
 }
 
 const (
 	selectUsers = `
-		SELECT
+		select
 			users.id,
 			users.name,
 			users.username,
@@ -40,31 +40,31 @@ const (
 			users.updated_at,
 			roles.admin,
 			roles.instructor
-		FROM users
-			LEFT JOIN roles ON users.id = roles.user_id
+		from users
+			left join roles on users.id = roles.user_id
 	`
 
 	queryGetUsers = selectUsers + `
-		WHERE users.id = ANY($1);
+		where users.id = any($1)
 	`
 
 	queryGetUser = selectUsers + `
-		WHERE users.id = $1;
+		where users.id = $1
 	`
 
 	queryGetUserFromUsername = selectUsers + `
-		WHERE users.username = $1;
+		where users.username = $1
 	`
 
 	queryListUsers = selectUsers + `
-		ORDER BY users.created_at DESC;
+		order by users.created_at desc
 	`
 
 	querySaveUser = `
-		UPSERT INTO users
+		upsert into users
 			(id, name, username, about_me, image, updated_at)
-		VALUES
-			($1, $2, $3, $4, $5, now());
+		values
+			($1, $2, $3, $4, $5, now())
 	`
 )
 
@@ -81,15 +81,10 @@ func (x *User) Save() error {
 }
 
 func scanUser(scan scanFunc, x *User) error {
-	var admin, instructor sql.NullBool
-	var email sql.NullString
-	err := scan(&x.ID, &x.Name, &x.Username, &email, &x.AboutMe, &x.Image, &x.CreatedAt, &x.UpdatedAt, &admin, &instructor)
+	err := scan(&x.ID, &x.Name, &x.Username, &x.Email, &x.AboutMe, &x.Image, &x.CreatedAt, &x.UpdatedAt, &x.Role.Admin, &x.Role.Instructor)
 	if err != nil {
 		return err
 	}
-	x.Email = email.String
-	x.Role.Admin = admin.Bool
-	x.Role.Instructor = instructor.Bool
 	return nil
 }
 
@@ -100,6 +95,7 @@ func GetUsers(userIDs []string) ([]*User, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 	for rows.Next() {
 		var x User
 		err = scanUser(rows.Scan, &x)
@@ -107,6 +103,9 @@ func GetUsers(userIDs []string) ([]*User, error) {
 			return nil, err
 		}
 		xs = append(xs, &x)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
 	}
 	return xs, nil
 }
@@ -139,6 +138,7 @@ func ListUsers() ([]*User, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 	for rows.Next() {
 		var x User
 		err = scanUser(rows.Scan, &x)
@@ -146,6 +146,9 @@ func ListUsers() ([]*User, error) {
 			return nil, err
 		}
 		xs = append(xs, &x)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
 	}
 	return xs, nil
 }

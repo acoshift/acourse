@@ -18,7 +18,10 @@ Coures
         <td>{{.ID}}</td>
         <td><img src="{{.Image}}"></td>
         <td>{{.Title}}</td>
-        <td>{{.UserID}}</td>
+        <td>
+          <img src="{{.Owner.Image}}"></td>
+          {{.Owner.Username}}
+        </td>
         <td>{{.Type | courseType}}</td>
         <td>
           {{.Price | currency}}

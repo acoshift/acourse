@@ -103,7 +103,7 @@ func onlyAdmin(h http.Handler) http.Handler {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
-		if !u.Role.Admin {
+		if !u.Role.Admin.Bool {
 			http.Error(w, "Forbidden", http.StatusForbidden)
 			return
 		}
