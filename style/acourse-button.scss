@@ -1,7 +1,10 @@
 @import 'config';
+button:focus {
+  outline: none;
+}
+
 .acourse-button {
   border-radius: 4px;
-  width: 100%;
   cursor: pointer;
   user-select: none;
   font-weight: 400;
