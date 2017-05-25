@@ -288,8 +288,9 @@ func getCourse(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	if len(course.URL) == 0 {
-		course.URL = strconv.FormatInt(course.ID, 10)
+	if course.URL == nil || len(*course.URL) == 0 {
+		p := strconv.FormatInt(course.ID, 10)
+		course.URL = &p
 	}
 	enrolled := false
 	if user != nil {
@@ -303,7 +304,7 @@ func getCourse(w http.ResponseWriter, r *http.Request) {
 	page.Title = course.Title + " | " + page.Title
 	page.Desc = course.ShortDesc
 	page.Image = course.Image
-	page.URL = baseURL + "/course/" + url.PathEscape(course.URL)
+	page.URL = baseURL + "/course/" + url.PathEscape(*course.URL)
 	view.Course(w, r, &view.CourseData{
 		Page:     &page,
 		Course:   course,

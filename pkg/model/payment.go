@@ -19,7 +19,7 @@ type Payment struct {
 	Status        int
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
-	At            time.Time
+	At            *time.Time
 
 	User   User
 	Course Course
@@ -144,21 +144,13 @@ func (x *Payment) Reject() error {
 }
 
 func scanPayment(scan scanFunc, x *Payment) error {
-	var at *time.Time
-	var courseURL *string
 	err := scan(&x.ID,
-		&x.Image, &x.Price, &x.OriginalPrice, &x.Code, &x.Status, &x.CreatedAt, &x.UpdatedAt, &at,
+		&x.Image, &x.Price, &x.OriginalPrice, &x.Code, &x.Status, &x.CreatedAt, &x.UpdatedAt, &x.At,
 		&x.User.ID, &x.User.Username, &x.User.Image,
-		&x.Course.ID, &x.Course.Title, &x.Course.Image, &courseURL,
+		&x.Course.ID, &x.Course.Title, &x.Course.Image, &x.Course.URL,
 	)
 	if err != nil {
 		return err
-	}
-	if at != nil {
-		x.At = *at
-	}
-	if courseURL != nil {
-		x.Course.URL = *courseURL
 	}
 	x.UserID = x.User.ID
 	x.CourseID = x.Course.ID

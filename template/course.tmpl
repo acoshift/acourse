@@ -2,7 +2,7 @@
   <div id="course" class="page-pattern">
     <div class="grid-container">
       <div class="course-detail-container col-xs-12 _flex-column">
-      
+
       {{if .Enrolled}}
         TRUE
         <div>
@@ -35,7 +35,7 @@
               </div>
               <div class="playlist">
               {{range $i, $x := .Course.Contents}}
-                <div 
+                <div
                   class="list"
                   :class="{active: selectedItem === {{$i}} }"
                   @click="selectedItem = {{$i}}">
@@ -51,7 +51,7 @@
       <h3>Course ${ 1+ 2 }> {{.Course.Title}}</h3>
       <img src="{{.Course.Image}}">
       <h4>Course Detail</h4>
-      {{if not .Course.Start.IsZero}}
+      {{if .Course.Start}}
       <p>Start At: {{.Course.Start | date}}</p>
       {{end}}
       <hr>
@@ -59,7 +59,7 @@
         {{.Course.Desc | html}}
       </div>
       <hr>
-      
+
       </div>
     </div>
   </div>

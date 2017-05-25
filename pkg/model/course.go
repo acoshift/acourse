@@ -18,8 +18,8 @@ type Course struct {
 	Desc          string
 	Image         string
 	UserID        string
-	Start         time.Time
-	URL           string // MUST not parsable to int
+	Start         *time.Time
+	URL           *string // MUST not parsable to int
 	Type          int
 	Price         float64
 	Discount      float64
@@ -117,10 +117,6 @@ const (
 		order by course_contents.i asc
 	`
 
-	queryListCourses = selectCourses + `
-		order by courses.created_at desc
-	`
-
 	queryListCoursesPublic = selectCourses + `
 		where course_options.public = true
 		order by courses.created_at desc
@@ -159,16 +155,13 @@ func (x *Course) Save() error {
 		return err
 	}
 	defer tx.Rollback()
-	var start *time.Time
-	if !x.Start.IsZero() {
-		start = &x.Start
-	}
-	var url *string
-	if len(x.URL) > 0 && x.URL != strconv.FormatInt(x.ID, 10) {
-		url = &x.URL
+	if x.URL != nil && len(*x.URL) > 0 && *x.URL != strconv.FormatInt(x.ID, 10) {
+		// url can be save
+	} else {
+		x.URL = nil
 	}
 
-	_, err = tx.Exec(querySaveCourse, x.ID, x.UserID, x.Title, x.ShortDesc, x.Desc, x.Image, start, url, x.Type, x.Price, x.Discount, x.EnrollDetail)
+	_, err = tx.Exec(querySaveCourse, x.ID, x.UserID, x.Title, x.ShortDesc, x.Desc, x.Image, x.Start, x.URL, x.Type, x.Price, x.Discount, x.EnrollDetail)
 	if err != nil {
 		return err
 	}
@@ -185,24 +178,17 @@ func (x *Course) Save() error {
 }
 
 func scanCourse(scan scanFunc, x *Course) error {
-	var start *time.Time
-	var u *string
 	err := scan(&x.ID,
-		&x.Title, &x.ShortDesc, &x.Desc, &x.Image, &start, &u, &x.Type, &x.Price, &x.Discount, &x.EnrollDetail,
+		&x.Title, &x.ShortDesc, &x.Desc, &x.Image, &x.Start, &x.URL, &x.Type, &x.Price, &x.Discount, &x.EnrollDetail,
 		&x.CreatedAt, &x.UpdatedAt,
 		&x.Option.Public, &x.Option.Enroll, &x.Option.Attend, &x.Option.Assignment, &x.Option.Discount,
 	)
 	if err != nil {
 		return err
 	}
-	if start != nil {
-		x.Start = *start
-	}
-	if u != nil {
-		x.URL = *u
-	}
-	if len(x.URL) == 0 {
-		x.URL = strconv.FormatInt(x.ID, 10)
+	if x.URL == nil {
+		p := strconv.FormatInt(x.ID, 10)
+		x.URL = &p
 	}
 	return nil
 }
@@ -294,20 +280,56 @@ func GetCourFromIDOrURL(v string) (*Course, error) {
 	return GetCourseFromURL(v)
 }
 
-// ListCourses lists courses
+// ListCourses lists all courses
 // TODO: pagination
 func ListCourses() ([]*Course, error) {
 	xs := make([]*Course, 0)
-	rows, err := db.Query(queryListCourses)
+	rows, err := db.Query(`
+		select
+			courses.id,
+			courses.title,
+			courses.short_desc,
+			courses.long_desc,
+			courses.image,
+			courses.start,
+			courses.url,
+			courses.type,
+			courses.price,
+			courses.discount,
+			courses.enroll_detail,
+			courses.created_at,
+			courses.updated_at,
+			course_options.public,
+			course_options.enroll,
+			course_options.attend,
+			course_options.assignment,
+			course_options.discount,
+			users.id,
+			users.username,
+			users.image
+		from courses
+			left join course_options on courses.id = course_options.id
+			left join users on courses.user_id = users.id
+			order by courses.created_at desc
+	`)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var x Course
-		err = scanCourse(rows.Scan, &x)
+		err := rows.Scan(&x.ID,
+			&x.Title, &x.ShortDesc, &x.Desc, &x.Image, &x.Start, &x.URL, &x.Type, &x.Price, &x.Discount, &x.EnrollDetail,
+			&x.CreatedAt, &x.UpdatedAt,
+			&x.Option.Public, &x.Option.Enroll, &x.Option.Attend, &x.Option.Assignment, &x.Option.Discount,
+			&x.Owner.ID, &x.Owner.Username, &x.Owner.Image,
+		)
 		if err != nil {
 			return nil, err
+		}
+		if x.URL == nil {
+			p := strconv.FormatInt(x.ID, 10)
+			x.URL = &p
 		}
 		xs = append(xs, &x)
 	}
