@@ -107,7 +107,7 @@ func postSignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID, err := SignInUser(email, pass)
+	userID, err := firAuth.VerifyPassword(ctx, email, pass)
 	if err != nil {
 		f.Add("Errors", err.Error())
 		back(w, r)
@@ -137,26 +137,30 @@ func getSignInProvider(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "provider not allowed", http.StatusBadRequest)
 		return
 	}
-	redirectURL, sessID, err := SignInUserProvider(p)
+
+	ctx := r.Context()
+	sessID := generateSessionID()
+	redirectURL, err := firAuth.CreateAuthURI(ctx, p, baseURL+"/openid/callback", sessID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	s := session.Get(r.Context())
+	s := session.Get(ctx)
 	s.Set(keyOpenIDSessionID, sessID)
 	http.Redirect(w, r, redirectURL, http.StatusSeeOther)
 }
 
 func getSignInCallback(w http.ResponseWriter, r *http.Request) {
-	s := session.Get(r.Context())
+	ctx := r.Context()
+	s := session.Get(ctx)
 	sessID, _ := s.Get(keyOpenIDSessionID).(string)
 	s.Del(keyOpenIDSessionID)
-	userID, err := SignInUserProviderCallback(r.RequestURI, sessID)
+	user, err := firAuth.VerifyAuthCallbackURI(ctx, baseURL+r.RequestURI, sessID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	s.Set(keyUserID, userID)
+	s.Set(keyUserID, user.UserID)
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 

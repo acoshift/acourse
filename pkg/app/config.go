@@ -5,19 +5,17 @@ import (
 	"database/sql"
 	"encoding/gob"
 
+	"cloud.google.com/go/storage"
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/acourse/pkg/view"
-
-	"cloud.google.com/go/storage"
+	"github.com/acoshift/go-firebase-admin"
 	"golang.org/x/oauth2/google"
-	"google.golang.org/api/identitytoolkit/v3"
 	"google.golang.org/api/option"
 	"gopkg.in/gomail.v2"
 )
 
 // app shared vars
 var (
-	gitClient    *identitytoolkit.RelyingpartyService
 	bucketName   string
 	bucketHandle *storage.BucketHandle
 	emailDialer  *gomail.Dialer
@@ -25,10 +23,12 @@ var (
 	baseURL      string
 	xsrfSecret   string
 	db           *sql.DB
+	firAuth      *admin.Auth
 )
 
 // Config use to init app package
 type Config struct {
+	ProjectID      string
 	ServiceAccount []byte
 	BucketName     string
 	EmailServer    string
@@ -50,17 +50,19 @@ func Init(config Config) error {
 	ctx := context.Background()
 
 	// init google cloud config
-	gconf, err := google.JWTConfigFromJSON(config.ServiceAccount, identitytoolkit.CloudPlatformScope, storage.ScopeReadWrite)
+	gconf, err := google.JWTConfigFromJSON(config.ServiceAccount, storage.ScopeReadWrite)
 	if err != nil {
 		return err
 	}
 
-	// init google identity toolkit
-	gitService, err := identitytoolkit.New(gconf.Client(ctx))
+	firApp, err := admin.InitializeApp(ctx, admin.AppOptions{
+		ProjectID:      config.ProjectID,
+		ServiceAccount: config.ServiceAccount,
+	})
 	if err != nil {
 		return err
 	}
-	gitClient = gitService.Relyingparty
+	firAuth = firApp.Auth()
 
 	// init google storage
 	storageClient, err := storage.NewClient(ctx, option.WithTokenSource(gconf.TokenSource(ctx)))

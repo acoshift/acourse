@@ -1,10 +1,17 @@
 package app
 
 import (
+	"crypto/rand"
 	"net/http"
 
 	"golang.org/x/net/xsrftoken"
 )
+
+func generateSessionID() string {
+	b := make([]byte, 24)
+	rand.Read(b)
+	return string(b)
+}
 
 func verifyXSRF(token, userID, action string) bool {
 	return xsrftoken.Valid(token, xsrfSecret, userID, action)
