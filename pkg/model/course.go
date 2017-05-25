@@ -1,6 +1,7 @@
 package model
 
 import (
+	"database/sql"
 	"strconv"
 	"time"
 
@@ -18,8 +19,8 @@ type Course struct {
 	Desc          string
 	Image         string
 	UserID        string
-	Start         *time.Time
-	URL           *string // MUST not parsable to int
+	Start         pq.NullTime
+	URL           sql.NullString // MUST not parsable to int
 	Type          int
 	Price         float64
 	Discount      float64
@@ -60,6 +61,14 @@ type CourseOption struct {
 	Attend     bool
 	Assignment bool
 	Discount   bool
+}
+
+// Link returns id if url is invalid
+func (x *Course) Link() string {
+	if !x.URL.Valid || len(x.URL.String) == 0 {
+		return strconv.FormatInt(x.ID, 10)
+	}
+	return x.URL.String
 }
 
 // EnrollCount returns count of enrolled user
@@ -155,10 +164,10 @@ func (x *Course) Save() error {
 		return err
 	}
 	defer tx.Rollback()
-	if x.URL != nil && len(*x.URL) > 0 && *x.URL != strconv.FormatInt(x.ID, 10) {
-		// url can be save
+	if len(x.URL.String) > 0 && x.URL.String != strconv.FormatInt(x.ID, 10) {
+		x.URL.Valid = true
 	} else {
-		x.URL = nil
+		x.URL.Valid = false
 	}
 
 	_, err = tx.Exec(querySaveCourse, x.ID, x.UserID, x.Title, x.ShortDesc, x.Desc, x.Image, x.Start, x.URL, x.Type, x.Price, x.Discount, x.EnrollDetail)
@@ -186,9 +195,8 @@ func scanCourse(scan scanFunc, x *Course) error {
 	if err != nil {
 		return err
 	}
-	if x.URL == nil {
-		p := strconv.FormatInt(x.ID, 10)
-		x.URL = &p
+	if len(x.URL.String) == 0 {
+		x.URL.String = strconv.FormatInt(x.ID, 10)
 	}
 	return nil
 }
@@ -326,10 +334,6 @@ func ListCourses() ([]*Course, error) {
 		)
 		if err != nil {
 			return nil, err
-		}
-		if x.URL == nil {
-			p := strconv.FormatInt(x.ID, 10)
-			x.URL = &p
 		}
 		xs = append(xs, &x)
 	}

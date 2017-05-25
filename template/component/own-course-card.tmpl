@@ -1,6 +1,6 @@
 {{define "own-course-card"}}
     <div id="course-card">
-      <a class="course-cover" href="/course/{{.URL}}">
+      <a class="course-cover" href="/course/{{.Link}}">
         <img src="{{.Image}}" width="100%">
       </a>
       <div class="course-detail">
@@ -8,7 +8,7 @@
         <div class="course-type-container">
           <div class="course-type {{.Type | courseType}} _text-thin">{{.Type | courseType}}</div>
           {{if eq .Type live}}
-            <div class="live-date">Start at {{.Start | date}}</div>
+            <div class="live-date">Start at {{.Start.Time | date}}</div>
           {{end}}
         </div>
         <p class="course-description">{{.ShortDesc}}</p>
@@ -99,7 +99,7 @@
     font-size: 13px;
   }
   #course-card .course-price .discounted-price {
-    
+
   }
   #course-card .course-bottom {
     display: flex;

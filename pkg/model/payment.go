@@ -19,7 +19,7 @@ type Payment struct {
 	Status        int
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
-	At            *time.Time
+	At            pq.NullTime
 
 	User   User
 	Course Course

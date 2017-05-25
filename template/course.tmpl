@@ -51,8 +51,8 @@
       <h3>Course ${ 1+ 2 }> {{.Course.Title}}</h3>
       <img src="{{.Course.Image}}">
       <h4>Course Detail</h4>
-      {{if .Course.Start}}
-      <p>Start At: {{.Course.Start | date}}</p>
+      {{if not .Course.Start.Time.IsZero}}
+      <p>Start At: {{.Course.Start.Time | date}}</p>
       {{end}}
       <hr>
       <div>
