@@ -46,6 +46,7 @@ const (
 			payments.at,
 			users.id,
 			users.username,
+			users.email,
 			users.image,
 			courses.id,
 			courses.title,
@@ -146,7 +147,7 @@ func (x *Payment) Reject() error {
 func scanPayment(scan scanFunc, x *Payment) error {
 	err := scan(&x.ID,
 		&x.Image, &x.Price, &x.OriginalPrice, &x.Code, &x.Status, &x.CreatedAt, &x.UpdatedAt, &x.At,
-		&x.User.ID, &x.User.Username, &x.User.Image,
+		&x.User.ID, &x.User.Username, &x.User.Email, &x.User.Image,
 		&x.Course.ID, &x.Course.Title, &x.Course.Image, &x.Course.URL,
 	)
 	if err != nil {

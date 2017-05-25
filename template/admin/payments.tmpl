@@ -11,9 +11,9 @@
         <thead>
           <tr>
             <th>ID</th>
-            <!--<th>Image</th>
-            <th>Username</th>
-            <th>Name</th>
+            <!--<th>Image</th>-->
+            <th>User</th>
+            <!--<th>Name</th>
             <th>Email</th>-->
             <th>Status</th>
             <th>Created At</th>
@@ -25,9 +25,15 @@
           {{range .Payments}}
             <tr>
               <td data-column="ID">{{.ID}}</td>
-              <!--<td><img src="{{.Image}}"></td>
-              <td></td>
-              <td></td>
+              <!--<td><img src="{{.Image}}"></td>-->
+              <td>
+                <img src="{{.User.Image}}">
+                <span>
+                  {{.User.Username}}<br>
+                  {{.User.Email.String}}
+                </span>
+              </td>
+              <!--<td></td>
               <td></td>-->
               <td data-column="Status">
                 {{if eq .Status pending}}
@@ -61,7 +67,7 @@
 {{define "app-style"}}
 <style>
   #payment {
-    padding-top: 32px;    
+    padding-top: 32px;
   }
 </style>
 {{end}}

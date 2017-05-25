@@ -14,7 +14,7 @@ type User struct {
 	Role      UserRole
 	Username  string
 	Name      string
-	Email     string
+	Email     sql.NullString
 	AboutMe   string
 	Image     string
 	CreatedAt time.Time
@@ -23,8 +23,8 @@ type User struct {
 
 // UserRole type
 type UserRole struct {
-	Admin      bool
-	Instructor bool
+	Admin      sql.NullBool
+	Instructor sql.NullBool
 }
 
 const (
@@ -81,15 +81,10 @@ func (x *User) Save() error {
 }
 
 func scanUser(scan scanFunc, x *User) error {
-	var admin, instructor sql.NullBool
-	var email sql.NullString
-	err := scan(&x.ID, &x.Name, &x.Username, &email, &x.AboutMe, &x.Image, &x.CreatedAt, &x.UpdatedAt, &admin, &instructor)
+	err := scan(&x.ID, &x.Name, &x.Username, &x.Email, &x.AboutMe, &x.Image, &x.CreatedAt, &x.UpdatedAt, &x.Role.Admin, &x.Role.Instructor)
 	if err != nil {
 		return err
 	}
-	x.Email = email.String
-	x.Role.Admin = admin.Bool
-	x.Role.Instructor = instructor.Bool
 	return nil
 }
 
