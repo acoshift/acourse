@@ -1,23 +1,28 @@
-//Primary Color
+// Primary Color
 $color-main: #02b7e9;
 $color-sub: #2F8DFA;
 
-//Accent Color
+// Accent Color
 $color-accent: #ff3860;
 
-//Semantic Color
+// Semantic Color
 $color-primary: #02b7e9;
 $color-negative: #ff3860;
 $color-positive: #23d160;
 $color-warning: #ffdd57;
 $color-info: #3273dc;
 
-//Neutral Color
+// Neutral Color
 $color-black: #363636;
 $color-dark: #565656;
 $color-light: whitesmoke;
-
 $color-base: #f4f5f7;
 
+// Font
 $main-fontface: 'Source Sans Pro', sans-serif;
 $secondary-fontface: 'Open Sans', san-serif;
+
+// Breakpoint
+$lg: 1170px;
+$md: 970px;
+$sm: 768px;

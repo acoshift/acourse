@@ -6,7 +6,10 @@ table {
 }
 /* Zebra striping */
 tr:nth-of-type(odd) { 
-	background: #eee; 
+	background: #f7f7f7; 
+}
+tr:nth-of-type(even) { 
+	background: white; 
 }
 
 th { 
@@ -17,7 +20,7 @@ th {
 
 td, th { 
 	padding: 10px; 
-	border: 1px solid gray; 
+	border: 1px solid #e3e6e8; 
 	text-align: left; 
 	font-size: 18px;
 }
@@ -27,34 +30,40 @@ Max width before this PARTICULAR table gets nasty
 This query will take effect for any screen smaller than 760px
 and also iPads specifically.
 */
-@media 
-only screen and (max-width: 760px),
-(min-device-width: 768px) and (max-device-width: 1024px)  {
-
+@media only screen and (max-width: $md)  {
 	table { 
-	  	width: 100%; 
+    width: 100%; 
 	}
-
 	/* Force table to not be like tables anymore */
 	table, thead, tbody, th, td, tr { 
 		display: block; 
 	}
-	
 	/* Hide table headers (but not display: none;, for accessibility) */
 	thead tr { 
 		position: absolute;
 		top: -9999px;
 		left: -9999px;
 	}
-	
-	tr { border: 1px solid #ccc; }
-	
+	tr { 
+    border: 1px solid #ccc;
+    // border-bottom: 0px;
+    // &:last-child {
+    //   border-bottom: 1px;
+    // }
+  }
 	td { 
 		/* Behave  like a "row" */
 		border: none;
 		border-bottom: 1px solid #eee; 
 		position: relative;
-		padding-left: 50%; 
+		padding-left: 50%;
+    word-break: break-all;
+    &:last-child {
+      border-bottom: 0px;
+    }
+    span {
+      word-break: break-all;
+    }
 	}
 
 	td:before { 
