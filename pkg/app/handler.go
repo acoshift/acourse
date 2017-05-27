@@ -349,14 +349,35 @@ func postCourseEdit(w http.ResponseWriter, r *http.Request) {
 }
 
 func getAdminUsers(w http.ResponseWriter, r *http.Request) {
-	users, err := model.ListUsers()
+	page, _ := strconv.ParseInt(r.FormValue("page"), 10, 64)
+	if page <= 0 {
+		page = 1
+	}
+	limit := int64(30)
+
+	cnt, err := model.CountUsers()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	offset := (page - 1) * limit
+	for offset > cnt {
+		page--
+		offset = (page - 1) * limit
+	}
+	totalPage := cnt / limit
+
+	users, err := model.ListUsers(limit, offset)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	view.AdminUsers(w, r, &view.AdminUsersData{
-		Page:  &defaultPage,
-		Users: users,
+		Page:        &defaultPage,
+		Users:       users,
+		CurrentPage: int(page),
+		TotalPage:   int(totalPage),
 	})
 }
 

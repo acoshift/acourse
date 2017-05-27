@@ -58,6 +58,7 @@ const (
 
 	queryListUsers = selectUsers + `
 		order by users.created_at desc
+		limit $1 offset $2
 	`
 
 	querySaveUser = `
@@ -131,10 +132,9 @@ func GetUserFromUsername(username string) (*User, error) {
 }
 
 // ListUsers lists users
-// TODO: pagination
-func ListUsers() ([]*User, error) {
+func ListUsers(limit, offset int64) ([]*User, error) {
 	xs := make([]*User, 0)
-	rows, err := db.Query(queryListUsers)
+	rows, err := db.Query(queryListUsers, limit, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -151,4 +151,14 @@ func ListUsers() ([]*User, error) {
 		return nil, err
 	}
 	return xs, nil
+}
+
+// CountUsers counts users
+func CountUsers() (int64, error) {
+	var cnt int64
+	err := db.QueryRow(`select count(*) from users`).Scan(&cnt)
+	if err != nil {
+		return 0, err
+	}
+	return cnt, nil
 }
