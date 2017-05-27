@@ -39,10 +39,10 @@
         <tbody>
           {{range .Courses}}
             <tr>
-              <td data-column="ID">{{.ID}}</td>
+              <td data-column="ID" class="acourse-word-brakeable" style="min-width: 120px">{{.ID}}</td>
               <td data-column="Image"><img src="{{.Image}}"></td>
-              <td data-column="Title">{{.Title}}</td>
-              <td data-column="Owner">
+              <td data-column="Title" class="acourse-word-brakeable" style="min-width: 120px">{{.Title}}</td>
+              <td data-column="Owner" class="acourse-word-brakeable" style="min-width: 120px">
                 <img src="{{.Owner.Image}}"></td>
                 {{.Owner.Username}}
               </td>
