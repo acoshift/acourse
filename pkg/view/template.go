@@ -90,6 +90,9 @@ func parseTemplate(key interface{}, set []string) {
 		"paginate": func(p, n int) []int {
 			r := make([]int, 0, 7)
 			r = append(r, 1)
+			if n <= 1 {
+				return r
+			}
 			if p <= 3 {
 				r = append(r, 2, 3)
 			}
