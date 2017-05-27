@@ -13,7 +13,7 @@ type Course struct {
 	ID            int64
 	Option        CourseOption
 	Owner         User
-	enrollCount   int
+	EnrollCount   int64
 	Title         string
 	ShortDesc     string
 	Desc          string
@@ -69,11 +69,6 @@ func (x *Course) Link() string {
 		return strconv.FormatInt(x.ID, 10)
 	}
 	return x.URL.String
-}
-
-// EnrollCount returns count of enrolled user
-func (x *Course) EnrollCount() int {
-	return x.enrollCount
 }
 
 const (
@@ -352,6 +347,8 @@ func ListPublicCourses() ([]*Course, error) {
 		return nil, err
 	}
 	defer rows.Close()
+	ids := make([]int64, 0)
+	m := make(map[int64]*Course)
 	for rows.Next() {
 		var x Course
 		err = scanCourse(rows.Scan, &x)
@@ -359,9 +356,25 @@ func ListPublicCourses() ([]*Course, error) {
 			return nil, err
 		}
 		xs = append(xs, &x)
+		ids = append(ids, x.ID)
+		m[x.ID] = &x
 	}
 	if err = rows.Err(); err != nil {
 		return nil, err
+	}
+	rows.Close()
+
+	rows, err = db.Query(`select course_id, count(*) from enrolls where course_id = any($1) group by course_id`, pq.Array(ids))
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var courseID, cnt int64
+		err = rows.Scan(&courseID, &cnt)
+		if err != nil {
+			return nil, err
+		}
+		m[courseID].EnrollCount = cnt
 	}
 	return xs, nil
 }
