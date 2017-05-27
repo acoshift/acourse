@@ -72,6 +72,13 @@ const (
 	queryListPaymentsWithStatus = selectPayment + `
 		where payments.status = any($1)
 		order by payments.created_at desc
+		limit $2 offset $3
+	`
+
+	queryCountPaymentsWithStatus = `
+		select count(*)
+		from payments
+		where status = any($1)
 	`
 
 	querySavePayment = `
@@ -191,10 +198,9 @@ func GetPayment(paymentID int64) (*Payment, error) {
 }
 
 // ListHistoryPayments lists history payments
-// TODO: pagination
-func ListHistoryPayments() ([]*Payment, error) {
+func ListHistoryPayments(limit, offset int64) ([]*Payment, error) {
 	xs := make([]*Payment, 0)
-	rows, err := db.Query(queryListPaymentsWithStatus, pq.Array([]int{Accepted, Rejected}))
+	rows, err := db.Query(queryListPaymentsWithStatus, pq.Array([]int{Accepted, Rejected}), limit, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -214,10 +220,9 @@ func ListHistoryPayments() ([]*Payment, error) {
 }
 
 // ListPendingPayments lists pending payments
-// TODO: pagination
-func ListPendingPayments() ([]*Payment, error) {
+func ListPendingPayments(limit, offset int64) ([]*Payment, error) {
 	xs := make([]*Payment, 0)
-	rows, err := db.Query(queryListPaymentsWithStatus, pq.Array([]int{Pending}))
+	rows, err := db.Query(queryListPaymentsWithStatus, pq.Array([]int{Pending}), limit, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -234,4 +239,24 @@ func ListPendingPayments() ([]*Payment, error) {
 		return nil, err
 	}
 	return xs, nil
+}
+
+// CountHistoryPayments returns history payments count
+func CountHistoryPayments() (int64, error) {
+	var cnt int64
+	err := db.QueryRow(queryCountPaymentsWithStatus, pq.Array([]int{Accepted, Rejected})).Scan(&cnt)
+	if err != nil {
+		return 0, err
+	}
+	return cnt, nil
+}
+
+// CountPendingPayments returns pending payments count
+func CountPendingPayments() (int64, error) {
+	var cnt int64
+	err := db.QueryRow(queryCountPaymentsWithStatus, pq.Array([]int{Pending})).Scan(&cnt)
+	if err != nil {
+		return 0, err
+	}
+	return cnt, nil
 }
