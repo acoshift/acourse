@@ -1,0 +1,28 @@
+$square-width: 50px;
+$square-height: 50px;
+.acourse-square {
+  &.-small {
+    width: $square-width * 0.5;
+    height: $square-height * 0.5;
+  }
+  &.-big {
+    width: $square-width * 1.5;
+    height: $square-height * 1.5;
+  }
+}
+
+$circle-width: 50px;
+$circle-height: 50px;
+.acourse-circle {
+  border-radius: 50%;
+  width: $circle-width;
+  height: $circle-height;
+  &.-small {
+    width: $circle-width * 0.5;
+    height: $circle-height * 0.5;
+  }
+  &.-big {
+    width: $circle-width * 1.5;
+    height: $circle-height * 1.5;
+  }
+}
