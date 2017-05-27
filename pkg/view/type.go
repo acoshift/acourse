@@ -74,5 +74,7 @@ type AdminCoursesData struct {
 // AdminPaymentsData type
 type AdminPaymentsData struct {
 	*Page
-	Payments []*model.Payment
+	Payments    []*model.Payment
+	CurrentPage int
+	TotalPage   int
 }
