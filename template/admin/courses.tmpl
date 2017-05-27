@@ -40,11 +40,24 @@
           {{range .Courses}}
             <tr>
               <td data-column="ID" class="acourse-word-brakeable" style="min-width: 120px">{{.ID}}</td>
-              <td data-column="Image"><img src="{{.Image}}"></td>
+              <td data-column="Image">
+                <img
+                  class="_img-cover"
+                  src="{{.Image}}"
+                  onerror="this.src = '/~/img/placeholder-img.svg'"
+                  width="200"
+                  height="100">
+              </td>
               <td data-column="Title" class="acourse-word-brakeable" style="min-width: 120px">{{.Title}}</td>
-              <td data-column="Owner" class="acourse-word-brakeable" style="min-width: 120px">
-                <img src="{{.Owner.Image}}"></td>
+              <td data-column="Owner" class="acourse-word-brakeable _align-center" style="min-width: 120px">
+                <img
+                  class="acourse-circle _img-cover"
+                  src="{{.Owner.Image}}"
+                  onerror="this.src = '/~/img/placeholder-img.svg'">
+                <br>
                 {{.Owner.Username}}
+              </td>
+                
               </td>
               <td data-column="Type">{{.Type | courseType}}</td>
               <td data-column="Price">
@@ -66,8 +79,24 @@
           {{end}}
         </tbody>
       </table>
-
     </div>
+
+    <!-- Pagination -->
+    <div class="acourse-block-big _flex-row _main-end _cross-start">
+      <a class="_flex-row acourse-button-outline -info acourse-side-space" href>
+        <span class="show-sm-upper"><i class="show-sm-upper fa fa-angle-left _font-size-normal"></i> &nbsp&nbsp </span>Prev
+      </a>
+      <div class="show-sm-upper acourse-button -info acourse-side-space">1</div>
+      <div class="show-sm-upper acourse-button-base -info acourse-side-space">...</div>
+      <a class="show-sm-upper acourse-button-outline -info acourse-side-space">3</a>
+      <div class="hide-sm-upper _flex-row _flex-span _self-stretch">
+        <input class="-rise _full-width" type="number" placeholder="Page Number">
+      </div>
+      <a class="_flex-row acourse-button-outline -info acourse-side-space">
+        Next <span class="show-sm-upper">&nbsp&nbsp <i class="fa fa-angle-right _font-size-normal"></i></span>
+      </a>
+    </div>
+    
   </div>
 </div>
 {{end}}
@@ -77,9 +106,6 @@
 <style>
   #course-list {
     padding-top: 32px;
-  }
-  #course-list img {
-    max-width: 100%;
   }
 </style>
 {{end}}
