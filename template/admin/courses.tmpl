@@ -1,48 +1,84 @@
 {{define "app-body"}}
-Coures
-<table>
-  <thead>
-    <th>ID</th>
-    <th>Image</th>
-    <th>Title</th>
-    <th>Owner</th>
-    <th>Type</th>
-    <th>Price</th>
-    <th>Discount</th>
-    <th>Created At</th>
-    <th>Updated At</th>
-  </thead>
-  <tbody>
-    {{range .Courses}}
-      <tr>
-        <td>{{.ID}}</td>
-        <td><img src="{{.Image}}"></td>
-        <td>{{.Title}}</td>
-        <td>
-          <img src="{{.Owner.Image}}"></td>
-          {{.Owner.Username}}
-        </td>
-        <td>{{.Type | courseType}}</td>
-        <td>
-          {{.Price | currency}}
-          {{if .Option.Discount}}
-            ({{.Discount}})
+<div id="course-list">
+  <div class="grid-container _flex-column">
+
+    <div class="acourse-header">
+      Course List
+    </div>
+    
+    <!-- Pagination -->
+    <div class="acourse-block-big _flex-row _main-end _cross-start">
+      <a class="_flex-row acourse-button-outline -info acourse-side-space" href>
+        <span class="show-sm-upper"><i class="show-sm-upper fa fa-angle-left _font-size-normal"></i> &nbsp&nbsp </span>Prev
+      </a>
+      <div class="show-sm-upper acourse-button -info acourse-side-space">1</div>
+      <div class="show-sm-upper acourse-button-base -info acourse-side-space">...</div>
+      <a class="show-sm-upper acourse-button-outline -info acourse-side-space">3</a>
+      <div class="hide-sm-upper _flex-row _flex-span _self-stretch">
+        <input class="-rise _full-width" type="number" placeholder="Page Number">
+      </div>
+      <a class="_flex-row acourse-button-outline -info acourse-side-space">
+        Next <span class="show-sm-upper">&nbsp&nbsp <i class="fa fa-angle-right _font-size-normal"></i></span>
+      </a>
+    </div>
+
+    <!-- Table -->
+    <div class="flex-row">
+      <table class="acourse-block-big">
+        <thead>
+          <th>ID</th>
+          <th>Image</th>
+          <th>Title</th>
+          <th>Owner</th>
+          <th>Type</th>
+          <th>Price</th>
+          <th>Discount</th>
+          <th>Created At</th>
+          <th>Updated At</th>
+        </thead>
+        <tbody>
+          {{range .Courses}}
+            <tr>
+              <td data-column="ID">{{.ID}}</td>
+              <td data-column="Image"><img src="{{.Image}}"></td>
+              <td data-column="Title">{{.Title}}</td>
+              <td data-column="Owner">
+                <img src="{{.Owner.Image}}"></td>
+                {{.Owner.Username}}
+              </td>
+              <td data-column="Type">{{.Type | courseType}}</td>
+              <td data-column="Price">
+                {{.Price | currency}}
+                {{if .Option.Discount}}
+                  ({{.Discount}})
+                {{end}}
+              </td>
+              <td data-column="Discount">
+                {{if .Option.Discount}}
+                  Yes
+                {{else}}
+                  No
+                {{end}}
+              </td>
+              <td data-column="Created At">{{.CreatedAt | dateTime}}</td>
+              <td data-column="Updated At">{{.UpdatedAt | dateTime}}</td>
+            </tr>
           {{end}}
-        </td>
-        <td>
-          {{if .Option.Discount}}
-            Yes
-          {{else}}
-            No
-          {{end}}
-        </td>
-        <td>{{.CreatedAt | dateTime}}</td>
-        <td>{{.UpdatedAt | dateTime}}</td>
-      </tr>
-    {{end}}
-  </tbody>
-</table>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+</div>
 {{end}}
 
 {{define "app-script"}}{{end}}
-{{define "app-style"}}{{end}}
+{{define "app-style"}}
+<style>
+  #course-list {
+    padding-top: 32px;
+  }
+  #course-list img {
+    max-width: 100%;
+  }
+</style>{{end}}
