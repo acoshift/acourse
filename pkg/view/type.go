@@ -62,7 +62,9 @@ type CourseEditData struct {
 // AdminUsersData type
 type AdminUsersData struct {
 	*Page
-	Users []*model.User
+	Users       []*model.User
+	CurrentPage int
+	TotalPage   int
 }
 
 // AdminCoursesData type
