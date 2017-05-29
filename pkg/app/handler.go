@@ -6,7 +6,6 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-
 	"unicode/utf8"
 
 	"github.com/acoshift/acourse/pkg/appctx"
