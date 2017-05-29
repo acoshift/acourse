@@ -1,5 +1,5 @@
-hash: 2b511da8fbf506be217a023fd7561c25d966834f0eb43c3d6428da128d85a74b
-updated: 2017-05-25T23:14:15.228025773+07:00
+hash: 1a3f780dea13301eaae968ef7d7191a25807414f1aec5b0cdffc4e1f9a1de9ab
+updated: 2017-05-29T16:11:38.171069968+07:00
 imports:
 - name: cloud.google.com/go
   version: 2e6a95edb1071d750f6d7db777bf66cd2997af6c
@@ -19,7 +19,7 @@ imports:
 - name: github.com/acoshift/flash
   version: d425581a47b9e0e872e6404977e9b227760b77d8
 - name: github.com/acoshift/go-firebase-admin
-  version: 1413f092b7bdf0954366777f489d5bc19408fd0d
+  version: 59385f310dc0842016b15b778b80dc54c4cca528
 - name: github.com/acoshift/gzip
   version: 4d0cdce0d0fc57666ffcf5803e97a35d15a9e848
 - name: github.com/acoshift/header
@@ -32,6 +32,8 @@ imports:
   version: 3bfd7252fa87e7bc7918a25536728f1e7ef0d384
   subpackages:
   - store/sql
+- name: github.com/asaskevich/govalidator
+  version: 09b3be6fc926601c45962221bb7d80c38204edd7
 - name: github.com/dgrijalva/jwt-go
   version: d2709f9f1f31ebcda9651b03077758c1f3a0018c
 - name: github.com/disintegration/imaging

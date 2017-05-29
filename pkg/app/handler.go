@@ -1,18 +1,23 @@
 package app
 
 import (
+	"database/sql"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
 
+	"unicode/utf8"
+
 	"github.com/acoshift/acourse/pkg/appctx"
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/acourse/pkg/view"
 	"github.com/acoshift/flash"
+	"github.com/acoshift/go-firebase-admin"
 	"github.com/acoshift/header"
 	"github.com/acoshift/httprouter"
 	"github.com/acoshift/session"
+	"github.com/asaskevich/govalidator"
 )
 
 // Mount mounts app's handlers into mux
@@ -172,7 +177,71 @@ func getSignUp(w http.ResponseWriter, r *http.Request) {
 }
 
 func postSignUp(w http.ResponseWriter, r *http.Request) {
-	defer back(w, r)
+	ctx := r.Context()
+
+	f := flash.Get(ctx)
+
+	if !verifyXSRF(r.FormValue("X"), "", "signup") {
+		f.Add("Errors", "invalid xsrf token")
+		back(w, r)
+		return
+	}
+
+	email := r.FormValue("Email")
+	if len(email) == 0 {
+		f.Add("Errors", "email required")
+	}
+
+	email, err := govalidator.NormalizeEmail(email)
+	if err != nil {
+		f.Add("Errors", err.Error())
+		return
+	}
+	pass := r.FormValue("Password")
+	if len(pass) == 0 {
+		f.Add("Errors", "password required")
+	}
+	if n := utf8.RuneCountInString(pass); n < 6 || n > 64 {
+		f.Add("Errors", "password must have 6 to 64 characters")
+	}
+	if f.Has("Errors") {
+		f.Set("Email", email)
+		back(w, r)
+		return
+	}
+
+	userID, err := firAuth.CreateUser(ctx, &admin.User{
+		Email:    email,
+		Password: pass,
+	})
+	if err != nil {
+		f.Add("Errors", err.Error())
+		back(w, r)
+		return
+	}
+
+	user := model.User{
+		ID: userID,
+		Email: sql.NullString{
+			String: email,
+			Valid:  true,
+		},
+	}
+	err = user.Save()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	s := session.Get(ctx)
+	s.Set(keyUserID, userID)
+
+	rURL := r.FormValue("r")
+	if len(rURL) == 0 {
+		rURL = "/"
+	}
+
+	http.Redirect(w, r, rURL, http.StatusSeeOther)
 }
 
 func getSignOut(w http.ResponseWriter, r *http.Request) {

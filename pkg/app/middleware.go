@@ -87,8 +87,10 @@ func fetchUser(h http.Handler) http.Handler {
 		if len(id) > 0 {
 			u, err := model.GetUser(id)
 			if err == model.ErrNotFound {
-				u = &model.User{}
-				u.ID = id
+				u = &model.User{
+					ID:       id,
+					Username: id,
+				}
 			}
 			r = r.WithContext(appctx.WithUser(ctx, u))
 		}
