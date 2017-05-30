@@ -2,6 +2,7 @@ package app
 
 import (
 	"crypto/rand"
+	"encoding/base64"
 	"net/http"
 
 	"golang.org/x/net/xsrftoken"
@@ -10,7 +11,7 @@ import (
 func generateSessionID() string {
 	b := make([]byte, 24)
 	rand.Read(b)
-	return string(b)
+	return base64.URLEncoding.EncodeToString(b)
 }
 
 func verifyXSRF(token, userID, action string) bool {
