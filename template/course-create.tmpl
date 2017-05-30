@@ -1,3 +1,85 @@
 {{define "app-body"}}
-<h3>Create new Course</h3>
+<div id="course-create">
+  <div class="grid-container _flex-column">
+    <div class="acourse-header">Create new course</div>
+    <div class="acourse-card acourse-segment acourse-block-bigger">
+      <form method="post">
+        <div class="input-field _flex-column">
+          <label>Course Name</label>
+          <input class="acourse-input" name="CourseName" type="text">
+        </div>
+        <div class="input-field _flex-column">
+          <label>Short Description</label>
+          <input class="acourse-input" name="ShortDesc" type="text">
+        </div>
+        <div class="input-field _flex-column">
+          <label>Start Date</label>
+          <input
+            class="acourse-input"
+            name="StartDate"
+            type="date"
+            data-date=""
+            data-date-format="DD MMMM YYYY">
+        </div>
+        <div class="input-field _flex-column">
+          <label>Course Detail</label>
+          <textarea id="mytextarea"></textarea>
+        </div>
+        
+      </form>
+      </div>
+  </div>
+</div>
+{{end}}
+
+{{define "app-script"}}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/4.6.2/tinymce.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.3/moment.min.js"></script>
+<script>
+  $('document').ready(function(){
+    tinymce.init({
+      selector: '#mytextarea',
+      plugins : 'advlist autolink link image lists charmap print preview'
+    })
+    $('input').on('change', function() {
+      this.setAttribute(
+        'data-date',
+        moment(this.value, "YYYY-MM-DD")
+          .format( this.getAttribute("data-date-format") )
+      )
+    }).trigger("change")
+  })
+</script>
+<script>
+//   new Vue({
+//     el: '#course',
+//     delimiters: ['${', '}'],
+//     data () {
+//       return {
+//       }
+//     }
+//   })
+</script>
+{{end}}
+
+{{define "app-style"}}
+<style>
+  #course-create {
+    padding-top: 32px;
+    min-height: calc(100vh - 194px);
+  }
+  #course-create .acourse-card {
+    width: initial;
+  }
+  input[type='date'] {
+    position: relative;
+  }
+  input[type='date']:before {
+    position: absolute;
+    top: 11px; left: 14px;
+    content: attr(data-date);
+    display: inline-block;
+    color: black;
+  }
+</style>
 {{end}}

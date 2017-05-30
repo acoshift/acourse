@@ -1,14 +1,16 @@
 @import 'config.scss';
-input[type='email'],
-input[type='number'],
-input[type='password'],
-input[type='search'],
-input[type='tel'],
-input[type='text'],
-input[type='url'],
-input:not([type]),
-textarea,
-select {
+
+input[type='email'].acourse-input,
+input[type='number'].acourse-input,
+input[type='password'].acourse-input,
+input[type='search'].acourse-input,
+input[type='tel'].acourse-input,
+input[type='text'].acourse-input,
+input[type='date'].acourse-input,
+input[type='url'].acourse-input,
+input:not([type]).acourse-input,
+textarea.acourse-input,
+select.acourse-input {
   -webkit-appearance: none;
      -moz-appearance: none;
           appearance: none;
@@ -22,30 +24,32 @@ select {
     box-shadow: 8px 10px 20px 0 rgba(46,61,73,0.15);
   }
 }
-input[type='email']:focus,
-input[type='number']:focus,
-input[type='password']:focus,
-input[type='search']:focus,
-input[type='tel']:focus,
-input[type='text']:focus,
-input[type='url']:focus,
-input:not([type]):focus,
-textarea:focus,
-select:focus {
+input[type='email'].acourse-input:focus,
+input[type='number'].acourse-input:focus,
+input[type='password'].acourse-input:focus,
+input[type='search'].acourse-input:focus,
+input[type='tel'].acourse-input:focus,
+input[type='text'].acourse-input:focus,
+input[type='date'].acourse-input:focus,
+input[type='url'].acourse-input:focus,
+input:not([type]).acourse-input:focus,
+textarea.acourse-input:focus,
+select.acourse-input:focus {
   border-color: $color-sub;
   outline: 0;
 }
 
-input[type='email'].error,
-input[type='number'].error,
-input[type='password'].error,
-input[type='search'].error,
-input[type='tel'].error,
-input[type='text'].error,
-input[type='url'].error,
-input:not([type]).error,
-textarea.error,
-select.error {
+input[type='email'].acourse-input.error,
+input[type='number'].acourse-input.error,
+input[type='password'].acourse-input.error,
+input[type='search'].acourse-input.error,
+input[type='tel'].acourse-input.error,
+input[type='text'].acourse-input.error,
+input[type='date'].acourse-input.error,
+input[type='url'].acourse-input.error,
+input:not([type]).acourse-input.error,
+textarea.acourse-input.error,
+select.acourse-input.error {
   border-color: $color-negative;
   outline: 0;
 }

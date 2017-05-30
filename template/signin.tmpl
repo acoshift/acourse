@@ -16,11 +16,11 @@
             <input name="X" type="hidden" value="{{xsrf "signin"}}">
             <div class="input-field _flex-column">
               <label>Email:</label>
-              <input name="Email" value="{{.Flash.Get "User"}}">
+              <input class="acourse-input" name="Email" value="{{.Flash.Get "User"}}">
             </div>
             <div class="input-field _flex-column">
               <label>Password</label>
-              <input name="Password" type="password">
+              <input class="acourse-input" name="Password" type="password">
             </div>
             <div class="_flex-row _main-center">
               <button class="acourse-button -primary acourse-block-big _full-width" type="submit">
