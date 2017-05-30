@@ -1,0 +1,47 @@
+@import 'config.scss';
+
+.acourse-switch {
+	height: 35px;
+	width: 70px;
+	position: relative;
+  input {
+    cursor: pointer;
+    height: 100%;
+    opacity: 0;
+    position: absolute;
+    width: 100%;
+    z-index: 100;
+  }
+}
+/* Checked States */
+.acourse-switch input:checked~label {
+	background: $color-positive;
+}
+/* Background unchecked */
+.acourse-switch label {
+	background: darken($color-base, 8%);
+	border-radius: 2px;
+	display: block;
+	height: 100%;
+  border-radius: 200px;
+	position: relative;
+	transition: all .25s ease;
+  width: 100%;
+}
+/* Slider unchecked */
+.acourse-switch label div {
+	display: block;
+	height: 29px;
+  width: 29px;
+	border-radius: 50%;
+	position: absolute;
+  left: 3px;
+	top: 3px;
+	transition: all .15s ease;
+	z-index: 3;
+  background: #fff;
+	
+}
+.acourse-switch input:checked~label div {
+	left: 38px;
+}

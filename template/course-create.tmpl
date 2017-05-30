@@ -1,64 +1,86 @@
 {{define "app-body"}}
 <div id="course-create">
   <div class="grid-container _flex-column">
-    <div class="acourse-header">Create new course</div>
-    <div class="acourse-card acourse-segment acourse-block-bigger">
-      <form method="post">
-        <div class="input-field _flex-column">
-          <label>Course Name</label>
-          <input class="acourse-input" name="CourseName" type="text">
-        </div>
-        <div class="input-field _flex-column">
-          <label>Short Description</label>
-          <input class="acourse-input" name="ShortDesc" type="text">
-        </div>
-        <div class="input-field _flex-column">
-          <label>Start Date</label>
-          <input
-            class="acourse-input"
-            name="StartDate"
-            type="date"
-            data-date=""
-            data-date-format="DD MMMM YYYY">
-        </div>
-        <div class="input-field _flex-column">
-          <label>Course Detail</label>
-          <textarea id="mytextarea"></textarea>
-        </div>
-        
-      </form>
+    <div class="col-xs-12 col-lg-8 col-lg-offset-2">
+      <div class="acourse-header _color-sub">Create new course</div>
+      <div class="acourse-card acourse-segment acourse-block-bigger">
+        <img
+          id="cover"
+          class="_full-width _img-cover acourse-block-big"
+          src=""
+          onerror="this.src = '/~/img/placeholder-img.svg'">
+
+        <form method="POST" enctype="multipart/form-data">
+          <input type="hidden" name="X" value="{{xsrf "create-course"}}">
+
+          <div class="input-field _flex-column">
+            <label>Cover Photo</label>
+            <input id="image-input" class="acourse-input" name="Image" type="file" accept="image/*">
+          </div>
+
+          <div class="input-field _flex-column">
+            <label>Course Name</label>
+            <input class="acourse-input" name="Title" type="text" placeholder="Course Name" required>
+          </div>
+
+          <div class="input-field _flex-column">
+            <label>Short Description</label>
+            <input class="acourse-input" name="ShortDesc" type="text" placeholder="Short Description">
+          </div>
+
+          <div class="input-field _flex-column">
+            <label>Start Date</label>
+            <input class="acourse-input" name="Start" type="date">
+          </div>
+
+          <div class="input-field _flex-column">
+            <label>Assignment</label>
+            <div class="acourse-switch">
+              <input type="checkbox" name="Assignment">
+              <label>
+                <div></div>
+              </label>
+            </div>
+          </div>
+
+          <div class="input-field _flex-column">
+            <label>Course Detail</label>
+            <textarea id="mytextarea" name="Desc"></textarea>
+          </div>
+
+          <button class="acourse-button -primary _full-width" type="submit">
+            Create Course
+          </button>
+
+        </form>
+
       </div>
+    </div>
   </div>
 </div>
 {{end}}
 
 {{define "app-script"}}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/4.6.2/tinymce.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.3/moment.min.js"></script>
 <script>
   $('document').ready(function(){
     tinymce.init({
       selector: '#mytextarea',
       plugins : 'advlist autolink link image lists charmap print preview'
     })
-    $('input').on('change', function() {
-      this.setAttribute(
-        'data-date',
-        moment(this.value, "YYYY-MM-DD")
-          .format( this.getAttribute("data-date-format") )
-      )
-    }).trigger("change")
   })
-</script>
-<script>
-//   new Vue({
-//     el: '#course',
-//     delimiters: ['${', '}'],
-//     data () {
-//       return {
-//       }
-//     }
-//   })
+  function readURL(input) {
+    if (input.files && input.files[0]) {
+      var reader = new FileReader()
+      reader.onload = function (e) {
+        $('#cover').attr('src', e.target.result)
+      }
+      reader.readAsDataURL(input.files[0])
+    }
+  }
+  $("#image-input").change(function(){
+    readURL(this)
+  })
 </script>
 {{end}}
 
@@ -71,15 +93,16 @@
   #course-create .acourse-card {
     width: initial;
   }
-  input[type='date'] {
-    position: relative;
+  #course-create #cover {
+    height: 200px;
   }
-  input[type='date']:before {
-    position: absolute;
-    top: 11px; left: 14px;
-    content: attr(data-date);
-    display: inline-block;
-    color: black;
+  @media only screen and (max-width: 767px) {
+    #course-create #cover {
+      height: 140px;
+    }
+    #course-create .grid-container > div {
+      padding: 0;
+    }
   }
 </style>
 {{end}}
