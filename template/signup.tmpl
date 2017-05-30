@@ -16,7 +16,7 @@
             <input name="X" type="hidden" value="{{xsrf "signup"}}">
             <div class="input-field _flex-column">
               <label>Email:</label>
-              <input name="Email" type="text" placeholder="Email">
+              <input class="acourse-input" name="Email" type="text" placeholder="Email">
             </div>
             <div class="input-field _flex-column">
               <label>Password</label>
@@ -43,7 +43,7 @@
               <a class="link" href="/openid?p=github.com"><i class="fa fa-github"></i>Github</a>
             </div>
             <div class="_flex-row _main-center acourse-block">
-               have an account?&nbsp <a class="_color-main" href="/signin">Sign in</a>
+               Already have an account?&nbsp <a class="_color-main" href="/signin">Sign in</a>
             </div>
           </div>
         </form>
@@ -69,9 +69,6 @@
   }
   #sign-up .link i {
     margin-right: 4px;
-  }
-  #sign-up .acourse-card {
-    min-height: 482px;
   }
 </style>
 {{end}}
