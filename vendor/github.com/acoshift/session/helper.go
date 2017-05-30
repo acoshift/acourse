@@ -1,18 +1,16 @@
 package session
 
-import "net/http"
+import (
+	"net/http"
 
-const (
-	prefixWWW = "www."
-
-	headerXForwardedProto = "X-Forwarded-Proto"
+	"github.com/acoshift/header"
 )
 
 func isTLS(r *http.Request) bool {
 	if r.TLS != nil {
 		return true
 	}
-	if r.Header.Get(headerXForwardedProto) == "https" {
+	if r.Header.Get(header.XForwardedProto) == "https" {
 		return true
 	}
 	return false

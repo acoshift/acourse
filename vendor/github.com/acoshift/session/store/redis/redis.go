@@ -7,9 +7,18 @@ import (
 	"github.com/garyburd/redigo/redis"
 )
 
+// Config is the redis store config
+type Config struct {
+	Pool   *redis.Pool
+	Prefix string
+}
+
 // New creates new redis store
-func New(pool *redis.Pool, prefix string) session.Store {
-	return &redisStore{pool, prefix}
+func New(config Config) session.Store {
+	return &redisStore{
+		pool:   config.Pool,
+		prefix: config.Prefix,
+	}
 }
 
 type redisStore struct {

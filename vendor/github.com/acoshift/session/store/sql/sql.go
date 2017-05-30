@@ -4,15 +4,38 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/acoshift/session"
 )
 
+// Errors
+var (
+	ErrDBRequired    = errors.New("sql: db required")
+	ErrTableRequired = errors.New("sql: table required")
+)
+
+// Config is the sql store config
+type Config struct {
+	DB              *sql.DB
+	Table           string
+	CleanupInterval time.Duration
+}
+
 // New creates new sql store
-func New(db *sql.DB, table string) session.Store {
-	_, err := db.Exec(fmt.Sprintf(`
+func New(config Config) session.Store {
+	db := config.DB
+	table := config.Table
+	cleanupInterval := config.CleanupInterval
+
+	if db == nil {
+		panic(ErrDBRequired)
+	}
+	if len(table) == 0 {
+		panic(ErrTableRequired)
+	}
+
+	db.Exec(fmt.Sprintf(`
 		create table if not exists %s (
 			k text,
 			v blob,
@@ -21,40 +44,41 @@ func New(db *sql.DB, table string) session.Store {
 			index (e)
 		);
 	`, table))
-	if err != nil {
-		log.Printf("session: can not create sql table; %v\n", err)
+	// ignore create table error
+
+	s := &sqlStore{
+		db:              db,
+		cleanupInterval: cleanupInterval,
+		getQuery:        fmt.Sprintf(`select v, e, now() from %s where k = $1`, table),
+		setQuery:        fmt.Sprintf(`insert into %s (k, v, e) values ($1, $2, $3) on conflict (k) do update set v = excluded.v, k = excluded.k`, table),
+		delQuery:        fmt.Sprintf(`delete from %s where k = $1`, table),
+		expQuery:        fmt.Sprintf(`update %s set e = $2 where k = $1`, table),
+		delExpiredQuery: fmt.Sprintf(`delete from %s where e <= now()`, table),
 	}
-	getStmt, _ := db.Prepare(fmt.Sprintf(`select v, e, now() from %s where k = $1;`, table))
-	setStmt, _ := db.Prepare(fmt.Sprintf(`
-		insert into %s (k, v, e)
-		values ($1, $2, $3)
-		on conflict (k)
-		do update set v = excluded.v, k = excluded.k;
-	`, table))
-	delStmt, _ := db.Prepare(fmt.Sprintf(`delete from %s where k = $1;`, table))
-	expStmt, _ := db.Prepare(fmt.Sprintf(`update %s set e = $2 where k = $1;`, table))
-	delExpiredStmt, _ := db.Prepare(fmt.Sprintf(`delete from %s where e <= now();`, table))
-	s := &sqlStore{db, getStmt, setStmt, delStmt, expStmt, delExpiredStmt}
-	go s.cleanupWorker()
+	if cleanupInterval > 0 {
+		go s.cleanupWorker()
+	}
 	return s
 }
 
 type sqlStore struct {
-	db             *sql.DB
-	getStmt        *sql.Stmt
-	setStmt        *sql.Stmt
-	delStmt        *sql.Stmt
-	expStmt        *sql.Stmt
-	delExpiredStmt *sql.Stmt
+	db              *sql.DB
+	cleanupInterval time.Duration
+	getQuery        string
+	setQuery        string
+	delQuery        string
+	expQuery        string
+	delExpiredQuery string
 }
 
 var errNotFound = errors.New("sql: session not found")
 
 func (s *sqlStore) cleanupWorker() {
+	// add small delay before start worker
 	time.Sleep(5 * time.Second)
 	for {
-		s.delExpiredStmt.Exec()
-		time.Sleep(6 * time.Hour)
+		s.db.Exec(s.delExpiredQuery)
+		time.Sleep(s.cleanupInterval)
 	}
 }
 
@@ -62,7 +86,7 @@ func (s *sqlStore) Get(key string) ([]byte, error) {
 	var bs []byte
 	var exp *time.Time
 	var now time.Time
-	err := s.getStmt.QueryRow(key).Scan(&bs, &exp, &now)
+	err := s.db.QueryRow(s.getQuery, key).Scan(&bs, &exp, &now)
 	if err != nil {
 		return nil, err
 	}
@@ -79,12 +103,12 @@ func (s *sqlStore) Set(key string, value []byte, ttl time.Duration) error {
 		t := time.Now().Add(ttl)
 		exp = &t
 	}
-	_, err := s.setStmt.Exec(key, value, exp)
+	_, err := s.db.Exec(s.setQuery, key, value, exp)
 	return err
 }
 
 func (s *sqlStore) Del(key string) error {
-	_, err := s.delStmt.Exec(key)
+	_, err := s.db.Exec(s.delQuery, key)
 	return err
 }
 
@@ -94,6 +118,6 @@ func (s *sqlStore) Exp(key string, ttl time.Duration) error {
 		t := time.Now().Add(ttl)
 		exp = &t
 	}
-	_, err := s.expStmt.Exec(key, exp)
+	_, err := s.db.Exec(s.expQuery, key, exp)
 	return err
 }
