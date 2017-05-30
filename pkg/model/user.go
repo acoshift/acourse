@@ -60,13 +60,6 @@ const (
 		order by users.created_at desc
 		limit $1 offset $2
 	`
-
-	querySaveUser = `
-		upsert into users
-			(id, name, username, about_me, image, updated_at)
-		values
-			($1, $2, $3, $4, $5, now())
-	`
 )
 
 // Save saves user
@@ -74,7 +67,12 @@ func (x *User) Save() error {
 	if len(x.ID) == 0 {
 		return fmt.Errorf("invalid id")
 	}
-	_, err := db.Exec(querySaveUser, x.ID, x.Name, x.Username, x.AboutMe, x.Image)
+	_, err := db.Exec(`
+		upsert into users
+			(id, name, username, about_me, image, updated_at)
+		values
+			($1, $2, $3, $4, $5, now())
+	`, x.ID, x.Name, x.Username, x.AboutMe, x.Image)
 	if err != nil {
 		return err
 	}
@@ -115,6 +113,9 @@ func GetUsers(userIDs []string) ([]*User, error) {
 func GetUser(userID string) (*User, error) {
 	var x User
 	err := scanUser(db.QueryRow(queryGetUser, userID).Scan, &x)
+	if err == sql.ErrNoRows {
+		return nil, ErrNotFound
+	}
 	if err != nil {
 		return nil, err
 	}

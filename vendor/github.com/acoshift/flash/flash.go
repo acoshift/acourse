@@ -15,7 +15,7 @@ import (
 type Flash url.Values
 
 func init() {
-	gob.Register(flashKey)
+	gob.Register(flashKey{})
 }
 
 // Middleware decodes flash data from session and save back
@@ -25,7 +25,7 @@ func Middleware() middleware.Middleware {
 			ctx := r.Context()
 			sess := session.Get(ctx)
 			var f Flash
-			if b, ok := sess.Get(flashKey).([]byte); ok {
+			if b, ok := sess.Get(flashKey{}).([]byte); ok {
 				f, _ = Decode(b)
 			}
 			if f == nil {
@@ -36,7 +36,7 @@ func Middleware() middleware.Middleware {
 				// save flash back to session
 				b, err := f.Encode()
 				if err == nil {
-					sess.Set(flashKey, b)
+					sess.Set(flashKey{}, b)
 				}
 			}()
 
@@ -61,13 +61,11 @@ func Decode(b []byte) (Flash, error) {
 	return f, nil
 }
 
-type contextKey int
-
-const flashKey contextKey = iota
+type flashKey struct{}
 
 // Get gets flash from context
 func Get(ctx context.Context) Flash {
-	f, ok := ctx.Value(flashKey).(Flash)
+	f, ok := ctx.Value(flashKey{}).(Flash)
 	if !ok {
 		return New()
 	}
@@ -76,7 +74,7 @@ func Get(ctx context.Context) Flash {
 
 // Set sets flash to context's value
 func Set(ctx context.Context, f Flash) context.Context {
-	return context.WithValue(ctx, flashKey, f)
+	return context.WithValue(ctx, flashKey{}, f)
 }
 
 // Encode encodes flash

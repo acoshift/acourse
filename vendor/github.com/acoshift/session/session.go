@@ -12,9 +12,9 @@ import (
 	"github.com/acoshift/middleware"
 )
 
-type contextKey int
-
-const sessionKey contextKey = iota
+type (
+	sessionKey struct{}
+)
 
 // Middleware is the session parser middleware
 func Middleware(config Config) middleware.Middleware {
@@ -108,13 +108,13 @@ func init() {
 
 // Get gets session from context
 func Get(ctx context.Context) *Session {
-	sess, _ := ctx.Value(sessionKey).(*Session)
+	sess, _ := ctx.Value(sessionKey{}).(*Session)
 	return sess
 }
 
 // Set sets session to context
 func Set(ctx context.Context, s *Session) context.Context {
-	return context.WithValue(ctx, sessionKey, s)
+	return context.WithValue(ctx, sessionKey{}, s)
 }
 
 func (sess *Session) encode() ([]byte, error) {

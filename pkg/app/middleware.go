@@ -12,7 +12,7 @@ import (
 	"github.com/acoshift/gzip"
 	"github.com/acoshift/middleware"
 	"github.com/acoshift/session"
-	sSQL "github.com/acoshift/session/store/sql"
+	store "github.com/acoshift/session/store/sql"
 )
 
 // Middleware wraps handlers with app's middleware
@@ -27,7 +27,11 @@ func Middleware(h http.Handler) http.Handler {
 			MaxAge:   10 * 24 * time.Hour,
 			HTTPOnly: true,
 			Secure:   session.PreferSecure,
-			Store:    sSQL.New(db, "sessions"),
+			Store: store.New(store.Config{
+				DB:              db,
+				Table:           "sessions",
+				CleanupInterval: 6 * time.Hour,
+			}),
 		}),
 		flash.Middleware(),
 		fetchUser,
@@ -87,8 +91,10 @@ func fetchUser(h http.Handler) http.Handler {
 		if len(id) > 0 {
 			u, err := model.GetUser(id)
 			if err == model.ErrNotFound {
-				u = &model.User{}
-				u.ID = id
+				u = &model.User{
+					ID:       id,
+					Username: id,
+				}
 			}
 			r = r.WithContext(appctx.WithUser(ctx, u))
 		}
