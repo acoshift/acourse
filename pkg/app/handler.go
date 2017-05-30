@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 	"unicode/utf8"
 
 	"github.com/acoshift/acourse/pkg/appctx"
@@ -17,6 +18,7 @@ import (
 	"github.com/acoshift/httprouter"
 	"github.com/acoshift/session"
 	"github.com/asaskevich/govalidator"
+	"github.com/lib/pq"
 )
 
 // Mount mounts app's handlers into mux
@@ -381,15 +383,103 @@ func getCourse(w http.ResponseWriter, r *http.Request) {
 }
 
 func getCourseCreate(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	f := flash.Get(ctx)
+
 	page := defaultPage
 	page.Title = "Create new Course | " + page.Title
 	view.CourseCreate(w, r, &view.CourseCreateData{
-		Page: &page,
+		Page:  &page,
+		Flash: f,
 	})
 }
 
 func postCourseCreate(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	f := flash.Get(ctx)
+	user := appctx.GetUser(ctx)
 
+	if !verifyXSRF(r.FormValue("X"), user.ID, "create-course") {
+		f.Add("Errors", "invalid xsrf token")
+		back(w, r)
+		return
+	}
+
+	var (
+		title         = r.FormValue("Title")
+		shortDesc     = r.FormValue("ShortDesc")
+		desc          = r.FormValue("Desc")
+		imageURL      string
+		start         pq.NullTime
+		typ, _        = strconv.Atoi(r.FormValue("Type"))
+		assignment, _ = strconv.ParseBool(r.FormValue("Assignment"))
+	)
+	if len(title) == 0 {
+		f.Add("Errors", "title required")
+		back(w, r)
+		return
+	}
+
+	if v := r.FormValue("Start"); len(v) > 0 {
+		t, _ := time.Parse("02/01/2006", v)
+		if !t.IsZero() {
+			start.Time = t
+			start.Valid = true
+		}
+	}
+
+	image, info, err := r.FormFile("Image")
+	if err != http.ErrMissingFile {
+		if err != nil {
+			f.Add("Errors", err.Error())
+			back(w, r)
+			return
+		}
+
+		if !strings.Contains(info.Header.Get(header.ContentType), "image") {
+			f.Add("Errors", "file is not an image")
+			back(w, r)
+			return
+		}
+
+		imageURL, err = UploadProfileImage(ctx, image)
+		if err != nil {
+			f.Add("Errors", err.Error())
+			back(w, r)
+			return
+		}
+	}
+
+	tx, err := db.Begin()
+	if err != nil {
+		f.Add("Errors", err.Error())
+		back(w, r)
+		return
+	}
+	defer tx.Rollback()
+
+	var id int64
+	tx.QueryRow(`
+		insert into courses
+			(user_id, title, short_desc, long_desc, image, start, type)
+		values
+			($1, $2, $3, $4, $5, $6, $7)
+		returning id
+	`, user.ID, title, shortDesc, desc, imageURL, start, typ).Scan(&id)
+	tx.Exec(`
+		insert into course_options
+			(id, assignment)
+		values
+			($1, $2)
+	`, id, assignment)
+	err = tx.Commit()
+	if err != nil {
+		f.Add("Errors", err.Error())
+		back(w, r)
+		return
+	}
+
+	http.Redirect(w, r, "/course/"+strconv.FormatInt(id, 10), http.StatusFound)
 }
 
 func getCourseEdit(w http.ResponseWriter, r *http.Request) {

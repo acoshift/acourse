@@ -136,20 +136,6 @@ const (
 		where enrolls.user_id = $1
 		order by enrolls.created_at desc
 	`
-
-	querySaveCourse = `
-		upsert into courses
-			(id, user_id, title, short_desc, long_desc, image, start, url, type, price, discount, enroll_detail, updated_at)
-		values
-			($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, now())
-	`
-
-	querySaveCourseOption = `
-		upsert into course_options
-			(id, public, enroll, attend, assignment, discount)
-		values
-			($1, $2, $3, $4, $5, $6)
-	`
 )
 
 // Save saves course
@@ -159,17 +145,29 @@ func (x *Course) Save() error {
 		return err
 	}
 	defer tx.Rollback()
-	if len(x.URL.String) > 0 && x.URL.String != strconv.FormatInt(x.ID, 10) {
+	strID := strconv.FormatInt(x.ID, 10)
+	if len(x.URL.String) > 0 && x.URL.String != strID {
 		x.URL.Valid = true
 	} else {
+		x.URL.String = strID
 		x.URL.Valid = false
 	}
 
-	_, err = tx.Exec(querySaveCourse, x.ID, x.UserID, x.Title, x.ShortDesc, x.Desc, x.Image, x.Start, x.URL, x.Type, x.Price, x.Discount, x.EnrollDetail)
+	_, err = tx.Exec(`
+		upsert into courses
+			(id, user_id, title, short_desc, long_desc, image, start, url, type, price, discount, enroll_detail, updated_at)
+		values
+			($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, now())
+	`, x.ID, x.UserID, x.Title, x.ShortDesc, x.Desc, x.Image, x.Start, x.URL, x.Type, x.Price, x.Discount, x.EnrollDetail)
 	if err != nil {
 		return err
 	}
-	_, err = tx.Exec(querySaveCourseOption, x.ID, x.Option.Public, x.Option.Enroll, x.Option.Attend, x.Option.Assignment, x.Option.Discount)
+	_, err = tx.Exec(`
+		upsert into course_options
+			(id, public, enroll, attend, assignment, discount)
+		values
+			($1, $2, $3, $4, $5, $6)
+	`, x.ID, x.Option.Public, x.Option.Enroll, x.Option.Attend, x.Option.Assignment, x.Option.Discount)
 	if err != nil {
 		return err
 	}
