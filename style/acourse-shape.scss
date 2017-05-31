@@ -25,4 +25,12 @@ $circle-height: 50px;
     width: $circle-width * 1.5;
     height: $circle-height * 1.5;
   }
+  &.-bigger {
+    width: $circle-width * 2;
+    height: $circle-height * 2;
+  }
+  &.-large {
+    width: $circle-width * 2.5;
+    height: $circle-height * 2.5;
+  }
 }

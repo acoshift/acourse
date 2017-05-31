@@ -10,9 +10,15 @@
       
       <form method="POST" enctype="multipart/form-data">
         <input type="hidden" name="X" value="{{xsrf "profile-edit"}}">
+        <div class="acourse-block _flex-row _main-center">
+          <img id="avatar" class="acourse-circle -large _img-cover" src="" onerror="this.src = '/~/img/placeholder-img.svg'">
+        </div>
         <div class="input-field _flex-column">
           <label>Image</label>
-          <input class="acourse-input" id="Image" type="file" name="Image">
+          <div class="_flex-row">
+            <label class="acourse-button -info" for="image-input">Upload Avatar</label>
+            <input id="image-input" class="_hide" name="Image" type="file" accept="image/*">
+          </div>
         </div>
         <div class="input-field _flex-column">
           <label>Username</label>
@@ -45,7 +51,7 @@
 
       </form>
       <div class="_flex-row _main-center">
-        <a class="_color-sub" href="/profile">กลับสู่หน้าโปลไฟล์</a>
+        <a class="_color-sub" href="/profile">View Profile</a>
       </div>
     </div>
   </div>
@@ -53,6 +59,20 @@
 {{end}}
 
 {{define "app-script"}}
+<script>
+  function readURL(input) {
+    if (input.files && input.files[0]) {
+      var reader = new FileReader()
+      reader.onload = function (e) {
+        $('#avatar').attr('src', e.target.result)
+      }
+      reader.readAsDataURL(input.files[0])
+    }
+  }
+  $("#image-input").change(function(){
+    readURL(this)
+  })
+</script>
 {{end}}
 
 {{define "app-style"}}
@@ -63,5 +83,8 @@
     padding-bottom: 32px;
     min-height: calc(100vh - 242px);
   }
+   #profile-edit #avater {
+     
+   }
 </style>
 {{end}}
