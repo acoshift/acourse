@@ -85,7 +85,7 @@ create table course_options (
 create table course_contents (
   id serial,
   course_id int not null,
-  order int not null,
+  i int not null,
   title string not null,
   long_desc string not null,
   video_id string default null,
@@ -95,13 +95,13 @@ create table course_contents (
   updated_at timestamp not null default now(),
   primary key (id),
   foreign key (course_id) references courses (id),
-  index (course_id, order)
+  index (course_id, i)
 );
 
 create table assignments (
   id serial,
   course_id int not null,
-  order int not null,
+  i int not null,
   title string not null,
   long_desc string not null,
   open bool not null default false,
@@ -109,7 +109,7 @@ create table assignments (
   updated_at timestamp not null default now(),
   primary key (id),
   foreign key (course_id) references courses (id),
-  index (course_id, order)
+  index (course_id, i)
 );
 
 create table user_assignments (
