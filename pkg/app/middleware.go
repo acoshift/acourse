@@ -116,3 +116,18 @@ func onlyAdmin(h http.Handler) http.Handler {
 		h.ServeHTTP(w, r)
 	})
 }
+
+func onlyInstructor(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		u := appctx.GetUser(r.Context())
+		if u == nil {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+		if !u.Role.Instructor.Bool {
+			http.Error(w, "Forbidden", http.StatusForbidden)
+			return
+		}
+		h.ServeHTTP(w, r)
+	})
+}
