@@ -49,7 +49,7 @@
 
           <div class="input-field _flex-column">
             <label>Course Detail</label>
-            <textarea id="mytextarea" rows="12" name="Desc"></textarea>
+            <textarea id="decs-text" rows="12" name="Desc"></textarea>
           </div>
 
           <button class="acourse-button -primary _full-width" type="submit">
@@ -69,22 +69,11 @@
 <script>
   $('document').ready(function(){
     tinymce.init({
-      selector: '#mytextarea',
+      selector: '#decs-text',
       plugins : 'advlist autolink link image lists charmap print preview'
     })
   })
-  function readURL(input) {
-    if (input.files && input.files[0]) {
-      var reader = new FileReader()
-      reader.onload = function (e) {
-        $('#cover').attr('src', e.target.result)
-      }
-      reader.readAsDataURL(input.files[0])
-    }
-  }
-  $("#image-input").change(function(){
-    readURL(this)
-  })
+  bindFileInputImage($('#image-input'), $('#cover'))
 </script>
 {{end}}
 

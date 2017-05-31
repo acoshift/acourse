@@ -1,17 +1,17 @@
 {{define "app-body"}}
 <div id="profile-edit" class="page-pattern">
   <div class="grid-container">
-    
+
     <div class="acourse-card acourse-segment col-xs-12 col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3">
-      
+
       <div class="acourse-header _color-main _align-center">
         Edit Profile
       </div>
-      
+
       <form method="POST" enctype="multipart/form-data">
         <input type="hidden" name="X" value="{{xsrf "profile-edit"}}">
         <div class="acourse-block _flex-row _main-center">
-          <img id="avatar" class="acourse-circle -large _img-cover" src="" onerror="this.src = '/~/img/placeholder-img.svg'">
+          <img id="avatar" class="acourse-circle -large _img-cover" src="{{me.Image}}" onerror="this.src = '/~/img/placeholder-img.svg'">
         </div>
         <div class="input-field _flex-column">
           <label>Image</label>
@@ -60,18 +60,7 @@
 
 {{define "app-script"}}
 <script>
-  function readURL(input) {
-    if (input.files && input.files[0]) {
-      var reader = new FileReader()
-      reader.onload = function (e) {
-        $('#avatar').attr('src', e.target.result)
-      }
-      reader.readAsDataURL(input.files[0])
-    }
-  }
-  $("#image-input").change(function(){
-    readURL(this)
-  })
+  bindFileInputImage($('#image-input'), $('#avatar'))
 </script>
 {{end}}
 
@@ -84,7 +73,7 @@
     min-height: calc(100vh - 242px);
   }
    #profile-edit #avater {
-     
+
    }
 </style>
 {{end}}

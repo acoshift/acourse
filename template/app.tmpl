@@ -28,47 +28,59 @@
   </div>
 
   <footer>
-    Made with <span>❤️</span>&nbsp;&nbsp;by 
+    Made with <span>❤️</span>&nbsp;&nbsp;by
     <a href="https://moonrhythm.info" target="_blank">Moon Rhythm</a>
   </footer>
 {{end}}
 
 {{define "script"}}
-  {{template "app-script" $}}
   <script>
     // Navbar scroll event
-    let didScroll;
-    let lastScrollTop = 0;
-    let delta = 5;
-    let navbarHeight = $('#navbar').outerHeight();
+    var didScroll
+    var lastScrollTop = 0
+    var delta = 5
+    var navbarHeight = $('#navbar').outerHeight()
 
-    $(window).scroll(function(event){
-      didScroll = true;
-    });
+    $(window).scroll(function () {
+      didScroll = true
+    })
 
-    setInterval(function() {
+    setInterval(function () {
       if (didScroll) {
-        hasScrolled();
-        didScroll = false;
+        hasScrolled()
+        didScroll = false
       }
-    }, 250);
+    }, 250)
 
     function hasScrolled() {
-      var st = $(this).scrollTop();
-      
-      if(Math.abs(lastScrollTop - st) <= delta)
-        return;
+      var st = $(this).scrollTop()
 
-      if (st > lastScrollTop && st > navbarHeight){
-        $('#navbar').removeClass('nav-down').addClass('nav-up');
+      if(Math.abs(lastScrollTop - st) <= delta) return
+
+      if (st > lastScrollTop && st > navbarHeight) {
+        $('#navbar').removeClass('nav-down').addClass('nav-up')
       } else {
         if(st + $(window).height() < $(document).height()) {
-          $('#navbar').removeClass('nav-up').addClass('nav-down');
+          $('#navbar').removeClass('nav-up').addClass('nav-down')
         }
       }
-      lastScrollTop = st;
+      lastScrollTop = st
+    }
+
+    function bindFileInputImage ($input, $img) {
+      $input.change(function () {
+        var fp = this.files && this.files[0]
+        if (fp) {
+          var reader = new FileReader()
+          reader.onload = function (e) {
+            $img.attr('src', e.target.result)
+          }
+          reader.readAsDataURL(fp)
+        }
+      })
     }
   </script>
+  {{template "app-script" $}}
 {{end}}
 
 
