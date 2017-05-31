@@ -166,8 +166,8 @@ func getCourseEdit(w http.ResponseWriter, r *http.Request) {
 	page := defaultPage
 	page.Title = "Edit Course | " + page.Title
 
-	courseID := r.FormValue("id")
-	course, err := model.GetCourFromIDOrURL(courseID)
+	id, _ := strconv.ParseInt(r.FormValue("id"), 10, 64)
+	course, err := model.GetCourse(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -295,4 +295,21 @@ func postCourseEdit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	http.Redirect(w, r, "/course/"+link.String, http.StatusFound)
+}
+
+func getCourseContentEdit(w http.ResponseWriter, r *http.Request) {
+	page := defaultPage
+	page.Title = "Edit Course | " + page.Title
+
+	id, _ := strconv.ParseInt(r.FormValue("id"), 10, 64)
+	course, err := model.GetCourse(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	view.CourseContentEdit(w, r, &view.CourseEditData{
+		Page:   &page,
+		Course: course,
+	})
 }

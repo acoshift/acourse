@@ -61,6 +61,7 @@ func init() {
 	parseTemplate(keyCourse, []string{"course.tmpl", "app.tmpl", "layout.tmpl"})
 	parseTemplate(keyCourseCreate, []string{"editor/create.tmpl", "app.tmpl", "layout.tmpl"})
 	parseTemplate(keyCourseEdit, []string{"editor/course.tmpl", "app.tmpl", "layout.tmpl"})
+	parseTemplate(keyCourseContentEdit, []string{"editor/content.tmpl", "app.tmpl", "layout.tmpl"})
 	parseTemplate(keyAdminUsers, []string{"admin/users.tmpl", "app.tmpl", "layout.tmpl"})
 	parseTemplate(keyAdminCourses, []string{"admin/courses.tmpl", "app.tmpl", "layout.tmpl"})
 	parseTemplate(keyAdminPayments, []string{"admin/payments.tmpl", "app.tmpl", "layout.tmpl"})

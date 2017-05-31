@@ -15,6 +15,7 @@ const (
 	keyCourse
 	keyCourseCreate
 	keyCourseEdit
+	keyCourseContentEdit
 	keyAdminUsers
 	keyAdminCourses
 	keyAdminPayments
@@ -58,6 +59,11 @@ func CourseCreate(w http.ResponseWriter, r *http.Request, data *CourseCreateData
 // CourseEdit renders course edit view
 func CourseEdit(w http.ResponseWriter, r *http.Request, data *CourseEditData) {
 	render(w, r, keyCourseEdit, data)
+}
+
+// CourseContentEdit renders course content edit view
+func CourseContentEdit(w http.ResponseWriter, r *http.Request, data *CourseEditData) {
+	render(w, r, keyCourseContentEdit, data)
 }
 
 // AdminUsers renders admin users view
