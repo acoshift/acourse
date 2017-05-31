@@ -357,24 +357,62 @@ func postProfileEdit(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	username := r.FormValue("Username")
-	name := r.FormValue("Name")
-	aboutMe := r.FormValue("AboutMe")
-	user.Username = username
-	user.Name = name
-	user.AboutMe = aboutMe
-	if len(imageURL) > 0 {
-		user.Image = imageURL
-	}
+	var (
+		username = r.FormValue("Username")
+		name     = r.FormValue("Name")
+		aboutMe  = r.FormValue("AboutMe")
+	)
 	f.Set("Username", username)
 	f.Set("Name", name)
 	f.Set("AboutMe", aboutMe)
-	err = user.Save()
+
+	if !govalidator.IsAlphanumeric(username) {
+		f.Add("Errors", "username allow only a-z, A-Z, and 0-9")
+	}
+	if n := utf8.RuneCountInString(username); n < 4 || n > 32 {
+		f.Add("Errors", "username must have 4 - 32 characters")
+	}
+	if n := utf8.RuneCountInString(name); n < 4 || n > 40 {
+		f.Add("Errors", "name must have 4 - 40 characters")
+	}
+	if n := utf8.RuneCountInString(aboutMe); n > 256 {
+		f.Add("Errors", "about me must have lower than 256 characters")
+	}
+	if f.Has("Errors") {
+		back(w, r)
+		return
+	}
+
+	tx, err := db.Begin()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer tx.Rollback()
+
+	if len(imageURL) > 0 {
+		tx.Exec(`
+			update users
+			set image = $2
+			where id = $1
+		`, user.ID, imageURL)
+	}
+	tx.Exec(`
+		update users
+		set
+			username = $2,
+			name = $3,
+			about_me = $4,
+			updated_at = now()
+		where id = $1
+	`, user.ID, username, name, aboutMe)
+	err = tx.Commit()
 	if err != nil {
 		f.Add("Errors", err.Error())
 		back(w, r)
 		return
 	}
+
 	http.Redirect(w, r, "/profile", http.StatusSeeOther)
 }
 
