@@ -1,7 +1,6 @@
 package app
 
 import (
-	"database/sql"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -221,14 +220,12 @@ func postSignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := model.User{
-		ID: userID,
-		Email: sql.NullString{
-			String: email,
-			Valid:  true,
-		},
-	}
-	err = user.Save()
+	_, err = db.Exec(`
+		insert into users
+			(id, username, email)
+		values
+			($1, $2, $3)
+	`, userID, userID, email)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
