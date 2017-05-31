@@ -132,6 +132,9 @@ func parseTemplate(key interface{}, set []string) {
 		"dateTime": func(v time.Time) string {
 			return v.In(loc).Format("02/01/2006 15:04:05")
 		},
+		"dateInput": func(v time.Time) string {
+			return v.Format("2006-01-02")
+		},
 		"live": func() int {
 			return model.Live
 		},

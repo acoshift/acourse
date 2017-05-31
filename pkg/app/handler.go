@@ -3,10 +3,8 @@ package app
 import (
 	"database/sql"
 	"net/http"
-	"net/url"
 	"strconv"
 	"strings"
-	"time"
 	"unicode/utf8"
 
 	"github.com/acoshift/acourse/pkg/appctx"
@@ -18,7 +16,6 @@ import (
 	"github.com/acoshift/httprouter"
 	"github.com/acoshift/session"
 	"github.com/asaskevich/govalidator"
-	"github.com/lib/pq"
 )
 
 // Mount mounts app's handlers into mux
@@ -40,8 +37,8 @@ func Mount(mux *http.ServeMux) {
 	r.GET("/create-course", onlyInstructor(http.HandlerFunc(getCourseCreate)))
 	r.POST("/create-course", onlyInstructor(http.HandlerFunc(postCourseCreate)))
 	r.GET("/course/:courseID", http.HandlerFunc(getCourse))
-	r.GET("/course/:courseID/edit", http.HandlerFunc(getCourseEdit))
-	r.POST("/course/:courseID/edit", http.HandlerFunc(postCourseEdit))
+	r.GET("/course/:courseID/edit", isCourseOwner(http.HandlerFunc(getCourseEdit)))
+	r.POST("/course/:courseID/edit", isCourseOwner(http.HandlerFunc(postCourseEdit)))
 
 	admin := httprouter.New()
 	admin.GET("/users", http.HandlerFunc(getAdminUsers))
@@ -414,163 +411,6 @@ func postProfileEdit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Redirect(w, r, "/profile", http.StatusSeeOther)
-}
-
-func getCourse(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	user := appctx.GetUser(ctx)
-	id := httprouter.GetParam(ctx, "courseID")
-	course, err := model.GetCourFromIDOrURL(id)
-	if err == model.ErrNotFound {
-		http.NotFound(w, r)
-		return
-	}
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	enrolled := false
-	if user != nil {
-		enrolled, err = model.IsEnrolled(user.ID, course.ID)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-	}
-	page := defaultPage
-	page.Title = course.Title + " | " + page.Title
-	page.Desc = course.ShortDesc
-	page.Image = course.Image
-	page.URL = baseURL + "/course/" + url.PathEscape(course.Link())
-	view.Course(w, r, &view.CourseData{
-		Page:     &page,
-		Course:   course,
-		Enrolled: enrolled,
-	})
-}
-
-func getCourseCreate(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	f := flash.Get(ctx)
-
-	page := defaultPage
-	page.Title = "Create new Course | " + page.Title
-	view.CourseCreate(w, r, &view.CourseCreateData{
-		Page:  &page,
-		Flash: f,
-	})
-}
-
-func postCourseCreate(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	f := flash.Get(ctx)
-	user := appctx.GetUser(ctx)
-
-	if !verifyXSRF(r.FormValue("X"), user.ID, "create-course") {
-		f.Add("Errors", "invalid xsrf token")
-		back(w, r)
-		return
-	}
-
-	var (
-		title         = r.FormValue("Title")
-		shortDesc     = r.FormValue("ShortDesc")
-		desc          = r.FormValue("Desc")
-		imageURL      string
-		start         pq.NullTime
-		typ, _        = strconv.Atoi(r.FormValue("Type"))
-		assignment, _ = strconv.ParseBool(r.FormValue("Assignment"))
-	)
-	if len(title) == 0 {
-		f.Add("Errors", "title required")
-		back(w, r)
-		return
-	}
-
-	if v := r.FormValue("Start"); len(v) > 0 {
-		t, _ := time.Parse("02/01/2006", v)
-		if !t.IsZero() {
-			start.Time = t
-			start.Valid = true
-		}
-	}
-
-	image, info, err := r.FormFile("Image")
-	if err != http.ErrMissingFile {
-		if err != nil {
-			f.Add("Errors", err.Error())
-			back(w, r)
-			return
-		}
-
-		if !strings.Contains(info.Header.Get(header.ContentType), "image") {
-			f.Add("Errors", "file is not an image")
-			back(w, r)
-			return
-		}
-
-		imageURL, err = UploadProfileImage(ctx, image)
-		if err != nil {
-			f.Add("Errors", err.Error())
-			back(w, r)
-			return
-		}
-	}
-
-	tx, err := db.Begin()
-	if err != nil {
-		f.Add("Errors", err.Error())
-		back(w, r)
-		return
-	}
-	defer tx.Rollback()
-
-	var id int64
-	tx.QueryRow(`
-		insert into courses
-			(user_id, title, short_desc, long_desc, image, start, type)
-		values
-			($1, $2, $3, $4, $5, $6, $7)
-		returning id
-	`, user.ID, title, shortDesc, desc, imageURL, start, typ).Scan(&id)
-	tx.Exec(`
-		insert into course_options
-			(course_id, assignment)
-		values
-			($1, $2)
-	`, id, assignment)
-	err = tx.Commit()
-	if err != nil {
-		f.Add("Errors", err.Error())
-		back(w, r)
-		return
-	}
-
-	http.Redirect(w, r, "/course/"+strconv.FormatInt(id, 10), http.StatusFound)
-}
-
-func getCourseEdit(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	page := defaultPage
-	page.Title = "Edit Course | " + page.Title
-
-	courseID := httprouter.GetParam(ctx, "courseID")
-	course, err := model.GetCourFromIDOrURL(courseID)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	view.CourseEdit(w, r, &view.CourseEditData{
-		Page:   &page,
-		Course: course,
-	})
-}
-
-func postCourseEdit(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	id := httprouter.GetParam(ctx, "courseID")
-	http.Redirect(w, r, "/course/"+id, http.StatusSeeOther)
 }
 
 func getAdminUsers(w http.ResponseWriter, r *http.Request) {

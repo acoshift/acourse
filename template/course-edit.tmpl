@@ -5,7 +5,7 @@
     <div class="col-xs-12 col-lg-8 col-lg-offset-2">
       <div class="acourse-header _color-sub">Edit: {{.Course.Title}}</div>
       <div class="acourse-card acourse-segment acourse-block-bigger">
-        
+
         <img
           id="cover"
           class="_full-width _img-cover acourse-block-big"
@@ -13,7 +13,7 @@
           onerror="this.src = '/~/img/placeholder-img.svg'">
 
         <form method="POST" enctype="multipart/form-data">
-          <input type="hidden" name="X" value="{{xsrf "create-course"}}">
+          <input type="hidden" name="X" value="{{xsrf "edit-course"}}">
 
           <div class="input-field _flex-column">
             <label>Cover Photo</label>
@@ -35,7 +35,7 @@
 
           <div class="input-field _flex-column">
             <label>Start Date</label>
-            <input class="acourse-input" name="Start" value="{{.Course.Start.Time}}" type="date">
+            <input class="acourse-input" name="Start" value="{{.Course.Start.Time | dateInput}}" type="date">
           </div>
 
           <div class="input-field _flex-column">

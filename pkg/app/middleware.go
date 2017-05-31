@@ -1,15 +1,18 @@
 package app
 
 import (
+	"database/sql"
 	"net/http"
 	"net/url"
 	"runtime/debug"
+	"strconv"
 	"time"
 
 	"github.com/acoshift/acourse/pkg/appctx"
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/flash"
 	"github.com/acoshift/gzip"
+	"github.com/acoshift/httprouter"
 	"github.com/acoshift/middleware"
 	"github.com/acoshift/session"
 	store "github.com/acoshift/session/store/sql"
@@ -125,6 +128,30 @@ func onlyInstructor(h http.Handler) http.Handler {
 			return
 		}
 		if !u.Role.Instructor.Bool {
+			http.Error(w, "Forbidden", http.StatusForbidden)
+			return
+		}
+		h.ServeHTTP(w, r)
+	})
+}
+
+func isCourseOwner(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		u := appctx.GetUser(ctx)
+		id, _ := strconv.ParseInt(httprouter.GetParam(ctx, "courseID"), 10, 64)
+
+		var ownerID string
+		err := db.QueryRow(`select user_id from courses where id = $1`, id).Scan(&ownerID)
+		if err == sql.ErrNoRows {
+			http.NotFound(w, r)
+			return
+		}
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		if ownerID != u.ID {
 			http.Error(w, "Forbidden", http.StatusForbidden)
 			return
 		}
