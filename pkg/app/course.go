@@ -67,7 +67,7 @@ func postCourseCreate(w http.ResponseWriter, r *http.Request) {
 	f := flash.Get(ctx)
 	user := appctx.GetUser(ctx)
 
-	if !verifyXSRF(r.FormValue("X"), user.ID, "create-course") {
+	if !verifyXSRF(r.FormValue("X"), user.ID, "editor/create") {
 		f.Add("Errors", "invalid xsrf token")
 		back(w, r)
 		return
@@ -163,11 +163,10 @@ func postCourseCreate(w http.ResponseWriter, r *http.Request) {
 }
 
 func getCourseEdit(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
 	page := defaultPage
 	page.Title = "Edit Course | " + page.Title
 
-	courseID := httprouter.GetParam(ctx, "courseID")
+	courseID := r.FormValue("id")
 	course, err := model.GetCourFromIDOrURL(courseID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -182,12 +181,12 @@ func getCourseEdit(w http.ResponseWriter, r *http.Request) {
 
 func postCourseEdit(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	id, _ := strconv.ParseInt(httprouter.GetParam(ctx, "courseID"), 10, 64)
+	id, _ := strconv.ParseInt(r.FormValue("id"), 10, 64)
 
 	f := flash.Get(ctx)
 	user := appctx.GetUser(ctx)
 
-	if !verifyXSRF(r.FormValue("X"), user.ID, "edit-course") {
+	if !verifyXSRF(r.FormValue("X"), user.ID, "editor/course") {
 		f.Add("Errors", "invalid xsrf token")
 		back(w, r)
 		return

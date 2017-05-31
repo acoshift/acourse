@@ -17,11 +17,11 @@
         {{if me.Role.Instructor}}
           <div class="acourse-block-big col-xs-12 _flex-row _main-space-between _cross-center">
             <div class="acourse-header _no-margin _color-main">My Own Courses</div>
-            <a href="/create-course">
+            <a href="/editor/create">
               <div class="acourse-button -primary">Create new Course</div>
             </a>
           </div>
-          
+
           <div class="acourse-block row">
             {{range .OwnCourses}}
               <div class="col-xs-12 col-md-6 col-lg-4 _flex-row">
@@ -45,7 +45,7 @@
       </div>
 
     </div>
-      
+
   </div>
 </div>
 {{end}}
