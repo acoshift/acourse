@@ -118,7 +118,7 @@ const (
 		from courses
 			inner join course_contents on courses.id = course_contents.course_id
 		where courses.id = $1
-		order by course_contents.i asc
+		order by course_contents.order asc
 	`
 
 	queryListCoursesPublic = selectCourses + `

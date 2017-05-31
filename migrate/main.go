@@ -58,7 +58,7 @@ func main() {
 	must(client.Query(ctx, "Payment", &payments))
 	must(client.Query(ctx, "Attend", &attends))
 	must(client.Query(ctx, "Enroll", &enrolls))
-	must(client.Query(ctx, "Assignment", &assignments))
+	must(client.Query(ctx, "Assignment", &assignments, ds.Order("CreatedAt")))
 	must(client.Query(ctx, "UserAssignment", &userAssignments))
 
 	findCourse := func(courseID string) *courseModel {
@@ -165,7 +165,7 @@ func main() {
 	must(err)
 	stmt3, err := db.Prepare(`
 		insert into course_contents
-			(course_id, i, title, long_desc, video_id, video_type, download_url)
+			(course_id, order, title, long_desc, video_id, video_type, download_url)
 		values
 			($1, $2, $3, $4, $5, $6, $7);
 	`)
@@ -235,15 +235,16 @@ func main() {
 	log.Println("migrate assignments")
 	stmt, err = db.Prepare(`
 		insert into assignments
-			(course_id, title, long_desc, open, created_at, updated_at)
-		values ($1, $2, $3, $4, $5, $6)
+			(course_id, order, title, long_desc, open, created_at, updated_at)
+		values ($1, $2, $3, $4, $5, $6, $7)
 		returning id;
 	`)
 	must(err)
 	for _, p := range assignments {
 		c := findCourse(p.CourseID)
 		var id int64
-		err = stmt.QueryRow(c.newID, p.Title, p.Description, p.Open, p.CreatedAt, p.UpdatedAt).Scan(&id)
+		err = stmt.QueryRow(c.newID, c.assignmentOrder, p.Title, p.Description, p.Open, p.CreatedAt, p.UpdatedAt).Scan(&id)
+		c.assignmentOrder++
 		must(err)
 		p.newID = id
 	}
@@ -317,8 +318,9 @@ type roleModel struct {
 }
 
 type courseModel struct {
-	newID       int64
-	assignments []string
+	newID           int64
+	assignments     []string
+	assignmentOrder int
 
 	ds.StringIDModel
 	ds.StampModel
