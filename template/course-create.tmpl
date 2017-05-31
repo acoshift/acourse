@@ -4,6 +4,7 @@
     <div class="col-xs-12 col-lg-8 col-lg-offset-2">
       <div class="acourse-header _color-sub">Create new course</div>
       <div class="acourse-card acourse-segment acourse-block-bigger">
+        
         <img
           id="cover"
           class="_full-width _img-cover acourse-block-big"
@@ -15,7 +16,10 @@
 
           <div class="input-field _flex-column">
             <label>Cover Photo</label>
-            <input id="image-input" class="acourse-input" name="Image" type="file" accept="image/*">
+            <div class="_flex-row">
+              <label class="acourse-button -info" for="image-input">Upload Cover Photo</label>
+              <input id="image-input" class="_hide" name="Image" type="file" accept="image/*">
+            </div>
           </div>
 
           <div class="input-field _flex-column">
