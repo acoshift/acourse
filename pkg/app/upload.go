@@ -5,6 +5,8 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net/http"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -47,6 +49,43 @@ func UploadProfileImage(ctx context.Context, r io.Reader) (string, error) {
 		return "", err
 	}
 	return downloadURL, nil
+}
+
+// UploadProfileFromURLAsync copies data from given url and upload profile in background,
+// returns url of destination file
+func UploadProfileFromURLAsync(url string) string {
+	if len(url) == 0 {
+		return ""
+	}
+
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return ""
+	}
+	filename := generateFilename() + ".jpg"
+	go func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		req = req.WithContext(ctx)
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			return
+		}
+		defer resp.Body.Close()
+		buf := &bytes.Buffer{}
+		err = resizeCropEncode(buf, resp.Body, 500, 500, 90)
+		if err != nil {
+			return
+		}
+		cancel()
+		ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		err = Upload(ctx, buf, filename)
+		if err != nil {
+			return
+		}
+	}()
+	return generateDownloadURL(filename)
 }
 
 // UploadCourseCoverImage uploads course cover image

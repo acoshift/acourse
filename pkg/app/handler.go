@@ -1,6 +1,7 @@
 package app
 
 import (
+	"database/sql"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -165,6 +166,37 @@ func getSignInCallback(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	tx, err := db.Begin()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer tx.Rollback()
+
+	// check is user sign up
+	var cnt int64
+	err = tx.QueryRow(`select 1 from users where id = $1`, user.UserID).Scan(&cnt)
+	if err == sql.ErrNoRows {
+		// user not found, insert new user
+		imageURL := UploadProfileFromURLAsync(user.PhotoURL)
+		tx.Exec(`
+			insert into users
+				(id, name, username, email, image)
+			values
+				($1, $2, $3, $4, $5)
+		`, user.UserID, user.DisplayName, user.UserID, sql.NullString{String: user.Email, Valid: len(user.Email) > 0}, imageURL)
+		err = tx.Commit()
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	s.Set(keyUserID, user.UserID)
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
