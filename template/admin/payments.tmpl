@@ -36,7 +36,6 @@
         <thead>
           <tr>
             <th>ID</th>
-            <!--<th>Image</th>-->
             <th>User</th>
             <!--<th>Name</th>
             <th>Email</th>-->
@@ -50,9 +49,9 @@
           {{range .Payments}}
             <tr>
               <td data-column="ID">{{.ID}}</td>
-              <!--<td><img src="{{.Image}}"></td>-->
               <td>
-                <img src="{{.User.Image}}">
+                <img src="{{.User.Image}}" class="acourse-circle _img-cover" onerror="this.src = '/~/img/placeholder-img.svg'">
+                <br>
                 <span>
                   {{.User.Username}}<br>
                   {{.User.Email.String}}
