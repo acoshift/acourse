@@ -67,14 +67,14 @@ create table courses (
 );
 
 create table course_options (
-  id int,
+  course_id int,
   public bool not null default false,
   enroll bool not null default false,
   attend bool not null default false,
   assignment bool not null default false,
   discount bool not null default false,
-  primary key (id),
-  foreign key (id) references courses (id),
+  primary key (course_id),
+  foreign key (course_id) references courses (id),
   index (public),
   index (enroll),
   index (public, enroll),

@@ -535,7 +535,7 @@ func postCourseCreate(w http.ResponseWriter, r *http.Request) {
 	`, user.ID, title, shortDesc, desc, imageURL, start, typ).Scan(&id)
 	tx.Exec(`
 		insert into course_options
-			(id, assignment)
+			(course_id, assignment)
 		values
 			($1, $2)
 	`, id, assignment)

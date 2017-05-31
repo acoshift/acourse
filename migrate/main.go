@@ -158,7 +158,7 @@ func main() {
 	must(err)
 	stmt2, err := db.Prepare(`
 		insert into course_options
-			(id, public, enroll, attend, assignment, discount)
+			(course_id, public, enroll, attend, assignment, discount)
 		values
 			($1, $2, $3, $4, $5, $6);
 	`)

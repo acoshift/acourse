@@ -93,7 +93,7 @@ const (
 			course_options.assignment,
 			course_options.discount
 		from courses
-			left join course_options on courses.id = course_options.id
+			left join course_options on courses.id = course_options.course_id
 	`
 
 	queryGetCourse = selectCourses + `
@@ -164,7 +164,7 @@ func (x *Course) Save() error {
 	}
 	_, err = tx.Exec(`
 		upsert into course_options
-			(id, public, enroll, attend, assignment, discount)
+			(course_id, public, enroll, attend, assignment, discount)
 		values
 			($1, $2, $3, $4, $5, $6)
 	`, x.ID, x.Option.Public, x.Option.Enroll, x.Option.Attend, x.Option.Assignment, x.Option.Discount)
@@ -309,7 +309,7 @@ func ListCourses() ([]*Course, error) {
 			users.username,
 			users.image
 		from courses
-			left join course_options on courses.id = course_options.id
+			left join course_options on courses.id = course_options.course_id
 			left join users on courses.user_id = users.id
 			order by courses.created_at desc
 	`)
