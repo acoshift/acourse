@@ -360,5 +360,62 @@ func getCourseContentEdit(w http.ResponseWriter, r *http.Request) {
 }
 
 func getCourseEnroll(w http.ResponseWriter, r *http.Request) {
-	view.CourseEnroll(w, r, nil)
+	ctx := r.Context()
+	user := appctx.GetUser(ctx)
+
+	link := httprouter.GetParam(ctx, "courseID")
+
+	id, err := strconv.ParseInt(link, 10, 64)
+	if err != nil {
+		id, err = model.GetCourseIDFromURL(link)
+		if err == model.ErrNotFound {
+			http.NotFound(w, r)
+			return
+		}
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+
+	x, err := model.GetCourse(id)
+	if err == model.ErrNotFound {
+		http.NotFound(w, r)
+		return
+	}
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// if user is course owner redirect back to course page
+	if user.ID == x.UserID {
+		http.Redirect(w, r, "/course/"+link, http.StatusFound)
+		return
+	}
+
+	// redirect enrolled user back to course page
+	enrolled, err := model.IsEnrolled(user.ID, id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if enrolled {
+		http.Redirect(w, r, "/course/"+link, http.StatusFound)
+		return
+	}
+
+	page := defaultPage
+	page.Title = x.Title + " | " + page.Title
+	page.Desc = x.ShortDesc
+	page.Image = x.Image
+	page.URL = baseURL + "/course/" + url.PathEscape(x.Link())
+	view.CourseEnroll(w, r, &view.CourseData{
+		Page:   &page,
+		Course: x,
+	})
+}
+
+func postCourseEnroll(w http.ResponseWriter, r *http.Request) {
+
 }

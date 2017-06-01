@@ -1,0 +1,15 @@
+{{define "app-body"}}
+  <p>{{.Course.EnrollDetail}}</p>
+  <form method="POST" enctype="multipart/form-data">
+    <input type="hidden" name="X" value="{{xsrf "enroll"}}">
+    <input type="file" name="Image">
+    <input type="number" name="Price">
+    <button type="submit">Enroll</button>
+  </form>
+{{end}}
+
+{{define "app-script"}}
+{{end}}
+
+{{define "app-style"}}
+{{end}}
