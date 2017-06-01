@@ -96,29 +96,8 @@ const (
 			left join course_options on courses.id = course_options.course_id
 	`
 
-	queryGetCourse = selectCourses + `
-		where courses.id = $1
-	`
-
 	queryGetCourses = selectCourses + `
 		where courses.id = any($1)
-	`
-
-	queryGetCourseFromURL = selectCourses + `
-		where courses.url = $1
-	`
-
-	queryGetCourseContents = `
-		select
-			course_contents.title,
-			course_contents.long_desc,
-			course_contents.video_id,
-			course_contents.video_type,
-			course_contents.download_url
-		from courses
-			inner join course_contents on courses.id = course_contents.course_id
-		where courses.id = $1
-		order by course_contents.i asc
 	`
 
 	queryListCoursesPublic = selectCourses + `
@@ -194,10 +173,6 @@ func scanCourse(scan scanFunc, x *Course) error {
 	return nil
 }
 
-func scanCourseContent(scan scanFunc, x *CourseContent) error {
-	return scan(&x.Title, &x.Desc, &x.VideoID, &x.VideoType, &x.DownloadURL)
-}
-
 // GetCourses gets courses
 func GetCourses(courseIDs []int64) ([]*Course, error) {
 	xs := make([]*Course, 0, len(courseIDs))
@@ -223,62 +198,72 @@ func GetCourses(courseIDs []int64) ([]*Course, error) {
 // GetCourse gets course
 func GetCourse(courseID int64) (*Course, error) {
 	var x Course
-	err := scanCourse(db.QueryRow(queryGetCourse, courseID).Scan, &x)
+	err := db.QueryRow(`
+		select
+			id, user_id, title, short_desc, long_desc, image, start, url, type, price, courses.discount, enroll_detail,
+			opt.public, opt.enroll, opt.attend, opt.assignment, opt.discount
+		from courses left join course_options as opt on courses.id = opt.course_id
+		where id = $1
+	`, courseID).Scan(
+		&x.ID, &x.UserID, &x.Title, &x.ShortDesc, &x.Desc, &x.Image, &x.Start, &x.URL, &x.Type, &x.Price, &x.Discount, &x.EnrollDetail,
+		&x.Option.Public, &x.Option.Enroll, &x.Option.Attend, &x.Option.Assignment, &x.Option.Discount,
+	)
+	if err == sql.ErrNoRows {
+		return nil, ErrNotFound
+	}
 	if err != nil {
-		return nil, err
-	}
-	rows, err := db.Query(queryGetCourseContents, x.ID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var content CourseContent
-		err = scanCourseContent(rows.Scan, &content)
-		if err != nil {
-			return nil, err
-		}
-		x.Contents = append(x.Contents, &content)
-	}
-	if err = rows.Err(); err != nil {
 		return nil, err
 	}
 	return &x, nil
 }
 
-// GetCourseFromURL gets course from url
-func GetCourseFromURL(url string) (*Course, error) {
-	var x Course
-	err := scanCourse(db.QueryRow(queryGetCourseFromURL, url).Scan, &x)
-	if err != nil {
-		return nil, err
-	}
-	rows, err := db.Query(queryGetCourseContents, x.ID)
+// GetCourseContents gets course contents for given course id
+func GetCourseContents(courseID int64) ([]*CourseContent, error) {
+	rows, err := db.Query(`
+		select
+			title,
+			long_desc,
+			video_id,
+			video_type,
+			download_url
+		from course_contents
+		where course_id = $1
+		order by i asc
+	`, courseID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
+	xs := make([]*CourseContent, 0)
 	for rows.Next() {
-		var content CourseContent
-		err = scanCourseContent(rows.Scan, &content)
+		var x CourseContent
+		err = rows.Scan(&x.Title, &x.Desc, &x.VideoID, &x.VideoType, &x.DownloadURL)
 		if err != nil {
 			return nil, err
 		}
-		x.Contents = append(x.Contents, &content)
+		xs = append(xs, &x)
 	}
 	if err = rows.Err(); err != nil {
 		return nil, err
 	}
-	return &x, nil
+	return xs, nil
 }
 
-// GetCourFromIDOrURL gets course from id if given v can parse to int,
-// otherwise get from url
-func GetCourFromIDOrURL(v string) (*Course, error) {
-	if id, err := strconv.ParseInt(v, 10, 64); err == nil {
-		return GetCourse(id)
+// GetCourseIDFromURL gets course id from url
+func GetCourseIDFromURL(url string) (int64, error) {
+	var id int64
+	err := db.QueryRow(`
+		select id
+		from courses
+		where url = $1
+	`, url).Scan(&id)
+	if err == sql.ErrNoRows {
+		return 0, ErrNotFound
 	}
-	return GetCourseFromURL(v)
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
 }
 
 // ListCourses lists all courses

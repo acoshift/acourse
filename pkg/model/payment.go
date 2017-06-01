@@ -128,7 +128,8 @@ func (x *Payment) Accept() error {
 	if err != nil {
 		return err
 	}
-	_, err = tx.Exec(querySaveEnroll, x.UserID, x.CourseID)
+
+	err = Enroll(tx, x.UserID, x.CourseID)
 	if err != nil {
 		return err
 	}

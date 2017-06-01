@@ -20,8 +20,23 @@ import (
 func getCourse(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	user := appctx.GetUser(ctx)
-	id := httprouter.GetParam(ctx, "courseID")
-	course, err := model.GetCourFromIDOrURL(id)
+	link := httprouter.GetParam(ctx, "courseID")
+
+	// if id can parse to int64 get course from id
+	id, err := strconv.ParseInt(link, 10, 64)
+	if err != nil {
+		// link can not parse to int64 get course id from url
+		id, err = model.GetCourseIDFromURL(link)
+		if err == model.ErrNotFound {
+			http.NotFound(w, r)
+			return
+		}
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+	x, err := model.GetCourse(id)
 	if err == model.ErrNotFound {
 		http.NotFound(w, r)
 		return
@@ -30,24 +45,43 @@ func getCourse(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	// if course has url, redirect to course url
+	if x.URL.Valid && x.URL.String != link {
+		http.Redirect(w, r, "/course/"+x.URL.String, http.StatusFound)
+		return
+	}
+
 	enrolled := false
 	if user != nil {
-		enrolled, err = model.IsEnrolled(user.ID, course.ID)
+		enrolled, err = model.IsEnrolled(user.ID, x.ID)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 	}
+
+	owned := user.ID == x.UserID
+
+	// if user enrolled or user is owner fetch course contents
+	if enrolled || owned {
+		x.Contents, err = model.GetCourseContents(x.ID)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+
 	page := defaultPage
-	page.Title = course.Title + " | " + page.Title
-	page.Desc = course.ShortDesc
-	page.Image = course.Image
-	page.URL = baseURL + "/course/" + url.PathEscape(course.Link())
+	page.Title = x.Title + " | " + page.Title
+	page.Desc = x.ShortDesc
+	page.Image = x.Image
+	page.URL = baseURL + "/course/" + url.PathEscape(x.Link())
 	view.Course(w, r, &view.CourseData{
 		Page:     &page,
-		Course:   course,
+		Course:   x,
 		Enrolled: enrolled,
-		Owned:    user.ID == course.UserID,
+		Owned:    owned,
 	})
 }
 
