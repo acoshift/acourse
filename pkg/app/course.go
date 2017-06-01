@@ -358,3 +358,7 @@ func getCourseContentEdit(w http.ResponseWriter, r *http.Request) {
 		Course: course,
 	})
 }
+
+func getCourseEnroll(w http.ResponseWriter, r *http.Request) {
+	view.CourseEnroll(w, r, nil)
+}

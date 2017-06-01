@@ -33,6 +33,7 @@ func Mount(mux *http.ServeMux) {
 	r.GET("/profile/edit", mustSignedIn(http.HandlerFunc(getProfileEdit)))
 	r.POST("/profile/edit", mustSignedIn(http.HandlerFunc(postProfileEdit)))
 	r.GET("/course/:courseID", http.HandlerFunc(getCourse))
+	r.GET("/course/:courseID/enroll", http.HandlerFunc(getCourseEnroll))
 	r.GET("/editor/create", onlyInstructor(http.HandlerFunc(getCourseCreate)))
 	r.POST("/editor/create", onlyInstructor(http.HandlerFunc(postCourseCreate)))
 	r.GET("/editor/course", isCourseOwner(http.HandlerFunc(getCourseEdit)))

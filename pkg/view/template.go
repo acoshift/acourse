@@ -59,6 +59,7 @@ func init() {
 	})
 	parseTemplate(keyProfileEdit, []string{"profile-edit.tmpl", "app.tmpl", "layout.tmpl"})
 	parseTemplate(keyCourse, []string{"course.tmpl", "app.tmpl", "layout.tmpl"})
+	parseTemplate(keyCourseEnroll, []string{"enroll.tmpl", "app.tmpl", "layout.tmpl"})
 	parseTemplate(keyCourseCreate, []string{"editor/create.tmpl", "app.tmpl", "layout.tmpl"})
 	parseTemplate(keyCourseEdit, []string{"editor/course.tmpl", "app.tmpl", "layout.tmpl"})
 	parseTemplate(keyCourseContentEdit, []string{"editor/content.tmpl", "app.tmpl", "layout.tmpl"})
