@@ -47,6 +47,7 @@ func getCourse(w http.ResponseWriter, r *http.Request) {
 		Page:     &page,
 		Course:   course,
 		Enrolled: enrolled,
+		Owned:    user.ID == course.UserID,
 	})
 }
 

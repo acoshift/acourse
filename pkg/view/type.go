@@ -44,6 +44,7 @@ type CourseData struct {
 	*Page
 	Course   *model.Course
 	Enrolled bool
+	Owned    bool
 }
 
 // CourseCreateData type
