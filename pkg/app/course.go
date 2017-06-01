@@ -72,6 +72,16 @@ func getCourse(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	if owned {
+		x.Owner = user
+	} else {
+		x.Owner, err = model.GetUser(x.UserID)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+
 	page := defaultPage
 	page.Title = x.Title + " | " + page.Title
 	page.Desc = x.ShortDesc

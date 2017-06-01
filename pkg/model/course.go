@@ -12,7 +12,7 @@ import (
 type Course struct {
 	ID            int64
 	Option        CourseOption
-	Owner         User
+	Owner         *User
 	EnrollCount   int64
 	Title         string
 	ShortDesc     string

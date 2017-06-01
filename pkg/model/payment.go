@@ -80,20 +80,6 @@ const (
 		from payments
 		where status = any($1)
 	`
-
-	querySavePayment = `
-		insert into payments
-			(user_id, course_id, image, price, original_price, code, status, updated_at)
-		values
-			($1, $2, $3, $4, $5, $6, $7, now())
-		returning id
-	`
-
-	queryChangePaymentStatus = `
-		update payments
-		set status = $2
-		where id = $1
-	`
 )
 
 // Save saves payment, allow for create only
@@ -107,7 +93,13 @@ func (x *Payment) Save() error {
 	if x.CourseID <= 0 {
 		return fmt.Errorf("invalid course")
 	}
-	err := db.QueryRow(querySavePayment, x.UserID, x.CourseID, x.Image, x.Price, x.OriginalPrice, x.Code, Pending).Scan(&x.ID)
+	err := db.QueryRow(`
+		insert into payments
+			(user_id, course_id, image, price, original_price, code, status, updated_at)
+		values
+			($1, $2, $3, $4, $5, $6, $7, now())
+		returning id
+	`, x.UserID, x.CourseID, x.Image, x.Price, x.OriginalPrice, x.Code, Pending).Scan(&x.ID)
 	if err != nil {
 		return err
 	}
@@ -124,7 +116,10 @@ func (x *Payment) Accept() error {
 		return err
 	}
 	defer tx.Rollback()
-	_, err = tx.Exec(queryChangePaymentStatus, x.ID, Accepted)
+	_, err = tx.Exec(`
+		update payments
+		set status = $2
+		where id = $1`, x.ID, Accepted)
 	if err != nil {
 		return err
 	}
@@ -145,7 +140,11 @@ func (x *Payment) Reject() error {
 	if x.ID <= 0 {
 		return fmt.Errorf("payment must be save before accept")
 	}
-	_, err := db.Exec(queryChangePaymentStatus, x.ID, Rejected)
+	_, err := db.Exec(`
+		update payments
+		set status = $2
+		where id = $1
+	`, x.ID, Rejected)
 	if err != nil {
 		return err
 	}
