@@ -2,87 +2,84 @@ package view
 
 import "net/http"
 
-type viewKey int
-
-const (
-	_ viewKey = iota
-	keyIndex
-	keySignIn
-	keySignUp
-	keyProfile
-	keyProfileEdit
-	keyUser
-	keyCourse
-	keyCourseCreate
-	keyCourseEdit
-	keyCourseContentEdit
-	keyCourseEnroll
-	keyAdminUsers
-	keyAdminCourses
-	keyAdminPayments
+type (
+	keyIndex             struct{}
+	keySignIn            struct{}
+	keySignUp            struct{}
+	keyProfile           struct{}
+	keyProfileEdit       struct{}
+	keyUser              struct{}
+	keyCourse            struct{}
+	keyCourseCreate      struct{}
+	keyCourseEdit        struct{}
+	keyCourseContentEdit struct{}
+	keyCourseEnroll      struct{}
+	keyAdminUsers        struct{}
+	keyAdminCourses      struct{}
+	keyAdminPayments     struct{}
 )
 
 // Index renders index view
 func Index(w http.ResponseWriter, r *http.Request, data *IndexData) {
-	render(w, r, keyIndex, data)
+	render(w, r, keyIndex{}, data)
 }
 
 // SignIn renders signin view
 func SignIn(w http.ResponseWriter, r *http.Request, data *AuthData) {
-	render(w, r, keySignIn, data)
+	render(w, r, keySignIn{}, data)
 }
 
 // SignUp renders signup view
 func SignUp(w http.ResponseWriter, r *http.Request, data *AuthData) {
-	render(w, r, keySignUp, data)
+	render(w, r, keySignUp{}, data)
 }
 
 // Profile renders profile view
 func Profile(w http.ResponseWriter, r *http.Request, data *ProfileData) {
-	render(w, r, keyProfile, data)
+	render(w, r, keyProfile{}, data)
 }
 
 // ProfileEdit renders profile edit view
 func ProfileEdit(w http.ResponseWriter, r *http.Request, data *ProfileEditData) {
-	render(w, r, keyProfileEdit, data)
+	render(w, r, keyProfileEdit{}, data)
 }
 
 // Course renders course view
 func Course(w http.ResponseWriter, r *http.Request, data *CourseData) {
-	render(w, r, keyCourse, data)
+	render(w, r, keyCourse{}, data)
 }
 
 // CourseCreate renders course create view
 func CourseCreate(w http.ResponseWriter, r *http.Request, data *CourseCreateData) {
-	render(w, r, keyCourseCreate, data)
+	render(w, r, keyCourseCreate{}, data)
 }
 
 // CourseEdit renders course edit view
 func CourseEdit(w http.ResponseWriter, r *http.Request, data *CourseEditData) {
-	render(w, r, keyCourseEdit, data)
+	render(w, r, keyCourseEdit{}, data)
 }
 
 // CourseContentEdit renders course content edit view
 func CourseContentEdit(w http.ResponseWriter, r *http.Request, data *CourseEditData) {
-	render(w, r, keyCourseContentEdit, data)
+	render(w, r, keyCourseContentEdit{}, data)
 }
 
 // CourseEnroll renders course enroll view
 func CourseEnroll(w http.ResponseWriter, r *http.Request, data *CourseData) {
-	render(w, r, keyCourseEnroll, data)
+	render(w, r, keyCourseEnroll{}, data)
 }
 
 // AdminUsers renders admin users view
 func AdminUsers(w http.ResponseWriter, r *http.Request, data *AdminUsersData) {
-	render(w, r, keyAdminUsers, data)
+	render(w, r, keyAdminUsers{}, data)
 }
 
 // AdminCourses renders admin courses view
 func AdminCourses(w http.ResponseWriter, r *http.Request, data *AdminCoursesData) {
-	render(w, r, keyAdminCourses, data)
+	render(w, r, keyAdminCourses{}, data)
 }
 
 // AdminPayments renders admin payments view
 func AdminPayments(w http.ResponseWriter, r *http.Request, data *AdminPaymentsData) {
-	render(w, r, keyAdminPayments, data)
+	render(w, r, keyAdminPayments{}, data)
 }
