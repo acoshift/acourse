@@ -61,6 +61,23 @@ func recovery(h http.Handler) http.Handler {
 	})
 }
 
+func xsrf(action string) middleware.Middleware {
+	return func(h http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			var id string
+			if u := appctx.GetUser(r.Context()); u != nil {
+				id = u.ID
+			}
+			x := r.FormValue("X")
+			if !verifyXSRF(x, id, action) {
+				http.Error(w, "invalid xsrf token, go back, refresh and try again...", http.StatusBadRequest)
+				return
+			}
+			h.ServeHTTP(w, r)
+		})
+	}
+}
+
 func mustSignedIn(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		s := session.Get(r.Context())

@@ -12,6 +12,7 @@ import (
 	"github.com/acoshift/flash"
 	"github.com/acoshift/go-firebase-admin"
 	"github.com/acoshift/httprouter"
+	"github.com/acoshift/middleware"
 	"github.com/acoshift/session"
 	"github.com/asaskevich/govalidator"
 )
@@ -23,22 +24,40 @@ func Mount(mux *http.ServeMux) {
 	r.ServeFiles("/~/*filepath", http.Dir("static"))
 	r.GET("/favicon.ico", fileHandler("static/favicon.ico"))
 	r.GET("/signin", mustNotSignedIn(http.HandlerFunc(getSignIn)))
-	r.POST("/signin", mustNotSignedIn(http.HandlerFunc(postSignIn)))
+	r.POST("/signin", middleware.Chain(
+		mustNotSignedIn,
+		xsrf("signin"),
+	)(http.HandlerFunc(postSignIn)))
 	r.GET("/openid", mustNotSignedIn(http.HandlerFunc(getSignInProvider)))
 	r.GET("/openid/callback", mustNotSignedIn(http.HandlerFunc(getSignInCallback)))
 	r.GET("/signup", mustNotSignedIn(http.HandlerFunc(getSignUp)))
-	r.POST("/signup", mustNotSignedIn(http.HandlerFunc(postSignUp)))
+	r.POST("/signup", middleware.Chain(
+		mustNotSignedIn,
+		xsrf("signup"),
+	)(http.HandlerFunc(postSignUp)))
 	r.GET("/signout", mustSignedIn(http.HandlerFunc(getSignOut)))
 	r.GET("/profile", mustSignedIn(http.HandlerFunc(getProfile)))
 	r.GET("/profile/edit", mustSignedIn(http.HandlerFunc(getProfileEdit)))
-	r.POST("/profile/edit", mustSignedIn(http.HandlerFunc(postProfileEdit)))
+	r.POST("/profile/edit", middleware.Chain(
+		mustSignedIn,
+		xsrf("profile/edit"),
+	)(http.HandlerFunc(postProfileEdit)))
 	r.GET("/course/:courseID", http.HandlerFunc(getCourse))
 	r.GET("/course/:courseID/enroll", mustSignedIn(http.HandlerFunc(getCourseEnroll)))
-	r.POST("/course/:courseID/enroll", mustSignedIn(http.HandlerFunc(postCourseEnroll)))
+	r.POST("/course/:courseID/enroll", middleware.Chain(
+		mustSignedIn,
+		xsrf("enroll"),
+	)(http.HandlerFunc(postCourseEnroll)))
 	r.GET("/editor/create", onlyInstructor(http.HandlerFunc(getCourseCreate)))
-	r.POST("/editor/create", onlyInstructor(http.HandlerFunc(postCourseCreate)))
+	r.POST("/editor/create", middleware.Chain(
+		onlyInstructor,
+		xsrf("editor/create"),
+	)(http.HandlerFunc(postCourseCreate)))
 	r.GET("/editor/course", isCourseOwner(http.HandlerFunc(getCourseEdit)))
-	r.POST("/editor/course", isCourseOwner(http.HandlerFunc(postCourseEdit)))
+	r.POST("/editor/course", middleware.Chain(
+		isCourseOwner,
+		xsrf("editor/course"),
+	)(http.HandlerFunc(postCourseEdit)))
 	r.GET("/editor/content", isCourseOwner(http.HandlerFunc(getCourseContentEdit)))
 
 	admin := httprouter.New()
@@ -90,12 +109,6 @@ func getSignIn(w http.ResponseWriter, r *http.Request) {
 func postSignIn(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	f := flash.Get(ctx)
-
-	if !verifyXSRF(r.FormValue("X"), "", "signin") {
-		f.Add("Errors", "invalid xsrf token")
-		back(w, r)
-		return
-	}
 
 	email := r.FormValue("Email")
 	if len(email) == 0 {
@@ -210,12 +223,6 @@ func postSignUp(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	f := flash.Get(ctx)
-
-	if !verifyXSRF(r.FormValue("X"), "", "signup") {
-		f.Add("Errors", "invalid xsrf token")
-		back(w, r)
-		return
-	}
 
 	email := r.FormValue("Email")
 	if len(email) == 0 {

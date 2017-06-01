@@ -62,11 +62,7 @@ func postProfileEdit(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	user := appctx.GetUser(ctx)
 	f := flash.Get(ctx)
-	if !verifyXSRF(r.FormValue("X"), user.ID, "profile-edit") {
-		f.Add("Errors", "invalid xsrf token")
-		back(w, r)
-		return
-	}
+
 	image, info, err := r.FormFile("Image")
 	var imageURL string
 	if err != http.ErrMissingFile {

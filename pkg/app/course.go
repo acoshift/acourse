@@ -112,12 +112,6 @@ func postCourseCreate(w http.ResponseWriter, r *http.Request) {
 	f := flash.Get(ctx)
 	user := appctx.GetUser(ctx)
 
-	if !verifyXSRF(r.FormValue("X"), user.ID, "editor/create") {
-		f.Add("Errors", "invalid xsrf token")
-		back(w, r)
-		return
-	}
-
 	var (
 		title         = r.FormValue("Title")
 		shortDesc     = r.FormValue("ShortDesc")
@@ -229,13 +223,6 @@ func postCourseEdit(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.ParseInt(r.FormValue("id"), 10, 64)
 
 	f := flash.Get(ctx)
-	user := appctx.GetUser(ctx)
-
-	if !verifyXSRF(r.FormValue("X"), user.ID, "editor/course") {
-		f.Add("Errors", "invalid xsrf token")
-		back(w, r)
-		return
-	}
 
 	var (
 		title         = r.FormValue("Title")
