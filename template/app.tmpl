@@ -88,46 +88,52 @@
 
 
 {{define "style"}}
-  {{template "app-style" $}}
-  <style>
-    footer {
-      position: relative;
-      z-index: 2;
-      padding: 32px;
-      backface-visibility: hidden;
-      background-color: #292d35;
-      color: #484d56;
-    }
-    .app-container {
-      padding-top: 80px;
-    }
-    #navbar {
-      position: fixed;
-      z-index: 100;
-      width: 100%;
-      top: 0;
-      background-color: white;
-      transition: top 0.2s ease-in-out;
-      border-bottom: 1px solid #e7eef1;
-    }
-    #navbar .link {
-      color: #474f57;
-      text-decoration: none;
-      padding: 0 16px;
-    }
-    #navbar.nav-up {
-      top: -82px;
-    }
-    #navbar > .navbar-container {
-      position: relative;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      height: 80px;
-    }
-    #navbar .acourse-button {
-      flex-basis: 100px;
-    }
-  </style>
+{{template "app-style" $}}
+<style>
+  footer {
+    position: relative;
+    z-index: 2;
+    padding: 32px;
+    backface-visibility: hidden;
+    background-color: #292d35;
+    color: #484d56;
+  }
+
+  .app-container {
+    padding-top: 80px;
+  }
+
+  #navbar {
+    position: fixed;
+    z-index: 100;
+    width: 100%;
+    top: 0;
+    background-color: white;
+    transition: top 0.2s ease-in-out;
+    border-bottom: 1px solid #e7eef1;
+  }
+
+  #navbar .link {
+    color: #474f57;
+    text-decoration: none;
+    padding: 0 16px;
+  }
+
+  #navbar.nav-up {
+    top: -82px;
+  }
+
+  #navbar>.navbar-container {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 80px;
+  }
+
+  #navbar .acourse-button {
+    flex-basis: 100px;
+  }
+</style>
 {{end}}
 

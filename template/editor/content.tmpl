@@ -1,11 +1,42 @@
 {{define "app-body"}}
-  {{range .Course.Contents}}
-    <p>{{.Title}}</p>
-  {{end}}
+<div id="content-edit">
+  <div class="grid-container _flex-column">
+    <div class="acourse-header col-xs-12 col-md-8 col-md-offset-2 _color-sub">
+      Course: {{.Course.Title}}
+    </div>
+    {{range .Course.Contents}}
+    <div class="acourse-card acourse-block-big _flex-row row col-xs-12 col-md-8 col-md-offset-2 _no-padding">
+      <div class="acourse-segment col-xs-12 col-md-9">
+        <h3 class="color-sub">{{.Title}}</h3>
+        <div class="_flex-column">
+          <p class="_pre-wrap _color-dark">
+            {{.Desc}}
+          </p>
+        </div>
+        <div><span class="_font-bold">Video ID:</span> {{.VideoID}}</div>
+      </div>
+      <div class="acourse-segment col-xs-12 col-md-3 _bg-color-base-2">
+        <form method="POST">
+          <input type="hidden">
+          <button class="acourse-button -primary acourse-block _full-width">Edit</button>
+        </form>
+        <form method="POST">
+          <input type="hidden">
+          <button class="acourse-button -negative _full-width">Delete</button>
+        </form>
+      </div>
+    </div>
+    {{end}}
+  </div>
+</div>
 {{end}}
 
-{{define "app-script"}}
-{{end}}
+{{define "app-script"}} {{end}}
 
 {{define "app-style"}}
+<style>
+  #content-edit {
+    padding-top: 32px;
+  }
+</style>
 {{end}}

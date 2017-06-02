@@ -107,17 +107,13 @@
                     {{xsrf "payment-action"}}
                     <input type="hidden" name="ID" value="{{.ID}}">
                     <input type="hidden" name="Action" value="accept">
-                    <a href="/">
-                      <button class="acourse-button -positive _full-width"  type="submit">Accept</button>
-                    </a>
+                    <button class="acourse-button -positive _full-width"  type="submit">Accept</button>
                   </form>
                   <form method="POST">
                     {{xsrf "payment-action"}}
                     <input type="hidden" name="ID" value="{{.ID}}">
                     <input type="hidden" name="Action" value="reject">
-                    <a href="/">
-                      <button class="acourse-button -negative _full-width" type="submit">Reject</button>
-                    </a>
+                    <button class="acourse-button -negative _full-width" type="submit">Reject</button>
                   </form>
                 {{else}}
                   <div>-</div>
@@ -159,6 +155,7 @@
   #payment {
     padding-top: 32px;
   }
+
   #payment img {
     max-width: 100%;
   }
