@@ -53,11 +53,20 @@ func getCourse(w http.ResponseWriter, r *http.Request) {
 	}
 
 	enrolled := false
+	pendingEnroll := false
 	if user != nil {
 		enrolled, err = model.IsEnrolled(user.ID, x.ID)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
+		}
+
+		if !enrolled {
+			pendingEnroll, err = model.HasPendingPayment(user.ID, x.ID)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
 		}
 	}
 
@@ -91,10 +100,11 @@ func getCourse(w http.ResponseWriter, r *http.Request) {
 	page.Image = x.Image
 	page.URL = baseURL + "/course/" + url.PathEscape(x.Link())
 	view.Course(w, r, &view.CourseData{
-		Page:     &page,
-		Course:   x,
-		Enrolled: enrolled,
-		Owned:    owned,
+		Page:          &page,
+		Course:        x,
+		Enrolled:      enrolled,
+		Owned:         owned,
+		PendingEnroll: pendingEnroll,
 	})
 }
 
@@ -361,6 +371,7 @@ func getCourseContentEdit(w http.ResponseWriter, r *http.Request) {
 func getCourseEnroll(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	user := appctx.GetUser(ctx)
+	f := flash.Get(ctx)
 
 	link := httprouter.GetParam(ctx, "courseID")
 
@@ -411,10 +422,134 @@ func getCourseEnroll(w http.ResponseWriter, r *http.Request) {
 	page.URL = baseURL + "/course/" + url.PathEscape(x.Link())
 	view.CourseEnroll(w, r, &view.CourseData{
 		Page:   &page,
+		Flash:  f,
 		Course: x,
 	})
 }
 
 func postCourseEnroll(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	user := appctx.GetUser(ctx)
+	f := flash.Get(ctx)
 
+	link := httprouter.GetParam(ctx, "courseID")
+
+	id, err := strconv.ParseInt(link, 10, 64)
+	if err != nil {
+		id, err = model.GetCourseIDFromURL(link)
+		if err == model.ErrNotFound {
+			http.NotFound(w, r)
+			return
+		}
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+
+	x, err := model.GetCourse(id)
+	if err == model.ErrNotFound {
+		http.NotFound(w, r)
+		return
+	}
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// if user is course owner redirect back to course page
+	if user.ID == x.UserID {
+		http.Redirect(w, r, "/course/"+link, http.StatusFound)
+		return
+	}
+
+	// redirect enrolled user back to course page
+	enrolled, err := model.IsEnrolled(user.ID, id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if enrolled {
+		http.Redirect(w, r, "/course/"+link, http.StatusFound)
+		return
+	}
+
+	priceStr := r.FormValue("Price")
+	if len(priceStr) == 0 {
+		f.Add("Errors", "price can not be empty")
+		back(w, r)
+		return
+	}
+	price, _ := strconv.ParseFloat(priceStr, 64)
+
+	if price < 0 {
+		f.Add("Errors", "price can not be negative")
+		back(w, r)
+		return
+	}
+
+	originalPrice := x.Price
+	if x.Option.Discount {
+		originalPrice = x.Discount
+	}
+
+	var imageURL string
+	if x.Price != 0 {
+		image, info, err := r.FormFile("Image")
+		if err != http.ErrMissingFile {
+			if err != nil {
+				f.Add("Errors", err.Error())
+				back(w, r)
+				return
+			}
+
+			if !strings.Contains(info.Header.Get(header.ContentType), "image") {
+				f.Add("Errors", "file is not an image")
+				back(w, r)
+				return
+			}
+
+			imageURL, err = UploadPaymentImage(ctx, image)
+			if err != nil {
+				f.Add("Errors", err.Error())
+				back(w, r)
+				return
+			}
+		}
+	}
+
+	tx, err := db.Begin()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer tx.Rollback()
+	if x.Price == 0 {
+		err = model.Enroll(tx, user.ID, x.ID)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	} else {
+		paymentID, err := model.CreatePayment(tx, &model.Payment{
+			CourseID:      x.ID,
+			UserID:        user.ID,
+			Image:         imageURL,
+			Price:         price,
+			OriginalPrice: originalPrice,
+		})
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		// TODO: send email to user
+		_ = paymentID
+	}
+	err = tx.Commit()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, "/course/"+link, http.StatusFound)
 }

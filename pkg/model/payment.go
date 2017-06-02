@@ -1,6 +1,7 @@
 package model
 
 import (
+	"database/sql"
 	"fmt"
 	"time"
 
@@ -82,28 +83,20 @@ const (
 	`
 )
 
-// Save saves payment, allow for create only
-func (x *Payment) Save() error {
-	if x.ID > 0 {
-		return fmt.Errorf("payment already created")
-	}
-	if len(x.UserID) == 0 {
-		return fmt.Errorf("invalid user")
-	}
-	if x.CourseID <= 0 {
-		return fmt.Errorf("invalid course")
-	}
-	err := db.QueryRow(`
+// CreatePayment creates new payment
+func CreatePayment(tx *sql.Tx, x *Payment) (int64, error) {
+	var id int64
+	err := tx.QueryRow(`
 		insert into payments
-			(user_id, course_id, image, price, original_price, code, status, updated_at)
+			(user_id, course_id, image, price, original_price, code, status)
 		values
-			($1, $2, $3, $4, $5, $6, $7, now())
+			($1, $2, $3, $4, $5, $6, $7)
 		returning id
-	`, x.UserID, x.CourseID, x.Image, x.Price, x.OriginalPrice, x.Code, Pending).Scan(&x.ID)
+	`, x.UserID, x.CourseID, x.Image, x.Price, x.OriginalPrice, x.Code, Pending).Scan(&id)
 	if err != nil {
-		return err
+		return 0, err
 	}
-	return nil
+	return id, nil
 }
 
 // Accept accepts a payment and create new enroll
@@ -195,6 +188,23 @@ func GetPayment(paymentID int64) (*Payment, error) {
 		return nil, err
 	}
 	return &x, nil
+}
+
+// HasPendingPayment returns ture if given user has pending payment for given course
+func HasPendingPayment(userID string, courseID int64) (bool, error) {
+	var p int
+	err := db.QueryRow(`
+		select 1 from payments
+		where user_id = $1 and course_id = $2 and status = $3`,
+		userID, courseID, Pending,
+	).Scan(&p)
+	if err == sql.ErrNoRows {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 // ListHistoryPayments lists history payments

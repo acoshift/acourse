@@ -2,10 +2,19 @@
   <p>{{.Course.EnrollDetail}}</p>
   <form method="POST" enctype="multipart/form-data">
     {{xsrf "enroll"}}
-    <input type="file" name="Image">
-    <input type="number" name="Price">
+    {{if ne .Course.Price 0.0}}
+      <input type="file" name="Image">
+      <input type="number" name="Price">
+    {{end}}
     <button type="submit">Enroll</button>
   </form>
+  {{if .Flash.Errors}}
+    <ul>
+      {{range .Flash.Errors}}
+      <li>{{.}}</li>
+      {{end}}
+    </ul>
+  {{end}}
 {{end}}
 
 {{define "app-script"}}

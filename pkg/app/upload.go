@@ -35,6 +35,22 @@ func generateDownloadURL(filename string) string {
 	return fmt.Sprintf("https://storage.googleapis.com/%s/%s", bucketName, filename)
 }
 
+// UploadPaymentImage uploads payment image
+func UploadPaymentImage(ctx context.Context, r io.Reader) (string, error) {
+	buf := &bytes.Buffer{}
+	err := resizeCropEncode(buf, r, 1200, 1200, 80)
+	if err != nil {
+		return "", err
+	}
+	filename := generateFilename() + ".jpg"
+	downloadURL := generateDownloadURL(filename)
+	err = Upload(ctx, buf, filename)
+	if err != nil {
+		return "", err
+	}
+	return downloadURL, nil
+}
+
 // UploadProfileImage uploads profile image and return url
 func UploadProfileImage(ctx context.Context, r io.Reader) (string, error) {
 	buf := &bytes.Buffer{}

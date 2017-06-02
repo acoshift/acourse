@@ -42,9 +42,11 @@ type ProfileEditData struct {
 // CourseData type
 type CourseData struct {
 	*Page
-	Course   *model.Course
-	Enrolled bool
-	Owned    bool
+	flash.Flash
+	Course        *model.Course
+	Enrolled      bool
+	Owned         bool
+	PendingEnroll bool
 }
 
 // CourseCreateData type
