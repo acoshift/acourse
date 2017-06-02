@@ -16,6 +16,8 @@ import (
 	"github.com/acoshift/flash"
 	"github.com/acoshift/header"
 	"github.com/dustin/go-humanize"
+	"github.com/microcosm-cc/bluemonday"
+	"github.com/russross/blackfriday"
 	"github.com/tdewolff/minify"
 	"github.com/tdewolff/minify/css"
 	"github.com/tdewolff/minify/html"
@@ -136,6 +138,11 @@ func parseTemplate(key interface{}, set []string) {
 		},
 		"dateInput": func(v time.Time) string {
 			return v.Format("2006-01-02")
+		},
+		"markdown": func(s string) template.HTML {
+			md := blackfriday.MarkdownCommon([]byte(s))
+			r := bluemonday.UGCPolicy().SanitizeBytes(md)
+			return template.HTML(r)
 		},
 		"live": func() int {
 			return model.Live

@@ -1,5 +1,5 @@
 hash: 1a3f780dea13301eaae968ef7d7191a25807414f1aec5b0cdffc4e1f9a1de9ab
-updated: 2017-05-31T01:11:16.857143576+07:00
+updated: 2017-06-03T01:16:37.397559664+07:00
 imports:
 - name: cloud.google.com/go
   version: 2e6a95edb1071d750f6d7db777bf66cd2997af6c
@@ -41,7 +41,7 @@ imports:
 - name: github.com/dustin/go-humanize
   version: 259d2a102b871d17f30e3cd9881a642961a1e486
 - name: github.com/garyburd/redigo
-  version: fb985d0d06e5f1065b3bfb0b2bb8aea6809a3670
+  version: 95d11dba2d44531bdb8022752b98912baafae03a
   subpackages:
   - internal
   - redis
@@ -61,6 +61,10 @@ imports:
   version: 2704adc878c21e1329f46f6e56a1c387d788ff94
   subpackages:
   - oid
+- name: github.com/microcosm-cc/bluemonday
+  version: e79763773ab6222ca1d5a7cbd9d62d83c1f77081
+- name: github.com/russross/blackfriday
+  version: 0ba0f2b6ed7c475a92e4df8641825cb7a11d1fa3
 - name: github.com/tdewolff/buffer
   version: df6253e2a2cda5aba1b5d0c59fc5bdf0a98ae192
 - name: github.com/tdewolff/minify
@@ -88,6 +92,8 @@ imports:
   subpackages:
   - context
   - context/ctxhttp
+  - html
+  - html/atom
   - http2
   - http2/hpack
   - idna
@@ -137,7 +143,7 @@ imports:
   - socket
   - urlfetch
 - name: google.golang.org/genproto
-  version: d80a6e20e776b0b17a324d0ba1ab50a39c8e8944
+  version: aa2eb687b4d3e17154372564ad8d6bf11c3cf21f
   subpackages:
   - googleapis/api/annotations
   - googleapis/datastore/v1
