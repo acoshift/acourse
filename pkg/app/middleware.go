@@ -13,11 +13,33 @@ import (
 	"github.com/acoshift/flash"
 	"github.com/acoshift/middleware"
 	"github.com/acoshift/session"
-	store "github.com/acoshift/session/store/sql"
+	redisstore "github.com/acoshift/session/store/redis"
+	sqlstore "github.com/acoshift/session/store/sql"
+	"github.com/garyburd/redigo/redis"
 )
 
 // Middleware wraps handlers with app's middleware
 func Middleware(h http.Handler) http.Handler {
+	var sessionStore session.Store
+	if len(redisAddr) > 0 {
+		sessionStore = redisstore.New(redisstore.Config{
+			Prefix: "acourse:",
+			Pool: &redis.Pool{
+				MaxIdle:     20,
+				IdleTimeout: 10 * time.Minute,
+				Dial: func() (redis.Conn, error) {
+					return redis.Dial("tcp", redisAddr, redis.DialDatabase(redisDB), redis.DialPassword(redisPass))
+				},
+			},
+		})
+	} else {
+		sessionStore = sqlstore.New(sqlstore.Config{
+			DB:              db,
+			Table:           "sessions",
+			CleanupInterval: 8 * time.Hour,
+		})
+	}
+
 	return middleware.Chain(
 		recovery,
 		session.Middleware(session.Config{
@@ -27,11 +49,7 @@ func Middleware(h http.Handler) http.Handler {
 			MaxAge:   10 * 24 * time.Hour,
 			HTTPOnly: true,
 			Secure:   session.PreferSecure,
-			Store: store.New(store.Config{
-				DB:              db,
-				Table:           "sessions",
-				CleanupInterval: 6 * time.Hour,
-			}),
+			Store:    sessionStore,
 		}),
 		flash.Middleware(),
 		fetchUser,

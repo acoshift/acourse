@@ -41,6 +41,9 @@ func main() {
 		BaseURL:        config.String("base_url"),
 		XSRFSecret:     config.String("xsrf_key"),
 		SQLURL:         config.String("sql_url"),
+		RedisAddr:      config.String("redis_addr"),
+		RedisPass:      config.String("redis_pass"),
+		RedisDB:        config.Int("redis_db"),
 	})
 	if err != nil {
 		log.Fatal(err)

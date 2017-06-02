@@ -24,6 +24,9 @@ var (
 	xsrfSecret   string
 	db           *sql.DB
 	firAuth      *admin.Auth
+	redisAddr    string
+	redisPass    string
+	redisDB      int
 )
 
 // Config use to init app package
@@ -39,6 +42,9 @@ type Config struct {
 	BaseURL        string
 	XSRFSecret     string
 	SQLURL         string
+	RedisAddr      string
+	RedisPass      string
+	RedisDB        int
 }
 
 func init() {
@@ -78,6 +84,9 @@ func Init(config Config) error {
 
 	baseURL = config.BaseURL
 	xsrfSecret = config.XSRFSecret
+	redisAddr = config.RedisAddr
+	redisPass = config.RedisPass
+	redisDB = config.RedisDB
 
 	// init databases
 	db, err = sql.Open("postgres", config.SQLURL)
