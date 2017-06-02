@@ -304,6 +304,7 @@ func ListCourses() ([]*Course, error) {
 	defer rows.Close()
 	for rows.Next() {
 		var x Course
+		x.Owner = &User{}
 		err := rows.Scan(&x.ID,
 			&x.Title, &x.ShortDesc, &x.Desc, &x.Image, &x.Start, &x.URL, &x.Type, &x.Price, &x.Discount, &x.EnrollDetail,
 			&x.CreatedAt, &x.UpdatedAt,
