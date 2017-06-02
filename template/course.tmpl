@@ -106,9 +106,11 @@
               <div class="acourse-segment">
                 <div class="col-xs-12">
                   <div class="acourse-block _font-bold _font-size-bigger">฿ 1,300</div>
+                  {{if and (not .Owned) (not .Enrolled)}}
                   <a href="/course/{{.Course.Link}}/enroll">
                     <button class="acourse-button -positive _font-bold _full-width acourse-block">Enroll Now</button>
                   </a>
+                  {{end}}
                   {{if .Owned}}
                     <a href="/editor/course?id={{.Course.ID}}">
                       <button class="acourse-button -positive _font-bold _full-width acourse-block">Edit</button>
