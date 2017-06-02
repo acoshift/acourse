@@ -1,24 +1,83 @@
 {{define "app-body"}}
-  <p>{{.Course.EnrollDetail}}</p>
-  <form method="POST" enctype="multipart/form-data">
-    {{xsrf "enroll"}}
-    {{if ne .Course.Price 0.0}}
-      <input type="file" name="Image">
-      <input type="number" name="Price">
-    {{end}}
-    <button type="submit">Enroll</button>
-  </form>
-  {{if .Flash.Errors}}
-    <ul>
-      {{range .Flash.Errors}}
-      <li>{{.}}</li>
-      {{end}}
-    </ul>
-  {{end}}
+<div id="enroll">
+  <div class="grid-container _flex-column">
+
+    <div class="acourse-header _color-sub">
+      Enroll Course: {{.Course.Title}}
+    </div>
+
+    <div class="acourse-card _flex-row row">
+
+      <div class="acourse-segment col-xs-12 col-md-8">
+        <h3 class="acourse-block-big">Enrollment Detail</h3>
+        <div>
+          <p class="_pre-wrap">{{.Course.EnrollDetail}}</p>
+        </div>
+      </div>
+
+      <div class="acourse-segment col-xs-12 col-md-4 _bg-color-base-2">
+        <h3 class="acourse-block-big">
+          Enroll
+        </h3>
+        <form method="POST" enctype="multipart/form-data">
+          {{xsrf "enroll"}}
+          {{if ne .Course.Price 0.0}}
+            <div class="_flex-row">
+              <div class="input-field col-xs-6 _no-padding _flex-column">
+                <label>Upload Slip</label>
+                <div class="_flex-row">
+                  <label class="acourse-button -info _full-width" for="image-input">Upload Slip</label>
+                  <input id="image-input" class="_hide" type="file" name="Image" accept="image/*">
+                </div>
+              </div>
+              <div class="acourse-block col-xs-6">
+                <img 
+                  id="slip"
+                  class="_img-cover"
+                  src="">
+              </div>
+            </div>
+            
+            <div class="input-field _flex-column">
+              <label>Payment Amount:</label>
+              <input class="acourse-input" type="number" name="Price" placeholder="amount (THB)">
+            </div>
+          {{end}}
+          <button class="acourse-button -positive _full-width" type="submit">Enroll</button>
+        </form>
+        {{if .Flash.Errors}}
+          <ul>
+            {{range .Flash.Errors}}
+            <li>{{.}}</li>
+            {{end}}
+          </ul>
+        {{end}}
+      </div>
+    </div>
+  </div>
+</div>
 {{end}}
 
 {{define "app-script"}}
+<script>
+  bindFileInputImage (
+    document.querySelector('#image-input'),
+    document.querySelector('#slip')
+  )
+</script>
 {{end}}
 
 {{define "app-style"}}
+<style>
+  #enroll {
+    padding-top: 32px;
+  }
+  #enroll #slip{
+    height: 120px;
+    width: 90px;
+  }
+  #enroll img[src=''] {
+    display: none;
+  }
+</style>
 {{end}}

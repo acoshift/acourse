@@ -37,6 +37,9 @@
 ._bg-color-base {
   background: $color-base;
 }
+._bg-color-base-2 {
+  background: $color-base-2;
+}
 
 /*===============================
   Color
@@ -72,9 +75,11 @@
   color: $color-light;
 }
 ._color-base {
-  background: $color-base;
+  color: $color-base;
 }
-
+._color-base-2 {
+  color: $color-base-2;
+}
 /*===============================
   Box Model
 ===============================*/
@@ -211,4 +216,7 @@
 }
 ._hide {
   display: none;
+}
+._pre-wrap {
+  white-space: pre-wrap;
 }
