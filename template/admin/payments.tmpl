@@ -34,6 +34,8 @@
         <thead>
           <tr>
             <th>ID</th>
+            <th>Course</th>
+            <th>Slip</th>
             <th>User</th>
             <!--<th>Name</th>
             <th>Email</th>-->
@@ -47,12 +49,43 @@
           {{range .Payments}}
             <tr>
               <td data-column="ID">{{.ID}}</td>
-              <td>
-                <img src="{{.User.Image}}" class="acourse-circle _img-cover" onerror="this.src = '/~/img/placeholder-img.svg'">
+              <td data-column="Course">
+                <a href="/course/{{.Course.Link}}" target="_blank">
+                  <img
+                    class="_img-cover"
+                    src="{{.Course.Image}}"
+                    onerror="this.src = '/~/img/placeholder-img.svg'"
+                    width="200"
+                    height="100">
+                </a>
+              </td>
+              <td data-column="Slip">
+                {{if .Image}}
+                  <a href="{{.Image}}" target="_blank">
+                    <img
+                      class="_img-cover"
+                      src="{{.Image}}"
+                      onerror="this.src = '/~/img/placeholder-img.svg'"
+                      width="200"
+                      height="100">
+                  </a>
+                {{else}}
+                  <img
+                      class="_img-cover"
+                      src="/~/img/placeholder-img.svg"
+                      width="200"
+                      height="100">
+                {{end}}
+              </td>
+              <td class="acourse-word-brakeable" style="min-width: 100px">
+                <img
+                  src="{{.User.Image}}"
+                  class="acourse-circle acourse-block _img-cover"
+                  onerror="this.src = '/~/img/placeholder-img.svg'">
                 <br>
                 <span>
-                  {{.User.Username}}<br>
-                  {{.User.Email.String}}
+                  <div class="_font-bold">{{.User.Username}}</div>
+                  <div>{{.User.Email.String}}</div>
                 </span>
               </td>
               <!--<td></td>
