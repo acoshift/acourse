@@ -11,7 +11,6 @@ import (
 	"github.com/acoshift/acourse/pkg/appctx"
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/flash"
-	"github.com/acoshift/gzip"
 	"github.com/acoshift/middleware"
 	"github.com/acoshift/session"
 	store "github.com/acoshift/session/store/sql"
@@ -21,7 +20,6 @@ import (
 func Middleware(h http.Handler) http.Handler {
 	return middleware.Chain(
 		recovery,
-		gzip.New(gzip.Config{Level: gzip.DefaultCompression}),
 		session.Middleware(session.Config{
 			Name:     "sess",
 			Entropy:  32,
