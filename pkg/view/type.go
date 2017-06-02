@@ -15,34 +15,34 @@ type Page struct {
 
 // IndexData type
 type IndexData struct {
-	*Page
+	Page    *Page
 	Courses []*model.Course
 }
 
 // AuthData type
 type AuthData struct {
-	*Page
-	flash.Flash
+	Page  *Page
+	Flash flash.Flash
 }
 
 // ProfileData type
 type ProfileData struct {
-	*Page
-	flash.Flash
+	Page            *Page
+	Flash           flash.Flash
 	OwnCourses      []*model.Course
 	EnrolledCourses []*model.Course
 }
 
 // ProfileEditData type
 type ProfileEditData struct {
-	*Page
-	flash.Flash
+	Page  *Page
+	Flash flash.Flash
 }
 
 // CourseData type
 type CourseData struct {
-	*Page
-	flash.Flash
+	Page          *Page
+	Flash         flash.Flash
 	Course        *model.Course
 	Enrolled      bool
 	Owned         bool
@@ -51,20 +51,20 @@ type CourseData struct {
 
 // CourseCreateData type
 type CourseCreateData struct {
-	*Page
-	flash.Flash
+	Page  *Page
+	Flash flash.Flash
 }
 
 // CourseEditData type
 type CourseEditData struct {
-	*Page
-	flash.Flash
+	Page   *Page
+	Flash  flash.Flash
 	Course *model.Course
 }
 
 // AdminUsersData type
 type AdminUsersData struct {
-	*Page
+	Page        *Page
 	Users       []*model.User
 	CurrentPage int
 	TotalPage   int
@@ -72,13 +72,13 @@ type AdminUsersData struct {
 
 // AdminCoursesData type
 type AdminCoursesData struct {
-	*Page
+	Page    *Page
 	Courses []*model.Course
 }
 
 // AdminPaymentsData type
 type AdminPaymentsData struct {
-	*Page
+	Page        *Page
 	Payments    []*model.Payment
 	CurrentPage int
 	TotalPage   int
