@@ -60,7 +60,7 @@
 
 {{define "app-script"}}
 <script>
-  bindFileInputImage($('#image-input'), $('#avatar'))
+  bindFileInputImage(document.querySelector('#image-input'), document.querySelector('#avatar'))
 </script>
 {{end}}
 
@@ -72,8 +72,5 @@
     padding-bottom: 32px;
     min-height: calc(100vh - 242px);
   }
-   #profile-edit #avater {
-
-   }
 </style>
 {{end}}

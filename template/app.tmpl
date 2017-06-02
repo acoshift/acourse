@@ -36,48 +36,50 @@
 {{define "script"}}
   <script>
     // Navbar scroll event
-    var didScroll
-    var lastScrollTop = 0
-    var delta = 5
-    var navbarHeight = $('#navbar').outerHeight()
+    ;(() => {
+      let didScroll
+      let lastScrollTop = 0
+      let delta = 5
+      let navbarHeight = $('#navbar').outerHeight()
 
-    $(window).scroll(function () {
-      didScroll = true
-    })
+      $(window).scroll(() => {
+        didScroll = true
+      })
 
-    setInterval(function () {
-      if (didScroll) {
-        hasScrolled()
-        didScroll = false
-      }
-    }, 250)
+      const hasScrolled = () => {
+        const st = $(this).scrollTop()
 
-    function hasScrolled() {
-      var st = $(this).scrollTop()
+        if (Math.abs(lastScrollTop - st) <= delta) return
 
-      if(Math.abs(lastScrollTop - st) <= delta) return
-
-      if (st > lastScrollTop && st > navbarHeight) {
-        $('#navbar').removeClass('nav-down').addClass('nav-up')
-      } else {
-        if(st + $(window).height() < $(document).height()) {
-          $('#navbar').removeClass('nav-up').addClass('nav-down')
+        if (st > lastScrollTop && st > navbarHeight) {
+          $('#navbar').removeClass('nav-down').addClass('nav-up')
+        } else {
+          if (st + $(window).height() < $(document).height()) {
+            $('#navbar').removeClass('nav-up').addClass('nav-down')
+          }
         }
+        lastScrollTop = st
       }
-      lastScrollTop = st
-    }
 
-    function bindFileInputImage ($input, $img) {
-      $input.change(function () {
-        var fp = this.files && this.files[0]
+      setInterval(() => {
+        if (didScroll) {
+          hasScrolled()
+          didScroll = false
+        }
+      }, 250)
+    })()
+
+    function bindFileInputImage (input, img) {
+      input.onchange = () => {
+        const fp = input.files && input.files[0]
         if (fp) {
-          var reader = new FileReader()
-          reader.onload = function (e) {
-            $img.attr('src', e.target.result)
+          const reader = new FileReader()
+          reader.onload = (e) => {
+            img.src = e.target.result
           }
           reader.readAsDataURL(fp)
         }
-      })
+      }
     }
   </script>
   {{template "app-script" $}}
