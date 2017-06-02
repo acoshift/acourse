@@ -155,6 +155,11 @@ func isCourseOwner(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		u := appctx.GetUser(ctx)
+		if u == nil {
+			http.Redirect(w, r, "/signin", http.StatusFound)
+			return
+		}
+
 		id, _ := strconv.ParseInt(r.FormValue("id"), 10, 64)
 
 		var ownerID string
@@ -168,7 +173,7 @@ func isCourseOwner(h http.Handler) http.Handler {
 			return
 		}
 		if ownerID != u.ID {
-			http.Error(w, "Forbidden", http.StatusForbidden)
+			http.Redirect(w, r, "/", http.StatusFound)
 			return
 		}
 		h.ServeHTTP(w, r)
