@@ -10,8 +10,6 @@ import (
 	_ "github.com/lib/pq"
 )
 
-var config = configfile.NewReader("config")
-
 func main() {
 	time.Local = time.UTC
 
@@ -28,7 +26,8 @@ func main() {
 	// 	},
 	// }
 
-	// init email
+	config := configfile.NewReader("config")
+
 	err := app.Init(app.Config{
 		ProjectID:      config.String("project_id"),
 		ServiceAccount: config.Bytes("service_account"),
@@ -39,7 +38,7 @@ func main() {
 		EmailPassword:  config.String("email_password"),
 		EmailFrom:      config.String("email_from"),
 		BaseURL:        config.String("base_url"),
-		XSRFSecret:     config.String("xsrf_secret"),
+		XSRFSecret:     config.String("xsrf_key"),
 		SQLURL:         config.String("sql_url"),
 	})
 	if err != nil {
