@@ -1,0 +1,82 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: acourse-dev
+  labels:
+    app: acourse-dev
+spec:
+  replicas: 1
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels:
+      app: acourse-dev
+  template:
+    metadata:
+      name: acourse-dev
+      labels:
+        app: acourse-dev
+    spec:
+      containers:
+      - name: acourse-dev
+        image: gcr.io/acoshift-1362/acourse-dev
+        ports:
+        - containerPort: 8080
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          periodSeconds: 10
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+          initialDelaySeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          periodSeconds: 10
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+          initialDelaySeconds: 5
+        imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: 10m
+            memory: 20Mi
+        volumeMounts:
+        - name: acourse-dev-config
+          mountPath: /config
+        - name: acourse-dev-secret
+          mountPath: /secret
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: acourse-dev-config
+        configMap:
+          name: acourse-dev-config
+      - name: acourse-dev-secret
+        secret:
+          secretName: acourse-dev-secret
+          defaultMode: 0600
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: acourse-dev
+  labels:
+    app: acourse-dev
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  selector:
+    app: acourse-dev

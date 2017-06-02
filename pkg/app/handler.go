@@ -2,6 +2,7 @@ package app
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
 	"strconv"
 	"unicode/utf8"
@@ -20,6 +21,9 @@ import (
 func Mount(mux *http.ServeMux) {
 	r := httprouter.New()
 	r.GET("/", http.HandlerFunc(getIndex))
+	r.GET("/healthz", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "OK")
+	}))
 	r.ServeFiles("/~/*filepath", http.Dir("static"))
 	r.GET("/favicon.ico", fileHandler("static/favicon.ico"))
 	r.GET("/signin", mustNotSignedIn(http.HandlerFunc(getSignIn)))
