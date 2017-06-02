@@ -70,6 +70,7 @@
     })()
 
     function bindFileInputImage (input, img) {
+      if (!input || !img) return
       input.onchange = () => {
         const fp = input.files && input.files[0]
         if (fp) {

@@ -474,8 +474,13 @@ func postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	originalPrice := x.Price
+	if x.Option.Discount {
+		originalPrice = x.Discount
+	}
+
 	priceStr := r.FormValue("Price")
-	if len(priceStr) == 0 {
+	if len(priceStr) == 0 && originalPrice != 0 {
 		f.Add("Errors", "price can not be empty")
 		back(w, r)
 		return
@@ -486,11 +491,6 @@ func postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 		f.Add("Errors", "price can not be negative")
 		back(w, r)
 		return
-	}
-
-	originalPrice := x.Price
-	if x.Option.Discount {
-		originalPrice = x.Discount
 	}
 
 	var imageURL string
