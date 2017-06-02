@@ -10,9 +10,7 @@
 
       <div class="acourse-segment col-xs-12 col-md-8">
         <h3 class="acourse-block-big">Enrollment Detail</h3>
-        <div>
-          <p class="_pre-wrap">{{.Course.EnrollDetail}}</p>
-        </div>
+        <div>{{.Course.EnrollDetail | markdown}}</div>
       </div>
 
       <div class="acourse-segment col-xs-12 col-md-4 _bg-color-base-2">
@@ -31,16 +29,13 @@
                 </div>
               </div>
               <div class="acourse-block col-xs-6">
-                <img
-                  id="slip"
-                  class="_img-cover"
-                  src="">
+                <img id="slip" class="_img-cover" src="">
               </div>
             </div>
 
             <div class="input-field _flex-column">
               <label>Payment Amount:</label>
-              <input class="acourse-input" type="number" step="0.01" name="Price">
+              <input class="acourse-input" type="number" step="0.Î01" name="Price">
             </div>
           {{end}}
           <button class="acourse-button -positive _full-width" type="submit">Enroll</button>

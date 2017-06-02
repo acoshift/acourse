@@ -32,7 +32,7 @@
                   {{end}}
                   {{range $i, $x := .Course.Contents}}
                     <div v-if="selectedItem === {{$i}}">
-                      {{.Desc | html}}
+                      {{.Desc | markdown}}
                       <br>
                       ---------
                       <br>
@@ -78,7 +78,7 @@
 
           <div class="course-content _flex-row">
             <div class="_flex-column _flex-span">
-             
+
               <div class="acourse-block">
                 <h1 class="col-xs-12">{{.Course.Title}}</h1>
               </div>
@@ -95,7 +95,7 @@
                 <div class="col-xs-12">
                   <div class="acourse-header">Course Detail</div>
                   <div class="course-detail _pre-wrap _font-sub">
-                    {{.Course.Desc | html}}
+                    {{.Course.Desc | markdown}}
                   </div>
                 </div>
               </div>
@@ -105,7 +105,7 @@
               <div class="acourse-segment _bg-color-base-2">
                 <div class="col-xs-12">
                   <div class="acourse-block _font-bold _font-size-bigger">฿ 1,300</div>
-                  
+
                   {{if .PendingEnroll}}
                     <button class="acourse-button -disable _font-bold _full-width acourse-block disabled">Pending Enroll</button>
                   {{else}}
@@ -115,13 +115,13 @@
                     </a>
                     {{end}}
                   {{end}}
-                  
+
                   {{if .Owned}}
                     <a href="/editor/course?id={{.Course.ID}}">
                       <button class="acourse-button -positive _font-bold _full-width acourse-block">Edit</button>
                     </a>
                   {{end}}
-                  
+
                   <div>
                     <div class="acourse-header">Lecturer</div>
                     <div class="course-detail _font-sub">
