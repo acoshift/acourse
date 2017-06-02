@@ -27,9 +27,17 @@
     {{template "app-body" $}}
   </div>
 
-  <footer>
-    Made with <span>❤️</span>&nbsp;&nbsp;by
-    <a href="https://moonrhythm.info" target="_blank">Moon Rhythm</a>
+  <footer class="row">
+    <div class="col-xs-12 col-md-6 _font-size-big">
+      Acourse.io © 2016-2020 &nbsp &nbsp 
+      <a href="https://github.com/acoshift/acourse" class="_font-size-bigger">
+        <i class="fa fa-github _color-sub"></i>
+      </a>
+    </div>
+    <div class="col-xs-12 col-md-6 _font-size-big">
+      Made with <i class="fa fa-heart _color-negative pulse"></i>&nbsp;&nbsp;by
+      <a class="_color-sub" href="https://moonrhythm.info" target="_blank">Moon Rhythm</a>
+    </div>
   </footer>
 {{end}}
 
@@ -93,10 +101,36 @@
   footer {
     position: relative;
     z-index: 2;
-    padding: 32px;
+    padding: 48px 32px;
     backface-visibility: hidden;
     background-color: #292d35;
-    color: #484d56;
+    color: #777777;
+  }
+
+  footer > div:first-child {
+    text-align: left;
+  }
+  
+  footer > div:last-child {
+    text-align: right;
+  }
+
+  @media only screen and (max-width: 767px) {
+    
+    footer > div {
+      text-align: center !important;
+    }
+
+    footer > div:first-child {
+      text-align: left;
+      margin-bottom: 8px;
+    }
+
+  }
+
+  .pulse {
+    animation: pound .35s infinite alternate;
+    -webkit-animation: pound .35s infinite alternate
   }
 
   .app-container {
@@ -133,6 +167,18 @@
 
   #navbar .acourse-button {
     flex-basis: 100px;
+  }
+
+  @-webkit-keyframes pound {
+    to {
+      transform: scale(1.1)
+    }
+  }
+
+  @keyframes pound {
+    to {
+      transform: scale(1.1)
+    }
   }
 </style>
 {{end}}

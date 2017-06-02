@@ -19,6 +19,9 @@
 ._bg-color-positive {
   background-color: $color-positive;
 }
+._bg-color-negative {
+  background-color: $color-negative;
+}
 ._bg-color-warning {
   background-color: $color-warning;
 }
@@ -58,6 +61,9 @@
 }
 ._color-positive {
   color: $color-positive;
+}
+._color-negative {
+  color: $color-negative;
 }
 ._color-warning {
   color: $color-warning;
