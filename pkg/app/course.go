@@ -61,7 +61,10 @@ func getCourse(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	owned := user.ID == x.UserID
+	var owned bool
+	if user != nil {
+		owned = user.ID == x.UserID
+	}
 
 	// if user enrolled or user is owner fetch course contents
 	if enrolled || owned {
