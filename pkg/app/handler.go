@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"unicode/utf8"
 
-	"github.com/acoshift/acourse/pkg/appctx"
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/acourse/pkg/view"
 	"github.com/acoshift/flash"
@@ -64,6 +63,7 @@ func Mount(mux *http.ServeMux) {
 	admin.GET("/users", http.HandlerFunc(getAdminUsers))
 	admin.GET("/courses", http.HandlerFunc(getAdminCourses))
 	admin.GET("/payments/pending", http.HandlerFunc(getAdminPendingPayments))
+	admin.POST("/payments/pending", xsrf("payment-action")(http.HandlerFunc(postAdminPendingPayment)))
 	admin.GET("/payments/history", http.HandlerFunc(getAdminHistoryPayments))
 
 	mux.Handle("/", r)
@@ -331,30 +331,6 @@ func getAdminCourses(w http.ResponseWriter, r *http.Request) {
 }
 
 func getAdminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter func(int64, int64) ([]*model.Payment, error), paymentsCounter func() (int64, error)) {
-	action := r.FormValue("action")
-	if len(action) > 0 {
-		defer http.Redirect(w, r, "/admin/payments", http.StatusSeeOther)
-		user := appctx.GetUser(r.Context())
-		id, err := strconv.ParseInt(r.FormValue("id"), 10, 64)
-		if err != nil {
-			return
-		}
-		if action == "accept" && verifyXSRF(r.FormValue("x"), user.ID, "payment-accept") {
-			x, err := model.GetPayment(id)
-			if err != nil {
-				return
-			}
-			x.Accept()
-		} else if action == "reject" && verifyXSRF(r.FormValue("x"), user.ID, "payment-reject") {
-			x, err := model.GetPayment(id)
-			if err != nil {
-				return
-			}
-			x.Reject()
-		}
-		return
-	}
-
 	page, _ := strconv.ParseInt(r.FormValue("page"), 10, 64)
 	if page <= 0 {
 		page = 1
@@ -385,6 +361,40 @@ func getAdminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter fun
 		CurrentPage: int(page),
 		TotalPage:   int(totalPage),
 	})
+}
+
+func postAdminPendingPayment(w http.ResponseWriter, r *http.Request) {
+	action := r.FormValue("Action")
+
+	id, err := strconv.ParseInt(r.FormValue("ID"), 10, 64)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if action == "accept" {
+		x, err := model.GetPayment(id)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		err = x.Accept()
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	} else if action == "reject" {
+		x, err := model.GetPayment(id)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		err = x.Reject()
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+	http.Redirect(w, r, "/admin/payments/pending", http.StatusSeeOther)
 }
 
 func getAdminPendingPayments(w http.ResponseWriter, r *http.Request) {

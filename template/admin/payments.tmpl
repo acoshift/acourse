@@ -1,6 +1,4 @@
 {{define "app-body"}}
-{{$xsrfAccept := xsrf "payment-accept"}}
-{{$xsrfReject := xsrf "payment-reject"}}
 <div id="payment">
   <div class="grid-container _flex-column">
 
@@ -72,8 +70,18 @@
               <td data-column="Updated At">{{.UpdatedAt | dateTime}}</td>
               <td data-column="Actions">
                 {{if eq .Status pending}}
-                  <a href="?id={{.ID}}&action=accept&x={{$xsrfAccept}}">Accept</a>
-                  <a href="?id={{.ID}}&action=reject&x={{$xsrfReject}}">Reject</a>
+                  <form method="POST">
+                    {{xsrf "payment-action"}}
+                    <input type="hidden" name="ID" value="{{.ID}}">
+                    <input type="hidden" name="Action" value="accept">
+                    <button type="submit">Accept</button>
+                  </form>
+                  <form method="POST">
+                    {{xsrf "payment-action"}}
+                    <input type="hidden" name="ID" value="{{.ID}}">
+                    <input type="hidden" name="Action" value="reject">
+                    <button type="submit">Reject</button>
+                  </form>
                 {{else}}
                   <div>-</div>
                 {{end}}
