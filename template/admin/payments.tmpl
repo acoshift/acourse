@@ -70,17 +70,21 @@
               <td data-column="Updated At">{{.UpdatedAt | dateTime}}</td>
               <td data-column="Actions">
                 {{if eq .Status pending}}
-                  <form method="POST">
+                  <form method="POST" class="acourse-block">
                     {{xsrf "payment-action"}}
                     <input type="hidden" name="ID" value="{{.ID}}">
                     <input type="hidden" name="Action" value="accept">
-                    <button type="submit">Accept</button>
+                    <a href="/">
+                      <button class="acourse-button -positive _full-width"  type="submit">Accept</button>
+                    </a>
                   </form>
                   <form method="POST">
                     {{xsrf "payment-action"}}
                     <input type="hidden" name="ID" value="{{.ID}}">
                     <input type="hidden" name="Action" value="reject">
-                    <button type="submit">Reject</button>
+                    <a href="/">
+                      <button class="acourse-button -negative _full-width" type="submit">Reject</button>
+                    </a>
                   </form>
                 {{else}}
                   <div>-</div>
