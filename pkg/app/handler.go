@@ -34,7 +34,7 @@ func Mount(mux *http.ServeMux) {
 		mustNotSignedIn,
 		xsrf("signup"),
 	)(http.HandlerFunc(postSignUp)))
-	r.GET("/signout", mustSignedIn(http.HandlerFunc(getSignOut)))
+	r.GET("/signout", http.HandlerFunc(getSignOut))
 	r.GET("/profile", mustSignedIn(http.HandlerFunc(getProfile)))
 	r.GET("/profile/edit", mustSignedIn(http.HandlerFunc(getProfileEdit)))
 	r.POST("/profile/edit", middleware.Chain(
