@@ -95,7 +95,7 @@
               <div class="acourse-block">
                 <div class="col-xs-12">
                   <div class="acourse-header">Course Detail</div>
-                  <div class="course-detail _font-sub">
+                  <div class="course-detail _pre-wrap _font-sub">
                     {{.Course.Desc | html}}
                   </div>
                 </div>
@@ -103,7 +103,7 @@
             </div>
 
             <div class="course-sidebar _flex-column acourse-block-big">
-              <div class="acourse-segment">
+              <div class="acourse-segment _bg-color-base-2">
                 <div class="col-xs-12">
                   <div class="acourse-block _font-bold _font-size-bigger">฿ 1,300</div>
                   {{if .PendingEnroll}}
@@ -172,7 +172,6 @@
       vertical-align: bottom;
     }
     .course-detail {
-      white-space: pre-wrap;
       line-height: 1.6em;
     }
     .course-detail h1,
@@ -218,9 +217,6 @@
     #course .course-sidebar {
       flex-basis: 300px;
       padding: 0 8px;
-    }
-    #course .course-sidebar > .acourse-segment{
-      background-color: #eff8ff;
     }
     #course-player {
       margin-top: 8px;
