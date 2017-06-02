@@ -202,7 +202,7 @@ func render(w http.ResponseWriter, r *http.Request, key, data interface{}) {
 	ctx := r.Context()
 
 	me := appctx.GetUser(ctx)
-	tp := t.Template
+	tp, _ := t.Template.Clone()
 
 	// inject template funcs
 	if me != nil {
@@ -227,6 +227,7 @@ func render(w http.ResponseWriter, r *http.Request, key, data interface{}) {
 	err = m.Minify("text/html", w, pipe)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 	f := flash.Get(r.Context())
 	f.Clear()
