@@ -107,7 +107,7 @@
                 <div class="col-xs-12">
                   <div class="acourse-block _font-bold _font-size-bigger">฿ 1,300</div>
                   {{if .PendingEnroll}}
-                    <button class="acourse-button -positive _font-bold _full-width acourse-block disabled">Pending Enroll</button>
+                    <button class="acourse-button -disable _font-bold _full-width acourse-block disabled">Pending Enroll</button>
                   {{else}}
                     {{if and (not .Owned) (not .Enrolled)}}
                     <a href="/course/{{.Course.Link}}/enroll">

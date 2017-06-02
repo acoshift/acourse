@@ -35,6 +35,10 @@
   &.-info {
     background-color: $color-info;
   }
+  &.-disable {
+    background-color: $color-disable;
+    color: white;
+  }
 }
 
 .acourse-button-outline {
