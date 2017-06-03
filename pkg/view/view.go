@@ -3,6 +3,7 @@ package view
 import (
 	"context"
 	"net/http"
+	"net/url"
 
 	"github.com/acoshift/acourse/pkg/appctx"
 	"github.com/acoshift/acourse/pkg/model"
@@ -118,42 +119,79 @@ func Course(w http.ResponseWriter, r *http.Request, data *CourseData) {
 }
 
 // EditorCreate renders course create view
-func EditorCreate(w http.ResponseWriter, r *http.Request, data *CourseCreateData) {
-	render(w, r, keyEditorCreate{}, data)
+func EditorCreate(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	page := newPage(ctx)
+
+	data := struct {
+		Page *Page
+	}{page}
+	render(w, r, keyEditorCreate{}, &data)
 }
 
 // EditorCourse renders course edit view
-func EditorCourse(w http.ResponseWriter, r *http.Request, data *CourseEditData) {
-	render(w, r, keyEditorCourse{}, data)
+func EditorCourse(w http.ResponseWriter, r *http.Request, course *model.Course) {
+	ctx := r.Context()
+	page := newPage(ctx)
+
+	data := struct {
+		Page   *Page
+		Course *model.Course
+	}{page, course}
+	render(w, r, keyEditorCourse{}, &data)
 }
 
 // EditorContent renders editor content view
-func EditorContent(w http.ResponseWriter, r *http.Request, data *CourseEditData) {
-	render(w, r, keyEditorContent{}, data)
+func EditorContent(w http.ResponseWriter, r *http.Request, course *model.Course) {
+	ctx := r.Context()
+	page := newPage(ctx)
+
+	data := struct {
+		Page   *Page
+		Course *model.Course
+	}{page, course}
+	render(w, r, keyEditorContent{}, &data)
 }
 
 // EditorContentCreate renders editor content create view
 func EditorContentCreate(w http.ResponseWriter, r *http.Request, course *model.Course) {
+	ctx := r.Context()
+	page := newPage(ctx)
+
 	data := struct {
 		Page   *Page
 		Course *model.Course
-	}{&defaultPage, course}
+	}{page, course}
 	render(w, r, keyEditorContentCreate{}, &data)
 }
 
 // EditorContentEdit renders editor content edit view
 func EditorContentEdit(w http.ResponseWriter, r *http.Request, course *model.Course, content *model.CourseContent) {
+	ctx := r.Context()
+	page := newPage(ctx)
+
 	data := struct {
 		Page    *Page
 		Course  *model.Course
 		Content *model.CourseContent
-	}{&defaultPage, course, content}
+	}{page, course, content}
 	render(w, r, keyEditorContentEdit{}, &data)
 }
 
 // CourseEnroll renders course enroll view
-func CourseEnroll(w http.ResponseWriter, r *http.Request, data *CourseData) {
-	render(w, r, keyCourseEnroll{}, data)
+func CourseEnroll(w http.ResponseWriter, r *http.Request, course *model.Course) {
+	ctx := r.Context()
+	page := newPage(ctx)
+	page.Title = course.Title + " | " + page.Title
+	page.Desc = course.ShortDesc
+	page.Image = course.Image
+	page.URL = baseURL + "/course/" + url.PathEscape(course.Link())
+
+	data := struct {
+		Page   *Page
+		Course *model.Course
+	}{page, course}
+	render(w, r, keyCourseEnroll{}, &data)
 }
 
 // AdminUsers renders admin users view

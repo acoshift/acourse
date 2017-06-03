@@ -64,7 +64,7 @@ func Mount(mux *http.ServeMux) {
 		})))
 	}
 	{
-		post := xsrf("editor/course")(http.HandlerFunc(postCourseEdit))
+		post := xsrf("editor/course")(http.HandlerFunc(postEditorCourse))
 		editor.Handle("/course", isCourseOwner(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			switch r.Method {
 			case http.MethodGet, http.MethodHead:

@@ -40,9 +40,9 @@
           {{end}}
           <button class="acourse-button -positive _font-sub  _full-width" type="submit">Enroll</button>
         </form>
-        {{if .Flash.Errors}}
+        {{if .Page.Flash.Errors}}
           <ul>
-            {{range .Flash.Errors}}
+            {{range .Page.Flash.Errors}}
             <li>{{.}}</li>
             {{end}}
           </ul>

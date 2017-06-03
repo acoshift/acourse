@@ -5,26 +5,6 @@ import (
 	"github.com/acoshift/flash"
 )
 
-// IndexData type
-type IndexData struct {
-	Page    *Page
-	Courses []*model.Course
-}
-
-// ProfileData type
-type ProfileData struct {
-	Page            *Page
-	Flash           flash.Flash
-	OwnCourses      []*model.Course
-	EnrolledCourses []*model.Course
-}
-
-// ProfileEditData type
-type ProfileEditData struct {
-	Page  *Page
-	Flash flash.Flash
-}
-
 // CourseData type
 type CourseData struct {
 	Page          *Page
@@ -33,12 +13,6 @@ type CourseData struct {
 	Enrolled      bool
 	Owned         bool
 	PendingEnroll bool
-}
-
-// CourseCreateData type
-type CourseCreateData struct {
-	Page  *Page
-	Flash flash.Flash
 }
 
 // CourseEditData type

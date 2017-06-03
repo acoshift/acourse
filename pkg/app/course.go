@@ -109,15 +109,7 @@ func getCourse(w http.ResponseWriter, r *http.Request) {
 }
 
 func getEditorCreate(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	f := flash.Get(ctx)
-
-	page := defaultPage
-	page.Title = "Create new Course | " + page.Title
-	view.EditorCreate(w, r, &view.CourseCreateData{
-		Page:  &page,
-		Flash: f,
-	})
+	view.EditorCreate(w, r)
 }
 
 func postEditorCreate(w http.ResponseWriter, r *http.Request) {
@@ -215,9 +207,6 @@ func postEditorCreate(w http.ResponseWriter, r *http.Request) {
 }
 
 func getEditorCourse(w http.ResponseWriter, r *http.Request) {
-	page := defaultPage
-	page.Title = "Edit Course | " + page.Title
-
 	id, _ := strconv.ParseInt(r.FormValue("id"), 10, 64)
 	course, err := model.GetCourse(id)
 	if err != nil {
@@ -225,13 +214,10 @@ func getEditorCourse(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	view.EditorCourse(w, r, &view.CourseEditData{
-		Page:   &page,
-		Course: course,
-	})
+	view.EditorCourse(w, r, course)
 }
 
-func postCourseEdit(w http.ResponseWriter, r *http.Request) {
+func postEditorCourse(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	id, _ := strconv.ParseInt(r.FormValue("id"), 10, 64)
 
@@ -339,13 +325,10 @@ func postCourseEdit(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/course/"+strconv.FormatInt(id, 10), http.StatusFound)
 		return
 	}
-	http.Redirect(w, r, "/course/"+link.String, http.StatusFound)
+	http.Redirect(w, r, "/course/"+link.String, http.StatusSeeOther)
 }
 
 func getEditorContent(w http.ResponseWriter, r *http.Request) {
-	page := defaultPage
-	page.Title = "Edit Course | " + page.Title
-
 	id, _ := strconv.ParseInt(r.FormValue("id"), 10, 64)
 	course, err := model.GetCourse(id)
 	if err == model.ErrNotFound {
@@ -362,16 +345,12 @@ func getEditorContent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	view.EditorContent(w, r, &view.CourseEditData{
-		Page:   &page,
-		Course: course,
-	})
+	view.EditorContent(w, r, course)
 }
 
 func getCourseEnroll(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	user := appctx.GetUser(ctx)
-	f := flash.Get(ctx)
 
 	link := httprouter.GetParam(ctx, "courseID")
 
@@ -415,16 +394,7 @@ func getCourseEnroll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	page := defaultPage
-	page.Title = x.Title + " | " + page.Title
-	page.Desc = x.ShortDesc
-	page.Image = x.Image
-	page.URL = baseURL + "/course/" + url.PathEscape(x.Link())
-	view.CourseEnroll(w, r, &view.CourseData{
-		Page:   &page,
-		Flash:  f,
-		Course: x,
-	})
+	view.CourseEnroll(w, r, x)
 }
 
 func postCourseEnroll(w http.ResponseWriter, r *http.Request) {
