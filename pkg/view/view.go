@@ -3,20 +3,22 @@ package view
 import "net/http"
 
 type (
-	keyIndex         struct{}
-	keySignIn        struct{}
-	keySignUp        struct{}
-	keyProfile       struct{}
-	keyProfileEdit   struct{}
-	keyUser          struct{}
-	keyCourse        struct{}
-	keyEditorCreate  struct{}
-	keyEditorCourse  struct{}
-	keyEditorContent struct{}
-	keyCourseEnroll  struct{}
-	keyAdminUsers    struct{}
-	keyAdminCourses  struct{}
-	keyAdminPayments struct{}
+	keyIndex               struct{}
+	keySignIn              struct{}
+	keySignUp              struct{}
+	keyProfile             struct{}
+	keyProfileEdit         struct{}
+	keyUser                struct{}
+	keyCourse              struct{}
+	keyEditorCreate        struct{}
+	keyEditorCourse        struct{}
+	keyEditorContent       struct{}
+	keyEditorContentCreate struct{}
+	keyEditorContentEdit   struct{}
+	keyCourseEnroll        struct{}
+	keyAdminUsers          struct{}
+	keyAdminCourses        struct{}
+	keyAdminPayments       struct{}
 )
 
 // Index renders index view
@@ -59,9 +61,19 @@ func EditorCourse(w http.ResponseWriter, r *http.Request, data *CourseEditData) 
 	render(w, r, keyEditorCourse{}, data)
 }
 
-// EditorContents renders course content edit view
-func EditorContents(w http.ResponseWriter, r *http.Request, data *CourseEditData) {
+// EditorContent renders editor content view
+func EditorContent(w http.ResponseWriter, r *http.Request, data *CourseEditData) {
 	render(w, r, keyEditorContent{}, data)
+}
+
+// EditorContentCreate renders editor content create view
+func EditorContentCreate(w http.ResponseWriter, r *http.Request, data *CourseEditData) {
+	render(w, r, keyEditorContentCreate{}, data)
+}
+
+// EditorContentEdit renders editor content edit view
+func EditorContentEdit(w http.ResponseWriter, r *http.Request, data *CourseEditData) {
+	render(w, r, keyEditorContentEdit{}, data)
 }
 
 // CourseEnroll renders course enroll view

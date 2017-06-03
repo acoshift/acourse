@@ -56,7 +56,9 @@ func Mount(mux *http.ServeMux) {
 		isCourseOwner,
 		xsrf("editor/course"),
 	)(http.HandlerFunc(postCourseEdit)))
-	r.GET("/editor/contents", isCourseOwner(http.HandlerFunc(getCourseContentEdit)))
+	r.GET("/editor/content", isCourseOwner(http.HandlerFunc(getEditorContent)))
+	r.GET("/editor/content/create", isCourseOwner(http.HandlerFunc(getEditorContentCreate)))
+	r.GET("/editor/content/edit", isCourseOwner(http.HandlerFunc(getEditorContentEdit)))
 
 	admin := httprouter.New()
 	admin.GET("/users", http.HandlerFunc(getAdminUsers))
