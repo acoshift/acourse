@@ -20,8 +20,6 @@ import (
 func Mount(mux *http.ServeMux) {
 	r := httprouter.New()
 	r.GET("/", http.HandlerFunc(getIndex))
-	// r.ServeFiles("/~/*filepath", http.Dir("static"))
-	r.GET("/favicon.ico", fileHandler("static/favicon.ico"))
 
 	r.GET("/signin", mustNotSignedIn(http.HandlerFunc(getSignIn)))
 	r.POST("/signin", middleware.Chain(
@@ -74,6 +72,7 @@ func Mount(mux *http.ServeMux) {
 
 	mux.Handle("/", r)
 	mux.Handle("/~/", http.StripPrefix("/~", http.FileServer(&fileFS{http.Dir("static")})))
+	mux.Handle("/favicon.ico", fileHandler("static/favicon.ico"))
 	mux.Handle("/admin/", http.StripPrefix("/admin", onlyAdmin(admin)))
 }
 
