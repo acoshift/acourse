@@ -83,7 +83,6 @@ func Mount(mux *http.ServeMux) {
 	admin := http.NewServeMux()
 	admin.Handle("/users", http.HandlerFunc(getAdminUsers))
 	admin.Handle("/courses", http.HandlerFunc(getAdminCourses))
-
 	{
 		post := xsrf("payment-action")(http.HandlerFunc(postAdminPendingPayment))
 		admin.Handle("/payments/pending", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -97,7 +96,6 @@ func Mount(mux *http.ServeMux) {
 			}
 		}))
 	}
-
 	admin.Handle("/payments/history", http.HandlerFunc(getAdminHistoryPayments))
 
 	mux.Handle("/", r)
@@ -150,7 +148,6 @@ func getIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	view.Index(w, r, &view.IndexData{
-		Page:    &defaultPage,
 		Courses: courses,
 	})
 }

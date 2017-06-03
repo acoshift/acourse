@@ -21,8 +21,16 @@ type (
 	keyAdminPayments       struct{}
 )
 
+var defaultPage = Page{
+	Title: "Acourse",
+	Desc:  "Online courses for everyone",
+	Image: "https://storage.googleapis.com/acourse/static/62b9eb0e-3668-4f9f-86b7-a11349938f7a.jpg",
+	URL:   "https://acourse.io",
+}
+
 // Index renders index view
 func Index(w http.ResponseWriter, r *http.Request, data *IndexData) {
+	data.Page = &defaultPage
 	render(w, r, keyIndex{}, data)
 }
 
@@ -67,12 +75,14 @@ func EditorContent(w http.ResponseWriter, r *http.Request, data *CourseEditData)
 }
 
 // EditorContentCreate renders editor content create view
-func EditorContentCreate(w http.ResponseWriter, r *http.Request, data *CourseEditData) {
+func EditorContentCreate(w http.ResponseWriter, r *http.Request, data *EditorContentCreateData) {
+	data.Page = &defaultPage
 	render(w, r, keyEditorContentCreate{}, data)
 }
 
 // EditorContentEdit renders editor content edit view
-func EditorContentEdit(w http.ResponseWriter, r *http.Request, data *CourseEditData) {
+func EditorContentEdit(w http.ResponseWriter, r *http.Request, data *EditorContentCreateData) {
+	data.Page = &defaultPage
 	render(w, r, keyEditorContentEdit{}, data)
 }
 

@@ -555,7 +555,7 @@ func postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 }
 
 func getEditorContentCreate(w http.ResponseWriter, r *http.Request) {
-	view.EditorContentCreate(w, r, nil)
+	view.EditorContentCreate(w, r, &view.EditorContentCreateData{})
 }
 
 func getEditorContentEdit(w http.ResponseWriter, r *http.Request) {
