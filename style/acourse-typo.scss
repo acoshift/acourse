@@ -8,5 +8,8 @@
   word-break: break-all;
 }
 .acourse-link {
-  
+  cursor: pointer;
+  &:hover {
+    text-decoration: underline;
+  }
 }
