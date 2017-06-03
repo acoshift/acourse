@@ -1,9 +1,22 @@
 {{define "app-body"}}
 <div id="content-edit">
   <div class="grid-container _flex-column">
-    <div class="acourse-header col-xs-12 col-md-8 col-md-offset-2 _color-sub">
-      Course: {{.Course.Title}}
+    
+    <div class="acourse-block-big row">
+      <div class="col-xs-12 col-md-8 col-md-offset-2 _no-padding row">
+        <div class="acourse-header _color-sub col-xs-12 col-md-8">
+          Course: {{.Course.Title}}
+        </div>
+        <div class="col-xs-12 col-md-4 _full-width _align-right">
+          <form method="POST">
+            <button type="submit" class="acourse-button -positive _full-width _color-sub">
+              <i class="fa fa-plus"></i>&nbsp&nbsp Add content
+            </button>
+          </form>
+        </div>
+      </div>
     </div>
+
     {{range .Course.Contents}}
     <div class="acourse-card acourse-block-big _flex-row row col-xs-12 col-md-8 col-md-offset-2 _no-padding">
       <div class="acourse-segment col-xs-12 col-md-9">
@@ -27,6 +40,17 @@
       </div>
     </div>
     {{end}}
+
+    <div class="col-xs-12 col-md-8 col-md-offset-2 _no-padding row">
+      <div class="col-xs-12 col-sm-5 col-sm-offset-7 col-md-4 col-md-offset-8 _full-width _align-right">
+        <form method="POST">
+          <button type="submit" class="acourse-button -positive _full-width _color-sub">
+            <i class="fa fa-plus"></i>&nbsp&nbsp Add content
+          </button>
+        </form>
+      </div>
+    </div>
+
   </div>
 </div>
 {{end}}
@@ -37,6 +61,7 @@
 <style>
   #content-edit {
     padding-top: 32px;
+    padding-bottom: 32px;
     min-height: calc(100vh - 236px);
   }
 </style>
