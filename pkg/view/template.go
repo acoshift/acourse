@@ -2,6 +2,7 @@ package view
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"html/template"
 	"log"
@@ -185,7 +186,7 @@ func parseTemplate(key interface{}, set []string) {
 	}
 }
 
-func render(w http.ResponseWriter, r *http.Request, key, data interface{}) {
+func render(ctx context.Context, w http.ResponseWriter, key, data interface{}) {
 	t := templates[key]
 	if t == nil {
 		http.Error(w, fmt.Sprintf("template not found"), http.StatusInternalServerError)
@@ -197,8 +198,6 @@ func render(w http.ResponseWriter, r *http.Request, key, data interface{}) {
 		parseTemplate(key, t.set)
 		t = templates[key]
 	}
-
-	ctx := r.Context()
 
 	me := appctx.GetUser(ctx)
 	tp, _ := t.Template.Clone()
@@ -226,6 +225,6 @@ func render(w http.ResponseWriter, r *http.Request, key, data interface{}) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	f := flash.Get(r.Context())
+	f := flash.Get(ctx)
 	f.Clear()
 }

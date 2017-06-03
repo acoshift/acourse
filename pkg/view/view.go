@@ -61,7 +61,7 @@ func Index(w http.ResponseWriter, r *http.Request, courses []*model.Course) {
 		Page    *Page
 		Courses []*model.Course
 	}{newPage(ctx), courses}
-	render(w, r, keyIndex{}, &data)
+	render(ctx, w, keyIndex{}, &data)
 }
 
 // SignIn renders signin view
@@ -71,7 +71,7 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 		Page  *Page
 		Flash flash.Flash
 	}{newPage(ctx), flash.Get(r.Context())}
-	render(w, r, keySignIn{}, &data)
+	render(ctx, w, keySignIn{}, &data)
 }
 
 // SignUp renders signup view
@@ -81,7 +81,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 		Page  *Page
 		Flash flash.Flash
 	}{newPage(ctx), flash.Get(r.Context())}
-	render(w, r, keySignUp{}, &data)
+	render(ctx, w, keySignUp{}, &data)
 }
 
 // Profile renders profile view
@@ -97,7 +97,7 @@ func Profile(w http.ResponseWriter, r *http.Request, ownCourses, enrolledCourses
 		OwnCourses      []*model.Course
 		EnrolledCourses []*model.Course
 	}{page, ownCourses, enrolledCourses}
-	render(w, r, keyProfile{}, &data)
+	render(ctx, w, keyProfile{}, &data)
 }
 
 // ProfileEdit renders profile edit view
@@ -110,7 +110,7 @@ func ProfileEdit(w http.ResponseWriter, r *http.Request) {
 	data := struct {
 		Page *Page
 	}{page}
-	render(w, r, keyProfileEdit{}, &data)
+	render(ctx, w, keyProfileEdit{}, &data)
 }
 
 // Course renders course view
@@ -129,7 +129,7 @@ func Course(w http.ResponseWriter, r *http.Request, course *model.Course, enroll
 		Owned         bool
 		PendingEnroll bool
 	}{page, course, enrolled, owned, pendingEnroll}
-	render(w, r, keyCourse{}, &data)
+	render(ctx, w, keyCourse{}, &data)
 }
 
 // EditorCreate renders course create view
@@ -140,7 +140,7 @@ func EditorCreate(w http.ResponseWriter, r *http.Request) {
 	data := struct {
 		Page *Page
 	}{page}
-	render(w, r, keyEditorCreate{}, &data)
+	render(ctx, w, keyEditorCreate{}, &data)
 }
 
 // EditorCourse renders course edit view
@@ -152,7 +152,7 @@ func EditorCourse(w http.ResponseWriter, r *http.Request, course *model.Course) 
 		Page   *Page
 		Course *model.Course
 	}{page, course}
-	render(w, r, keyEditorCourse{}, &data)
+	render(ctx, w, keyEditorCourse{}, &data)
 }
 
 // EditorContent renders editor content view
@@ -164,7 +164,7 @@ func EditorContent(w http.ResponseWriter, r *http.Request, course *model.Course)
 		Page   *Page
 		Course *model.Course
 	}{page, course}
-	render(w, r, keyEditorContent{}, &data)
+	render(ctx, w, keyEditorContent{}, &data)
 }
 
 // EditorContentCreate renders editor content create view
@@ -176,7 +176,7 @@ func EditorContentCreate(w http.ResponseWriter, r *http.Request, course *model.C
 		Page   *Page
 		Course *model.Course
 	}{page, course}
-	render(w, r, keyEditorContentCreate{}, &data)
+	render(ctx, w, keyEditorContentCreate{}, &data)
 }
 
 // EditorContentEdit renders editor content edit view
@@ -189,7 +189,7 @@ func EditorContentEdit(w http.ResponseWriter, r *http.Request, course *model.Cou
 		Course  *model.Course
 		Content *model.CourseContent
 	}{page, course, content}
-	render(w, r, keyEditorContentEdit{}, &data)
+	render(ctx, w, keyEditorContentEdit{}, &data)
 }
 
 // CourseEnroll renders course enroll view
@@ -205,7 +205,7 @@ func CourseEnroll(w http.ResponseWriter, r *http.Request, course *model.Course) 
 		Page   *Page
 		Course *model.Course
 	}{page, course}
-	render(w, r, keyCourseEnroll{}, &data)
+	render(ctx, w, keyCourseEnroll{}, &data)
 }
 
 // AdminUsers renders admin users view
@@ -219,7 +219,7 @@ func AdminUsers(w http.ResponseWriter, r *http.Request, users []*model.User, cur
 		CurrentPage int
 		TotalPage   int
 	}{page, users, currentPage, totalPage}
-	render(w, r, keyAdminUsers{}, &data)
+	render(ctx, w, keyAdminUsers{}, &data)
 }
 
 // AdminCourses renders admin courses view
@@ -233,7 +233,7 @@ func AdminCourses(w http.ResponseWriter, r *http.Request, courses []*model.Cours
 		CurrentPage int
 		TotalPage   int
 	}{page, courses, currentPage, totalPage}
-	render(w, r, keyAdminCourses{}, &data)
+	render(ctx, w, keyAdminCourses{}, &data)
 }
 
 // AdminPayments renders admin payments view
@@ -247,5 +247,5 @@ func AdminPayments(w http.ResponseWriter, r *http.Request, payments []*model.Pay
 		CurrentPage int
 		TotalPage   int
 	}{page, payments, currentPage, totalPage}
-	render(w, r, keyAdminPayments{}, &data)
+	render(ctx, w, keyAdminPayments{}, &data)
 }
