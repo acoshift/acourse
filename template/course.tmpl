@@ -67,6 +67,9 @@
 
                   {{if .Owned}}
                   <div class="acourse-block-big">
+                    <a href="/course/{{.Course.Link}}/content?p=1">
+                      <button class="acourse-button -positive _font-sub _full-width acourse-block">Start Learning</button>
+                    </a>
                     <a href="/editor/course?id={{.Course.ID}}">
                       <button class="acourse-button -primary _font-sub _full-width acourse-block">Edit Course</button>
                     </a>
