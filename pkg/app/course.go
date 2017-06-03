@@ -214,7 +214,7 @@ func postCourseCreate(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/course/"+link.String, http.StatusFound)
 }
 
-func getCourseEdit(w http.ResponseWriter, r *http.Request) {
+func getEditorCourse(w http.ResponseWriter, r *http.Request) {
 	page := defaultPage
 	page.Title = "Edit Course | " + page.Title
 

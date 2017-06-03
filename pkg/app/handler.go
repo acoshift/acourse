@@ -3,6 +3,7 @@ package app
 import (
 	"database/sql"
 	"net/http"
+	"os"
 	"unicode/utf8"
 
 	"github.com/acoshift/acourse/pkg/model"
@@ -19,8 +20,9 @@ import (
 func Mount(mux *http.ServeMux) {
 	r := httprouter.New()
 	r.GET("/", http.HandlerFunc(getIndex))
-	r.ServeFiles("/~/*filepath", http.Dir("static"))
+	// r.ServeFiles("/~/*filepath", http.Dir("static"))
 	r.GET("/favicon.ico", fileHandler("static/favicon.ico"))
+
 	r.GET("/signin", mustNotSignedIn(http.HandlerFunc(getSignIn)))
 	r.POST("/signin", middleware.Chain(
 		mustNotSignedIn,
@@ -34,24 +36,27 @@ func Mount(mux *http.ServeMux) {
 		xsrf("signup"),
 	)(http.HandlerFunc(postSignUp)))
 	r.GET("/signout", http.HandlerFunc(getSignOut))
+
 	r.GET("/profile", mustSignedIn(http.HandlerFunc(getProfile)))
 	r.GET("/profile/edit", mustSignedIn(http.HandlerFunc(getProfileEdit)))
 	r.POST("/profile/edit", middleware.Chain(
 		mustSignedIn,
 		xsrf("profile/edit"),
 	)(http.HandlerFunc(postProfileEdit)))
+
 	r.GET("/course/:courseID", http.HandlerFunc(getCourse))
 	r.GET("/course/:courseID/enroll", mustSignedIn(http.HandlerFunc(getCourseEnroll)))
 	r.POST("/course/:courseID/enroll", middleware.Chain(
 		mustSignedIn,
 		xsrf("enroll"),
 	)(http.HandlerFunc(postCourseEnroll)))
+
 	r.GET("/editor/create", onlyInstructor(http.HandlerFunc(getCourseCreate)))
 	r.POST("/editor/create", middleware.Chain(
 		onlyInstructor,
 		xsrf("editor/create"),
 	)(http.HandlerFunc(postCourseCreate)))
-	r.GET("/editor/course", isCourseOwner(http.HandlerFunc(getCourseEdit)))
+	r.GET("/editor/course", isCourseOwner(http.HandlerFunc(getEditorCourse)))
 	r.POST("/editor/course", middleware.Chain(
 		isCourseOwner,
 		xsrf("editor/course"),
@@ -68,7 +73,27 @@ func Mount(mux *http.ServeMux) {
 	admin.GET("/payments/history", http.HandlerFunc(getAdminHistoryPayments))
 
 	mux.Handle("/", r)
+	mux.Handle("/~/", http.StripPrefix("/~", http.FileServer(&fileFS{http.Dir("static")})))
 	mux.Handle("/admin/", http.StripPrefix("/admin", onlyAdmin(admin)))
+}
+
+type fileFS struct {
+	http.FileSystem
+}
+
+func (fs *fileFS) Open(name string) (http.File, error) {
+	f, err := fs.FileSystem.Open(name)
+	if err != nil {
+		return nil, err
+	}
+	stat, err := f.Stat()
+	if err != nil {
+		return nil, err
+	}
+	if stat.IsDir() {
+		return nil, os.ErrNotExist
+	}
+	return f, nil
 }
 
 func fileHandler(name string) http.Handler {
