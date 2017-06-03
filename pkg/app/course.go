@@ -681,5 +681,30 @@ func getEditorContentEdit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if r.Method == http.MethodPost {
+		if !verifyXSRF(r.FormValue("X"), user.ID, "editor/content+edit") {
+			http.Error(w, "invalid xsrf token", http.StatusInternalServerError)
+			return
+		}
+
+		var (
+			title   = r.FormValue("Title")
+			desc    = r.FormValue("Desc")
+			videoID = r.FormValue("VideoID")
+		)
+
+		db.Exec(`
+			update course_contents
+			set
+				title = $3,
+				long_desc = $4,
+				video_id = $5,
+				updated_at = now()
+			where id = $1 and course_id = $2
+		`, id, course.ID, title, desc, videoID)
+		http.Redirect(w, r, "/editor/content?id="+strconv.FormatInt(course.ID, 10), http.StatusSeeOther)
+		return
+	}
+
 	view.EditorContentEdit(w, r, course, content)
 }

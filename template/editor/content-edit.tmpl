@@ -11,26 +11,26 @@
       </div>
       <div class="acourse-card acourse-segment acourse-block-bigger">
 
-        <form method="POST" enctype="multipart/form-data">
-          <!--{{xsrf "editor/create"}}-->
+        <form method="POST">
+          {{xsrf "editor/content+edit"}}
 
           <div class="input-field _flex-column">
             <label>Title</label>
-            <input class="acourse-input" name="Title" type="text" placeholder="Content Title" required>
+            <input class="acourse-input" name="Title" type="text" placeholder="Content Title" required value="{{.Content.Title}}">
           </div>
 
           <div class="input-field _flex-column">
             <label>Description</label>
-            <textarea class="acourse-input" id="decs-text" rows="10" name="Desc"></textarea>
+            <textarea class="acourse-input" id="decs-text" rows="10" name="Desc">{{.Content.Desc}}</textarea>
           </div>
 
           <div class="input-field _flex-column">
             <label>Video ID</label>
-            <input class="acourse-input" type="text" name="VideoID" placeholder="Video ID">
+            <input class="acourse-input" type="text" name="VideoID" placeholder="Video ID" value="{{.Content.VideoID}}">
           </div>
 
           <button class="acourse-button -primary _font-sub _full-width" type="submit">
-            Create Content
+            Edit Content
           </button>
 
         </form>
@@ -54,7 +54,7 @@
   #content-edit .acourse-header a {
     color: #adadad;
   }
-  
+
   #content-edit .acourse-card {
     width: initial;
   }
