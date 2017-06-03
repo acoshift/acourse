@@ -205,6 +205,7 @@ func render(w http.ResponseWriter, r *http.Request, key, data interface{}) {
 	tp, _ := t.Template.Clone()
 
 	// inject template funcs
+	// TODO: don't clone and inject to view data
 	if me != nil {
 		tp = tp.Funcs(template.FuncMap{
 			"me": func() interface{} {
