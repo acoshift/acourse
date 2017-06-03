@@ -114,8 +114,22 @@ func ProfileEdit(w http.ResponseWriter, r *http.Request) {
 }
 
 // Course renders course view
-func Course(w http.ResponseWriter, r *http.Request, data *CourseData) {
-	render(w, r, keyCourse{}, data)
+func Course(w http.ResponseWriter, r *http.Request, course *model.Course, enrolled bool, owned bool, pendingEnroll bool) {
+	ctx := r.Context()
+	page := newPage(ctx)
+	page.Title = course.Title + " | " + page.Title
+	page.Desc = course.ShortDesc
+	page.Image = course.Image
+	page.URL = baseURL + "/course/" + url.PathEscape(course.Link())
+
+	data := struct {
+		Page          *Page
+		Course        *model.Course
+		Enrolled      bool
+		Owned         bool
+		PendingEnroll bool
+	}{page, course, enrolled, owned, pendingEnroll}
+	render(w, r, keyCourse{}, &data)
 }
 
 // EditorCreate renders course create view

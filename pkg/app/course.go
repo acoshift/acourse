@@ -3,7 +3,6 @@ package app
 import (
 	"database/sql"
 	"net/http"
-	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -94,18 +93,7 @@ func getCourse(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	page := defaultPage
-	page.Title = x.Title + " | " + page.Title
-	page.Desc = x.ShortDesc
-	page.Image = x.Image
-	page.URL = baseURL + "/course/" + url.PathEscape(x.Link())
-	view.Course(w, r, &view.CourseData{
-		Page:          &page,
-		Course:        x,
-		Enrolled:      enrolled,
-		Owned:         owned,
-		PendingEnroll: pendingEnroll,
-	})
+	view.Course(w, r, x, enrolled, owned, pendingEnroll)
 }
 
 func getEditorCreate(w http.ResponseWriter, r *http.Request) {
