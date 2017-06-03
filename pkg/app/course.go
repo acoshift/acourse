@@ -555,9 +555,37 @@ func postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 }
 
 func getEditorContentCreate(w http.ResponseWriter, r *http.Request) {
-	view.EditorContentCreate(w, r, &view.EditorContentCreateData{})
+	id, _ := strconv.ParseInt(r.FormValue("id"), 10, 64)
+	course, err := model.GetCourse(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	view.EditorContentCreate(w, r, course)
 }
 
 func getEditorContentEdit(w http.ResponseWriter, r *http.Request) {
-	view.EditorContentEdit(w, r, nil)
+	// course content id
+	id, _ := strconv.ParseInt(r.FormValue("id"), 10, 64)
+
+	content, err := model.GetCourseContent(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	course, err := model.GetCourse(content.CourseID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	user := appctx.GetUser(r.Context())
+	// user is not course owner
+	if user.ID != course.UserID {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
+
+	view.EditorContentEdit(w, r, course, content)
 }

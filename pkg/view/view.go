@@ -66,14 +66,14 @@ func Profile(w http.ResponseWriter, r *http.Request, ownCourses, enrolledCourses
 	me := appctx.GetUser(r.Context())
 	page := defaultPage
 	page.Title = me.Username + " | " + page.Title
+	page.Navbar = "profile"
 
 	data := struct {
 		Page            *Page
-		Navbar          string
 		Me              *model.User
 		OwnCourses      []*model.Course
 		EnrolledCourses []*model.Course
-	}{&page, "profile", me, ownCourses, enrolledCourses}
+	}{&page, me, ownCourses, enrolledCourses}
 	render(w, r, keyProfile{}, &data)
 }
 
@@ -103,15 +103,22 @@ func EditorContent(w http.ResponseWriter, r *http.Request, data *CourseEditData)
 }
 
 // EditorContentCreate renders editor content create view
-func EditorContentCreate(w http.ResponseWriter, r *http.Request, data *EditorContentCreateData) {
-	data.Page = &defaultPage
-	render(w, r, keyEditorContentCreate{}, data)
+func EditorContentCreate(w http.ResponseWriter, r *http.Request, course *model.Course) {
+	data := struct {
+		Page   *Page
+		Course *model.Course
+	}{&defaultPage, course}
+	render(w, r, keyEditorContentCreate{}, &data)
 }
 
 // EditorContentEdit renders editor content edit view
-func EditorContentEdit(w http.ResponseWriter, r *http.Request, data *EditorContentCreateData) {
-	data.Page = &defaultPage
-	render(w, r, keyEditorContentEdit{}, data)
+func EditorContentEdit(w http.ResponseWriter, r *http.Request, course *model.Course, content *model.CourseContent) {
+	data := struct {
+		Page    *Page
+		Course  *model.Course
+		Content *model.CourseContent
+	}{&defaultPage, course, content}
+	render(w, r, keyEditorContentEdit{}, &data)
 }
 
 // CourseEnroll renders course enroll view

@@ -7,10 +7,11 @@ import (
 
 // Page type provides layout data like title, description, and og
 type Page struct {
-	Title string
-	Desc  string
-	Image string
-	URL   string
+	Title  string
+	Desc   string
+	Image  string
+	URL    string
+	Navbar string
 }
 
 // IndexData type

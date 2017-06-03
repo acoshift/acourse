@@ -47,6 +47,8 @@ const (
 
 // CourseContent type
 type CourseContent struct {
+	ID          int64
+	CourseID    int64
 	Title       string
 	Desc        string
 	VideoID     string
@@ -221,6 +223,8 @@ func GetCourse(courseID int64) (*Course, error) {
 func GetCourseContents(courseID int64) ([]*CourseContent, error) {
 	rows, err := db.Query(`
 		select
+			id,
+			course_id,
 			title,
 			long_desc,
 			video_id,
@@ -237,7 +241,7 @@ func GetCourseContents(courseID int64) ([]*CourseContent, error) {
 	xs := make([]*CourseContent, 0)
 	for rows.Next() {
 		var x CourseContent
-		err = rows.Scan(&x.Title, &x.Desc, &x.VideoID, &x.VideoType, &x.DownloadURL)
+		err = rows.Scan(&x.ID, &x.CourseID, &x.Title, &x.Desc, &x.VideoID, &x.VideoType, &x.DownloadURL)
 		if err != nil {
 			return nil, err
 		}
@@ -247,6 +251,27 @@ func GetCourseContents(courseID int64) ([]*CourseContent, error) {
 		return nil, err
 	}
 	return xs, nil
+}
+
+// GetCourseContent gets course content from id
+func GetCourseContent(courseContentID int64) (*CourseContent, error) {
+	var x CourseContent
+	err := db.QueryRow(`
+		select
+			id,
+			course_id,
+			title,
+			long_desc,
+			video_id,
+			video_type,
+			download_url
+		from course_contents
+		where id = $1
+	`, courseContentID).Scan(&x.ID, &x.CourseID, &x.Title, &x.Desc, &x.VideoID, &x.VideoType, &x.DownloadURL)
+	if err != nil {
+		return nil, err
+	}
+	return &x, nil
 }
 
 // GetCourseIDFromURL gets course id from url

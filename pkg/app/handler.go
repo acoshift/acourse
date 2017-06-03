@@ -78,7 +78,7 @@ func Mount(mux *http.ServeMux) {
 	}
 	editor.Handle("/content", isCourseOwner(http.HandlerFunc(getEditorContent)))
 	editor.Handle("/content/create", isCourseOwner(http.HandlerFunc(getEditorContentCreate)))
-	editor.Handle("/content/edit", isCourseOwner(http.HandlerFunc(getEditorContentEdit)))
+	editor.Handle("/content/edit", http.HandlerFunc(getEditorContentEdit))
 
 	admin := http.NewServeMux()
 	admin.Handle("/users", http.HandlerFunc(getAdminUsers))

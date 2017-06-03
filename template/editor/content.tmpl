@@ -29,12 +29,12 @@
         <div><span class="_font-bold">Video ID:</span> {{.VideoID}}</div>
       </div>
       <div class="acourse-segment col-xs-12 col-md-3 _bg-color-base-2">
-        <form method="POST">
-          <input type="hidden">
+        <a href="/editor/content/edit?id={{.ID}}">
           <button class="acourse-button -primary acourse-block _font-sub _full-width">Edit</button>
-        </form>
+        </a>
         <form method="POST">
-          <input type="hidden">
+          {{xsrf "editor/content"}}
+          <input type="hidden" name="Action" value="delete">
           <button class="acourse-button -negative _full-width _font-sub">Delete</button>
         </form>
       </div>
