@@ -586,7 +586,50 @@ func postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 }
 
 func getEditorContentCreate(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 	id, _ := strconv.ParseInt(r.FormValue("id"), 10, 64)
+
+	if r.Method == http.MethodPost {
+		user := appctx.GetUser(ctx)
+		if !verifyXSRF(r.FormValue("X"), user.ID, "editor/create") {
+			http.Error(w, "invalid xsrf token", http.StatusInternalServerError)
+			return
+		}
+
+		var (
+			title   = r.FormValue("Title")
+			desc    = r.FormValue("Desc")
+			videoID = r.FormValue("VideoID")
+			i       int64
+		)
+
+		tx, err := db.Begin()
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		defer tx.Rollback()
+
+		// get content index
+		tx.QueryRow(`
+			select i from course_contents where course_id = $1 order by i desc limit 1
+		`, id).Scan(&i)
+		tx.Exec(`
+			insert into course_contents
+				(course_id, i, title, long_desc, video_id, video_type)
+			values
+				($1, $2, $3, $4, $5, $6)
+		`, id, i, title, desc, videoID, model.Youtube)
+		err = tx.Commit()
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		http.Redirect(w, r, "/editor/content?id="+r.FormValue("id"), http.StatusFound)
+		return
+	}
+
 	course, err := model.GetCourse(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -619,4 +662,8 @@ func getEditorContentEdit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	view.EditorContentEdit(w, r, course, content)
+}
+
+func postEditorContentCreate(w http.ResponseWriter, r *http.Request) {
+
 }
