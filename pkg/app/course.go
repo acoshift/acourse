@@ -114,7 +114,7 @@ func getCourseCreate(w http.ResponseWriter, r *http.Request) {
 
 	page := defaultPage
 	page.Title = "Create new Course | " + page.Title
-	view.CourseCreate(w, r, &view.CourseCreateData{
+	view.EditorCreate(w, r, &view.CourseCreateData{
 		Page:  &page,
 		Flash: f,
 	})
@@ -225,7 +225,7 @@ func getCourseEdit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	view.CourseEdit(w, r, &view.CourseEditData{
+	view.EditorCourse(w, r, &view.CourseEditData{
 		Page:   &page,
 		Course: course,
 	})
@@ -362,7 +362,7 @@ func getCourseContentEdit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	view.CourseContentEdit(w, r, &view.CourseEditData{
+	view.EditorContents(w, r, &view.CourseEditData{
 		Page:   &page,
 		Course: course,
 	})

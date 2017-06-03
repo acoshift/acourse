@@ -3,20 +3,20 @@ package view
 import "net/http"
 
 type (
-	keyIndex             struct{}
-	keySignIn            struct{}
-	keySignUp            struct{}
-	keyProfile           struct{}
-	keyProfileEdit       struct{}
-	keyUser              struct{}
-	keyCourse            struct{}
-	keyCourseCreate      struct{}
-	keyCourseEdit        struct{}
-	keyCourseContentEdit struct{}
-	keyCourseEnroll      struct{}
-	keyAdminUsers        struct{}
-	keyAdminCourses      struct{}
-	keyAdminPayments     struct{}
+	keyIndex         struct{}
+	keySignIn        struct{}
+	keySignUp        struct{}
+	keyProfile       struct{}
+	keyProfileEdit   struct{}
+	keyUser          struct{}
+	keyCourse        struct{}
+	keyEditorCreate  struct{}
+	keyEditorCourse  struct{}
+	keyEditorContent struct{}
+	keyCourseEnroll  struct{}
+	keyAdminUsers    struct{}
+	keyAdminCourses  struct{}
+	keyAdminPayments struct{}
 )
 
 // Index renders index view
@@ -49,19 +49,19 @@ func Course(w http.ResponseWriter, r *http.Request, data *CourseData) {
 	render(w, r, keyCourse{}, data)
 }
 
-// CourseCreate renders course create view
-func CourseCreate(w http.ResponseWriter, r *http.Request, data *CourseCreateData) {
-	render(w, r, keyCourseCreate{}, data)
+// EditorCreate renders course create view
+func EditorCreate(w http.ResponseWriter, r *http.Request, data *CourseCreateData) {
+	render(w, r, keyEditorCreate{}, data)
 }
 
-// CourseEdit renders course edit view
-func CourseEdit(w http.ResponseWriter, r *http.Request, data *CourseEditData) {
-	render(w, r, keyCourseEdit{}, data)
+// EditorCourse renders course edit view
+func EditorCourse(w http.ResponseWriter, r *http.Request, data *CourseEditData) {
+	render(w, r, keyEditorCourse{}, data)
 }
 
-// CourseContentEdit renders course content edit view
-func CourseContentEdit(w http.ResponseWriter, r *http.Request, data *CourseEditData) {
-	render(w, r, keyCourseContentEdit{}, data)
+// EditorContents renders course content edit view
+func EditorContents(w http.ResponseWriter, r *http.Request, data *CourseEditData) {
+	render(w, r, keyEditorContent{}, data)
 }
 
 // CourseEnroll renders course enroll view
