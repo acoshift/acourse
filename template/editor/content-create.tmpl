@@ -1,0 +1,68 @@
+{{define "app-body"}}
+<div id="content-create">
+  <div class="grid-container">
+    <div class="col-xs-12 col-lg-8 col-lg-offset-2">
+      <div class="acourse-header _color-sub">
+        Create Content<br>
+        <div class="_font-size-big">
+          <span class="_font-bold _color-dark">For Course: </span>
+          <a href="/course/{{.Course.Link}}" class="acourse-link">{{.Course.Title}}</a>
+        </div>
+      </div>
+      <div class="acourse-card acourse-segment acourse-block-bigger">
+
+        <form method="POST" enctype="multipart/form-data">
+          <!--{{xsrf "editor/create"}}-->
+
+          <div class="input-field _flex-column">
+            <label>Title</label>
+            <input class="acourse-input" name="Title" type="text" placeholder="Content Title" required>
+          </div>
+
+          <div class="input-field _flex-column">
+            <label>Description</label>
+            <textarea class="acourse-input" id="decs-text" rows="10" name="Desc"></textarea>
+          </div>
+
+          <div class="input-field _flex-column">
+            <label>Video ID</label>
+            <input class="acourse-input" type="text" name="VideoID" placeholder="Video ID">
+          </div>
+
+          <button class="acourse-button -primary _font-sub _full-width" type="submit">
+            Create Content
+          </button>
+
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>
+{{end}}
+
+{{define "app-script"}}
+{{end}}
+
+{{define "app-style"}}
+<style>
+  #content-create {
+    padding-top: 32px;
+    min-height: calc(100vh - 236px);
+  }
+
+  #content-create .acourse-header a {
+    color: #adadad;
+  }
+
+  #content-create .acourse-card {
+    width: initial;
+  }
+
+  @media only screen and (max-width: 767px) {
+    #course-create .grid-container > div {
+      padding: 0;
+    }
+  }
+</style>
+{{end}}
