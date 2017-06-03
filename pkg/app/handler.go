@@ -130,13 +130,6 @@ func fileHandler(name string) http.Handler {
 	})
 }
 
-var defaultPage = view.Page{
-	Title: "Acourse",
-	Desc:  "Online courses for everyone",
-	Image: "https://storage.googleapis.com/acourse/static/62b9eb0e-3668-4f9f-86b7-a11349938f7a.jpg",
-	URL:   "https://acourse.io",
-}
-
 func getIndex(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
 		http.NotFound(w, r)

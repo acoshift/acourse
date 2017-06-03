@@ -209,16 +209,43 @@ func CourseEnroll(w http.ResponseWriter, r *http.Request, course *model.Course) 
 }
 
 // AdminUsers renders admin users view
-func AdminUsers(w http.ResponseWriter, r *http.Request, data *AdminUsersData) {
-	render(w, r, keyAdminUsers{}, data)
+func AdminUsers(w http.ResponseWriter, r *http.Request, users []*model.User, currentPage, totalPage int) {
+	ctx := r.Context()
+	page := newPage(ctx)
+
+	data := struct {
+		Page        *Page
+		Users       []*model.User
+		CurrentPage int
+		TotalPage   int
+	}{page, users, currentPage, totalPage}
+	render(w, r, keyAdminUsers{}, &data)
 }
 
 // AdminCourses renders admin courses view
-func AdminCourses(w http.ResponseWriter, r *http.Request, data *AdminCoursesData) {
-	render(w, r, keyAdminCourses{}, data)
+func AdminCourses(w http.ResponseWriter, r *http.Request, courses []*model.Course, currentPage, totalPage int) {
+	ctx := r.Context()
+	page := newPage(ctx)
+
+	data := struct {
+		Page        *Page
+		Courses     []*model.Course
+		CurrentPage int
+		TotalPage   int
+	}{page, courses, currentPage, totalPage}
+	render(w, r, keyAdminCourses{}, &data)
 }
 
 // AdminPayments renders admin payments view
-func AdminPayments(w http.ResponseWriter, r *http.Request, data *AdminPaymentsData) {
-	render(w, r, keyAdminPayments{}, data)
+func AdminPayments(w http.ResponseWriter, r *http.Request, payments []*model.Payment, currentPage, totalPage int) {
+	ctx := r.Context()
+	page := newPage(ctx)
+
+	data := struct {
+		Page        *Page
+		Payments    []*model.Payment
+		CurrentPage int
+		TotalPage   int
+	}{page, payments, currentPage, totalPage}
+	render(w, r, keyAdminPayments{}, &data)
 }

@@ -33,12 +33,8 @@ func getAdminUsers(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	view.AdminUsers(w, r, &view.AdminUsersData{
-		Page:        &defaultPage,
-		Users:       users,
-		CurrentPage: int(page),
-		TotalPage:   int(totalPage),
-	})
+
+	view.AdminUsers(w, r, users, int(page), int(totalPage))
 }
 
 func getAdminCourses(w http.ResponseWriter, r *http.Request) {
@@ -47,10 +43,8 @@ func getAdminCourses(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	view.AdminCourses(w, r, &view.AdminCoursesData{
-		Page:    &defaultPage,
-		Courses: courses,
-	})
+
+	view.AdminCourses(w, r, courses, 1, 1)
 }
 
 func getAdminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter func(int64, int64) ([]*model.Payment, error), paymentsCounter func() (int64, error)) {
@@ -78,12 +72,8 @@ func getAdminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter fun
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	view.AdminPayments(w, r, &view.AdminPaymentsData{
-		Page:        &defaultPage,
-		Payments:    payments,
-		CurrentPage: int(page),
-		TotalPage:   int(totalPage),
-	})
+
+	view.AdminPayments(w, r, payments, int(page), int(totalPage))
 }
 
 func postAdminPendingPayment(w http.ResponseWriter, r *http.Request) {
