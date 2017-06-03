@@ -663,7 +663,3 @@ func getEditorContentEdit(w http.ResponseWriter, r *http.Request) {
 
 	view.EditorContentEdit(w, r, course, content)
 }
-
-func postEditorContentCreate(w http.ResponseWriter, r *http.Request) {
-
-}
