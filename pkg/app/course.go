@@ -108,7 +108,7 @@ func getCourse(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func getCourseCreate(w http.ResponseWriter, r *http.Request) {
+func getEditorCreate(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	f := flash.Get(ctx)
 
@@ -120,7 +120,7 @@ func getCourseCreate(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func postCourseCreate(w http.ResponseWriter, r *http.Request) {
+func postEditorCreate(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	f := flash.Get(ctx)
 	user := appctx.GetUser(ctx)

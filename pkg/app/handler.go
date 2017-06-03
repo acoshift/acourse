@@ -49,40 +49,62 @@ func Mount(mux *http.ServeMux) {
 		xsrf("enroll"),
 	)(http.HandlerFunc(postCourseEnroll)))
 
-	r.GET("/editor/create", onlyInstructor(http.HandlerFunc(getCourseCreate)))
-	r.POST("/editor/create", middleware.Chain(
-		onlyInstructor,
-		xsrf("editor/create"),
-	)(http.HandlerFunc(postCourseCreate)))
-	r.GET("/editor/course", isCourseOwner(http.HandlerFunc(getEditorCourse)))
-	r.POST("/editor/course", middleware.Chain(
-		isCourseOwner,
-		xsrf("editor/course"),
-	)(http.HandlerFunc(postCourseEdit)))
-	r.GET("/editor/content", isCourseOwner(http.HandlerFunc(getEditorContent)))
-	r.GET("/editor/content/create", isCourseOwner(http.HandlerFunc(getEditorContentCreate)))
-	r.GET("/editor/content/edit", isCourseOwner(http.HandlerFunc(getEditorContentEdit)))
+	editor := http.NewServeMux()
+	{
+		post := xsrf("editor/create")(http.HandlerFunc(postEditorCreate))
+		editor.Handle("/create", onlyInstructor(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			switch r.Method {
+			case http.MethodGet, http.MethodHead:
+				getEditorCreate(w, r)
+			case http.MethodPost:
+				post.ServeHTTP(w, r)
+			default:
+				http.NotFound(w, r)
+			}
+		})))
+	}
+	{
+		post := xsrf("editor/course")(http.HandlerFunc(postCourseEdit))
+		editor.Handle("/course", isCourseOwner(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			switch r.Method {
+			case http.MethodGet, http.MethodHead:
+				getEditorCourse(w, r)
+			case http.MethodPost:
+				post.ServeHTTP(w, r)
+			default:
+				http.NotFound(w, r)
+			}
+		})))
+	}
+	editor.Handle("/content", isCourseOwner(http.HandlerFunc(getEditorContent)))
+	editor.Handle("/content/create", isCourseOwner(http.HandlerFunc(getEditorContentCreate)))
+	editor.Handle("/content/edit", isCourseOwner(http.HandlerFunc(getEditorContentEdit)))
 
 	admin := http.NewServeMux()
 	admin.Handle("/users", http.HandlerFunc(getAdminUsers))
 	admin.Handle("/courses", http.HandlerFunc(getAdminCourses))
-	admin.Handle("/payments/pending", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+	{
 		post := xsrf("payment-action")(http.HandlerFunc(postAdminPendingPayment))
-		switch r.Method {
-		case http.MethodGet, http.MethodHead:
-			getAdminPendingPayments(w, r)
-		case http.MethodPost:
-			post.ServeHTTP(w, r)
-		default:
-			http.NotFound(w, r)
-		}
-	}))
+		admin.Handle("/payments/pending", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			switch r.Method {
+			case http.MethodGet, http.MethodHead:
+				getAdminPendingPayments(w, r)
+			case http.MethodPost:
+				post.ServeHTTP(w, r)
+			default:
+				http.NotFound(w, r)
+			}
+		}))
+	}
+
 	admin.Handle("/payments/history", http.HandlerFunc(getAdminHistoryPayments))
 
 	mux.Handle("/", r)
 	mux.Handle("/~/", http.StripPrefix("/~", http.FileServer(&fileFS{http.Dir("static")})))
 	mux.Handle("/favicon.ico", fileHandler("static/favicon.ico"))
 	mux.Handle("/admin/", http.StripPrefix("/admin", onlyAdmin(admin)))
+	mux.Handle("/editor/", http.StripPrefix("/editor", editor))
 }
 
 type fileFS struct {
