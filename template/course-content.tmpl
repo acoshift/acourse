@@ -41,7 +41,7 @@
 
               <div class="playlist-container _no-padding _flex-column col-xs-12 col-md-4">
                 <div class="playlist-title _font-bold">
-                  {{ len .Course.Contents }} Video
+                  {{ len .Course.Contents }} {{if eq .Course.Type eBook}}Ebook{{else}}Video{{end}}
                 </div>
                 <div class="playlist-list">
                 {{range $i, $x := .Course.Contents}}
