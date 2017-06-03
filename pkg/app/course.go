@@ -114,7 +114,7 @@ func getCourseCreate(w http.ResponseWriter, r *http.Request) {
 
 	page := defaultPage
 	page.Title = "Create new Course | " + page.Title
-	view.CourseCreate(w, r, &view.CourseCreateData{
+	view.EditorCreate(w, r, &view.CourseCreateData{
 		Page:  &page,
 		Flash: f,
 	})
@@ -214,7 +214,7 @@ func postCourseCreate(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/course/"+link.String, http.StatusFound)
 }
 
-func getCourseEdit(w http.ResponseWriter, r *http.Request) {
+func getEditorCourse(w http.ResponseWriter, r *http.Request) {
 	page := defaultPage
 	page.Title = "Edit Course | " + page.Title
 
@@ -225,7 +225,7 @@ func getCourseEdit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	view.CourseEdit(w, r, &view.CourseEditData{
+	view.EditorCourse(w, r, &view.CourseEditData{
 		Page:   &page,
 		Course: course,
 	})
@@ -342,7 +342,7 @@ func postCourseEdit(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/course/"+link.String, http.StatusFound)
 }
 
-func getCourseContentEdit(w http.ResponseWriter, r *http.Request) {
+func getEditorContent(w http.ResponseWriter, r *http.Request) {
 	page := defaultPage
 	page.Title = "Edit Course | " + page.Title
 
@@ -362,7 +362,7 @@ func getCourseContentEdit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	view.CourseContentEdit(w, r, &view.CourseEditData{
+	view.EditorContent(w, r, &view.CourseEditData{
 		Page:   &page,
 		Course: course,
 	})
@@ -552,4 +552,12 @@ func postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Redirect(w, r, "/course/"+link, http.StatusFound)
+}
+
+func getEditorContentCreate(w http.ResponseWriter, r *http.Request) {
+	view.EditorContentCreate(w, r, nil)
+}
+
+func getEditorContentEdit(w http.ResponseWriter, r *http.Request) {
+	view.EditorContentEdit(w, r, nil)
 }

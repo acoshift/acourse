@@ -62,9 +62,11 @@ func init() {
 	parseTemplate(keyProfileEdit{}, []string{"profile-edit.tmpl", "app.tmpl", "layout.tmpl"})
 	parseTemplate(keyCourse{}, []string{"course.tmpl", "app.tmpl", "layout.tmpl"})
 	parseTemplate(keyCourseEnroll{}, []string{"enroll.tmpl", "app.tmpl", "layout.tmpl"})
-	parseTemplate(keyCourseCreate{}, []string{"editor/create.tmpl", "app.tmpl", "layout.tmpl"})
-	parseTemplate(keyCourseEdit{}, []string{"editor/course.tmpl", "app.tmpl", "layout.tmpl"})
-	parseTemplate(keyCourseContentEdit{}, []string{"editor/content.tmpl", "app.tmpl", "layout.tmpl"})
+	parseTemplate(keyEditorCreate{}, []string{"editor/create.tmpl", "app.tmpl", "layout.tmpl"})
+	parseTemplate(keyEditorCourse{}, []string{"editor/course.tmpl", "app.tmpl", "layout.tmpl"})
+	parseTemplate(keyEditorContent{}, []string{"editor/content.tmpl", "app.tmpl", "layout.tmpl"})
+	parseTemplate(keyEditorContentCreate{}, []string{"editor/content-create.tmpl", "app.tmpl", "layout.tmpl"})
+	parseTemplate(keyEditorContentEdit{}, []string{"editor/content-edit.tmpl", "app.tmpl", "layout.tmpl"})
 	parseTemplate(keyAdminUsers{}, []string{"admin/users.tmpl", "app.tmpl", "layout.tmpl"})
 	parseTemplate(keyAdminCourses{}, []string{"admin/courses.tmpl", "app.tmpl", "layout.tmpl"})
 	parseTemplate(keyAdminPayments{}, []string{"admin/payments.tmpl", "app.tmpl", "layout.tmpl"})
@@ -205,6 +207,7 @@ func render(w http.ResponseWriter, r *http.Request, key, data interface{}) {
 	tp, _ := t.Template.Clone()
 
 	// inject template funcs
+	// TODO: don't clone and inject to view data
 	if me != nil {
 		tp = tp.Funcs(template.FuncMap{
 			"me": func() interface{} {

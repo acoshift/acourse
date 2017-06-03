@@ -3,7 +3,7 @@ package app
 import (
 	"database/sql"
 	"net/http"
-	"strconv"
+	"os"
 	"unicode/utf8"
 
 	"github.com/acoshift/acourse/pkg/model"
@@ -20,8 +20,7 @@ import (
 func Mount(mux *http.ServeMux) {
 	r := httprouter.New()
 	r.GET("/", http.HandlerFunc(getIndex))
-	r.ServeFiles("/~/*filepath", http.Dir("static"))
-	r.GET("/favicon.ico", fileHandler("static/favicon.ico"))
+
 	r.GET("/signin", mustNotSignedIn(http.HandlerFunc(getSignIn)))
 	r.POST("/signin", middleware.Chain(
 		mustNotSignedIn,
@@ -35,39 +34,74 @@ func Mount(mux *http.ServeMux) {
 		xsrf("signup"),
 	)(http.HandlerFunc(postSignUp)))
 	r.GET("/signout", http.HandlerFunc(getSignOut))
+
 	r.GET("/profile", mustSignedIn(http.HandlerFunc(getProfile)))
 	r.GET("/profile/edit", mustSignedIn(http.HandlerFunc(getProfileEdit)))
 	r.POST("/profile/edit", middleware.Chain(
 		mustSignedIn,
 		xsrf("profile/edit"),
 	)(http.HandlerFunc(postProfileEdit)))
+
 	r.GET("/course/:courseID", http.HandlerFunc(getCourse))
 	r.GET("/course/:courseID/enroll", mustSignedIn(http.HandlerFunc(getCourseEnroll)))
 	r.POST("/course/:courseID/enroll", middleware.Chain(
 		mustSignedIn,
 		xsrf("enroll"),
 	)(http.HandlerFunc(postCourseEnroll)))
+
 	r.GET("/editor/create", onlyInstructor(http.HandlerFunc(getCourseCreate)))
 	r.POST("/editor/create", middleware.Chain(
 		onlyInstructor,
 		xsrf("editor/create"),
 	)(http.HandlerFunc(postCourseCreate)))
-	r.GET("/editor/course", isCourseOwner(http.HandlerFunc(getCourseEdit)))
+	r.GET("/editor/course", isCourseOwner(http.HandlerFunc(getEditorCourse)))
 	r.POST("/editor/course", middleware.Chain(
 		isCourseOwner,
 		xsrf("editor/course"),
 	)(http.HandlerFunc(postCourseEdit)))
-	r.GET("/editor/content", isCourseOwner(http.HandlerFunc(getCourseContentEdit)))
+	r.GET("/editor/content", isCourseOwner(http.HandlerFunc(getEditorContent)))
+	r.GET("/editor/content/create", isCourseOwner(http.HandlerFunc(getEditorContentCreate)))
+	r.GET("/editor/content/edit", isCourseOwner(http.HandlerFunc(getEditorContentEdit)))
 
-	admin := httprouter.New()
-	admin.GET("/users", http.HandlerFunc(getAdminUsers))
-	admin.GET("/courses", http.HandlerFunc(getAdminCourses))
-	admin.GET("/payments/pending", http.HandlerFunc(getAdminPendingPayments))
-	admin.POST("/payments/pending", xsrf("payment-action")(http.HandlerFunc(postAdminPendingPayment)))
-	admin.GET("/payments/history", http.HandlerFunc(getAdminHistoryPayments))
+	admin := http.NewServeMux()
+	admin.Handle("/users", http.HandlerFunc(getAdminUsers))
+	admin.Handle("/courses", http.HandlerFunc(getAdminCourses))
+	admin.Handle("/payments/pending", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		post := xsrf("payment-action")(http.HandlerFunc(postAdminPendingPayment))
+		switch r.Method {
+		case http.MethodGet, http.MethodHead:
+			getAdminPendingPayments(w, r)
+		case http.MethodPost:
+			post.ServeHTTP(w, r)
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	admin.Handle("/payments/history", http.HandlerFunc(getAdminHistoryPayments))
 
 	mux.Handle("/", r)
+	mux.Handle("/~/", http.StripPrefix("/~", http.FileServer(&fileFS{http.Dir("static")})))
+	mux.Handle("/favicon.ico", fileHandler("static/favicon.ico"))
 	mux.Handle("/admin/", http.StripPrefix("/admin", onlyAdmin(admin)))
+}
+
+type fileFS struct {
+	http.FileSystem
+}
+
+func (fs *fileFS) Open(name string) (http.File, error) {
+	f, err := fs.FileSystem.Open(name)
+	if err != nil {
+		return nil, err
+	}
+	stat, err := f.Stat()
+	if err != nil {
+		return nil, err
+	}
+	if stat.IsDir() {
+		return nil, os.ErrNotExist
+	}
+	return f, nil
 }
 
 func fileHandler(name string) http.Handler {
@@ -283,124 +317,4 @@ func getSignOut(w http.ResponseWriter, r *http.Request) {
 	s := session.Get(r.Context())
 	s.Del(keyUserID)
 	http.Redirect(w, r, "/", http.StatusSeeOther)
-}
-
-func getAdminUsers(w http.ResponseWriter, r *http.Request) {
-	page, _ := strconv.ParseInt(r.FormValue("page"), 10, 64)
-	if page <= 0 {
-		page = 1
-	}
-	limit := int64(30)
-
-	cnt, err := model.CountUsers()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	offset := (page - 1) * limit
-	for offset > cnt {
-		page--
-		offset = (page - 1) * limit
-	}
-	totalPage := cnt / limit
-
-	users, err := model.ListUsers(limit, offset)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	view.AdminUsers(w, r, &view.AdminUsersData{
-		Page:        &defaultPage,
-		Users:       users,
-		CurrentPage: int(page),
-		TotalPage:   int(totalPage),
-	})
-}
-
-func getAdminCourses(w http.ResponseWriter, r *http.Request) {
-	courses, err := model.ListCourses()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	view.AdminCourses(w, r, &view.AdminCoursesData{
-		Page:    &defaultPage,
-		Courses: courses,
-	})
-}
-
-func getAdminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter func(int64, int64) ([]*model.Payment, error), paymentsCounter func() (int64, error)) {
-	page, _ := strconv.ParseInt(r.FormValue("page"), 10, 64)
-	if page <= 0 {
-		page = 1
-	}
-	limit := int64(30)
-
-	cnt, err := paymentsCounter()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	offset := (page - 1) * limit
-	for offset > cnt {
-		page--
-		offset = (page - 1) * limit
-	}
-	totalPage := cnt / limit
-
-	payments, err := paymentsGetter(limit, offset)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	view.AdminPayments(w, r, &view.AdminPaymentsData{
-		Page:        &defaultPage,
-		Payments:    payments,
-		CurrentPage: int(page),
-		TotalPage:   int(totalPage),
-	})
-}
-
-func postAdminPendingPayment(w http.ResponseWriter, r *http.Request) {
-	action := r.FormValue("Action")
-
-	id, err := strconv.ParseInt(r.FormValue("ID"), 10, 64)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	if action == "accept" {
-		x, err := model.GetPayment(id)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		err = x.Accept()
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-	} else if action == "reject" {
-		x, err := model.GetPayment(id)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		err = x.Reject()
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-	}
-	http.Redirect(w, r, "/admin/payments/pending", http.StatusSeeOther)
-}
-
-func getAdminPendingPayments(w http.ResponseWriter, r *http.Request) {
-	getAdminPayments(w, r, model.ListPendingPayments, model.CountPendingPayments)
-}
-
-func getAdminHistoryPayments(w http.ResponseWriter, r *http.Request) {
-	getAdminPayments(w, r, model.ListHistoryPayments, model.CountHistoryPayments)
 }
