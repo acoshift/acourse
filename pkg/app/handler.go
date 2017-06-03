@@ -147,16 +147,11 @@ func getIndex(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	view.Index(w, r, &view.IndexData{
-		Courses: courses,
-	})
+	view.Index(w, r, courses)
 }
 
 func getSignIn(w http.ResponseWriter, r *http.Request) {
-	view.SignIn(w, r, &view.AuthData{
-		Page:  &defaultPage,
-		Flash: flash.Get(r.Context()),
-	})
+	view.SignIn(w, r)
 }
 
 func postSignIn(w http.ResponseWriter, r *http.Request) {
@@ -266,10 +261,7 @@ func getSignInCallback(w http.ResponseWriter, r *http.Request) {
 }
 
 func getSignUp(w http.ResponseWriter, r *http.Request) {
-	view.SignUp(w, r, &view.AuthData{
-		Page:  &defaultPage,
-		Flash: flash.Get(r.Context()),
-	})
+	view.SignUp(w, r)
 }
 
 func postSignUp(w http.ResponseWriter, r *http.Request) {

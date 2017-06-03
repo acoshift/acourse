@@ -7,23 +7,16 @@ import (
 
 // Page type provides layout data like title, description, and og
 type Page struct {
-	Title        string
-	Desc         string
-	Image        string
-	URL          string
-	NavbarActive string
+	Title string
+	Desc  string
+	Image string
+	URL   string
 }
 
 // IndexData type
 type IndexData struct {
 	Page    *Page
 	Courses []*model.Course
-}
-
-// AuthData type
-type AuthData struct {
-	Page  *Page
-	Flash flash.Flash
 }
 
 // ProfileData type

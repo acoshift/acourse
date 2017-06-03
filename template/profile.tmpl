@@ -4,9 +4,9 @@
     <div class="row _cross-start">
 
       <div class="acourse-card acourse-segment acourse-block-bigger col-xs-12 col-md-3 _flex-column">
-        {{template "user-profile" me}}
+        {{template "user-profile" .Me}}
         <div class="user-id _font-size-small _align-center">
-          ID: {{me.ID}}
+          ID: {{.Me.ID}}
         </div>
         <a href="/profile/edit">
           <div class="acourse-button-secondary">Edit Profile</div>
@@ -14,7 +14,7 @@
       </div>
 
       <div class="user-dashboard col-xs-12 col-md-9 _flex-column">
-        {{if me.Role.Instructor}}
+        {{if .Me.Role.Instructor}}
           <div class="acourse-block-big col-xs-12 _flex-row _main-space-between _cross-center">
             <div class="acourse-header _no-margin _color-main">My Own Courses</div>
             <a href="/editor/create">

@@ -1,6 +1,12 @@
 package view
 
-import "net/http"
+import (
+	"net/http"
+
+	"github.com/acoshift/acourse/pkg/appctx"
+	"github.com/acoshift/acourse/pkg/model"
+	"github.com/acoshift/flash"
+)
 
 type (
 	keyIndex               struct{}
@@ -29,24 +35,46 @@ var defaultPage = Page{
 }
 
 // Index renders index view
-func Index(w http.ResponseWriter, r *http.Request, data *IndexData) {
-	data.Page = &defaultPage
-	render(w, r, keyIndex{}, data)
+func Index(w http.ResponseWriter, r *http.Request, courses []*model.Course) {
+	data := struct {
+		Page    *Page
+		Courses []*model.Course
+	}{&defaultPage, courses}
+	render(w, r, keyIndex{}, &data)
 }
 
 // SignIn renders signin view
-func SignIn(w http.ResponseWriter, r *http.Request, data *AuthData) {
-	render(w, r, keySignIn{}, data)
+func SignIn(w http.ResponseWriter, r *http.Request) {
+	data := struct {
+		Page  *Page
+		Flash flash.Flash
+	}{&defaultPage, flash.Get(r.Context())}
+	render(w, r, keySignIn{}, &data)
 }
 
 // SignUp renders signup view
-func SignUp(w http.ResponseWriter, r *http.Request, data *AuthData) {
-	render(w, r, keySignUp{}, data)
+func SignUp(w http.ResponseWriter, r *http.Request) {
+	data := struct {
+		Page  *Page
+		Flash flash.Flash
+	}{&defaultPage, flash.Get(r.Context())}
+	render(w, r, keySignUp{}, &data)
 }
 
 // Profile renders profile view
-func Profile(w http.ResponseWriter, r *http.Request, data *ProfileData) {
-	render(w, r, keyProfile{}, data)
+func Profile(w http.ResponseWriter, r *http.Request, ownCourses, enrolledCourses []*model.Course) {
+	me := appctx.GetUser(r.Context())
+	page := defaultPage
+	page.Title = me.Username + " | " + page.Title
+
+	data := struct {
+		Page            *Page
+		Navbar          string
+		Me              *model.User
+		OwnCourses      []*model.Course
+		EnrolledCourses []*model.Course
+	}{&page, "profile", me, ownCourses, enrolledCourses}
+	render(w, r, keyProfile{}, &data)
 }
 
 // ProfileEdit renders profile edit view

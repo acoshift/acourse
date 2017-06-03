@@ -27,14 +27,7 @@ func getProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	page := defaultPage
-	page.Title = user.Username + " | " + page.Title
-
-	view.Profile(w, r, &view.ProfileData{
-		Page:            &page,
-		OwnCourses:      ownCourses,
-		EnrolledCourses: enrolledCourses,
-	})
+	view.Profile(w, r, ownCourses, enrolledCourses)
 }
 
 func getProfileEdit(w http.ResponseWriter, r *http.Request) {
