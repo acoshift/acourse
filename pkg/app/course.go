@@ -96,6 +96,79 @@ func getCourse(w http.ResponseWriter, r *http.Request) {
 	view.Course(w, r, x, enrolled, owned, pendingEnroll)
 }
 
+func getCourseContent(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	user := appctx.GetUser(ctx)
+	link := httprouter.GetParam(ctx, "courseID")
+
+	// if id can parse to int64 get course from id
+	id, err := strconv.ParseInt(link, 10, 64)
+	if err != nil {
+		// link can not parse to int64 get course id from url
+		id, err = model.GetCourseIDFromURL(link)
+		if err == model.ErrNotFound {
+			http.NotFound(w, r)
+			return
+		}
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+	x, err := model.GetCourse(id)
+	if err == model.ErrNotFound {
+		http.NotFound(w, r)
+		return
+	}
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// if course has url, redirect to course url
+	if x.URL.Valid && x.URL.String != link {
+		http.Redirect(w, r, "/course/"+x.URL.String+"/content", http.StatusFound)
+		return
+	}
+
+	enrolled, err := model.IsEnrolled(user.ID, x.ID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if !enrolled && user.ID != x.UserID {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
+
+	x.Contents, err = model.GetCourseContents(x.ID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	x.Owner, err = model.GetUser(x.UserID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var content *model.CourseContent
+	p, _ := strconv.Atoi(r.FormValue("p"))
+	if p < 0 {
+		p = 0
+	}
+	if p > len(x.Contents)-1 {
+		p = len(x.Contents) - 1
+	}
+	if p >= 0 {
+		content = x.Contents[p]
+	}
+
+	view.CourseContent(w, r, x, content)
+}
+
 func getEditorCreate(w http.ResponseWriter, r *http.Request) {
 	view.EditorCreate(w, r)
 }

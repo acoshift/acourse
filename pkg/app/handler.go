@@ -43,6 +43,7 @@ func Mount(mux *http.ServeMux) {
 	)(http.HandlerFunc(postProfileEdit)))
 
 	r.GET("/course/:courseID", http.HandlerFunc(getCourse))
+	r.GET("/course/:courseID/content", mustSignedIn(http.HandlerFunc(getCourseContent)))
 	r.GET("/course/:courseID/enroll", mustSignedIn(http.HandlerFunc(getCourseEnroll)))
 	r.POST("/course/:courseID/enroll", middleware.Chain(
 		mustSignedIn,

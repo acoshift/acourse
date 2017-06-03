@@ -18,6 +18,7 @@ type (
 	keyProfileEdit         struct{}
 	keyUser                struct{}
 	keyCourse              struct{}
+	keyCourseContent       struct{}
 	keyEditorCreate        struct{}
 	keyEditorCourse        struct{}
 	keyEditorContent       struct{}
@@ -130,6 +131,22 @@ func Course(w http.ResponseWriter, r *http.Request, course *model.Course, enroll
 		PendingEnroll bool
 	}{page, course, enrolled, owned, pendingEnroll}
 	render(ctx, w, keyCourse{}, &data)
+}
+
+// CourseContent renders course content view
+func CourseContent(w http.ResponseWriter, r *http.Request, course *model.Course, content *model.CourseContent) {
+	ctx := r.Context()
+	page := newPage(ctx)
+	page.Title = course.Title + " | " + page.Title
+	page.Desc = course.ShortDesc
+	page.Image = course.Image
+
+	data := struct {
+		Page    *Page
+		Course  *model.Course
+		Content *model.CourseContent
+	}{page, course, content}
+	render(ctx, w, keyCourseContent{}, &data)
 }
 
 // EditorCreate renders course create view
