@@ -43,12 +43,7 @@ func getProfileEdit(w http.ResponseWriter, r *http.Request) {
 	if !f.Has("AboutMe") {
 		f.Set("AboutMe", user.AboutMe)
 	}
-	page := defaultPage
-	page.Title = user.Username + " | " + page.Title
-	view.ProfileEdit(w, r, &view.ProfileEditData{
-		Page:  &page,
-		Flash: f,
-	})
+	view.ProfileEdit(w, r)
 }
 
 func postProfileEdit(w http.ResponseWriter, r *http.Request) {

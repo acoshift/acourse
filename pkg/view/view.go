@@ -1,6 +1,7 @@
 package view
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/acoshift/acourse/pkg/appctx"
@@ -27,6 +28,17 @@ type (
 	keyAdminPayments       struct{}
 )
 
+// Page type provides layout data like title, description, and og
+type Page struct {
+	Title  string
+	Desc   string
+	Image  string
+	URL    string
+	Navbar string
+	Me     *model.User
+	Flash  flash.Flash
+}
+
 var defaultPage = Page{
 	Title: "Acourse",
 	Desc:  "Online courses for everyone",
@@ -34,52 +46,70 @@ var defaultPage = Page{
 	URL:   "https://acourse.io",
 }
 
+func newPage(ctx context.Context) *Page {
+	p := defaultPage
+	p.Me = appctx.GetUser(ctx)
+	p.Flash = flash.Get(ctx)
+	return &p
+}
+
 // Index renders index view
 func Index(w http.ResponseWriter, r *http.Request, courses []*model.Course) {
+	ctx := r.Context()
 	data := struct {
 		Page    *Page
 		Courses []*model.Course
-	}{&defaultPage, courses}
+	}{newPage(ctx), courses}
 	render(w, r, keyIndex{}, &data)
 }
 
 // SignIn renders signin view
 func SignIn(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 	data := struct {
 		Page  *Page
 		Flash flash.Flash
-	}{&defaultPage, flash.Get(r.Context())}
+	}{newPage(ctx), flash.Get(r.Context())}
 	render(w, r, keySignIn{}, &data)
 }
 
 // SignUp renders signup view
 func SignUp(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 	data := struct {
 		Page  *Page
 		Flash flash.Flash
-	}{&defaultPage, flash.Get(r.Context())}
+	}{newPage(ctx), flash.Get(r.Context())}
 	render(w, r, keySignUp{}, &data)
 }
 
 // Profile renders profile view
 func Profile(w http.ResponseWriter, r *http.Request, ownCourses, enrolledCourses []*model.Course) {
-	me := appctx.GetUser(r.Context())
-	page := defaultPage
+	ctx := r.Context()
+	page := newPage(ctx)
+	me := appctx.GetUser(ctx)
 	page.Title = me.Username + " | " + page.Title
 	page.Navbar = "profile"
 
 	data := struct {
 		Page            *Page
-		Me              *model.User
 		OwnCourses      []*model.Course
 		EnrolledCourses []*model.Course
-	}{&page, me, ownCourses, enrolledCourses}
+	}{page, ownCourses, enrolledCourses}
 	render(w, r, keyProfile{}, &data)
 }
 
 // ProfileEdit renders profile edit view
-func ProfileEdit(w http.ResponseWriter, r *http.Request, data *ProfileEditData) {
-	render(w, r, keyProfileEdit{}, data)
+func ProfileEdit(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	me := appctx.GetUser(ctx)
+	page := newPage(ctx)
+	page.Title = me.Username + " | " + page.Title
+
+	data := struct {
+		Page *Page
+	}{page}
+	render(w, r, keyProfileEdit{}, &data)
 }
 
 // Course renders course view

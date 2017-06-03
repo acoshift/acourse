@@ -117,9 +117,6 @@ func parseTemplate(key interface{}, set []string) {
 			r = append(r, n)
 			return r
 		},
-		"me": func() interface{} {
-			return nil
-		},
 		"courseType": func(v int) string {
 			switch v {
 			case model.Live:
@@ -210,9 +207,6 @@ func render(w http.ResponseWriter, r *http.Request, key, data interface{}) {
 	// TODO: don't clone and inject to view data
 	if me != nil {
 		tp = tp.Funcs(template.FuncMap{
-			"me": func() interface{} {
-				return me
-			},
 			"xsrf": func(action string) template.HTML {
 				return template.HTML(`<input type="hidden" name="X" value="` + xsrftoken.Generate(xsrfSecret, me.ID, action) + `">`)
 			},

@@ -11,7 +11,7 @@
       <form method="POST" enctype="multipart/form-data">
         {{xsrf "profile/edit"}}
         <div class="acourse-block _flex-row _main-center">
-          <img id="avatar" class="acourse-circle -large _img-cover" src="{{me.Image}}" onerror="this.src = '/~/img/placeholder-img.svg'">
+          <img id="avatar" class="acourse-circle -large _img-cover" src="{{.Page.Me.Image}}" onerror="this.src = '/~/img/placeholder-img.svg'">
         </div>
         <div class="input-field _flex-column">
           <label>Image</label>
@@ -22,15 +22,15 @@
         </div>
         <div class="input-field _flex-column">
           <label>Username</label>
-          <input class="acourse-input" name="Username" value="{{.Flash.Get "Username"}}">
+          <input class="acourse-input" name="Username" value="{{.Page.Flash.Get "Username"}}">
         </div>
         <div class="input-field _flex-column">
           <label>Name</label>
-          <input class="acourse-input" name="Name" value="{{.Flash.Get "Name"}}">
+          <input class="acourse-input" name="Name" value="{{.Page.Flash.Get "Name"}}">
         </div>
         <div class="input-field _flex-column">
           <label>About Me</label>
-          <input class="acourse-input" name="AboutMe" value="{{.Flash.Get "AboutMe"}}">
+          <input class="acourse-input" name="AboutMe" value="{{.Page.Flash.Get "AboutMe"}}">
         </div>
 
         <div class="acourse-block-big _flex-row _main-center">
@@ -39,10 +39,10 @@
           </button>
         </div>
 
-        {{if .Flash.Errors}}
+        {{if .Page.Flash.Errors}}
           <div class="acourse-message -error">
             <ul>
-              {{range .Flash.Errors}}
+              {{range .Page.Flash.Errors}}
                 <li>{{.}}</li>
               {{end}}
             </ul>

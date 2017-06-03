@@ -5,15 +5,6 @@ import (
 	"github.com/acoshift/flash"
 )
 
-// Page type provides layout data like title, description, and og
-type Page struct {
-	Title  string
-	Desc   string
-	Image  string
-	URL    string
-	Navbar string
-}
-
 // IndexData type
 type IndexData struct {
 	Page    *Page

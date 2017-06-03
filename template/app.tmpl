@@ -1,25 +1,25 @@
 {{define "body"}}
   <div id="navbar" class="navbar-color">
     <div class="navbar-container grid-container _flex-row _main-space-between _cross-stretch">
-      
+
       <a href="/" class="_flex-row _cross-center">
         <img class="logo" src="/~/img/acourse-logo-w-2.svg" height="45">
       </a>
       <div class="_flex-row _cross-center _main-end _flex-span">
-      {{if me}}
+      {{if .Page.Me}}
         <div class="dropdown _full-height">
           <div class="dropbtn _full-height _flex-row _cross-center ">
             <img
               class="acourse-block-big acourse-circle _img-cover _no-margin"
-              src="{{me.Image}}"
+              src="{{.Page.Me.Image}}"
               onerror="this.src = '/~/img/placeholder-img.svg'">
-            <div class="username">&nbsp;&nbsp;{{me.Username}}</div>
+            <div class="username">&nbsp;&nbsp;{{.Page.Me.Username}}</div>
             &nbsp;&nbsp;<i class="fa fa-caret-down"></i>
           </div>
           <div class="dropdown-content-w">
             <div class="dropdown-content">
               <a class="_font-main _font-bold _font-size-big {{if eq templateName "profile"}} active{{end}}" href="/profile">Profile</a>
-              {{if me.Role.Admin}}
+              {{if .Page.Me.Role.Admin}}
               <a class="_font-main _font-bold _font-size-big {{if eq templateName "user"}} active{{end}}" href="/admin/users">Users</a>
               <a class="_font-main _font-bold _font-size-big {{if eq templateName "course"}} active{{end}}" href="/admin/courses">Courses</a>
               <a class="_font-main _font-bold _font-size-big" href="/admin/payments/pending">Pending Payments</a>
@@ -43,7 +43,7 @@
 
   <footer class="row">
     <div class="col-xs-12 col-md-6 _font-size-big">
-      Acourse.io © 2016-2020 &nbsp &nbsp 
+      Acourse.io © 2016-2020 &nbsp &nbsp
       <a href="https://github.com/acoshift/acourse" class="_font-size-bigger" target="_blank">
         <i class="fa fa-github _color-sub"></i>
       </a>
@@ -124,13 +124,13 @@
   footer > div:first-child {
     text-align: left;
   }
-  
+
   footer > div:last-child {
     text-align: right;
   }
 
   @media only screen and (max-width: 767px) {
-    
+
     footer > div {
       text-align: center !important;
     }
