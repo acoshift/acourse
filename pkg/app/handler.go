@@ -63,12 +63,21 @@ func Mount(mux *http.ServeMux) {
 	r.GET("/editor/content/create", isCourseOwner(http.HandlerFunc(getEditorContentCreate)))
 	r.GET("/editor/content/edit", isCourseOwner(http.HandlerFunc(getEditorContentEdit)))
 
-	admin := httprouter.New()
-	admin.GET("/users", http.HandlerFunc(getAdminUsers))
-	admin.GET("/courses", http.HandlerFunc(getAdminCourses))
-	admin.GET("/payments/pending", http.HandlerFunc(getAdminPendingPayments))
-	admin.POST("/payments/pending", xsrf("payment-action")(http.HandlerFunc(postAdminPendingPayment)))
-	admin.GET("/payments/history", http.HandlerFunc(getAdminHistoryPayments))
+	admin := http.NewServeMux()
+	admin.Handle("/users", http.HandlerFunc(getAdminUsers))
+	admin.Handle("/courses", http.HandlerFunc(getAdminCourses))
+	admin.Handle("/payments/pending", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		post := xsrf("payment-action")(http.HandlerFunc(postAdminPendingPayment))
+		switch r.Method {
+		case http.MethodGet, http.MethodHead:
+			getAdminPendingPayments(w, r)
+		case http.MethodPost:
+			post.ServeHTTP(w, r)
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	admin.Handle("/payments/history", http.HandlerFunc(getAdminHistoryPayments))
 
 	mux.Handle("/", r)
 	mux.Handle("/~/", http.StripPrefix("/~", http.FileServer(&fileFS{http.Dir("static")})))
