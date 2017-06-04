@@ -38,7 +38,7 @@ func generateDownloadURL(filename string) string {
 // UploadPaymentImage uploads payment image
 func UploadPaymentImage(ctx context.Context, r io.Reader) (string, error) {
 	buf := &bytes.Buffer{}
-	err := resizeCropEncode(buf, r, 1200, 1200, 80)
+	err := resizeEncode(buf, r, 800, 0, 75)
 	if err != nil {
 		return "", err
 	}
