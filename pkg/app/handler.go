@@ -10,6 +10,7 @@ import (
 	"github.com/acoshift/acourse/pkg/view"
 	"github.com/acoshift/flash"
 	"github.com/acoshift/go-firebase-admin"
+	"github.com/acoshift/header"
 	"github.com/acoshift/httprouter"
 	"github.com/acoshift/middleware"
 	"github.com/acoshift/session"
@@ -100,7 +101,7 @@ func Mount(mux *http.ServeMux) {
 	admin.Handle("/payments/history", http.HandlerFunc(getAdminHistoryPayments))
 
 	mux.Handle("/", r)
-	mux.Handle("/~/", http.StripPrefix("/~", http.FileServer(&fileFS{http.Dir("static")})))
+	mux.Handle("/~/", http.StripPrefix("/~", cache(http.FileServer(&fileFS{http.Dir("static")}))))
 	mux.Handle("/favicon.ico", fileHandler("static/favicon.ico"))
 	mux.Handle("/admin/", http.StripPrefix("/admin", onlyAdmin(admin)))
 	mux.Handle("/editor/", http.StripPrefix("/editor", editor))
@@ -123,6 +124,13 @@ func (fs *fileFS) Open(name string) (http.File, error) {
 		return nil, os.ErrNotExist
 	}
 	return f, nil
+}
+
+func cache(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set(header.CacheControl, "public, max-age=31536000")
+		h.ServeHTTP(w, r)
+	})
 }
 
 func fileHandler(name string) http.Handler {
