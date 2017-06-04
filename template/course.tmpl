@@ -32,14 +32,14 @@
             <div class="course-sidebar _flex-column acourse-block-big">
               <div class="acourse-segment-big _bg-color-base-2">
                 <div>
-                  
+
                   {{if not .Enrolled}}
                   <div class="acourse-block _font-bold _font-size-bigger _align-right">฿ 1,300</div>
                   {{end}}
-                  
+
                   {{if .Enrolled}}
                   <div class="acourse-block-big">
-                    <a href="/course/{{.Course.Link}}/content?p=1">
+                    <a href="/course/{{.Course.Link}}/content">
                       <button class="acourse-button -positive _font-sub _full-width acourse-block">Start Learning</button>
                     </a>
                     <!--<a href="/">
@@ -50,7 +50,7 @@
                     </a>-->
                   </div>
                   {{end}}
-                  
+
                   {{if .PendingEnroll}}
                   <div class="acourse-block-big">
                     <button class="acourse-button -disable _font-sub _full-width acourse-block disabled">Pending Enroll</button>
@@ -67,7 +67,7 @@
 
                   {{if .Owned}}
                   <div class="acourse-block-big">
-                    <a href="/course/{{.Course.Link}}/content?p=1">
+                    <a href="/course/{{.Course.Link}}/content">
                       <button class="acourse-button -positive _font-sub _full-width acourse-block">Start Learning</button>
                     </a>
                     <a href="/editor/course?id={{.Course.ID}}">
