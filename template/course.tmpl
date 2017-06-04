@@ -35,13 +35,23 @@
               <div class="acourse-segment-big _bg-color-base-2">
                 <div>
                   {{if not .Enrolled}}
-                  <div class="acourse-block _font-bold _font-size-bigger _align-right">฿
-                    {{if .Course.Option.Discount}}
-                      {{.Course.Discount | currency}}
+
+                  
+                  <div class="acourse-block _flex-row _main-end _cross-end">
+                    {{if le .Course.Price 0.0}}
+                      <p class="_font-bold _font-size-bigger _no-margin">FREE</p>
                     {{else}}
-                      {{.Course.Price | currency}}
+                      <p class="_font-main _no-margin {{if .Course.Option.Discount}}discount _color-dark{{else}} _font-size-bigger{{end}}">
+                        ฿{{.Course.Price | currency}}
+                      </p>
+                      {{if .Course.Option.Discount}}
+                        <p class="_font-main _font-size-bigger _no-margin">
+                          &nbsp฿ {{.Course.Discount | currency}}
+                        </p>
+                      {{end}}
                     {{end}}
                   </div>
+
                   {{end}}
 
                   {{if .Enrolled}}
@@ -143,6 +153,11 @@
 
   #course .course-sidebar {
     flex-basis: 300px;
+  }
+
+  #course .discount {
+    text-decoration: line-through;
+    font-size: 13px;
   }
 
   @media only screen and (max-width: 767px) {
