@@ -1,6 +1,7 @@
 SERVICE=acourse
 REGISTRY=gcr.io/acoshift-1362
 COMMIT_SHA=$(shell git rev-parse HEAD)
+NOW=$(shell date +%s)
 
 default:
 	# `make deploy` build and deploy to production
@@ -15,6 +16,13 @@ stag:
 	TAG=-dev make deploy
 
 deploy: clean style build docker cluster patch
+
+.PHONY: static
+static: css = $(shell node_modules/.bin/node-sass --output-style compressed style/main.scss)
+static: hash = $(shell echo "${css}" | md5sum | awk '{ print $1 }')
+static:
+	@echo "${css}" > static/style.${hash}.css
+	@echo "style.css: style.${hash}.css" >> static.yaml
 
 .PHONY: style
 style: css = $(shell node_modules/.bin/node-sass --output-style compressed style/main.scss)
@@ -45,5 +53,6 @@ cluster:
 	gcloud container clusters get-credentials cluster-sg-1 --zone asia-southeast1-b --project acoshift-1362
 
 patch:
-	kubectl set image deployment/$(SERVICE)$(TAG) $(SERVICE)$(TAG)=$(REGISTRY)/$(SERVICE):$(COMMIT_SHA)
+	kubectl patch deployment $(SERVICE)$(TAG) -p '{"spec":{"template":{"metadata":{"labels":{"date":"$(NOW)"}},"spec":{"containers":[{"name":"$(SERVICE)","image":"$(REGISTRY)/$(SERVICE):$(COMMIT_SHA)"}]}}}}'
+	# kubectl set image deployment/$(SERVICE)$(TAG) $(SERVICE)$(TAG)=$(REGISTRY)/$(SERVICE):$(COMMIT_SHA)
 	kubectl rollout status deployment/$(SERVICE)$(TAG)
