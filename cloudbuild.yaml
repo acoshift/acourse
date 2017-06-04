@@ -1,6 +1,10 @@
 steps:
+- name: 'gcr.io/cloud-builders/npm'
+  args: ['install']
+- name: 'gcc'
+  args: ['make', 'style']
 - name: 'gcr.io/cloud-builders/go'
-  args: ['build', '-o', 'entrypoint', '-a', '-ldflags', '-w -s', 'cmd/acourse/main.go']
+  args: ['build', '-o', 'entrypoint', '-a', '-ldflags', '-w, '-s', 'cmd/acourse/main.go']
   env:
   - 'PROJECT_ROOT=github.com/acoshift/acourse'
   - 'GOOS=linux'
