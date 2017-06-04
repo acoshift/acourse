@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/gob"
+	"time"
 
 	"cloud.google.com/go/storage"
 	"github.com/acoshift/acourse/pkg/model"
@@ -27,6 +28,7 @@ var (
 	redisAddr    string
 	redisPass    string
 	redisDB      int
+	loc          *time.Location
 )
 
 // Config use to init app package
@@ -54,6 +56,12 @@ func init() {
 // Init inits app package with given config
 func Init(config Config) error {
 	ctx := context.Background()
+
+	var err error
+	loc, err = time.LoadLocation("Asia/Bangkok")
+	if err != nil {
+		return err
+	}
 
 	// init google cloud config
 	gconf, err := google.JWTConfigFromJSON(config.ServiceAccount, storage.ScopeReadWrite)

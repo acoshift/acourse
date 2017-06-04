@@ -34,7 +34,13 @@
                 <div>
 
                   {{if not .Enrolled}}
-                  <div class="acourse-block _font-bold _font-size-bigger _align-right">฿ 1,300</div>
+                  <div class="acourse-block _font-bold _font-size-bigger _align-right">฿
+                    {{if .Course.Option.Discount}}
+                      {{.Course.Discount | currency}}
+                    {{else}}
+                      {{.Course.Price | currency}}
+                    {{end}}
+                  </div>
                   {{end}}
 
                   {{if .Enrolled}}
@@ -55,14 +61,14 @@
                   <div class="acourse-block-big">
                     <button class="acourse-button -disable _font-sub _full-width acourse-block disabled">Pending Enroll</button>
                   </div>
-                  {{end}}
-
-                  {{if and (not .Owned) (not .Enrolled)}}
-                  <div class="acourse-block-big">
-                    <a href="/course/{{.Course.Link}}/enroll">
-                      <button class="acourse-button -positive _font-sub _full-width acourse-block">Enroll Now</button>
-                    </a>
-                  </div>
+                  {{else}}
+                    {{if and (not .Owned) (not .Enrolled)}}
+                    <div class="acourse-block-big">
+                      <a href="/course/{{.Course.Link}}/enroll">
+                        <button class="acourse-button -positive _font-sub _full-width acourse-block">Enroll Now</button>
+                      </a>
+                    </div>
+                    {{end}}
                   {{end}}
 
                   {{if .Owned}}

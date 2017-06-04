@@ -1,5 +1,7 @@
 .DS_Store
 config/service_account
+config/email_user
+config/email_password
 node_modules/
 static/style.*.css
 private/

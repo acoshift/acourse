@@ -582,7 +582,7 @@ func postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		paymentID, err := model.CreatePayment(tx, &model.Payment{
+		err = model.CreatePayment(tx, &model.Payment{
 			CourseID:      x.ID,
 			UserID:        user.ID,
 			Image:         imageURL,
@@ -593,8 +593,6 @@ func postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		// TODO: send email to user
-		_ = paymentID
 	}
 	err = tx.Commit()
 	if err != nil {

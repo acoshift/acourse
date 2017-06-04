@@ -47,6 +47,7 @@ const (
 			payments.at,
 			users.id,
 			users.username,
+			users.name,
 			users.email,
 			users.image,
 			courses.id,
@@ -84,19 +85,18 @@ const (
 )
 
 // CreatePayment creates new payment
-func CreatePayment(tx *sql.Tx, x *Payment) (int64, error) {
-	var id int64
-	err := tx.QueryRow(`
+func CreatePayment(tx *sql.Tx, x *Payment) error {
+	_, err := tx.Exec(`
 		insert into payments
 			(user_id, course_id, image, price, original_price, code, status)
 		values
 			($1, $2, $3, $4, $5, $6, $7)
 		returning id
-	`, x.UserID, x.CourseID, x.Image, x.Price, x.OriginalPrice, x.Code, Pending).Scan(&id)
+	`, x.UserID, x.CourseID, x.Image, x.Price, x.OriginalPrice, x.Code, Pending)
 	if err != nil {
-		return 0, err
+		return err
 	}
-	return id, nil
+	return nil
 }
 
 // Accept accepts a payment and create new enroll
@@ -111,7 +111,10 @@ func (x *Payment) Accept() error {
 	defer tx.Rollback()
 	_, err = tx.Exec(`
 		update payments
-		set status = $2
+		set
+			status = $2,
+			updated_at = now(),
+			at = now()
 		where id = $1`, x.ID, Accepted)
 	if err != nil {
 		return err
@@ -135,7 +138,10 @@ func (x *Payment) Reject() error {
 	}
 	_, err := db.Exec(`
 		update payments
-		set status = $2
+		set
+			status = $2,
+			updated_at = now(),
+			at = now()
 		where id = $1
 	`, x.ID, Rejected)
 	if err != nil {
@@ -147,7 +153,7 @@ func (x *Payment) Reject() error {
 func scanPayment(scan scanFunc, x *Payment) error {
 	err := scan(&x.ID,
 		&x.Image, &x.Price, &x.OriginalPrice, &x.Code, &x.Status, &x.CreatedAt, &x.UpdatedAt, &x.At,
-		&x.User.ID, &x.User.Username, &x.User.Email, &x.User.Image,
+		&x.User.ID, &x.User.Username, &x.User.Name, &x.User.Email, &x.User.Image,
 		&x.Course.ID, &x.Course.Title, &x.Course.Image, &x.Course.URL,
 	)
 	if err != nil {

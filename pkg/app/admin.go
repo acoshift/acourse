@@ -1,6 +1,7 @@
 package app
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -95,6 +96,52 @@ func postAdminPendingPayment(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+
+		if x.User.Email.Valid {
+			go func() {
+				// re-fetch payment to get latest timestamp
+				x, err := model.GetPayment(id)
+				if err != nil {
+					return
+				}
+
+				name := x.User.Name
+				if len(name) == 0 {
+					name = x.User.Username
+				}
+				body := fmt.Sprintf(`สวัสดีครับคุณ %s,<br>
+<br>
+อีเมล์ฉบับนี้ยืนยันว่าท่านได้รับการอนุมัติการชำระเงินสำหรับหลักสูตร "%s" เสร็จสิ้น ท่านสามารถทำการ login เข้าสู่ Website Acourse แล้วเข้าเรียนหลักสูตร "%s" ได้ทันที<br>
+<br>
+รหัสการชำระเงิน: %d<br>
+ชื่อหลักสูตร: %s<br>
+จำนวนเงิน: %.2f บาท<br>
+เวลาที่ทำการชำระเงิน: %s<br>
+เวลาที่อนุมัติการชำระเงิน: %s<br>
+ชื่อผู้ชำระเงิน: %s<br>
+อีเมล์ผู้ชำระเงิน: %s<br>
+----------------------<br>
+ขอบคุณที่ร่วมเรียนกับเราครับ<br>
+Krissada Chalermsook (Oak)<br>
+Founder/CEO Acourse.io<br>
+https://acourse.io
+`,
+					name,
+					x.Course.Title,
+					x.Course.Title,
+					x.ID,
+					x.Course.Title,
+					x.Price,
+					x.CreatedAt.In(loc).Format("02/01/2006 15:04:05"),
+					x.At.Time.In(loc).Format("02/01/2006 15:04:05"),
+					name,
+					x.User.Email.String,
+				)
+
+				title := fmt.Sprintf("ยืนยันการชำระเงิน หลักสูตร %s", x.Course.Title)
+				SendEmail(x.User.Email.String, title, body)
+			}()
+		}
 	} else if action == "reject" {
 		x, err := model.GetPayment(id)
 		if err != nil {
@@ -105,6 +152,47 @@ func postAdminPendingPayment(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
+		}
+
+		if x.User.Email.Valid {
+			go func() {
+				x, err := model.GetPayment(id)
+				if err != nil {
+					return
+				}
+				name := x.User.Name
+				if len(name) == 0 {
+					name = x.User.Username
+				}
+
+				body := fmt.Sprintf(`สวัสดีครับคุณ %s,<br>
+<br>
+ตามที่ท่านได้ upload file เพื่อใช้ในการสมัครหลักสูตร "%s" เมื่อเวลา %s<br>
+<br>
+ทางทีมงาน acourse.io ขอเรียนแจ้งให้ทราบว่าคำขอของคุณถูกปฏิเสธ โดยอาจจะเกิดจากสาเหตุใด สาเหตุหนึ่ง ตามรายละเอียดด้านล่าง<br>
+<br>
+1.รูปภาพที่ upload ไม่ตรงกับสิ่งที่ระบุไว้ เช่น<br>
+- สำหรับ Course free ไม่มีมัดจำ - รูปภาพต้องเป็นรูป screenshot จากการแชร์ link ของ course "https://acourse.io/course/%s" ไปยัง timeline facebook ของตนเองเท่านั้น<br>
+- สำหรับ Course ประเภทอื่นๆ ให้ลองอ่านรายละเอียดของรูปภาพที่จำเป็นต้องใช้ในการ upload ให้ครบถ้วนและปฏิบัติตามให้ถูกต้อง<br>
+<br>
+2. จำนวนเงินที่ระบุไม่ตรงกับจำนวนเงินที่โอนจริง<br>
+- ในกรณีที่ Course มีส่วนลด ให้ระบุยอดที่โอนเป็นตัวเลขที่ตรงกับยอดโอน เท่านั้น (ไม่ใช่ตัวเลขราคาเต็มของ Course)<br>
+- ในกรณีที่จ่ายผ่าน 3rd party เช่น eventpop ให้ใส่ตามราคาบัตร ไม่รวมค่าบริการอื่น ๆ เช่นค่า fee ของ eventpop<br>
+<br>
+ถ้าติดขัดหรือสงสัยตรงไหนเพิ่มเติม ท่านสามารถ reply email นี้เพื่อสอบถามเพิ่มเติมได้ครับ<br>
+<br>
+ขอบคุณมากครับ<br>
+ทีมงาน acourse.io
+`,
+					name,
+					x.Course.Title,
+					x.CreatedAt.In(loc).Format("02/01/2006 15:04:05"),
+					x.Course.Link(),
+				)
+
+				title := fmt.Sprintf("คำขอเพื่อเรียนหลักสูตร %s ได้รับการปฏิเสธ", x.Course.Title)
+				SendEmail(x.User.Email.String, title, body)
+			}()
 		}
 	}
 	http.Redirect(w, r, "/admin/payments/pending", http.StatusSeeOther)
