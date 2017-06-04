@@ -59,25 +59,28 @@
   <script>
     // Navbar scroll event
     ;(() => {
-      let didScroll
+      const navbar = document.querySelector('#navbar')
+      const delta = 5
+      const navbarHeight = navbar.offsetHeight || navbar.clientHeight
+      let didScroll = false
       let lastScrollTop = 0
-      let delta = 5
-      let navbarHeight = $('#navbar').outerHeight()
 
-      $(window).scroll(() => {
+      window.onscroll = () => {
         didScroll = true
-      })
+      }
 
       const hasScrolled = () => {
-        const st = $(this).scrollTop()
+        const st = window.scrollY
 
         if (Math.abs(lastScrollTop - st) <= delta) return
 
         if (st > lastScrollTop && st > navbarHeight) {
-          $('#navbar').removeClass('nav-down').addClass('nav-up')
+          navbar.classList.remove('nav-down')
+          navbar.classList.add('nav-up')
         } else {
-          if (st + $(window).height() < $(document).height()) {
-            $('#navbar').removeClass('nav-up').addClass('nav-down')
+          if (st + window.innerHeight < document.documentElement.scrollHeight) {
+            navbar.classList.remove('nav-up')
+            navbar.classList.add('nav-down')
           }
         }
         lastScrollTop = st
@@ -88,7 +91,7 @@
           hasScrolled()
           didScroll = false
         }
-      }, 250)
+      }, 500)
     })()
 
     function bindFileInputImage (input, img) {
