@@ -545,7 +545,7 @@ func postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var imageURL string
-	if price != 0 {
+	if originalPrice != 0 {
 		image, info, err := r.FormFile("Image")
 		if err == http.ErrMissingFile {
 			f.Add("Errors", "image required")
