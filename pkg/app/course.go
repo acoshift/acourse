@@ -545,27 +545,29 @@ func postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var imageURL string
-	if x.Price != 0 {
+	if price != 0 {
 		image, info, err := r.FormFile("Image")
-		if err != http.ErrMissingFile {
-			if err != nil {
-				f.Add("Errors", err.Error())
-				back(w, r)
-				return
-			}
+		if err == http.ErrMissingFile {
+			f.Add("Errors", "image required")
+			back(w, r)
+			return
+		}
+		if err != nil {
+			f.Add("Errors", err.Error())
+			back(w, r)
+			return
+		}
+		if !strings.Contains(info.Header.Get(header.ContentType), "image") {
+			f.Add("Errors", "file is not an image")
+			back(w, r)
+			return
+		}
 
-			if !strings.Contains(info.Header.Get(header.ContentType), "image") {
-				f.Add("Errors", "file is not an image")
-				back(w, r)
-				return
-			}
-
-			imageURL, err = UploadPaymentImage(ctx, image)
-			if err != nil {
-				f.Add("Errors", err.Error())
-				back(w, r)
-				return
-			}
+		imageURL, err = UploadPaymentImage(ctx, image)
+		if err != nil {
+			f.Add("Errors", err.Error())
+			back(w, r)
+			return
 		}
 	}
 
