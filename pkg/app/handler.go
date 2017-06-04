@@ -233,12 +233,16 @@ func getSignInCallback(w http.ResponseWriter, r *http.Request) {
 	if err == sql.ErrNoRows {
 		// user not found, insert new user
 		imageURL := UploadProfileFromURLAsync(user.PhotoURL)
-		tx.Exec(`
+		_, err = tx.Exec(`
 			insert into users
 				(id, name, username, email, image)
 			values
 				($1, $2, $3, $4, $5)
 		`, user.UserID, user.DisplayName, user.UserID, sql.NullString{String: user.Email, Valid: len(user.Email) > 0}, imageURL)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 		err = tx.Commit()
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
