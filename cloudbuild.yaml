@@ -4,7 +4,7 @@ steps:
 - name: 'gcc'
   args: ['make', 'style']
 - name: 'gcr.io/cloud-builders/go'
-  args: ['build', '-o', 'entrypoint', '-a', '-ldflags', '-w, '-s', 'cmd/acourse/main.go']
+  args: ['build', '-o', 'entrypoint', '-a', '-ldflags', '-w', '-s', 'cmd/acourse/main.go']
   env:
   - 'PROJECT_ROOT=github.com/acoshift/acourse'
   - 'GOOS=linux'
