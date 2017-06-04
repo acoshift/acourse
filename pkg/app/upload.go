@@ -107,7 +107,7 @@ func UploadProfileFromURLAsync(url string) string {
 // UploadCourseCoverImage uploads course cover image
 func UploadCourseCoverImage(ctx context.Context, r io.Reader) (string, error) {
 	buf := &bytes.Buffer{}
-	err := resizeCropEncode(buf, r, 1200, 700, 90)
+	err := resizeEncode(buf, r, 1200, 0, 90)
 	if err != nil {
 		return "", err
 	}
