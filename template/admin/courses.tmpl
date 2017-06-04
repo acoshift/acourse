@@ -5,7 +5,7 @@
     <div class="acourse-header">
       Course List
     </div>
-    
+
     <!-- Pagination -->
     <div class="acourse-block-big _flex-row _main-end _cross-start">
       <a class="_flex-row acourse-button-outline -info acourse-side-space" href>
@@ -44,7 +44,7 @@
                 <img
                   class="_img-cover"
                   src="{{.Image}}"
-                  onerror="this.src = '/~/img/placeholder-img.svg'"
+                  onerror="this.src = 'https://storage.googleapis.com/acourse/static/d509b7d8-88ad-478c-aa40-2984878c87cd.svg'"
                   width="200"
                   height="100">
               </td>
@@ -53,11 +53,11 @@
                 <img
                   class="acourse-circle _img-cover"
                   src="{{.Owner.Image}}"
-                  onerror="this.src = '/~/img/placeholder-img.svg'">
+                  onerror="this.src = 'https://storage.googleapis.com/acourse/static/d509b7d8-88ad-478c-aa40-2984878c87cd.svg'">
                 <br>
                 {{.Owner.Username}}
               </td>
-                
+
               </td>
               <td data-column="Type">{{.Type | courseType}}</td>
               <td data-column="Price">
@@ -96,7 +96,7 @@
         Next <span class="show-sm-upper">&nbsp&nbsp <i class="fa fa-angle-right _font-size-normal"></i></span>
       </a>
     </div>
-    
+
   </div>
 </div>
 {{end}}
