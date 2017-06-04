@@ -9,7 +9,6 @@ import (
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/configfile"
 	"github.com/acoshift/ds"
-	"github.com/garyburd/redigo/redis"
 	_ "github.com/lib/pq"
 	"golang.org/x/oauth2/google"
 	identitytoolkit "google.golang.org/api/identitytoolkit/v3"
@@ -18,7 +17,6 @@ import (
 var ctx = context.Background()
 
 var client, _ = ds.NewClient(ctx, "acourse-156413")
-var conn, _ = redis.Dial("tcp", "localhost:6379", redis.DialDatabase(4))
 
 var config = configfile.NewReader("config")
 var serviceAccount = config.Bytes("service_account")
