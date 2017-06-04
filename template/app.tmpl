@@ -19,7 +19,7 @@
           <div class="dropdown-content-w">
             <div class="dropdown-content">
               <a class="_font-main _font-bold _font-size-big {{if eq templateName "profile"}} active{{end}}" href="/profile">Profile</a>
-              {{if .Page.Me.Role.Admin}}
+              {{if .Page.Me.Role.Admin.Bool}}
               <a class="_font-main _font-bold _font-size-big {{if eq templateName "admin/users"}} active{{end}}" href="/admin/users">Users</a>
               <a class="_font-main _font-bold _font-size-big {{if eq templateName "admin/courses"}} active{{end}}" href="/admin/courses">Courses</a>
               <a class="_font-main _font-bold _font-size-big" href="/admin/payments/pending">Pending Payments</a>

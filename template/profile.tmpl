@@ -14,7 +14,7 @@
       </div>
 
       <div class="user-dashboard col-xs-12 col-md-9 _flex-column">
-        {{if .Page.Me.Role.Instructor}}
+        {{if .Page.Me.Role.Instructor.Bool}}
           <div class="acourse-block-big col-xs-12 _flex-row _main-space-between _cross-center">
             <div class="acourse-header _no-margin _color-main">My Own Courses</div>
             <a href="/editor/create">
