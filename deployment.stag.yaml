@@ -1,24 +1,24 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: acourse
+  name: acourse-dev
   labels:
-    app: acourse
+    app: acourse-dev
 spec:
-  replicas: 2
+  replicas: 1
   revisionHistoryLimit: 1
   selector:
     matchLabels:
-      app: acourse
+      app: acourse-dev
   template:
     metadata:
-      name: acourse
+      name: acourse-dev
       labels:
-        app: acourse
+        app: acourse-dev
     spec:
       containers:
-      - name: acourse
-        image: gcr.io/acoshift-1362/acourse
+      - name: acourse-dev
+        image: gcr.io/acoshift-1362/acourse-dev
         ports:
         - containerPort: 8080
         livenessProbe:
@@ -45,19 +45,19 @@ spec:
             cpu: 10m
             memory: 20Mi
         volumeMounts:
-        - name: acourse-config
+        - name: acourse-dev-config
           mountPath: /config
-        - name: acourse-secret
+        - name: acourse-dev-secret
           mountPath: /secret
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       volumes:
-      - name: acourse-config
+      - name: acourse-dev-config
         configMap:
-          name: acourse-config
-      - name: acourse-secret
+          name: acourse-dev-config
+      - name: acourse-dev-secret
         secret:
-          secretName: acourse-secret
+          secretName: acourse-dev-secret
           defaultMode: 0600
   strategy:
     type: RollingUpdate
@@ -68,9 +68,9 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: acourse
+  name: acourse-dev
   labels:
-    app: acourse
+    app: acourse-dev
 spec:
   type: ClusterIP
   ports:
@@ -79,4 +79,4 @@ spec:
     protocol: TCP
     name: http
   selector:
-    app: acourse
+    app: acourse-dev

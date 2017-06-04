@@ -1,4 +1,4 @@
-SERVICE=acourse-dev
+SERVICE=acourse
 REGISTRY=gcr.io/acoshift-1362
 COMMIT_SHA=$(shell git rev-parse HEAD)
 
