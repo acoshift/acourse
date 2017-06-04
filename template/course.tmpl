@@ -15,10 +15,12 @@
                 <h1 class="_color-sub">{{.Course.Title}}</h1>
               </div>
 
-              {{if not .Course.Start.Time.IsZero}}
-              <div class="acourse-block-bigger">
-                <div class="acourse-label -red _font-bold">Start At: {{.Course.Start.Time | date}}</div>
-              </div>
+              {{if eq .Course.Type live}}
+                {{if not .Course.Start.Time.IsZero}}
+                <div class="acourse-block-bigger">
+                  <div class="acourse-label -red _font-bold">Start At: {{.Course.Start.Time | date}}</div>
+                </div>
+                {{end}}
               {{end}}
 
               <div class="acourse-block">
@@ -32,7 +34,6 @@
             <div class="course-sidebar _flex-column acourse-block-big">
               <div class="acourse-segment-big _bg-color-base-2">
                 <div>
-
                   {{if not .Enrolled}}
                   <div class="acourse-block _font-bold _font-size-bigger _align-right">฿
                     {{if .Course.Option.Discount}}
@@ -86,7 +87,7 @@
                   {{end}}
 
                   <div>
-                    <h3>Lecturer</h3>
+                    <h3>Instructor</h3>
                     <div class="_flex-column _cross-center _font-sub">
                       <img
                         class="acourse-block acourse-circle _img-cover"
@@ -98,7 +99,6 @@
                 </div>
               </div>
             </div>
-
           </div>
         </div>
       </div>
