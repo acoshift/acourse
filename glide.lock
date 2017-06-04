@@ -1,5 +1,5 @@
 hash: 1a3f780dea13301eaae968ef7d7191a25807414f1aec5b0cdffc4e1f9a1de9ab
-updated: 2017-06-03T01:16:37.397559664+07:00
+updated: 2017-06-04T22:22:52.23226604+07:00
 imports:
 - name: cloud.google.com/go
   version: 2e6a95edb1071d750f6d7db777bf66cd2997af6c
@@ -31,6 +31,7 @@ imports:
 - name: github.com/acoshift/session
   version: beb3329a6aeb98571581fb154fa6fc5898611d32
   subpackages:
+  - store/redis
   - store/sql
 - name: github.com/asaskevich/govalidator
   version: aa5cce4a76edb1a5acecab1870c17abbffb5419e
@@ -166,4 +167,6 @@ imports:
   version: 2caba252f4dc53eaf6b553000885530023f54623
 - name: gopkg.in/gomail.v2
   version: 81ebce5c23dfd25c6c67194b37d3dd3f338c98b1
+- name: gopkg.in/yaml.v2
+  version: cd8b52f8269e0feb286dfeef29f8fe4d5b397e0b
 testImports: []

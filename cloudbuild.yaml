@@ -1,0 +1,15 @@
+steps:
+- name: 'gcr.io/cloud-builders/go'
+  args: ['build', '-o', 'entrypoint', '-a', '-ldflags', '-w -s', 'cmd/acourse/main.go']
+  env:
+  - 'PROJECT_ROOT=github.com/acoshift/acourse'
+  - 'GOOS=linux'
+  - 'GOARCH=amd64'
+  - 'CGO_ENABLED=0'
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '-t', 'gcr.io/$PROJECT_ID/acourse', '.']
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['tag', 'gcr.io/$PROJECT_ID/acourse', 'gcr.io/$PROJECT_ID/acourse:$COMMIT_SHA']
+images:
+  - 'gcr.io/$PROJECT_ID/acourse:latest'
+  - 'gcr.io/$PROJECT_ID/acourse:$COMMIT_SHA'
