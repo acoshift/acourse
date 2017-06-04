@@ -17,19 +17,9 @@ stag:
 
 deploy: clean style build docker cluster patch
 
-.PHONY: static
-static: css = $(shell node_modules/.bin/node-sass --output-style compressed style/main.scss)
-static: hash = $(shell echo "${css}" | md5sum | awk '{ print $1 }')
-static:
-	@echo "${css}" > static/style.${hash}.css
-	@echo "style.css: style.${hash}.css" >> static.yaml
-
 .PHONY: style
-style: css = $(shell node_modules/.bin/node-sass --output-style compressed style/main.scss)
-style: hash = $(shell echo "${css}" | md5)
 style:
-	@echo "${css}" > static/style.${hash}.css
-	@echo "style.css: style.${hash}.css" >> static.yaml
+	node build.js
 
 clean:
 	rm -f static/style.*.css
