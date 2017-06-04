@@ -12,6 +12,8 @@ import (
 	"sync"
 	"time"
 
+	"io/ioutil"
+
 	"github.com/acoshift/acourse/pkg/appctx"
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/flash"
@@ -24,15 +26,17 @@ import (
 	"github.com/tdewolff/minify/html"
 	"github.com/tdewolff/minify/js"
 	"golang.org/x/net/xsrftoken"
+	"gopkg.in/yaml.v2"
 )
 
 const templateDir = "template"
 
 var (
-	m         = minify.New()
-	muExecute = &sync.Mutex{}
-	templates = make(map[interface{}]*templateStruct)
-	loc       *time.Location
+	m          = minify.New()
+	muExecute  = &sync.Mutex{}
+	templates  = make(map[interface{}]*templateStruct)
+	loc        *time.Location
+	staticConf = make(map[string]string)
 )
 
 type templateStruct struct {
@@ -50,6 +54,12 @@ func init() {
 	m.AddFunc("text/html", html.Minify)
 	m.AddFunc("text/css", css.Minify)
 	m.AddFunc("text/javascript", js.Minify)
+
+	// load static config
+	{
+		bs, _ := ioutil.ReadFile("static.yaml")
+		yaml.Unmarshal(bs, &staticConf)
+	}
 
 	parseTemplate(keyIndex{}, []string{"index.tmpl", "app.tmpl", "layout.tmpl", "component/course-card.tmpl"})
 	parseTemplate(keySignIn{}, []string{"signin.tmpl", "auth.tmpl", "layout.tmpl"})
@@ -94,6 +104,9 @@ func parseTemplate(key interface{}, set []string) {
 		},
 		"currency": func(v float64) string {
 			return humanize.FormatFloat("#,###.##", v)
+		},
+		"static": func(s string) string {
+			return "/~/" + staticConf[s]
 		},
 		"paginate": func(p, n int) []int {
 			r := make([]int, 0, 7)

@@ -17,12 +17,16 @@ stag:
 deploy: clean style build docker cluster patch
 
 .PHONY: style
+style: css = $(shell node_modules/.bin/node-sass --output-style compressed style/main.scss)
+style: hash = $(shell echo "${css}" | md5)
 style:
-	node_modules/.bin/node-sass --output-style compressed style/main.scss > static/style.css
+	@echo "${css}" > static/style.${hash}.css
+	@echo "style.css: style.${hash}.css" >> static.yaml
 
 clean:
-	rm -f static/style.css
+	rm -f static/style.*.css
 	rm -f entrypoint
+	rm -f static.yaml
 
 .PHONY: migrate
 migrate:
