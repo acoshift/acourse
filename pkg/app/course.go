@@ -214,7 +214,7 @@ func postEditorCreate(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		imageURL, err = UploadProfileImage(ctx, image)
+		imageURL, err = UploadCourseCoverImage(ctx, image)
 		if err != nil {
 			f.Add("Errors", err.Error())
 			back(w, r)
@@ -320,7 +320,7 @@ func postEditorCourse(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		imageURL, err = UploadProfileImage(ctx, image)
+		imageURL, err = UploadCourseCoverImage(ctx, image)
 		if err != nil {
 			f.Add("Errors", err.Error())
 			back(w, r)
