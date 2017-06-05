@@ -49,7 +49,7 @@ create table courses (
   image string not null,
   start timestamp default null,
   url string default null,
-  type int not null,
+  type int not null default 0,
   price decimal(9,2) not null default 0,
   discount decimal(9,2) default 0,
   enroll_detail string not null default '',
