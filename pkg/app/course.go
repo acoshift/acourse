@@ -179,12 +179,12 @@ func postEditorCreate(w http.ResponseWriter, r *http.Request) {
 	user := appctx.GetUser(ctx)
 
 	var (
-		title         = r.FormValue("Title")
-		shortDesc     = r.FormValue("ShortDesc")
-		desc          = r.FormValue("Desc")
-		imageURL      string
-		start         pq.NullTime
-		assignment, _ = strconv.ParseBool(r.FormValue("Assignment"))
+		title     = r.FormValue("Title")
+		shortDesc = r.FormValue("ShortDesc")
+		desc      = r.FormValue("Desc")
+		imageURL  string
+		start     pq.NullTime
+		// assignment, _ = strconv.ParseBool(r.FormValue("Assignment"))
 	)
 	if len(title) == 0 {
 		f.Add("Errors", "title required")
@@ -244,10 +244,10 @@ func postEditorCreate(w http.ResponseWriter, r *http.Request) {
 	}
 	_, err = tx.Exec(`
 		insert into course_options
-			(course_id, assignment)
+			(course_id)
 		values
-			($1, $2)
-	`, id, assignment)
+			($1)
+	`, id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -285,12 +285,12 @@ func postEditorCourse(w http.ResponseWriter, r *http.Request) {
 	f := flash.Get(ctx)
 
 	var (
-		title         = r.FormValue("Title")
-		shortDesc     = r.FormValue("ShortDesc")
-		desc          = r.FormValue("Desc")
-		imageURL      string
-		start         pq.NullTime
-		assignment, _ = strconv.ParseBool(r.FormValue("Assignment"))
+		title     = r.FormValue("Title")
+		shortDesc = r.FormValue("ShortDesc")
+		desc      = r.FormValue("Desc")
+		imageURL  string
+		start     pq.NullTime
+		// assignment, _ = strconv.ParseBool(r.FormValue("Assignment"))
 	)
 	if len(title) == 0 {
 		f.Add("Errors", "title required")
@@ -363,16 +363,16 @@ func postEditorCourse(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	_, err = tx.Exec(`
-		upsert into course_options
-			(course_id, assignment)
-		values
-			($1, $2)
-	`, id, assignment)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	// _, err = tx.Exec(`
+	// 	upsert into course_options
+	// 		(course_id, assignment)
+	// 	values
+	// 		($1, $2)
+	// `, id, assignment)
+	// if err != nil {
+	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
+	// 	return
+	// }
 
 	err = tx.Commit()
 	if err != nil {
