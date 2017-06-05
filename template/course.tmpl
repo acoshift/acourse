@@ -34,21 +34,23 @@
             <div class="course-sidebar _flex-column acourse-block-big">
               <div class="acourse-segment-big _bg-color-base-2">
                 <div>
-                  {{if not .Enrolled}}
-                  <div class="acourse-block _flex-row _main-end _cross-end">
-                    {{if le .Course.Price 0.0}}
-                      <p class="_font-bold _font-size-bigger _no-margin">FREE</p>
-                    {{else}}
-                      <p class="_font-main _no-margin {{if .Course.Option.Discount}}discount _color-dark{{else}} _font-size-bigger{{end}}">
-                        ฿{{.Course.Price | currency}}
-                      </p>
-                      {{if .Course.Option.Discount}}
-                        <p class="_font-main _font-size-bigger _no-margin">
-                          &nbsp฿ {{.Course.Discount | currency}}
-                        </p>
-                      {{end}}
+                  {{if .Course.Option.Enroll}}
+                    {{if not .Enrolled}}
+                      <div class="acourse-block _flex-row _main-end _cross-end">
+                        {{if le .Course.Price 0.0}}
+                          <p class="_font-bold _font-size-bigger _no-margin">FREE</p>
+                        {{else}}
+                          <p class="_font-main _no-margin {{if .Course.Option.Discount}}discount _color-dark{{else}} _font-size-bigger{{end}}">
+                            ฿{{.Course.Price | currency}}
+                          </p>
+                          {{if .Course.Option.Discount}}
+                            <p class="_font-main _font-size-bigger _no-margin">
+                              &nbsp฿ {{.Course.Discount | currency}}
+                            </p>
+                          {{end}}
+                        {{end}}
+                      </div>
                     {{end}}
-                  </div>
                   {{end}}
 
                   {{if .Enrolled}}
@@ -70,12 +72,14 @@
                     <button class="acourse-button -disable _font-sub _full-width acourse-block disabled">Pending Enroll</button>
                   </div>
                   {{else}}
-                    {{if and (not .Owned) (not .Enrolled)}}
-                    <div class="acourse-block-big">
-                      <a href="/course/{{.Course.Link}}/enroll">
-                        <button class="acourse-button -positive _font-sub _full-width acourse-block">Enroll Now</button>
-                      </a>
-                    </div>
+                    {{if .Course.Option.Enroll}}
+                      {{if and (not .Owned) (not .Enrolled)}}
+                      <div class="acourse-block-big">
+                        <a href="/course/{{.Course.Link}}/enroll">
+                          <button class="acourse-button -positive _font-sub _full-width acourse-block">Enroll Now</button>
+                        </a>
+                      </div>
+                      {{end}}
                     {{end}}
                   {{end}}
 
