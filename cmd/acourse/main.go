@@ -14,19 +14,6 @@ import (
 func main() {
 	time.Local = time.UTC
 
-	// redisPool := &redis.Pool{
-	// 	IdleTimeout: 30 * time.Minute,
-	// 	MaxIdle:     10,
-	// 	MaxActive:   100,
-	// 	Wait:        true,
-	// 	Dial: func() (redis.Conn, error) {
-	// 		return redis.Dial("tcp", config.String("redis_addr"),
-	// 			redis.DialDatabase(config.Int("redis_db")),
-	// 			redis.DialPassword(config.String("redis_pass")),
-	// 		)
-	// 	},
-	// }
-
 	config := configfile.NewReader("config")
 
 	err := app.Init(app.Config{
@@ -44,6 +31,7 @@ func main() {
 		RedisAddr:      config.String("redis_addr"),
 		RedisPass:      config.String("redis_pass"),
 		RedisDB:        config.Int("redis_db"),
+		SlackURL:       config.String("slack_url"),
 	})
 	if err != nil {
 		log.Fatal(err)

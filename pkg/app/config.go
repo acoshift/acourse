@@ -28,6 +28,7 @@ var (
 	redisAddr    string
 	redisPass    string
 	redisDB      int
+	slackURL     string
 	loc          *time.Location
 )
 
@@ -47,6 +48,7 @@ type Config struct {
 	RedisAddr      string
 	RedisPass      string
 	RedisDB        int
+	SlackURL       string
 }
 
 func init() {
@@ -95,6 +97,7 @@ func Init(config Config) error {
 	redisAddr = config.RedisAddr
 	redisPass = config.RedisPass
 	redisDB = config.RedisDB
+	slackURL = config.SlackURL
 
 	// init databases
 	db, err = sql.Open("postgres", config.SQLURL)
