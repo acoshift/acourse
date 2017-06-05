@@ -37,8 +37,8 @@
             <th>Course</th>
             <th>Slip</th>
             <th>User</th>
-            <!--<th>Name</th>
-            <th>Email</th>-->
+            <th>Price</th>
+            <th>Original Price</th>
             <th>Status</th>
             <th>Created At</th>
             <th>Updated At</th>
@@ -88,8 +88,8 @@
                   <div>{{.User.Email.String}}</div>
                 </span>
               </td>
-              <!--<td></td>
-              <td></td>-->
+              <td>{{.Price | currency}}</td>
+              <td>{{.OriginalPrice | currency}}</td>
               <td data-column="Status">
                 {{if eq .Status pending}}
                   Pending
