@@ -1,11 +1,15 @@
 {{define "app-body"}}
-<div id="content-edit">
+<div id="content-list">
   <div class="grid-container _flex-column">
 
     <div class="acourse-block-big row">
       <div class="col-xs-12 col-md-8 col-md-offset-2 _no-padding row">
         <div class="acourse-header _color-sub col-xs-12 col-md-8">
-          Course: {{.Course.Title}}
+          Content List<br>
+          <div class="_font-size-big">
+            <span class="_font-bold _color-dark">Course: </span>
+            <a href="/course/{{.Course.Link}}" class="acourse-link">{{.Course.Title}}</a>
+          </div>
         </div>
         <div class="col-xs-12 col-md-4 _full-width _align-right">
           <a href="/editor/content/create?id={{.Course.ID}}">
@@ -50,10 +54,14 @@
 
 {{define "app-style"}}
 <style>
-  #content-edit {
+  #content-list {
     padding-top: 32px;
     padding-bottom: 32px;
     min-height: calc(100vh - 236px);
+  }
+
+  #content-list .acourse-header a {
+    color: #adadad;
   }
 </style>
 {{end}}
