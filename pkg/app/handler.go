@@ -12,7 +12,6 @@ import (
 	"github.com/acoshift/go-firebase-admin"
 	"github.com/acoshift/header"
 	"github.com/acoshift/httprouter"
-	"github.com/acoshift/middleware"
 	"github.com/acoshift/session"
 	"github.com/asaskevich/govalidator"
 )
@@ -23,29 +22,21 @@ func Mount(mux *http.ServeMux) {
 	r.GET("/", http.HandlerFunc(getIndex))
 
 	r.GET("/signin", mustNotSignedIn(http.HandlerFunc(getSignIn)))
-	r.POST("/signin", middleware.Chain(
-		mustNotSignedIn,
-	)(http.HandlerFunc(postSignIn)))
+	r.POST("/signin", mustNotSignedIn(http.HandlerFunc(postSignIn)))
 	r.GET("/openid", mustNotSignedIn(http.HandlerFunc(getSignInProvider)))
 	r.GET("/openid/callback", mustNotSignedIn(http.HandlerFunc(getSignInCallback)))
 	r.GET("/signup", mustNotSignedIn(http.HandlerFunc(getSignUp)))
-	r.POST("/signup", middleware.Chain(
-		mustNotSignedIn,
-	)(http.HandlerFunc(postSignUp)))
+	r.POST("/signup", mustNotSignedIn(http.HandlerFunc(postSignUp)))
 	r.GET("/signout", http.HandlerFunc(getSignOut))
 
 	r.GET("/profile", mustSignedIn(http.HandlerFunc(getProfile)))
 	r.GET("/profile/edit", mustSignedIn(http.HandlerFunc(getProfileEdit)))
-	r.POST("/profile/edit", middleware.Chain(
-		mustSignedIn,
-	)(http.HandlerFunc(postProfileEdit)))
+	r.POST("/profile/edit", mustSignedIn(http.HandlerFunc(postProfileEdit)))
 
 	r.GET("/course/:courseID", http.HandlerFunc(getCourse))
 	r.GET("/course/:courseID/content", mustSignedIn(http.HandlerFunc(getCourseContent)))
 	r.GET("/course/:courseID/enroll", mustSignedIn(http.HandlerFunc(getCourseEnroll)))
-	r.POST("/course/:courseID/enroll", middleware.Chain(
-		mustSignedIn,
-	)(http.HandlerFunc(postCourseEnroll)))
+	r.POST("/course/:courseID/enroll", mustSignedIn(http.HandlerFunc(postCourseEnroll)))
 
 	editor := http.NewServeMux()
 	{
