@@ -20,19 +20,6 @@ import (
 func Mount(mux *http.ServeMux) {
 	r := httprouter.New()
 	r.GET("/", http.HandlerFunc(getIndex))
-
-	r.GET("/signin", mustNotSignedIn(http.HandlerFunc(getSignIn)))
-	r.POST("/signin", mustNotSignedIn(http.HandlerFunc(postSignIn)))
-	r.GET("/openid", mustNotSignedIn(http.HandlerFunc(getSignInProvider)))
-	r.GET("/openid/callback", mustNotSignedIn(http.HandlerFunc(getSignInCallback)))
-	r.GET("/signup", mustNotSignedIn(http.HandlerFunc(getSignUp)))
-	r.POST("/signup", mustNotSignedIn(http.HandlerFunc(postSignUp)))
-	r.GET("/signout", http.HandlerFunc(getSignOut))
-
-	r.GET("/profile", mustSignedIn(http.HandlerFunc(getProfile)))
-	r.GET("/profile/edit", mustSignedIn(http.HandlerFunc(getProfileEdit)))
-	r.POST("/profile/edit", mustSignedIn(http.HandlerFunc(postProfileEdit)))
-
 	r.GET("/course/:courseID", http.HandlerFunc(getCourse))
 	r.GET("/course/:courseID/content", mustSignedIn(http.HandlerFunc(getCourseContent)))
 	r.GET("/course/:courseID/enroll", mustSignedIn(http.HandlerFunc(getCourseEnroll)))
@@ -41,17 +28,25 @@ func Mount(mux *http.ServeMux) {
 	editor := http.NewServeMux()
 	editor.Handle("/create", onlyInstructor(http.HandlerFunc(editorCreate)))
 	editor.Handle("/course", isCourseOwner(http.HandlerFunc(editorCourse)))
-	editor.Handle("/content", isCourseOwner(http.HandlerFunc(getEditorContent)))
-	editor.Handle("/content/create", isCourseOwner(http.HandlerFunc(getEditorContentCreate)))
-	editor.Handle("/content/edit", http.HandlerFunc(getEditorContentEdit))
+	editor.Handle("/content", isCourseOwner(http.HandlerFunc(editorContent)))
+	editor.Handle("/content/create", isCourseOwner(http.HandlerFunc(editorContentCreate)))
+	editor.Handle("/content/edit", http.HandlerFunc(editorContentEdit))
 
 	admin := http.NewServeMux()
 	admin.Handle("/users", http.HandlerFunc(adminUsers))
-	admin.Handle("/courses", http.HandlerFunc(getAdminCourses))
+	admin.Handle("/courses", http.HandlerFunc(adminCourses))
 	admin.Handle("/payments/pending", http.HandlerFunc(adminPendingPayments))
 	admin.Handle("/payments/history", http.HandlerFunc(adminHistoryPayments))
 
 	mux.Handle("/", r)
+	mux.Handle("/signin", mustNotSignedIn(http.HandlerFunc(signIn)))
+	mux.Handle("/openid", mustNotSignedIn(http.HandlerFunc(openID)))
+	mux.Handle("/openid/callback", mustNotSignedIn(http.HandlerFunc(openIDCallback)))
+	mux.Handle("/signup", mustNotSignedIn(http.HandlerFunc(signUp)))
+	mux.Handle("/signout", http.HandlerFunc(signOut))
+	mux.Handle("/profile", mustSignedIn(http.HandlerFunc(profile)))
+	mux.Handle("/profile/edit", mustSignedIn(http.HandlerFunc(profileEdit)))
+
 	mux.Handle("/~/", http.StripPrefix("/~", cache(http.FileServer(&fileFS{http.Dir("static")}))))
 	mux.Handle("/favicon.ico", fileHandler("static/favicon.ico"))
 	mux.Handle("/admin/", http.StripPrefix("/admin", onlyAdmin(admin)))
@@ -103,7 +98,11 @@ func getIndex(w http.ResponseWriter, r *http.Request) {
 	view.Index(w, r, courses)
 }
 
-func getSignIn(w http.ResponseWriter, r *http.Request) {
+func signIn(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		postSignIn(w, r)
+		return
+	}
 	view.SignIn(w, r)
 }
 
@@ -149,7 +148,7 @@ var allowProvider = map[string]bool{
 	"github.com":   true,
 }
 
-func getSignInProvider(w http.ResponseWriter, r *http.Request) {
+func openID(w http.ResponseWriter, r *http.Request) {
 	p := r.FormValue("p")
 	if !allowProvider[p] {
 		http.Error(w, "provider not allowed", http.StatusBadRequest)
@@ -168,7 +167,7 @@ func getSignInProvider(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, redirectURL, http.StatusSeeOther)
 }
 
-func getSignInCallback(w http.ResponseWriter, r *http.Request) {
+func openIDCallback(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	s := session.Get(ctx)
 	sessID, _ := s.Get(keyOpenIDSessionID).(string)
@@ -217,7 +216,11 @@ func getSignInCallback(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-func getSignUp(w http.ResponseWriter, r *http.Request) {
+func signUp(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		postSignUp(w, r)
+		return
+	}
 	view.SignUp(w, r)
 }
 
@@ -281,7 +284,7 @@ func postSignUp(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, rURL, http.StatusSeeOther)
 }
 
-func getSignOut(w http.ResponseWriter, r *http.Request) {
+func signOut(w http.ResponseWriter, r *http.Request) {
 	s := session.Get(r.Context())
 	s.Del(keyUserID)
 	http.Redirect(w, r, "/", http.StatusSeeOther)

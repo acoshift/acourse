@@ -399,7 +399,7 @@ func postEditorCourse(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/course/"+link.String, http.StatusSeeOther)
 }
 
-func getEditorContent(w http.ResponseWriter, r *http.Request) {
+func editorContent(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.ParseInt(r.FormValue("id"), 10, 64)
 
 	if r.Method == http.MethodPost {
@@ -621,7 +621,7 @@ func postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/course/"+link, http.StatusFound)
 }
 
-func getEditorContentCreate(w http.ResponseWriter, r *http.Request) {
+func editorContentCreate(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.ParseInt(r.FormValue("id"), 10, 64)
 
 	if r.Method == http.MethodPost {
@@ -667,7 +667,7 @@ func getEditorContentCreate(w http.ResponseWriter, r *http.Request) {
 	view.EditorContentCreate(w, r, course)
 }
 
-func getEditorContentEdit(w http.ResponseWriter, r *http.Request) {
+func editorContentEdit(w http.ResponseWriter, r *http.Request) {
 	// course content id
 	id, _ := strconv.ParseInt(r.FormValue("id"), 10, 64)
 

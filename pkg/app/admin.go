@@ -38,7 +38,7 @@ func adminUsers(w http.ResponseWriter, r *http.Request) {
 	view.AdminUsers(w, r, users, int(page), int(totalPage))
 }
 
-func getAdminCourses(w http.ResponseWriter, r *http.Request) {
+func adminCourses(w http.ResponseWriter, r *http.Request) {
 	courses, err := model.ListCourses()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
