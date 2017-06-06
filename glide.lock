@@ -1,5 +1,5 @@
-hash: 1a3f780dea13301eaae968ef7d7191a25807414f1aec5b0cdffc4e1f9a1de9ab
-updated: 2017-06-04T22:22:52.23226604+07:00
+hash: 02f6b7ef054bae8700ff06d198b64cfcaaab9cff056d2dfedfeda7757b9cf307
+updated: 2017-06-06T20:00:19.188634555+07:00
 imports:
 - name: cloud.google.com/go
   version: 2e6a95edb1071d750f6d7db777bf66cd2997af6c
@@ -24,8 +24,6 @@ imports:
   version: 4d0cdce0d0fc57666ffcf5803e97a35d15a9e848
 - name: github.com/acoshift/header
   version: 5c88c77f50897ba89140829b44b9d96c5050ff5a
-- name: github.com/acoshift/httprouter
-  version: a210a8e4dd1d0646a6f31f4a720295a66937b6c7
 - name: github.com/acoshift/middleware
   version: 84c36d0149badf0bd023187556881cc9a3f2abd8
 - name: github.com/acoshift/session

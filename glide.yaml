@@ -10,7 +10,6 @@ import:
   version: 0.0.2
 - package: github.com/acoshift/gzip
 - package: github.com/acoshift/header
-- package: github.com/acoshift/httprouter
 - package: github.com/acoshift/middleware
 - package: github.com/acoshift/session
   subpackages:
