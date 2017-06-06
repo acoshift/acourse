@@ -40,18 +40,7 @@ func Mount(mux *http.ServeMux) {
 
 	editor := http.NewServeMux()
 	editor.Handle("/create", onlyInstructor(http.HandlerFunc(editorCreate)))
-	{
-		editor.Handle("/course", isCourseOwner(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			switch r.Method {
-			case http.MethodGet, http.MethodHead:
-				getEditorCourse(w, r)
-			case http.MethodPost:
-				postEditorCourse(w, r)
-			default:
-				http.NotFound(w, r)
-			}
-		})))
-	}
+	editor.Handle("/course", isCourseOwner(http.HandlerFunc(editorCourse)))
 	editor.Handle("/content", isCourseOwner(http.HandlerFunc(getEditorContent)))
 	editor.Handle("/content/create", isCourseOwner(http.HandlerFunc(getEditorContentCreate)))
 	editor.Handle("/content/edit", http.HandlerFunc(getEditorContentEdit))

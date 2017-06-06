@@ -273,7 +273,11 @@ func postEditorCreate(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/course/"+link.String, http.StatusFound)
 }
 
-func getEditorCourse(w http.ResponseWriter, r *http.Request) {
+func editorCourse(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		postEditorCourse(w, r)
+		return
+	}
 	id, _ := strconv.ParseInt(r.FormValue("id"), 10, 64)
 	course, err := model.GetCourse(id)
 	if err != nil {
