@@ -171,7 +171,11 @@ func getCourseContent(w http.ResponseWriter, r *http.Request) {
 	view.CourseContent(w, r, x, content)
 }
 
-func getEditorCreate(w http.ResponseWriter, r *http.Request) {
+func editorCreate(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		postEditorCreate(w, r)
+		return
+	}
 	view.EditorCreate(w, r)
 }
 

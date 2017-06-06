@@ -39,18 +39,7 @@ func Mount(mux *http.ServeMux) {
 	r.POST("/course/:courseID/enroll", mustSignedIn(http.HandlerFunc(postCourseEnroll)))
 
 	editor := http.NewServeMux()
-	{
-		editor.Handle("/create", onlyInstructor(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			switch r.Method {
-			case http.MethodGet, http.MethodHead:
-				getEditorCreate(w, r)
-			case http.MethodPost:
-				postEditorCreate(w, r)
-			default:
-				http.NotFound(w, r)
-			}
-		})))
-	}
+	editor.Handle("/create", onlyInstructor(http.HandlerFunc(editorCreate)))
 	{
 		editor.Handle("/course", isCourseOwner(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			switch r.Method {
