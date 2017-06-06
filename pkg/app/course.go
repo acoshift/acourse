@@ -17,12 +17,23 @@ import (
 	"github.com/lib/pq"
 )
 
-func courseView(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
-		http.NotFound(w, r)
-		return
-	}
+type courseRouter string
 
+func (router courseRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	r = r.WithContext(appctx.WithCourseURL(r.Context(), string(router)))
+	switch strings.TrimSuffix(r.URL.Path, "/") {
+	case "":
+		courseView(w, r)
+	case "/content":
+		mustSignedIn(http.HandlerFunc(courseContent)).ServeHTTP(w, r)
+	case "/enroll":
+		mustSignedIn(http.HandlerFunc(courseEnroll)).ServeHTTP(w, r)
+	default:
+		http.NotFound(w, r)
+	}
+}
+
+func courseView(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	user := appctx.GetUser(ctx)
 	link := appctx.GetCourseURL(ctx)

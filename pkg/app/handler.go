@@ -7,7 +7,6 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/acoshift/acourse/pkg/appctx"
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/acourse/pkg/view"
 	"github.com/acoshift/flash"
@@ -47,20 +46,13 @@ func Mount(mux *http.ServeMux) {
 	mux.Handle("/signout", http.HandlerFunc(signOut))
 	mux.Handle("/profile", mustSignedIn(http.HandlerFunc(profile)))
 	mux.Handle("/profile/edit", mustSignedIn(http.HandlerFunc(profileEdit)))
-	mux.Handle("/course/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		link := strings.TrimPrefix(r.URL.Path, "/course/")
+	mux.Handle("/course/", http.StripPrefix("/course/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		link := r.URL.Path
 		if n := strings.Index(link, "/"); n > 0 {
 			link = link[:strings.Index(link, "/")]
 		}
-		r = r.WithContext(appctx.WithCourseURL(r.Context(), link))
-		r.URL.Path = r.URL.Path[len("/course/")+len(link):]
-		if len(r.URL.Path) == 0 {
-			r.URL.Path = "/"
-		} else {
-			r.URL.Path = strings.TrimSuffix(r.URL.Path, "/")
-		}
-		course.ServeHTTP(w, r)
-	}))
+		http.StripPrefix(link, courseRouter(link)).ServeHTTP(w, r)
+	})))
 	mux.Handle("/admin/", http.StripPrefix("/admin", onlyAdmin(admin)))
 	mux.Handle("/editor/", http.StripPrefix("/editor", editor))
 }
