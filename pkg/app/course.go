@@ -18,20 +18,19 @@ import (
 )
 
 func course(w http.ResponseWriter, r *http.Request) {
-	link := r.URL.Path
-	if n := strings.Index(link, "/"); n > 0 {
-		link = link[:n]
+	s := strings.SplitN(r.URL.Path, "/", 2)
+	var p string
+	if len(s) > 1 {
+		p = strings.TrimSuffix(s[1], "/")
 	}
-	p := r.URL.Path[len(link):]
-	p = strings.TrimSuffix(p, "/")
 
-	r = r.WithContext(appctx.WithCourseURL(r.Context(), link))
+	r = r.WithContext(appctx.WithCourseURL(r.Context(), s[0]))
 	switch p {
 	case "":
 		courseView(w, r)
-	case "/content":
+	case "content":
 		mustSignedIn(http.HandlerFunc(courseContent)).ServeHTTP(w, r)
-	case "/enroll":
+	case "enroll":
 		mustSignedIn(http.HandlerFunc(courseEnroll)).ServeHTTP(w, r)
 	default:
 		http.NotFound(w, r)
