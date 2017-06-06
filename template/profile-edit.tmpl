@@ -11,7 +11,7 @@
       <form method="POST" enctype="multipart/form-data">
         {{xsrf}}
         <div class="acourse-block _flex-row _main-center">
-          <img id="avatar" class="acourse-circle -large _img-cover" src="{{.Page.Me.Image}}" onerror="this.src = 'https://storage.googleapis.com/acourse/static/d509b7d8-88ad-478c-aa40-2984878c87cd.svg'">
+          <img id="avatar" class="acourse-circle -large _img-cover" src="{{.Me.Image}}" onerror="this.src = 'https://storage.googleapis.com/acourse/static/d509b7d8-88ad-478c-aa40-2984878c87cd.svg'">
         </div>
         <div class="input-field _flex-column">
           <label>Image</label>
@@ -22,15 +22,15 @@
         </div>
         <div class="input-field _flex-column">
           <label>Username</label>
-          <input class="acourse-input" name="Username" value="{{.Page.Flash.Get "Username"}}">
+          <input class="acourse-input" name="Username" value="{{.Flash.Get "Username"}}">
         </div>
         <div class="input-field _flex-column">
           <label>Name</label>
-          <input class="acourse-input" name="Name" value="{{.Page.Flash.Get "Name"}}">
+          <input class="acourse-input" name="Name" value="{{.Flash.Get "Name"}}">
         </div>
         <div class="input-field _flex-column">
           <label>About Me</label>
-          <input class="acourse-input" name="AboutMe" value="{{.Page.Flash.Get "AboutMe"}}">
+          <input class="acourse-input" name="AboutMe" value="{{.Flash.Get "AboutMe"}}">
         </div>
 
         <div class="acourse-block-big _flex-row _main-center">
@@ -39,10 +39,10 @@
           </button>
         </div>
 
-        {{if .Page.Flash.Errors}}
+        {{if .Flash.Errors}}
           <div class="acourse-message -error">
             <ul>
-              {{range .Page.Flash.Errors}}
+              {{range .Flash.Errors}}
                 <li>{{.}}</li>
               {{end}}
             </ul>

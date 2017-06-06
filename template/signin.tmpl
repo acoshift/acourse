@@ -16,7 +16,7 @@
             {{xsrf}}
             <div class="input-field _flex-column">
               <label>Email:</label>
-              <input class="acourse-input" name="Email" value="{{.Page.Flash.Get "User"}}">
+              <input class="acourse-input" name="Email" value="{{.Flash.Get "User"}}">
             </div>
             <div class="input-field _flex-column">
               <label>Password</label>
@@ -27,10 +27,10 @@
                 Sign In
               </button>
             </div>
-            {{if .Page.Flash.Errors}}
+            {{if .Flash.Errors}}
               <div class="acourse-message -error">
                 <ul>
-                  {{range .Page.Flash.Errors}}
+                  {{range .Flash.Errors}}
                     <li>{{.}}</li>
                   {{end}}
                 </ul>

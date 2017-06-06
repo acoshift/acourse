@@ -27,10 +27,10 @@
                 Sign Up
               </button>
             </div>
-            {{if .Page.Flash.Errors}}
+            {{if .Flash.Errors}}
               <div class="acourse-message -error">
                 <ul>
-                  {{range .Page.Flash.Errors}}
+                  {{range .Flash.Errors}}
                     <li>{{.}}</li>
                   {{end}}
                 </ul>
