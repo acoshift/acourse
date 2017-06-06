@@ -9,7 +9,7 @@ import (
 	"github.com/acoshift/acourse/pkg/view"
 )
 
-func getAdminUsers(w http.ResponseWriter, r *http.Request) {
+func adminUsers(w http.ResponseWriter, r *http.Request) {
 	page, _ := strconv.ParseInt(r.FormValue("page"), 10, 64)
 	if page <= 0 {
 		page = 1
@@ -38,7 +38,7 @@ func getAdminUsers(w http.ResponseWriter, r *http.Request) {
 	view.AdminUsers(w, r, users, int(page), int(totalPage))
 }
 
-func getAdminCourses(w http.ResponseWriter, r *http.Request) {
+func adminCourses(w http.ResponseWriter, r *http.Request) {
 	courses, err := model.ListCourses()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -48,7 +48,7 @@ func getAdminCourses(w http.ResponseWriter, r *http.Request) {
 	view.AdminCourses(w, r, courses, 1, 1)
 }
 
-func getAdminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter func(int64, int64) ([]*model.Payment, error), paymentsCounter func() (int64, error)) {
+func adminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter func(int64, int64) ([]*model.Payment, error), paymentsCounter func() (int64, error)) {
 	page, _ := strconv.ParseInt(r.FormValue("page"), 10, 64)
 	if page <= 0 {
 		page = 1
@@ -198,10 +198,16 @@ https://acourse.io
 	http.Redirect(w, r, "/admin/payments/pending", http.StatusSeeOther)
 }
 
-func getAdminPendingPayments(w http.ResponseWriter, r *http.Request) {
-	getAdminPayments(w, r, model.ListPendingPayments, model.CountPendingPayments)
+func adminPendingPayments(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodGet || r.Method == http.MethodHead {
+		adminPayments(w, r, model.ListPendingPayments, model.CountPendingPayments)
+	} else if r.Method == http.MethodPost {
+		postAdminPendingPayment(w, r)
+	} else {
+		http.NotFound(w, r)
+	}
 }
 
-func getAdminHistoryPayments(w http.ResponseWriter, r *http.Request) {
-	getAdminPayments(w, r, model.ListHistoryPayments, model.CountHistoryPayments)
+func adminHistoryPayments(w http.ResponseWriter, r *http.Request) {
+	adminPayments(w, r, model.ListHistoryPayments, model.CountHistoryPayments)
 }

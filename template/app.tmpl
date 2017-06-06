@@ -6,20 +6,20 @@
         <img class="logo" src="/~/img/acourse-logo-w-2.svg" height="45">
       </a>
       <div class="_flex-row _cross-center _main-end _flex-span">
-      {{if .Page.Me}}
+      {{if .Me}}
         <div class="dropdown _full-height">
           <div class="dropbtn _full-height _flex-row _cross-center ">
             <img
               class="acourse-block-big acourse-circle _img-cover _no-margin"
-              src="{{.Page.Me.Image}}"
+              src="{{.Me.Image}}"
               onerror="this.src = 'https://storage.googleapis.com/acourse/static/d509b7d8-88ad-478c-aa40-2984878c87cd.svg'">
-            <div class="username">&nbsp;&nbsp;{{.Page.Me.Username}}</div>
+            <div class="username">&nbsp;&nbsp;{{.Me.Username}}</div>
             &nbsp;&nbsp;<i class="fa fa-caret-down"></i>
           </div>
           <div class="dropdown-content-w">
             <div class="dropdown-content">
               <a class="_font-main _font-bold _font-size-big {{if eq templateName "profile"}} active{{end}}" href="/profile">Profile</a>
-              {{if .Page.Me.Role.Admin.Bool}}
+              {{if .Me.Role.Admin.Bool}}
               <a class="_font-main _font-bold _font-size-big {{if eq templateName "admin/users"}} active{{end}}" href="/admin/users">Users</a>
               <a class="_font-main _font-bold _font-size-big {{if eq templateName "admin/courses"}} active{{end}}" href="/admin/courses">Courses</a>
               <a class="_font-main _font-bold _font-size-big" href="/admin/payments/pending">Pending Payments</a>

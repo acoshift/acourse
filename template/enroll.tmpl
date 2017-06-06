@@ -18,7 +18,7 @@
           Enroll
         </h3>
         <form method="POST" enctype="multipart/form-data">
-          {{xsrf "enroll"}}
+          {{.XSRF}}
           {{if ne .Course.Price 0.0}}
             <div class="_flex-row">
               <div class="input-field col-xs-6 _no-padding _flex-column">
@@ -40,9 +40,9 @@
           {{end}}
           <button class="acourse-button -positive _font-sub  _full-width" type="submit">Enroll</button>
         </form>
-        {{if .Page.Flash.Errors}}
+        {{if .Flash.Errors}}
           <ul>
-            {{range .Page.Flash.Errors}}
+            {{range .Flash.Errors}}
             <li>{{.}}</li>
             {{end}}
           </ul>

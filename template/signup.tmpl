@@ -13,7 +13,7 @@
             <div class="acourse-header _font-sub _color-sub _align-center">
               Sign Up
             </div>
-            {{xsrf "signup"}}
+            {{.XSRF}}
             <div class="input-field _flex-column">
               <label>Email:</label>
               <input class="acourse-input" name="Email" type="text" placeholder="Email">
@@ -27,10 +27,10 @@
                 Sign Up
               </button>
             </div>
-            {{if .Page.Flash.Errors}}
+            {{if .Flash.Errors}}
               <div class="acourse-message -error">
                 <ul>
-                  {{range .Page.Flash.Errors}}
+                  {{range .Flash.Errors}}
                     <li>{{.}}</li>
                   {{end}}
                 </ul>

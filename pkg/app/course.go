@@ -14,14 +14,33 @@ import (
 	"github.com/acoshift/acourse/pkg/view"
 	"github.com/acoshift/flash"
 	"github.com/acoshift/header"
-	"github.com/acoshift/httprouter"
 	"github.com/lib/pq"
 )
 
-func getCourse(w http.ResponseWriter, r *http.Request) {
+func course(w http.ResponseWriter, r *http.Request) {
+	s := strings.SplitN(r.URL.Path, "/", 2)
+	var p string
+	if len(s) > 1 {
+		p = strings.TrimSuffix(s[1], "/")
+	}
+
+	r = r.WithContext(appctx.WithCourseURL(r.Context(), s[0]))
+	switch p {
+	case "":
+		courseView(w, r)
+	case "content":
+		mustSignedIn(http.HandlerFunc(courseContent)).ServeHTTP(w, r)
+	case "enroll":
+		mustSignedIn(http.HandlerFunc(courseEnroll)).ServeHTTP(w, r)
+	default:
+		http.NotFound(w, r)
+	}
+}
+
+func courseView(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	user := appctx.GetUser(ctx)
-	link := httprouter.GetParam(ctx, "courseID")
+	link := appctx.GetCourseURL(ctx)
 
 	// if id can parse to int64 get course from id
 	id, err := strconv.ParseInt(link, 10, 64)
@@ -98,10 +117,10 @@ func getCourse(w http.ResponseWriter, r *http.Request) {
 	view.Course(w, r, x, enrolled, owned, pendingEnroll)
 }
 
-func getCourseContent(w http.ResponseWriter, r *http.Request) {
+func courseContent(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	user := appctx.GetUser(ctx)
-	link := httprouter.GetParam(ctx, "courseID")
+	link := appctx.GetCourseURL(ctx)
 
 	// if id can parse to int64 get course from id
 	id, err := strconv.ParseInt(link, 10, 64)
@@ -171,7 +190,11 @@ func getCourseContent(w http.ResponseWriter, r *http.Request) {
 	view.CourseContent(w, r, x, content)
 }
 
-func getEditorCreate(w http.ResponseWriter, r *http.Request) {
+func editorCreate(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		postEditorCreate(w, r)
+		return
+	}
 	view.EditorCreate(w, r)
 }
 
@@ -269,7 +292,11 @@ func postEditorCreate(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/course/"+link.String, http.StatusFound)
 }
 
-func getEditorCourse(w http.ResponseWriter, r *http.Request) {
+func editorCourse(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		postEditorCourse(w, r)
+		return
+	}
 	id, _ := strconv.ParseInt(r.FormValue("id"), 10, 64)
 	course, err := model.GetCourse(id)
 	if err != nil {
@@ -391,17 +418,11 @@ func postEditorCourse(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/course/"+link.String, http.StatusSeeOther)
 }
 
-func getEditorContent(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
+func editorContent(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.ParseInt(r.FormValue("id"), 10, 64)
 
 	if r.Method == http.MethodPost {
 		if r.FormValue("action") == "delete" {
-			user := appctx.GetUser(ctx)
-			if !verifyXSRF(r.FormValue("X"), user.ID, "editor/content+delete") {
-				http.Error(w, "invalid xsrf token", http.StatusInternalServerError)
-				return
-			}
 			contentID, _ := strconv.ParseInt(r.FormValue("contentId"), 10, 64)
 			_, err := db.Exec(`delete from course_contents where id = $1 and course_id = $2`, contentID, id)
 			if err != nil {
@@ -431,11 +452,15 @@ func getEditorContent(w http.ResponseWriter, r *http.Request) {
 	view.EditorContent(w, r, course)
 }
 
-func getCourseEnroll(w http.ResponseWriter, r *http.Request) {
+func courseEnroll(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		postCourseEnroll(w, r)
+		return
+	}
 	ctx := r.Context()
 	user := appctx.GetUser(ctx)
 
-	link := httprouter.GetParam(ctx, "courseID")
+	link := appctx.GetCourseURL(ctx)
 
 	id, err := strconv.ParseInt(link, 10, 64)
 	if err != nil {
@@ -485,7 +510,7 @@ func postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 	user := appctx.GetUser(ctx)
 	f := flash.Get(ctx)
 
-	link := httprouter.GetParam(ctx, "courseID")
+	link := appctx.GetCourseURL(ctx)
 
 	id, err := strconv.ParseInt(link, 10, 64)
 	if err != nil {
@@ -619,17 +644,10 @@ func postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/course/"+link, http.StatusFound)
 }
 
-func getEditorContentCreate(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
+func editorContentCreate(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.ParseInt(r.FormValue("id"), 10, 64)
 
 	if r.Method == http.MethodPost {
-		user := appctx.GetUser(ctx)
-		if !verifyXSRF(r.FormValue("X"), user.ID, "editor/create") {
-			http.Error(w, "invalid xsrf token", http.StatusInternalServerError)
-			return
-		}
-
 		var (
 			title   = r.FormValue("Title")
 			desc    = r.FormValue("Desc")
@@ -672,7 +690,7 @@ func getEditorContentCreate(w http.ResponseWriter, r *http.Request) {
 	view.EditorContentCreate(w, r, course)
 }
 
-func getEditorContentEdit(w http.ResponseWriter, r *http.Request) {
+func editorContentEdit(w http.ResponseWriter, r *http.Request) {
 	// course content id
 	id, _ := strconv.ParseInt(r.FormValue("id"), 10, 64)
 
@@ -696,11 +714,6 @@ func getEditorContentEdit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Method == http.MethodPost {
-		if !verifyXSRF(r.FormValue("X"), user.ID, "editor/content+edit") {
-			http.Error(w, "invalid xsrf token", http.StatusInternalServerError)
-			return
-		}
-
 		var (
 			title   = r.FormValue("Title")
 			desc    = r.FormValue("Desc")

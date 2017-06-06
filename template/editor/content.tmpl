@@ -37,7 +37,7 @@
           <button class="acourse-button -primary acourse-block _font-sub _full-width">Edit</button>
         </a>
         <form method="POST">
-          {{xsrf "editor/content+delete"}}
+          {{.XSRF}}
           <input type="hidden" name="action" value="delete">
           <input type="hidden" name="contentId" value="{{.ID}}">
           <button class="acourse-button -negative _full-width _font-sub">Delete</button>

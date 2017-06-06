@@ -110,7 +110,7 @@ func Init(config Config) error {
 	if err != nil {
 		return err
 	}
-	err = view.Init(view.Config{XSRFSecret: xsrfSecret, BaseURL: baseURL})
+	err = view.Init(view.Config{BaseURL: baseURL})
 	if err != nil {
 		return err
 	}

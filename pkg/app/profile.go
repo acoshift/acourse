@@ -13,7 +13,7 @@ import (
 	"github.com/asaskevich/govalidator"
 )
 
-func getProfile(w http.ResponseWriter, r *http.Request) {
+func profile(w http.ResponseWriter, r *http.Request) {
 	user := appctx.GetUser(r.Context())
 
 	ownCourses, err := model.ListOwnCourses(user.ID)
@@ -30,7 +30,11 @@ func getProfile(w http.ResponseWriter, r *http.Request) {
 	view.Profile(w, r, ownCourses, enrolledCourses)
 }
 
-func getProfileEdit(w http.ResponseWriter, r *http.Request) {
+func profileEdit(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		postProfileEdit(w, r)
+		return
+	}
 	ctx := r.Context()
 	user := appctx.GetUser(ctx)
 	f := flash.Get(ctx)

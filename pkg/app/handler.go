@@ -11,98 +11,36 @@ import (
 	"github.com/acoshift/flash"
 	"github.com/acoshift/go-firebase-admin"
 	"github.com/acoshift/header"
-	"github.com/acoshift/httprouter"
-	"github.com/acoshift/middleware"
 	"github.com/acoshift/session"
 	"github.com/asaskevich/govalidator"
 )
 
 // Mount mounts app's handlers into mux
 func Mount(mux *http.ServeMux) {
-	r := httprouter.New()
-	r.GET("/", http.HandlerFunc(getIndex))
-
-	r.GET("/signin", mustNotSignedIn(http.HandlerFunc(getSignIn)))
-	r.POST("/signin", middleware.Chain(
-		mustNotSignedIn,
-		xsrf("signin"),
-	)(http.HandlerFunc(postSignIn)))
-	r.GET("/openid", mustNotSignedIn(http.HandlerFunc(getSignInProvider)))
-	r.GET("/openid/callback", mustNotSignedIn(http.HandlerFunc(getSignInCallback)))
-	r.GET("/signup", mustNotSignedIn(http.HandlerFunc(getSignUp)))
-	r.POST("/signup", middleware.Chain(
-		mustNotSignedIn,
-		xsrf("signup"),
-	)(http.HandlerFunc(postSignUp)))
-	r.GET("/signout", http.HandlerFunc(getSignOut))
-
-	r.GET("/profile", mustSignedIn(http.HandlerFunc(getProfile)))
-	r.GET("/profile/edit", mustSignedIn(http.HandlerFunc(getProfileEdit)))
-	r.POST("/profile/edit", middleware.Chain(
-		mustSignedIn,
-		xsrf("profile/edit"),
-	)(http.HandlerFunc(postProfileEdit)))
-
-	r.GET("/course/:courseID", http.HandlerFunc(getCourse))
-	r.GET("/course/:courseID/content", mustSignedIn(http.HandlerFunc(getCourseContent)))
-	r.GET("/course/:courseID/enroll", mustSignedIn(http.HandlerFunc(getCourseEnroll)))
-	r.POST("/course/:courseID/enroll", middleware.Chain(
-		mustSignedIn,
-		xsrf("enroll"),
-	)(http.HandlerFunc(postCourseEnroll)))
-
 	editor := http.NewServeMux()
-	{
-		post := xsrf("editor/create")(http.HandlerFunc(postEditorCreate))
-		editor.Handle("/create", onlyInstructor(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			switch r.Method {
-			case http.MethodGet, http.MethodHead:
-				getEditorCreate(w, r)
-			case http.MethodPost:
-				post.ServeHTTP(w, r)
-			default:
-				http.NotFound(w, r)
-			}
-		})))
-	}
-	{
-		post := xsrf("editor/course")(http.HandlerFunc(postEditorCourse))
-		editor.Handle("/course", isCourseOwner(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			switch r.Method {
-			case http.MethodGet, http.MethodHead:
-				getEditorCourse(w, r)
-			case http.MethodPost:
-				post.ServeHTTP(w, r)
-			default:
-				http.NotFound(w, r)
-			}
-		})))
-	}
-	editor.Handle("/content", isCourseOwner(http.HandlerFunc(getEditorContent)))
-	editor.Handle("/content/create", isCourseOwner(http.HandlerFunc(getEditorContentCreate)))
-	editor.Handle("/content/edit", http.HandlerFunc(getEditorContentEdit))
+	editor.Handle("/create", onlyInstructor(http.HandlerFunc(editorCreate)))
+	editor.Handle("/course", isCourseOwner(http.HandlerFunc(editorCourse)))
+	editor.Handle("/content", isCourseOwner(http.HandlerFunc(editorContent)))
+	editor.Handle("/content/create", isCourseOwner(http.HandlerFunc(editorContentCreate)))
+	editor.Handle("/content/edit", http.HandlerFunc(editorContentEdit))
 
 	admin := http.NewServeMux()
-	admin.Handle("/users", http.HandlerFunc(getAdminUsers))
-	admin.Handle("/courses", http.HandlerFunc(getAdminCourses))
-	{
-		post := xsrf("payment-action")(http.HandlerFunc(postAdminPendingPayment))
-		admin.Handle("/payments/pending", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			switch r.Method {
-			case http.MethodGet, http.MethodHead:
-				getAdminPendingPayments(w, r)
-			case http.MethodPost:
-				post.ServeHTTP(w, r)
-			default:
-				http.NotFound(w, r)
-			}
-		}))
-	}
-	admin.Handle("/payments/history", http.HandlerFunc(getAdminHistoryPayments))
+	admin.Handle("/users", http.HandlerFunc(adminUsers))
+	admin.Handle("/courses", http.HandlerFunc(adminCourses))
+	admin.Handle("/payments/pending", http.HandlerFunc(adminPendingPayments))
+	admin.Handle("/payments/history", http.HandlerFunc(adminHistoryPayments))
 
-	mux.Handle("/", r)
+	mux.Handle("/", http.HandlerFunc(index))
 	mux.Handle("/~/", http.StripPrefix("/~", cache(http.FileServer(&fileFS{http.Dir("static")}))))
 	mux.Handle("/favicon.ico", fileHandler("static/favicon.ico"))
+	mux.Handle("/signin", mustNotSignedIn(http.HandlerFunc(signIn)))
+	mux.Handle("/openid", mustNotSignedIn(http.HandlerFunc(openID)))
+	mux.Handle("/openid/callback", mustNotSignedIn(http.HandlerFunc(openIDCallback)))
+	mux.Handle("/signup", mustNotSignedIn(http.HandlerFunc(signUp)))
+	mux.Handle("/signout", http.HandlerFunc(signOut))
+	mux.Handle("/profile", mustSignedIn(http.HandlerFunc(profile)))
+	mux.Handle("/profile/edit", mustSignedIn(http.HandlerFunc(profileEdit)))
+	mux.Handle("/course/", http.StripPrefix("/course/", http.HandlerFunc(course)))
 	mux.Handle("/admin/", http.StripPrefix("/admin", onlyAdmin(admin)))
 	mux.Handle("/editor/", http.StripPrefix("/editor", editor))
 }
@@ -139,7 +77,7 @@ func fileHandler(name string) http.Handler {
 	})
 }
 
-func getIndex(w http.ResponseWriter, r *http.Request) {
+func index(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
 		http.NotFound(w, r)
 		return
@@ -152,7 +90,11 @@ func getIndex(w http.ResponseWriter, r *http.Request) {
 	view.Index(w, r, courses)
 }
 
-func getSignIn(w http.ResponseWriter, r *http.Request) {
+func signIn(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		postSignIn(w, r)
+		return
+	}
 	view.SignIn(w, r)
 }
 
@@ -198,7 +140,7 @@ var allowProvider = map[string]bool{
 	"github.com":   true,
 }
 
-func getSignInProvider(w http.ResponseWriter, r *http.Request) {
+func openID(w http.ResponseWriter, r *http.Request) {
 	p := r.FormValue("p")
 	if !allowProvider[p] {
 		http.Error(w, "provider not allowed", http.StatusBadRequest)
@@ -217,7 +159,7 @@ func getSignInProvider(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, redirectURL, http.StatusSeeOther)
 }
 
-func getSignInCallback(w http.ResponseWriter, r *http.Request) {
+func openIDCallback(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	s := session.Get(ctx)
 	sessID, _ := s.Get(keyOpenIDSessionID).(string)
@@ -266,7 +208,11 @@ func getSignInCallback(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-func getSignUp(w http.ResponseWriter, r *http.Request) {
+func signUp(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		postSignUp(w, r)
+		return
+	}
 	view.SignUp(w, r)
 }
 
@@ -330,7 +276,7 @@ func postSignUp(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, rURL, http.StatusSeeOther)
 }
 
-func getSignOut(w http.ResponseWriter, r *http.Request) {
+func signOut(w http.ResponseWriter, r *http.Request) {
 	s := session.Get(r.Context())
 	s.Del(keyUserID)
 	http.Redirect(w, r, "/", http.StatusSeeOther)

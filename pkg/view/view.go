@@ -2,6 +2,7 @@ package view
 
 import (
 	"context"
+	"html/template"
 	"net/http"
 	"net/url"
 
@@ -32,13 +33,13 @@ type (
 
 // Page type provides layout data like title, description, and og
 type Page struct {
-	Title  string
-	Desc   string
-	Image  string
-	URL    string
-	Navbar string
-	Me     *model.User
-	Flash  flash.Flash
+	Title string
+	Desc  string
+	Image string
+	URL   string
+	Me    *model.User
+	Flash flash.Flash
+	XSRF  template.HTML
 }
 
 var defaultPage = Page{
@@ -52,6 +53,7 @@ func newPage(ctx context.Context) *Page {
 	p := defaultPage
 	p.Me = appctx.GetUser(ctx)
 	p.Flash = flash.Get(ctx)
+	p.XSRF = template.HTML(`<input type="hidden" name="X" value="` + appctx.GetXSRFToken(ctx) + `">`)
 	return &p
 }
 
@@ -59,7 +61,7 @@ func newPage(ctx context.Context) *Page {
 func Index(w http.ResponseWriter, r *http.Request, courses []*model.Course) {
 	ctx := r.Context()
 	data := struct {
-		Page    *Page
+		*Page
 		Courses []*model.Course
 	}{newPage(ctx), courses}
 	render(ctx, w, keyIndex{}, &data)
@@ -69,7 +71,7 @@ func Index(w http.ResponseWriter, r *http.Request, courses []*model.Course) {
 func SignIn(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	data := struct {
-		Page  *Page
+		*Page
 		Flash flash.Flash
 	}{newPage(ctx), flash.Get(r.Context())}
 	render(ctx, w, keySignIn{}, &data)
@@ -79,7 +81,7 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 func SignUp(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	data := struct {
-		Page  *Page
+		*Page
 		Flash flash.Flash
 	}{newPage(ctx), flash.Get(r.Context())}
 	render(ctx, w, keySignUp{}, &data)
@@ -91,10 +93,9 @@ func Profile(w http.ResponseWriter, r *http.Request, ownCourses, enrolledCourses
 	page := newPage(ctx)
 	me := appctx.GetUser(ctx)
 	page.Title = me.Username + " | " + page.Title
-	page.Navbar = "profile"
 
 	data := struct {
-		Page            *Page
+		*Page
 		OwnCourses      []*model.Course
 		EnrolledCourses []*model.Course
 	}{page, ownCourses, enrolledCourses}
@@ -109,7 +110,7 @@ func ProfileEdit(w http.ResponseWriter, r *http.Request) {
 	page.Title = me.Username + " | " + page.Title
 
 	data := struct {
-		Page *Page
+		*Page
 	}{page}
 	render(ctx, w, keyProfileEdit{}, &data)
 }
@@ -124,7 +125,7 @@ func Course(w http.ResponseWriter, r *http.Request, course *model.Course, enroll
 	page.URL = baseURL + "/course/" + url.PathEscape(course.Link())
 
 	data := struct {
-		Page          *Page
+		*Page
 		Course        *model.Course
 		Enrolled      bool
 		Owned         bool
@@ -142,7 +143,7 @@ func CourseContent(w http.ResponseWriter, r *http.Request, course *model.Course,
 	page.Image = course.Image
 
 	data := struct {
-		Page    *Page
+		*Page
 		Course  *model.Course
 		Content *model.CourseContent
 	}{page, course, content}
@@ -155,7 +156,7 @@ func EditorCreate(w http.ResponseWriter, r *http.Request) {
 	page := newPage(ctx)
 
 	data := struct {
-		Page *Page
+		*Page
 	}{page}
 	render(ctx, w, keyEditorCreate{}, &data)
 }
@@ -166,7 +167,7 @@ func EditorCourse(w http.ResponseWriter, r *http.Request, course *model.Course) 
 	page := newPage(ctx)
 
 	data := struct {
-		Page   *Page
+		*Page
 		Course *model.Course
 	}{page, course}
 	render(ctx, w, keyEditorCourse{}, &data)
@@ -178,7 +179,7 @@ func EditorContent(w http.ResponseWriter, r *http.Request, course *model.Course)
 	page := newPage(ctx)
 
 	data := struct {
-		Page   *Page
+		*Page
 		Course *model.Course
 	}{page, course}
 	render(ctx, w, keyEditorContent{}, &data)
@@ -190,7 +191,7 @@ func EditorContentCreate(w http.ResponseWriter, r *http.Request, course *model.C
 	page := newPage(ctx)
 
 	data := struct {
-		Page   *Page
+		*Page
 		Course *model.Course
 	}{page, course}
 	render(ctx, w, keyEditorContentCreate{}, &data)
@@ -202,7 +203,7 @@ func EditorContentEdit(w http.ResponseWriter, r *http.Request, course *model.Cou
 	page := newPage(ctx)
 
 	data := struct {
-		Page    *Page
+		*Page
 		Course  *model.Course
 		Content *model.CourseContent
 	}{page, course, content}
@@ -219,7 +220,7 @@ func CourseEnroll(w http.ResponseWriter, r *http.Request, course *model.Course) 
 	page.URL = baseURL + "/course/" + url.PathEscape(course.Link())
 
 	data := struct {
-		Page   *Page
+		*Page
 		Course *model.Course
 	}{page, course}
 	render(ctx, w, keyCourseEnroll{}, &data)
@@ -231,7 +232,7 @@ func AdminUsers(w http.ResponseWriter, r *http.Request, users []*model.User, cur
 	page := newPage(ctx)
 
 	data := struct {
-		Page        *Page
+		*Page
 		Users       []*model.User
 		CurrentPage int
 		TotalPage   int
@@ -245,7 +246,7 @@ func AdminCourses(w http.ResponseWriter, r *http.Request, courses []*model.Cours
 	page := newPage(ctx)
 
 	data := struct {
-		Page        *Page
+		*Page
 		Courses     []*model.Course
 		CurrentPage int
 		TotalPage   int
@@ -259,7 +260,7 @@ func AdminPayments(w http.ResponseWriter, r *http.Request, payments []*model.Pay
 	page := newPage(ctx)
 
 	data := struct {
-		Page        *Page
+		*Page
 		Payments    []*model.Payment
 		CurrentPage int
 		TotalPage   int
