@@ -13,7 +13,7 @@
             <div class="acourse-header _font-sub _color-sub _align-center">
               Sign In
             </div>
-            {{xsrf "signin"}}
+            {{xsrf}}
             <div class="input-field _flex-column">
               <label>Email:</label>
               <input class="acourse-input" name="Email" value="{{.Page.Flash.Get "User"}}">

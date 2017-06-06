@@ -25,14 +25,12 @@ func Mount(mux *http.ServeMux) {
 	r.GET("/signin", mustNotSignedIn(http.HandlerFunc(getSignIn)))
 	r.POST("/signin", middleware.Chain(
 		mustNotSignedIn,
-		xsrf("signin"),
 	)(http.HandlerFunc(postSignIn)))
 	r.GET("/openid", mustNotSignedIn(http.HandlerFunc(getSignInProvider)))
 	r.GET("/openid/callback", mustNotSignedIn(http.HandlerFunc(getSignInCallback)))
 	r.GET("/signup", mustNotSignedIn(http.HandlerFunc(getSignUp)))
 	r.POST("/signup", middleware.Chain(
 		mustNotSignedIn,
-		xsrf("signup"),
 	)(http.HandlerFunc(postSignUp)))
 	r.GET("/signout", http.HandlerFunc(getSignOut))
 
@@ -40,7 +38,6 @@ func Mount(mux *http.ServeMux) {
 	r.GET("/profile/edit", mustSignedIn(http.HandlerFunc(getProfileEdit)))
 	r.POST("/profile/edit", middleware.Chain(
 		mustSignedIn,
-		xsrf("profile/edit"),
 	)(http.HandlerFunc(postProfileEdit)))
 
 	r.GET("/course/:courseID", http.HandlerFunc(getCourse))
@@ -48,31 +45,28 @@ func Mount(mux *http.ServeMux) {
 	r.GET("/course/:courseID/enroll", mustSignedIn(http.HandlerFunc(getCourseEnroll)))
 	r.POST("/course/:courseID/enroll", middleware.Chain(
 		mustSignedIn,
-		xsrf("enroll"),
 	)(http.HandlerFunc(postCourseEnroll)))
 
 	editor := http.NewServeMux()
 	{
-		post := xsrf("editor/create")(http.HandlerFunc(postEditorCreate))
 		editor.Handle("/create", onlyInstructor(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			switch r.Method {
 			case http.MethodGet, http.MethodHead:
 				getEditorCreate(w, r)
 			case http.MethodPost:
-				post.ServeHTTP(w, r)
+				postEditorCreate(w, r)
 			default:
 				http.NotFound(w, r)
 			}
 		})))
 	}
 	{
-		post := xsrf("editor/course")(http.HandlerFunc(postEditorCourse))
 		editor.Handle("/course", isCourseOwner(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			switch r.Method {
 			case http.MethodGet, http.MethodHead:
 				getEditorCourse(w, r)
 			case http.MethodPost:
-				post.ServeHTTP(w, r)
+				postEditorCourse(w, r)
 			default:
 				http.NotFound(w, r)
 			}
@@ -83,22 +77,10 @@ func Mount(mux *http.ServeMux) {
 	editor.Handle("/content/edit", http.HandlerFunc(getEditorContentEdit))
 
 	admin := http.NewServeMux()
-	admin.Handle("/users", http.HandlerFunc(getAdminUsers))
+	admin.Handle("/users", http.HandlerFunc(adminUsers))
 	admin.Handle("/courses", http.HandlerFunc(getAdminCourses))
-	{
-		post := xsrf("payment-action")(http.HandlerFunc(postAdminPendingPayment))
-		admin.Handle("/payments/pending", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			switch r.Method {
-			case http.MethodGet, http.MethodHead:
-				getAdminPendingPayments(w, r)
-			case http.MethodPost:
-				post.ServeHTTP(w, r)
-			default:
-				http.NotFound(w, r)
-			}
-		}))
-	}
-	admin.Handle("/payments/history", http.HandlerFunc(getAdminHistoryPayments))
+	admin.Handle("/payments/pending", http.HandlerFunc(adminPendingPayments))
+	admin.Handle("/payments/history", http.HandlerFunc(adminHistoryPayments))
 
 	mux.Handle("/", r)
 	mux.Handle("/~/", http.StripPrefix("/~", cache(http.FileServer(&fileFS{http.Dir("static")}))))

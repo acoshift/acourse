@@ -11,18 +11,12 @@ import (
 	"net/http"
 
 	"io/ioutil"
-
-	"golang.org/x/net/xsrftoken"
 )
 
 func generateSessionID() string {
 	b := make([]byte, 24)
 	rand.Read(b)
 	return base64.URLEncoding.EncodeToString(b)
-}
-
-func verifyXSRF(token, userID, action string) bool {
-	return xsrftoken.Valid(token, xsrfSecret, userID, action)
 }
 
 func back(w http.ResponseWriter, r *http.Request) {

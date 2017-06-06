@@ -16,6 +16,7 @@ import (
 	redisstore "github.com/acoshift/session/store/redis"
 	sqlstore "github.com/acoshift/session/store/sql"
 	"github.com/garyburd/redigo/redis"
+	"golang.org/x/net/xsrftoken"
 )
 
 // Middleware wraps handlers with app's middleware
@@ -53,6 +54,7 @@ func Middleware(h http.Handler) http.Handler {
 		}),
 		flash.Middleware(),
 		fetchUser,
+		xsrf,
 	)(h)
 }
 
@@ -77,21 +79,25 @@ func recovery(h http.Handler) http.Handler {
 	})
 }
 
-func xsrf(action string) middleware.Middleware {
-	return func(h http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			var id string
-			if u := appctx.GetUser(r.Context()); u != nil {
-				id = u.ID
-			}
+func xsrf(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var id string
+		if u := appctx.GetUser(r.Context()); u != nil {
+			id = u.ID
+		}
+		if r.Method == http.MethodPost {
 			x := r.FormValue("X")
-			if !verifyXSRF(x, id, action) {
+			if !xsrftoken.Valid(x, xsrfSecret, id, r.URL.Path) {
 				http.Error(w, "invalid xsrf token, go back, refresh and try again...", http.StatusBadRequest)
 				return
 			}
 			h.ServeHTTP(w, r)
-		})
-	}
+			return
+		}
+		token := xsrftoken.Generate(xsrfSecret, id, r.URL.Path)
+		ctx := appctx.WithXSRFToken(r.Context(), token)
+		h.ServeHTTP(w, r.WithContext(ctx))
+	})
 }
 
 func mustSignedIn(h http.Handler) http.Handler {

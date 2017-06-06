@@ -392,16 +392,10 @@ func postEditorCourse(w http.ResponseWriter, r *http.Request) {
 }
 
 func getEditorContent(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
 	id, _ := strconv.ParseInt(r.FormValue("id"), 10, 64)
 
 	if r.Method == http.MethodPost {
 		if r.FormValue("action") == "delete" {
-			user := appctx.GetUser(ctx)
-			if !verifyXSRF(r.FormValue("X"), user.ID, "editor/content+delete") {
-				http.Error(w, "invalid xsrf token", http.StatusInternalServerError)
-				return
-			}
 			contentID, _ := strconv.ParseInt(r.FormValue("contentId"), 10, 64)
 			_, err := db.Exec(`delete from course_contents where id = $1 and course_id = $2`, contentID, id)
 			if err != nil {
@@ -620,16 +614,9 @@ func postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 }
 
 func getEditorContentCreate(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
 	id, _ := strconv.ParseInt(r.FormValue("id"), 10, 64)
 
 	if r.Method == http.MethodPost {
-		user := appctx.GetUser(ctx)
-		if !verifyXSRF(r.FormValue("X"), user.ID, "editor/create") {
-			http.Error(w, "invalid xsrf token", http.StatusInternalServerError)
-			return
-		}
-
 		var (
 			title   = r.FormValue("Title")
 			desc    = r.FormValue("Desc")
@@ -696,11 +683,6 @@ func getEditorContentEdit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Method == http.MethodPost {
-		if !verifyXSRF(r.FormValue("X"), user.ID, "editor/content+edit") {
-			http.Error(w, "invalid xsrf token", http.StatusInternalServerError)
-			return
-		}
-
 		var (
 			title   = r.FormValue("Title")
 			desc    = r.FormValue("Desc")
