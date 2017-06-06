@@ -14,14 +14,18 @@ import (
 	"github.com/acoshift/acourse/pkg/view"
 	"github.com/acoshift/flash"
 	"github.com/acoshift/header"
-	"github.com/acoshift/httprouter"
 	"github.com/lib/pq"
 )
 
-func getCourse(w http.ResponseWriter, r *http.Request) {
+func courseView(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/" {
+		http.NotFound(w, r)
+		return
+	}
+
 	ctx := r.Context()
 	user := appctx.GetUser(ctx)
-	link := httprouter.GetParam(ctx, "courseID")
+	link := appctx.GetCourseURL(ctx)
 
 	// if id can parse to int64 get course from id
 	id, err := strconv.ParseInt(link, 10, 64)
@@ -98,10 +102,10 @@ func getCourse(w http.ResponseWriter, r *http.Request) {
 	view.Course(w, r, x, enrolled, owned, pendingEnroll)
 }
 
-func getCourseContent(w http.ResponseWriter, r *http.Request) {
+func courseContent(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	user := appctx.GetUser(ctx)
-	link := httprouter.GetParam(ctx, "courseID")
+	link := appctx.GetCourseURL(ctx)
 
 	// if id can parse to int64 get course from id
 	id, err := strconv.ParseInt(link, 10, 64)
@@ -433,11 +437,15 @@ func editorContent(w http.ResponseWriter, r *http.Request) {
 	view.EditorContent(w, r, course)
 }
 
-func getCourseEnroll(w http.ResponseWriter, r *http.Request) {
+func courseEnroll(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		postCourseEnroll(w, r)
+		return
+	}
 	ctx := r.Context()
 	user := appctx.GetUser(ctx)
 
-	link := httprouter.GetParam(ctx, "courseID")
+	link := appctx.GetCourseURL(ctx)
 
 	id, err := strconv.ParseInt(link, 10, 64)
 	if err != nil {
@@ -487,7 +495,7 @@ func postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 	user := appctx.GetUser(ctx)
 	f := flash.Get(ctx)
 
-	link := httprouter.GetParam(ctx, "courseID")
+	link := appctx.GetCourseURL(ctx)
 
 	id, err := strconv.ParseInt(link, 10, 64)
 	if err != nil {

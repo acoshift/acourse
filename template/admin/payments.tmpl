@@ -104,13 +104,13 @@
               <td data-column="Actions">
                 {{if eq .Status pending}}
                   <form method="POST" class="acourse-block">
-                    {{.XSRF}}
+                    {{$.XSRF}}
                     <input type="hidden" name="ID" value="{{.ID}}">
                     <input type="hidden" name="Action" value="accept">
                     <button class="acourse-button -positive _font-main _full-width"  type="submit">Accept</button>
                   </form>
                   <form method="POST">
-                    {{.XSRF}}
+                    {{$.XSRF}}
                     <input type="hidden" name="ID" value="{{.ID}}">
                     <input type="hidden" name="Action" value="reject">
                     <button class="acourse-button -negative _font-main _full-width" type="submit">Reject</button>

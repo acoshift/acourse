@@ -4,26 +4,25 @@ import (
 	"database/sql"
 	"net/http"
 	"os"
+	"strings"
 	"unicode/utf8"
 
+	"github.com/acoshift/acourse/pkg/appctx"
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/acourse/pkg/view"
 	"github.com/acoshift/flash"
 	"github.com/acoshift/go-firebase-admin"
 	"github.com/acoshift/header"
-	"github.com/acoshift/httprouter"
 	"github.com/acoshift/session"
 	"github.com/asaskevich/govalidator"
 )
 
 // Mount mounts app's handlers into mux
 func Mount(mux *http.ServeMux) {
-	r := httprouter.New()
-	r.GET("/", http.HandlerFunc(getIndex))
-	r.GET("/course/:courseID", http.HandlerFunc(getCourse))
-	r.GET("/course/:courseID/content", mustSignedIn(http.HandlerFunc(getCourseContent)))
-	r.GET("/course/:courseID/enroll", mustSignedIn(http.HandlerFunc(getCourseEnroll)))
-	r.POST("/course/:courseID/enroll", mustSignedIn(http.HandlerFunc(postCourseEnroll)))
+	course := http.NewServeMux()
+	course.Handle("/", http.HandlerFunc(courseView))
+	course.Handle("/content", mustSignedIn(http.HandlerFunc(courseContent)))
+	course.Handle("/enroll", mustSignedIn(http.HandlerFunc(courseEnroll)))
 
 	editor := http.NewServeMux()
 	editor.Handle("/create", onlyInstructor(http.HandlerFunc(editorCreate)))
@@ -38,12 +37,26 @@ func Mount(mux *http.ServeMux) {
 	admin.Handle("/payments/pending", http.HandlerFunc(adminPendingPayments))
 	admin.Handle("/payments/history", http.HandlerFunc(adminHistoryPayments))
 
-	mux.Handle("/", r)
+	mux.Handle("/", http.HandlerFunc(index))
 	mux.Handle("/signin", mustNotSignedIn(http.HandlerFunc(signIn)))
 	mux.Handle("/openid", mustNotSignedIn(http.HandlerFunc(openID)))
 	mux.Handle("/openid/callback", mustNotSignedIn(http.HandlerFunc(openIDCallback)))
 	mux.Handle("/signup", mustNotSignedIn(http.HandlerFunc(signUp)))
 	mux.Handle("/signout", http.HandlerFunc(signOut))
+	mux.Handle("/course/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		link := strings.TrimPrefix(r.URL.Path, "/course/")
+		if n := strings.Index(link, "/"); n > 0 {
+			link = link[:strings.Index(link, "/")]
+		}
+		r = r.WithContext(appctx.WithCourseURL(r.Context(), link))
+		r.URL.Path = r.URL.Path[len("/course/")+len(link):]
+		if len(r.URL.Path) == 0 {
+			r.URL.Path = "/"
+		} else {
+			r.URL.Path = strings.TrimSuffix(r.URL.Path, "/")
+		}
+		course.ServeHTTP(w, r)
+	}))
 	mux.Handle("/profile", mustSignedIn(http.HandlerFunc(profile)))
 	mux.Handle("/profile/edit", mustSignedIn(http.HandlerFunc(profileEdit)))
 
@@ -85,7 +98,7 @@ func fileHandler(name string) http.Handler {
 	})
 }
 
-func getIndex(w http.ResponseWriter, r *http.Request) {
+func index(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
 		http.NotFound(w, r)
 		return
