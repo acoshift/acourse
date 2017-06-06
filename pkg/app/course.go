@@ -17,11 +17,16 @@ import (
 	"github.com/lib/pq"
 )
 
-type courseRouter string
+func course(w http.ResponseWriter, r *http.Request) {
+	link := r.URL.Path
+	if n := strings.Index(link, "/"); n > 0 {
+		link = link[:n]
+	}
+	p := r.URL.Path[len(link):]
+	p = strings.TrimSuffix(p, "/")
 
-func (router courseRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	r = r.WithContext(appctx.WithCourseURL(r.Context(), string(router)))
-	switch strings.TrimSuffix(r.URL.Path, "/") {
+	r = r.WithContext(appctx.WithCourseURL(r.Context(), link))
+	switch p {
 	case "":
 		courseView(w, r)
 	case "/content":

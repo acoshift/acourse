@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"net/http"
 	"os"
-	"strings"
 	"unicode/utf8"
 
 	"github.com/acoshift/acourse/pkg/model"
@@ -41,13 +40,7 @@ func Mount(mux *http.ServeMux) {
 	mux.Handle("/signout", http.HandlerFunc(signOut))
 	mux.Handle("/profile", mustSignedIn(http.HandlerFunc(profile)))
 	mux.Handle("/profile/edit", mustSignedIn(http.HandlerFunc(profileEdit)))
-	mux.Handle("/course/", http.StripPrefix("/course/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		link := r.URL.Path
-		if n := strings.Index(link, "/"); n > 0 {
-			link = link[:strings.Index(link, "/")]
-		}
-		http.StripPrefix(link, courseRouter(link)).ServeHTTP(w, r)
-	})))
+	mux.Handle("/course/", http.StripPrefix("/course/", http.HandlerFunc(course)))
 	mux.Handle("/admin/", http.StripPrefix("/admin", onlyAdmin(admin)))
 	mux.Handle("/editor/", http.StripPrefix("/editor", editor))
 }
