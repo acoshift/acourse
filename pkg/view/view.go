@@ -2,6 +2,7 @@ package view
 
 import (
 	"context"
+	"html/template"
 	"net/http"
 	"net/url"
 
@@ -38,6 +39,7 @@ type Page struct {
 	URL   string
 	Me    *model.User
 	Flash flash.Flash
+	XSRF  template.HTML
 }
 
 var defaultPage = Page{
@@ -51,6 +53,7 @@ func newPage(ctx context.Context) *Page {
 	p := defaultPage
 	p.Me = appctx.GetUser(ctx)
 	p.Flash = flash.Get(ctx)
+	p.XSRF = template.HTML(`<input type="hidden" name="X" value="` + appctx.GetXSRFToken(ctx) + `">`)
 	return &p
 }
 

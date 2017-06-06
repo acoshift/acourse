@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"html/template"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"path/filepath"
@@ -12,9 +13,6 @@ import (
 	"sync"
 	"time"
 
-	"io/ioutil"
-
-	"github.com/acoshift/acourse/pkg/appctx"
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/flash"
 	"github.com/acoshift/header"
@@ -97,9 +95,6 @@ func parseTemplate(key interface{}, set []string) {
 	t.Funcs(template.FuncMap{
 		"templateName": func() string {
 			return templateName
-		},
-		"xsrf": func() template.HTML {
-			return template.HTML("")
 		},
 		"currency": func(v float64) string {
 			return humanize.FormatFloat("#,###.##", v)
@@ -234,20 +229,10 @@ func render(ctx context.Context, w http.ResponseWriter, key, data interface{}) {
 		t = templates[key]
 	}
 
-	tp, _ := t.Template.Clone()
-	// inject template funcs
-	// TODO: don't clone and inject to view data
-	tp = tp.Funcs(template.FuncMap{
-		"xsrf": func() template.HTML {
-			token := appctx.GetXSRFToken(ctx)
-			return template.HTML(`<input type="hidden" name="X" value="` + token + `">`)
-		},
-	})
-
 	w.Header().Set(header.ContentType, "text/html; charset=utf-8")
 	w.Header().Set(header.CacheControl, "no-cache, no-store, must-revalidate, max-age=0")
 	pipe := &bytes.Buffer{}
-	err := tp.Execute(pipe, data)
+	err := t.Execute(pipe, data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
