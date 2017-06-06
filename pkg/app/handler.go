@@ -38,11 +38,15 @@ func Mount(mux *http.ServeMux) {
 	admin.Handle("/payments/history", http.HandlerFunc(adminHistoryPayments))
 
 	mux.Handle("/", http.HandlerFunc(index))
+	mux.Handle("/~/", http.StripPrefix("/~", cache(http.FileServer(&fileFS{http.Dir("static")}))))
+	mux.Handle("/favicon.ico", fileHandler("static/favicon.ico"))
 	mux.Handle("/signin", mustNotSignedIn(http.HandlerFunc(signIn)))
 	mux.Handle("/openid", mustNotSignedIn(http.HandlerFunc(openID)))
 	mux.Handle("/openid/callback", mustNotSignedIn(http.HandlerFunc(openIDCallback)))
 	mux.Handle("/signup", mustNotSignedIn(http.HandlerFunc(signUp)))
 	mux.Handle("/signout", http.HandlerFunc(signOut))
+	mux.Handle("/profile", mustSignedIn(http.HandlerFunc(profile)))
+	mux.Handle("/profile/edit", mustSignedIn(http.HandlerFunc(profileEdit)))
 	mux.Handle("/course/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		link := strings.TrimPrefix(r.URL.Path, "/course/")
 		if n := strings.Index(link, "/"); n > 0 {
@@ -57,11 +61,6 @@ func Mount(mux *http.ServeMux) {
 		}
 		course.ServeHTTP(w, r)
 	}))
-	mux.Handle("/profile", mustSignedIn(http.HandlerFunc(profile)))
-	mux.Handle("/profile/edit", mustSignedIn(http.HandlerFunc(profileEdit)))
-
-	mux.Handle("/~/", http.StripPrefix("/~", cache(http.FileServer(&fileFS{http.Dir("static")}))))
-	mux.Handle("/favicon.ico", fileHandler("static/favicon.ico"))
 	mux.Handle("/admin/", http.StripPrefix("/admin", onlyAdmin(admin)))
 	mux.Handle("/editor/", http.StripPrefix("/editor", editor))
 }
