@@ -18,11 +18,6 @@ import (
 
 // Mount mounts app's handlers into mux
 func Mount(mux *http.ServeMux) {
-	course := http.NewServeMux()
-	course.Handle("/", http.HandlerFunc(courseView))
-	course.Handle("/content", mustSignedIn(http.HandlerFunc(courseContent)))
-	course.Handle("/enroll", mustSignedIn(http.HandlerFunc(courseEnroll)))
-
 	editor := http.NewServeMux()
 	editor.Handle("/create", onlyInstructor(http.HandlerFunc(editorCreate)))
 	editor.Handle("/course", isCourseOwner(http.HandlerFunc(editorCourse)))
