@@ -72,8 +72,7 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	data := struct {
 		*Page
-		Flash flash.Flash
-	}{newPage(ctx), flash.Get(r.Context())}
+	}{newPage(ctx)}
 	render(ctx, w, keySignIn{}, &data)
 }
 
@@ -82,8 +81,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	data := struct {
 		*Page
-		Flash flash.Flash
-	}{newPage(ctx), flash.Get(r.Context())}
+	}{newPage(ctx)}
 	render(ctx, w, keySignUp{}, &data)
 }
 
