@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
       - name: acourse-dev
-        image: gcr.io/acoshift-1362/acourse-dev
+        image: gcr.io/acoshift-1362/acourse
         ports:
         - containerPort: 8080
         livenessProbe:
