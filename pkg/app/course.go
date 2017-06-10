@@ -557,13 +557,7 @@ func postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 		originalPrice = x.Discount
 	}
 
-	priceStr := r.FormValue("Price")
-	if len(priceStr) == 0 && originalPrice != 0 {
-		f.Add("Errors", "price can not be empty")
-		back(w, r)
-		return
-	}
-	price, _ := strconv.ParseFloat(priceStr, 64)
+	price, _ := strconv.ParseFloat(r.FormValue("Price"), 64)
 
 	if price < 0 {
 		f.Add("Errors", "price can not be negative")
