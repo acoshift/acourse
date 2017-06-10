@@ -1,107 +1,128 @@
-// Use rscss System na
-@import './config.scss';
-
 /*===============================
   Background Color
 ===============================*/
 ._bg-color-main {
-  background-color: $color-main;
+  background-color: #02b7e9;
 }
+
 ._bg-color-sub {
-  background-color: $color-sub;
+  background-color: #2F8DFA;
 }
+
 ._bg-color-accent {
-  background-color: $color-accent;
+  background-color: #ff3860;
 }
+
 ._bg-color-primary {
-  background: $color-primary;
+  background: #02b7e9;
 }
+
 ._bg-color-positive {
-  background-color: $color-positive;
+  background-color: #23d160;
 }
+
 ._bg-color-negative {
-  background-color: $color-negative;
+  background-color: #ff3860;
 }
+
 ._bg-color-warning {
-  background-color: $color-warning;
+  background-color: #ffdd57;
 }
+
 ._bg-color-info {
-  background-color: $color-info;
+  background-color: #2F8DFA;
 }
+
 ._bg-color-black {
-  background-color: $color-black;
+  background-color: #363636;
 }
+
 ._bg-color-dark {
-  background-color: $color-dark;
+  background-color: #565656;
 }
+
 ._bg-color-light {
-  background-color: $color-light;
+  background-color: whitesmoke;
 }
+
 ._bg-color-base {
-  background: $color-base;
+  background: #f4f5f7;
 }
+
 ._bg-color-base-2 {
-  background: $color-base-2;
+  background: #eff8ff;
 }
 
 /*===============================
   Color
 ===============================*/
 ._color-main {
-  color: $color-main;
+  color: #02b7e9;
 }
+
 ._color-sub {
-  color: $color-sub;
+  color: #2F8DFA;
 }
+
 ._color-accent {
-  color: $color-accent;
+  color: #ff3860;
 }
+
 ._color-primary {
-  background: $color-primary;
+  background: #02b7e9;
 }
+
 ._color-positive {
-  color: $color-positive;
+  color: #23d160;
 }
+
 ._color-negative {
-  color: $color-negative;
+  color: #ff3860;
 }
+
 ._color-warning {
-  color: $color-warning;
+  color: #ffdd57;
 }
+
 ._color-info {
-  color: $color-info;
+  color: #2F8DFA;
 }
+
 ._color-black {
-  color: $color-black;
+  color: #363636;
 }
+
 ._color-dark {
-  color: $color-dark;
+  color: #565656;
 }
+
 ._color-light {
-  color: $color-light;
+  color: whitesmoke;
 }
+
 ._color-base {
-  color: $color-base;
+  color: #f4f5f7;
 }
+
 ._color-base-2 {
-  color: $color-base-2;
+  color: #eff8ff;
 }
+
 /*===============================
   Box Model
 ===============================*/
-._full-width {
+._full-width, ._full {
   width: 100% !important;
 }
-._full-height {
+
+._full-height, ._full {
   height: 100% !important;
 }
-._full {
-  @extend ._full-width;
-  @extend ._full-height;
-}
+
 ._no-padding {
   padding: 0 !important;
 }
+
 ._no-margin {
   margin: 0 !important;
 }
@@ -109,48 +130,83 @@
 /*===============================
   Flex Display
 ===============================*/
-._flex {
+._flex, ._flex-row, ._flex-column {
+  display: -webkit-box !important;
+  display: -ms-flexbox !important;
   display: flex !important;
 }
-._flex-row {
-  @extend ._flex;
-}
+
 ._flex-column {
-  @extend ._flex;
-  flex-direction: column;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
 }
+
 ._flex-span {
-  flex: 1;
+  -webkit-box-flex: 1;
+      -ms-flex: 1;
+          flex: 1;
 }
+
 ._main-strech {
-  justify-content: stretch;
+  -webkit-box-pack: stretch;
+      -ms-flex-pack: stretch;
+          justify-content: stretch;
 }
+
 ._cross-strech {
-  align-items: stretch;
+  -webkit-box-align: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch;
 }
+
 ._self-stretch {
-  align-self: stretch;
+  -ms-flex-item-align: stretch;
+      -ms-grid-row-align: stretch;
+      align-self: stretch;
 }
+
 ._main-start {
-  justify-content: flex-start;
+  -webkit-box-pack: start;
+      -ms-flex-pack: start;
+          justify-content: flex-start;
 }
+
 ._cross-start {
-  align-items: flex-start;
+  -webkit-box-align: start;
+      -ms-flex-align: start;
+          align-items: flex-start;
 }
+
 ._main-end {
-  justify-content: flex-end;
+  -webkit-box-pack: end;
+      -ms-flex-pack: end;
+          justify-content: flex-end;
 }
+
 ._cross-end {
-  align-items: flex-end;
+  -webkit-box-align: end;
+      -ms-flex-align: end;
+          align-items: flex-end;
 }
+
 ._main-center {
-  justify-content: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
 }
+
 ._cross-center {
-  align-items: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
 }
+
 ._main-space-between {
-  justify-content: space-between;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
 }
 
 /*===============================
@@ -159,26 +215,30 @@
 ._align-center {
   text-align: center !important;
 }
+
 ._align-left {
   text-align: left !important;
 }
+
 ._align-right {
   text-align: right !important;
 }
-
 
 /*===============================
   Font
 ===============================*/
 ._font-main {
-  font-family: $main-fontface;
+  font-family: "Source Sans Pro", sans-serif;
 }
+
 ._font-sub {
-  font-family: $secondary-fontface;
+  font-family: "Open Sans", san-serif;
 }
+
 ._font-bold {
   font-weight: 700 !important;
 }
+
 ._font-thin {
   font-weight: 100 !important;
 }
@@ -187,18 +247,22 @@
   font-size: 13px;
   line-height: 21px;
 }
+
 ._font-size-normal {
   font-size: 15px;
   line-height: 22px;
 }
+
 ._font-size-big {
   font-size: 17px;
   line-height: 24px;
 }
+
 ._font-size-bigger {
   font-size: 24px;
   line-height: 28px;
 }
+
 ._font-size-biggest {
   font-size: 32px;
   line-height: 38px;
@@ -208,10 +272,13 @@
   Img.
 ===============================*/
 ._img-cover {
-  object-fit: cover;
+  -o-object-fit: cover;
+     object-fit: cover;
 }
+
 ._img-contain {
-  object-fit: contain;
+  -o-object-fit: contain;
+     object-fit: contain;
 }
 
 /*===============================
@@ -220,15 +287,23 @@
 ._round {
   border-radius: 50%;
 }
+
 ._hide {
   display: none;
 }
+
 ._pre-wrap {
   white-space: pre-wrap;
 }
+
 ._opa50 {
   opacity: .5;
 }
+
 ._no-wrap {
   white-space: nowrap;
+}
+
+._clearflex {
+  flex: 1 0 auto !important;
 }
