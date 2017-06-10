@@ -256,9 +256,9 @@ func postSignUp(w http.ResponseWriter, r *http.Request) {
 
 	_, err = db.Exec(`
 		insert into users
-			(id, username, email)
+			(id, username, name, email)
 		values
-			($1, $2, $3)
+			($1, $2, '', $3)
 	`, userID, userID, email)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
