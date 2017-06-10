@@ -11,8 +11,30 @@
           <div class="course-content _flex-row">
             <div class="acourse-segment _flex-column _flex-span">
 
-              <div class="acourse-block">
+              <div class="">
                 <h1 class="_color-sub">{{.Course.Title}}</h1>
+              </div>
+
+              <div class="acourse-block-big _flex-row _cross-center">
+                <p class="_no-margin">share on &nbsp;</p>
+                <a 
+                  href="https://www.facebook.com/sharer/sharer.php?u=http%3A//acourse.io/course/{{.Course.Link}}"
+                  target="_blank"
+                  class="_font-size-bigger acourse-side-space">
+                  <i class="fa fa-facebook-square" style="color: #3b5999"></i>
+                </a>
+                <a
+                  href="https://twitter.com/home?status=http%3A//acourse.io/course/{{.Course.Link}}"
+                  target="_blank"
+                  class="_font-size-bigger acourse-side-space">
+                  <i class="fa fa-twitter-square" style="color: #55acee"></i>
+                </a>
+                <a
+                  href="https://plus.google.com/share?url=http%3A//acourse.io/course/{{.Course.Link}}"
+                  target="_blank"
+                  class="_font-size-bigger acourse-side-space">
+                  <i class="fa fa-google-plus-square" style="color: #dc4e41"></i>
+                </a>
               </div>
 
               {{if eq .Course.Type live}}
