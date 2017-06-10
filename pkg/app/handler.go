@@ -126,6 +126,16 @@ func postSignIn(w http.ResponseWriter, r *http.Request) {
 	s := session.Get(ctx)
 	s.Set(keyUserID, userID)
 
+	// if user not found in our database, insert new user
+	// this happend when database out of sync with firebase authentication
+	{
+		var id int64
+		err = db.QueryRow(`select id from users where id = $1`, userID).Scan(&id)
+		if err == sql.ErrNoRows {
+			db.Exec(`insert into users (id, username, name, email) values ($1, $2, $3, $4)`, userID, userID, "", email)
+		}
+	}
+
 	rURL := r.FormValue("r")
 	if len(rURL) == 0 {
 		rURL = "/"
