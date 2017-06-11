@@ -13,7 +13,7 @@ dev:
 	go run -tags dev cmd/acourse/main.go
 
 stag:
-	TAG=-dev make deploy
+	TAG=-dev make patch
 
 deploy: clean style build docker cluster patch
 
