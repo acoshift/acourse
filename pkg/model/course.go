@@ -1,10 +1,13 @@
 package model
 
 import (
+	"bytes"
 	"database/sql"
+	"encoding/gob"
 	"strconv"
 	"time"
 
+	"github.com/garyburd/redigo/redis"
 	"github.com/lib/pq"
 )
 
@@ -350,6 +353,20 @@ func ListCourses() ([]*Course, error) {
 // ListPublicCourses lists public course sort by created at desc
 // TODO: add pagination
 func ListPublicCourses() ([]*Course, error) {
+	// look from cache
+	{
+		c := redisPool.Get()
+		bs, err := redis.Bytes(c.Do("GET", "acourse:cache:list_public_course"))
+		c.Close()
+		if err == nil {
+			var xs []*Course
+			err = gob.NewDecoder(bytes.NewReader(bs)).Decode(&xs)
+			if err == nil {
+				return xs, nil
+			}
+		}
+	}
+
 	rows, err := db.Query(queryListCoursesPublic)
 	if err != nil {
 		return nil, err
@@ -386,6 +403,18 @@ func ListPublicCourses() ([]*Course, error) {
 		}
 		m[courseID].EnrollCount = cnt
 	}
+
+	// save to cache
+	go func() {
+		buf := bytes.Buffer{}
+		err := gob.NewEncoder(&buf).Encode(xs)
+		if err == nil {
+			c := redisPool.Get()
+			c.Do("SETEX", "acourse:cache:list_public_course", 5, buf.Bytes())
+			c.Close()
+		}
+	}()
+
 	return xs, nil
 }
 
