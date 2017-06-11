@@ -8,9 +8,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 
-	"io/ioutil"
+	"gopkg.in/gomail.v2"
 )
 
 func generateSessionID() string {
@@ -53,14 +54,20 @@ func sendSlackMessage(ctx context.Context, message string) error {
 	return nil
 }
 
-// func hashPassword(password string) (string, error) {
-// 	hpwd, err := bcrypt.GenerateFromPassword([]byte(password), 10)
-// 	if err != nil {
-// 		return "", err
-// 	}
-// 	return string(hpwd), nil
-// }
+func sendEmail(to string, subject, body string) error {
+	if len(to) == 0 {
+		return fmt.Errorf("invalid to")
+	}
 
-// func verifyPassword(hpwd, password string) bool {
-// 	return bcrypt.CompareHashAndPassword([]byte(hpwd), []byte(password)) == nil
-// }
+	m := gomail.NewMessage()
+	m.SetHeader("From", emailFrom)
+	m.SetHeader("To", to)
+	m.SetHeader("Subject", subject)
+	m.SetBody("text/html", body)
+
+	err := emailDialer.DialAndSend(m)
+	if err != nil {
+		return err
+	}
+	return nil
+}

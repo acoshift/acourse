@@ -139,7 +139,7 @@ https://acourse.io
 				)
 
 				title := fmt.Sprintf("ยืนยันการชำระเงิน หลักสูตร %s", x.Course.Title)
-				SendEmail(x.User.Email.String, title, body)
+				sendEmail(x.User.Email.String, title, body)
 			}()
 		}
 	} else if action == "reject" {
@@ -191,7 +191,7 @@ https://acourse.io
 				)
 
 				title := fmt.Sprintf("คำขอเพื่อเรียนหลักสูตร %s ได้รับการปฏิเสธ", x.Course.Title)
-				SendEmail(x.User.Email.String, title, body)
+				sendEmail(x.User.Email.String, title, body)
 			}()
 		}
 	}
