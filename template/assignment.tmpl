@@ -15,35 +15,29 @@
     </div>
 
     {{range .Assignments}}
-    <div class="acourse-card acourse-block-big _flex-row row col-xs-12 col-md-8 col-md-offset-2 _no-padding _clearflex">
-      <div class="acourse-segment col-xs-12 col-md-9">
-        <h3 class="color-sub">{{.Title}}</h3>
-        <div class="_flex-column">
-          <p class="_pre-wrap acourse-word-breakeable _color-dark">
-            {{.Desc}}
-          </p>
+      <div class="acourse-card acourse-block-big _flex-row row col-xs-12 col-md-8 col-md-offset-2 _no-padding _clearflex">
+        <div class="acourse-segment col-xs-12 col-md-9">
+          <h3 class="color-sub">{{.Title}}</h3>
+          <div class="_flex-column">
+            <p class="_pre-wrap acourse-word-breakeable _color-dark">
+              {{.Desc}}
+            </p>
+          </div>
         </div>
+        <!--<div class="acourse-segment col-xs-12 col-md-3 _bg-color-base-2">
+          {{if .Open}}
+            <a href="/">
+              <button class="acourse-button -primary acourse-block _font-sub _full-width">Submit</button>
+            </a>
+          {{end}}
+        </div>-->
       </div>
-      <div class="acourse-segment col-xs-12 col-md-3 _bg-color-base-2">
-        {{if .Open}}
-        <a href="/">
-          <button class="acourse-button -primary acourse-block _font-sub _full-width">Submit</button>
-        </a>
-        {{else}}
-        <button class="acourse-button -disable acourse-block _font-sub _full-width">Submit</button>
-        {{end}}
-      </div>
-    </div>
     {{end}}
-
   </div>
 </div>
 {{end}}
 
 {{define "app-script"}}
-<script>
-  console.log({{.}})
-</script>
 {{end}}
 
 {{define "app-style"}}

@@ -17,7 +17,7 @@
 
               <div class="acourse-block-big _flex-row _cross-center">
                 <p class="_no-margin">share on &nbsp;</p>
-                <a 
+                <a
                   href="https://www.facebook.com/sharer/sharer.php?u=http%3A//acourse.io/course/{{.Course.Link}}"
                   target="_blank"
                   class="_font-size-bigger acourse-side-space">
@@ -82,10 +82,12 @@
                     </a>
                     <!--<a href="/">
                       <button class="acourse-button -primary _font-sub _full-width acourse-block">Attend</button>
-                    </a>
-                    <a href="/">
-                      <button class="acourse-button -primary _font-sub _full-width acourse-block">Assignment</button>
                     </a>-->
+                    {{if .Course.Option.Assignment}}
+                      <a href="/course/{{.Course.Link}}/assignment">
+                        <button class="acourse-button -primary _font-sub _full-width acourse-block">Assignment</button>
+                      </a>
+                    {{end}}
                   </div>
                   {{end}}
 
