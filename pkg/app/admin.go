@@ -199,13 +199,11 @@ https://acourse.io
 }
 
 func adminPendingPayments(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodGet || r.Method == http.MethodHead {
-		adminPayments(w, r, model.ListPendingPayments, model.CountPendingPayments)
-	} else if r.Method == http.MethodPost {
+	if r.Method == http.MethodPost {
 		postAdminPendingPayment(w, r)
-	} else {
-		http.NotFound(w, r)
+		return
 	}
+	adminPayments(w, r, model.ListPendingPayments, model.CountPendingPayments)
 }
 
 func adminHistoryPayments(w http.ResponseWriter, r *http.Request) {
