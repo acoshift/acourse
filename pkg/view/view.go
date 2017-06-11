@@ -20,6 +20,7 @@ type (
 	keyUser                struct{}
 	keyCourse              struct{}
 	keyCourseContent       struct{}
+	keyAssignment          struct{}
 	keyEditorCreate        struct{}
 	keyEditorCourse        struct{}
 	keyEditorContent       struct{}
@@ -222,6 +223,23 @@ func CourseEnroll(w http.ResponseWriter, r *http.Request, course *model.Course) 
 		Course *model.Course
 	}{page, course}
 	render(ctx, w, keyCourseEnroll{}, &data)
+}
+
+// Assignment render assignment view
+func Assignment(w http.ResponseWriter, r *http.Request, course *model.Course, assignments []*model.Assignment) {
+	ctx := r.Context()
+	page := newPage(ctx)
+	page.Title = course.Title + " | " + page.Title
+	page.Desc = course.ShortDesc
+	page.Image = course.Image
+	page.URL = baseURL + "/course/" + url.PathEscape(course.Link())
+
+	data := struct {
+		*Page
+		Course      *model.Course
+		Assignments []*model.Assignment
+	}{page, course, assignments}
+	render(ctx, w, keyAssignment{}, &data)
 }
 
 // AdminUsers renders admin users view

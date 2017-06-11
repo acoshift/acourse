@@ -32,6 +32,8 @@ func course(w http.ResponseWriter, r *http.Request) {
 		mustSignedIn(http.HandlerFunc(courseContent)).ServeHTTP(w, r)
 	case "enroll":
 		mustSignedIn(http.HandlerFunc(courseEnroll)).ServeHTTP(w, r)
+	case "assignment":
+		mustSignedIn(http.HandlerFunc(courseAssignment)).ServeHTTP(w, r)
 	default:
 		http.NotFound(w, r)
 	}
@@ -636,6 +638,61 @@ func postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	http.Redirect(w, r, "/course/"+link, http.StatusFound)
+}
+
+func courseAssignment(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	user := appctx.GetUser(ctx)
+	link := appctx.GetCourseURL(ctx)
+
+	// if id can parse to int64 get course from id
+	id, err := strconv.ParseInt(link, 10, 64)
+	if err != nil {
+		// link can not parse to int64 get course id from url
+		id, err = model.GetCourseIDFromURL(link)
+		if err == model.ErrNotFound {
+			http.NotFound(w, r)
+			return
+		}
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+	x, err := model.GetCourse(id)
+	if err == model.ErrNotFound {
+		http.NotFound(w, r)
+		return
+	}
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// if course has url, redirect to course url
+	if x.URL.Valid && x.URL.String != link {
+		http.Redirect(w, r, "/course/"+x.URL.String+"/assignment", http.StatusFound)
+		return
+	}
+
+	enrolled, err := model.IsEnrolled(user.ID, x.ID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if !enrolled && user.ID != x.UserID {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
+
+	assignments, err := model.GetAssignments(x.ID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	view.Assignment(w, r, x, assignments)
 }
 
 func editorContentCreate(w http.ResponseWriter, r *http.Request) {
