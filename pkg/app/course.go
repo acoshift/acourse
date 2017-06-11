@@ -686,8 +686,11 @@ func courseAssignment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var assignments []*model.Assignment
-	// TODO: get assignment from database
+	assignments, err := model.GetAssignments(x.ID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	view.Assignment(w, r, x, assignments)
 }
