@@ -44,6 +44,6 @@ cluster:
 
 patch:
 	# sed "s/{{TAG}}/$(COMMIT_SHA)/g" deployment.yaml | kubectl apply -f -
-	kubectl patch deployment $(SERVICE)$(TAG) -p '{"spec":{"template":{"metadata":{"labels":{"date":"$(NOW)"}},"spec":{"containers":[{"name":"$(SERVICE)","image":"$(REGISTRY)/$(SERVICE):$(COMMIT_SHA)"}]}}}}'
+	kubectl patch deployment $(SERVICE)$(TAG) -p '{"spec":{"template":{"metadata":{"labels":{"date":"$(NOW)"}},"spec":{"containers":[{"name":"$(SERVICE)$(TAG)","image":"$(REGISTRY)/$(SERVICE):$(COMMIT_SHA)"}]}}}}'
 	# kubectl set image deployment/$(SERVICE)$(TAG) $(SERVICE)$(TAG)=$(REGISTRY)/$(SERVICE):$(COMMIT_SHA)
 	kubectl rollout status deployment/$(SERVICE)$(TAG)
