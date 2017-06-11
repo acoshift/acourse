@@ -10,6 +10,7 @@ import (
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/acourse/pkg/view"
 	"github.com/acoshift/go-firebase-admin"
+	"github.com/garyburd/redigo/redis"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 	"gopkg.in/gomail.v2"
@@ -105,8 +106,17 @@ func Init(config Config) error {
 		return err
 	}
 
+	// TODO: use in-memory redis for caching
+	redisPool := &redis.Pool{
+		MaxIdle:     100,
+		IdleTimeout: 10 * time.Minute,
+		Dial: func() (redis.Conn, error) {
+			return redis.Dial("tcp", redisAddr, redis.DialDatabase(redisDB), redis.DialPassword(redisPass))
+		},
+	}
+
 	// init other packages
-	err = model.Init(model.Config{DB: db})
+	err = model.Init(model.Config{DB: db, RedisPool: redisPool})
 	if err != nil {
 		return err
 	}
