@@ -1,1 +1,1 @@
-postgresql://acourse_dev@35.186.155.127:26257/acourse_dev?sslmode=verify-full&sslcert=private%2Fclient.crt&sslkey=private%2Fclient.key&sslrootcert=private%2Fca.crt
+postgresql://acourse_dev@db-lb.cluster.acoshift.com:26257/acourse_dev?sslmode=verify-full&sslcert=private%2Fclient.crt&sslkey=private%2Fclient.key&sslrootcert=private%2Fca.crt

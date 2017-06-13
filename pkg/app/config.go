@@ -105,6 +105,7 @@ func Init(config Config) error {
 	if err != nil {
 		return err
 	}
+	db.SetMaxIdleConns(10)
 
 	// TODO: use in-memory redis for caching
 	redisPool := &redis.Pool{
