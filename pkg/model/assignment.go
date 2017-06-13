@@ -20,6 +20,7 @@ func GetAssignments(courseID int64) ([]*Assignment, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 	xs := make([]*Assignment, 0)
 	for rows.Next() {
 		var x Assignment
