@@ -1,44 +1,45 @@
+@import 'config.scss';
 /*===============================
   Background Color
 ===============================*/
 ._bg-color-main {
-  background-color: #02b7e9;
+  background-color: $color-main;
 }
 
 ._bg-color-sub {
-  background-color: #2F8DFA;
+  background-color: $color-sub;
 }
 
 ._bg-color-accent {
-  background-color: #ff3860;
+  background-color: $color-accent;
 }
 
 ._bg-color-primary {
-  background: #02b7e9;
+  background: $color-primary;
 }
 
 ._bg-color-positive {
-  background-color: #23d160;
+  background-color: $color-positive;
 }
 
 ._bg-color-negative {
-  background-color: #ff3860;
+  background-color: $color-negative;
 }
 
 ._bg-color-warning {
-  background-color: #ffdd57;
+  background-color: $color-warning;
 }
 
 ._bg-color-info {
-  background-color: #2F8DFA;
+  background-color: $color-info;
 }
 
 ._bg-color-black {
-  background-color: #363636;
+  background-color: $color-black;
 }
 
 ._bg-color-dark {
-  background-color: #565656;
+  background-color: $color-dark;
 }
 
 ._bg-color-light {
@@ -46,54 +47,54 @@
 }
 
 ._bg-color-base {
-  background: #f4f5f7;
+  background: $color-base;
 }
 
 ._bg-color-base-2 {
-  background: #eff8ff;
+  background: $color-base-2;
 }
 
 /*===============================
   Color
 ===============================*/
 ._color-main {
-  color: #02b7e9;
+  color: $color-main;
 }
 
 ._color-sub {
-  color: #2F8DFA;
+  color: $color-sub;
 }
 
 ._color-accent {
-  color: #ff3860;
+  color: $color-accent;
 }
 
 ._color-primary {
-  background: #02b7e9;
+  background: $color-primary;
 }
 
 ._color-positive {
-  color: #23d160;
+  color: $color-positive;
 }
 
 ._color-negative {
-  color: #ff3860;
+  color: $color-negative;
 }
 
 ._color-warning {
-  color: #ffdd57;
+  color: $color-warning;
 }
 
 ._color-info {
-  color: #2F8DFA;
+  color: $color-info;
 }
 
 ._color-black {
-  color: #363636;
+  color: $color-black;
 }
 
 ._color-dark {
-  color: #565656;
+  color: $color-dark;
 }
 
 ._color-light {
@@ -101,11 +102,11 @@
 }
 
 ._color-base {
-  color: #f4f5f7;
+  color: $color-base;
 }
 
 ._color-base-2 {
-  color: #eff8ff;
+  color: $color-base-2;
 }
 
 /*===============================
