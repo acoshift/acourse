@@ -314,7 +314,7 @@ func editorCourse(w http.ResponseWriter, r *http.Request) {
 
 func postEditorCourse(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	id, _ := strconv.ParseInt(r.FormValue("id"), 10, 64)
+	id := r.FormValue("id")
 
 	f := flash.Get(ctx)
 
@@ -417,7 +417,7 @@ func postEditorCourse(w http.ResponseWriter, r *http.Request) {
 	var link sql.NullString
 	db.QueryRow(`select url from courses where id = $1`, id).Scan(&link)
 	if !link.Valid {
-		http.Redirect(w, r, "/course/"+strconv.FormatInt(id, 10), http.StatusFound)
+		http.Redirect(w, r, "/course/"+id, http.StatusFound)
 		return
 	}
 	http.Redirect(w, r, "/course/"+link.String, http.StatusSeeOther)
@@ -428,7 +428,7 @@ func editorContent(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodPost {
 		if r.FormValue("action") == "delete" {
-			contentID, _ := strconv.ParseInt(r.FormValue("contentId"), 10, 64)
+			contentID := r.FormValue("contentId")
 			_, err := db.Exec(`delete from course_contents where id = $1 and course_id = $2`, contentID, id)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)

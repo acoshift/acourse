@@ -33,11 +33,9 @@ migrate:
 build:
 	env GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o entrypoint -a -ldflags '-w -s' cmd/acourse/main.go
 
-docker:
-	gcloud docker -- build -t $(REGISTRY)/$(SERVICE) .
-	docker tag $(REGISTRY)/$(SERVICE) $(REGISTRY)/$(SERVICE):$(COMMIT_SHA)
+docker: clean style build
+	gcloud docker -- build -t $(REGISTRY)/$(SERVICE):$(COMMIT_SHA) .
 	gcloud docker -- push $(REGISTRY)/$(SERVICE):$(COMMIT_SHA)
-	gcloud docker -- push $(REGISTRY)/$(SERVICE):latest
 
 cluster:
 	gcloud container clusters get-credentials cluster-sg-1 --zone asia-southeast1-b --project acoshift-1362
