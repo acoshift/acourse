@@ -13,7 +13,7 @@ func main() {
 
 	db1, err := sql.Open("postgres", "postgresql://acourse_dev@db-0.cluster.acoshift.com:26257/acourse_dev?sslmode=verify-full&sslcert=private%2Fclient.crt&sslkey=private%2Fclient.key&sslrootcert=private%2Fca.crt")
 	must(err)
-	db2, err := sql.Open("postgres", "postgresql://acoshift@localhost:5432/acourse?sslmode=disable")
+	db2, err := sql.Open("postgres", "")
 	must(err)
 
 	_, err = db2.Exec("delete from payments")

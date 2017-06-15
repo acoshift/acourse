@@ -2,14 +2,14 @@ package model
 
 // Assignment model
 type Assignment struct {
-	ID    int64
+	ID    string
 	Title string
 	Desc  string
 	Open  bool
 }
 
 // GetAssignments gets assignments
-func GetAssignments(courseID int64) ([]*Assignment, error) {
+func GetAssignments(courseID string) ([]*Assignment, error) {
 	rows, err := db.Query(`
 		select
 			id, title, long_desc, open
