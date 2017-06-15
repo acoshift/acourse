@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"net/url"
 	"runtime/debug"
-	"strconv"
 	"time"
 
 	"github.com/acoshift/acourse/pkg/appctx"
@@ -182,7 +181,7 @@ func isCourseOwner(h http.Handler) http.Handler {
 			return
 		}
 
-		id, _ := strconv.ParseInt(r.FormValue("id"), 10, 64)
+		id := r.FormValue("id")
 
 		var ownerID string
 		err := db.QueryRow(`select user_id from courses where id = $1`, id).Scan(&ownerID)

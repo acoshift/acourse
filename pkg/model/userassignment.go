@@ -8,7 +8,7 @@ import (
 
 // UserAssignment model
 type UserAssignment struct {
-	ID          int64
+	ID          string
 	UserID      string
 	CourseID    string
 	DownloadURL string

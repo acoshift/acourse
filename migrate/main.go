@@ -1,421 +1,289 @@
 package main
 
 import (
-	"context"
 	"database/sql"
 	"log"
 	"time"
 
-	"github.com/acoshift/acourse/pkg/model"
-	"github.com/acoshift/configfile"
-	"github.com/acoshift/ds"
 	_ "github.com/lib/pq"
-	"golang.org/x/oauth2/google"
-	identitytoolkit "google.golang.org/api/identitytoolkit/v3"
 )
 
-var ctx = context.Background()
-
-var client, _ = ds.NewClient(ctx, "acourse-156413")
-
-var config = configfile.NewReader("config")
-var serviceAccount = config.Bytes("service_account")
-var sqlURL = config.String("sql_url")
-
-// migrate all data from datastore and firebase to redis
 func main() {
 	time.Local = time.UTC
-	ctx := context.Background()
 
-	gconf, err := google.JWTConfigFromJSON(serviceAccount, identitytoolkit.CloudPlatformScope)
-	if err != nil {
-		log.Fatal(err)
-	}
-	gitService, err := identitytoolkit.New(gconf.Client(ctx))
-	if err != nil {
-		log.Fatal(err)
-	}
-	gitClient := gitService.Relyingparty
-
-	db, err := sql.Open("postgres", sqlURL)
+	db1, err := sql.Open("postgres", "postgresql://acourse_dev@db-0.cluster.acoshift.com:26257/acourse_dev?sslmode=verify-full&sslcert=private%2Fclient.crt&sslkey=private%2Fclient.key&sslrootcert=private%2Fca.crt")
+	must(err)
+	db2, err := sql.Open("postgres", "")
 	must(err)
 
-	var users []*userModel
-	var roles []*roleModel
-	var courses []*courseModel
-	var payments []*paymentModel
-	var attends []*attendModel
-	var enrolls []*enrollModel
-	var assignments []*assignment
-	var userAssignments []*userAssignment
-
-	log.Println("load old database")
-	must(client.Query(ctx, "User", &users))
-	must(client.Query(ctx, "Role", &roles))
-	must(client.Query(ctx, "Course", &courses))
-	must(client.Query(ctx, "Payment", &payments))
-	must(client.Query(ctx, "Attend", &attends))
-	must(client.Query(ctx, "Enroll", &enrolls))
-	must(client.Query(ctx, "Assignment", &assignments, ds.Order("CreatedAt")))
-	must(client.Query(ctx, "UserAssignment", &userAssignments))
-
-	findCourse := func(courseID string) *courseModel {
-		for _, p := range courses {
-			if p.ID() == courseID {
-				return p
-			}
-		}
-		return nil
-	}
-
-	findAssignment := func(assignmentID string) *assignment {
-		for _, p := range assignments {
-			if p.ID() == assignmentID {
-				return p
-			}
-		}
-		return nil
-	}
-
-	respUser, err := gitClient.DownloadAccount(&identitytoolkit.IdentitytoolkitRelyingpartyDownloadAccountRequest{
-		MaxResults: 5000,
-	}).Do()
+	_, err = db2.Exec("delete from payments")
 	must(err)
-
-	findUser := func(userID string) *userModel {
-		for _, p := range users {
-			if p.ID() == userID {
-				return p
-			}
-		}
-		return &userModel{}
-	}
-
-	db.Exec("delete from payments;")
-	db.Exec("delete from user_assignments;")
-	db.Exec("delete from course_assignments;")
-	db.Exec("delete from course_contents;")
-	db.Exec("delete from course_options;")
-	db.Exec("delete from courses;")
-	db.Exec("delete from roles;")
-	db.Exec("delete from users;")
+	_, err = db2.Exec("delete from user_assignments")
+	must(err)
+	_, err = db2.Exec("delete from assignments")
+	must(err)
+	_, err = db2.Exec("delete from enrolls")
+	must(err)
+	_, err = db2.Exec("delete from course_contents")
+	must(err)
+	_, err = db2.Exec("delete from course_options")
+	must(err)
+	_, err = db2.Exec("delete from attends")
+	must(err)
+	_, err = db2.Exec("delete from courses")
+	must(err)
+	_, err = db2.Exec("delete from roles")
+	must(err)
+	_, err = db2.Exec("delete from users")
+	must(err)
 
 	log.Println("migrate users")
-	stmt, err := db.Prepare(`
+	stmt, err := db2.Prepare(`
 		insert into users
-			(id, username, name, image, about_me, email, created_at, updated_at)
+			(id, username, name, email, about_me, image, created_at, updated_at)
 		values
-			($1, $2, $3, $4, $5, $6, $7, $8);
+			($1, $2, $3, $4, $5, $6, $7, $8)
 	`)
 	must(err)
-	for _, p := range respUser.Users {
-		u := findUser(p.LocalId)
-		id := p.LocalId
-		username := u.Username
-		if len(username) == 0 {
-			username = id
-		}
-		name := u.Name
-		if len(name) == 0 {
-			name = p.DisplayName
-		}
-		createdAt := time.Unix(0, p.CreatedAt*1000000)
-		updatedAt := u.UpdatedAt
-		if updatedAt.IsZero() {
-			updatedAt = time.Now()
-		}
-		if createdAt.IsZero() {
-			createdAt = updatedAt
-		}
-		email := &sql.NullString{String: p.Email, Valid: len(p.Email) > 0}
-		_, err = stmt.Exec(id, username, name, u.Photo, u.AboutMe, email, createdAt, updatedAt)
+	rows, err := db1.Query(`
+		select id, username, name, email, about_me, image, created_at, updated_at
+		from users
+	`)
+	must(err)
+	for rows.Next() {
+		var id, username, name, email, aboutMe, image, createdAt, updatedAt interface{}
+		err = rows.Scan(&id, &username, &name, &email, &aboutMe, &image, &createdAt, &updatedAt)
+		must(err)
+		_, err = stmt.Exec(id, username, name, email, aboutMe, image, createdAt, updatedAt)
 		must(err)
 	}
+	rows.Close()
+	stmt.Close()
 
 	log.Println("migrate role")
-	stmt, err = db.Prepare(`
+	stmt, err = db2.Prepare(`
 		insert into roles
 			(user_id, admin, instructor, created_at, updated_at)
 		values
 			($1, $2, $3, $4, $5);
 	`)
 	must(err)
-	for _, p := range roles {
-		_, err = stmt.Exec(p.ID(), p.Admin, p.Instructor, p.CreatedAt, p.UpdatedAt)
+	rows, err = db1.Query(`
+		select user_id, admin, instructor, created_at, updated_at
+		from roles
+	`)
+	for rows.Next() {
+		var userID, admin, instructor, createdAt, updatedAt interface{}
+		err = rows.Scan(&userID, &admin, &instructor, &createdAt, &updatedAt)
+		must(err)
+		_, err = stmt.Exec(userID, admin, instructor, createdAt, updatedAt)
 		must(err)
 	}
+	rows.Close()
+	stmt.Close()
 
 	log.Println("migrate courses")
-	stmt, err = db.Prepare(`
+	stmt, err = db2.Prepare(`
 		insert into courses
 			(user_id, title, short_desc, long_desc, image, start, url, type, price, discount, enroll_detail, created_at, updated_at)
 		values
 			($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
-		returning id;
+		returning id
 	`)
 	must(err)
-	stmt2, err := db.Prepare(`
+	rows, err = db1.Query(`
+		select id, user_id, title, short_desc, long_desc, image, start, url, type, price, discount, enroll_detail, created_at, updated_at
+		from courses
+	`)
+	must(err)
+	mapCourseID := make(map[int64]string)
+	for rows.Next() {
+		var id int64
+		var userID, title, shortDesc, longDesc, image, start, url, typ, price, discount, enrollDetail, createdAt, updatedAt interface{}
+		err = rows.Scan(&id, &userID, &title, &shortDesc, &longDesc, &image, &start, &url, &typ, &price, &discount, &enrollDetail, &createdAt, &updatedAt)
+		must(err)
+		var newID string
+		err = stmt.QueryRow(userID, title, shortDesc, longDesc, image, start, url, typ, price, discount, enrollDetail, createdAt, updatedAt).Scan(&newID)
+		must(err)
+		mapCourseID[id] = newID
+	}
+	rows.Close()
+	stmt.Close()
+
+	log.Println("migrate course_options")
+	stmt, err = db2.Prepare(`
 		insert into course_options
 			(course_id, public, enroll, attend, assignment, discount)
 		values
 			($1, $2, $3, $4, $5, $6);
 	`)
 	must(err)
-	stmt3, err := db.Prepare(`
+	rows, err = db1.Query(`
+		select course_id, public, enroll, attend, assignment, discount
+		from course_options
+	`)
+	must(err)
+	for rows.Next() {
+		var courseID int64
+		var public, enroll, attend, assignment, discount interface{}
+		err = rows.Scan(&courseID, &public, &enroll, &attend, &assignment, &discount)
+		must(err)
+		_, err = stmt.Exec(mapCourseID[courseID], public, enroll, attend, assignment, discount)
+		must(err)
+	}
+	rows.Close()
+	stmt.Close()
+
+	log.Println("migrate course_contents")
+	stmt, err = db2.Prepare(`
 		insert into course_contents
 			(course_id, i, title, long_desc, video_id, video_type, download_url)
 		values
 			($1, $2, $3, $4, $5, $6, $7);
 	`)
 	must(err)
-	for _, p := range courses {
-		var tp int
-		switch p.Type {
-		case CourseTypeLive:
-			tp = model.Live
-		case CourseTypeVideo:
-			tp = model.Video
-		case CourseTypeEbook:
-			tp = model.EBook
-		}
-		var st *time.Time
-		if !p.Start.IsZero() {
-			st = &p.Start
-		}
-		var url *string
-		if len(p.URL) > 0 {
-			url = &p.URL
-		}
-		var id int64
-		err = stmt.QueryRow(p.Owner, p.Title, p.ShortDescription, p.Description, p.Photo, st, url, tp, p.Price, p.DiscountedPrice, p.EnrollDetail, p.CreatedAt, p.UpdatedAt).Scan(&id)
+	rows, err = db1.Query(`
+		select course_id, i, title, long_desc, video_id, video_type, download_url
+		from course_contents
+	`)
+	for rows.Next() {
+		var courseID int64
+		var i, title, longDesc, videoID, videoType, downloadURL interface{}
+		err = rows.Scan(&courseID, &i, &title, &longDesc, &videoID, &videoType, &downloadURL)
 		must(err)
-		p.newID = id
-
-		_, err = stmt2.Exec(id, p.Options.Public, p.Options.Enroll, p.Options.Attend, p.Options.Assignment, p.Options.Discount)
+		_, err = stmt.Exec(mapCourseID[courseID], i, title, longDesc, videoID, videoType, downloadURL)
 		must(err)
-		for i, c := range p.Contents {
-			var vt int
-			if len(p.Video) > 0 {
-				vt = model.Youtube
-			}
-			_, err = stmt3.Exec(id, i, c.Title, c.Description, c.Video, vt, c.DownloadURL)
-			must(err)
-		}
 	}
+	rows.Close()
+	stmt.Close()
 
 	log.Println("migrate payments")
-	stmt, err = db.Prepare(`
+	stmt, err = db2.Prepare(`
 		insert into payments
 			(user_id, course_id, image, price, original_price, code, status, created_at, updated_at, at)
 		values
-			($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);
+			($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 	`)
 	must(err)
-	for _, p := range payments {
-		c := findCourse(p.CourseID)
-		if c == nil {
-			log.Println("course not found")
-			continue
-		}
-		var status int
-		switch p.Status {
-		case statusWaiting:
-			status = model.Pending
-		case statusApproved:
-			status = model.Accepted
-		case statusRejected:
-			status = model.Rejected
-		}
-		_, err = stmt.Exec(p.UserID, c.newID, p.URL, p.Price, p.OriginalPrice, p.Code, status, p.CreatedAt, p.UpdatedAt, p.At)
+	rows, err = db1.Query(`
+		select user_id, course_id, image, price, original_price, code, status, created_at, updated_at, at
+		from payments
+	`)
+	must(err)
+	for rows.Next() {
+		var courseID int64
+		var userID, image, price, originalPrice, code, status, createdAt, updatedAt, at interface{}
+		err = rows.Scan(&userID, &courseID, &image, &price, &originalPrice, &code, &status, &createdAt, &updatedAt, &at)
+		must(err)
+		_, err = stmt.Exec(userID, mapCourseID[courseID], image, price, originalPrice, code, status, createdAt, updatedAt, at)
 		must(err)
 	}
+	rows.Close()
+	stmt.Close()
 
 	log.Println("migrate assignments")
-	stmt, err = db.Prepare(`
+	stmt, err = db2.Prepare(`
 		insert into assignments
 			(course_id, i, title, long_desc, open, created_at, updated_at)
 		values ($1, $2, $3, $4, $5, $6, $7)
 		returning id;
 	`)
 	must(err)
-	for _, p := range assignments {
-		c := findCourse(p.CourseID)
+	rows, err = db1.Query(`
+		select id, course_id, i, title, long_desc, open, created_at, updated_at
+		from assignments
+	`)
+	must(err)
+	mapAssignmentID := make(map[int64]string)
+	for rows.Next() {
 		var id int64
-		err = stmt.QueryRow(c.newID, c.assignmentOrder, p.Title, p.Description, p.Open, p.CreatedAt, p.UpdatedAt).Scan(&id)
-		c.assignmentOrder++
+		var courseID int64
+		var i, title, longDesc, open, createdAt, updatedAt interface{}
+		err = rows.Scan(&id, &courseID, &i, &title, &longDesc, &open, &createdAt, &updatedAt)
 		must(err)
-		p.newID = id
+		var newID string
+		err = stmt.QueryRow(mapCourseID[courseID], i, title, longDesc, open, createdAt, updatedAt).Scan(&newID)
+		must(err)
+		mapAssignmentID[id] = newID
 	}
+	rows.Close()
+	stmt.Close()
 
 	log.Println("migrate enroll")
-	stmt, err = db.Prepare(`
+	stmt, err = db2.Prepare(`
 		insert into enrolls
 			(user_id, course_id, created_at)
 		values
 			($1, $2, $3);
 	`)
 	must(err)
-	for _, p := range enrolls {
-		c := findCourse(p.CourseID)
-		_, err = stmt.Exec(p.UserID, c.newID, p.CreatedAt)
+	rows, err = db1.Query(`
+		select user_id, course_id, created_at
+		from enrolls
+	`)
+	must(err)
+	for rows.Next() {
+		var courseID int64
+		var userID, createdAt interface{}
+		err = rows.Scan(&userID, &courseID, &createdAt)
+		must(err)
+		_, err = stmt.Exec(userID, mapCourseID[courseID], createdAt)
 		must(err)
 	}
+	rows.Close()
+	stmt.Close()
 
 	log.Println("migrate attend")
-	stmt, err = db.Prepare(`
+	stmt, err = db2.Prepare(`
 		insert into attends
 			(user_id, course_id, created_at)
 		values
 			($1, $2, $3);
 	`)
 	must(err)
-	for _, p := range attends {
-		c := findCourse(p.CourseID)
-		_, err = stmt.Exec(p.UserID, c.newID, p.CreatedAt)
+	rows, err = db1.Query(`
+		select user_id, course_id, created_at
+		from attends
+	`)
+	must(err)
+	for rows.Next() {
+		var courseID int64
+		var userID, createdAt interface{}
+		err = rows.Scan(&userID, &courseID, &createdAt)
+		must(err)
+		_, err = stmt.Exec(userID, mapCourseID[courseID], createdAt)
 		must(err)
 	}
+	rows.Close()
+	stmt.Close()
 
 	log.Println("migrate user assignments")
-	stmt, err = db.Prepare(`
+	stmt, err = db2.Prepare(`
 		insert into user_assignments
 			(user_id, assignment_id, download_url, created_at)
 		values
 			($1, $2, $3, $4);
 	`)
 	must(err)
-	for _, p := range userAssignments {
-		c := findAssignment(p.AssignmentID)
-		_, err = stmt.Exec(p.UserID, c.newID, p.URL, p.CreatedAt)
+	rows, err = db1.Query(`
+		select user_id, assignment_id, download_url, created_at
+		from user_assignments
+	`)
+	must(err)
+	for rows.Next() {
+		var id int64
+		var userID, downloadURL, createdAt interface{}
+		err = rows.Scan(&userID, &id, &downloadURL, &createdAt)
+		must(err)
+		_, err = stmt.Exec(userID, mapAssignmentID[id], downloadURL, createdAt)
 		must(err)
 	}
+	rows.Close()
+	stmt.Close()
 }
 
 func must(err error) {
 	if err != nil {
-		// log.Fatal(err)
-		log.Println(err)
+		log.Fatal(err)
 	}
-}
-
-type userModel struct {
-	ds.StringIDModel
-	ds.StampModel
-	Username string
-	Name     string `datastore:",noindex"`
-	Photo    string `datastore:",noindex"`
-	AboutMe  string `datastore:",noindex"`
-}
-
-type roleModel struct {
-	ds.StringIDModel
-	ds.StampModel
-
-	// roles
-	Admin      bool
-	Instructor bool
-}
-
-type courseModel struct {
-	newID           int64
-	assignments     []string
-	assignmentOrder int
-
-	ds.StringIDModel
-	ds.StampModel
-	Title            string `datastore:",noindex"`
-	ShortDescription string `datastore:",noindex"`
-	Description      string `datastore:",noindex"` // Markdown
-	Photo            string `datastore:",noindex"` // URL
-	Owner            string
-	Start            time.Time
-	URL              string
-	Type             courseType
-	Video            string `datastore:",noindex"` // Cover Video
-	Price            float64
-	DiscountedPrice  float64
-	Options          courseOption
-	Contents         courseContents `datastore:",noindex"`
-	EnrollDetail     string         `datastore:",noindex"`
-}
-
-type courseModels []*courseModel
-
-type courseOption struct {
-	Public     bool
-	Enroll     bool `datastore:",noindex"`
-	Attend     bool `datastore:",noindex"`
-	Assignment bool `datastore:",noindex"`
-	Discount   bool
-}
-
-type courseContent struct {
-	Title       string `datastore:",noindex"`
-	Description string `datastore:",noindex"` // Markdown
-	Video       string `datastore:",noindex"` // Youtube ID
-	DownloadURL string `datastore:",noindex"` // Video download link
-}
-
-type courseContents []courseContent
-
-type courseType string
-
-// CourseType
-const (
-	CourseTypeLive  courseType = "live"
-	CourseTypeVideo courseType = "video"
-	CourseTypeEbook courseType = "ebook"
-)
-
-type paymentModel struct {
-	ds.StringIDModel
-	ds.StampModel
-	UserID        string
-	CourseID      string
-	OriginalPrice float64 `datastore:",noindex"`
-	Price         float64 `datastore:",noindex"`
-	Code          string
-	URL           string `datastore:",noindex"`
-	Status        status
-	At            time.Time
-}
-
-type status string
-
-const (
-	statusWaiting  status = "waiting"
-	statusApproved status = "approved"
-	statusRejected status = "rejected"
-)
-
-type attendModel struct {
-	ds.StringIDModel
-	ds.StampModel
-	UserID   string
-	CourseID string
-}
-
-type enrollModel struct {
-	ds.StringIDModel
-	ds.StampModel
-	UserID   string
-	CourseID string
-}
-
-type assignment struct {
-	newID int64
-
-	ds.StringIDModel
-	ds.StampModel
-	CourseID    string
-	Title       string `datastore:",noindex"`
-	Description string `datastore:",noindex"`
-	Open        bool   `datastore:",noindex"`
-}
-
-type userAssignment struct {
-	ds.StringIDModel
-	ds.StampModel
-	AssignmentID string
-	UserID       string
-	URL          string `datastore:",noindex"`
 }
