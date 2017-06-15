@@ -11,165 +11,155 @@ create table sessions (
 );
 
 create table users (
-  id string,
-  username string not null,
-  name string not null,
-  email string,
-  about_me string not null default '',
-  image string not null default '',
+  id varchar not null,
+  username varchar not null,
+  name varchar not null,
+  email varchar,
+  about_me varchar not null default '',
+  image varchar not null default '',
   created_at timestamp not null default now(),
   updated_at timestamp not null default now(),
-  primary key (id),
-  unique (username),
-  unique (email),
-  index (created_at),
-  index (updated_at)
+  primary key (id)
 );
+create unique index users_username_key on users (username);
+create unique index users_email_key on users (email);
+create index users_created_at_idx on users (created_at desc);
 
 create table roles (
-  user_id string,
+  user_id varchar,
   admin bool not null default false,
   instructor bool not null default false,
   created_at timestamp not null default now(),
   updated_at timestamp not null default now(),
   primary key (user_id),
-  foreign key (user_id) references users (id),
-  index (admin),
-  index (instructor),
-  index (created_at),
-  index (updated_at)
+  foreign key (user_id) references users (id)
 );
+create index roles_admin_idx on roles (admin);
+create index roles_instructor_idx on roles (instructor);
 
 create table courses (
-  id serial,
-  user_id string not null,
-  title string not null,
-  short_desc string not null,
-  long_desc string not null,
-  image string not null,
+  id bigserial,
+  user_id varchar not null,
+  title varchar not null,
+  short_desc varchar not null,
+  long_desc varchar not null,
+  image varchar not null,
   start timestamp default null,
-  url string default null,
+  url varchar default null,
   type int not null default 0,
   price decimal(9,2) not null default 0,
   discount decimal(9,2) default 0,
-  enroll_detail string not null default '',
+  enroll_detail varchar not null default '',
   created_at timestamp not null default now(),
   updated_at timestamp not null default now(),
   primary key (id),
-  foreign key (user_id) references users (id),
-  unique (url),
-  index (created_at),
-  index (updated_at),
-  index (title),
-  index (start),
-  index (type),
-  index (price)
+  foreign key (user_id) references users (id)
 );
+create unique index courses_url_key on courses (url);
+create index courses_created_at_idx on courses (created_at desc);
+create index courses_updated_at_idx on courses (updated_at desc);
 
 create table course_options (
-  course_id int,
+  course_id bigint,
   public bool not null default false,
   enroll bool not null default false,
   attend bool not null default false,
   assignment bool not null default false,
   discount bool not null default false,
   primary key (course_id),
-  foreign key (course_id) references courses (id),
-  index (public),
-  index (enroll),
-  index (public, enroll),
-  index (public, discount),
-  index (public, discount, enroll)
+  foreign key (course_id) references courses (id)
 );
+create index course_options_public_idx on course_options (public);
+create index course_options_enroll_idx on course_options (enroll);
+create index course_options_public_enroll_idx on course_options (public, enroll);
+create index course_options_public_discount_idx on course_options (public, discount);
+create index course_options_public_discount_enroll_idx on course_options (public, discount, enroll);
 
 create table course_contents (
-  id serial,
-  course_id int not null,
+  id bigserial,
+  course_id bigint not null,
   i int not null default 0,
-  title string not null default '',
-  long_desc string not null default '',
-  video_id string not null default '',
+  title varchar not null default '',
+  long_desc varchar not null default '',
+  video_id varchar not null default '',
   video_type int not null default 0,
-  download_url string not null default '',
+  download_url varchar not null default '',
   created_at timestamp not null default now(),
   updated_at timestamp not null default now(),
   primary key (id),
-  foreign key (course_id) references courses (id),
-  index (course_id, i)
+  foreign key (course_id) references courses (id)
 );
+create index course_contents_course_id_i_idx on course_contents (course_id, i);
 
 create table assignments (
-  id serial,
-  course_id int not null,
+  id bigserial,
+  course_id bigint not null,
   i int not null,
-  title string not null,
-  long_desc string not null,
+  title varchar not null,
+  long_desc varchar not null,
   open bool not null default false,
   created_at timestamp not null default now(),
   updated_at timestamp not null default now(),
   primary key (id),
-  foreign key (course_id) references courses (id),
-  index (course_id, i)
+  foreign key (course_id) references courses (id)
 );
+create index assignments_course_id_idx on assignments (course_id, i);
 
 create table user_assignments (
-  id serial,
-  user_id string not null,
-  assignment_id int not null,
-  download_url string not null,
+  id bigserial,
+  user_id varchar not null,
+  assignment_id bigint not null,
+  download_url varchar not null,
   created_at timestamp not null default now(),
   primary key (id),
   foreign key (user_id) references users (id),
-  foreign key (assignment_id) references assignments (id),
-  index (created_at)
+  foreign key (assignment_id) references assignments (id)
 );
+create index user_assignments_created_at_idx on user_assignments (created_at);
 
 create table enrolls (
-  user_id string,
-  course_id int not null,
+  user_id varchar,
+  course_id bigint not null,
   created_at timestamp not null default now(),
   primary key (user_id, course_id),
   foreign key (user_id) references users (id),
-  foreign key (course_id) references courses (id),
-  index (created_at),
-  index (user_id, created_at),
-  index (course_id, created_at)
+  foreign key (course_id) references courses (id)
 );
+create index enrolls_created_at_idx on enrolls (created_at);
+create index enrolls_user_id_created_at_idx on enrolls (user_id, created_at);
+create index enrolls_course_id_created_at_idx on enrolls (course_id, created_at);
 
 create table attends (
-  id serial,
-  user_id string not null,
-  course_id int not null,
+  id bigserial,
+  user_id varchar not null,
+  course_id bigint not null,
   created_at timestamp not null default now(),
   primary key (id),
   foreign key (user_id) references users (id),
-  foreign key (course_id) references courses (id),
-  index (created_at),
-  index (user_id, created_at),
-  index (course_id, created_at),
-  index (user_id, course_id, created_at)
+  foreign key (course_id) references courses (id)
 );
+create index attends_created_at_idx on attends (created_at);
+create index attends_user_id_created_at_idx on attends (user_id, created_at);
+create index attends_course_id_created_at_idx on attends (course_id, created_at);
+create index attends_user_id_course_id_created_at_idx on attends (user_id, course_id, created_at);
 
 create table payments (
-  id serial,
-  user_id string not null,
-  course_id int not null,
-  image string not null,
+  id bigserial,
+  user_id varchar not null,
+  course_id bigint not null,
+  image varchar not null,
   price decimal(9, 2) not null,
   original_price decimal(9, 2) not null,
-  code string not null,
+  code varchar not null,
   status int not null,
   created_at timestamp not null default now(),
   updated_at timestamp not null default now(),
   at timestamp default null,
   primary key (id),
   foreign key (user_id) references users (id),
-  foreign key (course_id) references courses (id),
-  index (created_at),
-  index (updated_at),
-  index (code),
-  index (course_id, code),
-  index (status, created_at),
-  index (status, updated_at),
-  index (at)
+  foreign key (course_id) references courses (id)
 );
+create index payments_created_at_idx on payments (created_at desc);
+create index payments_code_idx on payments (code);
+create index payments_course_id_code_idx on payments (course_id, code);
+create index payments_status_created_at on payments (status, created_at desc);
