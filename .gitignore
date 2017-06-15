@@ -2,7 +2,6 @@
 config/service_account
 config/email_user
 config/email_password
-config/redis_addr
 node_modules/
 static/style.*.css
 private/
