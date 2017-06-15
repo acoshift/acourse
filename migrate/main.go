@@ -11,9 +11,9 @@ import (
 func main() {
 	time.Local = time.UTC
 
-	db1, err := sql.Open("postgres", "postgresql://acourse_dev@db-0.cluster.acoshift.com:26257/acourse_dev?sslmode=verify-full&sslcert=private%2Fclient.crt&sslkey=private%2Fclient.key&sslrootcert=private%2Fca.crt")
+	db1, err := sql.Open("postgres", "postgresql://acourse@db-0.cluster.acoshift.com:26257/acourse?sslmode=verify-full&sslcert=private%2Fclient.crt&sslkey=private%2Fclient.key&sslrootcert=private%2Fca.crt")
 	must(err)
-	db2, err := sql.Open("postgres", "")
+	db2, err := sql.Open("postgres", "postgresql://acourse@db-1.cluster.acoshift.com/acourse?sslmode=verify-full&sslcert=private2%2Fclient.crt&sslkey=private2%2Fclient.key&sslrootcert=private2%2Fca.crt")
 	must(err)
 
 	_, err = db2.Exec("delete from payments")
