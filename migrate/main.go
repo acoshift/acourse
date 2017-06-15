@@ -28,6 +28,8 @@ func main() {
 	must(err)
 	_, err = db2.Exec("delete from course_options")
 	must(err)
+	_, err = db2.Exec("delete from attends")
+	must(err)
 	_, err = db2.Exec("delete from courses")
 	must(err)
 	_, err = db2.Exec("delete from roles")
