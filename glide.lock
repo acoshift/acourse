@@ -1,16 +1,12 @@
 hash: 02f6b7ef054bae8700ff06d198b64cfcaaab9cff056d2dfedfeda7757b9cf307
-updated: 2017-06-06T20:00:19.188634555+07:00
+updated: 2017-06-15T20:19:17.164654893+07:00
 imports:
 - name: cloud.google.com/go
   version: 2e6a95edb1071d750f6d7db777bf66cd2997af6c
   subpackages:
   - compute/metadata
-  - datastore
   - internal
-  - internal/atomiccache
-  - internal/fields
   - internal/optional
-  - internal/version
   - storage
 - name: github.com/acoshift/configfile
   version: 20948b48ba598ef88b3b5326aad0374d9b61aa7d
@@ -34,7 +30,7 @@ imports:
 - name: github.com/asaskevich/govalidator
   version: aa5cce4a76edb1a5acecab1870c17abbffb5419e
 - name: github.com/dgrijalva/jwt-go
-  version: 6c8dedd55f8a2e41f605de6d5d66e51ed1f299fc
+  version: a539ee1a749a2b895533f979515ac7e6e0f5b650
 - name: github.com/disintegration/imaging
   version: ac27d1805a555e1754fa177216ee07f4e63c30b5
 - name: github.com/dustin/go-humanize
@@ -48,10 +44,6 @@ imports:
   version: 18c9bb3261723cd5401db4d0c9fbc5c3b6c70fe8
   subpackages:
   - proto
-  - protoc-gen-go/descriptor
-  - ptypes/struct
-  - ptypes/timestamp
-  - ptypes/wrappers
 - name: github.com/google/uuid
   version: 064e2069ce9c359c118179501254f67d7d37ba24
 - name: github.com/googleapis/gax-go
@@ -63,7 +55,7 @@ imports:
 - name: github.com/microcosm-cc/bluemonday
   version: e79763773ab6222ca1d5a7cbd9d62d83c1f77081
 - name: github.com/russross/blackfriday
-  version: 0ba0f2b6ed7c475a92e4df8641825cb7a11d1fa3
+  version: 067529f716f4c3f5e37c8c95ddd59df1007290ae
 - name: github.com/tdewolff/buffer
   version: df6253e2a2cda5aba1b5d0c59fc5bdf0a98ae192
 - name: github.com/tdewolff/minify
@@ -141,12 +133,6 @@ imports:
   - internal/urlfetch
   - socket
   - urlfetch
-- name: google.golang.org/genproto
-  version: aa2eb687b4d3e17154372564ad8d6bf11c3cf21f
-  subpackages:
-  - googleapis/api/annotations
-  - googleapis/datastore/v1
-  - googleapis/type/latlng
 - name: google.golang.org/grpc
   version: 708a7f9f3283aa2d4f6132d287d78683babe55c8
   subpackages:
