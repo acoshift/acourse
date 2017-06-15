@@ -720,15 +720,22 @@ func editorContentCreate(w http.ResponseWriter, r *http.Request) {
 		defer tx.Rollback()
 
 		// get content index
-		tx.QueryRow(`
+		err = tx.QueryRow(`
 			select i from course_contents where course_id = $1 order by i desc limit 1
 		`, id).Scan(&i)
-		tx.Exec(`
+		if err == sql.ErrNoRows {
+			i = -1
+		}
+		_, err = tx.Exec(`
 			insert into course_contents
 				(course_id, i, title, long_desc, video_id, video_type)
 			values
 				($1, $2, $3, $4, $5, $6)
-		`, id, i, title, desc, videoID, model.Youtube)
+		`, id, i+1, title, desc, videoID, model.Youtube)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 		err = tx.Commit()
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
