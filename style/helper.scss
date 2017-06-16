@@ -229,15 +229,19 @@
   Font
 ===============================*/
 ._font-main {
-  font-family: "Source Sans Pro", sans-serif;
+  font-family: $main-fontface;
 }
 
 ._font-sub {
-  font-family: "Open Sans", san-serif;
+  font-family: $secondary-fontface;
 }
 
 ._font-bold {
   font-weight: 700 !important;
+}
+
+._font-regular {
+  font-weight: 400 !important;
 }
 
 ._font-thin {
@@ -245,28 +249,28 @@
 }
 
 ._font-size-small {
-  font-size: 13px;
-  line-height: 21px;
+  font-size: 13px !important;
+  line-height: 21px !important;
 }
 
 ._font-size-normal {
-  font-size: 15px;
-  line-height: 22px;
+  font-size: 15px !important;
+  line-height: 22px !important;
 }
 
 ._font-size-big {
-  font-size: 17px;
-  line-height: 24px;
+  font-size: 17px !important;
+  line-height: 24px !important;
 }
 
 ._font-size-bigger {
-  font-size: 24px;
-  line-height: 28px;
+  font-size: 24px !important;
+  line-height: 28px !important;
 }
 
 ._font-size-biggest {
-  font-size: 32px;
-  line-height: 38px;
+  font-size: 32px !important;
+  line-height: 38px !important;
 }
 
 /*===============================

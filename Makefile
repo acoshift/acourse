@@ -12,10 +12,12 @@ default:
 dev:
 	go run -tags dev cmd/acourse/main.go
 
-stag:
+deploy: cluster patch
+
+stag: cluster
 	TAG=-dev make patch
 
-deploy: clean style build docker cluster patch
+# deploy: clean style build docker cluster patch
 
 .PHONY: style
 style:
