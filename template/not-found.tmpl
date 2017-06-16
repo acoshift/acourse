@@ -1,9 +1,17 @@
 {{define "app-body"}}
-  Not Found :D
+<div id="not-found">
+  Not Found
+</div>
 {{end}}
 
 {{define "app-script"}}
 {{end}}
 
 {{define "app-style"}}
+<style>
+  #not-found {
+    padding-top: 32px;
+    min-height: calc(100vh - 236px);
+  }
+</style>
 {{end}}
