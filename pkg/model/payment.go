@@ -10,9 +10,9 @@ import (
 
 // Payment model
 type Payment struct {
-	ID            int64
+	ID            string
 	UserID        string
-	CourseID      int64
+	CourseID      string
 	Image         string
 	Price         float64
 	OriginalPrice float64
@@ -101,7 +101,7 @@ func CreatePayment(tx *sql.Tx, x *Payment) error {
 
 // Accept accepts a payment and create new enroll
 func (x *Payment) Accept() error {
-	if x.ID <= 0 {
+	if len(x.ID) == 0 {
 		return fmt.Errorf("payment must be save before accept")
 	}
 	tx, err := db.Begin()
@@ -133,7 +133,7 @@ func (x *Payment) Accept() error {
 
 // Reject rejects a payment
 func (x *Payment) Reject() error {
-	if x.ID <= 0 {
+	if len(x.ID) == 0 {
 		return fmt.Errorf("payment must be save before accept")
 	}
 	_, err := db.Exec(`
@@ -165,7 +165,7 @@ func scanPayment(scan scanFunc, x *Payment) error {
 }
 
 // GetPayments gets payments
-func GetPayments(paymentIDs []int64) ([]*Payment, error) {
+func GetPayments(paymentIDs []string) ([]*Payment, error) {
 	xs := make([]*Payment, 0, len(paymentIDs))
 	rows, err := db.Query(queryGetPayments, pq.Array(paymentIDs))
 	if err != nil {
@@ -187,7 +187,7 @@ func GetPayments(paymentIDs []int64) ([]*Payment, error) {
 }
 
 // GetPayment gets payment from given id
-func GetPayment(paymentID int64) (*Payment, error) {
+func GetPayment(paymentID string) (*Payment, error) {
 	var x Payment
 	err := scanPayment(db.QueryRow(queryGetPayment, paymentID).Scan, &x)
 	if err != nil {
@@ -197,7 +197,7 @@ func GetPayment(paymentID int64) (*Payment, error) {
 }
 
 // HasPendingPayment returns ture if given user has pending payment for given course
-func HasPendingPayment(userID string, courseID int64) (bool, error) {
+func HasPendingPayment(userID string, courseID string) (bool, error) {
 	var p int
 	err := db.QueryRow(`
 		select 1 from payments

@@ -3,7 +3,7 @@ package model
 import "database/sql"
 
 // Enroll an user to a course
-func Enroll(tx *sql.Tx, userID string, courseID int64) error {
+func Enroll(tx *sql.Tx, userID string, courseID string) error {
 	_, err := tx.Exec(`
 		insert into enrolls
 			(user_id, course_id)
@@ -17,7 +17,7 @@ func Enroll(tx *sql.Tx, userID string, courseID int64) error {
 }
 
 // IsEnrolled returns true if user enrolled a given course
-func IsEnrolled(userID string, courseID int64) (bool, error) {
+func IsEnrolled(userID string, courseID string) (bool, error) {
 	var p int
 	err := db.QueryRow(`select 1 from enrolls where user_id = $1 and course_id = $2`, userID, courseID).Scan(&p)
 	if err == sql.ErrNoRows {

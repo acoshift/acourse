@@ -80,11 +80,7 @@ func adminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter func(i
 func postAdminPendingPayment(w http.ResponseWriter, r *http.Request) {
 	action := r.FormValue("Action")
 
-	id, err := strconv.ParseInt(r.FormValue("ID"), 10, 64)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	id := r.FormValue("ID")
 	if action == "accept" {
 		x, err := model.GetPayment(id)
 		if err != nil {
@@ -113,7 +109,7 @@ func postAdminPendingPayment(w http.ResponseWriter, r *http.Request) {
 <br>
 อีเมล์ฉบับนี้ยืนยันว่าท่านได้รับการอนุมัติการชำระเงินสำหรับหลักสูตร "%s" เสร็จสิ้น ท่านสามารถทำการ login เข้าสู่ Website Acourse แล้วเข้าเรียนหลักสูตร "%s" ได้ทันที<br>
 <br>
-รหัสการชำระเงิน: %d<br>
+รหัสการชำระเงิน: %s<br>
 ชื่อหลักสูตร: %s<br>
 จำนวนเงิน: %.2f บาท<br>
 เวลาที่ทำการชำระเงิน: %s<br>

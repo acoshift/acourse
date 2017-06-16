@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"net/url"
 	"runtime/debug"
-	"strconv"
 	"time"
 
 	"github.com/acoshift/acourse/pkg/appctx"
@@ -14,33 +13,12 @@ import (
 	"github.com/acoshift/middleware"
 	"github.com/acoshift/session"
 	redisstore "github.com/acoshift/session/store/redis"
-	sqlstore "github.com/acoshift/session/store/sql"
 	"github.com/garyburd/redigo/redis"
 	"golang.org/x/net/xsrftoken"
 )
 
 // Middleware wraps handlers with app's middleware
 func Middleware(h http.Handler) http.Handler {
-	var sessionStore session.Store
-	if len(redisAddr) > 0 {
-		sessionStore = redisstore.New(redisstore.Config{
-			Prefix: "acourse:",
-			Pool: &redis.Pool{
-				MaxIdle:     20,
-				IdleTimeout: 10 * time.Minute,
-				Dial: func() (redis.Conn, error) {
-					return redis.Dial("tcp", redisAddr, redis.DialDatabase(redisDB), redis.DialPassword(redisPass))
-				},
-			},
-		})
-	} else {
-		sessionStore = sqlstore.New(sqlstore.Config{
-			DB:              db,
-			Table:           "sessions",
-			CleanupInterval: 8 * time.Hour,
-		})
-	}
-
 	return middleware.Chain(
 		recovery,
 		session.Middleware(session.Config{
@@ -50,7 +28,16 @@ func Middleware(h http.Handler) http.Handler {
 			MaxAge:   10 * 24 * time.Hour,
 			HTTPOnly: true,
 			Secure:   session.PreferSecure,
-			Store:    sessionStore,
+			Store: redisstore.New(redisstore.Config{
+				Prefix: "acourse:",
+				Pool: &redis.Pool{
+					MaxIdle:     20,
+					IdleTimeout: 10 * time.Minute,
+					Dial: func() (redis.Conn, error) {
+						return redis.Dial("tcp", redisAddr, redis.DialDatabase(redisDB), redis.DialPassword(redisPass))
+					},
+				},
+			}),
 		}),
 		flash.Middleware(),
 		fetchUser,
@@ -182,7 +169,7 @@ func isCourseOwner(h http.Handler) http.Handler {
 			return
 		}
 
-		id, _ := strconv.ParseInt(r.FormValue("id"), 10, 64)
+		id := r.FormValue("id")
 
 		var ownerID string
 		err := db.QueryRow(`select user_id from courses where id = $1`, id).Scan(&ownerID)
