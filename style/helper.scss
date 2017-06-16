@@ -229,11 +229,11 @@
   Font
 ===============================*/
 ._font-main {
-  font-family: "Source Sans Pro", sans-serif;
+  font-family: $main-fontface;
 }
 
 ._font-sub {
-  font-family: "Open Sans", san-serif;
+  font-family: $secondary-fontface;
 }
 
 ._font-bold {

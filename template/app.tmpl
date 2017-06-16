@@ -5,7 +5,7 @@
       <a href="/" class="_flex-row _cross-center">
         <img class="logo" src="https://storage.googleapis.com/acourse/static/16e99da4-5af9-47e9-880c-babd8d6ba8cc.svg" height="45">
       </a>
-      <div class="_flex-row _cross-center _main-end _flex-span">
+      <div class="_flex-row _cross-center _main-end">
       {{if .Me}}
         <div class="dropdown _full-height">
           <div class="dropbtn _full-height _flex-row _cross-center ">
@@ -30,8 +30,15 @@
           </div>
         </div>
       {{else}}
-        <a class="link _flex-row _cross-center _font-sub" href="/signin">Sign In</a>
-        <a href="/signup"><div class="acourse-button -primary _font-sub">Register</div></a>
+        <a class="link _flex-row _cross-center _font-sub" href="/signin">
+          Sign In
+        </a>
+        <a href="/signup">
+          <div class="acourse-button -primary _font-sub acourse-side-space">Register</div>
+        </a>
+        <a href="https://startupcto.typeform.com/to/qd1Utf" target="blank">
+          <div class="acourse-button -negative _font-sub">Become an Instructor </div>
+        </a>
       {{end}}
       </div>
     </div>
