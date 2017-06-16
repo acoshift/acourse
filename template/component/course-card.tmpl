@@ -19,11 +19,11 @@
         <div class="course-student _color-dark">
           <i class="fa fa-user"></i>&nbsp {{.EnrollCount}}
         </div>
-        <div class="course-price">
+        <div class="course-price _flex-row _cross-end">
           {{if le .Price 0.0}}
             <p class="_font-bold _no-margin">FREE</p>
           {{else}}
-            <p class="_no-margin {{if .Option.Discount}}discount _font-thin _color-dark{{else}}_font-bold{{end}}">
+            <p class="_no-margin {{if .Option.Discount}}discount _color-positive{{else}}_font-bold{{end}}">
               ฿ {{.Price | currency}}
               {{if .Option.Discount}}
                 <p class="_font-bold _no-margin">&nbsp฿ {{.Discount | currency}}</p>
@@ -65,7 +65,7 @@
 
   #course-card .course-price .discount {
     text-decoration: line-through;
-    font-weight: 100;
+    font-weight: 400;
     font-size: 13px;
   }
 
