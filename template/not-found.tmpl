@@ -1,6 +1,11 @@
 {{define "app-body"}}
 <div id="not-found">
-  Not Found
+  <div class="grid-container">
+    <div class="text-not-found _flex-column _cross-center _full-width">
+      <div><span class="_color-main">404</span> <span>OH NO!!!</span></div>
+      <span>CHICKEN NOT FOUND</span>
+    </div>
+  </div>
 </div>
 {{end}}
 
@@ -11,7 +16,15 @@
 <style>
   #not-found {
     padding-top: 32px;
-    min-height: calc(100vh - 236px);
+    min-height: calc(100vh - 311px);
+  }
+  .text-not-found {
+    font-size: 80px
+  }
+  @media only screen and (max-width: 767px) {
+    .text-not-found {
+      font-size: 32px
+    }
   }
 </style>
 {{end}}
