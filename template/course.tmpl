@@ -62,7 +62,7 @@
                         {{if le .Course.Price 0.0}}
                           <p class="_font-bold _font-size-bigger _no-margin">FREE</p>
                         {{else}}
-                          <p class="_font-main _no-margin {{if .Course.Option.Discount}}discount _color-dark{{else}} _font-size-bigger{{end}}">
+                          <p class="_font-main _no-margin {{if .Course.Option.Discount}}discount _color-positive _font-size-big{{else}} _font-size-bigger{{end}}">
                             ฿{{.Course.Price | currency}}
                           </p>
                           {{if .Course.Option.Discount}}
