@@ -79,7 +79,7 @@ func fileHandler(name string) http.Handler {
 
 func index(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
-		http.NotFound(w, r)
+		view.NotFound(w, r)
 		return
 	}
 	courses, err := model.ListPublicCourses()
