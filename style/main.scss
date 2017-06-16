@@ -207,34 +207,6 @@ button {
   display: block;
 }
 
-footer {
-  position: relative;
-  z-index: 2;
-  padding: 48px 32px;
-  backface-visibility: hidden;
-  background-color: #292d35;
-  color: #777777;
-}
-
-footer>div:first-child {
-  text-align: left;
-}
-
-footer>div:last-child {
-  text-align: right;
-}
-
-@media only screen and (max-width: 767px) {
-  footer>div {
-    text-align: center !important;
-  }
-
-  footer>div:first-child {
-    text-align: left;
-    margin-bottom: 8px;
-  }
-}
-
 .pulse {
   animation: pound .35s infinite alternate;
   -webkit-animation: pound .35s infinite alternate
