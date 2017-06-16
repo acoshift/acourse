@@ -13,6 +13,7 @@ import (
 
 type (
 	keyIndex               struct{}
+	keyNotFound            struct{}
 	keySignIn              struct{}
 	keySignUp              struct{}
 	keyProfile             struct{}
@@ -66,6 +67,15 @@ func Index(w http.ResponseWriter, r *http.Request, courses []*model.Course) {
 		Courses []*model.Course
 	}{newPage(ctx), courses}
 	render(ctx, w, keyIndex{}, &data)
+}
+
+// NotFound renders not found view
+func NotFound(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	data := struct {
+		*Page
+	}{newPage(ctx)}
+	render(ctx, w, keyNotFound{}, &data)
 }
 
 // SignIn renders signin view
