@@ -5,7 +5,7 @@
     <div class="acourse-card acourse-segment acourse-block-bigger col-xs-12 col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3">
 
       <div class="acourse-header _color-main _align-center">
-        Edit Profile
+        แก้ไขโปรไฟล์
       </div>
 
       <form method="POST" enctype="multipart/form-data">
@@ -14,28 +14,28 @@
           <img id="avatar" class="acourse-circle -large _img-cover" src="{{.Me.Image}}" onerror="this.src = 'https://storage.googleapis.com/acourse/static/d509b7d8-88ad-478c-aa40-2984878c87cd.svg'">
         </div>
         <div class="input-field _flex-column">
-          <label>Image</label>
+          <label>รูปของคุณ</label>
           <div class="_flex-row">
-            <label class="acourse-button -info _font-sub" for="image-input">Upload Avatar</label>
+            <label class="acourse-button -info _font-sub" for="image-input">อัพโหลดรูปของคุณ</label>
             <input id="image-input" class="_hide" name="Image" type="file" accept="image/*">
           </div>
         </div>
         <div class="input-field _flex-column">
-          <label>Username</label>
+          <label>ชื่อผู้ใช้</label>
           <input class="acourse-input" name="Username" value="{{.Flash.Get "Username"}}">
         </div>
         <div class="input-field _flex-column">
-          <label>Name</label>
-          <input class="acourse-input" name="Name" value="{{.Flash.Get "Name"}}">
+          <label>ชื่อของคุณ</label>
+          <input class="acourse-input" name="Name" value="{{.Flash.Get "Name"}}" placeholder="ชื่อของคุณ">
         </div>
         <div class="input-field _flex-column">
-          <label>About Me</label>
-          <input class="acourse-input" name="AboutMe" value="{{.Flash.Get "AboutMe"}}">
+          <label>เกี่ยวกับคุณ</label>
+          <input class="acourse-input" name="AboutMe" value="{{.Flash.Get "AboutMe"}}" placeholder="เขียนเกี่ยวกับคุณสั้นๆ">
         </div>
 
         <div class="acourse-block-big _flex-row _main-center">
           <button class="acourse-button -primary _font-sub _full-width" type="submit">
-            Save Profile
+            บันทึกโปรไฟล์
           </button>
         </div>
 
@@ -51,7 +51,7 @@
 
       </form>
       <div class="_flex-row _main-center">
-        <a class="_color-sub" href="/profile">View Profile</a>
+        <a class="_color-sub" href="/profile">ดูโปรไฟล์</a>
       </div>
     </div>
   </div>

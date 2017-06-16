@@ -11,7 +11,7 @@
         <div class="acourse-segment">
           <div class="acourse-block">
             <div class="acourse-header _color-sub">{{.Content.Title}}</div>
-            <span class="_font-bold _color-dark">Course: </span>
+            <span class="_font-bold _color-dark">คอร์ส: </span>
             <a href="/course/{{.Course.Link}}" class="acourse-link">{{.Course.Title}}</a>
           </div>
         </div>
@@ -32,7 +32,7 @@
                 {{if .Content.Desc}}
                   <div class="acourse-segment">
                     <div class="acourse-segment _bg-color-base-2">
-                    <h4>Detail</h4>
+                    <h4>รายละเอียดคอร์ส</h4>
                     {{.Content.Desc | markdown}}
                     </div>
                   </div>
@@ -46,7 +46,7 @@
               </div>
               <div class="playlist-list">
               {{range $i, $x := .Course.Contents}}
-                <a href="/course/{{$.Course.Link}}/content?p={{$i}}" class="">
+                <a href="/course/{{$.Course.Link}}/content?p={{$i}}">
                   <div class="list {{if eq $x.ID $.Content.ID}}active{{end}}">
                     {{incr $i}}. {{$x.Title}}
                   </div>
@@ -60,11 +60,11 @@
         {{else}}
         <div class="acourse-segment">
           <div class="acourse-message -error acourse-segment _no-margin">
-            There is no content to display in this course. <br>
+            ยังไม่มีคอนเทนท์ที่จะแสดงในคอร์สนี้ <br>
           </div>
         </div>
         <div class="acourse-block-bigger _flex-row _main-center">
-           Back to course <a href="/course/{{.Course.Link}}" class="_color-sub">&nbsp;{{.Course.Title}}</a>
+           กลับไปที่คอร์ส <a href="/course/{{.Course.Link}}" class="_color-sub">&nbsp;{{.Course.Title}}</a>
         </div>
         {{end}}
       </div>

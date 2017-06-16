@@ -16,7 +16,7 @@
               </div>
 
               <div class="acourse-block-big _flex-row _cross-center">
-                <p class="_no-margin">share on &nbsp;</p>
+                <p class="_no-margin">แชร์บน &nbsp;</p>
                 <a
                   href="https://www.facebook.com/sharer/sharer.php?u=http%3A//acourse.io/course/{{.Course.Link}}"
                   target="_blank"
@@ -40,13 +40,13 @@
               {{if eq .Course.Type live}}
                 {{if not .Course.Start.Time.IsZero}}
                 <div class="acourse-block-bigger">
-                  <div class="acourse-label -red _font-bold">Start At: {{.Course.Start.Time | date}}</div>
+                  <div class="acourse-label -red _font-bold">เริ่มสอน: {{.Course.Start.Time | date}}</div>
                 </div>
                 {{end}}
               {{end}}
 
               <div class="acourse-block">
-                <h2 class="acourse-block">Course Detail</h2>
+                <h2 class="acourse-block">รายละเอียดคอร์ส</h2>
                 <div class="course-detail _pre-wrap _font-sub">
                   {{.Course.Desc | markdown}}
                 </div>
@@ -60,7 +60,7 @@
                     {{if not .Enrolled}}
                       <div class="acourse-block _flex-row _main-end _cross-end">
                         {{if le .Course.Price 0.0}}
-                          <p class="_font-bold _font-size-bigger _no-margin">FREE</p>
+                          <p class="_font-bold _font-size-bigger _no-margin">ฟรี</p>
                         {{else}}
                           <p class="_font-main _no-margin {{if .Course.Option.Discount}}discount _color-dark{{else}} _font-size-bigger{{end}}">
                             ฿{{.Course.Price | currency}}
@@ -78,14 +78,14 @@
                   {{if .Enrolled}}
                   <div class="acourse-block-big">
                     <a href="/course/{{.Course.Link}}/content">
-                      <button class="acourse-button -positive _font-sub _full-width acourse-block">Start Learning</button>
+                      <button class="acourse-button -positive _font-sub _full-width acourse-block">เริ่มเรียน</button>
                     </a>
                     <!--<a href="/">
                       <button class="acourse-button -primary _font-sub _full-width acourse-block">Attend</button>
                     </a>-->
                     {{if .Course.Option.Assignment}}
                       <a href="/course/{{.Course.Link}}/assignment">
-                        <button class="acourse-button -primary _font-sub _full-width acourse-block">Assignment</button>
+                        <button class="acourse-button -primary _font-sub _full-width acourse-block">การบ้าน</button>
                       </a>
                     {{end}}
                   </div>
@@ -93,14 +93,14 @@
 
                   {{if .PendingEnroll}}
                   <div class="acourse-block-big">
-                    <button class="acourse-button -disable _font-sub _full-width acourse-block disabled">Pending Enroll</button>
+                    <button class="acourse-button -disable _font-sub _full-width acourse-block disabled">กำลังตรวจสอบ</button>
                   </div>
                   {{else}}
                     {{if .Course.Option.Enroll}}
                       {{if and (not .Owned) (not .Enrolled)}}
                       <div class="acourse-block-big">
                         <a href="/course/{{.Course.Link}}/enroll">
-                          <button class="acourse-button -positive _font-sub _full-width acourse-block">Enroll Now</button>
+                          <button class="acourse-button -positive _font-sub _full-width acourse-block">สมัครเรียน</button>
                         </a>
                       </div>
                       {{end}}
@@ -110,19 +110,19 @@
                   {{if .Owned}}
                   <div class="acourse-block-big">
                     <a href="/course/{{.Course.Link}}/content">
-                      <button class="acourse-button -positive _font-sub _full-width acourse-block">Start Learning</button>
+                      <button class="acourse-button -positive _font-sub _full-width acourse-block">เริ่มเรียน</button>
                     </a>
                     <a href="/editor/course?id={{.Course.ID}}">
-                      <button class="acourse-button -primary _font-sub _full-width acourse-block">Edit Course</button>
+                      <button class="acourse-button -primary _font-sub _full-width acourse-block">แก้ไขคอร์ส</button>
                     </a>
                     <a href="/editor/content?id={{.Course.ID}}">
-                      <button class="acourse-button -primary _font-sub _full-width acourse-block">Edit Content</button>
+                      <button class="acourse-button -primary _font-sub _full-width acourse-block">แก้ไขคอนเทนท์</button>
                     </a>
                   </div>
                   {{end}}
 
                   <div>
-                    <h3>Instructor</h3>
+                    <h3>รายละเอียดผู้สอน</h3>
                     <div class="_flex-column _cross-center _font-sub">
                       <img
                         class="acourse-block acourse-circle _img-cover"

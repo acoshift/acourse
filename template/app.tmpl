@@ -18,26 +18,26 @@
           </div>
           <div class="dropdown-content-w">
             <div class="dropdown-content">
-              <a class="_font-main _font-bold _font-size-big {{if eq templateName "profile"}} active{{end}}" href="/profile">Profile</a>
+              <a class="_font-main _font-bold _font-size-big {{if eq templateName "profile"}} active{{end}}" href="/profile">โปรไฟล์</a>
               {{if .Me.Role.Admin.Bool}}
-              <a class="_font-main _font-bold _font-size-big {{if eq templateName "admin/users"}} active{{end}}" href="/admin/users">Users</a>
-              <a class="_font-main _font-bold _font-size-big {{if eq templateName "admin/courses"}} active{{end}}" href="/admin/courses">Courses</a>
+              <a class="_font-main _font-bold _font-size-big {{if eq templateName "admin/users"}} active{{end}}" href="/admin/users">รายชื่อผู้ใช้</a>
+              <a class="_font-main _font-bold _font-size-big {{if eq templateName "admin/courses"}} active{{end}}" href="/admin/courses">รายชื่อคอร์ส</a>
               <a class="_font-main _font-bold _font-size-big" href="/admin/payments/pending">Pending Payments</a>
               <a class="_font-main _font-bold _font-size-big" href="/admin/payments/history">History Payments</a>
               {{end}}
-              <a class="_font-main _font-bold _font-size-big" href="/signout">Sign Out</a>
+              <a class="_font-main _font-bold _font-size-big" href="/signout">ออกจากระบบ</a>
             </div>
           </div>
         </div>
       {{else}}
         <a class="link _flex-row _cross-center _font-sub" href="/signin">
-          Sign In
+          เข้าสู่ระบบ
         </a>
         <a href="/signup">
-          <div class="acourse-button -primary _font-sub acourse-side-space">Register</div>
+          <div class="acourse-button -primary _font-sub acourse-side-space">สมัครใช้งาน</div>
         </a>
-        <a href="https://startupcto.typeform.com/to/qd1Utf" target="_blank">
-          <div class="acourse-button -negative _font-sub">Become an Instructor </div>
+        <a href="https://startupcto.typeform.com/to/qd1Utf" target="blank">
+          <div class="acourse-button -negative _font-sub">สมัครเป็นผู้สอน</div>
         </a>
       {{end}}
       </div>

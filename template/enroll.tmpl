@@ -3,9 +3,9 @@
   <div class="grid-container _flex-column">
 
     <div class="acourse-header _color-sub">
-        Enroll Course<br>
+        สมัครเรียน<br>
         <div class="_font-size-big">
-          <span class="_font-bold _color-dark">Course: </span>
+          <span class="_font-bold _color-dark">คอร์ส: </span>
           <a href="/course/{{.Course.Link}}" class="acourse-link">{{.Course.Title}}</a>
         </div>
       </div>
@@ -13,22 +13,22 @@
     <div class="acourse-card _flex-row row">
 
       <div class="acourse-segment col-xs-12 col-md-8">
-        <h3 class="acourse-block-big">Detail</h3>
+        <h3 class="acourse-block-big">รายละเอียด</h3>
         <div>{{.Course.EnrollDetail | markdown}}</div>
       </div>
 
       <div class="acourse-segment col-xs-12 col-md-4 _bg-color-base-2">
         <h3 class="acourse-block-big">
-          Enroll
+          สมัครเรียน
         </h3>
         <form method="POST" enctype="multipart/form-data">
           {{.XSRF}}
           {{if ne .Course.Price 0.0}}
             <div class="_flex-row">
               <div class="input-field col-xs-6 _no-padding _flex-column">
-                <label>Upload Slip</label>
+                <label>สลิปโอนเงิน</label>
                 <div class="_flex-row">
-                  <label class="acourse-button -info _font-sub  _full-width" for="image-input">Upload Slip</label>
+                  <label class="acourse-button -info _font-sub  _full-width" for="image-input">อัพโหลดสลิปโอนเงิน</label>
                   <input id="image-input" class="_hide" type="file" name="Image" accept="image/*">
                 </div>
               </div>
@@ -38,11 +38,11 @@
             </div>
 
             <div class="input-field _flex-column">
-              <label>Payment Amount:</label>
+              <label>จำนวนเงินที่โอน</label>
               <input class="acourse-input" type="number" step="0.01" name="Price">
             </div>
           {{end}}
-          <button class="acourse-button -positive _font-sub  _full-width" type="submit">Enroll</button>
+          <button class="acourse-button -positive _font-sub _full-width" type="submit">สมัครเรียน</button>
         </form>
         {{if .Flash.Errors}}
           <ul>

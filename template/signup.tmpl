@@ -11,20 +11,20 @@
         <form method="POST">
           <div class="_flex-column">
             <div class="acourse-header _font-sub _color-sub _align-center">
-              Sign Up
+              สมัครสมาชิก
             </div>
             {{.XSRF}}
             <div class="input-field _flex-column">
-              <label>Email:</label>
+              <label>อีเมล์</label>
               <input class="acourse-input" name="Email" type="text" placeholder="Email">
             </div>
             <div class="input-field _flex-column">
-              <label>Password</label>
+              <label>รหัสผ่าน</label>
               <input class="acourse-input" name="Password" type="password" placeholder="Password">
             </div>
             <div class="_flex-row _main-center">
               <button class="acourse-button -primary _font-sub acourse-block-big _full-width" type="submit">
-                Sign Up
+                สมัครสมาชิก
               </button>
             </div>
             {{if .Flash.Errors}}
@@ -36,14 +36,14 @@
                 </ul>
               </div>
             {{end}}
-            <p class="_align-center acourse-block">or sign up with</p>
+            <p class="_align-center acourse-block">หรือสมัครสมาชิกด้วย</p>
             <div class="_flex-row _main-center acourse-block">
               <a class="link" href="/openid?p=google.com"><i class="fa fa-google"></i>Google</a>
               <a class="link" href="/openid?p=facebook.com"><i class="fa fa-facebook"></i>Facebook</a>
               <a class="link" href="/openid?p=github.com"><i class="fa fa-github"></i>Github</a>
             </div>
             <div class="_flex-row _main-center acourse-block">
-               Already have an account?&nbsp <a class="_color-main" href="/signin">Sign in</a>
+               มีบัญชีอยู่แล้ว ?<a class="_color-main" href="/signin">&nbsp;เข้าสู่ระบบ</a>
             </div>
           </div>
         </form>

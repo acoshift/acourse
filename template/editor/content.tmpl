@@ -5,16 +5,16 @@
     <div class="acourse-block-big row">
       <div class="col-xs-12 col-md-8 col-md-offset-2 _no-padding row">
         <div class="acourse-header _color-sub col-xs-12 col-md-8">
-          Content List<br>
+          รายการคอนเทนท์<br>
           <div class="_font-size-big">
-            <span class="_font-bold _color-dark">Course: </span>
+            <span class="_font-bold _color-dark">คอร์ส: </span>
             <a href="/course/{{.Course.Link}}" class="acourse-link">{{.Course.Title}}</a>
           </div>
         </div>
         <div class="col-xs-12 col-md-4 _full-width _align-right">
           <a href="/editor/content/create?id={{.Course.ID}}">
             <button class="acourse-button -positive _full-width _font-sub _color-sub">
-              <i class="fa fa-plus"></i>&nbsp&nbsp Add content
+              <i class="fa fa-plus"></i>&nbsp&nbsp เพิ่มคอนเทนท์
             </button>
           </a>
         </div>
@@ -30,17 +30,17 @@
             {{.Desc}}
           </p>
         </div>
-        <div><span class="_font-bold">Video ID:</span> {{.VideoID}}</div>
+        <div><span class="_font-bold">วิดีโอ ID:</span> {{.VideoID}}</div>
       </div>
       <div class="acourse-segment col-xs-12 col-md-3 _bg-color-base-2">
         <a href="/editor/content/edit?id={{.ID}}">
-          <button class="acourse-button -primary acourse-block _font-sub _full-width">Edit</button>
+          <button class="acourse-button -primary acourse-block _font-sub _full-width">แก้ไข</button>
         </a>
         <form method="POST">
           {{$.XSRF}}
           <input type="hidden" name="action" value="delete">
           <input type="hidden" name="contentId" value="{{.ID}}">
-          <button class="acourse-button -negative _full-width _font-sub">Delete</button>
+          <button class="acourse-button -negative _full-width _font-sub">ลบ</button>
         </form>
       </div>
     </div>
