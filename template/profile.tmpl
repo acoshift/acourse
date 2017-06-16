@@ -1,7 +1,7 @@
 {{define "app-body"}}
 <div id="profile">
   <div class="profile-container grid-container">
-    <div class="row _cross-start">
+    <div class="_full-width row _cross-start">
 
       <div class="acourse-card acourse-segment acourse-block-bigger col-xs-12 col-md-3 _flex-column">
         {{template "user-profile" .Me}}
@@ -57,7 +57,7 @@
   #profile {
     z-index: 1;
     padding-top: 32px;
-    min-height: calc(100vh - 236px);
+    min-height: calc(100vh - 311px);
   }
 
   #profile .acourse-button {
