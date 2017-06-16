@@ -42,22 +42,44 @@
   </div>
 
   <footer class="row">
-    <div class="col-xs-12 col-md-6 _font-size-big">
-      Acourse.io © 2016 - 2017 &nbsp &nbsp
-      <a href="https://github.com/acoshift/acourse" class="_font-size-bigger" target="_blank">
-        <i class="fa fa-github _color-sub"></i>
-      </a>
-      <a href="https://www.facebook.com/acourse.io" class="_font-size-bigger" target="_blank">
-        <i class="fa fa-facebook _color-sub"></i>
-      </a>
-      <a href="mailto:abc@acourse.io" class="_font-size-bigger" target="_blank">
-        <i class="fa fa-envelope _color-sub"></i>
-      </a>
+    <div class="_full-width acourse-block-big row">
+      <div class="col-xs-12 col-sm-6 _flex-column _cross-start acourse-block-big">
+        <h2 class="acourse-block _font-regular">Contact Us</h2>
+        <a href="mailto:abc@acourse.io" target="_blank">
+          <div class="_font-size-big _color-sub acourse-block">
+            <i class="fa fa-envelope"></i> &nbsp; contact@acourse.io
+          </div>
+        </a>
+        <p class="_font-size-big _color-sub">
+          <i class="fa fa-phone"></i> &nbsp; 087-999-9999
+        </p>
+      </div>
+
+      <div class="col-xs-12 col-sm-6 _flex-column _cross-start">
+        <h2 class="acourse-block _font-regular">Follow Us</h2>
+        <a href="https://github.com/acoshift/acourse" class="_font-size-bigger" target="_blank">
+          <div class="_font-size-big _color-sub acourse-block" >
+            <i class="fa fa-github _font-size-bigger _color-sub"></i> &nbsp; Github
+          </div>
+        </a>
+        <a href="https://www.facebook.com/acourse.io" class="_font-size-bigger" target="_blank">
+          <div class="_font-size-big _color-sub acourse-block" >
+            <i class="fa fa-facebook _color-sub"></i> &nbsp; Facebook
+          </div>
+        </a>
+      </div>
     </div>
-    <div class="col-xs-12 col-md-6 _font-size-big">
-      Made with &nbsp<i class="fa fa-heart _color-negative pulse"></i>&nbsp;&nbsp;by
-      <a class="_color-sub" href="https://moonrhythm.info" target="_blank">Moon Rhythm</a>
+
+    <div class="bottomline _full-width row">
+      <div class="col-xs-12 col-sm-6 acourse-block">
+        Acourse.io © 2016 - 2017 &nbsp &nbsp
+      </div>
+      <div class="col-xs-12 col-sm-6">
+        Made with &nbsp<i class="fa fa-heart _color-negative pulse"></i>&nbsp;&nbsp;by
+        <a class="_color-sub" href="https://moonrhythm.info" target="_blank">Moon Rhythm</a>
+      </div>
     </div>
+
   </footer>
 {{end}}
 
@@ -123,6 +145,24 @@
 <style>
   .app-container {
     padding-top: 80px;
+  }
+
+  footer >.bottomline > div:first-child {
+    text-align: left;
+  }
+
+  footer >.bottomline > div:last-child {
+    text-align: right;
+  }
+
+  @media only screen and (max-width: 767px) {
+    footer >.bottomline > div:first-child {
+      text-align: center;
+    }
+
+    footer >.bottomline > div:last-child {
+      text-align: center;
+    }
   }
 </style>
 {{end}}
