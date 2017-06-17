@@ -1,5 +1,5 @@
 hash: 3f74cafd3e178011e093f7171525af3380512efeb4b839204b116253600ff0cc
-updated: 2017-06-17T16:09:28.876969649+07:00
+updated: 2017-06-17T21:42:31.490532444+07:00
 imports:
 - name: cloud.google.com/go
   version: b8b88d2593afebb61b6f616bb3c85f79f28819d2
@@ -13,7 +13,7 @@ imports:
 - name: github.com/acoshift/configfile
   version: c416a3c1e7fab6eaaf0e3ee56ec17793a485eddf
 - name: github.com/acoshift/flash
-  version: c188946b6d9b3708b94a764356190a172de7766a
+  version: c0cf62742696f0e01007d7485d2f9147e8f1d412
 - name: github.com/acoshift/go-firebase-admin
   version: 59385f310dc0842016b15b778b80dc54c4cca528
 - name: github.com/acoshift/gzip
@@ -23,7 +23,7 @@ imports:
 - name: github.com/acoshift/middleware
   version: 2e4eb0b97b0ca9d8cfd42330dcc7c746c6acc1a5
 - name: github.com/acoshift/session
-  version: 3a7963d92af91d41c1ef263f0049309d0d5ac379
+  version: bf82628971d049e39a0cef24066f2c0444b92243
   subpackages:
   - store/redis
 - name: github.com/asaskevich/govalidator

@@ -112,6 +112,10 @@ func Set(ctx context.Context, s *Session) context.Context {
 }
 
 func (s *Session) encode() ([]byte, error) {
+	if len(s.d) == 0 {
+		return []byte{}, nil
+	}
+
 	buf := &bytes.Buffer{}
 	err := gob.NewEncoder(buf).Encode(&s.d)
 	if err != nil {
@@ -122,7 +126,9 @@ func (s *Session) encode() ([]byte, error) {
 
 func (s *Session) decode(b []byte) {
 	s.d = make(map[interface{}]interface{})
-	gob.NewDecoder(bytes.NewReader(b)).Decode(&s.d)
+	if len(b) > 0 {
+		gob.NewDecoder(bytes.NewReader(b)).Decode(&s.d)
+	}
 }
 
 // Get gets data from session
