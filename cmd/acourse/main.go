@@ -30,7 +30,7 @@ func main() {
 		SQLURL:         config.String("sql_url"),
 		RedisAddr:      config.String("redis_addr"),
 		RedisPass:      config.String("redis_pass"),
-		RedisDB:        config.Int("redis_db"),
+		RedisPrefix:    config.String("redis_prefix"),
 		SlackURL:       config.String("slack_url"),
 	})
 	if err != nil {

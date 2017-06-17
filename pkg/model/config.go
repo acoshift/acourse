@@ -8,14 +8,16 @@ import (
 
 // model shared vars
 var (
-	db        *sql.DB
-	redisPool *redis.Pool
+	db          *sql.DB
+	redisPool   *redis.Pool
+	redisPrefix string
 )
 
 // Config use to init model package
 type Config struct {
-	DB        *sql.DB
-	RedisPool *redis.Pool
+	DB          *sql.DB
+	RedisPool   *redis.Pool
+	RedisPrefix string
 }
 
 // Init inits model package

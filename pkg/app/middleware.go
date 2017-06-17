@@ -29,12 +29,12 @@ func Middleware(h http.Handler) http.Handler {
 			HTTPOnly: true,
 			Secure:   session.PreferSecure,
 			Store: redisstore.New(redisstore.Config{
-				Prefix: "acourse:",
+				Prefix: redisPrefix,
 				Pool: &redis.Pool{
 					MaxIdle:     20,
 					IdleTimeout: 10 * time.Minute,
 					Dial: func() (redis.Conn, error) {
-						return redis.Dial("tcp", redisAddr, redis.DialDatabase(redisDB), redis.DialPassword(redisPass))
+						return redis.Dial("tcp", redisAddr, redis.DialPassword(redisPass))
 					},
 				},
 			}),
