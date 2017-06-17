@@ -44,10 +44,10 @@ func Middleware(config Config) middleware.Middleware {
 			cookie, err := r.Cookie(name)
 			if err == nil && len(cookie.Value) > 0 {
 				// get session data from store
-				sessData, err := config.Store.Get(cookie.Value)
-				if err == nil && len(sessData) > 0 {
+				s.p, err = config.Store.Get(cookie.Value)
+				if err == nil {
 					s.id = cookie.Value
-					s.decode(sessData)
+					s.decode(s.p)
 				}
 			}
 
