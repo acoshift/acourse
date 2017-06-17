@@ -41,13 +41,14 @@ func main() {
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "OK")
 	})
-	app.Mount(mux)
-	h := app.Middleware(mux)
+	appMux := http.NewServeMux()
+	app.Mount(appMux)
+	mux.Handle("/", app.Middleware(appMux))
 
 	// lets reverse proxy handle other settings
 	srv := &http.Server{
 		Addr:    ":8080",
-		Handler: h,
+		Handler: mux,
 	}
 
 	log.Println("Start server at :8080")
