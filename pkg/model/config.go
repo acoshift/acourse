@@ -24,6 +24,7 @@ type Config struct {
 func Init(config Config) error {
 	db = config.DB
 	redisPool = config.RedisPool
+	redisPrefix = config.RedisPrefix
 
 	return nil
 }
