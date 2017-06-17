@@ -25,14 +25,20 @@ func Middleware() middleware.Middleware {
 			ctx := r.Context()
 			sess := session.Get(ctx)
 			var f Flash
+			var isNew bool
 			if b, ok := sess.Get(flashKey{}).([]byte); ok {
 				f, _ = Decode(b)
 			}
 			if f == nil {
 				f = New()
+				isNew = true
 			}
 
 			defer func() {
+				if isNew && len(f) == 0 {
+					return
+				}
+
 				// save flash back to session
 				b, err := f.Encode()
 				if err == nil {

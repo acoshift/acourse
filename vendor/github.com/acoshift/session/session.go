@@ -12,10 +12,6 @@ import (
 	"github.com/acoshift/middleware"
 )
 
-type (
-	sessionKey struct{}
-)
-
 // Middleware is the session parser middleware
 func Middleware(config Config) middleware.Middleware {
 	if config.Store == nil {
@@ -27,9 +23,9 @@ func Middleware(config Config) middleware.Middleware {
 		entropy = 16
 	}
 
-	sessName := config.Name
-	if len(sessName) == 0 {
-		sessName = "sess"
+	name := config.Name
+	if len(name) == 0 {
+		name = "sess"
 	}
 
 	maxAge := int(config.MaxAge / time.Second)
@@ -42,54 +38,50 @@ func Middleware(config Config) middleware.Middleware {
 
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			var sess Session
+			var s Session
 
 			// get session key from cookie
-			cookie, err := r.Cookie(sessName)
+			cookie, err := r.Cookie(name)
 			if err == nil && len(cookie.Value) > 0 {
 				// get session data from store
 				sessData, err := config.Store.Get(cookie.Value)
 				if err == nil && len(sessData) > 0 {
-					sess.id = cookie.Value
-					sess.decode(sessData)
+					s.id = cookie.Value
+					s.decode(sessData)
 				}
 			}
 
 			// if session not found, create new session
-			if len(sess.id) == 0 {
-				sess.id = generateID()
+			if len(s.id) == 0 {
+				s.id = generateID()
 			}
 
-			secure := false
-			if (config.Secure == ForceSecure) || (config.Secure == PreferSecure && isTLS(r)) {
-				secure = true
-			}
-
-			// rolling session
+			// rolling cookie
 			http.SetCookie(w, &http.Cookie{
-				Name:     sessName,
+				Name:     name,
 				Domain:   config.Domain,
 				Path:     config.Path,
 				HttpOnly: config.HTTPOnly,
-				Value:    sess.id,
+				Value:    s.id,
 				MaxAge:   maxAge,
-				Secure:   secure,
+				Secure:   (config.Secure == ForceSecure) || (config.Secure == PreferSecure && isTLS(r)),
 			})
 
+			// use defer to alway save session even panic
 			defer func() {
 				// if session was modified, save session to store,
 				// if not don't save to store to prevent brute force attack
-				b, err := sess.encode()
+				b, err := s.encode()
 				if err == nil {
-					if bytes.Compare(sess.p, b) == 0 {
-						config.Store.Exp(sess.id, config.MaxAge)
+					if bytes.Compare(s.p, b) == 0 {
+						config.Store.Exp(s.id, config.MaxAge)
 						return
 					}
-					config.Store.Set(sess.id, b, config.MaxAge)
+					config.Store.Set(s.id, b, config.MaxAge)
 				}
 			}()
 
-			nr := r.WithContext(Set(r.Context(), &sess))
+			nr := r.WithContext(Set(r.Context(), &s))
 			h.ServeHTTP(w, nr)
 		})
 	}
@@ -106,10 +98,12 @@ func init() {
 	gob.Register(map[interface{}]interface{}{})
 }
 
+type sessionKey struct{}
+
 // Get gets session from context
 func Get(ctx context.Context) *Session {
-	sess, _ := ctx.Value(sessionKey{}).(*Session)
-	return sess
+	s, _ := ctx.Value(sessionKey{}).(*Session)
+	return s
 }
 
 // Set sets session to context
@@ -117,43 +111,40 @@ func Set(ctx context.Context, s *Session) context.Context {
 	return context.WithValue(ctx, sessionKey{}, s)
 }
 
-func (sess *Session) encode() ([]byte, error) {
+func (s *Session) encode() ([]byte, error) {
 	buf := &bytes.Buffer{}
-	err := gob.NewEncoder(buf).Encode(&sess.d)
+	err := gob.NewEncoder(buf).Encode(&s.d)
 	if err != nil {
 		return nil, err
 	}
 	return buf.Bytes(), nil
 }
 
-func (sess *Session) decode(b []byte) {
-	sess.d = make(map[interface{}]interface{})
-	err := gob.NewDecoder(bytes.NewReader(b)).Decode(&sess.d)
-	if err != nil {
-		return
-	}
+func (s *Session) decode(b []byte) {
+	s.d = make(map[interface{}]interface{})
+	gob.NewDecoder(bytes.NewReader(b)).Decode(&s.d)
 }
 
 // Get gets data from session
-func (sess *Session) Get(key interface{}) interface{} {
-	if sess.d == nil {
+func (s *Session) Get(key interface{}) interface{} {
+	if s.d == nil {
 		return nil
 	}
-	return sess.d[key]
+	return s.d[key]
 }
 
 // Set sets data to session
-func (sess *Session) Set(key, value interface{}) {
-	if sess.d == nil {
-		sess.d = make(map[interface{}]interface{})
+func (s *Session) Set(key, value interface{}) {
+	if s.d == nil {
+		s.d = make(map[interface{}]interface{})
 	}
-	sess.d[key] = value
+	s.d[key] = value
 }
 
 // Del deletes data from session
-func (sess *Session) Del(key interface{}) {
-	if sess.d == nil {
+func (s *Session) Del(key interface{}) {
+	if s.d == nil {
 		return
 	}
-	delete(sess.d, key)
+	delete(s.d, key)
 }

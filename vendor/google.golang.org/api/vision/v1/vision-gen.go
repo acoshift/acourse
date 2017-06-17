@@ -736,11 +736,10 @@ type DetectedBreak struct {
 	//   "SPACE" - Regular space.
 	//   "SURE_SPACE" - Sure space (very wide).
 	//   "EOL_SURE_SPACE" - Line-wrapping break.
-	//   "HYPHEN" - End-line hyphen that is not present in text; does
-	//   "LINE_BREAK" - not co-occur with SPACE, LEADER_SPACE,
-	// or
-	// LINE_BREAK.
-	// Line break that ends a paragraph.
+	//   "HYPHEN" - End-line hyphen that is not present in text; does not
+	// co-occur with
+	// `SPACE`, `LEADER_SPACE`, or `LINE_BREAK`.
+	//   "LINE_BREAK" - Line break that ends a paragraph.
 	Type string `json:"type,omitempty"`
 
 	// ForceSendFields is a list of field names (e.g. "IsPrefix") to
@@ -1505,10 +1504,6 @@ func (s *Landmark) MarshalJSON() ([]byte, error) {
 //     assert (0.0, -170.0) == NormalizeLatLng(180.0, 10.0)
 //     assert (-90.0, 10.0) == NormalizeLatLng(270.0, 10.0)
 //     assert (90.0, 10.0) == NormalizeLatLng(-270.0, 10.0)
-//
-// The code in logs/storage/validator/logs_validator_traits.cc treats
-// this type
-// as if it were annotated as ST_LOCATION.
 type LatLng struct {
 	// Latitude: The latitude in degrees. It must be in the range [-90.0,
 	// +90.0].
@@ -1918,7 +1913,7 @@ func (s *SafeSearchAnnotation) MarshalJSON() ([]byte, error) {
 // arbitrary
 // information about the error. There is a predefined set of error
 // detail types
-// in the package `google.rpc` which can be used for common error
+// in the package `google.rpc` that can be used for common error
 // conditions.
 //
 // # Language mapping
@@ -1951,7 +1946,7 @@ func (s *SafeSearchAnnotation) MarshalJSON() ([]byte, error) {
 //
 // - Workflow errors. A typical workflow has multiple steps. Each step
 // may
-//     have a `Status` message for error reporting purpose.
+//     have a `Status` message for error reporting.
 //
 // - Batch operations. If a client uses batch request and batch
 // response, the
@@ -2172,9 +2167,7 @@ func (s *Vertex) MarshalJSON() ([]byte, error) {
 // WebDetection: Relevant information for the image from the Internet.
 type WebDetection struct {
 	// FullMatchingImages: Fully matching images from the Internet.
-	// They're definite neardups and most often a copy of the query image
-	// with
-	// merely a size change.
+	// Can include resized copies of the query image.
 	FullMatchingImages []*WebImage `json:"fullMatchingImages,omitempty"`
 
 	// PagesWithMatchingImages: Web pages containing the matching images

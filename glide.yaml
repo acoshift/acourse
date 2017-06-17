@@ -4,7 +4,6 @@ import:
   subpackages:
   - storage
 - package: github.com/acoshift/configfile
-- package: github.com/acoshift/ds
 - package: github.com/acoshift/flash
 - package: github.com/acoshift/go-firebase-admin
   version: 0.0.2
@@ -13,7 +12,7 @@ import:
 - package: github.com/acoshift/middleware
 - package: github.com/acoshift/session
   subpackages:
-  - store/sql
+  - store/redis
 - package: github.com/disintegration/imaging
 - package: github.com/dustin/go-humanize
 - package: github.com/garyburd/redigo
