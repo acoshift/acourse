@@ -11,6 +11,7 @@ import (
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/flash"
 	"github.com/acoshift/middleware"
+	"github.com/acoshift/servertiming"
 	"github.com/acoshift/session"
 	redisstore "github.com/acoshift/session/store/redis"
 	"github.com/garyburd/redigo/redis"
@@ -20,7 +21,8 @@ import (
 // Middleware wraps handlers with app's middleware
 func Middleware(h http.Handler) http.Handler {
 	return middleware.Chain(
-		recovery,
+		servertiming.Middleware(),
+		panicLogger,
 		session.Middleware(session.Config{
 			Name:     "sess",
 			Entropy:  32,
@@ -45,7 +47,7 @@ func Middleware(h http.Handler) http.Handler {
 	)(h)
 }
 
-func recovery(h http.Handler) http.Handler {
+func panicLogger(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if r := recover(); r != nil {
