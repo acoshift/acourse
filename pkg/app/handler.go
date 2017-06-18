@@ -193,7 +193,7 @@ func openIDCallback(w http.ResponseWriter, r *http.Request) {
 	err = tx.QueryRow(`select 1 from users where id = $1`, user.UserID).Scan(&cnt)
 	if err == sql.ErrNoRows {
 		// user not found, insert new user
-		imageURL := UploadProfileFromURLAsync(ctx, user.PhotoURL)
+		imageURL := UploadProfileFromURLAsync(user.PhotoURL)
 		_, err = tx.Exec(`
 			insert into users
 				(id, name, username, email, image)
