@@ -36,3 +36,4 @@ import:
   - identitytoolkit/v3
   - option
 - package: gopkg.in/gomail.v2
+- package: github.com/acoshift/servertiming

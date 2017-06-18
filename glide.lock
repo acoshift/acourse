@@ -1,5 +1,5 @@
-hash: 3f74cafd3e178011e093f7171525af3380512efeb4b839204b116253600ff0cc
-updated: 2017-06-17T22:03:26.466397402+07:00
+hash: 68cd7896bcd91d39c1e5691cbd19af2c23e76a81d85f2acda310ee14fc9cddd2
+updated: 2017-06-18T22:19:54.103133983+07:00
 imports:
 - name: cloud.google.com/go
   version: b8b88d2593afebb61b6f616bb3c85f79f28819d2
@@ -13,7 +13,7 @@ imports:
 - name: github.com/acoshift/configfile
   version: c416a3c1e7fab6eaaf0e3ee56ec17793a485eddf
 - name: github.com/acoshift/flash
-  version: c0cf62742696f0e01007d7485d2f9147e8f1d412
+  version: 63dbe8e58db386dd783a24d3f8d649ec34111a50
 - name: github.com/acoshift/go-firebase-admin
   version: 59385f310dc0842016b15b778b80dc54c4cca528
 - name: github.com/acoshift/gzip
@@ -22,6 +22,8 @@ imports:
   version: 5c88c77f50897ba89140829b44b9d96c5050ff5a
 - name: github.com/acoshift/middleware
   version: 2e4eb0b97b0ca9d8cfd42330dcc7c746c6acc1a5
+- name: github.com/acoshift/servertiming
+  version: 87b7a21e4eb43ec7d54da072aebf88cb2af97c0a
 - name: github.com/acoshift/session
   version: 9e444f59736658097b5677e3296eb2eb7ce584fc
   subpackages:

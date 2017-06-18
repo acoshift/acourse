@@ -5,7 +5,6 @@ import (
 	"context"
 	"testing"
 
-	"github.com/acoshift/flash"
 	. "github.com/acoshift/flash"
 )
 
@@ -21,7 +20,7 @@ func TestNew(t *testing.T) {
 
 func TestEncodeDecode(t *testing.T) {
 	var (
-		f, p flash.Flash
+		f, p Flash
 		b    []byte
 		err  error
 	)
