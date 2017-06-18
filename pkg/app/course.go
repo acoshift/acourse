@@ -252,7 +252,7 @@ func postEditorCreate(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	tx, err := db.BeginTx(ctx)
+	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
 		f.Add("Errors", err.Error())
 		back(w, r)
