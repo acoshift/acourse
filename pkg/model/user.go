@@ -1,6 +1,7 @@
 package model
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"time"
@@ -63,11 +64,11 @@ const (
 )
 
 // Save saves user
-func (x *User) Save() error {
+func (x *User) Save(ctx context.Context) error {
 	if len(x.ID) == 0 {
 		return fmt.Errorf("invalid id")
 	}
-	_, err := db.Exec(`
+	_, err := db.ExecContext(ctx, `
 		upsert into users
 			(id, name, username, about_me, image, updated_at)
 		values
@@ -88,9 +89,9 @@ func scanUser(scan scanFunc, x *User) error {
 }
 
 // GetUsers gets users
-func GetUsers(userIDs []string) ([]*User, error) {
+func GetUsers(ctx context.Context, userIDs []string) ([]*User, error) {
 	xs := make([]*User, 0, len(userIDs))
-	rows, err := db.Query(queryGetUsers, pq.Array(userIDs))
+	rows, err := db.QueryContext(ctx, queryGetUsers, pq.Array(userIDs))
 	if err != nil {
 		return nil, err
 	}
@@ -110,9 +111,9 @@ func GetUsers(userIDs []string) ([]*User, error) {
 }
 
 // GetUser gets user from id
-func GetUser(userID string) (*User, error) {
+func GetUser(ctx context.Context, userID string) (*User, error) {
 	var x User
-	err := scanUser(db.QueryRow(queryGetUser, userID).Scan, &x)
+	err := scanUser(db.QueryRowContext(ctx, queryGetUser, userID).Scan, &x)
 	if err == sql.ErrNoRows {
 		return nil, ErrNotFound
 	}
@@ -123,9 +124,9 @@ func GetUser(userID string) (*User, error) {
 }
 
 // GetUserFromUsername gets user from username
-func GetUserFromUsername(username string) (*User, error) {
+func GetUserFromUsername(ctx context.Context, username string) (*User, error) {
 	var x User
-	err := scanUser(db.QueryRow(queryGetUserFromUsername, username).Scan, &x)
+	err := scanUser(db.QueryRowContext(ctx, queryGetUserFromUsername, username).Scan, &x)
 	if err != nil {
 		return nil, err
 	}
@@ -133,9 +134,9 @@ func GetUserFromUsername(username string) (*User, error) {
 }
 
 // ListUsers lists users
-func ListUsers(limit, offset int64) ([]*User, error) {
+func ListUsers(ctx context.Context, limit, offset int64) ([]*User, error) {
 	xs := make([]*User, 0)
-	rows, err := db.Query(queryListUsers, limit, offset)
+	rows, err := db.QueryContext(ctx, queryListUsers, limit, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -155,9 +156,9 @@ func ListUsers(limit, offset int64) ([]*User, error) {
 }
 
 // CountUsers counts users
-func CountUsers() (int64, error) {
+func CountUsers(ctx context.Context) (int64, error) {
 	var cnt int64
-	err := db.QueryRow(`select count(*) from users`).Scan(&cnt)
+	err := db.QueryRowContext(ctx, `select count(*) from users`).Scan(&cnt)
 	if err != nil {
 		return 0, err
 	}
