@@ -117,7 +117,7 @@ func fetchUser(h http.Handler) http.Handler {
 		s := session.Get(ctx)
 		id, _ := s.Get(keyUserID).(string)
 		if len(id) > 0 {
-			u, err := model.GetUser(id)
+			u, err := model.GetUser(ctx, id)
 			if err == model.ErrNotFound {
 				u = &model.User{
 					ID:       id,
@@ -172,7 +172,7 @@ func isCourseOwner(h http.Handler) http.Handler {
 		id := r.FormValue("id")
 
 		var ownerID string
-		err := db.QueryRow(`select user_id from courses where id = $1`, id).Scan(&ownerID)
+		err := db.QueryRowContext(ctx, `select user_id from courses where id = $1`, id).Scan(&ownerID)
 		if err == sql.ErrNoRows {
 			http.NotFound(w, r)
 			return
