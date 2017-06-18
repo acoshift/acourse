@@ -1,5 +1,7 @@
 package model
 
+import "context"
+
 // Assignment model
 type Assignment struct {
 	ID    string
@@ -9,8 +11,8 @@ type Assignment struct {
 }
 
 // GetAssignments gets assignments
-func GetAssignments(courseID string) ([]*Assignment, error) {
-	rows, err := db.Query(`
+func GetAssignments(ctx context.Context, courseID string) ([]*Assignment, error) {
+	rows, err := db.QueryContext(ctx, `
 		select
 			id, title, long_desc, open
 		from assignments

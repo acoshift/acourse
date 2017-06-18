@@ -14,14 +14,15 @@ import (
 )
 
 func profile(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 	user := appctx.GetUser(r.Context())
 
-	ownCourses, err := model.ListOwnCourses(user.ID)
+	ownCourses, err := model.ListOwnCourses(ctx, user.ID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	enrolledCourses, err := model.ListEnrolledCourses(user.ID)
+	enrolledCourses, err := model.ListEnrolledCourses(ctx, user.ID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -104,7 +105,7 @@ func postProfileEdit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tx, err := db.Begin()
+	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
