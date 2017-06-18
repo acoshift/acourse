@@ -78,11 +78,12 @@ func fileHandler(name string) http.Handler {
 }
 
 func index(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 	if r.URL.Path != "/" {
 		http.NotFound(w, r)
 		return
 	}
-	courses, err := model.ListPublicCourses()
+	courses, err := model.ListPublicCourses(ctx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -130,9 +131,9 @@ func postSignIn(w http.ResponseWriter, r *http.Request) {
 	// this happend when database out of sync with firebase authentication
 	{
 		var id string
-		err = db.QueryRow(`select id from users where id = $1`, userID).Scan(&id)
+		err = db.QueryRowContext(ctx, `select id from users where id = $1`, userID).Scan(&id)
 		if err == sql.ErrNoRows {
-			db.Exec(`insert into users (id, username, name, email) values ($1, $2, $3, $4)`, userID, userID, "", email)
+			db.ExecContext(ctx, `insert into users (id, username, name, email) values ($1, $2, $3, $4)`, userID, userID, "", email)
 		}
 	}
 
@@ -180,7 +181,7 @@ func openIDCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tx, err := db.Begin()
+	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -192,7 +193,7 @@ func openIDCallback(w http.ResponseWriter, r *http.Request) {
 	err = tx.QueryRow(`select 1 from users where id = $1`, user.UserID).Scan(&cnt)
 	if err == sql.ErrNoRows {
 		// user not found, insert new user
-		imageURL := UploadProfileFromURLAsync(user.PhotoURL)
+		imageURL := UploadProfileFromURLAsync(ctx, user.PhotoURL)
 		_, err = tx.Exec(`
 			insert into users
 				(id, name, username, email, image)
@@ -264,7 +265,7 @@ func postSignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = db.Exec(`
+	_, err = db.ExecContext(ctx, `
 		insert into users
 			(id, username, name, email)
 		values
