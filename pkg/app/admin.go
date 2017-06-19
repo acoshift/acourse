@@ -81,6 +81,78 @@ func adminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter func(c
 	view.AdminPayments(w, r, payments, int(page), int(totalPage))
 }
 
+func adminRejectPayment(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodGet {
+		id := r.URL.Query().Get("id")
+		view.AdminPaymentReject(w, r, id)
+		return
+	}
+	postAdminPendingPayment(w, r)
+}
+
+func postAdminRejectPayment(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	message := r.FormValue("Message")
+
+	id := r.FormValue("ID")
+
+	x, err := model.GetPayment(ctx, id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	err = x.Reject(ctx)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if x.User.Email.Valid {
+		go func() {
+			x, err := model.GetPayment(ctx, id)
+			if err != nil {
+				return
+			}
+			name := x.User.Name
+			if len(name) == 0 {
+				name = x.User.Username
+			}
+
+			body := fmt.Sprintf(`สวัสดีครับคุณ %s,<br>
+<br>
+ตามที่ท่านได้ upload file เพื่อใช้ในการสมัครหลักสูตร "%s" เมื่อเวลา %s<br>
+<br>
+ทางทีมงาน acourse.io ขอเรียนแจ้งให้ทราบว่าคำขอของคุณถูกปฏิเสธ โดยอาจจะเกิดจากสาเหตุใด สาเหตุหนึ่ง ตามรายละเอียดด้านล่าง<br>
+<br>
+1.รูปภาพที่ upload ไม่ตรงกับสิ่งที่ระบุไว้ เช่น<br>
+- สำหรับ Course free ไม่มีมัดจำ - รูปภาพต้องเป็นรูป screenshot จากการแชร์ link ของ course "https://acourse.io/course/%s" ไปยัง timeline facebook ของตนเองเท่านั้น<br>
+- สำหรับ Course ประเภทอื่นๆ ให้ลองอ่านรายละเอียดของรูปภาพที่จำเป็นต้องใช้ในการ upload ให้ครบถ้วนและปฏิบัติตามให้ถูกต้อง<br>
+<br>
+2. จำนวนเงินที่ระบุไม่ตรงกับจำนวนเงินที่โอนจริง<br>
+- ในกรณีที่ Course มีส่วนลด ให้ระบุยอดที่โอนเป็นตัวเลขที่ตรงกับยอดโอน เท่านั้น (ไม่ใช่ตัวเลขราคาเต็มของ Course)<br>
+- ในกรณีที่จ่ายผ่าน 3rd party เช่น eventpop ให้ใส่ตามราคาบัตร ไม่รวมค่าบริการอื่น ๆ เช่นค่า fee ของ eventpop<br>
+<br>
+<br>
+%s
+<br>
+ถ้าติดขัดหรือสงสัยตรงไหนเพิ่มเติม ท่านสามารถ reply email นี้เพื่อสอบถามเพิ่มเติมได้ครับ<br>
+<br>
+ขอบคุณมากครับ<br>
+ทีมงาน acourse.io
+`,
+				name,
+				x.Course.Title,
+				x.CreatedAt.In(loc).Format("02/01/2006 15:04:05"),
+				x.Course.Link(),
+				message,
+			)
+			title := fmt.Sprintf("คำขอเพื่อเรียนหลักสูตร %s ได้รับการปฏิเสธ", x.Course.Title)
+			sendEmail(x.User.Email.String, title, body)
+		}()
+	}
+
+	http.Redirect(w, r, "/admin/payments/pending", http.StatusSeeOther)
+}
 func postAdminPendingPayment(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	action := r.FormValue("Action")
