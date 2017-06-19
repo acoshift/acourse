@@ -109,12 +109,9 @@
                     <input type="hidden" name="Action" value="accept">
                     <button class="acourse-button -positive _font-main _full-width"  type="submit">Accept</button>
                   </form>
-                  <form method="POST">
-                    {{$.XSRF}}
-                    <input type="hidden" name="ID" value="{{.ID}}">
-                    <input type="hidden" name="Action" value="reject">
-                    <button class="acourse-button -negative _font-main _full-width" type="submit">Reject</button>
-                  </form>
+                  <a href="reject?id={{.ID}}">
+                    <button class="acourse-button -negative _font-main _full-width"  type="submit">Reject</button>
+                  </a>
                 {{else}}
                   <div>-</div>
                 {{end}}

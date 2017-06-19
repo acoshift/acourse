@@ -29,6 +29,7 @@ func Mount(mux *http.ServeMux) {
 	admin.Handle("/courses", http.HandlerFunc(adminCourses))
 	admin.Handle("/payments/pending", http.HandlerFunc(adminPendingPayments))
 	admin.Handle("/payments/history", http.HandlerFunc(adminHistoryPayments))
+	admin.Handle("/payments/reject", http.HandlerFunc(adminRejectPayment))
 
 	mux.Handle("/", http.HandlerFunc(index))
 	mux.Handle("/~/", http.StripPrefix("/~", cache(http.FileServer(&fileFS{http.Dir("static")}))))
