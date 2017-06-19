@@ -13,7 +13,6 @@ import (
 
 	"github.com/microcosm-cc/bluemonday"
 	"github.com/russross/blackfriday"
-
 	"gopkg.in/gomail.v2"
 )
 
