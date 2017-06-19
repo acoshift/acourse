@@ -28,7 +28,7 @@ var (
 	firAuth      *admin.Auth
 	redisAddr    string
 	redisPass    string
-	redisDB      int
+	redisPrefix  string
 	slackURL     string
 	loc          *time.Location
 )
@@ -48,7 +48,7 @@ type Config struct {
 	SQLURL         string
 	RedisAddr      string
 	RedisPass      string
-	RedisDB        int
+	RedisPrefix    string
 	SlackURL       string
 }
 
@@ -97,7 +97,7 @@ func Init(config Config) error {
 	xsrfSecret = config.XSRFSecret
 	redisAddr = config.RedisAddr
 	redisPass = config.RedisPass
-	redisDB = config.RedisDB
+	redisPrefix = config.RedisPrefix
 	slackURL = config.SlackURL
 
 	// init databases
@@ -112,12 +112,12 @@ func Init(config Config) error {
 		MaxIdle:     100,
 		IdleTimeout: 10 * time.Minute,
 		Dial: func() (redis.Conn, error) {
-			return redis.Dial("tcp", redisAddr, redis.DialDatabase(redisDB), redis.DialPassword(redisPass))
+			return redis.Dial("tcp", redisAddr, redis.DialPassword(redisPass))
 		},
 	}
 
 	// init other packages
-	err = model.Init(model.Config{DB: db, RedisPool: redisPool})
+	err = model.Init(model.Config{DB: db, RedisPool: redisPool, RedisPrefix: redisPrefix})
 	if err != nil {
 		return err
 	}

@@ -12,6 +12,7 @@ import (
 	"github.com/acoshift/acourse/pkg/view"
 	"github.com/acoshift/flash"
 	"github.com/acoshift/middleware"
+	"github.com/acoshift/servertiming"
 	"github.com/acoshift/session"
 	redisstore "github.com/acoshift/session/store/redis"
 	"github.com/garyburd/redigo/redis"
@@ -21,7 +22,8 @@ import (
 // Middleware wraps handlers with app's middleware
 func Middleware(h http.Handler) http.Handler {
 	return middleware.Chain(
-		recovery,
+		servertiming.Middleware(),
+		panicLogger,
 		session.Middleware(session.Config{
 			Name:     "sess",
 			Entropy:  32,
@@ -30,12 +32,12 @@ func Middleware(h http.Handler) http.Handler {
 			HTTPOnly: true,
 			Secure:   session.PreferSecure,
 			Store: redisstore.New(redisstore.Config{
-				Prefix: "acourse:",
+				Prefix: redisPrefix,
 				Pool: &redis.Pool{
 					MaxIdle:     20,
 					IdleTimeout: 10 * time.Minute,
 					Dial: func() (redis.Conn, error) {
-						return redis.Dial("tcp", redisAddr, redis.DialDatabase(redisDB), redis.DialPassword(redisPass))
+						return redis.Dial("tcp", redisAddr, redis.DialPassword(redisPass))
 					},
 				},
 			}),
@@ -46,7 +48,7 @@ func Middleware(h http.Handler) http.Handler {
 	)(h)
 }
 
-func recovery(h http.Handler) http.Handler {
+func panicLogger(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if r := recover(); r != nil {
@@ -118,7 +120,7 @@ func fetchUser(h http.Handler) http.Handler {
 		s := session.Get(ctx)
 		id, _ := s.Get(keyUserID).(string)
 		if len(id) > 0 {
-			u, err := model.GetUser(id)
+			u, err := model.GetUser(ctx, id)
 			if err == model.ErrNotFound {
 				u = &model.User{
 					ID:       id,
@@ -173,7 +175,7 @@ func isCourseOwner(h http.Handler) http.Handler {
 		id := r.FormValue("id")
 
 		var ownerID string
-		err := db.QueryRow(`select user_id from courses where id = $1`, id).Scan(&ownerID)
+		err := db.QueryRowContext(ctx, `select user_id from courses where id = $1`, id).Scan(&ownerID)
 		if err == sql.ErrNoRows {
 			view.NotFound(w, r)
 			return

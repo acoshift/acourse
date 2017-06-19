@@ -2,6 +2,7 @@ package model
 
 import (
 	"bytes"
+	"context"
 	"database/sql"
 	"encoding/gob"
 	"time"
@@ -122,8 +123,8 @@ const (
 )
 
 // Save saves course
-func (x *Course) Save() error {
-	tx, err := db.Begin()
+func (x *Course) Save(ctx context.Context) error {
+	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
 	}
@@ -177,9 +178,9 @@ func scanCourse(scan scanFunc, x *Course) error {
 }
 
 // GetCourses gets courses
-func GetCourses(courseIDs []string) ([]*Course, error) {
+func GetCourses(ctx context.Context, courseIDs []string) ([]*Course, error) {
 	xs := make([]*Course, 0, len(courseIDs))
-	rows, err := db.Query(queryGetCourses, pq.Array(courseIDs))
+	rows, err := db.QueryContext(ctx, queryGetCourses, pq.Array(courseIDs))
 	if err != nil {
 		return nil, err
 	}
@@ -199,9 +200,9 @@ func GetCourses(courseIDs []string) ([]*Course, error) {
 }
 
 // GetCourse gets course
-func GetCourse(courseID string) (*Course, error) {
+func GetCourse(ctx context.Context, courseID string) (*Course, error) {
 	var x Course
-	err := db.QueryRow(`
+	err := db.QueryRowContext(ctx, `
 		select
 			id, user_id, title, short_desc, long_desc, image, start, url, type, price, courses.discount, enroll_detail,
 			opt.public, opt.enroll, opt.attend, opt.assignment, opt.discount
@@ -221,8 +222,8 @@ func GetCourse(courseID string) (*Course, error) {
 }
 
 // GetCourseContents gets course contents for given course id
-func GetCourseContents(courseID string) ([]*CourseContent, error) {
-	rows, err := db.Query(`
+func GetCourseContents(ctx context.Context, courseID string) ([]*CourseContent, error) {
+	rows, err := db.QueryContext(ctx, `
 		select
 			id,
 			course_id,
@@ -255,9 +256,9 @@ func GetCourseContents(courseID string) ([]*CourseContent, error) {
 }
 
 // GetCourseContent gets course content from id
-func GetCourseContent(courseContentID string) (*CourseContent, error) {
+func GetCourseContent(ctx context.Context, courseContentID string) (*CourseContent, error) {
 	var x CourseContent
-	err := db.QueryRow(`
+	err := db.QueryRowContext(ctx, `
 		select
 			id,
 			course_id,
@@ -276,9 +277,9 @@ func GetCourseContent(courseContentID string) (*CourseContent, error) {
 }
 
 // GetCourseIDFromURL gets course id from url
-func GetCourseIDFromURL(url string) (string, error) {
+func GetCourseIDFromURL(ctx context.Context, url string) (string, error) {
 	var id string
-	err := db.QueryRow(`
+	err := db.QueryRowContext(ctx, `
 		select id
 		from courses
 		where url = $1
@@ -294,9 +295,9 @@ func GetCourseIDFromURL(url string) (string, error) {
 
 // ListCourses lists all courses
 // TODO: pagination
-func ListCourses() ([]*Course, error) {
+func ListCourses(ctx context.Context) ([]*Course, error) {
 	xs := make([]*Course, 0)
-	rows, err := db.Query(`
+	rows, err := db.QueryContext(ctx, `
 		select
 			courses.id,
 			courses.title,
@@ -350,11 +351,11 @@ func ListCourses() ([]*Course, error) {
 
 // ListPublicCourses lists public course sort by created at desc
 // TODO: add pagination
-func ListPublicCourses() ([]*Course, error) {
+func ListPublicCourses(ctx context.Context) ([]*Course, error) {
 	// look from cache
 	{
 		c := redisPool.Get()
-		bs, err := redis.Bytes(c.Do("GET", "acourse:cache:list_public_course"))
+		bs, err := redis.Bytes(c.Do("GET", redisPrefix+"cache:list_public_course"))
 		c.Close()
 		if err == nil {
 			var xs []*Course
@@ -365,7 +366,7 @@ func ListPublicCourses() ([]*Course, error) {
 		}
 	}
 
-	rows, err := db.Query(queryListCoursesPublic)
+	rows, err := db.QueryContext(ctx, queryListCoursesPublic)
 	if err != nil {
 		return nil, err
 	}
@@ -388,7 +389,7 @@ func ListPublicCourses() ([]*Course, error) {
 	}
 	rows.Close()
 
-	rows, err = db.Query(`select course_id, count(*) from enrolls where course_id = any($1) group by course_id`, pq.Array(ids))
+	rows, err = db.QueryContext(ctx, `select course_id, count(*) from enrolls where course_id = any($1) group by course_id`, pq.Array(ids))
 	if err != nil {
 		return nil, err
 	}
@@ -409,7 +410,7 @@ func ListPublicCourses() ([]*Course, error) {
 		err := gob.NewEncoder(&buf).Encode(xs)
 		if err == nil {
 			c := redisPool.Get()
-			c.Do("SETEX", "acourse:cache:list_public_course", 5, buf.Bytes())
+			c.Do("SETEX", redisPrefix+"cache:list_public_course", 5, buf.Bytes())
 			c.Close()
 		}
 	}()
@@ -419,8 +420,8 @@ func ListPublicCourses() ([]*Course, error) {
 
 // ListOwnCourses lists courses that owned by given user
 // TODO: add pagination
-func ListOwnCourses(userID string) ([]*Course, error) {
-	rows, err := db.Query(queryListCoursesOwn, userID)
+func ListOwnCourses(ctx context.Context, userID string) ([]*Course, error) {
+	rows, err := db.QueryContext(ctx, queryListCoursesOwn, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -443,7 +444,7 @@ func ListOwnCourses(userID string) ([]*Course, error) {
 	}
 	rows.Close()
 
-	rows, err = db.Query(`select course_id, count(*) from enrolls where course_id = any($1) group by course_id`, pq.Array(ids))
+	rows, err = db.QueryContext(ctx, `select course_id, count(*) from enrolls where course_id = any($1) group by course_id`, pq.Array(ids))
 	if err != nil {
 		return nil, err
 	}
@@ -462,9 +463,9 @@ func ListOwnCourses(userID string) ([]*Course, error) {
 
 // ListEnrolledCourses lists courses that enrolled by given user
 // TODO: add pagination
-func ListEnrolledCourses(userID string) ([]*Course, error) {
+func ListEnrolledCourses(ctx context.Context, userID string) ([]*Course, error) {
 	xs := make([]*Course, 0)
-	rows, err := db.Query(queryListCoursesEnrolled, userID)
+	rows, err := db.QueryContext(ctx, queryListCoursesEnrolled, userID)
 	if err != nil {
 		return nil, err
 	}

@@ -243,6 +243,9 @@ type Build struct {
 	// Substitutions: Substitutions data for Build resource.
 	Substitutions map[string]string `json:"substitutions,omitempty"`
 
+	// Tags: Tags for annotation of a Build. These are not docker tags.
+	Tags []string `json:"tags,omitempty"`
+
 	// Timeout: Amount of time that this build should be allowed to run, to
 	// second
 	// granularity. If this amount of time elapses, work on the build will
@@ -1024,7 +1027,7 @@ func (s *SourceProvenance) MarshalJSON() ([]byte, error) {
 // arbitrary
 // information about the error. There is a predefined set of error
 // detail types
-// in the package `google.rpc` which can be used for common error
+// in the package `google.rpc` that can be used for common error
 // conditions.
 //
 // # Language mapping
@@ -1057,7 +1060,7 @@ func (s *SourceProvenance) MarshalJSON() ([]byte, error) {
 //
 // - Workflow errors. A typical workflow has multiple steps. Each step
 // may
-//     have a `Status` message for error reporting purpose.
+//     have a `Status` message for error reporting.
 //
 // - Batch operations. If a client uses batch request and batch
 // response, the
@@ -1472,9 +1475,18 @@ type OperationsListCall struct {
 // server doesn't support this method, it returns
 // `UNIMPLEMENTED`.
 //
-// NOTE: the `name` binding below allows API services to override the
+// NOTE: the `name` binding allows API services to override the
 // binding
 // to use different resource name schemes, such as `users/*/operations`.
+// To
+// override the binding, API services can add a binding such
+// as
+// "/v1/{name=users/*}/operations" to their service configuration.
+// For backwards compatibility, the default name includes the
+// operations
+// collection id, however overriding users must ensure the name
+// binding
+// is the parent resource, without the operations collection id.
 func (r *OperationsService) List(name string) *OperationsListCall {
 	c := &OperationsListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.name = name
@@ -1596,7 +1608,7 @@ func (c *OperationsListCall) Do(opts ...googleapi.CallOption) (*ListOperationsRe
 	}
 	return ret, nil
 	// {
-	//   "description": "Lists operations that match the specified filter in the request. If the\nserver doesn't support this method, it returns `UNIMPLEMENTED`.\n\nNOTE: the `name` binding below allows API services to override the binding\nto use different resource name schemes, such as `users/*/operations`.",
+	//   "description": "Lists operations that match the specified filter in the request. If the\nserver doesn't support this method, it returns `UNIMPLEMENTED`.\n\nNOTE: the `name` binding allows API services to override the binding\nto use different resource name schemes, such as `users/*/operations`. To\noverride the binding, API services can add a binding such as\n`\"/v1/{name=users/*}/operations\"` to their service configuration.\nFor backwards compatibility, the default name includes the operations\ncollection id, however overriding users must ensure the name binding\nis the parent resource, without the operations collection id.",
 	//   "flatPath": "v1/operations",
 	//   "httpMethod": "GET",
 	//   "id": "cloudbuild.operations.list",
@@ -1610,7 +1622,7 @@ func (c *OperationsListCall) Do(opts ...googleapi.CallOption) (*ListOperationsRe
 	//       "type": "string"
 	//     },
 	//     "name": {
-	//       "description": "The name of the operation collection.",
+	//       "description": "The name of the operation's parent resource.",
 	//       "location": "path",
 	//       "pattern": "^operations$",
 	//       "required": true,

@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -10,13 +11,14 @@ import (
 )
 
 func adminUsers(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 	page, _ := strconv.ParseInt(r.FormValue("page"), 10, 64)
 	if page <= 0 {
 		page = 1
 	}
 	limit := int64(30)
 
-	cnt, err := model.CountUsers()
+	cnt, err := model.CountUsers(ctx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -29,7 +31,7 @@ func adminUsers(w http.ResponseWriter, r *http.Request) {
 	}
 	totalPage := cnt / limit
 
-	users, err := model.ListUsers(limit, offset)
+	users, err := model.ListUsers(ctx, limit, offset)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -39,7 +41,8 @@ func adminUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func adminCourses(w http.ResponseWriter, r *http.Request) {
-	courses, err := model.ListCourses()
+	ctx := r.Context()
+	courses, err := model.ListCourses(ctx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -48,14 +51,15 @@ func adminCourses(w http.ResponseWriter, r *http.Request) {
 	view.AdminCourses(w, r, courses, 1, 1)
 }
 
-func adminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter func(int64, int64) ([]*model.Payment, error), paymentsCounter func() (int64, error)) {
+func adminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter func(context.Context, int64, int64) ([]*model.Payment, error), paymentsCounter func(context.Context) (int64, error)) {
+	ctx := r.Context()
 	page, _ := strconv.ParseInt(r.FormValue("page"), 10, 64)
 	if page <= 0 {
 		page = 1
 	}
 	limit := int64(30)
 
-	cnt, err := paymentsCounter()
+	cnt, err := paymentsCounter(ctx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -68,7 +72,7 @@ func adminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter func(i
 	}
 	totalPage := cnt / limit
 
-	payments, err := paymentsGetter(limit, offset)
+	payments, err := paymentsGetter(ctx, limit, offset)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -78,16 +82,17 @@ func adminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter func(i
 }
 
 func postAdminPendingPayment(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 	action := r.FormValue("Action")
 
 	id := r.FormValue("ID")
 	if action == "accept" {
-		x, err := model.GetPayment(id)
+		x, err := model.GetPayment(ctx, id)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		err = x.Accept()
+		err = x.Accept(ctx)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -96,7 +101,7 @@ func postAdminPendingPayment(w http.ResponseWriter, r *http.Request) {
 		if x.User.Email.Valid {
 			go func() {
 				// re-fetch payment to get latest timestamp
-				x, err := model.GetPayment(id)
+				x, err := model.GetPayment(ctx, id)
 				if err != nil {
 					return
 				}
@@ -139,12 +144,12 @@ https://acourse.io
 			}()
 		}
 	} else if action == "reject" {
-		x, err := model.GetPayment(id)
+		x, err := model.GetPayment(ctx, id)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		err = x.Reject()
+		err = x.Reject(ctx)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -152,7 +157,7 @@ https://acourse.io
 
 		if x.User.Email.Valid {
 			go func() {
-				x, err := model.GetPayment(id)
+				x, err := model.GetPayment(ctx, id)
 				if err != nil {
 					return
 				}

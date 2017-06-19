@@ -30,7 +30,7 @@ func main() {
 		SQLURL:         config.String("sql_url"),
 		RedisAddr:      config.String("redis_addr"),
 		RedisPass:      config.String("redis_pass"),
-		RedisDB:        config.Int("redis_db"),
+		RedisPrefix:    config.String("redis_prefix"),
 		SlackURL:       config.String("slack_url"),
 	})
 	if err != nil {
@@ -41,13 +41,14 @@ func main() {
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "OK")
 	})
-	app.Mount(mux)
-	h := app.Middleware(mux)
+	appMux := http.NewServeMux()
+	app.Mount(appMux)
+	mux.Handle("/", app.Middleware(appMux))
 
 	// lets reverse proxy handle other settings
 	srv := &http.Server{
 		Addr:    ":8080",
-		Handler: h,
+		Handler: mux,
 	}
 
 	log.Println("Start server at :8080")

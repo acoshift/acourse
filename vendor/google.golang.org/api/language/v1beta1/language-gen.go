@@ -176,9 +176,7 @@ func (s *AnalyzeEntitiesResponse) MarshalJSON() ([]byte, error) {
 
 // AnalyzeSentimentRequest: The sentiment analysis request message.
 type AnalyzeSentimentRequest struct {
-	// Document: Input document. Currently, `analyzeSentiment` only supports
-	// English text
-	// (Document.language="EN").
+	// Document: Input document.
 	Document *Document `json:"document,omitempty"`
 
 	// EncodingType: The encoding type used by the API to calculate sentence
@@ -238,6 +236,7 @@ type AnalyzeSentimentResponse struct {
 	// language specified
 	// in the request or, if not specified, the automatically-detected
 	// language.
+	// See Document.language field for more details.
 	Language string `json:"language,omitempty"`
 
 	// Sentences: The sentiment for all the sentences in the document.
@@ -628,10 +627,8 @@ type Document struct {
 	// automatically detected). Both ISO and BCP-47 language codes
 	// are
 	// accepted.<br>
-	// **Current Language Restrictions:**
-	//
-	//  * Only English, Spanish, and Japanese textual content are
-	// supported.
+	// [Language Support](/natural-language/docs/languages)
+	// lists currently supported languages for each API method.
 	// If the language (either specified by the caller or automatically
 	// detected)
 	// is not supported by the called API method, an `INVALID_ARGUMENT`
@@ -1138,7 +1135,7 @@ func (s *Sentiment) UnmarshalJSON(data []byte) error {
 // arbitrary
 // information about the error. There is a predefined set of error
 // detail types
-// in the package `google.rpc` which can be used for common error
+// in the package `google.rpc` that can be used for common error
 // conditions.
 //
 // # Language mapping
@@ -1171,7 +1168,7 @@ func (s *Sentiment) UnmarshalJSON(data []byte) error {
 //
 // - Workflow errors. A typical workflow has multiple steps. Each step
 // may
-//     have a `Status` message for error reporting purpose.
+//     have a `Status` message for error reporting.
 //
 // - Batch operations. If a client uses batch request and batch
 // response, the

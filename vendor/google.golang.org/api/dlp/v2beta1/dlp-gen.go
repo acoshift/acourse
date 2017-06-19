@@ -252,6 +252,34 @@ func (s *CloudStorageOptions) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
+// CloudStoragePath: A location in Cloud Storage.
+type CloudStoragePath struct {
+	// Path: The url, in the format of `gs://bucket/<path>`.
+	Path string `json:"path,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "Path") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Path") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *CloudStoragePath) MarshalJSON() ([]byte, error) {
+	type noMethod CloudStoragePath
+	raw := noMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
 // ContentItem: Container structure for the content to inspect.
 type ContentItem struct {
 	// Data: Content data to inspect or redact.
@@ -296,6 +324,33 @@ func (s *ContentItem) MarshalJSON() ([]byte, error) {
 type CreateInspectOperationRequest struct {
 	// InspectConfig: Configuration for the inspector.
 	InspectConfig *InspectConfig `json:"inspectConfig,omitempty"`
+
+	// OutputConfig: Optional location to store findings. The bucket must
+	// already exist and
+	// the Google APIs service account for DLP must have write permission
+	// to
+	// write to the given bucket.
+	// <p>Results are split over multiple csv files with each file name
+	// matching
+	// the pattern "[operation_id]_[count].csv", for
+	// example
+	// `3094877188788974909_1.csv`. The `operation_id` matches
+	// the
+	// identifier for the Operation, and the `count` is a counter used
+	// for
+	// tracking the number of files written. <p>The CSV file(s) contain
+	// the
+	// following columns regardless of storage type scanned: <li>id
+	// <li>info_type
+	// <li>likelihood <li>byte size of finding <li>quote
+	// <li>time_stamp<br/>
+	// <p>For Cloud Storage the next columns are:
+	// <li>file_path
+	// <li>start_offset<br/>
+	// <p>For Cloud Datastore the next columns are:
+	// <li>project_id
+	// <li>namespace_id <li>path <li>column_name <li>offset
+	OutputConfig *OutputStorageConfig `json:"outputConfig,omitempty"`
 
 	// StorageConfig: Specification of the data set to process.
 	StorageConfig *StorageConfig `json:"storageConfig,omitempty"`
@@ -438,7 +493,7 @@ func (s *FieldId) MarshalJSON() ([]byte, error) {
 
 // FileSet: Set of files to scan.
 type FileSet struct {
-	// Url: The url, in the format gs://<bucket>/<path>. Trailing wildcard
+	// Url: The url, in the format `gs://<bucket>/<path>`. Trailing wildcard
 	// in the
 	// path is allowed.
 	Url string `json:"url,omitempty"`
@@ -480,7 +535,7 @@ type Finding struct {
 	//
 	// Possible values:
 	//   "LIKELIHOOD_UNSPECIFIED" - Default value; information with all
-	// likelihoods will be included.
+	// likelihoods is included.
 	//   "VERY_UNLIKELY" - Few matching elements.
 	//   "UNLIKELY"
 	//   "POSSIBLE" - Some matching elements.
@@ -557,8 +612,13 @@ func (s *ImageLocation) MarshalJSON() ([]byte, error) {
 
 // InfoType: Type of information detected by the API.
 type InfoType struct {
-	// Name: Name of the information type, provided by the API call
-	// ListInfoTypes.
+	// Name: Name of the information type. For built-in info types, this is
+	// provided by
+	// the API call ListInfoTypes. For user-defined info types, this
+	// is
+	// provided by the user. All user-defined info types must have unique
+	// names,
+	// and cannot conflict with built-in info type names.
 	Name string `json:"name,omitempty"`
 
 	// ForceSendFields is a list of field names (e.g. "Name") to
@@ -628,8 +688,8 @@ type InspectConfig struct {
 	ExcludeTypes bool `json:"excludeTypes,omitempty"`
 
 	// IncludeQuote: When true, a contextual quote from the data that
-	// triggered a finding will
-	// be included in the response; see Finding.quote.
+	// triggered a finding is
+	// included in the response; see Finding.quote.
 	IncludeQuote bool `json:"includeQuote,omitempty"`
 
 	// InfoTypes: Restrict what info_types to look for. The values must
@@ -646,7 +706,7 @@ type InspectConfig struct {
 	//
 	// Possible values:
 	//   "LIKELIHOOD_UNSPECIFIED" - Default value; information with all
-	// likelihoods will be included.
+	// likelihoods is included.
 	//   "VERY_UNLIKELY" - Few matching elements.
 	//   "UNLIKELY"
 	//   "POSSIBLE" - Some matching elements.
@@ -715,8 +775,8 @@ func (s *InspectContentRequest) MarshalJSON() ([]byte, error) {
 
 // InspectContentResponse: Results of inspecting a list of items.
 type InspectContentResponse struct {
-	// Results: Each content_item from the request will have a result in
-	// this list, in the
+	// Results: Each content_item from the request has a result in this
+	// list, in the
 	// same order as the request.
 	Results []*InspectResult `json:"results,omitempty"`
 
@@ -1063,7 +1123,7 @@ type Operation struct {
 	// cancellation.
 	Error *Status `json:"error,omitempty"`
 
-	// Metadata: This field will contain an `InspectOperationMetdata`
+	// Metadata: This field will contain an `InspectOperationMetadata`
 	// object.
 	Metadata googleapi.RawMessage `json:"metadata,omitempty"`
 
@@ -1101,6 +1161,35 @@ func (s *Operation) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
+// OutputStorageConfig: Cloud repository for storing output.
+type OutputStorageConfig struct {
+	// StoragePath: The path to a Google Cloud Storage location to store
+	// output.
+	StoragePath *CloudStoragePath `json:"storagePath,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "StoragePath") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "StoragePath") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *OutputStorageConfig) MarshalJSON() ([]byte, error) {
+	type noMethod OutputStorageConfig
+	raw := noMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
 // PartitionId: Datastore partition ID.
 // A partition ID identifies a grouping of entities. The grouping is
 // always
@@ -1109,11 +1198,6 @@ func (s *Operation) MarshalJSON() ([]byte, error) {
 // A partition ID contains several dimensions:
 // project ID and namespace ID.
 type PartitionId struct {
-	// DatabaseId: If not empty, the ID of the database to which the
-	// entities
-	// belong.
-	DatabaseId string `json:"databaseId,omitempty"`
-
 	// NamespaceId: If not empty, the ID of the namespace to which the
 	// entities belong.
 	NamespaceId string `json:"namespaceId,omitempty"`
@@ -1121,7 +1205,7 @@ type PartitionId struct {
 	// ProjectId: The ID of the project to which the entities belong.
 	ProjectId string `json:"projectId,omitempty"`
 
-	// ForceSendFields is a list of field names (e.g. "DatabaseId") to
+	// ForceSendFields is a list of field names (e.g. "NamespaceId") to
 	// unconditionally include in API requests. By default, fields with
 	// empty values are omitted from API requests. However, any non-pointer,
 	// non-interface field appearing in ForceSendFields will be sent to the
@@ -1129,10 +1213,10 @@ type PartitionId struct {
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
 
-	// NullFields is a list of field names (e.g. "DatabaseId") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
+	// NullFields is a list of field names (e.g. "NamespaceId") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
 	// null. It is an error if a field in this list has a non-empty value.
 	// This may be used to include null fields in Patch requests.
 	NullFields []string `json:"-"`
@@ -1349,7 +1433,7 @@ func (s *RedactContentRequest) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// RedactContentResponse: Results of deidentifying a list of items.
+// RedactContentResponse: Results of redacting a list of items.
 type RedactContentResponse struct {
 	// Items: The redacted content.
 	Items []*ContentItem `json:"items,omitempty"`
@@ -1384,10 +1468,10 @@ func (s *RedactContentResponse) MarshalJSON() ([]byte, error) {
 type ReplaceConfig struct {
 	// InfoType: Type of information to replace. Only one ReplaceConfig per
 	// info_type
-	// should be provided. If ReplaceConfig does not have an info_type,
-	// we'll
-	// match it against all info_types that are found but not specified
-	// in
+	// should be provided. If ReplaceConfig does not have an info_type, the
+	// DLP
+	// API matches it against all info_types that are found but not
+	// specified in
 	// another ReplaceConfig.
 	InfoType *InfoType `json:"infoType,omitempty"`
 
@@ -1446,7 +1530,7 @@ func (s *ReplaceConfig) MarshalJSON() ([]byte, error) {
 // arbitrary
 // information about the error. There is a predefined set of error
 // detail types
-// in the package `google.rpc` which can be used for common error
+// in the package `google.rpc` that can be used for common error
 // conditions.
 //
 // # Language mapping
@@ -1479,7 +1563,7 @@ func (s *ReplaceConfig) MarshalJSON() ([]byte, error) {
 //
 // - Workflow errors. A typical workflow has multiple steps. Each step
 // may
-//     have a `Status` message for error reporting purpose.
+//     have a `Status` message for error reporting.
 //
 // - Batch operations. If a client uses batch request and batch
 // response, the
@@ -2357,9 +2441,18 @@ type InspectOperationsListCall struct {
 // server doesn't support this method, it returns
 // `UNIMPLEMENTED`.
 //
-// NOTE: the `name` binding below allows API services to override the
+// NOTE: the `name` binding allows API services to override the
 // binding
 // to use different resource name schemes, such as `users/*/operations`.
+// To
+// override the binding, API services can add a binding such
+// as
+// "/v1/{name=users/*}/operations" to their service configuration.
+// For backwards compatibility, the default name includes the
+// operations
+// collection id, however overriding users must ensure the name
+// binding
+// is the parent resource, without the operations collection id.
 func (r *InspectOperationsService) List(name string) *InspectOperationsListCall {
 	c := &InspectOperationsListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.name = name
@@ -2481,7 +2574,7 @@ func (c *InspectOperationsListCall) Do(opts ...googleapi.CallOption) (*ListOpera
 	}
 	return ret, nil
 	// {
-	//   "description": "Lists operations that match the specified filter in the request. If the\nserver doesn't support this method, it returns `UNIMPLEMENTED`.\n\nNOTE: the `name` binding below allows API services to override the binding\nto use different resource name schemes, such as `users/*/operations`.",
+	//   "description": "Lists operations that match the specified filter in the request. If the\nserver doesn't support this method, it returns `UNIMPLEMENTED`.\n\nNOTE: the `name` binding allows API services to override the binding\nto use different resource name schemes, such as `users/*/operations`. To\noverride the binding, API services can add a binding such as\n`\"/v1/{name=users/*}/operations\"` to their service configuration.\nFor backwards compatibility, the default name includes the operations\ncollection id, however overriding users must ensure the name binding\nis the parent resource, without the operations collection id.",
 	//   "flatPath": "v2beta1/inspect/operations",
 	//   "httpMethod": "GET",
 	//   "id": "dlp.inspect.operations.list",
@@ -2495,7 +2588,7 @@ func (c *InspectOperationsListCall) Do(opts ...googleapi.CallOption) (*ListOpera
 	//       "type": "string"
 	//     },
 	//     "name": {
-	//       "description": "The name of the operation collection.",
+	//       "description": "The name of the operation's parent resource.",
 	//       "location": "path",
 	//       "pattern": "^inspect/operations$",
 	//       "required": true,
@@ -2564,9 +2657,26 @@ func (r *InspectResultsFindingsService) List(name string) *InspectResultsFinding
 	return c
 }
 
+// Filter sets the optional parameter "filter": Restrict findings to
+// items that match. Supports info_type and
+// likelihood.
+// <p>Examples:<br/>
+// <li>info_type=EMAIL_ADDRESS
+// <li>info_typ
+// e=PHONE_NUMBER,EMAIL_ADDRESS
+// <li>likelihood=VERY_LIKELY
+// <li>likelihood
+// =VERY_LIKELY,LIKELY
+// <li>info_type=EMAIL_ADDRESS,likelihood=VERY_LIKELY
+// ,LIKELY
+func (c *InspectResultsFindingsListCall) Filter(filter string) *InspectResultsFindingsListCall {
+	c.urlParams_.Set("filter", filter)
+	return c
+}
+
 // PageSize sets the optional parameter "pageSize": Maximum number of
 // results to return.
-// If 0, the implementation will select a reasonable value.
+// If 0, the implementation select a reasonable value.
 func (c *InspectResultsFindingsListCall) PageSize(pageSize int64) *InspectResultsFindingsListCall {
 	c.urlParams_.Set("pageSize", fmt.Sprint(pageSize))
 	return c
@@ -2684,6 +2794,11 @@ func (c *InspectResultsFindingsListCall) Do(opts ...googleapi.CallOption) (*List
 	//     "name"
 	//   ],
 	//   "parameters": {
+	//     "filter": {
+	//       "description": "Restrict findings to items that match. Supports info_type and likelihood.\n\u003cp\u003eExamples:\u003cbr/\u003e\n\u003cli\u003einfo_type=EMAIL_ADDRESS\n\u003cli\u003einfo_type=PHONE_NUMBER,EMAIL_ADDRESS\n\u003cli\u003elikelihood=VERY_LIKELY\n\u003cli\u003elikelihood=VERY_LIKELY,LIKELY\n\u003cli\u003einfo_type=EMAIL_ADDRESS,likelihood=VERY_LIKELY,LIKELY",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
 	//     "name": {
 	//       "description": "Identifier of the results set returned as metadata of\nthe longrunning operation created by a call to CreateInspectOperation.\nShould be in the format of `inspect/results/{id}.",
 	//       "location": "path",
@@ -2692,7 +2807,7 @@ func (c *InspectResultsFindingsListCall) Do(opts ...googleapi.CallOption) (*List
 	//       "type": "string"
 	//     },
 	//     "pageSize": {
-	//       "description": "Maximum number of results to return.\nIf 0, the implementation will select a reasonable value.",
+	//       "description": "Maximum number of results to return.\nIf 0, the implementation select a reasonable value.",
 	//       "format": "int32",
 	//       "location": "query",
 	//       "type": "integer"
