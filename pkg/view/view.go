@@ -286,13 +286,13 @@ func AdminPayments(w http.ResponseWriter, r *http.Request, payments []*model.Pay
 }
 
 // AdminPaymentReject renders admin payment reject view
-func AdminPaymentReject(w http.ResponseWriter, r *http.Request, id int) {
+func AdminPaymentReject(w http.ResponseWriter, r *http.Request, id string) {
 	ctx := r.Context()
 	page := newPage(ctx)
 
 	data := struct {
 		*Page
-		ID int
+		ID string
 	}{page, id}
 	render(ctx, w, keyAdminPaymentReject{}, &data)
 }
