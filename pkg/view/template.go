@@ -1,10 +1,10 @@
 package view
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"html/template"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -234,14 +234,11 @@ func render(ctx context.Context, w http.ResponseWriter, key, data interface{}) {
 
 	w.Header().Set(header.ContentType, "text/html; charset=utf-8")
 	w.Header().Set(header.CacheControl, "no-cache, no-store, must-revalidate, max-age=0")
-	pipe := &bytes.Buffer{}
-	err := t.Execute(pipe, data)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	err = m.Minify("text/html", w, pipe)
-	if err != nil {
+	pr, pw := io.Pipe()
+	go func() {
+		pw.CloseWithError(t.Execute(pw, data))
+	}()
+	if err := m.Minify("text/html", w, pr); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
