@@ -2,14 +2,25 @@
 <div id="not-found">
   <div class="grid-container">
     <div class="text-not-found _flex-column _cross-center _full-width">
-      <div><span class="_color-main">404</span> <span>OH NO!!!</span></div>
-      <span>CHICKEN NOT FOUND</span>
+      <img
+        src=""
+        alt="404">
     </div>
   </div>
 </div>
 {{end}}
 
 {{define "app-script"}}
+<script>
+  let src = [
+    'https://storage.googleapis.com/acourse/static/9961f3c1-575f-4b98-af4f-447566ee1cb3.png',
+    'https://storage.googleapis.com/acourse/static/b14a40c9-d3a4-465d-9453-ce7fcfbc594c.png'
+  ]
+  let randImage = src[Math.ceil((Math.random() * 2) - 1)]
+  document.querySelector('#not-found > div > div').innerHTML = `
+    <img src="${randImage}" alt="404">
+  `
+</script>
 {{end}}
 
 {{define "app-style"}}
@@ -17,11 +28,23 @@
   #not-found {
     padding-top: 32px;
     min-height: calc(100vh - 311px);
+    background-color: white;
   }
-  .text-not-found {
-    font-size: 80px
+  
+  #not-found img {
+    width: 60%;
   }
+
   @media only screen and (max-width: 767px) {
+    #not-found {
+      padding-top: 32px;
+      min-height: calc(100vh - 417px);
+    }
+    
+    #not-found img {
+      width: 100%;
+    }
+
     .text-not-found {
       font-size: 32px
     }
