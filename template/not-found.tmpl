@@ -17,9 +17,10 @@
     'https://storage.googleapis.com/acourse/static/b14a40c9-d3a4-465d-9453-ce7fcfbc594c.png'
   ]
   let randImage = src[Math.ceil((Math.random() * 2) - 1)]
-  document.querySelector('#not-found > div > div').innerHTML = `
-    <img src="${randImage}" alt="404">
-  `
+  document
+    .querySelector('#not-found > div > div')
+    .innerHTML = `<img src="${randImage}" alt="404">`
+
 </script>
 {{end}}
 
