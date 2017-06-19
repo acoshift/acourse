@@ -36,7 +36,7 @@ func course(w http.ResponseWriter, r *http.Request) {
 	case "assignment":
 		mustSignedIn(http.HandlerFunc(courseAssignment)).ServeHTTP(w, r)
 	default:
-		http.NotFound(w, r)
+		view.NotFound(w, r)
 	}
 }
 
@@ -52,7 +52,7 @@ func courseView(w http.ResponseWriter, r *http.Request) {
 		// link can not parse to uuid get course id from url
 		id, err = model.GetCourseIDFromURL(ctx, link)
 		if err == model.ErrNotFound {
-			http.NotFound(w, r)
+			view.NotFound(w, r)
 			return
 		}
 		if err != nil {
@@ -62,7 +62,7 @@ func courseView(w http.ResponseWriter, r *http.Request) {
 	}
 	x, err := model.GetCourse(ctx, id)
 	if err == model.ErrNotFound {
-		http.NotFound(w, r)
+		view.NotFound(w, r)
 		return
 	}
 	if err != nil {
@@ -133,7 +133,7 @@ func courseContent(w http.ResponseWriter, r *http.Request) {
 		// link can not parse to uuid get course id from url
 		id, err = model.GetCourseIDFromURL(ctx, link)
 		if err == model.ErrNotFound {
-			http.NotFound(w, r)
+			view.NotFound(w, r)
 			return
 		}
 		if err != nil {
@@ -143,7 +143,7 @@ func courseContent(w http.ResponseWriter, r *http.Request) {
 	}
 	x, err := model.GetCourse(ctx, id)
 	if err == model.ErrNotFound {
-		http.NotFound(w, r)
+		view.NotFound(w, r)
 		return
 	}
 	if err != nil {
@@ -443,7 +443,7 @@ func editorContent(w http.ResponseWriter, r *http.Request) {
 
 	course, err := model.GetCourse(ctx, id)
 	if err == model.ErrNotFound {
-		http.NotFound(w, r)
+		view.NotFound(w, r)
 		return
 	}
 	if err != nil {
@@ -474,7 +474,7 @@ func courseEnroll(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		id, err = model.GetCourseIDFromURL(ctx, link)
 		if err == model.ErrNotFound {
-			http.NotFound(w, r)
+			view.NotFound(w, r)
 			return
 		}
 		if err != nil {
@@ -485,7 +485,7 @@ func courseEnroll(w http.ResponseWriter, r *http.Request) {
 
 	x, err := model.GetCourse(ctx, id)
 	if err == model.ErrNotFound {
-		http.NotFound(w, r)
+		view.NotFound(w, r)
 		return
 	}
 	if err != nil {
@@ -525,7 +525,7 @@ func postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		id, err = model.GetCourseIDFromURL(ctx, link)
 		if err == model.ErrNotFound {
-			http.NotFound(w, r)
+			view.NotFound(w, r)
 			return
 		}
 		if err != nil {
@@ -536,7 +536,7 @@ func postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 
 	x, err := model.GetCourse(ctx, id)
 	if err == model.ErrNotFound {
-		http.NotFound(w, r)
+		view.NotFound(w, r)
 		return
 	}
 	if err != nil {
@@ -659,7 +659,7 @@ func courseAssignment(w http.ResponseWriter, r *http.Request) {
 		// link can not parse to int64 get course id from url
 		id, err = model.GetCourseIDFromURL(ctx, link)
 		if err == model.ErrNotFound {
-			http.NotFound(w, r)
+			view.NotFound(w, r)
 			return
 		}
 		if err != nil {
@@ -669,7 +669,7 @@ func courseAssignment(w http.ResponseWriter, r *http.Request) {
 	}
 	x, err := model.GetCourse(ctx, id)
 	if err == model.ErrNotFound {
-		http.NotFound(w, r)
+		view.NotFound(w, r)
 		return
 	}
 	if err != nil {

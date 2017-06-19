@@ -9,6 +9,7 @@ import (
 
 	"github.com/acoshift/acourse/pkg/appctx"
 	"github.com/acoshift/acourse/pkg/model"
+	"github.com/acoshift/acourse/pkg/view"
 	"github.com/acoshift/flash"
 	"github.com/acoshift/middleware"
 	"github.com/acoshift/servertiming"
@@ -176,7 +177,7 @@ func isCourseOwner(h http.Handler) http.Handler {
 		var ownerID string
 		err := db.QueryRowContext(ctx, `select user_id from courses where id = $1`, id).Scan(&ownerID)
 		if err == sql.ErrNoRows {
-			http.NotFound(w, r)
+			view.NotFound(w, r)
 			return
 		}
 		if err != nil {

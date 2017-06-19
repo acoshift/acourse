@@ -3,6 +3,7 @@ package view
 import (
 	"context"
 	"html/template"
+	"math/rand"
 	"net/http"
 	"net/url"
 
@@ -13,6 +14,7 @@ import (
 
 type (
 	keyIndex               struct{}
+	keyNotFound            struct{}
 	keySignIn              struct{}
 	keySignUp              struct{}
 	keyProfile             struct{}
@@ -67,6 +69,23 @@ func Index(w http.ResponseWriter, r *http.Request, courses []*model.Course) {
 		Courses []*model.Course
 	}{newPage(ctx), courses}
 	render(ctx, w, keyIndex{}, &data)
+}
+
+var notFoundImages = []string{
+	"https://storage.googleapis.com/acourse/static/9961f3c1-575f-4b98-af4f-447566ee1cb3.png",
+	"https://storage.googleapis.com/acourse/static/b14a40c9-d3a4-465d-9453-ce7fcfbc594c.png",
+}
+
+// NotFound renders not found view
+func NotFound(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	page := newPage(ctx)
+	page.Image = notFoundImages[rand.Intn(len(notFoundImages))]
+
+	data := struct {
+		*Page
+	}{page}
+	render(ctx, w, keyNotFound{}, &data)
 }
 
 // SignIn renders signin view
