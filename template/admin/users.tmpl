@@ -26,8 +26,8 @@
           <a class="show-sm-upper acourse-button-outline -info acourse-side-space" href="?page={{.}}">{{.}}</a>
         {{end}}
       {{end}}
-      <div class="hide-sm-upper _flex-row _flex-span _self-stretch">
-        <input class="acourse-input -rise _full-width" type="number" placeholder="Page Number" value={{.CurrentPage}} onkeypress="paginationHandler(event, 'top')">
+      <div class="hide-sm-upper _flex-row _flex-span _main-center">
+        <label>Page: {{.CurrentPage}}</label>
       </div>
       {{if eq .CurrentPage .TotalPage}}
         <a class="_flex-row acourse-button-outline -info acourse-side-space -disabled" href="?page={{incr .CurrentPage}}" class="disabled">
@@ -93,8 +93,8 @@
           <a class="show-sm-upper acourse-button-outline -info acourse-side-space" href="?page={{.}}">{{.}}</a>
         {{end}}
       {{end}}
-      <div class="hide-sm-upper _flex-row _flex-span _self-stretch">
-        <input class="acourse-input -rise _full-width" type="number" placeholder="Page Number" value={{.CurrentPage}} onkeypress="paginationHandler(event, 'bottom')">
+      <div class="hide-sm-upper _flex-row _flex-span _main-center">
+        <label>Page: {{.CurrentPage}}</label>
       </div>
       {{if eq .CurrentPage .TotalPage}}
         <a class="_flex-row acourse-button-outline -info acourse-side-space -disabled" href="?page={{incr .CurrentPage}}" class="disabled">
