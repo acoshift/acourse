@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"math"
+
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/acourse/pkg/view"
 )
@@ -42,13 +44,32 @@ func adminUsers(w http.ResponseWriter, r *http.Request) {
 
 func adminCourses(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	courses, err := model.ListCourses(ctx)
+	page, _ := strconv.ParseInt(r.FormValue("page"), 10, 64)
+	if page <= 0 {
+		page = 1
+	}
+	limit := int64(30)
+
+	cnt, err := model.CountCourses(ctx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	view.AdminCourses(w, r, courses, 1, 1)
+	offset := (page - 1) * limit
+	for offset > cnt {
+		page--
+		offset = (page - 1) * limit
+	}
+	totalPage := int64(math.Ceil(float64(cnt) / float64(limit)))
+
+	courses, err := model.ListCourses(ctx, limit, offset)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	view.AdminCourses(w, r, courses, int(page), int(totalPage))
 }
 
 func adminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter func(context.Context, int64, int64) ([]*model.Payment, error), paymentsCounter func(context.Context) (int64, error)) {
