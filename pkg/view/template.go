@@ -111,6 +111,9 @@ func parseTemplate(key interface{}, set []string) {
 			if n <= 1 {
 				return r
 			}
+			if n <= 2 {
+				return append(r, 2)
+			}
 			if p <= 3 {
 				r = append(r, 2, 3)
 			}
