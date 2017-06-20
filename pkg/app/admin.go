@@ -3,10 +3,9 @@ package app
 import (
 	"context"
 	"fmt"
+	"math"
 	"net/http"
 	"strconv"
-
-	"math"
 
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/acourse/pkg/view"
