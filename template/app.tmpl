@@ -136,6 +136,13 @@
         }
       }
     }
+
+    function paginationHandler (e, position) {
+      if(e.keyCode === 13) {
+        var idx = position === "top" ? 0 : 1
+        window.location = "?page="+ document.getElementsByTagName("input")[idx].value
+      }
+    }
   </script>
   {{template "app-script" $}}
 {{end}}
