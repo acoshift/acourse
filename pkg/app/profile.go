@@ -146,7 +146,3 @@ func postProfileEdit(w http.ResponseWriter, r *http.Request) {
 
 	http.Redirect(w, r, "/profile", http.StatusSeeOther)
 }
-
-func userResetPassword(w http.ResponseWriter, r *http.Request) {
-	view.UserResetPassword(w, r)
-}

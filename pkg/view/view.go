@@ -18,6 +18,7 @@ type (
 	keyNotFound            struct{}
 	keySignIn              struct{}
 	keySignUp              struct{}
+	keyResetPassword       struct{}
 	keyProfile             struct{}
 	keyProfileEdit         struct{}
 	keyUser                struct{}
@@ -34,7 +35,6 @@ type (
 	keyAdminCourses        struct{}
 	keyAdminPayments       struct{}
 	keyAdminPaymentReject  struct{}
-	keyUserResetPassword   struct{}
 )
 
 // Page type provides layout data like title, description, and og
@@ -109,6 +109,16 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 		*Page
 	}{newPage(ctx)}
 	render(ctx, w, keySignUp{}, &data)
+}
+
+// ResetPassword render reset password view
+func ResetPassword(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	page := newPage(ctx)
+	data := struct {
+		*Page
+	}{page}
+	render(ctx, w, keyResetPassword{}, &data)
 }
 
 // Profile renders profile view
@@ -320,14 +330,4 @@ func AdminPaymentReject(w http.ResponseWriter, r *http.Request, payment *model.P
 		Message string
 	}{page, payment, message}
 	render(ctx, w, keyAdminPaymentReject{}, &data)
-}
-
-// UserResetPassword render user reset password view
-func UserResetPassword(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	page := newPage(ctx)
-	data := struct {
-		*Page
-	}{page}
-	render(ctx, w, keyUserResetPassword{}, &data)
 }
