@@ -10,6 +10,7 @@ import (
 	"github.com/acoshift/acourse/pkg/appctx"
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/flash"
+	"github.com/acoshift/header"
 )
 
 type (
@@ -85,6 +86,9 @@ func NotFound(w http.ResponseWriter, r *http.Request) {
 	data := struct {
 		*Page
 	}{page}
+
+	w.Header().Set(header.XContentTypeOptions, "nosniff")
+	w.WriteHeader(http.StatusNotFound)
 	render(ctx, w, keyNotFound{}, &data)
 }
 
