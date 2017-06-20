@@ -129,7 +129,9 @@ func parseTemplate(key interface{}, set []string) {
 			if n-p >= 3 {
 				r = append(r, -1)
 			}
-			r = append(r, n)
+			if n >= 4 {
+				r = append(r, n)
+			}
 			return r
 		},
 		"courseType": func(v int) string {
