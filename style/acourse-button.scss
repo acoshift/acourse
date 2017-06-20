@@ -52,23 +52,44 @@
   &.-primary {
     color: $color-primary;
     border: 1px solid $color-primary;
+    &.-disabled {
+      color: white;
+      background-color: $color-primary;
+    }
   }
   &.-positive {
     color: $color-positive;
     border: 1px solid $color-positive;
+    &.-disabled {
+      color: white;
+      background-color: $color-positive;
+    }
   }
   &.-warning {
     color: $color-warning;
     border: 1px solid $color-warning;
+    &.-disabled {
+      color: white;
+      background-color: $color-warning;
+    }
   }
   &.-negative {
     color: $color-negative;
     border: 1px solid $color-negative;
+    &.-disabled {
+      color: white;
+      background-color: $color-negative;
+    }
   }
   &.-info {
     color: $color-info;
     border: 1px solid $color-info;
+    &.-disabled {
+      color: white;
+      background-color: $color-info;
+    }
   }
+ 
 }
 
 .acourse-button-secondary {
