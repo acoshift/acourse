@@ -366,30 +366,33 @@ func ListPublicCourses(ctx context.Context) ([]*Course, error) {
 		}
 	}
 
-	rows, err := db.QueryContext(ctx, queryListCoursesPublic)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
 	xs := make([]*Course, 0)
-	ids := make([]string, 0)
 	m := make(map[string]*Course)
-	for rows.Next() {
-		var x Course
-		err = scanCourse(rows.Scan, &x)
+	ids := make([]string, 0)
+
+	{
+		rows, err := db.QueryContext(ctx, queryListCoursesPublic)
 		if err != nil {
 			return nil, err
 		}
-		xs = append(xs, &x)
-		ids = append(ids, x.ID)
-		m[x.ID] = &x
+		defer rows.Close()
+		for rows.Next() {
+			var x Course
+			err = scanCourse(rows.Scan, &x)
+			if err != nil {
+				return nil, err
+			}
+			xs = append(xs, &x)
+			ids = append(ids, x.ID)
+			m[x.ID] = &x
+		}
+		if err = rows.Err(); err != nil {
+			return nil, err
+		}
+		rows.Close()
 	}
-	if err = rows.Err(); err != nil {
-		return nil, err
-	}
-	rows.Close()
 
-	rows, err = db.QueryContext(ctx, `select course_id, count(*) from enrolls where course_id = any($1) group by course_id`, pq.Array(ids))
+	rows, err := db.QueryContext(ctx, `select course_id, count(*) from enrolls where course_id = any($1) group by course_id`, pq.Array(ids))
 	if err != nil {
 		return nil, err
 	}
