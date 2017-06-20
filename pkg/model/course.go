@@ -107,7 +107,12 @@ const (
 
 	queryListCoursesPublic = selectCourses + `
 		where course_options.public = true
-		order by courses.created_at desc
+		order by
+			case when courses.type = 1
+				then 1
+				else null
+			end,
+			courses.created_at desc
 	`
 
 	queryListCoursesOwn = selectCourses + `
