@@ -26,19 +26,16 @@ func adminUsers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	offset := (page - 1) * limit
-	for offset > cnt {
-		flagOutOfBound = true
-		page--
-		offset = (page - 1) * limit
+	totalPage := int64(math.Ceil(float64(cnt) / float64(limit)))
+	offset := (totalPage - 1) * limit
+	if totalPage == 0 {
+		totalPage = 1
+		offset = 0
 	}
-	if flagOutOfBound {
-		var buffer bytes.Buffer
-		buffer.WriteString("/admin/users?page=")
-		buffer.WriteString(strconv.FormatInt(page, 10))
-		http.Redirect(w, r, buffer.String(), http.StatusSeeOther)
+
+	if page > totalPage {
+		http.Redirect(w, r, "/admin/users?page="+strconv.FormatInt(totalPage, 10), http.StatusSeeOther)
 	}
-	totalPage := cnt / limit
 
 	users, err := model.ListUsers(ctx, limit, offset)
 	if err != nil {
@@ -53,7 +50,7 @@ func adminCourses(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	page, _ := strconv.ParseInt(r.FormValue("page"), 10, 64)
 	if page <= 0 {
-		http.Redirect(w, r, "/admin/users?page=1", http.StatusSeeOther)
+		http.Redirect(w, r, "/admin/courses?page=1", http.StatusSeeOther)
 	}
 	limit := int64(30)
 
@@ -63,19 +60,19 @@ func adminCourses(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	offset := (page - 1) * limit
-	for offset > cnt {
-		flagOutOfBound = true
-		page--
-		offset = (page - 1) * limit
+	totalPage := int64(math.Ceil(float64(cnt) / float64(limit)))
+	offset := (totalPage - 1) * limit
+	if totalPage == 0 {
+		totalPage = 1
+		offset = 0
 	}
-	if flagOutOfBound {
+
+	if page > totalPage {
 		var buffer bytes.Buffer
 		buffer.WriteString("/admin/courses?page=")
-		buffer.WriteString(strconv.FormatInt(page, 10))
-		http.Redirect(w, r, buffer.String(), http.StatusSeeOther)
+		buffer.WriteString(strconv.FormatInt(totalPage, 10))
+		http.Redirect(w, r, "/admin/courses?page="+strconv.FormatInt(totalPage, 10), http.StatusSeeOther)
 	}
-	totalPage := int64(math.Ceil(float64(cnt) / float64(limit)))
 
 	courses, err := model.ListCourses(ctx, limit, offset)
 	if err != nil {
@@ -90,7 +87,7 @@ func adminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter func(c
 	ctx := r.Context()
 	page, _ := strconv.ParseInt(r.FormValue("page"), 10, 64)
 	if page <= 0 {
-		http.Redirect(w, r, "/admin/users?page=1", http.StatusSeeOther)
+		http.Redirect(w, r, "/admin/payments/"+category+"?page=1", http.StatusSeeOther)
 	}
 	limit := int64(30)
 
@@ -100,21 +97,16 @@ func adminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter func(c
 		return
 	}
 
-	offset := (page - 1) * limit
-	for offset > cnt {
-		flagOutOfBound = true
-		page--
-		offset = (page - 1) * limit
+	totalPage := int64(math.Ceil(float64(cnt) / float64(limit)))
+	offset := (totalPage - 1) * limit
+	if totalPage == 0 {
+		totalPage = 1
+		offset = 0
 	}
-	if flagOutOfBound {
-		var buffer bytes.Buffer
-		buffer.WriteString("/admin/payments/")
-		buffer.WriteString(category)
-		buffer.WriteString("?page=")
-		buffer.WriteString(strconv.FormatInt(page, 10))
-		http.Redirect(w, r, buffer.String(), http.StatusSeeOther)
+
+	if page > totalPage {
+		http.Redirect(w, r, "/admin/payments/"+category+"?page="+strconv.FormatInt(totalPage, 10), http.StatusSeeOther)
 	}
-	totalPage := cnt / limit
 
 	payments, err := paymentsGetter(ctx, limit, offset)
 	if err != nil {
