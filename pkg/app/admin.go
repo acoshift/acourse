@@ -1,7 +1,6 @@
 package app
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"math"
@@ -68,9 +67,6 @@ func adminCourses(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if page > totalPage {
-		var buffer bytes.Buffer
-		buffer.WriteString("/admin/courses?page=")
-		buffer.WriteString(strconv.FormatInt(totalPage, 10))
 		http.Redirect(w, r, "/admin/courses?page="+strconv.FormatInt(totalPage, 10), http.StatusSeeOther)
 	}
 
