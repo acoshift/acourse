@@ -52,9 +52,11 @@ func adminUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func adminCourses(w http.ResponseWriter, r *http.Request) {
+	flagOutOfBound := bool(false)
 	ctx := r.Context()
 	page, _ := strconv.ParseInt(r.FormValue("page"), 10, 64)
 	if page <= 0 {
+		flagOutOfBound = true
 		page = 1
 	}
 	limit := int64(30)
@@ -67,8 +69,15 @@ func adminCourses(w http.ResponseWriter, r *http.Request) {
 
 	offset := (page - 1) * limit
 	for offset > cnt {
+		flagOutOfBound = true
 		page--
 		offset = (page - 1) * limit
+	}
+	if flagOutOfBound {
+		var buffer bytes.Buffer
+		buffer.WriteString("/admin/courses?page=")
+		buffer.WriteString(strconv.FormatInt(page, 10))
+		http.Redirect(w, r, buffer.String(), http.StatusSeeOther)
 	}
 	totalPage := int64(math.Ceil(float64(cnt) / float64(limit)))
 
