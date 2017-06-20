@@ -13,12 +13,10 @@ import (
 )
 
 func adminUsers(w http.ResponseWriter, r *http.Request) {
-	flagOutOfBound := bool(false)
 	ctx := r.Context()
 	page, _ := strconv.ParseInt(r.FormValue("page"), 10, 64)
 	if page <= 0 {
-		flagOutOfBound = true
-		page = 1
+		http.Redirect(w, r, "/admin/users?page=1", http.StatusSeeOther)
 	}
 	limit := int64(30)
 
@@ -52,12 +50,10 @@ func adminUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func adminCourses(w http.ResponseWriter, r *http.Request) {
-	flagOutOfBound := bool(false)
 	ctx := r.Context()
 	page, _ := strconv.ParseInt(r.FormValue("page"), 10, 64)
 	if page <= 0 {
-		flagOutOfBound = true
-		page = 1
+		http.Redirect(w, r, "/admin/users?page=1", http.StatusSeeOther)
 	}
 	limit := int64(30)
 
@@ -91,12 +87,10 @@ func adminCourses(w http.ResponseWriter, r *http.Request) {
 }
 
 func adminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter func(context.Context, int64, int64) ([]*model.Payment, error), paymentsCounter func(context.Context) (int64, error), category string) {
-	flagOutOfBound := bool(false)
 	ctx := r.Context()
 	page, _ := strconv.ParseInt(r.FormValue("page"), 10, 64)
 	if page <= 0 {
-		flagOutOfBound = true
-		page = 1
+		http.Redirect(w, r, "/admin/users?page=1", http.StatusSeeOther)
 	}
 	limit := int64(30)
 
