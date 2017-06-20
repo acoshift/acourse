@@ -90,10 +90,12 @@ func adminCourses(w http.ResponseWriter, r *http.Request) {
 	view.AdminCourses(w, r, courses, int(page), int(totalPage))
 }
 
-func adminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter func(context.Context, int64, int64) ([]*model.Payment, error), paymentsCounter func(context.Context) (int64, error)) {
+func adminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter func(context.Context, int64, int64) ([]*model.Payment, error), paymentsCounter func(context.Context) (int64, error), category string) {
+	flagOutOfBound := bool(false)
 	ctx := r.Context()
 	page, _ := strconv.ParseInt(r.FormValue("page"), 10, 64)
 	if page <= 0 {
+		flagOutOfBound = true
 		page = 1
 	}
 	limit := int64(30)
@@ -106,8 +108,17 @@ func adminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter func(c
 
 	offset := (page - 1) * limit
 	for offset > cnt {
+		flagOutOfBound = true
 		page--
 		offset = (page - 1) * limit
+	}
+	if flagOutOfBound {
+		var buffer bytes.Buffer
+		buffer.WriteString("/admin/payments/")
+		buffer.WriteString(category)
+		buffer.WriteString("?page=")
+		buffer.WriteString(strconv.FormatInt(page, 10))
+		http.Redirect(w, r, buffer.String(), http.StatusSeeOther)
 	}
 	totalPage := cnt / limit
 
@@ -287,9 +298,9 @@ func adminPendingPayments(w http.ResponseWriter, r *http.Request) {
 		postAdminPendingPayment(w, r)
 		return
 	}
-	adminPayments(w, r, model.ListPendingPayments, model.CountPendingPayments)
+	adminPayments(w, r, model.ListPendingPayments, model.CountPendingPayments, "pending")
 }
 
 func adminHistoryPayments(w http.ResponseWriter, r *http.Request) {
-	adminPayments(w, r, model.ListHistoryPayments, model.CountHistoryPayments)
+	adminPayments(w, r, model.ListHistoryPayments, model.CountHistoryPayments, "history")
 }
