@@ -294,7 +294,6 @@ func GetCourseIDFromURL(ctx context.Context, url string) (string, error) {
 }
 
 // ListCourses lists all courses
-// TODO: pagination
 func ListCourses(ctx context.Context, limit, offset int64) ([]*Course, error) {
 	xs := make([]*Course, 0)
 	rows, err := db.QueryContext(ctx, `
