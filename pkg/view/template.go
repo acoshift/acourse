@@ -82,6 +82,7 @@ func init() {
 	parseTemplate(keyAdminPayments{}, []string{"admin/payments.tmpl", "app.tmpl", "layout.tmpl"})
 	parseTemplate(keyAdminPaymentReject{}, []string{"admin/payment-reject.tmpl", "app.tmpl", "layout.tmpl"})
 	parseTemplate(keyNotFound{}, []string{"not-found.tmpl", "app.tmpl", "layout.tmpl"})
+	parseTemplate(keyUserResetPassword{}, []string{"reset-password.tmpl", "app.tmpl", "layout.tmpl"})
 }
 
 func joinTemplateDir(files []string) []string {

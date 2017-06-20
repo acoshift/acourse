@@ -44,6 +44,7 @@ func Mount(mux *http.ServeMux) {
 	mux.Handle("/course/", http.StripPrefix("/course/", http.HandlerFunc(course)))
 	mux.Handle("/admin/", http.StripPrefix("/admin", onlyAdmin(admin)))
 	mux.Handle("/editor/", http.StripPrefix("/editor", editor))
+	mux.Handle("/reset-password", mustNotSignedIn(http.HandlerFunc(userResetPassword)))
 }
 
 type fileFS struct {
