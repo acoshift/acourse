@@ -16,6 +16,7 @@ func adminUsers(w http.ResponseWriter, r *http.Request) {
 	page, _ := strconv.ParseInt(r.FormValue("page"), 10, 64)
 	if page <= 0 {
 		http.Redirect(w, r, "/admin/users?page=1", http.StatusSeeOther)
+		return
 	}
 	limit := int64(30)
 
@@ -34,6 +35,7 @@ func adminUsers(w http.ResponseWriter, r *http.Request) {
 
 	if page > totalPage {
 		http.Redirect(w, r, "/admin/users?page="+strconv.FormatInt(totalPage, 10), http.StatusSeeOther)
+		return
 	}
 
 	users, err := model.ListUsers(ctx, limit, offset)
@@ -50,6 +52,7 @@ func adminCourses(w http.ResponseWriter, r *http.Request) {
 	page, _ := strconv.ParseInt(r.FormValue("page"), 10, 64)
 	if page <= 0 {
 		http.Redirect(w, r, "/admin/courses?page=1", http.StatusSeeOther)
+		return
 	}
 	limit := int64(30)
 
@@ -68,6 +71,7 @@ func adminCourses(w http.ResponseWriter, r *http.Request) {
 
 	if page > totalPage {
 		http.Redirect(w, r, "/admin/courses?page="+strconv.FormatInt(totalPage, 10), http.StatusSeeOther)
+		return
 	}
 
 	courses, err := model.ListCourses(ctx, limit, offset)
@@ -84,6 +88,7 @@ func adminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter func(c
 	page, _ := strconv.ParseInt(r.FormValue("page"), 10, 64)
 	if page <= 0 {
 		http.Redirect(w, r, "/admin/payments/"+category+"?page=1", http.StatusSeeOther)
+		return
 	}
 	limit := int64(30)
 
@@ -102,6 +107,7 @@ func adminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter func(c
 
 	if page > totalPage {
 		http.Redirect(w, r, "/admin/payments/"+category+"?page="+strconv.FormatInt(totalPage, 10), http.StatusSeeOther)
+		return
 	}
 
 	payments, err := paymentsGetter(ctx, limit, offset)
