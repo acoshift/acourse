@@ -10,6 +10,7 @@ import (
 	"github.com/acoshift/acourse/pkg/appctx"
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/acourse/pkg/view"
+	"github.com/acoshift/cachestatic"
 	"github.com/acoshift/flash"
 	"github.com/acoshift/middleware"
 	"github.com/acoshift/servertiming"
@@ -21,6 +22,16 @@ import (
 
 // Middleware wraps handlers with app's middleware
 func Middleware(h http.Handler) http.Handler {
+	cacheInvalidator := make(chan interface{})
+	type indexIndex struct{}
+
+	go func() {
+		for {
+			time.Sleep(15 * time.Second)
+			cacheInvalidator <- indexIndex{}
+		}
+	}()
+
 	return middleware.Chain(
 		servertiming.Middleware(),
 		panicLogger,
@@ -41,6 +52,27 @@ func Middleware(h http.Handler) http.Handler {
 					},
 				},
 			}),
+		}),
+		cachestatic.New(cachestatic.Config{
+			Indexer: func(r *http.Request) interface{} {
+				if r.URL.Path == "/" {
+					return indexIndex{}
+				}
+				return nil
+			},
+			Skipper: func(r *http.Request) bool {
+				s := session.Get(r.Context())
+				// skip if signed in
+				if x := s.Get(keyUserID); x != nil {
+					return true
+				}
+				// cache only index
+				if r.URL.Path == "/" {
+					return false
+				}
+				return true
+			},
+			Invalidator: cacheInvalidator,
 		}),
 		flash.Middleware(),
 		fetchUser,

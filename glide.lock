@@ -1,8 +1,8 @@
 hash: 68cd7896bcd91d39c1e5691cbd19af2c23e76a81d85f2acda310ee14fc9cddd2
-updated: 2017-06-18T22:19:54.103133983+07:00
+updated: 2017-06-21T15:34:40.245376569+07:00
 imports:
 - name: cloud.google.com/go
-  version: b8b88d2593afebb61b6f616bb3c85f79f28819d2
+  version: d4f8670e9dba7e0c9dd3f6da843d678afd21c587
   subpackages:
   - compute/metadata
   - iam
@@ -10,6 +10,8 @@ imports:
   - internal/optional
   - internal/version
   - storage
+- name: github.com/acoshift/cachestatic
+  version: 76c349efd085b9bd50261f3b71b3b1772a359e9b
 - name: github.com/acoshift/configfile
   version: c416a3c1e7fab6eaaf0e3ee56ec17793a485eddf
 - name: github.com/acoshift/flash
@@ -42,7 +44,7 @@ imports:
   - internal
   - redis
 - name: github.com/golang/protobuf
-  version: e325f446bebc2998605911c0a2650d9920361d4a
+  version: 1fb8fd32a09087bcd727225167edd31e1b9ceb24
   subpackages:
   - proto
   - protoc-gen-go/descriptor
@@ -82,7 +84,7 @@ imports:
   - tiff
   - tiff/lzw
 - name: golang.org/x/net
-  version: 973f3f3bbd50e92b13faa6c53ec16f49b45e851c
+  version: 057a25b06247e0c51ba15d8ae475feb2fcb72164
   subpackages:
   - context
   - context/ctxhttp
@@ -103,7 +105,7 @@ imports:
   - jws
   - jwt
 - name: golang.org/x/text
-  version: 9e2f80a6ba7ed4ba13e0cd4b1f094bf916875735
+  version: 4e9ab9ee170f2a39bd66c92b3e0a47ff47a4bc77
   subpackages:
   - secure/bidirule
   - transform
@@ -143,7 +145,7 @@ imports:
   - googleapis/iam/v1
   - googleapis/rpc/status
 - name: google.golang.org/grpc
-  version: c5c761dbca07f4d0efafd3f430a40dcdf1c1163f
+  version: 40e7a759a035a36611d6c9a3c2acb11ce1497727
   subpackages:
   - codes
   - credentials
