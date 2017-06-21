@@ -15,8 +15,7 @@ func adminUsers(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	page, _ := strconv.ParseInt(r.FormValue("page"), 10, 64)
 	if page <= 0 {
-		http.Redirect(w, r, "/admin/users?page=1", http.StatusSeeOther)
-		return
+		page = 1
 	}
 	limit := int64(30)
 
@@ -51,8 +50,7 @@ func adminCourses(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	page, _ := strconv.ParseInt(r.FormValue("page"), 10, 64)
 	if page <= 0 {
-		http.Redirect(w, r, "/admin/courses?page=1", http.StatusSeeOther)
-		return
+		page = 1
 	}
 	limit := int64(30)
 
@@ -87,8 +85,7 @@ func adminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter func(c
 	ctx := r.Context()
 	page, _ := strconv.ParseInt(r.FormValue("page"), 10, 64)
 	if page <= 0 {
-		http.Redirect(w, r, "/admin/payments/"+category+"?page=1", http.StatusSeeOther)
-		return
+		page = 1
 	}
 	limit := int64(30)
 
