@@ -8,7 +8,7 @@
       <div class="acourse-block">
         <div class="acourse-label {{.Type | courseType}} _font-bold">{{.Type | courseType}}</div>
         {{if and (eq .Type live) .Start.Valid}}
-          <div class="live-date _font-size-small">Start at {{.Start.Time | date}}</div>
+          <div class="live-date _font-size-small">เริ่มเรียน {{.Start.Time | date}}</div>
         {{end}}
       </div>
 
@@ -21,7 +21,7 @@
         </div>
         <div class="course-price _flex-row _cross-end">
           {{if le .Price 0.0}}
-            <p class="_font-bold _no-margin">FREE</p>
+            <p class="_font-bold _no-margin">ฟรี</p>
           {{else}}
             <p class="_no-margin {{if .Option.Discount}}discount _color-positive{{else}}_font-bold{{end}}">
               ฿ {{.Price | currency}}

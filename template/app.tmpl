@@ -7,35 +7,35 @@
       </a>
       <div class="_flex-row _cross-center _main-end">
       {{if .Me}}
-        <div class="dropdown _full-height">
-          <div class="dropbtn _full-height _flex-row _cross-center ">
-            <img
-              class="acourse-block-big acourse-circle _img-cover _no-margin"
-              src="{{.Me.Image}}"
-              onerror="this.src = 'https://storage.googleapis.com/acourse/static/d509b7d8-88ad-478c-aa40-2984878c87cd.svg'">
-            <div class="username">&nbsp;&nbsp;{{.Me.Username}}</div>
-            &nbsp;&nbsp;<i class="fa fa-caret-down"></i>
-          </div>
-          <div class="dropdown-content-w">
-            <div class="dropdown-content">
-              <a class="_font-main _font-bold _font-size-big {{if eq templateName "profile"}} active{{end}}" href="/profile">Profile</a>
-              {{if .Me.Role.Admin.Bool}}
-              <a class="_font-main _font-bold _font-size-big {{if eq templateName "admin/users"}} active{{end}}" href="/admin/users">Users</a>
-              <a class="_font-main _font-bold _font-size-big {{if eq templateName "admin/courses"}} active{{end}}" href="/admin/courses">Courses</a>
-              <a class="_font-main _font-bold _font-size-big" href="/admin/payments/pending">Pending Payments</a>
-              <a class="_font-main _font-bold _font-size-big" href="/admin/payments/history">History Payments</a>
-              {{end}}
-              <a class="_font-main _font-bold _font-size-big" href="/signout">Sign Out</a>
-            </div>
+      <div class="dropdown _full-height">
+        <div class="dropbtn _full-height _flex-row _cross-center ">
+          <img
+            class="acourse-block-big acourse-circle _img-cover _no-margin"
+            src="{{.Me.Image}}"
+            onerror="this.src = 'https://storage.googleapis.com/acourse/static/d509b7d8-88ad-478c-aa40-2984878c87cd.svg'">
+          <div class="username">&nbsp;&nbsp;{{.Me.Username}}</div>
+          &nbsp;&nbsp;<i class="fa fa-caret-down"></i>
+        </div>
+        <div class="dropdown-content-w">
+          <div class="dropdown-content">
+            <a class="_font-main _font-bold _font-size-big {{if eq templateName "profile"}} active{{end}}" href="/profile">โปรไฟล์</a>
+            {{if .Me.Role.Admin.Bool}}
+            <a class="_font-main _font-bold _font-size-big {{if eq templateName "admin/users"}} active{{end}}" href="/admin/users">รายชื่อผู้ใช้</a>
+            <a class="_font-main _font-bold _font-size-big {{if eq templateName "admin/courses"}} active{{end}}" href="/admin/courses">รายชื่อคอร์ส</a>
+            <a class="_font-main _font-bold _font-size-big" href="/admin/payments/pending">การชำระเงินรอดำเนินการ</a>
+            <a class="_font-main _font-bold _font-size-big" href="/admin/payments/history">ประวัติการชำระเงิน</a>
+            {{end}}
+            <a class="_font-main _font-bold _font-size-big" href="/signout">ออกจากระบบ</a>
           </div>
         </div>
+      </div>
       {{else}}
-        <a class="link _flex-row _cross-center _font-sub" href="/signin">
-          Sign In
-        </a>
-        <a href="/signup">
-          <div class="acourse-button -primary _font-sub">Register</div>
-        </a>
+      <a class="link _flex-row _cross-center _font-sub" href="/signin">
+        เข้าสู่ระบบ
+      </a>
+      <a href="/signup">
+        <div class="acourse-button -primary _font-sub acourse-side-space">สมัครใช้งาน</div>
+      </a>
       {{end}}
       </div>
     </div>
@@ -147,7 +147,7 @@
   .app-container {
     padding-top: 80px;
   }
-  
+
   footer {
     position: relative;
     z-index: 2;

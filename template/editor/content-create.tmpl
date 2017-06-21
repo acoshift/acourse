@@ -3,9 +3,9 @@
   <div class="grid-container">
     <div class="col-xs-12 col-lg-8 col-lg-offset-2">
       <div class="acourse-header _color-sub">
-        Create Content<br>
+        สร้างคอนเทนท์<br>
         <div class="_font-size-big">
-          <span class="_font-bold _color-dark">Course: </span>
+          <span class="_font-bold _color-dark">คอร์ส: </span>
           <a href="/course/{{.Course.Link}}" class="acourse-link">{{.Course.Title}}</a>
         </div>
       </div>
@@ -15,25 +15,25 @@
           {{.XSRF}}
 
           <div class="input-field _flex-column">
-            <label>Title</label>
-            <input class="acourse-input" name="Title" type="text" placeholder="Content Title" required>
+            <label>หัวข้อคอนเทนท์</label>
+            <input class="acourse-input" name="Title" type="text" placeholder="หัวข้อคอนเทนท์" required>
           </div>
 
           <div class="input-field _flex-column">
-            <label>Description</label>
-            <textarea class="acourse-input" id="decs-text" rows="10" name="Desc"></textarea>
+            <label>รายละเอียด</label>
+            <textarea class="acourse-input" id="decs-text" rows="10" name="Desc" placeholder="รายละเอียด"></textarea>
             <div class="_flex-row _opa50">
               <img src="https://storage.googleapis.com/acourse/static/f0e314d7-41a2-45b5-8c60-3b751ee1a275.svg"><div class="_font-size-small">&nbsp;Styling with Markdown is supported</div>
             </div>
           </div>
 
           <div class="input-field _flex-column">
-            <label>Video ID</label>
-            <input class="acourse-input" type="text" name="VideoID" placeholder="Video ID">
+            <label>วิดีโอ ID</label>
+            <input class="acourse-input" type="text" name="VideoID" placeholder="วิดีโอ ID">
           </div>
 
           <button class="acourse-button -primary _font-sub _full-width" type="submit">
-            Create Content
+            สร้างคอนเทนท์
           </button>
 
         </form>

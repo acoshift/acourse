@@ -8,7 +8,7 @@
       <div class="acourse-block">
         <div class="acourse-label {{.Type | courseType}} _font-bold">{{.Type | courseType}}</div>
         {{if and (eq .Type live) .Start.Valid}}
-          <div class="live-date _font-size-small">Start at {{.Start.Time | date}}</div>
+          <div class="live-date _font-size-small">เริ่มเรียน {{.Start.Time | date}}</div>
         {{end}}
       </div>
 

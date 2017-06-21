@@ -9,16 +9,16 @@
           ID: {{.Me.ID}}
         </div>
         <a href="/profile/edit">
-          <div class="acourse-button-secondary">Edit Profile</div>
+          <div class="acourse-button-secondary">แก้ไขโปรไฟล์</div>
         </a>
       </div>
 
       <div class="user-dashboard col-xs-12 col-md-9 _flex-column">
         {{if .Me.Role.Instructor.Bool}}
           <div class="acourse-block-big col-xs-12 _flex-row _main-space-between _cross-center _clearflex">
-            <div class="acourse-header _no-margin _color-main">My Own Courses</div>
+            <div class="acourse-header _no-margin _color-main">คอร์สที่คุณสอน</div>
             <a href="/editor/create">
-              <div class="acourse-button -primary _font-sub">Create new Course</div>
+              <div class="acourse-button -primary _font-sub">สร้างคอร์สใหม่</div>
             </a>
           </div>
 
@@ -32,7 +32,7 @@
         {{end}}
 
         <div class="acourse-block-big col-xs-12 _flex-row _main-space-between _cross-center _clearflex">
-          <div class="acourse-header _no-margin _color-main">Enrolled Courses</div>
+          <div class="acourse-header _no-margin _color-main">คอร์สที่สมัครเรียน</div>
         </div>
 
         <div class="acourse-block row">
