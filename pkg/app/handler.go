@@ -29,6 +29,7 @@ func Mount(mux *http.ServeMux) {
 	admin.Handle("/courses", http.HandlerFunc(adminCourses))
 	admin.Handle("/payments/pending", http.HandlerFunc(adminPendingPayments))
 	admin.Handle("/payments/history", http.HandlerFunc(adminHistoryPayments))
+	admin.Handle("/payments/reject", http.HandlerFunc(adminRejectPayment))
 
 	mux.Handle("/", http.HandlerFunc(index))
 	mux.Handle("/~/", http.StripPrefix("/~", cache(http.FileServer(&fileFS{http.Dir("static")}))))
@@ -78,11 +79,12 @@ func fileHandler(name string) http.Handler {
 }
 
 func index(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 	if r.URL.Path != "/" {
-		http.NotFound(w, r)
+		view.NotFound(w, r)
 		return
 	}
-	courses, err := model.ListPublicCourses()
+	courses, err := model.ListPublicCourses(ctx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -130,9 +132,9 @@ func postSignIn(w http.ResponseWriter, r *http.Request) {
 	// this happend when database out of sync with firebase authentication
 	{
 		var id string
-		err = db.QueryRow(`select id from users where id = $1`, userID).Scan(&id)
+		err = db.QueryRowContext(ctx, `select id from users where id = $1`, userID).Scan(&id)
 		if err == sql.ErrNoRows {
-			db.Exec(`insert into users (id, username, name, email) values ($1, $2, $3, $4)`, userID, userID, "", email)
+			db.ExecContext(ctx, `insert into users (id, username, name, email) values ($1, $2, $3, $4)`, userID, userID, "", email)
 		}
 	}
 
@@ -180,7 +182,7 @@ func openIDCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tx, err := db.Begin()
+	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -264,7 +266,7 @@ func postSignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = db.Exec(`
+	_, err = db.ExecContext(ctx, `
 		insert into users
 			(id, username, name, email)
 		values

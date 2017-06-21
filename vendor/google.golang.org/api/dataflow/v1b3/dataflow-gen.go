@@ -53,6 +53,9 @@ const (
 	// View and manage your Google Compute Engine resources
 	ComputeScope = "https://www.googleapis.com/auth/compute"
 
+	// View your Google Compute Engine resources
+	ComputeReadonlyScope = "https://www.googleapis.com/auth/compute.readonly"
+
 	// View your email address
 	UserinfoEmailScope = "https://www.googleapis.com/auth/userinfo.email"
 )
@@ -684,9 +687,6 @@ type ComputationTopology struct {
 
 	// SystemStageName: The system stage name.
 	SystemStageName string `json:"systemStageName,omitempty"`
-
-	// UserStageName: The user stage name.
-	UserStageName string `json:"userStageName,omitempty"`
 
 	// ForceSendFields is a list of field names (e.g. "ComputationId") to
 	// unconditionally include in API requests. By default, fields with
@@ -3070,6 +3070,10 @@ type MetricUpdate struct {
 	// as a delta that is not associated with any WorkItem.
 	Cumulative bool `json:"cumulative,omitempty"`
 
+	// Distribution: A struct value describing properties of a distribution
+	// of numeric values.
+	Distribution interface{} `json:"distribution,omitempty"`
+
 	// Internal: Worker-computed aggregate value for internal use by the
 	// Dataflow
 	// service.
@@ -3077,7 +3081,8 @@ type MetricUpdate struct {
 
 	// Kind: Metric aggregation kind.  The possible metric aggregation kinds
 	// are
-	// "Sum", "Max", "Min", "Mean", "Set", "And", and "Or".
+	// "Sum", "Max", "Min", "Mean", "Set", "And", "Or", and
+	// "Distribution".
 	// The specified aggregation kind is case-insensitive.
 	//
 	// If omitted, this is not an aggregated value but instead
@@ -3899,6 +3904,11 @@ type RuntimeEnvironment struct {
 	// Use with caution.
 	BypassTempDirValidation bool `json:"bypassTempDirValidation,omitempty"`
 
+	// MachineType: The machine type to use for the job. Defaults to the
+	// value from the
+	// template if not specified.
+	MachineType string `json:"machineType,omitempty"`
+
 	// MaxWorkers: The maximum number of Google Compute Engine instances to
 	// be made
 	// available to your pipeline during execution, from 1 to 1000.
@@ -3912,9 +3922,10 @@ type RuntimeEnvironment struct {
 	// Must be a valid Cloud Storage URL, beginning with `gs://`.
 	TempLocation string `json:"tempLocation,omitempty"`
 
-	// Zone: The Compute Engine [availability
-	// zone](https://cloud.google.com/compute/docs/regions-zones/regions-zone
-	// s)
+	// Zone: The Compute Engine
+	// [availability
+	// zone](https://cloud.google.com/compute/docs/regions-zone
+	// s/regions-zones)
 	// for launching worker instances to run your pipeline.
 	Zone string `json:"zone,omitempty"`
 
@@ -4846,7 +4857,7 @@ func (s *StateFamilyConfig) MarshalJSON() ([]byte, error) {
 // arbitrary
 // information about the error. There is a predefined set of error
 // detail types
-// in the package `google.rpc` which can be used for common error
+// in the package `google.rpc` that can be used for common error
 // conditions.
 //
 // # Language mapping
@@ -4879,7 +4890,7 @@ func (s *StateFamilyConfig) MarshalJSON() ([]byte, error) {
 //
 // - Workflow errors. A typical workflow has multiple steps. Each step
 // may
-//     have a `Status` message for error reporting purpose.
+//     have a `Status` message for error reporting.
 //
 // - Batch operations. If a client uses batch request and batch
 // response, the
@@ -5516,13 +5527,6 @@ func (s *TaskRunnerSettings) MarshalJSON() ([]byte, error) {
 
 // TemplateMetadata: Metadata describing a template.
 type TemplateMetadata struct {
-	// BypassTempDirValidation: If true, will bypass the validation that the
-	// temp directory is
-	// writable. This should only be used with templates for pipelines
-	// that are guaranteed not to need to write to the temp directory,
-	// which is subject to change based on the optimizer.
-	BypassTempDirValidation bool `json:"bypassTempDirValidation,omitempty"`
-
 	// Description: Optional. A description of the template.
 	Description string `json:"description,omitempty"`
 
@@ -5532,22 +5536,20 @@ type TemplateMetadata struct {
 	// Parameters: The parameters for the template.
 	Parameters []*ParameterMetadata `json:"parameters,omitempty"`
 
-	// ForceSendFields is a list of field names (e.g.
-	// "BypassTempDirValidation") to unconditionally include in API
-	// requests. By default, fields with empty values are omitted from API
-	// requests. However, any non-pointer, non-interface field appearing in
-	// ForceSendFields will be sent to the server regardless of whether the
-	// field is empty or not. This may be used to include empty fields in
-	// Patch requests.
+	// ForceSendFields is a list of field names (e.g. "Description") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
 
-	// NullFields is a list of field names (e.g. "BypassTempDirValidation")
-	// to include in API requests with the JSON null value. By default,
-	// fields with empty values are omitted from API requests. However, any
-	// field with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
+	// NullFields is a list of field names (e.g. "Description") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
 	NullFields []string `json:"-"`
 }
 
@@ -6610,6 +6612,7 @@ func (c *ProjectsWorkerMessagesCall) Do(opts ...googleapi.CallOption) (*SendWork
 	//   "scopes": [
 	//     "https://www.googleapis.com/auth/cloud-platform",
 	//     "https://www.googleapis.com/auth/compute",
+	//     "https://www.googleapis.com/auth/compute.readonly",
 	//     "https://www.googleapis.com/auth/userinfo.email"
 	//   ]
 	// }
@@ -6794,6 +6797,7 @@ func (c *ProjectsJobsCreateCall) Do(opts ...googleapi.CallOption) (*Job, error) 
 	//   "scopes": [
 	//     "https://www.googleapis.com/auth/cloud-platform",
 	//     "https://www.googleapis.com/auth/compute",
+	//     "https://www.googleapis.com/auth/compute.readonly",
 	//     "https://www.googleapis.com/auth/userinfo.email"
 	//   ]
 	// }
@@ -6980,6 +6984,7 @@ func (c *ProjectsJobsGetCall) Do(opts ...googleapi.CallOption) (*Job, error) {
 	//   "scopes": [
 	//     "https://www.googleapis.com/auth/cloud-platform",
 	//     "https://www.googleapis.com/auth/compute",
+	//     "https://www.googleapis.com/auth/compute.readonly",
 	//     "https://www.googleapis.com/auth/userinfo.email"
 	//   ]
 	// }
@@ -7156,6 +7161,7 @@ func (c *ProjectsJobsGetMetricsCall) Do(opts ...googleapi.CallOption) (*JobMetri
 	//   "scopes": [
 	//     "https://www.googleapis.com/auth/cloud-platform",
 	//     "https://www.googleapis.com/auth/compute",
+	//     "https://www.googleapis.com/auth/compute.readonly",
 	//     "https://www.googleapis.com/auth/userinfo.email"
 	//   ]
 	// }
@@ -7385,6 +7391,7 @@ func (c *ProjectsJobsListCall) Do(opts ...googleapi.CallOption) (*ListJobsRespon
 	//   "scopes": [
 	//     "https://www.googleapis.com/auth/cloud-platform",
 	//     "https://www.googleapis.com/auth/compute",
+	//     "https://www.googleapis.com/auth/compute.readonly",
 	//     "https://www.googleapis.com/auth/userinfo.email"
 	//   ]
 	// }
@@ -7564,6 +7571,7 @@ func (c *ProjectsJobsUpdateCall) Do(opts ...googleapi.CallOption) (*Job, error) 
 	//   "scopes": [
 	//     "https://www.googleapis.com/auth/cloud-platform",
 	//     "https://www.googleapis.com/auth/compute",
+	//     "https://www.googleapis.com/auth/compute.readonly",
 	//     "https://www.googleapis.com/auth/userinfo.email"
 	//   ]
 	// }
@@ -7711,6 +7719,7 @@ func (c *ProjectsJobsDebugGetConfigCall) Do(opts ...googleapi.CallOption) (*GetD
 	//   "scopes": [
 	//     "https://www.googleapis.com/auth/cloud-platform",
 	//     "https://www.googleapis.com/auth/compute",
+	//     "https://www.googleapis.com/auth/compute.readonly",
 	//     "https://www.googleapis.com/auth/userinfo.email"
 	//   ]
 	// }
@@ -7857,6 +7866,7 @@ func (c *ProjectsJobsDebugSendCaptureCall) Do(opts ...googleapi.CallOption) (*Se
 	//   "scopes": [
 	//     "https://www.googleapis.com/auth/cloud-platform",
 	//     "https://www.googleapis.com/auth/compute",
+	//     "https://www.googleapis.com/auth/compute.readonly",
 	//     "https://www.googleapis.com/auth/userinfo.email"
 	//   ]
 	// }
@@ -8105,6 +8115,7 @@ func (c *ProjectsJobsMessagesListCall) Do(opts ...googleapi.CallOption) (*ListJo
 	//   "scopes": [
 	//     "https://www.googleapis.com/auth/cloud-platform",
 	//     "https://www.googleapis.com/auth/compute",
+	//     "https://www.googleapis.com/auth/compute.readonly",
 	//     "https://www.googleapis.com/auth/userinfo.email"
 	//   ]
 	// }
@@ -8272,6 +8283,7 @@ func (c *ProjectsJobsWorkItemsLeaseCall) Do(opts ...googleapi.CallOption) (*Leas
 	//   "scopes": [
 	//     "https://www.googleapis.com/auth/cloud-platform",
 	//     "https://www.googleapis.com/auth/compute",
+	//     "https://www.googleapis.com/auth/compute.readonly",
 	//     "https://www.googleapis.com/auth/userinfo.email"
 	//   ]
 	// }
@@ -8419,6 +8431,7 @@ func (c *ProjectsJobsWorkItemsReportStatusCall) Do(opts ...googleapi.CallOption)
 	//   "scopes": [
 	//     "https://www.googleapis.com/auth/cloud-platform",
 	//     "https://www.googleapis.com/auth/compute",
+	//     "https://www.googleapis.com/auth/compute.readonly",
 	//     "https://www.googleapis.com/auth/userinfo.email"
 	//   ]
 	// }
@@ -8565,6 +8578,7 @@ func (c *ProjectsLocationsWorkerMessagesCall) Do(opts ...googleapi.CallOption) (
 	//   "scopes": [
 	//     "https://www.googleapis.com/auth/cloud-platform",
 	//     "https://www.googleapis.com/auth/compute",
+	//     "https://www.googleapis.com/auth/compute.readonly",
 	//     "https://www.googleapis.com/auth/userinfo.email"
 	//   ]
 	// }
@@ -8747,6 +8761,7 @@ func (c *ProjectsLocationsJobsCreateCall) Do(opts ...googleapi.CallOption) (*Job
 	//   "scopes": [
 	//     "https://www.googleapis.com/auth/cloud-platform",
 	//     "https://www.googleapis.com/auth/compute",
+	//     "https://www.googleapis.com/auth/compute.readonly",
 	//     "https://www.googleapis.com/auth/userinfo.email"
 	//   ]
 	// }
@@ -8931,6 +8946,7 @@ func (c *ProjectsLocationsJobsGetCall) Do(opts ...googleapi.CallOption) (*Job, e
 	//   "scopes": [
 	//     "https://www.googleapis.com/auth/cloud-platform",
 	//     "https://www.googleapis.com/auth/compute",
+	//     "https://www.googleapis.com/auth/compute.readonly",
 	//     "https://www.googleapis.com/auth/userinfo.email"
 	//   ]
 	// }
@@ -9105,6 +9121,7 @@ func (c *ProjectsLocationsJobsGetMetricsCall) Do(opts ...googleapi.CallOption) (
 	//   "scopes": [
 	//     "https://www.googleapis.com/auth/cloud-platform",
 	//     "https://www.googleapis.com/auth/compute",
+	//     "https://www.googleapis.com/auth/compute.readonly",
 	//     "https://www.googleapis.com/auth/userinfo.email"
 	//   ]
 	// }
@@ -9332,6 +9349,7 @@ func (c *ProjectsLocationsJobsListCall) Do(opts ...googleapi.CallOption) (*ListJ
 	//   "scopes": [
 	//     "https://www.googleapis.com/auth/cloud-platform",
 	//     "https://www.googleapis.com/auth/compute",
+	//     "https://www.googleapis.com/auth/compute.readonly",
 	//     "https://www.googleapis.com/auth/userinfo.email"
 	//   ]
 	// }
@@ -9509,6 +9527,7 @@ func (c *ProjectsLocationsJobsUpdateCall) Do(opts ...googleapi.CallOption) (*Job
 	//   "scopes": [
 	//     "https://www.googleapis.com/auth/cloud-platform",
 	//     "https://www.googleapis.com/auth/compute",
+	//     "https://www.googleapis.com/auth/compute.readonly",
 	//     "https://www.googleapis.com/auth/userinfo.email"
 	//   ]
 	// }
@@ -9666,6 +9685,7 @@ func (c *ProjectsLocationsJobsDebugGetConfigCall) Do(opts ...googleapi.CallOptio
 	//   "scopes": [
 	//     "https://www.googleapis.com/auth/cloud-platform",
 	//     "https://www.googleapis.com/auth/compute",
+	//     "https://www.googleapis.com/auth/compute.readonly",
 	//     "https://www.googleapis.com/auth/userinfo.email"
 	//   ]
 	// }
@@ -9822,6 +9842,7 @@ func (c *ProjectsLocationsJobsDebugSendCaptureCall) Do(opts ...googleapi.CallOpt
 	//   "scopes": [
 	//     "https://www.googleapis.com/auth/cloud-platform",
 	//     "https://www.googleapis.com/auth/compute",
+	//     "https://www.googleapis.com/auth/compute.readonly",
 	//     "https://www.googleapis.com/auth/userinfo.email"
 	//   ]
 	// }
@@ -10068,6 +10089,7 @@ func (c *ProjectsLocationsJobsMessagesListCall) Do(opts ...googleapi.CallOption)
 	//   "scopes": [
 	//     "https://www.googleapis.com/auth/cloud-platform",
 	//     "https://www.googleapis.com/auth/compute",
+	//     "https://www.googleapis.com/auth/compute.readonly",
 	//     "https://www.googleapis.com/auth/userinfo.email"
 	//   ]
 	// }
@@ -10245,6 +10267,7 @@ func (c *ProjectsLocationsJobsWorkItemsLeaseCall) Do(opts ...googleapi.CallOptio
 	//   "scopes": [
 	//     "https://www.googleapis.com/auth/cloud-platform",
 	//     "https://www.googleapis.com/auth/compute",
+	//     "https://www.googleapis.com/auth/compute.readonly",
 	//     "https://www.googleapis.com/auth/userinfo.email"
 	//   ]
 	// }
@@ -10402,6 +10425,7 @@ func (c *ProjectsLocationsJobsWorkItemsReportStatusCall) Do(opts ...googleapi.Ca
 	//   "scopes": [
 	//     "https://www.googleapis.com/auth/cloud-platform",
 	//     "https://www.googleapis.com/auth/compute",
+	//     "https://www.googleapis.com/auth/compute.readonly",
 	//     "https://www.googleapis.com/auth/userinfo.email"
 	//   ]
 	// }
@@ -10548,6 +10572,7 @@ func (c *ProjectsLocationsTemplatesCreateCall) Do(opts ...googleapi.CallOption) 
 	//   "scopes": [
 	//     "https://www.googleapis.com/auth/cloud-platform",
 	//     "https://www.googleapis.com/auth/compute",
+	//     "https://www.googleapis.com/auth/compute.readonly",
 	//     "https://www.googleapis.com/auth/userinfo.email"
 	//   ]
 	// }
@@ -10730,6 +10755,7 @@ func (c *ProjectsLocationsTemplatesGetCall) Do(opts ...googleapi.CallOption) (*G
 	//   "scopes": [
 	//     "https://www.googleapis.com/auth/cloud-platform",
 	//     "https://www.googleapis.com/auth/compute",
+	//     "https://www.googleapis.com/auth/compute.readonly",
 	//     "https://www.googleapis.com/auth/userinfo.email"
 	//   ]
 	// }
@@ -10757,21 +10783,20 @@ func (r *ProjectsLocationsTemplatesService) Launch(projectId string, location st
 	return c
 }
 
-// DryRun sets the optional parameter "dryRun": Whether or not the job
-// should actually be executed after
-// validating parameters. Defaults to false. Validation errors do
-// not cause the HTTP request to fail if true.
-func (c *ProjectsLocationsTemplatesLaunchCall) DryRun(dryRun bool) *ProjectsLocationsTemplatesLaunchCall {
-	c.urlParams_.Set("dryRun", fmt.Sprint(dryRun))
-	return c
-}
-
 // GcsPath sets the optional parameter "gcsPath": Required. A Cloud
 // Storage path to the template from which to create
 // the job.
 // Must be valid Cloud Storage URL, beginning with 'gs://'.
 func (c *ProjectsLocationsTemplatesLaunchCall) GcsPath(gcsPath string) *ProjectsLocationsTemplatesLaunchCall {
 	c.urlParams_.Set("gcsPath", gcsPath)
+	return c
+}
+
+// ValidateOnly sets the optional parameter "validateOnly": If true, the
+// request is validated but not actually executed.
+// Defaults to false.
+func (c *ProjectsLocationsTemplatesLaunchCall) ValidateOnly(validateOnly bool) *ProjectsLocationsTemplatesLaunchCall {
+	c.urlParams_.Set("validateOnly", fmt.Sprint(validateOnly))
 	return c
 }
 
@@ -10871,11 +10896,6 @@ func (c *ProjectsLocationsTemplatesLaunchCall) Do(opts ...googleapi.CallOption) 
 	//     "location"
 	//   ],
 	//   "parameters": {
-	//     "dryRun": {
-	//       "description": "Whether or not the job should actually be executed after\nvalidating parameters. Defaults to false. Validation errors do\nnot cause the HTTP request to fail if true.",
-	//       "location": "query",
-	//       "type": "boolean"
-	//     },
 	//     "gcsPath": {
 	//       "description": "Required. A Cloud Storage path to the template from which to create\nthe job.\nMust be valid Cloud Storage URL, beginning with 'gs://'.",
 	//       "location": "query",
@@ -10892,6 +10912,11 @@ func (c *ProjectsLocationsTemplatesLaunchCall) Do(opts ...googleapi.CallOption) 
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
+	//     },
+	//     "validateOnly": {
+	//       "description": "If true, the request is validated but not actually executed.\nDefaults to false.",
+	//       "location": "query",
+	//       "type": "boolean"
 	//     }
 	//   },
 	//   "path": "v1b3/projects/{projectId}/locations/{location}/templates:launch",
@@ -10904,6 +10929,7 @@ func (c *ProjectsLocationsTemplatesLaunchCall) Do(opts ...googleapi.CallOption) 
 	//   "scopes": [
 	//     "https://www.googleapis.com/auth/cloud-platform",
 	//     "https://www.googleapis.com/auth/compute",
+	//     "https://www.googleapis.com/auth/compute.readonly",
 	//     "https://www.googleapis.com/auth/userinfo.email"
 	//   ]
 	// }
@@ -11040,6 +11066,7 @@ func (c *ProjectsTemplatesCreateCall) Do(opts ...googleapi.CallOption) (*Job, er
 	//   "scopes": [
 	//     "https://www.googleapis.com/auth/cloud-platform",
 	//     "https://www.googleapis.com/auth/compute",
+	//     "https://www.googleapis.com/auth/compute.readonly",
 	//     "https://www.googleapis.com/auth/userinfo.email"
 	//   ]
 	// }
@@ -11224,6 +11251,7 @@ func (c *ProjectsTemplatesGetCall) Do(opts ...googleapi.CallOption) (*GetTemplat
 	//   "scopes": [
 	//     "https://www.googleapis.com/auth/cloud-platform",
 	//     "https://www.googleapis.com/auth/compute",
+	//     "https://www.googleapis.com/auth/compute.readonly",
 	//     "https://www.googleapis.com/auth/userinfo.email"
 	//   ]
 	// }
@@ -11249,15 +11277,6 @@ func (r *ProjectsTemplatesService) Launch(projectId string, launchtemplateparame
 	return c
 }
 
-// DryRun sets the optional parameter "dryRun": Whether or not the job
-// should actually be executed after
-// validating parameters. Defaults to false. Validation errors do
-// not cause the HTTP request to fail if true.
-func (c *ProjectsTemplatesLaunchCall) DryRun(dryRun bool) *ProjectsTemplatesLaunchCall {
-	c.urlParams_.Set("dryRun", fmt.Sprint(dryRun))
-	return c
-}
-
 // GcsPath sets the optional parameter "gcsPath": Required. A Cloud
 // Storage path to the template from which to create
 // the job.
@@ -11271,6 +11290,14 @@ func (c *ProjectsTemplatesLaunchCall) GcsPath(gcsPath string) *ProjectsTemplates
 // which to direct the request.
 func (c *ProjectsTemplatesLaunchCall) Location(location string) *ProjectsTemplatesLaunchCall {
 	c.urlParams_.Set("location", location)
+	return c
+}
+
+// ValidateOnly sets the optional parameter "validateOnly": If true, the
+// request is validated but not actually executed.
+// Defaults to false.
+func (c *ProjectsTemplatesLaunchCall) ValidateOnly(validateOnly bool) *ProjectsTemplatesLaunchCall {
+	c.urlParams_.Set("validateOnly", fmt.Sprint(validateOnly))
 	return c
 }
 
@@ -11368,11 +11395,6 @@ func (c *ProjectsTemplatesLaunchCall) Do(opts ...googleapi.CallOption) (*LaunchT
 	//     "projectId"
 	//   ],
 	//   "parameters": {
-	//     "dryRun": {
-	//       "description": "Whether or not the job should actually be executed after\nvalidating parameters. Defaults to false. Validation errors do\nnot cause the HTTP request to fail if true.",
-	//       "location": "query",
-	//       "type": "boolean"
-	//     },
 	//     "gcsPath": {
 	//       "description": "Required. A Cloud Storage path to the template from which to create\nthe job.\nMust be valid Cloud Storage URL, beginning with 'gs://'.",
 	//       "location": "query",
@@ -11388,6 +11410,11 @@ func (c *ProjectsTemplatesLaunchCall) Do(opts ...googleapi.CallOption) (*LaunchT
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
+	//     },
+	//     "validateOnly": {
+	//       "description": "If true, the request is validated but not actually executed.\nDefaults to false.",
+	//       "location": "query",
+	//       "type": "boolean"
 	//     }
 	//   },
 	//   "path": "v1b3/projects/{projectId}/templates:launch",
@@ -11400,6 +11427,7 @@ func (c *ProjectsTemplatesLaunchCall) Do(opts ...googleapi.CallOption) (*LaunchT
 	//   "scopes": [
 	//     "https://www.googleapis.com/auth/cloud-platform",
 	//     "https://www.googleapis.com/auth/compute",
+	//     "https://www.googleapis.com/auth/compute.readonly",
 	//     "https://www.googleapis.com/auth/userinfo.email"
 	//   ]
 	// }

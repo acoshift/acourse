@@ -80,6 +80,8 @@ func init() {
 	parseTemplate(keyAdminUsers{}, []string{"admin/users.tmpl", "app.tmpl", "layout.tmpl"})
 	parseTemplate(keyAdminCourses{}, []string{"admin/courses.tmpl", "app.tmpl", "layout.tmpl"})
 	parseTemplate(keyAdminPayments{}, []string{"admin/payments.tmpl", "app.tmpl", "layout.tmpl"})
+	parseTemplate(keyAdminPaymentReject{}, []string{"admin/payment-reject.tmpl", "app.tmpl", "layout.tmpl"})
+	parseTemplate(keyNotFound{}, []string{"not-found.tmpl", "app.tmpl", "layout.tmpl"})
 }
 
 func joinTemplateDir(files []string) []string {
@@ -109,6 +111,9 @@ func parseTemplate(key interface{}, set []string) {
 			if n <= 1 {
 				return r
 			}
+			if n <= 2 {
+				return append(r, 2)
+			}
 			if p <= 3 {
 				r = append(r, 2, 3)
 			}
@@ -124,7 +129,9 @@ func parseTemplate(key interface{}, set []string) {
 			if n-p >= 3 {
 				r = append(r, -1)
 			}
-			r = append(r, n)
+			if n >= 4 {
+				r = append(r, n)
+			}
 			return r
 		},
 		"courseType": func(v int) string {

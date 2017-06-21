@@ -1,4 +1,4 @@
-// Package runtimeconfig provides access to the Google Cloud RuntimeConfig API.
+// Package runtimeconfig provides access to the Google Cloud Runtime Configuration API.
 //
 // See https://cloud.google.com/deployment-manager/runtime-configurator/
 //
@@ -162,6 +162,7 @@ type Binding struct {
 	// * `group:{emailid}`: An email address that represents a Google
 	// group.
 	//    For example, `admins@example.com`.
+	//
 	//
 	// * `domain:{domain}`: A Google Apps domain name that represents all
 	// the
@@ -722,7 +723,7 @@ func (s *SetIamPolicyRequest) MarshalJSON() ([]byte, error) {
 // arbitrary
 // information about the error. There is a predefined set of error
 // detail types
-// in the package `google.rpc` which can be used for common error
+// in the package `google.rpc` that can be used for common error
 // conditions.
 //
 // # Language mapping
@@ -755,7 +756,7 @@ func (s *SetIamPolicyRequest) MarshalJSON() ([]byte, error) {
 //
 // - Workflow errors. A typical workflow has multiple steps. Each step
 // may
-//     have a `Status` message for error reporting purpose.
+//     have a `Status` message for error reporting.
 //
 // - Batch operations. If a client uses batch request and batch
 // response, the

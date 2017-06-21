@@ -1,19 +1,19 @@
-hash: 02f6b7ef054bae8700ff06d198b64cfcaaab9cff056d2dfedfeda7757b9cf307
-updated: 2017-06-15T20:19:17.164654893+07:00
+hash: 68cd7896bcd91d39c1e5691cbd19af2c23e76a81d85f2acda310ee14fc9cddd2
+updated: 2017-06-18T22:19:54.103133983+07:00
 imports:
 - name: cloud.google.com/go
-  version: 2e6a95edb1071d750f6d7db777bf66cd2997af6c
+  version: b8b88d2593afebb61b6f616bb3c85f79f28819d2
   subpackages:
   - compute/metadata
+  - iam
   - internal
   - internal/optional
+  - internal/version
   - storage
 - name: github.com/acoshift/configfile
-  version: 20948b48ba598ef88b3b5326aad0374d9b61aa7d
-- name: github.com/acoshift/ds
-  version: 8083dd11f6b33b2f000ff5c81a0eaf4412995326
+  version: c416a3c1e7fab6eaaf0e3ee56ec17793a485eddf
 - name: github.com/acoshift/flash
-  version: 48bea95a1b4e5dd100dd554d387d93abd9f3167a
+  version: 63dbe8e58db386dd783a24d3f8d649ec34111a50
 - name: github.com/acoshift/go-firebase-admin
   version: 59385f310dc0842016b15b778b80dc54c4cca528
 - name: github.com/acoshift/gzip
@@ -21,12 +21,13 @@ imports:
 - name: github.com/acoshift/header
   version: 5c88c77f50897ba89140829b44b9d96c5050ff5a
 - name: github.com/acoshift/middleware
-  version: 84c36d0149badf0bd023187556881cc9a3f2abd8
+  version: 2e4eb0b97b0ca9d8cfd42330dcc7c746c6acc1a5
+- name: github.com/acoshift/servertiming
+  version: 87b7a21e4eb43ec7d54da072aebf88cb2af97c0a
 - name: github.com/acoshift/session
-  version: beb3329a6aeb98571581fb154fa6fc5898611d32
+  version: 9e444f59736658097b5677e3296eb2eb7ce584fc
   subpackages:
   - store/redis
-  - store/sql
 - name: github.com/asaskevich/govalidator
   version: aa5cce4a76edb1a5acecab1870c17abbffb5419e
 - name: github.com/dgrijalva/jwt-go
@@ -36,20 +37,22 @@ imports:
 - name: github.com/dustin/go-humanize
   version: 259d2a102b871d17f30e3cd9881a642961a1e486
 - name: github.com/garyburd/redigo
-  version: 95d11dba2d44531bdb8022752b98912baafae03a
+  version: 57f1cd7de6175c96b423e7ac2534ff2b39e2ef79
   subpackages:
   - internal
   - redis
 - name: github.com/golang/protobuf
-  version: 18c9bb3261723cd5401db4d0c9fbc5c3b6c70fe8
+  version: e325f446bebc2998605911c0a2650d9920361d4a
   subpackages:
   - proto
+  - protoc-gen-go/descriptor
+  - ptypes/any
 - name: github.com/google/uuid
-  version: 064e2069ce9c359c118179501254f67d7d37ba24
+  version: 6a5e28554805e78ea6141142aba763936c4761c0
 - name: github.com/googleapis/gax-go
-  version: 9af46dd5a1713e8b5cd71106287eba3cefdde50b
+  version: 84ed26760e7f6f80887a2fbfb50db3cc415d2cea
 - name: github.com/lib/pq
-  version: 2704adc878c21e1329f46f6e56a1c387d788ff94
+  version: 8837942c3e09574accbc5f150e2c5e057189cace
   subpackages:
   - oid
 - name: github.com/microcosm-cc/bluemonday
@@ -59,13 +62,13 @@ imports:
 - name: github.com/tdewolff/buffer
   version: df6253e2a2cda5aba1b5d0c59fc5bdf0a98ae192
 - name: github.com/tdewolff/minify
-  version: bf4ffcc476fdee34561726f5b5523dc0f87a707a
+  version: 2d28d6e43c68537a32f9b835a89d5038ebcb6ec9
   subpackages:
   - css
   - html
   - js
 - name: github.com/tdewolff/parse
-  version: 6fcdbb47e4a6ecb8a8fb9ea7d70f814d60c7a3a9
+  version: e3d09bbcbf6d7721468bbe5deb35fe71da57d0f3
   subpackages:
   - css
   - html
@@ -79,7 +82,7 @@ imports:
   - tiff
   - tiff/lzw
 - name: golang.org/x/net
-  version: da118f7b8e5954f39d0d2130ab35d4bf0e3cb344
+  version: 973f3f3bbd50e92b13faa6c53ec16f49b45e851c
   subpackages:
   - context
   - context/ctxhttp
@@ -93,21 +96,21 @@ imports:
   - trace
   - xsrftoken
 - name: golang.org/x/oauth2
-  version: a6bd8cefa1811bd24b86f8902872e4e8225f74c4
+  version: f047394b6d14284165300fd82dad67edb3a4d7f6
   subpackages:
   - google
   - internal
   - jws
   - jwt
 - name: golang.org/x/text
-  version: 470f45bf29f4147d6fbd7dfd0a02a848e49f5bf4
+  version: 9e2f80a6ba7ed4ba13e0cd4b1f094bf916875735
   subpackages:
   - secure/bidirule
   - transform
   - unicode/bidi
   - unicode/norm
 - name: google.golang.org/api
-  version: fbbaff1827317122a8a0e1b24de25df8417ce87b
+  version: 324744a33f1f37e63dd1695cfb3ec9a3e4a1cb05
   subpackages:
   - gensupport
   - googleapi
@@ -120,7 +123,7 @@ imports:
   - storage/v1
   - transport
 - name: google.golang.org/appengine
-  version: 170382fa85b10b94728989dfcf6cc818b335c952
+  version: a2f4131514e563cedfdb6e7d267df9ad48591e93
   subpackages:
   - internal
   - internal/app_identity
@@ -133,18 +136,27 @@ imports:
   - internal/urlfetch
   - socket
   - urlfetch
+- name: google.golang.org/genproto
+  version: aa2eb687b4d3e17154372564ad8d6bf11c3cf21f
+  subpackages:
+  - googleapis/api/annotations
+  - googleapis/iam/v1
+  - googleapis/rpc/status
 - name: google.golang.org/grpc
-  version: 708a7f9f3283aa2d4f6132d287d78683babe55c8
+  version: c5c761dbca07f4d0efafd3f430a40dcdf1c1163f
   subpackages:
   - codes
   - credentials
   - credentials/oauth
+  - grpclb/grpc_lb_v1
   - grpclog
   - internal
+  - keepalive
   - metadata
   - naming
   - peer
   - stats
+  - status
   - tap
   - transport
 - name: gopkg.in/alexcesaro/quotedprintable.v3

@@ -197,6 +197,7 @@ func (p *Parser) parseDeclarationList() GrammarType {
 	for {
 		tt, data := p.popToken(false)
 		if (tt == SemicolonToken || tt == RightBraceToken) && p.level == 0 || tt == ErrorToken {
+			p.prevEnd = (tt == RightBraceToken)
 			return ErrorGrammar
 		}
 		p.pushBuf(tt, data)

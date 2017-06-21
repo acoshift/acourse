@@ -25,17 +25,22 @@ func Middleware() middleware.Middleware {
 			ctx := r.Context()
 			sess := session.Get(ctx)
 			var f Flash
+			var isNew bool
 			if b, ok := sess.Get(flashKey{}).([]byte); ok {
 				f, _ = Decode(b)
 			}
 			if f == nil {
 				f = New()
+				isNew = true
 			}
 
 			defer func() {
+				if isNew && len(f) == 0 {
+					return
+				}
+
 				// save flash back to session
-				b, err := f.Encode()
-				if err == nil {
+				if b, err := f.Encode(); err == nil {
 					sess.Set(flashKey{}, b)
 				}
 			}()
@@ -54,6 +59,10 @@ func New() Flash {
 // Decode decodes flash data
 func Decode(b []byte) (Flash, error) {
 	f := New()
+	if len(b) == 0 {
+		return f, nil
+	}
+
 	err := gob.NewDecoder(bytes.NewReader(b)).Decode(&f)
 	if err != nil {
 		return nil, err
@@ -79,6 +88,11 @@ func Set(ctx context.Context, f Flash) context.Context {
 
 // Encode encodes flash
 func (f Flash) Encode() ([]byte, error) {
+	// empty flash encode to empty bytes
+	if len(f) == 0 {
+		return []byte{}, nil
+	}
+
 	buf := &bytes.Buffer{}
 	err := gob.NewEncoder(buf).Encode(f)
 	if err != nil {

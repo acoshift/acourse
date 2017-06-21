@@ -1,33 +1,18 @@
 /*
  *
- * Copyright 2016, Google Inc.
- * All rights reserved.
+ * Copyright 2016 gRPC authors.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are
- * met:
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *     * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above
- * copyright notice, this list of conditions and the following disclaimer
- * in the documentation and/or other materials provided with the
- * distribution.
- *     * Neither the name of Google Inc. nor the names of its
- * contributors may be used to endorse or promote products derived from
- * this software without specific prior written permission.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
  */
 
@@ -225,41 +210,38 @@ func performRPCs(gauge *gauge, conn *grpc.ClientConn, selector *weightedRandomTe
 	var numCalls int64
 	startTime := time.Now()
 	for {
-		done := make(chan bool, 1)
-		go func() {
-			test := selector.getNextTest()
-			switch test {
-			case "empty_unary":
-				interop.DoEmptyUnaryCall(client)
-			case "large_unary":
-				interop.DoLargeUnaryCall(client)
-			case "client_streaming":
-				interop.DoClientStreaming(client)
-			case "server_streaming":
-				interop.DoServerStreaming(client)
-			case "ping_pong":
-				interop.DoPingPong(client)
-			case "empty_stream":
-				interop.DoEmptyStream(client)
-			case "timeout_on_sleeping_server":
-				interop.DoTimeoutOnSleepingServer(client)
-			case "cancel_after_begin":
-				interop.DoCancelAfterBegin(client)
-			case "cancel_after_first_response":
-				interop.DoCancelAfterFirstResponse(client)
-			case "status_code_and_message":
-				interop.DoStatusCodeAndMessage(client)
-			case "custom_metadata":
-				interop.DoCustomMetadata(client)
-			}
-			done <- true
-		}()
+		test := selector.getNextTest()
+		switch test {
+		case "empty_unary":
+			interop.DoEmptyUnaryCall(client, grpc.FailFast(false))
+		case "large_unary":
+			interop.DoLargeUnaryCall(client, grpc.FailFast(false))
+		case "client_streaming":
+			interop.DoClientStreaming(client, grpc.FailFast(false))
+		case "server_streaming":
+			interop.DoServerStreaming(client, grpc.FailFast(false))
+		case "ping_pong":
+			interop.DoPingPong(client, grpc.FailFast(false))
+		case "empty_stream":
+			interop.DoEmptyStream(client, grpc.FailFast(false))
+		case "timeout_on_sleeping_server":
+			interop.DoTimeoutOnSleepingServer(client, grpc.FailFast(false))
+		case "cancel_after_begin":
+			interop.DoCancelAfterBegin(client, grpc.FailFast(false))
+		case "cancel_after_first_response":
+			interop.DoCancelAfterFirstResponse(client, grpc.FailFast(false))
+		case "status_code_and_message":
+			interop.DoStatusCodeAndMessage(client, grpc.FailFast(false))
+		case "custom_metadata":
+			interop.DoCustomMetadata(client, grpc.FailFast(false))
+		}
+		numCalls++
+		gauge.set(int64(float64(numCalls) / time.Since(startTime).Seconds()))
+
 		select {
 		case <-stop:
 			return
-		case <-done:
-			numCalls++
-			gauge.set(int64(float64(numCalls) / time.Since(startTime).Seconds()))
+		default:
 		}
 	}
 }

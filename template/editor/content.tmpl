@@ -27,7 +27,7 @@
         <h3 class="color-sub">{{.Title}}</h3>
         <div class="_flex-column">
           <p class="_pre-wrap acourse-word-breakeable _color-dark">
-            {{.Desc}}
+            {{.Desc | markdown}}
           </p>
         </div>
         <div><span class="_font-bold">วิดีโอ ID:</span> {{.VideoID}}</div>
