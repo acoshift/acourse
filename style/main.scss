@@ -13,11 +13,6 @@
 @import 'acourse-shape';
 @import 'acourse-switch';
 
-// Override Pace
-.pace .pace-progress {
-  background: $color-sub !important;
-}
-
 body, html {
   color: $color-dark;
   -webkit-font-smoothing: antialiased;
