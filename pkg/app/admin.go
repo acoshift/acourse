@@ -26,7 +26,7 @@ func adminUsers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	totalPage := int64(math.Ceil(float64(cnt) / float64(limit)))
-	offset := (totalPage - 1) * limit
+	offset := (page - 1) * limit
 	if totalPage == 0 {
 		totalPage = 1
 		offset = 0
@@ -61,7 +61,7 @@ func adminCourses(w http.ResponseWriter, r *http.Request) {
 	}
 
 	totalPage := int64(math.Ceil(float64(cnt) / float64(limit)))
-	offset := (totalPage - 1) * limit
+	offset := (page - 1) * limit
 	if totalPage == 0 {
 		totalPage = 1
 		offset = 0
@@ -96,7 +96,7 @@ func adminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter func(c
 	}
 
 	totalPage := int64(math.Ceil(float64(cnt) / float64(limit)))
-	offset := (totalPage - 1) * limit
+	offset := (page - 1) * limit
 	if totalPage == 0 {
 		totalPage = 1
 		offset = 0
