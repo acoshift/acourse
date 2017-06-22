@@ -18,6 +18,7 @@ type (
 	keyNotFound            struct{}
 	keySignIn              struct{}
 	keySignUp              struct{}
+	keyResetPassword       struct{}
 	keyProfile             struct{}
 	keyProfileEdit         struct{}
 	keyUser                struct{}
@@ -108,6 +109,16 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 		*Page
 	}{newPage(ctx)}
 	render(ctx, w, keySignUp{}, &data)
+}
+
+// ResetPassword render reset password view
+func ResetPassword(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	page := newPage(ctx)
+	data := struct {
+		*Page
+	}{page}
+	render(ctx, w, keyResetPassword{}, &data)
 }
 
 // Profile renders profile view

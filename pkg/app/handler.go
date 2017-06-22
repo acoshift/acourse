@@ -44,6 +44,7 @@ func Mount(mux *http.ServeMux) {
 	mux.Handle("/course/", http.StripPrefix("/course/", http.HandlerFunc(course)))
 	mux.Handle("/admin/", http.StripPrefix("/admin", onlyAdmin(admin)))
 	mux.Handle("/editor/", http.StripPrefix("/editor", editor))
+	mux.Handle("/reset/password", mustNotSignedIn(http.HandlerFunc(resetPassword)))
 }
 
 type fileFS struct {
@@ -292,4 +293,22 @@ func signOut(w http.ResponseWriter, r *http.Request) {
 	s := session.Get(r.Context())
 	s.Del(keyUserID)
 	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func resetPassword(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		defer back(w, r)
+		ctx := r.Context()
+		f := flash.Get(ctx)
+		f.Set("OK", "1")
+		email := r.FormValue("email")
+		user, err := firAuth.GetUserByEmail(ctx, email)
+		if err != nil {
+			// don't send any error back to user
+			return
+		}
+		firAuth.SendPasswordResetEmail(ctx, user.Email)
+		return
+	}
+	view.ResetPassword(w, r)
 }
