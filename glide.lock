@@ -1,8 +1,8 @@
-hash: 68cd7896bcd91d39c1e5691cbd19af2c23e76a81d85f2acda310ee14fc9cddd2
-updated: 2017-06-21T15:34:40.245376569+07:00
+hash: faba407d5cb6689e595ee16388cef269f488160b1d03ad07ec0b1770c3a7d7a7
+updated: 2017-06-30T11:23:07.146414537+07:00
 imports:
 - name: cloud.google.com/go
-  version: d4f8670e9dba7e0c9dd3f6da843d678afd21c587
+  version: 7c205da84d8d024a8200be93ab042357c9a70177
   subpackages:
   - compute/metadata
   - iam
@@ -11,13 +11,13 @@ imports:
   - internal/version
   - storage
 - name: github.com/acoshift/cachestatic
-  version: 76c349efd085b9bd50261f3b71b3b1772a359e9b
+  version: d3bd9ab0508f74193ceef59ad577cbe5baad253a
 - name: github.com/acoshift/configfile
   version: c416a3c1e7fab6eaaf0e3ee56ec17793a485eddf
 - name: github.com/acoshift/flash
   version: 63dbe8e58db386dd783a24d3f8d649ec34111a50
 - name: github.com/acoshift/go-firebase-admin
-  version: 59385f310dc0842016b15b778b80dc54c4cca528
+  version: ff6f1b1aa4e582c4261dda8ff2abc01c3ec2db03
 - name: github.com/acoshift/gzip
   version: 4d0cdce0d0fc57666ffcf5803e97a35d15a9e848
 - name: github.com/acoshift/header
@@ -44,7 +44,7 @@ imports:
   - internal
   - redis
 - name: github.com/golang/protobuf
-  version: 1fb8fd32a09087bcd727225167edd31e1b9ceb24
+  version: 6a1fa9404c0aebf36c879bc50152edcc953910d2
   subpackages:
   - proto
   - protoc-gen-go/descriptor
@@ -64,7 +64,7 @@ imports:
 - name: github.com/tdewolff/buffer
   version: df6253e2a2cda5aba1b5d0c59fc5bdf0a98ae192
 - name: github.com/tdewolff/minify
-  version: 2d28d6e43c68537a32f9b835a89d5038ebcb6ec9
+  version: bf4ffcc476fdee34561726f5b5523dc0f87a707a
   subpackages:
   - css
   - html
@@ -84,7 +84,7 @@ imports:
   - tiff
   - tiff/lzw
 - name: golang.org/x/net
-  version: 057a25b06247e0c51ba15d8ae475feb2fcb72164
+  version: 1f9224279e98554b6a6432d4dd998a739f8b2b7c
   subpackages:
   - context
   - context/ctxhttp
@@ -98,21 +98,21 @@ imports:
   - trace
   - xsrftoken
 - name: golang.org/x/oauth2
-  version: f047394b6d14284165300fd82dad67edb3a4d7f6
+  version: cce311a261e6fcf29de72ca96827bdb0b7d9c9e6
   subpackages:
   - google
   - internal
   - jws
   - jwt
 - name: golang.org/x/text
-  version: 4e9ab9ee170f2a39bd66c92b3e0a47ff47a4bc77
+  version: 6353ef0f924300eea566d3438817aa4d3374817e
   subpackages:
   - secure/bidirule
   - transform
   - unicode/bidi
   - unicode/norm
 - name: google.golang.org/api
-  version: 324744a33f1f37e63dd1695cfb3ec9a3e4a1cb05
+  version: e6586c9293b9d514c7f5d5076731ec977cff1be6
   subpackages:
   - gensupport
   - googleapi
@@ -145,7 +145,7 @@ imports:
   - googleapis/iam/v1
   - googleapis/rpc/status
 - name: google.golang.org/grpc
-  version: 40e7a759a035a36611d6c9a3c2acb11ce1497727
+  version: 3c33c26290b747350f8650c7d38bcc51b42dc785
   subpackages:
   - codes
   - credentials

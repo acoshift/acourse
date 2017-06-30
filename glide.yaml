@@ -6,7 +6,7 @@ import:
 - package: github.com/acoshift/configfile
 - package: github.com/acoshift/flash
 - package: github.com/acoshift/go-firebase-admin
-  version: 0.0.2
+  version: ff6f1b1aa4e582c4261dda8ff2abc01c3ec2db03
 - package: github.com/acoshift/gzip
 - package: github.com/acoshift/header
 - package: github.com/acoshift/middleware

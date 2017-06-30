@@ -63,12 +63,13 @@ Google API                       | Status       | Package
 [Logging][cloud-logging]         | stable       | [`cloud.google.com/go/logging`][cloud-logging-ref]
 [Monitoring][cloud-monitoring]   | alpha        | [`cloud.google.com/go/monitoring/apiv3`][cloud-monitoring-ref]
 [Pub/Sub][cloud-pubsub]          | alpha        | [`cloud.google.com/go/pubsub`][cloud-pubsub-ref]
-[Vision][cloud-vision]           | beta         | [`cloud.google.com/go/vision`][cloud-vision-ref]
+[Vision][cloud-vision]           | beta         | [`cloud.google.com/go/vision/apiv1`][cloud-vision-ref]
 [Language][cloud-language]       | beta         | [`cloud.google.com/go/language/apiv1`][cloud-language-ref]
 [Speech][cloud-speech]           | beta         | [`cloud.google.com/go/speech/apiv1`][cloud-speech-ref]
 [Spanner][cloud-spanner]         | alpha        | [`cloud.google.com/go/spanner`][cloud-spanner-ref]
-[Translation][cloud-translation] | beta         | [`cloud.google.com/go/translate`][cloud-translation-ref]
+[Translation][cloud-translation] | stable       | [`cloud.google.com/go/translate`][cloud-translation-ref]
 [Trace][cloud-trace]             | alpha        | [`cloud.google.com/go/trace`][cloud-trace-ref]
+[Video Intelligence][cloud-video]| alpha        | [`cloud.google.com/go/videointelligence/apiv1beta1`][cloud-video-ref]
 [ErrorReporting][cloud-errors]   | alpha        | [`cloud.google.com/go/errors`][cloud-errors-ref]
 
 
@@ -413,8 +414,8 @@ for more information.
 [cloud-monitoring]: https://cloud.google.com/monitoring/
 [cloud-monitoring-ref]: https://godoc.org/cloud.google.com/go/monitoring/apiv3
 
-[cloud-vision]: https://cloud.google.com/vision/
-[cloud-vision-ref]: https://godoc.org/cloud.google.com/go/vision
+[cloud-vision]: https://cloud.google.com/vision
+[cloud-vision-ref]: https://godoc.org/cloud.google.com/go/vision/apiv1
 
 [cloud-language]: https://cloud.google.com/natural-language
 [cloud-language-ref]: https://godoc.org/cloud.google.com/go/language/apiv1
@@ -431,6 +432,9 @@ for more information.
 
 [cloud-trace]: https://cloud.google.com/trace/
 [cloud-trace-ref]: https://godoc.org/cloud.google.com/go/trace
+
+[cloud-video]: https://cloud.google.com/video-intelligence/
+[cloud-video-ref]: https://godoc.org/cloud.google.com/go/videointelligence/apiv1beta1
 
 [cloud-errors]: https://cloud.google.com/error-reporting/
 [cloud-errors-ref]: https://godoc.org/cloud.google.com/go/errors
