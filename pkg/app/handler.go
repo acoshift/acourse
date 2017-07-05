@@ -291,7 +291,7 @@ func postSignUp(w http.ResponseWriter, r *http.Request) {
 
 func signOut(w http.ResponseWriter, r *http.Request) {
 	s := session.Get(r.Context())
-	s.Del(keyUserID)
+	s.Destroy()
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 

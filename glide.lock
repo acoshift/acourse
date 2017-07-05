@@ -1,8 +1,8 @@
 hash: faba407d5cb6689e595ee16388cef269f488160b1d03ad07ec0b1770c3a7d7a7
-updated: 2017-06-30T11:23:07.146414537+07:00
+updated: 2017-07-05T18:27:19.337977297+07:00
 imports:
 - name: cloud.google.com/go
-  version: 7c205da84d8d024a8200be93ab042357c9a70177
+  version: 3d09da3f2e00e6a4a98d42047bdf6dbcc3d09a4a
   subpackages:
   - compute/metadata
   - iam
@@ -27,7 +27,7 @@ imports:
 - name: github.com/acoshift/servertiming
   version: 87b7a21e4eb43ec7d54da072aebf88cb2af97c0a
 - name: github.com/acoshift/session
-  version: 9e444f59736658097b5677e3296eb2eb7ce584fc
+  version: b6a608ca5f341f4f67a360f3acda9d221eccbc2a
   subpackages:
   - store/redis
 - name: github.com/asaskevich/govalidator
@@ -64,7 +64,7 @@ imports:
 - name: github.com/tdewolff/buffer
   version: df6253e2a2cda5aba1b5d0c59fc5bdf0a98ae192
 - name: github.com/tdewolff/minify
-  version: bf4ffcc476fdee34561726f5b5523dc0f87a707a
+  version: 2d28d6e43c68537a32f9b835a89d5038ebcb6ec9
   subpackages:
   - css
   - html
@@ -84,7 +84,7 @@ imports:
   - tiff
   - tiff/lzw
 - name: golang.org/x/net
-  version: 1f9224279e98554b6a6432d4dd998a739f8b2b7c
+  version: 570fa1c91359c1869590e9cedf3b53162a51a167
   subpackages:
   - context
   - context/ctxhttp
@@ -105,7 +105,7 @@ imports:
   - jws
   - jwt
 - name: golang.org/x/text
-  version: 6353ef0f924300eea566d3438817aa4d3374817e
+  version: 2bf8f2a19ec09c670e931282edfe6567f6be21c9
   subpackages:
   - secure/bidirule
   - transform
@@ -125,7 +125,7 @@ imports:
   - storage/v1
   - transport
 - name: google.golang.org/appengine
-  version: a2f4131514e563cedfdb6e7d267df9ad48591e93
+  version: d11fc8a8dccf41ab5bd3c51a3ea52051240e325c
   subpackages:
   - internal
   - internal/app_identity
