@@ -17,7 +17,7 @@
       </div>
       <div class="_flex-row _main-space-between">
         <div class="course-student _color-dark">
-          <i class="fa fa-user"></i>&nbsp {{.EnrollCount}}
+          <i class="fa fa-user"></i>&nbsp; {{.EnrollCount}}
         </div>
         <div class="course-price _flex-row _cross-end">
           {{if le .Price 0.0}}
@@ -26,7 +26,7 @@
             <p class="_no-margin {{if .Option.Discount}}discount _color-positive{{else}}_font-bold{{end}}">
               ฿ {{.Price | currency}}
               {{if .Option.Discount}}
-                <p class="_font-bold _no-margin">&nbsp฿ {{.Discount | currency}}</p>
+                <p class="_font-bold _no-margin">&nbsp;฿ {{.Discount | currency}}</p>
               {{end}}
             </p>
           {{end}}
