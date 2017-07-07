@@ -8,9 +8,15 @@
 
     <!-- Pagination -->
     <div class="acourse-block-big _flex-row _main-end _cross-start">
-      <a class="_flex-row acourse-button-outline -info acourse-side-space" href="?page={{decr .CurrentPage}}">
-        <span class="show-sm-upper"><i class="show-sm-upper fa fa-angle-left _font-size-normal"></i> &nbsp&nbsp </span>Prev
-      </a>
+      {{if eq .CurrentPage 1}}
+        <a class="_flex-row acourse-button-outline -info acourse-side-space -disabled" href="?page={{decr .CurrentPage}}">
+          <span class="show-sm-upper"><i class="show-sm-upper fa fa-angle-left _font-size-normal"></i> &nbsp&nbsp </span>Prev
+        </a>
+      {{else}}
+        <a class="_flex-row acourse-button-outline -info acourse-side-space" href="?page={{decr .CurrentPage}}">
+          <span class="show-sm-upper"><i class="show-sm-upper fa fa-angle-left _font-size-normal"></i> &nbsp&nbsp </span>Prev
+        </a>
+      {{end}}
       {{range paginate .CurrentPage .TotalPage}}
         {{if eq . $.CurrentPage}}
           <div class="show-sm-upper acourse-button -info acourse-side-space">{{.}}</div>
@@ -20,12 +26,18 @@
           <a class="show-sm-upper acourse-button-outline -info acourse-side-space" href="?page={{.}}">{{.}}</a>
         {{end}}
       {{end}}
-      <div class="hide-sm-upper _flex-row _flex-span _self-stretch">
-        <input class="acourse-input -rise _full-width" type="number" placeholder="Page Number">
+      <div class="hide-sm-upper _flex-row _flex-span _main-center">
+        <label>Page: {{.CurrentPage}}</label>
       </div>
-      <a class="_flex-row acourse-button-outline -info acourse-side-space" href="?page={{incr .CurrentPage}}">
-        Next <span class="show-sm-upper">&nbsp&nbsp <i class="fa fa-angle-right _font-size-normal"></i></span>
-      </a>
+      {{if eq .CurrentPage .TotalPage}}
+        <a class="_flex-row acourse-button-outline -info acourse-side-space -disabled" href="?page={{incr .CurrentPage}}" class="disabled">
+          Next <span class="show-sm-upper">&nbsp&nbsp <i class="fa fa-angle-right _font-size-normal"></i></span>
+        </a>
+      {{else}}
+        <a class="_flex-row acourse-button-outline -info acourse-side-space" href="?page={{incr .CurrentPage}}">
+          Next <span class="show-sm-upper">&nbsp&nbsp <i class="fa fa-angle-right _font-size-normal"></i></span>
+        </a>
+      {{end}}
     </div>
 
     <!-- Table -->
@@ -124,9 +136,15 @@
 
     <!-- Pagination -->
     <div class="acourse-block-big _flex-row _main-end _cross-start">
-      <a class="_flex-row acourse-button-outline -info acourse-side-space" href="?page={{decr .CurrentPage}}">
-        <span class="show-sm-upper"><i class="show-sm-upper fa fa-angle-left _font-size-normal"></i> &nbsp&nbsp </span>Prev
-      </a>
+      {{if eq .CurrentPage 1}}
+        <a class="_flex-row acourse-button-outline -info acourse-side-space -disabled" href="?page={{decr .CurrentPage}}">
+          <span class="show-sm-upper"><i class="show-sm-upper fa fa-angle-left _font-size-normal"></i> &nbsp&nbsp </span>Prev
+        </a>
+      {{else}}
+        <a class="_flex-row acourse-button-outline -info acourse-side-space" href="?page={{decr .CurrentPage}}">
+          <span class="show-sm-upper"><i class="show-sm-upper fa fa-angle-left _font-size-normal"></i> &nbsp&nbsp </span>Prev
+        </a>
+      {{end}}
       {{range paginate .CurrentPage .TotalPage}}
         {{if eq . $.CurrentPage}}
           <div class="show-sm-upper acourse-button -info acourse-side-space">{{.}}</div>
@@ -136,12 +154,18 @@
           <a class="show-sm-upper acourse-button-outline -info acourse-side-space" href="?page={{.}}">{{.}}</a>
         {{end}}
       {{end}}
-      <div class="hide-sm-upper _flex-row _flex-span _self-stretch">
-        <input class="acourse-input -rise _full-width" type="number" placeholder="Page Number">
+      <div class="hide-sm-upper _flex-row _flex-span _main-center">
+        <label>Page: {{.CurrentPage}}</label>
       </div>
-      <a class="_flex-row acourse-button-outline -info acourse-side-space" href="?page={{incr .CurrentPage}}">
-        Next <span class="show-sm-upper">&nbsp&nbsp <i class="fa fa-angle-right _font-size-normal"></i></span>
-      </a>
+      {{if eq .CurrentPage .TotalPage}}
+        <a class="_flex-row acourse-button-outline -info acourse-side-space -disabled" href="?page={{incr .CurrentPage}}" class="disabled">
+          Next <span class="show-sm-upper">&nbsp&nbsp <i class="fa fa-angle-right _font-size-normal"></i></span>
+        </a>
+      {{else}}
+        <a class="_flex-row acourse-button-outline -info acourse-side-space" href="?page={{incr .CurrentPage}}">
+          Next <span class="show-sm-upper">&nbsp&nbsp <i class="fa fa-angle-right _font-size-normal"></i></span>
+        </a>
+      {{end}}
     </div>
 </div>
 {{end}}

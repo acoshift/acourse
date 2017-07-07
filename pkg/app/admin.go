@@ -25,12 +25,17 @@ func adminUsers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	totalPage := int64(math.Ceil(float64(cnt) / float64(limit)))
 	offset := (page - 1) * limit
-	for offset > cnt {
-		page--
-		offset = (page - 1) * limit
+	if totalPage == 0 {
+		totalPage = 1
+		offset = 0
 	}
-	totalPage := cnt / limit
+
+	if page > totalPage {
+		http.Redirect(w, r, "/admin/users?page="+strconv.FormatInt(totalPage, 10), http.StatusSeeOther)
+		return
+	}
 
 	users, err := model.ListUsers(ctx, limit, offset)
 	if err != nil {
@@ -55,12 +60,17 @@ func adminCourses(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	offset := (page - 1) * limit
-	for offset > cnt {
-		page--
-		offset = (page - 1) * limit
-	}
 	totalPage := int64(math.Ceil(float64(cnt) / float64(limit)))
+	offset := (page - 1) * limit
+	if totalPage == 0 {
+		totalPage = 1
+		offset = 0
+	}
+
+	if page > totalPage {
+		http.Redirect(w, r, "/admin/courses?page="+strconv.FormatInt(totalPage, 10), http.StatusSeeOther)
+		return
+	}
 
 	courses, err := model.ListCourses(ctx, limit, offset)
 	if err != nil {
@@ -71,7 +81,7 @@ func adminCourses(w http.ResponseWriter, r *http.Request) {
 	view.AdminCourses(w, r, courses, int(page), int(totalPage))
 }
 
-func adminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter func(context.Context, int64, int64) ([]*model.Payment, error), paymentsCounter func(context.Context) (int64, error)) {
+func adminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter func(context.Context, int64, int64) ([]*model.Payment, error), paymentsCounter func(context.Context) (int64, error), category string) {
 	ctx := r.Context()
 	page, _ := strconv.ParseInt(r.FormValue("page"), 10, 64)
 	if page <= 0 {
@@ -85,12 +95,17 @@ func adminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter func(c
 		return
 	}
 
+	totalPage := int64(math.Ceil(float64(cnt) / float64(limit)))
 	offset := (page - 1) * limit
-	for offset > cnt {
-		page--
-		offset = (page - 1) * limit
+	if totalPage == 0 {
+		totalPage = 1
+		offset = 0
 	}
-	totalPage := cnt / limit
+
+	if page > totalPage {
+		http.Redirect(w, r, "/admin/payments/"+category+"?page="+strconv.FormatInt(totalPage, 10), http.StatusSeeOther)
+		return
+	}
 
 	payments, err := paymentsGetter(ctx, limit, offset)
 	if err != nil {
@@ -268,9 +283,9 @@ func adminPendingPayments(w http.ResponseWriter, r *http.Request) {
 		postAdminPendingPayment(w, r)
 		return
 	}
-	adminPayments(w, r, model.ListPendingPayments, model.CountPendingPayments)
+	adminPayments(w, r, model.ListPendingPayments, model.CountPendingPayments, "pending")
 }
 
 func adminHistoryPayments(w http.ResponseWriter, r *http.Request) {
-	adminPayments(w, r, model.ListHistoryPayments, model.CountHistoryPayments)
+	adminPayments(w, r, model.ListHistoryPayments, model.CountHistoryPayments, "history")
 }
