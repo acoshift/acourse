@@ -1,8 +1,8 @@
 hash: faba407d5cb6689e595ee16388cef269f488160b1d03ad07ec0b1770c3a7d7a7
-updated: 2017-07-11T12:42:58.939712536+07:00
+updated: 2017-07-11T17:19:47.319985274+07:00
 imports:
 - name: cloud.google.com/go
-  version: 52fd3db7f48c4a55013f13ea070ff2d55dab6999
+  version: 28dc70a96a6dc4371c7c5b867b148cf05b9428b6
   subpackages:
   - compute/metadata
   - iam
@@ -27,7 +27,7 @@ imports:
 - name: github.com/acoshift/servertiming
   version: 87b7a21e4eb43ec7d54da072aebf88cb2af97c0a
 - name: github.com/acoshift/session
-  version: d7f60ea3216f466ca338574c7f41468f51f5c478
+  version: 1393f9eb7d52b4841b05da47a2ed6f7cef4c242d
   subpackages:
   - store/redis
 - name: github.com/asaskevich/govalidator

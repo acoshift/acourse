@@ -25,13 +25,13 @@ type Session struct {
 	encodedData []byte
 
 	// cookie config
-	entropy  int
-	Name     string
-	Domain   string
-	Path     string
-	HTTPOnly bool
-	MaxAge   time.Duration
-	Secure   bool
+	generateID func() string
+	Name       string
+	Domain     string
+	Path       string
+	HTTPOnly   bool
+	MaxAge     time.Duration
+	Secure     bool
 }
 
 func init() {
@@ -132,7 +132,7 @@ func (s *Session) setCookie(w http.ResponseWriter) {
 	}
 	if _, ok := s.mark.(markRotate); ok {
 		s.oldID = s.id
-		s.id = generateID(s.entropy)
+		s.id = s.generateID()
 	} else if bytes.Compare(s.rawData, s.encodedData) == 0 {
 		if len(s.encodedData) == 0 {
 			// empty session

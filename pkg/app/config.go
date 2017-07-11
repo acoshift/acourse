@@ -18,19 +18,20 @@ import (
 
 // app shared vars
 var (
-	bucketName   string
-	bucketHandle *storage.BucketHandle
-	emailDialer  *gomail.Dialer
-	emailFrom    string
-	baseURL      string
-	xsrfSecret   string
-	db           *sql.DB
-	firAuth      *admin.Auth
-	redisAddr    string
-	redisPass    string
-	redisPrefix  string
-	slackURL     string
-	loc          *time.Location
+	bucketName    string
+	bucketHandle  *storage.BucketHandle
+	emailDialer   *gomail.Dialer
+	emailFrom     string
+	baseURL       string
+	xsrfSecret    string
+	db            *sql.DB
+	firAuth       *admin.Auth
+	redisAddr     string
+	redisPass     string
+	redisPrefix   string
+	slackURL      string
+	sessionSecret []byte
+	loc           *time.Location
 )
 
 // Config use to init app package
@@ -49,6 +50,7 @@ type Config struct {
 	RedisAddr      string
 	RedisPass      string
 	RedisPrefix    string
+	SessionSecret  []byte
 	SlackURL       string
 }
 
@@ -99,6 +101,7 @@ func Init(config Config) error {
 	redisPass = config.RedisPass
 	redisPrefix = config.RedisPrefix
 	slackURL = config.SlackURL
+	sessionSecret = config.SessionSecret
 
 	// init databases
 	db, err = sql.Open("postgres", config.SQLURL)

@@ -40,6 +40,7 @@ func main() {
 		Domain:   "localhost",
 		HTTPOnly: true,
 		Entropy:  32,
+		Secret:   []byte("testsecret1234"),
 		MaxAge:   time.Minute,
 		Name:     "sess",
 		Path:     "/",

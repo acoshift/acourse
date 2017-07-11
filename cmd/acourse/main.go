@@ -31,6 +31,7 @@ func main() {
 		RedisAddr:      config.String("redis_addr"),
 		RedisPass:      config.String("redis_pass"),
 		RedisPrefix:    config.String("redis_prefix"),
+		SessionSecret:  config.Bytes("session_secret"),
 		SlackURL:       config.String("slack_url"),
 	})
 	if err != nil {

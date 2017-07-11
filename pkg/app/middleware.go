@@ -38,6 +38,7 @@ func Middleware(h http.Handler) http.Handler {
 		session.Middleware(session.Config{
 			Name:     "sess",
 			Entropy:  32,
+			Secret:   sessionSecret,
 			Path:     "/",
 			MaxAge:   10 * 24 * time.Hour,
 			HTTPOnly: true,
