@@ -48,7 +48,6 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	gax "github.com/googleapis/gax-go"
 	"golang.org/x/net/context"
-	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 	"google.golang.org/api/transport"
@@ -93,64 +92,83 @@ const (
 type Config struct {
 	// Target groups related deployments together, defaults to "unknown".
 	Target string
+
 	// DebugLogging enables detailed debug logging from profiler.
 	DebugLogging bool
-	// ProjectID is the ID of the cloud project to use instead of
-	// the one read from the VM metadata server. Typically for testing.
+
+	// ProjectID is the Cloud Console project ID to use instead of
+	// the one read from the VM metadata server.
+	//
+	// Set this if you are running the agent in your local environment
+	// or anywhere else outside of Google Cloud Platform.
 	ProjectID string
+
 	// InstanceName is the name of the VM instance to use instead of
-	// the one read from the VM metadata server. Typically for testing.
+	// the one read from the VM metadata server.
+	//
+	// Set this if you are running the agent in your local environment
+	// or anywhere else outside of Google Cloud Platform.
 	InstanceName string
+
 	// ZoneName is the name of the zone to use instead of
-	// the one read from the VM metadata server. Typically for testing.
+	// the one read from the VM metadata server.
+	//
+	// Set this if you are running the agent in your local environment
+	// or anywhere else outside of Google Cloud Platform.
 	ZoneName string
+
 	// APIAddr is the HTTP endpoint to use to connect to the profiler
 	// agent API. Defaults to the production environment, overridable
 	// for testing.
 	APIAddr string
 }
 
+// startError represents the error occured during the
+// initializating and starting of the agent.
+var startError error
+
 // Start starts a goroutine to collect and upload profiles.
 // See package level documentation for details.
-func Start(cfg *Config) error {
-	var err error
+func Start(cfg *Config, options ...option.ClientOption) error {
 	startOnce.Do(func() {
-		initializeConfig(cfg)
-
-		ctx := context.Background()
-
-		var ts oauth2.TokenSource
-		ts, err = google.DefaultTokenSource(ctx, scope)
-		if err != nil {
-			debugLog("failed to get application default credentials: %v", err)
-			return
-		}
-
-		opts := []option.ClientOption{
-			option.WithEndpoint(config.APIAddr),
-			option.WithTokenSource(ts),
-			option.WithScopes(scope),
-		}
-
-		var conn *grpc.ClientConn
-		conn, err = transport.DialGRPC(ctx, opts...)
-		if err != nil {
-			debugLog("failed to dial GRPC: %v", err)
-			return
-		}
-
-		var d *pb.Deployment
-		d, err = initializeDeployment()
-		if err != nil {
-			debugLog("failed to initialize deployment: %v", err)
-			return
-		}
-
-		a, ctx := initializeResources(ctx, conn, d)
-		go pollProfilerService(ctx, a)
+		startError = start(cfg, options...)
 	})
+	return startError
+}
 
-	return err
+func start(cfg *Config, options ...option.ClientOption) error {
+	initializeConfig(cfg)
+
+	ctx := context.Background()
+
+	ts, err := google.DefaultTokenSource(ctx, scope)
+	if err != nil {
+		debugLog("failed to get application default credentials: %v", err)
+		return err
+	}
+
+	opts := []option.ClientOption{
+		option.WithEndpoint(config.APIAddr),
+		option.WithTokenSource(ts),
+		option.WithScopes(scope),
+	}
+	opts = append(opts, options...)
+
+	conn, err := transport.DialGRPC(ctx, opts...)
+	if err != nil {
+		debugLog("failed to dial GRPC: %v", err)
+		return err
+	}
+
+	d, err := initializeDeployment()
+	if err != nil {
+		debugLog("failed to initialize deployment: %v", err)
+		return err
+	}
+
+	a, ctx := initializeResources(ctx, conn, d)
+	go pollProfilerService(ctx, a)
+	return nil
 }
 
 func debugLog(format string, e ...interface{}) {
@@ -317,44 +335,39 @@ func (c *client) insertMetadata(ctx context.Context) context.Context {
 }
 
 func initializeDeployment() (*pb.Deployment, error) {
-	var projectID, instance, zone string
 	var err error
 
-	if config.ProjectID != "" {
-		projectID = config.ProjectID
-	} else {
+	projectID := config.ProjectID
+	if projectID == "" {
 		projectID, err = getProjectID()
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	if config.InstanceName != "" {
-		instance = config.InstanceName
-	} else {
+	instance := config.InstanceName
+	if instance == "" {
 		instance, err = getInstanceName()
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	if config.ZoneName != "" {
-		zone = config.ZoneName
-	} else {
+	zone := config.ZoneName
+	if zone == "" {
 		zone, err = getZone()
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	labels := make(map[string]string)
-	labels[zoneNameLabel] = zone
-	labels[instanceLabel] = instance
-
 	return &pb.Deployment{
 		ProjectId: projectID,
 		Target:    config.Target,
-		Labels:    labels,
+		Labels: map[string]string{
+			instanceLabel: instance,
+			zoneNameLabel: zone,
+		},
 	}, nil
 }
 

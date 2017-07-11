@@ -1,8 +1,6 @@
 package session
 
 import (
-	"crypto/rand"
-	"encoding/base64"
 	"net/http"
 
 	"github.com/acoshift/middleware"
@@ -16,22 +14,17 @@ func Middleware(config Config) middleware.Middleware {
 
 	// set default config
 	if config.Entropy <= 0 {
-		config.Entropy = 16
+		config.Entropy = 32
 	}
 
 	if len(config.Name) == 0 {
 		config.Name = "sess"
 	}
 
-	generateID := func() string {
-		b := make([]byte, config.Entropy)
-		rand.Read(b)
-		return base64.URLEncoding.EncodeToString(b)
-	}
-
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			s := Session{
+				entropy:  config.Entropy,
 				Name:     config.Name,
 				Domain:   config.Domain,
 				Path:     config.Path,
@@ -55,13 +48,13 @@ func Middleware(config Config) middleware.Middleware {
 
 			// if session not found, create new session
 			if len(s.id) == 0 {
-				s.id = generateID()
+				s.id = generateID(s.entropy)
 			}
 
 			// use defer to alway save session even panic
 			defer func() {
-				switch s.mark {
-				case markDestory:
+				switch s.mark.(type) {
+				case markDestroy:
 					config.Store.Del(s.id)
 				case markSave:
 					// if session was modified, save session to store,
@@ -70,6 +63,9 @@ func Middleware(config Config) middleware.Middleware {
 				case markRolling:
 					// session not modified but not empty
 					config.Store.Exp(s.id, config.MaxAge)
+				case markRotate:
+					config.Store.Set(s.id, s.encodedData, s.MaxAge)
+					config.Store.Del(s.oldID)
 				}
 			}()
 

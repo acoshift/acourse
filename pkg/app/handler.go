@@ -128,6 +128,7 @@ func postSignIn(w http.ResponseWriter, r *http.Request) {
 
 	s := session.Get(ctx)
 	s.Set(keyUserID, userID)
+	s.Rotate()
 
 	// if user not found in our database, insert new user
 	// this happend when database out of sync with firebase authentication
@@ -218,6 +219,7 @@ func openIDCallback(w http.ResponseWriter, r *http.Request) {
 	}
 
 	s.Set(keyUserID, user.UserID)
+	s.Rotate()
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
