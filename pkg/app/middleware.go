@@ -12,6 +12,7 @@ import (
 	"github.com/acoshift/acourse/pkg/view"
 	"github.com/acoshift/cachestatic"
 	"github.com/acoshift/flash"
+	"github.com/acoshift/header"
 	"github.com/acoshift/middleware"
 	"github.com/acoshift/servertiming"
 	"github.com/acoshift/session"
@@ -77,7 +78,7 @@ func Middleware(h http.Handler) http.Handler {
 		}),
 		flash.Middleware(),
 		fetchUser,
-		xsrf,
+		csrf,
 	)(h)
 }
 
@@ -102,13 +103,18 @@ func panicLogger(h http.Handler) http.Handler {
 	})
 }
 
-func xsrf(h http.Handler) http.Handler {
+func csrf(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var id string
 		if u := appctx.GetUser(r.Context()); u != nil {
 			id = u.ID
 		}
 		if r.Method == http.MethodPost {
+			if r.Header.Get(header.Origin) != baseURL {
+				http.Error(w, "Not allow cross-site post", http.StatusBadRequest)
+				return
+			}
+
 			x := r.FormValue("X")
 			if !xsrftoken.Valid(x, xsrfSecret, id, r.URL.Path) {
 				http.Error(w, "invalid xsrf token, go back, refresh and try again...", http.StatusBadRequest)
