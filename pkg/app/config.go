@@ -108,14 +108,21 @@ func Init(config Config) error {
 	if err != nil {
 		return err
 	}
-	db.SetMaxIdleConns(10)
+	db.SetMaxIdleConns(5)
 
 	// TODO: use in-memory redis for caching
 	redisPool := &redis.Pool{
-		MaxIdle:     100,
-		IdleTimeout: 10 * time.Minute,
+		MaxIdle:     5,
+		IdleTimeout: 5 * time.Minute,
 		Dial: func() (redis.Conn, error) {
 			return redis.Dial("tcp", redisAddr, redis.DialPassword(redisPass))
+		},
+		TestOnBorrow: func(c redis.Conn, t time.Time) error {
+			if time.Since(t) > time.Minute {
+				return nil
+			}
+			_, err := c.Do("PING")
+			return err
 		},
 	}
 

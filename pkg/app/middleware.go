@@ -47,10 +47,17 @@ func Middleware(h http.Handler) http.Handler {
 			Store: redisstore.New(redisstore.Config{
 				Prefix: redisPrefix,
 				Pool: &redis.Pool{
-					MaxIdle:     20,
-					IdleTimeout: 10 * time.Minute,
+					MaxIdle:     5,
+					IdleTimeout: 5 * time.Minute,
 					Dial: func() (redis.Conn, error) {
 						return redis.Dial("tcp", redisAddr, redis.DialPassword(redisPass))
+					},
+					TestOnBorrow: func(c redis.Conn, t time.Time) error {
+						if time.Since(t) > time.Minute {
+							return nil
+						}
+						_, err := c.Do("PING")
+						return err
 					},
 				},
 			}),
