@@ -117,9 +117,12 @@ func csrf(h http.Handler) http.Handler {
 			id = u.ID
 		}
 		if r.Method == http.MethodPost {
-			if r.Header.Get(header.Origin) != baseURL {
-				http.Error(w, "Not allow cross-site post", http.StatusBadRequest)
-				return
+			origin := r.Header.Get(header.Origin)
+			if len(origin) > 0 {
+				if origin != baseURL {
+					http.Error(w, "Not allow cross-site post", http.StatusBadRequest)
+					return
+				}
 			}
 
 			x := r.FormValue("X")
