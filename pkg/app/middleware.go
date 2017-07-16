@@ -41,7 +41,7 @@ func Middleware(h http.Handler) http.Handler {
 			Entropy:  32,
 			Secret:   sessionSecret,
 			Path:     "/",
-			MaxAge:   10 * 24 * time.Hour,
+			MaxAge:   5 * 24 * time.Hour,
 			HTTPOnly: true,
 			Secure:   session.PreferSecure,
 			Store: redisstore.New(redisstore.Config{

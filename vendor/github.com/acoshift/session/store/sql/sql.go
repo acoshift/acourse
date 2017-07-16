@@ -52,7 +52,6 @@ func New(config Config) session.Store {
 		getQuery:        fmt.Sprintf(`select v, e, now() from %s where k = $1`, table),
 		setQuery:        fmt.Sprintf(`insert into %s (k, v, e) values ($1, $2, $3) on conflict (k) do update set v = excluded.v, k = excluded.k`, table),
 		delQuery:        fmt.Sprintf(`delete from %s where k = $1`, table),
-		expQuery:        fmt.Sprintf(`update %s set e = $2 where k = $1`, table),
 		delExpiredQuery: fmt.Sprintf(`delete from %s where e <= now()`, table),
 	}
 	if cleanupInterval > 0 {
@@ -67,7 +66,6 @@ type sqlStore struct {
 	getQuery        string
 	setQuery        string
 	delQuery        string
-	expQuery        string
 	delExpiredQuery string
 }
 
@@ -109,15 +107,5 @@ func (s *sqlStore) Set(key string, value []byte, ttl time.Duration) error {
 
 func (s *sqlStore) Del(key string) error {
 	_, err := s.db.Exec(s.delQuery, key)
-	return err
-}
-
-func (s *sqlStore) Exp(key string, ttl time.Duration) error {
-	var exp *time.Time
-	if ttl > 0 {
-		t := time.Now().Add(ttl)
-		exp = &t
-	}
-	_, err := s.db.Exec(s.expQuery, key, exp)
 	return err
 }

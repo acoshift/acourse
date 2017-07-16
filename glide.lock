@@ -1,8 +1,8 @@
 hash: faba407d5cb6689e595ee16388cef269f488160b1d03ad07ec0b1770c3a7d7a7
-updated: 2017-07-11T17:19:47.319985274+07:00
+updated: 2017-07-17T01:43:36.559308925+07:00
 imports:
 - name: cloud.google.com/go
-  version: 28dc70a96a6dc4371c7c5b867b148cf05b9428b6
+  version: 242055bb2e2977620eca971b4e9aea46c4e31deb
   subpackages:
   - compute/metadata
   - iam
@@ -27,7 +27,7 @@ imports:
 - name: github.com/acoshift/servertiming
   version: 87b7a21e4eb43ec7d54da072aebf88cb2af97c0a
 - name: github.com/acoshift/session
-  version: 1393f9eb7d52b4841b05da47a2ed6f7cef4c242d
+  version: f0ebb92125ed47a1161484d6ef105ad1818a3dd3
   subpackages:
   - store/redis
 - name: github.com/asaskevich/govalidator
@@ -35,7 +35,7 @@ imports:
 - name: github.com/dgrijalva/jwt-go
   version: a539ee1a749a2b895533f979515ac7e6e0f5b650
 - name: github.com/disintegration/imaging
-  version: ac27d1805a555e1754fa177216ee07f4e63c30b5
+  version: 1b5cf1a92e375a4574a8214eb877fc3f721a612d
 - name: github.com/dustin/go-humanize
   version: 259d2a102b871d17f30e3cd9881a642961a1e486
 - name: github.com/garyburd/redigo
@@ -44,7 +44,7 @@ imports:
   - internal
   - redis
 - name: github.com/golang/protobuf
-  version: 6a1fa9404c0aebf36c879bc50152edcc953910d2
+  version: 0a4f71a498b7c4812f64969510bcb4eca251e33a
   subpackages:
   - proto
   - protoc-gen-go/descriptor
@@ -70,7 +70,7 @@ imports:
   - html
   - js
 - name: github.com/tdewolff/parse
-  version: e3d09bbcbf6d7721468bbe5deb35fe71da57d0f3
+  version: e4ac711ab0bf625c08270ba17557c30b2c1c5c2d
   subpackages:
   - css
   - html
@@ -84,7 +84,7 @@ imports:
   - tiff
   - tiff/lzw
 - name: golang.org/x/net
-  version: 054b33e6527139ad5b1ec2f6232c3b175bd9a30c
+  version: b3756b4b77d7b13260a0a2ec658753cf48922eac
   subpackages:
   - context
   - context/ctxhttp
@@ -105,7 +105,7 @@ imports:
   - jws
   - jwt
 - name: golang.org/x/text
-  version: cfdf022e86b4ecfb646e1efbd7db175dd623a8fa
+  version: 836efe42bb4aa16aaa17b9c155d8813d336ed720
   subpackages:
   - secure/bidirule
   - transform
@@ -139,13 +139,13 @@ imports:
   - socket
   - urlfetch
 - name: google.golang.org/genproto
-  version: 40b7550fd0ba4b8f7e9d70ed40fcd4f3375db1de
+  version: b0a3dcfcd1a9bd48e63634bd8802960804cf8315
   subpackages:
   - googleapis/api/annotations
   - googleapis/iam/v1
   - googleapis/rpc/status
 - name: google.golang.org/grpc
-  version: 93166a0b0b28148e988c11f4f15a9d92cdc3414a
+  version: d6723916d2e73e8824d22a1ba5c52f8e6255e6f8
   subpackages:
   - codes
   - credentials
@@ -166,5 +166,5 @@ imports:
 - name: gopkg.in/gomail.v2
   version: 81ebce5c23dfd25c6c67194b37d3dd3f338c98b1
 - name: gopkg.in/yaml.v2
-  version: cd8b52f8269e0feb286dfeef29f8fe4d5b397e0b
+  version: 3b4ad1db5b2a649883ff3782f5f9f6fb52be71af
 testImports: []

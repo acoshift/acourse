@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/acoshift/middleware"
 )
@@ -45,13 +46,14 @@ func Middleware(config Config) middleware.Middleware {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			s := Session{
-				generateID: generateID,
-				Name:       config.Name,
-				Domain:     config.Domain,
-				Path:       config.Path,
-				HTTPOnly:   config.HTTPOnly,
-				MaxAge:     config.MaxAge,
-				Secure:     (config.Secure == ForceSecure) || (config.Secure == PreferSecure && isTLS(r)),
+				generateID:   generateID,
+				DisableRenew: config.DisableRenew,
+				Name:         config.Name,
+				Domain:       config.Domain,
+				Path:         config.Path,
+				HTTPOnly:     config.HTTPOnly,
+				MaxAge:       config.MaxAge,
+				Secure:       (config.Secure == ForceSecure) || (config.Secure == PreferSecure && isTLS(r)),
 			}
 
 			// get session key from cookie
@@ -67,13 +69,12 @@ func Middleware(config Config) middleware.Middleware {
 				// to prevent session fixation attack
 			}
 
-			// if session not found, create new session
-			if len(s.id) == 0 {
-				s.id = generateID()
-			}
-
 			// use defer to alway save session even panic
 			defer func() {
+				if len(s.id) == 0 {
+					return
+				}
+
 				hID := hashID(s.id)
 				switch s.mark.(type) {
 				case markDestroy:
@@ -82,12 +83,11 @@ func Middleware(config Config) middleware.Middleware {
 					// if session was modified, save session to store,
 					// if not don't save to store to prevent store overflow
 					config.Store.Set(hID, s.encodedData, s.MaxAge)
-				case markRolling:
-					// session not modified but not empty
-					config.Store.Exp(hID, config.MaxAge)
 				case markRotate:
 					config.Store.Set(hID, s.encodedData, s.MaxAge)
-					config.Store.Del(hashID(s.oldID))
+					if len(s.oldID) > 0 {
+						config.Store.Set(hashID(s.oldID), s.encodedData, 5*time.Second)
+					}
 				}
 			}()
 

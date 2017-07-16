@@ -82,14 +82,3 @@ func (s *memoryStore) Del(key string) error {
 	s.m.Unlock()
 	return nil
 }
-
-func (s *memoryStore) Exp(key string, ttl time.Duration) error {
-	s.m.Lock()
-	defer s.m.Unlock()
-	v := s.l[key]
-	if v == nil {
-		return nil
-	}
-	v.exp = time.Now().Add(ttl)
-	return nil
-}

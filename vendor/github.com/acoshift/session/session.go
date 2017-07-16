@@ -10,7 +10,6 @@ import (
 
 type (
 	markSave    struct{}
-	markRolling struct{}
 	markDestroy struct{}
 	markRotate  struct{}
 )
@@ -32,13 +31,22 @@ type Session struct {
 	HTTPOnly   bool
 	MaxAge     time.Duration
 	Secure     bool
+
+	// disable
+	DisableRenew bool
 }
 
 func init() {
 	gob.Register(map[interface{}]interface{}{})
+	gob.Register(timestampKey{})
 }
 
 type sessionKey struct{}
+
+// session internal data
+type (
+	timestampKey struct{}
+)
 
 // Get gets session from context
 func Get(ctx context.Context) *Session {
@@ -69,6 +77,21 @@ func (s *Session) decode(b []byte) {
 	if len(b) > 0 {
 		gob.NewDecoder(bytes.NewReader(b)).Decode(&s.data)
 	}
+}
+
+func (s *Session) shouldRenew() bool {
+	if s.DisableRenew {
+		return false
+	}
+	sec, _ := s.Get(timestampKey{}).(int64)
+	if sec <= 0 {
+		return false
+	}
+	t := time.Unix(sec, 0)
+	if time.Now().Sub(t) < s.MaxAge/2 {
+		return false
+	}
+	return true
 }
 
 // Get gets data from session
@@ -130,20 +153,30 @@ func (s *Session) setCookie(w http.ResponseWriter) {
 		// or developer don't register struct into gob
 		return
 	}
+
+	if s.shouldRenew() {
+		s.Rotate()
+	}
+
 	if _, ok := s.mark.(markRotate); ok {
 		s.oldID = s.id
-		s.id = s.generateID()
+		s.id = ""
 	} else if bytes.Compare(s.rawData, s.encodedData) == 0 {
 		if len(s.encodedData) == 0 {
 			// empty session
 			return
 		}
-		// should rolling cookie
-		s.mark = markRolling{}
 	} else {
 		s.mark = markSave{}
 	}
 
+	if len(s.id) > 0 {
+		return
+	}
+
+	s.id = s.generateID()
+	s.Set(timestampKey{}, time.Now().Unix())
+	s.encodedData, _ = s.encode()
 	http.SetCookie(w, &http.Cookie{
 		Name:     s.Name,
 		Domain:   s.Domain,

@@ -17,6 +17,9 @@ type Config struct {
 	Path     string
 	MaxAge   time.Duration
 	Secure   Secure
+
+	// Disable features
+	DisableRenew bool // disable auto renew session
 }
 
 // Secure config
