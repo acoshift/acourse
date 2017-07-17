@@ -16,21 +16,19 @@ type (
 
 // Session type
 type Session struct {
-	id          string
-	oldID       string // for rotate
-	data        map[interface{}]interface{}
-	rawData     []byte
-	mark        interface{}
-	encodedData []byte
+	id      string
+	oldID   string // for rotate
+	data    map[interface{}]interface{}
+	mark    interface{}
+	changed bool
 
 	// cookie config
-	generateID func() string
-	Name       string
-	Domain     string
-	Path       string
-	HTTPOnly   bool
-	MaxAge     time.Duration
-	Secure     bool
+	Name     string
+	Domain   string
+	Path     string
+	HTTPOnly bool
+	MaxAge   time.Duration
+	Secure   bool
 
 	// disable
 	DisableRenew bool
@@ -59,17 +57,19 @@ func Set(ctx context.Context, s *Session) context.Context {
 	return context.WithValue(ctx, sessionKey{}, s)
 }
 
-func (s *Session) encode() ([]byte, error) {
+func (s *Session) encode() []byte {
 	if len(s.data) == 0 {
-		return []byte{}, nil
+		return []byte{}
 	}
 
-	buf := &bytes.Buffer{}
-	err := gob.NewEncoder(buf).Encode(&s.data)
+	buf := bytes.Buffer{}
+	err := gob.NewEncoder(&buf).Encode(s.data)
 	if err != nil {
-		return nil, err
+		// this should never happended
+		// or developer don't register type into gob
+		panic("session: can not encode data; " + err.Error())
 	}
-	return buf.Bytes(), nil
+	return buf.Bytes()
 }
 
 func (s *Session) decode(b []byte) {
@@ -84,8 +84,12 @@ func (s *Session) shouldRenew() bool {
 		return false
 	}
 	sec, _ := s.Get(timestampKey{}).(int64)
-	if sec <= 0 {
+	if sec < 0 {
 		return false
+	}
+	if sec == 0 {
+		// backward-compability
+		return true
 	}
 	t := time.Unix(sec, 0)
 	if time.Now().Sub(t) < s.MaxAge/2 {
@@ -107,6 +111,7 @@ func (s *Session) Set(key, value interface{}) {
 	if s.data == nil {
 		s.data = make(map[interface{}]interface{})
 	}
+	s.changed = true
 	s.data[key] = value
 }
 
@@ -115,7 +120,10 @@ func (s *Session) Del(key interface{}) {
 	if s.data == nil {
 		return
 	}
-	delete(s.data, key)
+	if _, ok := s.data[key]; ok {
+		s.changed = true
+		delete(s.data, key)
+	}
 }
 
 // Rotate rotates session id
@@ -145,38 +153,26 @@ func (s *Session) setCookie(w http.ResponseWriter) {
 		return
 	}
 
-	// set cookie only if session value changed
-	var err error
-	s.encodedData, err = s.encode()
-	if err != nil {
-		// this should never happended
-		// or developer don't register struct into gob
-		return
-	}
-
-	if s.shouldRenew() {
+	if len(s.id) > 0 && s.shouldRenew() {
 		s.Rotate()
 	}
 
+	// if session was modified, save session to store,
+	// if not don't save to store to prevent store overflow
 	if _, ok := s.mark.(markRotate); ok {
 		s.oldID = s.id
 		s.id = ""
-	} else if bytes.Compare(s.rawData, s.encodedData) == 0 {
-		if len(s.encodedData) == 0 {
-			// empty session
-			return
-		}
-	} else {
+	} else if s.changed {
 		s.mark = markSave{}
+	} else {
+		return
 	}
 
 	if len(s.id) > 0 {
 		return
 	}
 
-	s.id = s.generateID()
-	s.Set(timestampKey{}, time.Now().Unix())
-	s.encodedData, _ = s.encode()
+	s.id = generateID()
 	http.SetCookie(w, &http.Cookie{
 		Name:     s.Name,
 		Domain:   s.Domain,

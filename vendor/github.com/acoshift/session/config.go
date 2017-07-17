@@ -6,9 +6,8 @@ import (
 
 // Config is the session middleware config
 type Config struct {
-	Store   Store
-	Entropy int    // session id entropy in byte, default is 32 byte
-	Secret  []byte // session id salt when put to store
+	Store  Store
+	Secret []byte // session id salt when put to store
 
 	// Cookie config
 	Name     string // Cookie name, default is "sess"

@@ -1,7 +1,6 @@
 package session
 
 import (
-	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
 	"net/http"
@@ -17,23 +16,8 @@ func Middleware(config Config) middleware.Middleware {
 		panic("session: nil store")
 	}
 
-	// set default config
-	if config.Entropy <= 0 {
-		config.Entropy = 32
-	}
-
 	if len(config.Name) == 0 {
 		config.Name = "sess"
-	}
-
-	generateID := func() string {
-		b := make([]byte, config.Entropy)
-		if _, err := rand.Read(b); err != nil {
-			// this should never happended
-			// or something wrong with OS's crypto pseudorandom generator
-			panic(err)
-		}
-		return strings.TrimRight(base64.URLEncoding.EncodeToString(b), "=")
 	}
 
 	hashID := func(id string) string {
@@ -46,7 +30,6 @@ func Middleware(config Config) middleware.Middleware {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			s := Session{
-				generateID:   generateID,
 				DisableRenew: config.DisableRenew,
 				Name:         config.Name,
 				Domain:       config.Domain,
@@ -60,10 +43,10 @@ func Middleware(config Config) middleware.Middleware {
 			cookie, err := r.Cookie(config.Name)
 			if err == nil && len(cookie.Value) > 0 {
 				// get session data from store
-				s.rawData, err = config.Store.Get(hashID(cookie.Value))
+				b, err := config.Store.Get(hashID(cookie.Value))
 				if err == nil {
 					s.id = cookie.Value
-					s.decode(s.rawData)
+					s.decode(b)
 				}
 				// DO NOT set session id to cookie value if not found in store
 				// to prevent session fixation attack
@@ -75,19 +58,20 @@ func Middleware(config Config) middleware.Middleware {
 					return
 				}
 
-				hID := hashID(s.id)
+				hashedID := hashID(s.id)
 				switch s.mark.(type) {
 				case markDestroy:
-					config.Store.Del(hID)
+					config.Store.Del(hashedID)
 				case markSave:
-					// if session was modified, save session to store,
-					// if not don't save to store to prevent store overflow
-					config.Store.Set(hID, s.encodedData, s.MaxAge)
+					s.Set(timestampKey{}, time.Now().Unix())
+					config.Store.Set(hashedID, s.encode(), s.MaxAge)
 				case markRotate:
-					config.Store.Set(hID, s.encodedData, s.MaxAge)
 					if len(s.oldID) > 0 {
-						config.Store.Set(hashID(s.oldID), s.encodedData, 5*time.Second)
+						s.Set(timestampKey{}, int64(-1))
+						config.Store.Set(hashID(s.oldID), s.encode(), 5*time.Second)
 					}
+					s.Set(timestampKey{}, time.Now().Unix())
+					config.Store.Set(hashedID, s.encode(), s.MaxAge)
 				}
 			}()
 

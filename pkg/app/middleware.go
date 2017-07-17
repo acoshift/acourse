@@ -38,7 +38,6 @@ func Middleware(h http.Handler) http.Handler {
 		panicLogger,
 		session.Middleware(session.Config{
 			Name:     "sess",
-			Entropy:  32,
 			Secret:   sessionSecret,
 			Path:     "/",
 			MaxAge:   5 * 24 * time.Hour,
