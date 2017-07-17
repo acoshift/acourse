@@ -1,7 +1,6 @@
 SERVICE=acourse
 REGISTRY=gcr.io/acoshift-1362
 COMMIT_SHA=$(shell git rev-parse HEAD)
-NOW=$(shell date +%s)
 
 default:
 	# `make deploy` build and deploy to production
@@ -28,10 +27,6 @@ clean:
 	rm -f entrypoint
 	rm -f static.yaml
 
-.PHONY: migrate
-migrate:
-	go run migrate/main.go
-
 build:
 	env GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o entrypoint -a -ldflags '-w -s' cmd/acourse/main.go
 
@@ -43,7 +38,5 @@ cluster:
 	gcloud container clusters get-credentials cluster-sg-1 --zone asia-southeast1-b --project acoshift-1362
 
 patch:
-	# sed "s/{{TAG}}/$(COMMIT_SHA)/g" deployment.yaml | kubectl apply -f -
-	kubectl patch deployment $(SERVICE)$(TAG) -p '{"spec":{"template":{"metadata":{"labels":{"date":"$(NOW)"}},"spec":{"containers":[{"name":"$(SERVICE)$(TAG)","image":"$(REGISTRY)/$(SERVICE):$(COMMIT_SHA)"}]}}}}'
-	# kubectl set image deployment/$(SERVICE)$(TAG) $(SERVICE)$(TAG)=$(REGISTRY)/$(SERVICE):$(COMMIT_SHA)
+	kubectl set image deployment/$(SERVICE)$(TAG) $(SERVICE)$(TAG)=$(REGISTRY)/$(SERVICE):$(COMMIT_SHA)
 	kubectl rollout status deployment/$(SERVICE)$(TAG)
