@@ -6,74 +6,74 @@ import (
 	"io"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/tdewolff/test"
 )
 
 func TestShifter(t *testing.T) {
-	s := `Lorem ipsum dolor sit amet, consectetur adipiscing elit.`
+	var s = `Lorem ipsum dolor sit amet, consectetur adipiscing elit.`
 	var z = NewShifter(bytes.NewBufferString(s))
 
-	test.That(t, z.IsEOF(), "buffer must be fully in memory")
-	test.Error(t, z.Err(), nil, "buffer is at EOF but must not return EOF until we reach that")
-	test.That(t, z.Pos() == 0, "buffer must start at position 0")
-	test.That(t, z.Peek(0) == 'L', "first character must be 'L'")
-	test.That(t, z.Peek(1) == 'o', "second character must be 'o'")
+	assert.Equal(t, true, z.IsEOF(), "buffer must be fully in memory")
+	assert.Equal(t, 0, z.Pos(), "buffer must start at position 0")
+	assert.Equal(t, byte('L'), z.Peek(0), "first character must be 'L'")
+	assert.Equal(t, byte('o'), z.Peek(1), "second character must be 'o'")
 
 	z.Move(1)
-	test.That(t, z.Peek(0) == 'o', "must be 'o' at position 1")
-	test.That(t, z.Peek(1) == 'r', "must be 'r' at position 1")
+	assert.Equal(t, byte('o'), z.Peek(0), "must be 'o' at position 1")
+	assert.Equal(t, byte('r'), z.Peek(1), "must be 'r' at position 1")
 	z.MoveTo(6)
-	test.That(t, z.Peek(0) == 'i', "must be 'i' at position 6")
-	test.That(t, z.Peek(1) == 'p', "must be 'p' at position 7")
+	assert.Equal(t, byte('i'), z.Peek(0), "must be 'i' at position 6")
+	assert.Equal(t, byte('p'), z.Peek(1), "must be 'p' at position 7")
 
-	test.Bytes(t, z.Bytes(), []byte("Lorem "), "buffered string must now read 'Lorem ' when at position 6")
-	test.Bytes(t, z.Shift(), []byte("Lorem "), "shift must return the buffered string")
-	test.That(t, z.Pos() == 0, "after shifting position must be 0")
-	test.That(t, z.Peek(0) == 'i', "must be 'i' at position 0 after shifting")
-	test.That(t, z.Peek(1) == 'p', "must be 'p' at position 1 after shifting")
-	test.Error(t, z.Err(), nil, "error must be nil at this point")
+	assert.Equal(t, []byte("Lorem "), z.Bytes(), "buffered string must now read 'Lorem ' when at position 6")
+	assert.Equal(t, []byte("Lorem "), z.Shift(), "shift must return the buffered string")
+	assert.Equal(t, 0, z.Pos(), "after shifting position must be 0")
+	assert.Equal(t, byte('i'), z.Peek(0), "must be 'i' at position 0 after shifting")
+	assert.Equal(t, byte('p'), z.Peek(1), "must be 'p' at position 1 after shifting")
+	assert.Nil(t, z.Err(), "error must be nil at this point")
 
 	z.Move(len(s) - len("Lorem ") - 1)
-	test.Error(t, z.Err(), nil, "error must be nil just before the end of the buffer")
+	assert.Nil(t, z.Err(), "error must be nil just before the end of the buffer")
 	z.Skip()
-	test.That(t, z.Pos() == 0, "after skipping position must be 0")
+	assert.Equal(t, 0, z.Pos(), "after skipping position must be 0")
 	z.Move(1)
-	test.Error(t, z.Err(), io.EOF, "error must be EOF when past the buffer")
+	assert.Equal(t, io.EOF, z.Err(), "error must be EOF when past the buffer")
 	z.Move(-1)
-	test.Error(t, z.Err(), nil, "error must be nil just before the end of the buffer, even when it has been past the buffer")
+	assert.Nil(t, z.Err(), "error must be nil just before the end of the buffer, even when it has been past the buffer")
 }
 
 func TestShifterSmall(t *testing.T) {
 	s := `abcdefghi`
 	z := NewShifterSize(test.NewPlainReader(bytes.NewBufferString(s)), 4)
-	test.That(t, z.Peek(8) == 'i', "first character must be 'i' at position 8")
+	assert.Equal(t, byte('i'), z.Peek(8), "first character must be 'i' at position 8")
 }
 
 func TestShifterRunes(t *testing.T) {
-	z := NewShifter(bytes.NewBufferString("aæ†\U00100000"))
+	var z = NewShifter(bytes.NewBufferString("aæ†\U00100000"))
 	r, n := z.PeekRune(0)
-	test.That(t, n == 1, "first character must be length 1")
-	test.That(t, r == 'a', "first character must be rune 'a'")
+	assert.Equal(t, 1, n, "first character must be length 1")
+	assert.Equal(t, 'a', r, "first character must be rune 'a'")
 	r, n = z.PeekRune(1)
-	test.That(t, n == 2, "second character must be length 2")
-	test.That(t, r == 'æ', "second character must be rune 'æ'")
+	assert.Equal(t, 2, n, "second character must be length 2")
+	assert.Equal(t, 'æ', r, "second character must be rune 'æ'")
 	r, n = z.PeekRune(3)
-	test.That(t, n == 3, "fourth character must be length 3")
-	test.That(t, r == '†', "fourth character must be rune '†'")
+	assert.Equal(t, 3, n, "fourth character must be length 3")
+	assert.Equal(t, '†', r, "fourth character must be rune '†'")
 	r, n = z.PeekRune(6)
-	test.That(t, n == 4, "seventh character must be length 4")
-	test.That(t, r == '\U00100000', "seventh character must be rune '\U00100000'")
+	assert.Equal(t, 4, n, "seventh character must be length 4")
+	assert.Equal(t, '\U00100000', r, "seventh character must be rune '\U00100000'")
 }
 
 func TestShifterZeroLen(t *testing.T) {
 	var z = NewShifter(test.NewPlainReader(bytes.NewBufferString("")))
-	test.That(t, z.Peek(0) == 0, "first character must yield error")
+	assert.Equal(t, byte(0), z.Peek(0), "first character must yield error")
 }
 
 func TestShifterEmptyReader(t *testing.T) {
 	var z = NewShifter(test.NewEmptyReader())
-	test.That(t, z.Peek(0) == 0, "first character must yield error")
-	test.That(t, z.IsEOF(), "empty reader must return EOF")
+	assert.Equal(t, byte(0), z.Peek(0), "first character must yield error")
+	assert.Equal(t, true, z.IsEOF(), "empty reader must return EOF")
 }
 
 ////////////////////////////////////////////////////////////////

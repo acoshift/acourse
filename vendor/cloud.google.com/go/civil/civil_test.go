@@ -16,10 +16,9 @@ package civil
 
 import (
 	"encoding/json"
+	"reflect"
 	"testing"
 	"time"
-
-	"github.com/google/go-cmp/cmp"
 )
 
 func TestDates(t *testing.T) {
@@ -419,7 +418,7 @@ func TestUnmarshalJSON(t *testing.T) {
 		if err := json.Unmarshal([]byte(test.data), test.ptr); err != nil {
 			t.Fatalf("%s: %v", test.data, err)
 		}
-		if !cmp.Equal(test.ptr, test.want) {
+		if !reflect.DeepEqual(test.ptr, test.want) {
 			t.Errorf("%s: got %#v, want %#v", test.data, test.ptr, test.want)
 		}
 	}

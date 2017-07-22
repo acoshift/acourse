@@ -40,9 +40,9 @@ func newAuth(app *App) *Auth {
 
 // CreateCustomToken creates a custom token used for client to authenticate
 // with firebase server using signInWithCustomToken
-// https://firebase.google.com/docs/auth/admin/create-custom-tokens
+// See https://firebase.google.com/docs/auth/admin/create-custom-tokens
 func (auth *Auth) CreateCustomToken(userID string, claims interface{}) (string, error) {
-	if auth.app.jwtConfig == nil || auth.app.privateKey == nil {
+	if auth.app.privateKey == nil {
 		return "", ErrRequireServiceAccount
 	}
 	now := time.Now()
@@ -61,6 +61,7 @@ func (auth *Auth) CreateCustomToken(userID string, claims interface{}) (string, 
 
 // VerifyIDToken validates given idToken
 // return Claims for that token only valid token
+// See https://firebase.google.com/docs/auth/admin/verify-id-tokens
 func (auth *Auth) VerifyIDToken(idToken string) (*Claims, error) {
 	token, err := jwt.ParseWithClaims(idToken, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
@@ -213,9 +214,6 @@ func (auth *Auth) createUserAutoID(ctx context.Context, user *User) (string, err
 	if err != nil {
 		return "", err
 	}
-	if len(resp.LocalId) == 0 {
-		return "", errors.New("firebaseauth: create account error")
-	}
 	return resp.LocalId, nil
 }
 
@@ -239,6 +237,7 @@ func (auth *Auth) createUserCustomID(ctx context.Context, user *User) error {
 		return err
 	}
 	if len(resp.Error) > 0 {
+		// TODO: merge errors into one error
 		return errors.New("firebaseauth: create user error")
 	}
 	return nil
@@ -293,8 +292,8 @@ func (cursor *ListAccountCursor) Next(ctx context.Context) ([]*UserRecord, error
 }
 
 // UpdateUser updates an existing user
-func (auth *Auth) UpdateUser(ctx context.Context, user *User) (*UserRecord, error) {
-	resp, err := auth.client.SetAccountInfo(&identitytoolkit.IdentitytoolkitRelyingpartySetAccountInfoRequest{
+func (auth *Auth) UpdateUser(ctx context.Context, user *User) error {
+	_, err := auth.client.SetAccountInfo(&identitytoolkit.IdentitytoolkitRelyingpartySetAccountInfoRequest{
 		LocalId:       user.UserID,
 		Email:         user.Email,
 		EmailVerified: user.EmailVerified,
@@ -304,14 +303,9 @@ func (auth *Auth) UpdateUser(ctx context.Context, user *User) (*UserRecord, erro
 		PhotoUrl:      user.PhotoURL,
 	}).Context(ctx).Do()
 	if err != nil {
-		return nil, err
+		return err
 	}
-
-	res, err := auth.GetUser(ctx, resp.LocalId)
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
+	return nil
 }
 
 // SendPasswordResetEmail sends password reset for the given user

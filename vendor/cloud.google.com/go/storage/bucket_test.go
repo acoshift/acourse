@@ -20,10 +20,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/google/go-cmp/cmp"
-
 	"cloud.google.com/go/internal/pretty"
-	"cloud.google.com/go/internal/testutil"
 	raw "google.golang.org/api/storage/v1"
 )
 
@@ -64,10 +61,8 @@ func TestBucketAttrsToRawBucket(t *testing.T) {
 	}
 
 	attrs.VersioningEnabled = true
-	attrs.RequesterPays = true
 	got = attrs.toRawBucket()
 	want.Versioning = &raw.BucketVersioning{Enabled: true}
-	want.Billing = &raw.BucketBilling{RequesterPays: true}
 	msg, ok, err = pretty.Diff(want, got)
 	if err != nil {
 		t.Fatal(err)
@@ -79,10 +74,7 @@ func TestBucketAttrsToRawBucket(t *testing.T) {
 
 func TestBucketAttrsToUpdateToRawBucket(t *testing.T) {
 	t.Parallel()
-	au := &BucketAttrsToUpdate{
-		VersioningEnabled: false,
-		RequesterPays:     false,
-	}
+	au := &BucketAttrsToUpdate{VersioningEnabled: false}
 	au.SetLabel("a", "foo")
 	au.DeleteLabel("b")
 	au.SetLabel("c", "")
@@ -95,10 +87,6 @@ func TestBucketAttrsToUpdateToRawBucket(t *testing.T) {
 		Labels: map[string]string{
 			"a": "foo",
 			"c": "",
-		},
-		Billing: &raw.BucketBilling{
-			RequesterPays:   false,
-			ForceSendFields: []string{"RequesterPays"},
 		},
 		NullFields: []string{"Labels.b"},
 	}
@@ -137,20 +125,7 @@ func TestCallBuilders(t *testing.T) {
 	const metagen = 17
 
 	b := c.Bucket("name")
-	bm := b.If(BucketConditions{MetagenerationMatch: metagen}).UserProject("p")
-
-	equal := func(x, y interface{}) bool {
-		return testutil.Equal(x, y,
-			cmp.AllowUnexported(
-				raw.BucketsGetCall{},
-				raw.BucketsDeleteCall{},
-				raw.BucketsPatchCall{},
-			),
-			cmp.FilterPath(func(p cmp.Path) bool {
-				return p[len(p)-1].Type() == reflect.TypeOf(&raw.Service{})
-			}, cmp.Ignore()),
-		)
-	}
+	bm := b.If(BucketConditions{MetagenerationMatch: metagen})
 
 	for i, test := range []struct {
 		callFunc func(*BucketHandle) (interface{}, error)
@@ -162,12 +137,12 @@ func TestCallBuilders(t *testing.T) {
 		{
 			func(b *BucketHandle) (interface{}, error) { return b.newGetCall() },
 			rc.Buckets.Get("name").Projection("full"),
-			func(req interface{}) { req.(*raw.BucketsGetCall).IfMetagenerationMatch(metagen).UserProject("p") },
+			func(req interface{}) { req.(*raw.BucketsGetCall).IfMetagenerationMatch(metagen) },
 		},
 		{
 			func(b *BucketHandle) (interface{}, error) { return b.newDeleteCall() },
 			rc.Buckets.Delete("name"),
-			func(req interface{}) { req.(*raw.BucketsDeleteCall).IfMetagenerationMatch(metagen).UserProject("p") },
+			func(req interface{}) { req.(*raw.BucketsDeleteCall).IfMetagenerationMatch(metagen) },
 		},
 		{
 			func(b *BucketHandle) (interface{}, error) {
@@ -176,7 +151,7 @@ func TestCallBuilders(t *testing.T) {
 			rc.Buckets.Patch("name", &raw.Bucket{
 				Versioning: &raw.BucketVersioning{Enabled: false, ForceSendFields: []string{"Enabled"}},
 			}).Projection("full"),
-			func(req interface{}) { req.(*raw.BucketsPatchCall).IfMetagenerationMatch(metagen).UserProject("p") },
+			func(req interface{}) { req.(*raw.BucketsPatchCall).IfMetagenerationMatch(metagen) },
 		},
 	} {
 		got, err := test.callFunc(b)
@@ -184,16 +159,17 @@ func TestCallBuilders(t *testing.T) {
 			t.Fatal(err)
 		}
 		setClientHeader(test.want.Header())
-		if !equal(got, test.want) {
+		if !reflect.DeepEqual(got, test.want) {
 			t.Errorf("#%d: got %#v, want %#v", i, got, test.want)
 		}
+
 		got, err = test.callFunc(bm)
 		if err != nil {
 			t.Fatal(err)
 		}
 		test.metagenFunc(test.want)
-		if !equal(got, test.want) {
-			t.Errorf("#%d:\ngot  %#v\nwant %#v", i, got, test.want)
+		if !reflect.DeepEqual(got, test.want) {
+			t.Errorf("#%d: got %#v, want %#v", i, got, test.want)
 		}
 	}
 

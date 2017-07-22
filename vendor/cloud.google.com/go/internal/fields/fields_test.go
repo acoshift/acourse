@@ -22,10 +22,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-
-	"github.com/google/go-cmp/cmp"
-
-	"cloud.google.com/go/internal/testutil"
 )
 
 type embed1 struct {
@@ -146,8 +142,7 @@ func TestAgainstJSONEncodingNoTags(t *testing.T) {
 		t.Fatal(err)
 	}
 	setFields(fields, &got, s1)
-	if !testutil.Equal(got, want,
-		cmp.AllowUnexported(S1{}, embed1{}, embed2{}, embed3{}, embed4{}, embed5{})) {
+	if !reflect.DeepEqual(got, want) {
 		t.Errorf("got\n%+v\nwant\n%+v", got, want)
 	}
 }
@@ -171,7 +166,7 @@ func TestAgainstJSONEncodingEmbeddedTime(t *testing.T) {
 		t.Fatal(err)
 	}
 	setFields(fields, &got, myt)
-	if !testutil.Equal(got, want) {
+	if !reflect.DeepEqual(got, want) {
 		t.Errorf("got\n%+v\nwant\n%+v", got, want)
 	}
 }
@@ -274,7 +269,7 @@ func TestAgainstJSONEncodingWithTags(t *testing.T) {
 		t.Fatal(err)
 	}
 	setFields(fields, &got, s2)
-	if !testutil.Equal(got, want, cmp.AllowUnexported(S2{})) {
+	if !reflect.DeepEqual(got, want) {
 		t.Errorf("got\n%+v\nwant\n%+v", got, want)
 	}
 }
@@ -415,7 +410,7 @@ func compareFields(got []Field, want []*Field) (msg string, ok bool) {
 }
 
 // Need this because Field contains a function, which cannot be compared even
-// by testutil.Equal.
+// by reflect.DeepEqual.
 func fieldsEqual(f1, f2 *Field) bool {
 	if f1 == nil || f2 == nil {
 		return f1 == f2
@@ -423,7 +418,7 @@ func fieldsEqual(f1, f2 *Field) bool {
 	return f1.Name == f2.Name &&
 		f1.NameFromTag == f2.NameFromTag &&
 		f1.Type == f2.Type &&
-		testutil.Equal(f1.ParsedTag, f2.ParsedTag)
+		reflect.DeepEqual(f1.ParsedTag, f2.ParsedTag)
 }
 
 // Set the fields of dst from those of src.

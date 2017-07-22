@@ -15,9 +15,8 @@
 package bigquery
 
 import (
+	"reflect"
 	"testing"
-
-	"cloud.google.com/go/internal/testutil"
 
 	"golang.org/x/net/context"
 	bq "google.golang.org/api/bigquery/v2"
@@ -130,7 +129,7 @@ func TestCopy(t *testing.T) {
 			t.Errorf("err calling Run: %v", err)
 			continue
 		}
-		if !testutil.Equal(s.Job, tc.want) {
+		if !reflect.DeepEqual(s.Job, tc.want) {
 			t.Errorf("copying: got:\n%v\nwant:\n%v", s.Job, tc.want)
 		}
 	}

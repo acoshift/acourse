@@ -15,12 +15,9 @@
 package bigquery
 
 import (
+	"reflect"
 	"testing"
 	"time"
-
-	"github.com/google/go-cmp/cmp"
-
-	"cloud.google.com/go/internal/testutil"
 
 	"golang.org/x/net/context"
 	bq "google.golang.org/api/bigquery/v2"
@@ -57,11 +54,7 @@ func TestCreateTableOptions(t *testing.T) {
 		viewQuery:      q,
 		useStandardSQL: true,
 	}
-	equal := func(x, y createTableConf) bool {
-		return testutil.Equal(x, y, cmp.AllowUnexported(createTableConf{}))
-	}
-
-	if !equal(*s.conf, want) {
+	if !reflect.DeepEqual(*s.conf, want) {
 		t.Errorf("createTableConf: got:\n%v\nwant:\n%v", *s.conf, want)
 	}
 
@@ -81,7 +74,7 @@ func TestCreateTableOptions(t *testing.T) {
 			},
 		},
 	}
-	if !equal(*s.conf, want) {
+	if !reflect.DeepEqual(*s.conf, want) {
 		t.Errorf("createTableConf: got:\n%v\nwant:\n%v", *s.conf, want)
 	}
 
@@ -103,7 +96,7 @@ func TestCreateTableOptions(t *testing.T) {
 			tableID:          "t",
 			timePartitioning: &TimePartitioning{c.expectedExpiration},
 		}
-		if !equal(*s.conf, want) {
+		if !reflect.DeepEqual(*s.conf, want) {
 			t.Errorf("createTableConf: got:\n%v\nwant:\n%v", *s.conf, want)
 		}
 	}

@@ -16,10 +16,9 @@ package iam
 
 import (
 	"fmt"
+	"reflect"
 	"sort"
 	"testing"
-
-	"cloud.google.com/go/internal/testutil"
 )
 
 func TestPolicy(t *testing.T) {
@@ -66,7 +65,7 @@ func TestPolicy(t *testing.T) {
 	if msg, ok := checkMembers(p, Owner, nil); !ok {
 		t.Fatal(msg)
 	}
-	if got, want := p.Roles(), []RoleName(nil); !testutil.Equal(got, want) {
+	if got, want := p.Roles(), []RoleName(nil); !reflect.DeepEqual(got, want) {
 		t.Fatalf("roles: got %v, want %v", got, want)
 	}
 }
@@ -75,7 +74,7 @@ func checkMembers(p *Policy, role RoleName, wantMembers []string) (string, bool)
 	gotMembers := p.Members(role)
 	sort.Strings(gotMembers)
 	sort.Strings(wantMembers)
-	if !testutil.Equal(gotMembers, wantMembers) {
+	if !reflect.DeepEqual(gotMembers, wantMembers) {
 		return fmt.Sprintf("got %v, want %v", gotMembers, wantMembers), false
 	}
 	for _, m := range wantMembers {

@@ -14,6 +14,7 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+	"sync"
 	"sync/atomic"
 	"time"
 
@@ -29,9 +30,6 @@ import (
 	"github.com/tdewolff/minify/xml"
 )
 
-const Concurrency = 50
-const Version = "2.1.0-dev"
-
 var filetypeMime = map[string]string{
 	"css":  "text/css",
 	"htm":  "text/html",
@@ -43,15 +41,14 @@ var filetypeMime = map[string]string{
 }
 
 var (
+	m         *min.M
+	recursive bool
 	hidden    bool
 	list      bool
-	m         *min.M
-	pattern   *regexp.Regexp
-	recursive bool
 	verbose   bool
-	version   bool
-	update    bool
 	watch     bool
+	update    bool
+	pattern   *regexp.Regexp
 )
 
 type task struct {
@@ -94,11 +91,9 @@ func main() {
 	flag.BoolVarP(&verbose, "verbose", "v", false, "Verbose")
 	flag.BoolVarP(&watch, "watch", "w", false, "Watch files and minify upon changes")
 	flag.BoolVarP(&update, "update", "u", false, "Update binary")
-	flag.BoolVarP(&version, "version", "", false, "Version")
 
 	flag.StringVar(&siteurl, "url", "", "URL of file to enable URL minification")
 	flag.IntVar(&cssMinifier.Decimals, "css-decimals", -1, "Number of decimals to preserve in numbers, -1 is all")
-	flag.BoolVar(&htmlMinifier.KeepConditionalComments, "html-keep-conditional-comments", false, "Preserve all IE conditional comments")
 	flag.BoolVar(&htmlMinifier.KeepDefaultAttrVals, "html-keep-default-attrvals", false, "Preserve default attribute values")
 	flag.BoolVar(&htmlMinifier.KeepDocumentTags, "html-keep-document-tags", false, "Preserve html, head and body tags")
 	flag.BoolVar(&htmlMinifier.KeepEndTags, "html-keep-end-tags", false, "Preserve all end tags")
@@ -113,11 +108,6 @@ func main() {
 		Info = log.New(os.Stderr, "INFO: ", 0)
 	} else {
 		Info = log.New(ioutil.Discard, "INFO: ", 0)
-	}
-
-	if version {
-		fmt.Println("minify", Version)
-		return
 	}
 
 	if update {
@@ -202,19 +192,17 @@ func main() {
 			}
 		}
 	} else {
-		sem := make(chan bool, Concurrency)
+		var wg sync.WaitGroup
 		for _, t := range tasks {
-			sem <- true
+			wg.Add(1)
 			go func(t task) {
-				defer func() { <-sem }()
+				defer wg.Done()
 				if ok := minify(mimetype, t); !ok {
 					atomic.AddInt32(&fails, 1)
 				}
 			}(t)
 		}
-		for i := 0; i < cap(sem); i++ {
-			sem <- true
-		}
+		wg.Wait()
 	}
 
 	if watch {
@@ -290,7 +278,7 @@ func getMimetype(mimetype, filetype string, useStdin bool) string {
 		}
 	}
 	if mimetype == "" && useStdin {
-		Error.Fatalln("must specify mimetype or filetype for stdin")
+		Error.Fatalln("must specify mime or type for stdin")
 	}
 
 	if verbose {

@@ -98,8 +98,8 @@ func main() {
 ### Usage
 The following creates a new Parser.
 ``` go
-// true because this is the content of an inline style attribute
-p := css.NewParser(bytes.NewBufferString("color: red;"), true)
+// false because this is the content of an inline style attribute
+p := css.NewParser(bytes.NewBufferString("color: red;"), false)
 ```
 
 To iterate over the stylesheet, use:
@@ -136,8 +136,8 @@ import (
 )
 
 func main() {
-	// true because this is the content of an inline style attribute
-	p := css.NewParser(bytes.NewBufferString("color: red;"), true)
+	// false because this is the content of an inline style attribute
+	p := css.NewParser(bytes.NewBufferString("color: red;"), false)
 	out := ""
 	for {
 		gt, _, data := p.Next()

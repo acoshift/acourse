@@ -152,17 +152,29 @@ func (ref *Reference) Set(value interface{}) error {
 }
 
 // Push pushs data to current location
-func (ref *Reference) Push(value interface{}) error {
+func (ref Reference) Push(value interface{}) (*Reference, error) {
 	buf := bytes.NewBuffer([]byte{})
 	err := json.NewEncoder(buf).Encode(value)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	_, err = ref.invokeRequest(http.MethodPost, buf)
+	b, err := ref.invokeRequest(http.MethodPost, buf)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+
+	var r struct {
+		Name string `json:"name"`
+	}
+	err = json.Unmarshal(b, &r)
+	if err != nil {
+		return nil, err
+	}
+
+	nRef := ref
+	nRef.path = _path.Join(ref.path, r.Name)
+
+	return &nRef, nil
 }
 
 // Remove removes data from current location
@@ -223,7 +235,7 @@ func (ref Reference) EqualTo(value interface{}) Query {
 }
 
 // IsEqual returns true if current and provided query is the same location,
-// save query params, and same App instance
+// same query params, and same App instance
 func (ref *Reference) IsEqual(other Query) bool {
 	r := other.Ref()
 
@@ -286,27 +298,27 @@ func (ref Reference) OrderByValue() Query {
 
 // OnValue implements Query interface
 func (ref *Reference) OnValue(event chan *DataSnapshot) CancelFunc {
-	panic(ErrNotImplement)
+	panic(ErrNotImplemented)
 }
 
 // OnChildAdded implements Query interface
 func (ref *Reference) OnChildAdded(event chan *ChildSnapshot) CancelFunc {
-	panic(ErrNotImplement)
+	panic(ErrNotImplemented)
 }
 
 // OnChildRemoved implements Query interface
 func (ref *Reference) OnChildRemoved(event chan *OldChildSnapshot) CancelFunc {
-	panic(ErrNotImplement)
+	panic(ErrNotImplemented)
 }
 
 // OnChildChanged implements Query interface
 func (ref *Reference) OnChildChanged(event chan *ChildSnapshot) CancelFunc {
-	panic(ErrNotImplement)
+	panic(ErrNotImplemented)
 }
 
 // OnChildMoved implements Query interface
 func (ref *Reference) OnChildMoved(event chan *ChildSnapshot) CancelFunc {
-	panic(ErrNotImplement)
+	panic(ErrNotImplemented)
 }
 
 // OnceValue implements Query interface
@@ -324,22 +336,22 @@ func (ref *Reference) OnceValue() (*DataSnapshot, error) {
 
 // OnceChildAdded implements Query interface
 func (ref *Reference) OnceChildAdded() *ChildSnapshot {
-	panic(ErrNotImplement)
+	panic(ErrNotImplemented)
 }
 
 // OnceChildRemove implements Query interface
 func (ref *Reference) OnceChildRemove() *OldChildSnapshot {
-	panic(ErrNotImplement)
+	panic(ErrNotImplemented)
 }
 
 // OnceChildChanged implements Query interface
 func (ref *Reference) OnceChildChanged() *ChildSnapshot {
-	panic(ErrNotImplement)
+	panic(ErrNotImplemented)
 }
 
 // OnceChildMoved implements Query interface
 func (ref *Reference) OnceChildMoved() *ChildSnapshot {
-	panic(ErrNotImplement)
+	panic(ErrNotImplemented)
 }
 
 // String returns absolute URL for this location

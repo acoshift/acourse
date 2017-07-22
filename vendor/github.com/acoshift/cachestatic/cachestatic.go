@@ -70,14 +70,16 @@ func New(c Config) func(http.Handler) http.Handler {
 	if c.Invalidator != nil {
 		go func() {
 			for {
-				p := <-c.Invalidator
-				l.Lock()
-				if _, ok := p.(invalidateAll); ok {
-					cache = make(map[interface{}]*item)
-				} else {
-					delete(cache, p)
+				select {
+				case p := <-c.Invalidator:
+					l.Lock()
+					if _, ok := p.(invalidateAll); ok {
+						cache = make(map[interface{}]*item)
+					} else {
+						delete(cache, p)
+					}
+					l.Unlock()
 				}
-				l.Unlock()
 			}
 		}()
 	}

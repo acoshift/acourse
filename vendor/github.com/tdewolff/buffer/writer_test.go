@@ -4,29 +4,29 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/tdewolff/test"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestWriter(t *testing.T) {
 	w := NewWriter(make([]byte, 0, 3))
 
-	test.That(t, w.Len() == 0, "buffer must initially have zero length")
+	assert.Equal(t, 0, w.Len(), "buffer must initially have zero length")
 
 	n, _ := w.Write([]byte("abc"))
-	test.That(t, n == 3, "first write must write 3 characters")
-	test.Bytes(t, w.Bytes(), []byte("abc"), "first write must match 'abc'")
-	test.That(t, w.Len() == 3, "buffer must have length 3 after first write")
+	assert.Equal(t, 3, n, "first write must write 3 characters")
+	assert.Equal(t, []byte("abc"), w.Bytes(), "first write must match 'abc'")
+	assert.Equal(t, 3, w.Len(), "buffer must have length 3 after first write")
 
 	n, _ = w.Write([]byte("def"))
-	test.That(t, n == 3, "second write must write 3 characters")
-	test.Bytes(t, w.Bytes(), []byte("abcdef"), "second write must match 'abcdef'")
+	assert.Equal(t, 3, n, "second write must write 3 characters")
+	assert.Equal(t, []byte("abcdef"), w.Bytes(), "second write must match 'abcdef'")
 
 	w.Reset()
-	test.Bytes(t, w.Bytes(), []byte(""), "reset must match ''")
+	assert.Equal(t, []byte(""), w.Bytes(), "reset must match ''")
 
 	n, _ = w.Write([]byte("ghijkl"))
-	test.That(t, n == 6, "third write must write 6 characters")
-	test.Bytes(t, w.Bytes(), []byte("ghijkl"), "third write must match 'ghijkl'")
+	assert.Equal(t, 6, n, "third write must write 6 characters")
+	assert.Equal(t, []byte("ghijkl"), w.Bytes(), "third write must match 'ghijkl'")
 }
 
 func ExampleNewWriter() {

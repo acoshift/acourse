@@ -15,9 +15,8 @@
 package bigquery
 
 import (
+	"reflect"
 	"testing"
-
-	"cloud.google.com/go/internal/testutil"
 
 	"golang.org/x/net/context"
 
@@ -261,7 +260,7 @@ func TestQuery(t *testing.T) {
 			t.Errorf("err calling query: %v", err)
 			continue
 		}
-		if !testutil.Equal(s.Job, tc.want) {
+		if !reflect.DeepEqual(s.Job, tc.want) {
 			t.Errorf("querying: got:\n%v\nwant:\n%v", s.Job, tc.want)
 		}
 	}
@@ -300,7 +299,7 @@ func TestConfiguringQuery(t *testing.T) {
 	if _, err := query.Run(context.Background()); err != nil {
 		t.Fatalf("err calling Query.Run: %v", err)
 	}
-	if !testutil.Equal(s.Job, want) {
+	if !reflect.DeepEqual(s.Job, want) {
 		t.Errorf("querying: got:\n%v\nwant:\n%v", s.Job, want)
 	}
 }

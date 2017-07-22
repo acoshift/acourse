@@ -24,11 +24,10 @@ import (
 	"net"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
-
-	"cloud.google.com/go/internal/testutil"
 
 	"golang.org/x/net/context"
 	"google.golang.org/api/iterator"
@@ -621,7 +620,7 @@ func TestObjectCompose(t *testing.T) {
 		if err := json.Unmarshal(body, &req); err != nil {
 			t.Errorf("%s: json.Unmarshal %v (body %s)", tt.desc, err, body)
 		}
-		if !testutil.Equal(req, tt.wantReq) {
+		if !reflect.DeepEqual(req, tt.wantReq) {
 			// Print to JSON.
 			wantReq, _ := json.Marshal(tt.wantReq)
 			t.Errorf("%s: request body\ngot  %s\nwant %s", tt.desc, body, wantReq)

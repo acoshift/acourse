@@ -384,9 +384,8 @@ func (p *streamingPuller) openLocked() {
 		return
 	}
 	// No opens in flight; start one.
-	// Keep the lock held, to avoid a race where we
-	// close the old stream while opening a new one.
 	p.inFlight = true
+	p.c.L.Unlock()
 	spc, err := p.subc.StreamingPull(p.ctx, gax.WithGRPCOptions(grpc.MaxCallRecvMsgSize(maxSendRecvBytes)))
 	if err == nil {
 		err = spc.Send(&pb.StreamingPullRequest{
@@ -394,6 +393,7 @@ func (p *streamingPuller) openLocked() {
 			StreamAckDeadlineSeconds: p.ackDeadlineSecs,
 		})
 	}
+	p.c.L.Lock()
 	p.spc = spc
 	p.err = err
 	p.inFlight = false

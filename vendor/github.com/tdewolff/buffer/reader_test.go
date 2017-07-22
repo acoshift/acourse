@@ -6,38 +6,32 @@ import (
 	"io"
 	"testing"
 
-	"github.com/tdewolff/test"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestReader(t *testing.T) {
 	s := []byte("abcde")
 	r := NewReader(s)
-	test.Bytes(t, r.Bytes(), s, "reader must return bytes stored")
+	assert.Equal(t, s, r.Bytes(), "reader must return bytes stored")
 
 	buf := make([]byte, 3)
 	n, err := r.Read(buf)
-	test.Error(t, err, nil, "error must be nil")
-	test.That(t, n == 3, "first read must read 3 characters")
-	test.Bytes(t, buf, []byte("abc"), "first read must match 'abc'")
+	assert.Nil(t, err, "error must be nil")
+	assert.Equal(t, 3, n, "first read must read 3 characters")
+	assert.Equal(t, []byte("abc"), buf, "first read must match 'abc'")
 
 	n, err = r.Read(buf)
-	test.Error(t, err, nil, "error must be nil")
-	test.That(t, n == 2, "second read must read 2 characters")
-	test.Bytes(t, buf[:n], []byte("de"), "second read must match 'de'")
+	assert.Nil(t, err, "error must be nil")
+	assert.Equal(t, 2, n, "second read must read 2 characters")
+	assert.Equal(t, []byte("de"), buf[:n], "second read must match 'de'")
 
 	n, err = r.Read(buf)
-	test.Error(t, err, io.EOF, "error must be io.EOF")
-	test.That(t, n == 0, "third read must read 0 characters")
+	assert.Equal(t, io.EOF, err, "error must be io.EOF")
+	assert.Equal(t, 0, n, "third read must read 0 characters")
 
 	n, err = r.Read(nil)
-	test.Error(t, err, nil, "error must be nil")
-	test.That(t, n == 0, "read to nil buffer must return 0 characters read")
-
-	r.Reset()
-	n, err = r.Read(buf)
-	test.Error(t, err, nil, "error must be nil")
-	test.That(t, n == 3, "read after reset must read 3 characters")
-	test.Bytes(t, buf, []byte("abc"), "read after reset must match 'abc'")
+	assert.Nil(t, err, "error must be nil")
+	assert.Equal(t, 0, n, "read to nil buffer must return 0 characters read")
 }
 
 func ExampleNewReader() {

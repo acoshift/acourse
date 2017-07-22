@@ -20,6 +20,7 @@ package logadmin
 
 import (
 	"log"
+	"reflect"
 	"testing"
 	"time"
 
@@ -124,14 +125,14 @@ func TestCreateDeleteSink(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer client.DeleteSink(ctx, sink.ID)
-	if want := sink; !testutil.Equal(got, want) {
+	if want := sink; !reflect.DeepEqual(got, want) {
 		t.Errorf("got %+v, want %+v", got, want)
 	}
 	got, err = client.Sink(ctx, sink.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if want := sink; !testutil.Equal(got, want) {
+	if want := sink; !reflect.DeepEqual(got, want) {
 		t.Errorf("got %+v, want %+v", got, want)
 	}
 
@@ -158,14 +159,14 @@ func TestUpdateSink(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer client.DeleteSink(ctx, sink.ID)
-	if want := sink; !testutil.Equal(got, want) {
+	if want := sink; !reflect.DeepEqual(got, want) {
 		t.Errorf("got %+v, want %+v", got, want)
 	}
 	got, err = client.Sink(ctx, sink.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if want := sink; !testutil.Equal(got, want) {
+	if want := sink; !reflect.DeepEqual(got, want) {
 		t.Errorf("got %+v, want %+v", got, want)
 	}
 
@@ -178,7 +179,7 @@ func TestUpdateSink(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if want := sink; !testutil.Equal(got, want) {
+	if want := sink; !reflect.DeepEqual(got, want) {
 		t.Errorf("got %+v, want %+v", got, want)
 	}
 }
@@ -219,7 +220,7 @@ func TestListSinks(t *testing.T) {
 			got[s.ID] = s
 		}
 	}
-	if !testutil.Equal(got, want) {
+	if !reflect.DeepEqual(got, want) {
 		t.Errorf("got %+v, want %+v", got, want)
 	}
 }

@@ -32,20 +32,14 @@ func TestCSS(t *testing.T) {
 		{"@media (-webkit-min-device-pixel-ratio:1.5),(min-resolution:1.5dppx){}", "@media(-webkit-min-device-pixel-ratio:1.5),(min-resolution:1.5dppx){}"},
 		{"[class^=icon-] i[class^=icon-],i[class*=\" icon-\"]{x:y}", "[class^=icon-] i[class^=icon-],i[class*=\" icon-\"]{x:y}"},
 		{"html{line-height:1;}html{line-height:1;}", "html{line-height:1}html{line-height:1}"},
+		{".clearfix { *zoom: 1; }", ".clearfix{*zoom:1}"},
 		{"a { b: 1", "a{b:1}"},
-
-		{":root { --custom-variable:0px; }", ":root{--custom-variable:0px}"},
 
 		// case sensitivity
 		{"@counter-style Ident{}", "@counter-style Ident{}"},
 
 		// coverage
 		{"a, b + c { x:y; }", "a,b+c{x:y}"},
-
-		// bad declaration
-		{".clearfix { *zoom: 1px; }", ".clearfix{*zoom:1px}"},
-		{".clearfix { *zoom: 1px }", ".clearfix{*zoom:1px}"},
-		{".clearfix { color:green; *zoom: 1px; color:red; }", ".clearfix{color:green;*zoom:1px;color:red}"},
 
 		// go-fuzz
 		{"input[type=\"\x00\"] {  a: b\n}.a{}", "input[type=\"\x00\"]{a:b}.a{}"},
@@ -81,7 +75,6 @@ func TestCSSInline(t *testing.T) {
 		{"color: rgba(255,0,0,0.5);", "color:rgba(255,0,0,.5)"},
 		{"color: rgba(255,0,0,-1);", "color:transparent"},
 		{"color: rgba(0%,15%,25%,0.2);", "color:rgba(0%,15%,25%,.2)"},
-		{"color: rgba(0,0,0,0.5);", "color:rgba(0,0,0,.5)"},
 		{"color: hsla(5,0%,10%,0.75);", "color:hsla(5,0%,10%,.75)"},
 		{"color: hsl(0,100%,50%);", "color:red"},
 		{"color: hsla(1,2%,3%,1);", "color:#080807"},
@@ -138,9 +131,6 @@ func TestCSSInline(t *testing.T) {
 		{"z-index:1000", "z-index:1000"},
 
 		{"any:0deg 0s 0ms 0dpi 0dpcm 0dppx 0hz 0khz", "any:0 0s 0ms 0dpi 0dpcm 0dppx 0hz 0khz"},
-		{"--custom-variable:0px;", "--custom-variable:0px"},
-		{"--foo: if(x > 5) this.width = 10", "--foo: if(x > 5) this.width = 10"},
-		{"--foo: ;", "--foo: "},
 
 		// case sensitivity
 		{"animation:Ident", "animation:Ident"},
@@ -196,8 +186,6 @@ func TestWriterErrors(t *testing.T) {
 		{`a{color:f(arg)}`, []int{4}},
 		{`<!--`, []int{0}},
 		{`/*!comment*/`, []int{0, 1, 2}},
-		{`a{--var:val}`, []int{2, 3, 4}},
-		{`a{*color:0}`, []int{2, 3}},
 	}
 
 	m := minify.New()
