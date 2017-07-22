@@ -76,8 +76,15 @@ func (s *fakeServer) wait() {
 }
 
 func (s *fakeServer) StreamingPull(stream pb.Subscriber_StreamingPullServer) error {
-	s.wg.Add(1)
-	defer s.wg.Done()
+	// Receive initial request.
+	_, err := stream.Recv()
+	if err == io.EOF {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	// Consume and ignore subsequent requests.
 	errc := make(chan error, 1)
 	s.wg.Add(1)
 	go func() {

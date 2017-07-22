@@ -16,10 +16,9 @@ package bigquery
 
 import (
 	"errors"
+	"reflect"
 	"strings"
 	"testing"
-
-	"cloud.google.com/go/internal/testutil"
 
 	bq "google.golang.org/api/bigquery/v2"
 )
@@ -95,7 +94,7 @@ func TestErrorFromErrorProto(t *testing.T) {
 			want: &Error{Location: "L", Message: "M", Reason: "R"},
 		},
 	} {
-		if got := errorFromErrorProto(test.in); !testutil.Equal(got, test.want) {
+		if got := errorFromErrorProto(test.in); !reflect.DeepEqual(got, test.want) {
 			t.Errorf("%v: got %v, want %v", test.in, got, test.want)
 		}
 	}

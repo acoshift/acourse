@@ -16,8 +16,8 @@ var emptyBytes = []byte("")
 // ErrBadQualifiedRule is returned when a qualitied rule is expected, but an error or EOF happened earlier.
 var ErrBadQualifiedRule = errors.New("unexpected ending in qualified rule, expected left brace token")
 
-// ErrBadDeclaration is returned when a declaration is expected but the syntax is invalid.
-var ErrBadDeclaration = errors.New("unexpected token in declaration")
+// ErrBadDeclaration is returned when a declaration is expected but the colon token is lacking.
+var ErrBadDeclaration = errors.New("unexpected token in declaration, expected colon token")
 
 ////////////////////////////////////////////////////////////////
 
@@ -35,7 +35,6 @@ const (
 	EndRulesetGrammar
 	DeclarationGrammar
 	TokenGrammar
-	CustomPropertyGrammar
 )
 
 // String returns the string representation of a GrammarType.
@@ -59,8 +58,6 @@ func (tt GrammarType) String() string {
 		return "Declaration"
 	case TokenGrammar:
 		return "Token"
-	case CustomPropertyGrammar:
-		return "CustomProperty"
 	}
 	return "Invalid(" + strconv.Itoa(int(tt)) + ")"
 }
@@ -118,7 +115,6 @@ func (p *Parser) Err() error {
 func (p *Parser) Next() (GrammarType, TokenType, []byte) {
 	p.l.Free(p.n)
 	p.n = 0
-	p.err = nil
 
 	if p.prevEnd {
 		p.tt, p.data = RightBraceToken, endBytes
@@ -187,21 +183,18 @@ func (p *Parser) parseDeclarationList() GrammarType {
 		return p.parseAtRule()
 	} else if p.tt == IdentToken {
 		return p.parseDeclaration()
-	} else if p.tt == CustomPropertyNameToken {
-		return p.parseCustomProperty()
-	}
-
-	// parse error
-	p.initBuf()
-	p.err = ErrBadDeclaration
-	for {
-		tt, data := p.popToken(false)
-		if (tt == SemicolonToken || tt == RightBraceToken) && p.level == 0 || tt == ErrorToken {
-			p.prevEnd = (tt == RightBraceToken)
-			return ErrorGrammar
+	} else if p.tt == DelimToken && p.data[0] == '*' { // CSS hack
+		p.tt, p.data = p.popToken(false)
+		if p.tt == IdentToken {
+			p.data = append([]byte("*"), p.data...)
+			return p.parseDeclaration()
 		}
-		p.pushBuf(tt, data)
 	}
+	// parse error
+	for p.tt != SemicolonToken && p.tt != ErrorToken {
+		p.tt, p.data = p.popToken(false)
+	}
+	return p.state[len(p.state)-1]()
 }
 
 ////////////////////////////////////////////////////////////////
@@ -373,27 +366,5 @@ func (p *Parser) parseDeclaration() GrammarType {
 			skipWS = false
 		}
 		p.pushBuf(tt, data)
-	}
-}
-
-func (p *Parser) parseCustomProperty() GrammarType {
-	p.initBuf()
-	if tt, _ := p.popToken(false); tt != ColonToken {
-		p.err = ErrBadDeclaration
-		return ErrorGrammar
-	}
-	val := []byte{}
-	for {
-		tt, data := p.l.Next()
-		if (tt == SemicolonToken || tt == RightBraceToken) && p.level == 0 || tt == ErrorToken {
-			p.prevEnd = (tt == RightBraceToken)
-			p.pushBuf(CustomPropertyValueToken, val)
-			return CustomPropertyGrammar
-		} else if tt == LeftParenthesisToken || tt == LeftBraceToken || tt == LeftBracketToken || tt == FunctionToken {
-			p.level++
-		} else if tt == RightParenthesisToken || tt == RightBraceToken || tt == RightBracketToken {
-			p.level--
-		}
-		val = append(val, data...)
 	}
 }

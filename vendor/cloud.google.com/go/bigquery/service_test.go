@@ -15,10 +15,9 @@
 package bigquery
 
 import (
+	"reflect"
 	"testing"
 	"time"
-
-	"cloud.google.com/go/internal/testutil"
 
 	bq "google.golang.org/api/bigquery/v2"
 )
@@ -77,7 +76,7 @@ func TestBQTableToMetadata(t *testing.T) {
 		},
 	} {
 		got := bqTableToMetadata(test.in)
-		if !testutil.Equal(got, test.want) {
+		if !reflect.DeepEqual(got, test.want) {
 			t.Errorf("%v:\ngot  %+v\nwant %+v", test.in, got, test.want)
 		}
 	}

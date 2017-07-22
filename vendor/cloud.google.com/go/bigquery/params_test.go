@@ -21,10 +21,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/google/go-cmp/cmp"
-
 	"cloud.google.com/go/civil"
-	"cloud.google.com/go/internal/testutil"
 	"golang.org/x/net/context"
 	bq "google.golang.org/api/bigquery/v2"
 )
@@ -77,7 +74,7 @@ func TestParamValueScalar(t *testing.T) {
 			continue
 		}
 		want := sval(test.want)
-		if !testutil.Equal(got, want) {
+		if !reflect.DeepEqual(got, want) {
 			t.Errorf("%v:\ngot  %+v\nwant %+v", test.val, got, want)
 		}
 	}
@@ -102,7 +99,7 @@ func TestParamValueArray(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if !testutil.Equal(got, test.want) {
+		if !reflect.DeepEqual(got, test.want) {
 			t.Errorf("%#v:\ngot  %+v\nwant %+v", test.val, got, test.want)
 		}
 	}
@@ -124,7 +121,7 @@ func TestParamValueStruct(t *testing.T) {
 			"C": sval("true"),
 		},
 	}
-	if !testutil.Equal(got, want) {
+	if !reflect.DeepEqual(got, want) {
 		t.Errorf("got  %+v\nwant %+v", got, want)
 	}
 }
@@ -175,7 +172,7 @@ func TestParamType(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if !testutil.Equal(got, test.want) {
+		if !reflect.DeepEqual(got, test.want) {
 			t.Errorf("%v (%T): got %v, want %v", test.val, test.val, got, test.want)
 		}
 	}
@@ -199,9 +196,7 @@ func TestIntegration_ScalarParam(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if !testutil.Equal(got, test.val, cmp.Comparer(func(t1, t2 time.Time) bool {
-			return t1.Round(time.Microsecond).Equal(t2.Round(time.Microsecond))
-		})) {
+		if !equal(got, test.val) {
 			t.Errorf("\ngot  %#v (%T)\nwant %#v (%T)", got, got, test.val, test.val)
 		}
 	}
@@ -224,7 +219,7 @@ func TestIntegration_OtherParam(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if !testutil.Equal(got, test.want) {
+		if !equal(got, test.want) {
 			t.Errorf("\ngot  %#v (%T)\nwant %#v (%T)", got, got, test.want, test.want)
 		}
 	}
@@ -246,4 +241,22 @@ func paramRoundTrip(c *Client, x interface{}) (Value, error) {
 		return nil, errors.New("wrong number of values")
 	}
 	return val[0], nil
+}
+
+func equal(x1, x2 interface{}) bool {
+	if reflect.TypeOf(x1) != reflect.TypeOf(x2) {
+		return false
+	}
+	switch x1 := x1.(type) {
+	case float64:
+		if math.IsNaN(x1) {
+			return math.IsNaN(x2.(float64))
+		}
+		return x1 == x2
+	case time.Time:
+		// BigQuery is only accurate to the microsecond.
+		return x1.Round(time.Microsecond).Equal(x2.(time.Time).Round(time.Microsecond))
+	default:
+		return reflect.DeepEqual(x1, x2)
+	}
 }

@@ -16,11 +16,8 @@ package bigquery
 
 import (
 	"errors"
+	"reflect"
 	"testing"
-
-	"github.com/google/go-cmp/cmp"
-
-	"cloud.google.com/go/internal/testutil"
 
 	"golang.org/x/net/context"
 	bq "google.golang.org/api/bigquery/v2"
@@ -116,7 +113,7 @@ func TestRead(t *testing.T) {
 			service.values = tc.data
 			service.pageTokens = tc.pageTokens
 			if got, ok := collectValues(t, readFunc()); ok {
-				if !testutil.Equal(got, tc.want) {
+				if !reflect.DeepEqual(got, tc.want) {
 					t.Errorf("reading: got:\n%v\nwant:\n%v", got, tc.want)
 				}
 			}
@@ -213,7 +210,7 @@ func TestReadTabledataOptions(t *testing.T) {
 		tok: "",
 	}}
 
-	if !testutil.Equal(s.readTabledataCalls, want, cmp.AllowUnexported(readTabledataArgs{}, readTableConf{}, pagingConf{})) {
+	if !reflect.DeepEqual(s.readTabledataCalls, want) {
 		t.Errorf("reading: got:\n%v\nwant:\n%v", s.readTabledataCalls, want)
 	}
 }
@@ -257,7 +254,7 @@ func TestReadQueryOptions(t *testing.T) {
 		tok: "",
 	}}
 
-	if !testutil.Equal(s.readTabledataCalls, want, cmp.AllowUnexported(readTabledataArgs{}, readTableConf{}, pagingConf{})) {
+	if !reflect.DeepEqual(s.readTabledataCalls, want) {
 		t.Errorf("reading: got:\n%v\nwant:\n%v", s.readTabledataCalls, want)
 	}
 }

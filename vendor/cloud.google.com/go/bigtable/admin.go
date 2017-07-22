@@ -92,18 +92,17 @@ func (ac *AdminClient) Tables(ctx context.Context) ([]string, error) {
 	return names, nil
 }
 
-// TableConf contains all of the information necessary to create a table with column families.
-type TableConf struct {
-	TableID   string
-	SplitKeys []string
-	// Families is a map from family name to GCPolicy
-	Families map[string]GCPolicy
-}
-
 // CreateTable creates a new table in the instance.
 // This method may return before the table's creation is complete.
 func (ac *AdminClient) CreateTable(ctx context.Context, table string) error {
-	return ac.CreateTableFromConf(ctx, &TableConf{TableID: table})
+	ctx = mergeOutgoingMetadata(ctx, ac.md)
+	prefix := ac.instancePrefix()
+	req := &btapb.CreateTableRequest{
+		Parent:  prefix,
+		TableId: table,
+	}
+	_, err := ac.tClient.CreateTable(ctx, req)
+	return err
 }
 
 // CreatePresplitTable creates a new table in the instance.
@@ -111,29 +110,16 @@ func (ac *AdminClient) CreateTable(ctx context.Context, table string) error {
 // Given two split keys, "s1" and "s2", three tablets will be created,
 // spanning the key ranges: [, s1), [s1, s2), [s2, ).
 // This method may return before the table's creation is complete.
-func (ac *AdminClient) CreatePresplitTable(ctx context.Context, table string, splitKeys []string) error {
-	return ac.CreateTableFromConf(ctx, &TableConf{TableID: table, SplitKeys: splitKeys})
-}
-
-// CreateTableFromConf creates a new table in the instance from the given configuration.
-func (ac *AdminClient) CreateTableFromConf(ctx context.Context, conf *TableConf) error {
-	ctx = mergeOutgoingMetadata(ctx, ac.md)
+func (ac *AdminClient) CreatePresplitTable(ctx context.Context, table string, split_keys []string) error {
 	var req_splits []*btapb.CreateTableRequest_Split
-	for _, split := range conf.SplitKeys {
+	for _, split := range split_keys {
 		req_splits = append(req_splits, &btapb.CreateTableRequest_Split{[]byte(split)})
 	}
-	var tbl btapb.Table
-	if conf.Families != nil {
-		tbl.ColumnFamilies = make(map[string]*btapb.ColumnFamily)
-		for fam, policy := range conf.Families {
-			tbl.ColumnFamilies[fam] = &btapb.ColumnFamily{policy.proto()}
-		}
-	}
+	ctx = mergeOutgoingMetadata(ctx, ac.md)
 	prefix := ac.instancePrefix()
 	req := &btapb.CreateTableRequest{
 		Parent:        prefix,
-		TableId:       conf.TableID,
-		Table:         &tbl,
+		TableId:       table,
 		InitialSplits: req_splits,
 	}
 	_, err := ac.tClient.CreateTable(ctx, req)

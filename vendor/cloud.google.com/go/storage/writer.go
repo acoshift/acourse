@@ -119,9 +119,6 @@ func (w *Writer) open() error {
 		var resp *raw.Object
 		err := applyConds("NewWriter", w.o.gen, w.o.conds, call)
 		if err == nil {
-			if w.o.userProject != "" {
-				call.UserProject(w.o.userProject)
-			}
 			setClientHeader(call.Header())
 			// We will only retry here if the initial POST, which obtains a URI for
 			// the resumable upload, fails with a retryable error. The upload itself
