@@ -9,7 +9,6 @@ import (
 )
 
 type (
-	markSave    struct{}
 	markDestroy struct{}
 	markRotate  struct{}
 )
@@ -162,10 +161,6 @@ func (s *Session) setCookie(w http.ResponseWriter) {
 	if _, ok := s.mark.(markRotate); ok {
 		s.oldID = s.id
 		s.id = ""
-	} else if s.changed {
-		s.mark = markSave{}
-	} else {
-		return
 	}
 
 	if len(s.id) > 0 {

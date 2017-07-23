@@ -26,10 +26,10 @@
   version = "v0.0.1"
 
 [[projects]]
-  branch = "master"
   name = "github.com/acoshift/go-firebase-admin"
   packages = ["."]
   revision = "e9222cf3e0e3a9dcf81a2cc91d270720f2aefc86"
+  version = "v0.0.3"
 
 [[projects]]
   branch = "master"
@@ -52,8 +52,8 @@
 [[projects]]
   name = "github.com/acoshift/session"
   packages = [".","store/redis"]
-  revision = "88144280c602342bcfb769e95cce463736f7f152"
-  version = "v0.1.0"
+  revision = "55895b7b52fe9d2db01c35969e7090816b194e7b"
+  version = "v0.1.1"
 
 [[projects]]
   name = "github.com/asaskevich/govalidator"
@@ -220,6 +220,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "f04ae025b7c8a79503a510d12d46241bf408016040e9365c1a9ffd7ada3662a2"
+  inputs-digest = "8d0728e822e067cb22e4c07382b3ed15584afb532446e116784452b1a5ce1aec"
   solver-name = "gps-cdcl"
   solver-version = 1

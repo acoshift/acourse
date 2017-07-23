@@ -39,7 +39,7 @@
 
 [[constraint]]
   name = "github.com/acoshift/go-firebase-admin"
-  branch = "master"
+  version = "0.0.3"
 
 [[constraint]]
   branch = "master"
@@ -55,7 +55,7 @@
 
 [[constraint]]
   name = "github.com/acoshift/session"
-  version = "0.1.0"
+  version = "0.1.1"
 
 [[constraint]]
   name = "github.com/asaskevich/govalidator"

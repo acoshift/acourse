@@ -62,9 +62,6 @@ func Middleware(config Config) middleware.Middleware {
 				switch s.mark.(type) {
 				case markDestroy:
 					config.Store.Del(hashedID)
-				case markSave:
-					s.Set(timestampKey{}, time.Now().Unix())
-					config.Store.Set(hashedID, s.encode(), s.MaxAge)
 				case markRotate:
 					if len(s.oldID) > 0 {
 						s.Set(timestampKey{}, int64(-1))
@@ -72,6 +69,11 @@ func Middleware(config Config) middleware.Middleware {
 					}
 					s.Set(timestampKey{}, time.Now().Unix())
 					config.Store.Set(hashedID, s.encode(), s.MaxAge)
+				default:
+					if s.changed {
+						s.Set(timestampKey{}, time.Now().Unix())
+						config.Store.Set(hashedID, s.encode(), s.MaxAge)
+					}
 				}
 			}()
 
