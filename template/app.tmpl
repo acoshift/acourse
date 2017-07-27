@@ -140,40 +140,6 @@
   {{template "app-script" $}}
 {{end}}
 
-
 {{define "style"}}
 {{template "app-style" $}}
-<style>
-  .app-container {
-    padding-top: 80px;
-  }
-
-  footer {
-    position: relative;
-    z-index: 2;
-    padding: 24px 32px;
-    backface-visibility: hidden;
-    background-color: #292d35;
-    color: #777777;
-  }
-
-  footer >.bottomline > div:first-child {
-    text-align: left;
-  }
-
-  footer >.bottomline > div:last-child {
-    text-align: right;
-  }
-
-  @media only screen and (max-width: 767px) {
-    footer >.bottomline > div:first-child {
-      text-align: center;
-    }
-
-    footer >.bottomline > div:last-child {
-      text-align: center;
-    }
-  }
-</style>
 {{end}}
-
