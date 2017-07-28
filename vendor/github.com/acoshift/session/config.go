@@ -18,7 +18,8 @@ type Config struct {
 	Secure   Secure
 
 	// Disable features
-	DisableRenew bool // disable auto renew session
+	DisableRenew  bool // disable auto renew session
+	DisableHashID bool // disable hash session id when save to store
 }
 
 // Secure config

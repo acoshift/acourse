@@ -147,6 +147,7 @@ func (s *Session) setCookie(w http.ResponseWriter) {
 			HttpOnly: s.HTTPOnly,
 			Value:    "",
 			MaxAge:   -1,
+			Expires:  time.Unix(0, 0),
 			Secure:   s.Secure,
 		})
 		return
@@ -175,6 +176,7 @@ func (s *Session) setCookie(w http.ResponseWriter) {
 		HttpOnly: s.HTTPOnly,
 		Value:    s.id,
 		MaxAge:   int(s.MaxAge / time.Second),
+		Expires:  time.Now().Add(s.MaxAge),
 		Secure:   s.Secure,
 	})
 }

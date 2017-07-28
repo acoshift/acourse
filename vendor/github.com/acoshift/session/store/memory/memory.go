@@ -37,18 +37,15 @@ type memoryStore struct {
 }
 
 func (s *memoryStore) cleanupWorker() {
-	time.Sleep(5 * time.Second)
-	for {
-		now := time.Now()
-		s.m.Lock()
-		for k, v := range s.l {
-			if !v.exp.IsZero() && v.exp.Before(now) {
-				delete(s.l, k)
-			}
+	now := time.Now()
+	s.m.Lock()
+	for k, v := range s.l {
+		if !v.exp.IsZero() && v.exp.Before(now) {
+			delete(s.l, k)
 		}
-		s.m.Unlock()
-		time.Sleep(s.cleanupInterval)
 	}
+	s.m.Unlock()
+	time.AfterFunc(s.cleanupInterval, s.cleanupWorker)
 }
 
 var errNotFound = errors.New("memory: session not found")

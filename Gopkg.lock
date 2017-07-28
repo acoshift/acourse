@@ -52,8 +52,8 @@
 [[projects]]
   name = "github.com/acoshift/session"
   packages = [".","store/redis"]
-  revision = "55895b7b52fe9d2db01c35969e7090816b194e7b"
-  version = "v0.1.1"
+  revision = "cc0cd7a7a63f6b05075afcad249e9547e7fe2708"
+  version = "v0.1.2"
 
 [[projects]]
   name = "github.com/asaskevich/govalidator"
@@ -220,6 +220,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "8d0728e822e067cb22e4c07382b3ed15584afb532446e116784452b1a5ce1aec"
+  inputs-digest = "0f47a4ca17f9a974d80f76772f9fbffd3c7dc3906b37792a672412c15d80ffbe"
   solver-name = "gps-cdcl"
   solver-version = 1
