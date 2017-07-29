@@ -50,7 +50,7 @@ type Page struct {
 
 var defaultPage = Page{
 	Title: "Acourse",
-	Desc:  "Online courses for everyone",
+	Desc:  "แหล่งเรียนรู้ออนไลน์ ที่ทุกคนเข้าถึงได้",
 	Image: "https://storage.googleapis.com/acourse/static/62b9eb0e-3668-4f9f-86b7-a11349938f7a.jpg",
 	URL:   "https://acourse.io",
 }
