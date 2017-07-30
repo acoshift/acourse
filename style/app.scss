@@ -154,3 +154,41 @@ footer {
     /*min-height: 200px;*/
   }
 }
+
+.course-card {
+  .course-cover {
+    flex-basis: 160px;
+    height: 160px;
+    min-height: 0;
+    object-fit: cover;
+  }
+
+  .acourse-label.Live {
+    background-color: #ff4e4e;
+  }
+
+  .acourse-label.eBook {
+    background-color: #55da65;
+  }
+
+  .acourse-label.Video {
+    background-color: #594eff;
+  }
+
+  .live-date {
+    margin-left: 8px;
+    color: gray;
+    display: inline-block;
+  }
+
+  .course-price .discount {
+    text-decoration: line-through;
+    font-weight: 400;
+    font-size: 13px;
+  }
+
+  .placeholder {
+    background-image: url(https://storage.googleapis.com/acourse/static/d509b7d8-88ad-478c-aa40-2984878c87cd.svg);
+    background-size: cover;
+  }
+}

@@ -4,6 +4,7 @@ config/email_user
 config/email_password
 node_modules/
 static/style.*.css
+static/script.*.js
 private/
 entrypoint
 static.yaml

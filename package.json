@@ -18,7 +18,9 @@
   },
   "homepage": "https://github.com/acoshift/acourse#readme",
   "devDependencies": {
-    "node-sass": "^4.5.2",
-    "md5": "^2.2.1"
+    "babel-core": "^6.25.0",
+    "babel-preset-env": "^1.6.0",
+    "md5": "^2.2.1",
+    "node-sass": "^4.5.2"
   }
 }

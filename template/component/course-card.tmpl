@@ -1,6 +1,6 @@
 {{define "course-card"}}
   <a href="/course/{{.Link}}" class="course-card acourse-card -hover-rise _flex-column _color-dark">
-    <img class="course-cover placeholder" src="{{.Image}}" width="100%">
+    <img class="course-cover placeholder" {{if .Image}}src="{{.Image}}"{{end}} width="100%">
     <div class="course-detail acourse-segment _flex-column _flex-span _main-start">
 
       <h4>{{.Title}}</h4>
@@ -34,44 +34,4 @@
       </div>
     </div>
   </a>
-{{end}}
-
-{{define "course-card-style"}}
-<style>
-  .course-card .course-cover {
-    flex-basis: 160px;
-    height: 160px;
-    min-height: 0;
-    object-fit: cover;
-  }
-
-  .course-card .acourse-label.Live {
-    background-color: #ff4e4e;
-  }
-
-  .course-card .acourse-label.eBook {
-    background-color: #55da65;
-  }
-
-  .course-card .acourse-label.Video {
-    background-color: #594eff;
-  }
-
-  .course-card .live-date {
-    margin-left: 8px;
-    color: gray;
-    display: inline-block;
-  }
-
-  .course-card .course-price .discount {
-    text-decoration: line-through;
-    font-weight: 400;
-    font-size: 13px;
-  }
-
-  .course-card .placeholder {
-    background-image: url(https://storage.googleapis.com/acourse/static/d509b7d8-88ad-478c-aa40-2984878c87cd.svg);
-    background-size: cover;
-  }
-</style>
 {{end}}
