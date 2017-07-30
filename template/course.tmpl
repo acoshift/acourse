@@ -4,7 +4,7 @@
       <div class="acourse-card _flex-column">
 
         <div class="">
-          <img class="course-img" src="{{.Course.Image}}" width="100%">
+          <img class="course-img" {{if .Course.Image}}src="{{.Course.Image}}"{{end}} width="100%">
         </div>
 
         <div class="acourse-segment">
@@ -145,96 +145,4 @@
 {{end}}
 
 {{define "app-style"}}
-<style>
-  #course {
-    position: relative;
-    z-index: 1;
-    padding-top: 32px;
-    min-height: calc(100vh - 311px);
-  }
-
-  #course .acourse-header {
-    margin-bottom: 8px;
-  }
-
-  #course .acourse-card {
-    margin-bottom: 32px;
-  }
-
-  #course .course-img {
-    height: 200px;
-    object-fit: cover;
-    vertical-align: bottom;
-  }
-
-  .course-detail p,
-  .course-detail li {
-    line-height: 1.4em;
-  }
-  .course-detail a {
-    word-break: break-all;
-    color: #2F8DFA;
-  }
-
-  #course .course-sidebar {
-    flex-basis: 300px;
-  }
-
-  #course .discount {
-    text-decoration: line-through;
-    font-size: 13px;
-  }
-
-  @media only screen and (max-width: 767px) {
-    #course {
-      padding: 0;
-      margin: 0;
-    }
-    #course .acourse-segment-big {
-      padding-left: 16px;
-      padding-right: 16px;
-    }
-    #course>.grid-container {
-      margin: 0;
-      width: 100%;
-    }
-    #course .acourse-card {
-      margin: 0px;
-      border-radius: 0;
-    }
-    #course .course-content {
-      flex-direction: column-reverse;
-    }
-    #course .course-sidebar {
-      flex-basis: initial;
-    }
-    #course .acourse-card>.acourse-segment {
-      padding-left: 0px;
-      padding-right: 0px;
-      padding-top: 0px;
-    }
-    #course .course-sidebar>.acourse-segment {
-      padding-left: 0px;
-      padding-right: 0px;
-    }
-  }
-
-  @media only screen and (min-width: 768px) {
-    #course .course-img {
-      height: 250px;
-    }
-  }
-
-  @media only screen and (min-width: 970px) {
-    #course .course-img {
-      height: 300px;
-    }
-  }
-
-  @media only screen and (min-width: 1170px) {
-    #course .course-img {
-      height: 350px;
-    }
-  }
-</style>
 {{end}}
