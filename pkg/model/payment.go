@@ -218,7 +218,7 @@ func HasPendingPayment(ctx context.Context, userID string, courseID string) (boo
 // ListHistoryPayments lists history payments
 func ListHistoryPayments(ctx context.Context, limit, offset int64) ([]*Payment, error) {
 	xs := make([]*Payment, 0)
-	rows, err := db.QueryContext(ctx, queryListPaymentsWithStatus, pq.Array([]int{Accepted, Rejected}), limit, offset)
+	rows, err := db.QueryContext(ctx, queryListPaymentsWithStatus, pq.Array([]int{Accepted, Rejected, Refunded}), limit, offset)
 	if err != nil {
 		return nil, err
 	}
