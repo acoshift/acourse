@@ -32,6 +32,7 @@ const (
 	Pending = iota
 	Accepted
 	Rejected
+	Refunded
 )
 
 const (

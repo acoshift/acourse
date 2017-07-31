@@ -97,6 +97,8 @@
                   Accepted
                 {{else if eq .Status rejected}}
                   Rejected
+                {{else if eq .Status refunded}}
+                  Refunded
                 {{end}}
               </td>
               <td data-column="Created At">{{.CreatedAt | dateTime}}</td>

@@ -201,6 +201,9 @@ func parseTemplate(key interface{}, set []string) {
 		"rejected": func() int {
 			return model.Rejected
 		},
+		"refunded": func() int {
+			return model.Refunded
+		},
 		"html": func(v string) template.HTML {
 			return template.HTML(v)
 		},
