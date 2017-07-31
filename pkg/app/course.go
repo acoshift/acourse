@@ -788,7 +788,7 @@ func editorContentEdit(w http.ResponseWriter, r *http.Request) {
 			videoID = r.FormValue("VideoID")
 		)
 
-		db.ExecContext(ctx, `
+		_, err = db.ExecContext(ctx, `
 			update course_contents
 			set
 				title = $3,
@@ -797,6 +797,10 @@ func editorContentEdit(w http.ResponseWriter, r *http.Request) {
 				updated_at = now()
 			where id = $1 and course_id = $2
 		`, id, course.ID, title, desc, videoID)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 		http.Redirect(w, r, "/editor/content?id="+course.ID, http.StatusSeeOther)
 		return
 	}
