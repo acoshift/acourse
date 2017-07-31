@@ -2,14 +2,6 @@ create database acourse;
 
 set database = acourse;
 
-create table sessions (
-  k text,
-  v blob,
-  e timestamp,
-  primary key (k),
-  index (e)
-);
-
 create table users (
   id varchar not null,
   username varchar not null,
@@ -162,4 +154,4 @@ create table payments (
 create index payments_created_at_idx on payments (created_at desc);
 create index payments_code_idx on payments (code);
 create index payments_course_id_code_idx on payments (course_id, code);
-create index payments_status_created_at on payments (status, created_at desc);
+create index payments_status_created_at_idx on payments (status, created_at desc);
