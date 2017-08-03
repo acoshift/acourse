@@ -36,6 +36,7 @@ func Middleware(h http.Handler) http.Handler {
 	return middleware.Chain(
 		servertiming.Middleware(),
 		panicLogger,
+		httpsRedirect,
 		session.Middleware(session.Config{
 			Name:     "sess",
 			Secret:   sessionSecret,
@@ -105,6 +106,16 @@ func panicLogger(h http.Handler) http.Handler {
 				http.Error(w, p, http.StatusInternalServerError)
 			}
 		}()
+		h.ServeHTTP(w, r)
+	})
+}
+
+func httpsRedirect(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get(header.XForwardedProto) == "http" {
+			http.Redirect(w, r, "https://"+r.Host+r.RequestURI, http.StatusMovedPermanently)
+			return
+		}
 		h.ServeHTTP(w, r)
 	})
 }
