@@ -40,11 +40,10 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "OK")
+		fmt.Fprintf(w, "ok")
 	})
-	appMux := http.NewServeMux()
-	app.Mount(appMux)
-	mux.Handle("/", app.Middleware(appMux))
+	h := app.Handler()
+	mux.Handle("/", h)
 
 	// lets reverse proxy handle other settings
 	srv := &http.Server{

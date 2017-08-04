@@ -6,6 +6,8 @@ import (
 	"os"
 	"unicode/utf8"
 
+	"github.com/acoshift/middleware"
+
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/acourse/pkg/view"
 	"github.com/acoshift/flash"
@@ -15,8 +17,10 @@ import (
 	"github.com/asaskevich/govalidator"
 )
 
-// Mount mounts app's handlers into mux
-func Mount(mux *http.ServeMux) {
+// Handler returns app's handlers
+func Handler() http.Handler {
+	mux := http.NewServeMux()
+
 	editor := http.NewServeMux()
 	editor.Handle("/create", onlyInstructor(http.HandlerFunc(editorCreate)))
 	editor.Handle("/course", isCourseOwner(http.HandlerFunc(editorCourse)))
@@ -31,20 +35,27 @@ func Mount(mux *http.ServeMux) {
 	admin.Handle("/payments/history", http.HandlerFunc(adminHistoryPayments))
 	admin.Handle("/payments/reject", http.HandlerFunc(adminRejectPayment))
 
-	mux.Handle("/", http.HandlerFunc(index))
-	mux.Handle("/~/", http.StripPrefix("/~", cache(http.FileServer(&fileFS{http.Dir("static")}))))
+	main := http.NewServeMux()
+	main.Handle("/", http.HandlerFunc(index))
+	main.Handle("/signin", mustNotSignedIn(http.HandlerFunc(signIn)))
+	main.Handle("/openid", mustNotSignedIn(http.HandlerFunc(openID)))
+	main.Handle("/openid/callback", mustNotSignedIn(http.HandlerFunc(openIDCallback)))
+	main.Handle("/signup", mustNotSignedIn(http.HandlerFunc(signUp)))
+	main.Handle("/signout", http.HandlerFunc(signOut))
+	main.Handle("/profile", mustSignedIn(http.HandlerFunc(profile)))
+	main.Handle("/profile/edit", mustSignedIn(http.HandlerFunc(profileEdit)))
+	main.Handle("/course/", http.StripPrefix("/course/", http.HandlerFunc(course)))
+	main.Handle("/admin/", http.StripPrefix("/admin", onlyAdmin(admin)))
+	main.Handle("/editor/", http.StripPrefix("/editor", editor))
+	main.Handle("/reset/password", mustNotSignedIn(http.HandlerFunc(resetPassword)))
+
+	mux.Handle("/", Middleware(main))
+	mux.Handle("/~/", middleware.Chain(
+		httpsRedirect,
+	)(http.StripPrefix("/~", cache(http.FileServer(&fileFS{http.Dir("static")})))))
 	mux.Handle("/favicon.ico", fileHandler("static/favicon.ico"))
-	mux.Handle("/signin", mustNotSignedIn(http.HandlerFunc(signIn)))
-	mux.Handle("/openid", mustNotSignedIn(http.HandlerFunc(openID)))
-	mux.Handle("/openid/callback", mustNotSignedIn(http.HandlerFunc(openIDCallback)))
-	mux.Handle("/signup", mustNotSignedIn(http.HandlerFunc(signUp)))
-	mux.Handle("/signout", http.HandlerFunc(signOut))
-	mux.Handle("/profile", mustSignedIn(http.HandlerFunc(profile)))
-	mux.Handle("/profile/edit", mustSignedIn(http.HandlerFunc(profileEdit)))
-	mux.Handle("/course/", http.StripPrefix("/course/", http.HandlerFunc(course)))
-	mux.Handle("/admin/", http.StripPrefix("/admin", onlyAdmin(admin)))
-	mux.Handle("/editor/", http.StripPrefix("/editor", editor))
-	mux.Handle("/reset/password", mustNotSignedIn(http.HandlerFunc(resetPassword)))
+
+	return mux
 }
 
 type fileFS struct {
