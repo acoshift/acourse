@@ -26,6 +26,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	h := middleware.Chain(
 		hsts.New(hsts.Config{
+			Skipper:           middleware.SkipHTTP,
 			MaxAge:            31536000 * time.Second,
 			IncludeSubDomains: true,
 			Preload:           true,

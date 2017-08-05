@@ -46,12 +46,7 @@ func main() {
 		fmt.Fprintf(w, "ok")
 	})
 	h := middleware.Chain(
-		hsts.New(hsts.Config{
-			Skipper:           middleware.SkipHTTP,
-			MaxAge:            31536000 * time.Second,
-			IncludeSubDomains: true,
-			Preload:           true,
-		}),
+		hsts.New(hsts.PreloadConfig),
 		gzip.New(gzip.DefaultConfig),
 	)(app.Handler())
 	mux.Handle("/", h)

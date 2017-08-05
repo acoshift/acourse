@@ -46,6 +46,10 @@
   name = "github.com/acoshift/header"
 
 [[constraint]]
+  name = "github.com/acoshift/hsts"
+  version = "0.1.1"
+
+[[constraint]]
   name = "github.com/acoshift/middleware"
   version = "0.2.0"
 
