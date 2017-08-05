@@ -9,6 +9,7 @@ import (
 	"github.com/acoshift/acourse/pkg/app"
 	"github.com/acoshift/configfile"
 	"github.com/acoshift/gzip"
+	"github.com/acoshift/hsts"
 	"github.com/acoshift/middleware"
 	_ "github.com/lib/pq"
 )
@@ -45,6 +46,12 @@ func main() {
 		fmt.Fprintf(w, "ok")
 	})
 	h := middleware.Chain(
+		hsts.New(hsts.Config{
+			Skipper:           middleware.SkipHTTP,
+			MaxAge:            31536000 * time.Second,
+			IncludeSubDomains: true,
+			Preload:           true,
+		}),
 		gzip.New(gzip.DefaultConfig),
 	)(app.Handler())
 	mux.Handle("/", h)

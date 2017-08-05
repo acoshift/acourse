@@ -12,3 +12,19 @@ type Skipper func(*http.Request) bool
 func DefaultSkipper(*http.Request) bool {
 	return false
 }
+
+// SkipHTTP skips http request
+func SkipHTTP(r *http.Request) bool {
+	if isTLS(r) {
+		return false
+	}
+	return true
+}
+
+// SkipHTTPS skips https request
+func SkipHTTPS(r *http.Request) bool {
+	if !isTLS(r) {
+		return false
+	}
+	return true
+}

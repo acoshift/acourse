@@ -6,13 +6,12 @@ import (
 	"os"
 	"unicode/utf8"
 
-	"github.com/acoshift/middleware"
-
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/acourse/pkg/view"
 	"github.com/acoshift/flash"
 	"github.com/acoshift/go-firebase-admin"
 	"github.com/acoshift/header"
+	"github.com/acoshift/middleware"
 	"github.com/acoshift/session"
 	"github.com/asaskevich/govalidator"
 )

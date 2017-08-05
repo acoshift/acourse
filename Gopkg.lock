@@ -44,10 +44,16 @@
   revision = "5c88c77f50897ba89140829b44b9d96c5050ff5a"
 
 [[projects]]
+  name = "github.com/acoshift/hsts"
+  packages = ["."]
+  revision = "7ff85e162dc2e00951ddfaec9ae627a46725f36a"
+  version = "v0.1.0"
+
+[[projects]]
   name = "github.com/acoshift/middleware"
   packages = ["."]
-  revision = "84c36d0149badf0bd023187556881cc9a3f2abd8"
-  version = "v0.1.0"
+  revision = "eb528086425529ef1d014404066c11b3bfa15a92"
+  version = "v0.2.0"
 
 [[projects]]
   branch = "master"
@@ -226,6 +232,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "aea120a793827e0d3fcd4ef21905b6476651d58252310e96ce5e855548a3bb81"
+  inputs-digest = "8c88095f9500f837ea494754aae5907a0ae64b6a002aebfcaec5c8e4117e7dbf"
   solver-name = "gps-cdcl"
   solver-version = 1
