@@ -8,6 +8,8 @@ import (
 
 	"github.com/acoshift/acourse/pkg/app"
 	"github.com/acoshift/configfile"
+	"github.com/acoshift/gzip"
+	"github.com/acoshift/middleware"
 	_ "github.com/lib/pq"
 )
 
@@ -42,7 +44,9 @@ func main() {
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "ok")
 	})
-	h := app.Handler()
+	h := middleware.Chain(
+		gzip.New(gzip.DefaultConfig),
+	)(app.Handler())
 	mux.Handle("/", h)
 
 	// lets reverse proxy handle other settings

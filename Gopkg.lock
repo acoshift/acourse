@@ -32,6 +32,12 @@
   version = "v0.0.3"
 
 [[projects]]
+  name = "github.com/acoshift/gzip"
+  packages = ["."]
+  revision = "4d0cdce0d0fc57666ffcf5803e97a35d15a9e848"
+  version = "v1.0.1"
+
+[[projects]]
   branch = "master"
   name = "github.com/acoshift/header"
   packages = ["."]
@@ -220,6 +226,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "0f47a4ca17f9a974d80f76772f9fbffd3c7dc3906b37792a672412c15d80ffbe"
+  inputs-digest = "aea120a793827e0d3fcd4ef21905b6476651d58252310e96ce5e855548a3bb81"
   solver-name = "gps-cdcl"
   solver-version = 1
