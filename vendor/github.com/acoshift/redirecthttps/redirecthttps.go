@@ -47,7 +47,7 @@ func New(config Config) middleware.Middleware {
 
 	if config.Mode == OnlyConnectionState || config.Mode == All {
 		checkRequest = func(r *http.Request) bool {
-			return r.TLS != nil
+			return r.TLS == nil
 		}
 	} else {
 		checkRequest = func(*http.Request) bool { return false }

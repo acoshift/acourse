@@ -58,8 +58,8 @@
 [[projects]]
   name = "github.com/acoshift/redirecthttps"
   packages = ["."]
-  revision = "03315729a8279f501a97a965b28c3915c170d8ab"
-  version = "v0.1.0"
+  revision = "20709bf41e76ae479a4028a6f55639d5ddcf14b7"
+  version = "v0.1.1"
 
 [[projects]]
   branch = "master"
@@ -88,8 +88,8 @@
 [[projects]]
   name = "github.com/disintegration/imaging"
   packages = ["."]
-  revision = "1b5cf1a92e375a4574a8214eb877fc3f721a612d"
-  version = "v1.2.0"
+  revision = "a5858022df0e1734a59f973fffe3f87b51c087ed"
+  version = "v1.2.1"
 
 [[projects]]
   branch = "master"
@@ -238,6 +238,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "485a38bf787dcb0241385f7727951dc05ea8bb15c19b4d6b2374e2ec124d99b2"
+  inputs-digest = "a57a4d78822648e155bb672e4fc55a93b98052fe59b92d02414a86017030cb47"
   solver-name = "gps-cdcl"
   solver-version = 1
