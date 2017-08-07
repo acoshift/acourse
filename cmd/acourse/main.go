@@ -11,6 +11,7 @@ import (
 	"github.com/acoshift/gzip"
 	"github.com/acoshift/hsts"
 	"github.com/acoshift/middleware"
+	"github.com/acoshift/redirecthttps"
 	_ "github.com/lib/pq"
 )
 
@@ -46,6 +47,7 @@ func main() {
 		fmt.Fprintf(w, "ok")
 	})
 	h := middleware.Chain(
+		redirecthttps.New(redirecthttps.Config{Mode: redirecthttps.OnlyProxy}),
 		hsts.New(hsts.PreloadConfig),
 		gzip.New(gzip.DefaultConfig),
 	)(app.Handler())

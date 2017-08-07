@@ -56,6 +56,12 @@
   version = "v0.2.0"
 
 [[projects]]
+  name = "github.com/acoshift/redirecthttps"
+  packages = ["."]
+  revision = "03315729a8279f501a97a965b28c3915c170d8ab"
+  version = "v0.1.0"
+
+[[projects]]
   branch = "master"
   name = "github.com/acoshift/servertiming"
   packages = ["."]
@@ -232,6 +238,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "50f1edb1bf46626a27406bdbf8f02e23a18d1e4ae0c1f194636b73b9e7c13807"
+  inputs-digest = "485a38bf787dcb0241385f7727951dc05ea8bb15c19b4d6b2374e2ec124d99b2"
   solver-name = "gps-cdcl"
   solver-version = 1

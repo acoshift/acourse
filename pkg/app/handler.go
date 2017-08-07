@@ -11,7 +11,6 @@ import (
 	"github.com/acoshift/flash"
 	"github.com/acoshift/go-firebase-admin"
 	"github.com/acoshift/header"
-	"github.com/acoshift/middleware"
 	"github.com/acoshift/session"
 	"github.com/asaskevich/govalidator"
 )
@@ -49,9 +48,7 @@ func Handler() http.Handler {
 	main.Handle("/reset/password", mustNotSignedIn(http.HandlerFunc(resetPassword)))
 
 	mux.Handle("/", Middleware(main))
-	mux.Handle("/~/", middleware.Chain(
-		httpsRedirect,
-	)(http.StripPrefix("/~", cache(http.FileServer(&fileFS{http.Dir("static")})))))
+	mux.Handle("/~/", http.StripPrefix("/~", cache(http.FileServer(&fileFS{http.Dir("static")}))))
 	mux.Handle("/favicon.ico", fileHandler("static/favicon.ico"))
 
 	return mux

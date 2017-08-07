@@ -62,6 +62,10 @@
   version = "0.1.2"
 
 [[constraint]]
+  name = "github.com/acoshift/redirecthttps"
+  version = "0.1.0"
+
+[[constraint]]
   name = "github.com/asaskevich/govalidator"
   version = "6.0.0"
 
