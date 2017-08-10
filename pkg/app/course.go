@@ -763,6 +763,10 @@ func editorContentEdit(w http.ResponseWriter, r *http.Request) {
 	id := r.FormValue("id")
 
 	content, err := model.GetCourseContent(ctx, id)
+	if err == sql.ErrNoRows {
+		view.NotFound(w, r)
+		return
+	}
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
