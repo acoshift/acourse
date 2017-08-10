@@ -24,7 +24,7 @@ func Handler() http.Handler {
 	editor.Handle("/course", isCourseOwner(http.HandlerFunc(editorCourse)))
 	editor.Handle("/content", isCourseOwner(http.HandlerFunc(editorContent)))
 	editor.Handle("/content/create", isCourseOwner(http.HandlerFunc(editorContentCreate)))
-	editor.Handle("/content/edit", http.HandlerFunc(editorContentEdit))
+	editor.Handle("/content/edit", isCourseOwner(http.HandlerFunc(editorContentEdit)))
 
 	admin := http.NewServeMux()
 	admin.Handle("/users", http.HandlerFunc(adminUsers))
