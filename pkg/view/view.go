@@ -89,8 +89,7 @@ func NotFound(w http.ResponseWriter, r *http.Request) {
 	}{page}
 
 	w.Header().Set(header.XContentTypeOptions, "nosniff")
-	w.WriteHeader(http.StatusNotFound)
-	render(ctx, w, keyNotFound{}, &data)
+	renderWithStatusCode(ctx, w, http.StatusNotFound, keyNotFound{}, &data)
 }
 
 // SignIn renders signin view

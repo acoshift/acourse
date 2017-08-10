@@ -228,7 +228,7 @@ func parseTemplate(key interface{}, set []string) {
 	}
 }
 
-func render(ctx context.Context, w http.ResponseWriter, key, data interface{}) {
+func renderWithStatusCode(ctx context.Context, w http.ResponseWriter, code int, key, data interface{}) {
 	t := templates[key]
 	if t == nil {
 		http.Error(w, fmt.Sprintf("template not found"), http.StatusInternalServerError)
@@ -240,9 +240,9 @@ func render(ctx context.Context, w http.ResponseWriter, key, data interface{}) {
 		parseTemplate(key, t.set)
 		t = templates[key]
 	}
-
 	w.Header().Set(header.ContentType, "text/html; charset=utf-8")
 	w.Header().Set(header.CacheControl, "no-cache, no-store, must-revalidate, max-age=0")
+	w.WriteHeader(code)
 	pipe := &bytes.Buffer{}
 	err := t.Execute(pipe, data)
 	if err != nil {
@@ -256,4 +256,8 @@ func render(ctx context.Context, w http.ResponseWriter, key, data interface{}) {
 	}
 	f := flash.Get(ctx)
 	f.Clear()
+}
+
+func render(ctx context.Context, w http.ResponseWriter, key, data interface{}) {
+	renderWithStatusCode(ctx, w, http.StatusOK, key, data)
 }
