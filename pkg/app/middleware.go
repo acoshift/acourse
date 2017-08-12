@@ -11,7 +11,6 @@ import (
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/acourse/pkg/view"
 	"github.com/acoshift/cachestatic"
-	"github.com/acoshift/flash"
 	"github.com/acoshift/header"
 	"github.com/acoshift/middleware"
 	"github.com/acoshift/servertiming"
@@ -20,6 +19,8 @@ import (
 	"github.com/garyburd/redigo/redis"
 	"golang.org/x/net/xsrftoken"
 )
+
+const sessName = "sess"
 
 // Middleware wraps handlers with app's middleware
 func Middleware(h http.Handler) http.Handler {
@@ -37,7 +38,6 @@ func Middleware(h http.Handler) http.Handler {
 		servertiming.Middleware(),
 		panicLogger,
 		session.Middleware(session.Config{
-			Name:     "sess",
 			Secret:   sessionSecret,
 			Path:     "/",
 			MaxAge:   5 * 24 * time.Hour,
@@ -69,7 +69,7 @@ func Middleware(h http.Handler) http.Handler {
 				return nil
 			},
 			Skipper: func(r *http.Request) bool {
-				s := session.Get(r.Context())
+				s := session.Get(r.Context(), sessName)
 				// skip if signed in
 				if x := s.Get(keyUserID); x != nil {
 					return true
@@ -82,7 +82,6 @@ func Middleware(h http.Handler) http.Handler {
 			},
 			Invalidator: cacheInvalidator,
 		}),
-		flash.Middleware(),
 		fetchUser,
 		csrf,
 	)(h)
@@ -140,7 +139,7 @@ func csrf(h http.Handler) http.Handler {
 
 func mustSignedIn(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		s := session.Get(r.Context())
+		s := session.Get(r.Context(), sessName)
 		id, _ := s.Get(keyUserID).(string)
 		if len(id) == 0 {
 			http.Redirect(w, r, "/signin?r="+url.QueryEscape(r.RequestURI), http.StatusFound)
@@ -152,7 +151,7 @@ func mustSignedIn(h http.Handler) http.Handler {
 
 func mustNotSignedIn(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		s := session.Get(r.Context())
+		s := session.Get(r.Context(), sessName)
 		id, _ := s.Get(keyUserID).(string)
 		if len(id) > 0 {
 			http.Redirect(w, r, "/", http.StatusFound)
@@ -165,7 +164,7 @@ func mustNotSignedIn(h http.Handler) http.Handler {
 func fetchUser(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		s := session.Get(ctx)
+		s := session.Get(ctx, sessName)
 		id, _ := s.Get(keyUserID).(string)
 		if len(id) > 0 {
 			u, err := model.GetUser(ctx, id)

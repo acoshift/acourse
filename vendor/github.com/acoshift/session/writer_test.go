@@ -46,4 +46,16 @@ func TestWriter(t *testing.T) {
 	w.Flush()
 	w.CloseNotify()
 	w.Hijack()
+
+	called := 0
+	w.beforeWriteHeader = func() {
+		called++
+	}
+	w.WriteHeader(200)
+	w.WriteHeader(200)
+	w.Write([]byte("ok"))
+
+	if called != 1 {
+		t.Fatalf("expected hook call 1 time; got %d times", called)
+	}
 }

@@ -7,7 +7,7 @@
 
 Session Middleware for Golang
 
-## Example
+## Example with Middleware
 
 ```go
 package main
@@ -25,7 +25,12 @@ import (
 func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		s := session.Get(r.Context())
+		if r.URL.Path != "/" {
+			http.NotFound(w, r)
+			return
+		}
+
+		s := session.Get(r.Context(), "sess")
 		cnt, _ := s.Get("counter").(int)
 		cnt++
 		s.Set("counter", cnt)
@@ -33,7 +38,7 @@ func main() {
 		fmt.Fprintf(w, "Couter: %d<br><a href=\"/reset\">Reset</a>", cnt)
 	})
 	mux.HandleFunc("/reset", func(w http.ResponseWriter, r *http.Request) {
-		s := session.Get(r.Context())
+		s := session.Get(r.Context(), "sess")
 		s.Del("counter")
 		http.Redirect(w, r, "/", http.StatusFound)
 	})
@@ -43,13 +48,66 @@ func main() {
 		HTTPOnly: true,
 		Secret:   []byte("testsecret1234"),
 		MaxAge:   time.Minute,
-		Name:     "sess",
 		Path:     "/",
 		Secure:   session.PreferSecure,
 		Store:    store.New(store.Config{}),
 	})(mux)
 
 	log.Fatal(http.ListenAndServe(":8080", h))
+}
+
+```
+
+## Example with Manager
+
+```go
+package main
+
+import (
+	"fmt"
+	"log"
+	"net/http"
+	"time"
+
+	"github.com/acoshift/session"
+	store "github.com/acoshift/session/store/memory"
+)
+
+func main() {
+	mux := http.NewServeMux()
+
+	m := session.New(session.Config{
+		Domain:   "localhost",
+		HTTPOnly: true,
+		Secret:   []byte("testsecret1234"),
+		MaxAge:   time.Minute,
+		Path:     "/",
+		Secure:   session.PreferSecure,
+		Store:    store.New(store.Config{}),
+	})
+
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/" {
+			http.NotFound(w, r)
+			return
+		}
+
+		s := m.Get(r, "sess")
+		cnt, _ := s.Get("counter").(int)
+		cnt++
+		s.Set("counter", cnt)
+		m.Save(w, s)
+		w.Header().Set("Content-Type", "text/html")
+		fmt.Fprintf(w, "Couter: %d<br><a href=\"/reset\">Reset</a>", cnt)
+	})
+	mux.HandleFunc("/reset", func(w http.ResponseWriter, r *http.Request) {
+		s := m.Get(r, "sess")
+		s.Del("counter")
+		m.Save(w, s)
+		http.Redirect(w, r, "/", http.StatusFound)
+	})
+
+	log.Fatal(http.ListenAndServe(":8080", mux))
 }
 
 ```

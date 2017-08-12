@@ -8,8 +8,8 @@ import (
 
 type sessionWriter struct {
 	http.ResponseWriter
-	wroteHeader bool
-	s           *Session
+	wroteHeader       bool
+	beforeWriteHeader func()
 }
 
 func (w *sessionWriter) Write(b []byte) (int, error) {
@@ -20,10 +20,11 @@ func (w *sessionWriter) Write(b []byte) (int, error) {
 }
 
 func (w *sessionWriter) WriteHeader(code int) {
+	if w.wroteHeader {
+		return
+	}
 	w.wroteHeader = true
-
-	// set cookie before write header
-	w.s.setCookie(w)
+	w.beforeWriteHeader()
 	w.ResponseWriter.WriteHeader(code)
 }
 

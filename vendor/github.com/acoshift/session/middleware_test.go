@@ -1,17 +1,22 @@
 package session_test
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 
+	"github.com/acoshift/middleware"
 	"github.com/acoshift/session"
+	"github.com/acoshift/session/store/memory"
 )
 
+const sessName = "sess"
+
 func mockHandlerFunc(w http.ResponseWriter, r *http.Request) {
-	s := session.Get(r.Context())
+	s := session.Get(r.Context(), sessName)
 	s.Set("test", 1)
 	w.Write([]byte("ok"))
 }
@@ -28,7 +33,7 @@ func TestPanicConfig(t *testing.T) {
 	session.Middleware(session.Config{})
 }
 
-func TestDefautConfig(t *testing.T) {
+func TestDefaultConfig(t *testing.T) {
 	h := session.Middleware(session.Config{
 		Store: &mockStore{},
 	})(mockHandler)
@@ -66,8 +71,8 @@ func TestEmptySession(t *testing.T) {
 	r := httptest.NewRequest(http.MethodGet, "/", nil)
 	h.ServeHTTP(w, r)
 	cookie := w.Header().Get("Set-Cookie")
-	if len(cookie) == 0 {
-		t.Fatalf("expected cookie not empty; got empty")
+	if len(cookie) > 0 {
+		t.Fatalf("expected cookie empty")
 	}
 }
 
@@ -142,7 +147,7 @@ func TestSessionGetSet(t *testing.T) {
 			},
 		},
 	})(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		s := session.Get(r.Context())
+		s := session.Get(r.Context(), sessName)
 		c, _ := s.Get("test").(int)
 		s.Set("test", c+1)
 		fmt.Fprintf(w, "%d", c)
@@ -266,7 +271,7 @@ func TestRotate(t *testing.T) {
 			},
 		},
 	})(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		s := session.Get(r.Context())
+		s := session.Get(r.Context(), sessName)
 		if c == 0 {
 			s.Set("test", 1)
 			c = 1
@@ -318,7 +323,7 @@ func TestDestroy(t *testing.T) {
 			},
 		},
 	})(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		s := session.Get(r.Context())
+		s := session.Get(r.Context(), sessName)
 		if c == 0 {
 			s.Set("test", 1)
 			c = 1
@@ -365,5 +370,82 @@ func TestDisableHashID(t *testing.T) {
 	}
 	if cs[0].Value != setKey {
 		t.Fatalf("expected session id was not hashed")
+	}
+}
+
+func TestSessionMultipleGet(t *testing.T) {
+	h := session.Middleware(session.Config{
+		Store: &mockStore{},
+	})(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		s := session.Get(r.Context(), "sess")
+		s.Set("test", 1)
+
+		s = session.Get(r.Context(), "sess")
+		if s.Get("test").(int) != 1 {
+			t.Fatalf("expected get session 2 times must preverse mutated value")
+		}
+	}))
+
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest(http.MethodGet, "/", nil)
+	h.ServeHTTP(w, r)
+}
+
+func TestEmptyContext(t *testing.T) {
+	defer func() {
+		r := recover()
+		if r != nil {
+			t.Fatalf("expected get session from empty context must not panic")
+		}
+	}()
+	s := session.Get(context.Background(), "sess")
+	if s != nil {
+		t.Fatalf("expected get session from empty context returns nil")
+	}
+}
+
+func TestFlash(t *testing.T) {
+	i := 0
+	h := middleware.Chain(
+		session.Middleware(session.Config{Store: memory.New(memory.Config{}), MaxAge: time.Minute}),
+	)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		s := session.Get(r.Context(), "sess")
+		if i == 0 {
+			s.Flash().Set("a", "1")
+			s.Flash().Set("b", "2")
+			i = 1
+			w.Write(nil)
+			return
+		}
+		if s.Flash().Get("a") != "1" {
+			t.Fatalf("expected flash save in session")
+		}
+		if s.Flash().Get("b") != "2" {
+			t.Fatalf("expected flash save in session")
+		}
+		w.Write(nil)
+	}))
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	resp := httptest.NewRecorder()
+	h.ServeHTTP(resp, req)
+	req = httptest.NewRequest(http.MethodGet, "/", nil)
+	for _, c := range resp.Result().Cookies() {
+		req.AddCookie(c)
+	}
+	resp = httptest.NewRecorder()
+	h.ServeHTTP(resp, req)
+	if i != 1 {
+		t.Fatalf("expected handler called 2 times")
+	}
+}
+
+func BenchmarkDefaultConfig(b *testing.B) {
+	h := session.Middleware(session.Config{
+		Store: &mockStore{},
+	})(mockHandler)
+	r := httptest.NewRequest(http.MethodGet, "/", nil)
+	for i := 0; i < b.N; i++ {
+		w := httptest.NewRecorder()
+		h.ServeHTTP(w, r)
 	}
 }

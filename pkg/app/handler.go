@@ -8,7 +8,6 @@ import (
 
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/acourse/pkg/view"
-	"github.com/acoshift/flash"
 	"github.com/acoshift/go-firebase-admin"
 	"github.com/acoshift/header"
 	"github.com/acoshift/session"
@@ -110,7 +109,7 @@ func signIn(w http.ResponseWriter, r *http.Request) {
 
 func postSignIn(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	f := flash.Get(ctx)
+	f := session.Get(ctx, sessName).Flash()
 
 	email := r.FormValue("Email")
 	if len(email) == 0 {
@@ -133,7 +132,7 @@ func postSignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s := session.Get(ctx)
+	s := session.Get(ctx, sessName)
 	s.Set(keyUserID, userID)
 	s.Rotate()
 
@@ -175,14 +174,14 @@ func openID(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	s := session.Get(ctx)
+	s := session.Get(ctx, sessName)
 	s.Set(keyOpenIDSessionID, sessID)
 	http.Redirect(w, r, redirectURL, http.StatusSeeOther)
 }
 
 func openIDCallback(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	s := session.Get(ctx)
+	s := session.Get(ctx, sessName)
 	sessID, _ := s.Get(keyOpenIDSessionID).(string)
 	s.Del(keyOpenIDSessionID)
 	user, err := firAuth.VerifyAuthCallbackURI(ctx, baseURL+r.RequestURI, sessID)
@@ -240,8 +239,7 @@ func signUp(w http.ResponseWriter, r *http.Request) {
 
 func postSignUp(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-
-	f := flash.Get(ctx)
+	f := session.Get(ctx, sessName).Flash()
 
 	email := r.FormValue("Email")
 	if len(email) == 0 {
@@ -287,7 +285,7 @@ func postSignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s := session.Get(ctx)
+	s := session.Get(ctx, sessName)
 	s.Set(keyUserID, userID)
 
 	rURL := r.FormValue("r")
@@ -299,7 +297,7 @@ func postSignUp(w http.ResponseWriter, r *http.Request) {
 }
 
 func signOut(w http.ResponseWriter, r *http.Request) {
-	s := session.Get(r.Context())
+	s := session.Get(r.Context(), sessName)
 	s.Destroy()
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
@@ -308,7 +306,7 @@ func resetPassword(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		defer back(w, r)
 		ctx := r.Context()
-		f := flash.Get(ctx)
+		f := session.Get(ctx, sessName).Flash()
 		f.Set("OK", "1")
 		email := r.FormValue("email")
 		user, err := firAuth.GetUserByEmail(ctx, email)

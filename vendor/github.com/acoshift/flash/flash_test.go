@@ -2,10 +2,8 @@ package flash_test
 
 import (
 	"bytes"
-	"context"
 	"testing"
 
-	"github.com/acoshift/flash"
 	. "github.com/acoshift/flash"
 )
 
@@ -21,7 +19,7 @@ func TestNew(t *testing.T) {
 
 func TestEncodeDecode(t *testing.T) {
 	var (
-		f, p flash.Flash
+		f, p Flash
 		b    []byte
 		err  error
 	)
@@ -100,19 +98,24 @@ func TestOperators(t *testing.T) {
 	}
 }
 
-func TestContext(t *testing.T) {
-	ctx := context.Background()
-	f := Get(ctx)
-	if f == nil {
-		t.Errorf("expected Get from empty context returns non-nil flash; got nil")
-	}
-	f.Set("a", "1")
-	ctx = Set(ctx, f)
-	p := Get(ctx)
+func TestClone(t *testing.T) {
+	f := New()
+	f.Add("a", "1")
+	f.Add("a", "2")
+	f.Add("b", "3")
 
-	bf, _ := f.Encode()
-	bp, _ := p.Encode()
-	if bytes.Compare(bf, bp) != 0 {
-		t.Errorf("expected Get returns same flash as Set")
+	p := f.Clone()
+
+	fb, _ := f.Encode()
+	pb, _ := p.Encode()
+	if !bytes.Equal(fb, pb) {
+		t.Fatalf("expected cloned encode to be same value")
+	}
+
+	f.Clear()
+	fb, _ = f.Encode()
+	pb, _ = p.Encode()
+	if bytes.Equal(fb, pb) {
+		t.Fatalf("expected cloned encode and cleard original not same value")
 	}
 }

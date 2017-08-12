@@ -2,54 +2,12 @@ package flash
 
 import (
 	"bytes"
-	"context"
 	"encoding/gob"
-	"net/http"
 	"net/url"
-
-	"github.com/acoshift/middleware"
-	"github.com/acoshift/session"
 )
 
 // Flash type
 type Flash url.Values
-
-func init() {
-	gob.Register(flashKey{})
-}
-
-// Middleware decodes flash data from session and save back
-func Middleware() middleware.Middleware {
-	return func(h http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			ctx := r.Context()
-			sess := session.Get(ctx)
-			var f Flash
-			var isNew bool
-			if b, ok := sess.Get(flashKey{}).([]byte); ok {
-				f, _ = Decode(b)
-			}
-			if f == nil {
-				f = New()
-				isNew = true
-			}
-
-			defer func() {
-				if isNew && len(f) == 0 {
-					return
-				}
-
-				// save flash back to session
-				if b, err := f.Encode(); err == nil {
-					sess.Set(flashKey{}, b)
-				}
-			}()
-
-			nr := r.WithContext(Set(ctx, f))
-			h.ServeHTTP(w, nr)
-		})
-	}
-}
 
 // New creates new flash
 func New() Flash {
@@ -68,22 +26,6 @@ func Decode(b []byte) (Flash, error) {
 		return nil, err
 	}
 	return f, nil
-}
-
-type flashKey struct{}
-
-// Get gets flash from context
-func Get(ctx context.Context) Flash {
-	f, ok := ctx.Value(flashKey{}).(Flash)
-	if !ok {
-		return New()
-	}
-	return f
-}
-
-// Set sets flash to context's value
-func Set(ctx context.Context, f Flash) context.Context {
-	return context.WithValue(ctx, flashKey{}, f)
 }
 
 // Encode encodes flash
@@ -132,4 +74,17 @@ func (f Flash) Clear() {
 	for k := range f {
 		v.Del(k)
 	}
+}
+
+// Clone clones flash
+func (f Flash) Clone() Flash {
+	v := url.Values(f)
+	n := make(url.Values, len(v))
+	for k, vv := range v {
+		n[k] = make([]string, len(vv))
+		for kk, vvv := range vv {
+			n[k][kk] = vvv
+		}
+	}
+	return Flash(n)
 }

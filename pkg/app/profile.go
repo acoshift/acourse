@@ -8,8 +8,8 @@ import (
 	"github.com/acoshift/acourse/pkg/appctx"
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/acourse/pkg/view"
-	"github.com/acoshift/flash"
 	"github.com/acoshift/header"
+	"github.com/acoshift/session"
 	"github.com/asaskevich/govalidator"
 )
 
@@ -38,7 +38,7 @@ func profileEdit(w http.ResponseWriter, r *http.Request) {
 	}
 	ctx := r.Context()
 	user := appctx.GetUser(ctx)
-	f := flash.Get(ctx)
+	f := session.Get(ctx, sessName).Flash()
 	if !f.Has("Username") {
 		f.Set("Username", user.Username)
 	}
@@ -54,7 +54,7 @@ func profileEdit(w http.ResponseWriter, r *http.Request) {
 func postProfileEdit(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	user := appctx.GetUser(ctx)
-	f := flash.Get(ctx)
+	f := session.Get(ctx, sessName).Flash()
 
 	image, info, err := r.FormFile("Image")
 	var imageURL string

@@ -10,12 +10,14 @@ type Config struct {
 	Secret []byte // session id salt when put to store
 
 	// Cookie config
-	Name     string // Cookie name, default is "sess"
 	Domain   string
 	HTTPOnly bool
 	Path     string
 	MaxAge   time.Duration
 	Secure   Secure
+
+	// Timeout
+	RenewalTimeout time.Duration // time before old session terminate after renew
 
 	// Disable features
 	DisableRenew  bool // disable auto renew session

@@ -12,8 +12,8 @@ import (
 	"github.com/acoshift/acourse/pkg/appctx"
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/acourse/pkg/view"
-	"github.com/acoshift/flash"
 	"github.com/acoshift/header"
+	"github.com/acoshift/session"
 	"github.com/google/uuid"
 	"github.com/lib/pq"
 )
@@ -205,7 +205,7 @@ func editorCreate(w http.ResponseWriter, r *http.Request) {
 
 func postEditorCreate(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	f := flash.Get(ctx)
+	f := session.Get(ctx, sessName).Flash()
 	user := appctx.GetUser(ctx)
 
 	var (
@@ -317,7 +317,7 @@ func postEditorCourse(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	id := r.FormValue("id")
 
-	f := flash.Get(ctx)
+	f := session.Get(ctx, sessName).Flash()
 
 	var (
 		title     = r.FormValue("Title")
@@ -516,7 +516,7 @@ func courseEnroll(w http.ResponseWriter, r *http.Request) {
 func postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	user := appctx.GetUser(ctx)
-	f := flash.Get(ctx)
+	f := session.Get(ctx, sessName).Flash()
 
 	link := appctx.GetCourseURL(ctx)
 

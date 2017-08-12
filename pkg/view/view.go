@@ -11,6 +11,7 @@ import (
 	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/flash"
 	"github.com/acoshift/header"
+	"github.com/acoshift/session"
 )
 
 type (
@@ -58,7 +59,7 @@ var defaultPage = Page{
 func newPage(ctx context.Context) *Page {
 	p := defaultPage
 	p.Me = appctx.GetUser(ctx)
-	p.Flash = flash.Get(ctx)
+	p.Flash = session.Get(ctx, "sess").Flash().Clone()
 	p.XSRF = template.HTML(`<input type="hidden" name="X" value="` + appctx.GetXSRFToken(ctx) + `">`)
 	return &p
 }

@@ -1,90 +1,69 @@
 package session
 
 import (
-	"crypto/sha256"
-	"encoding/base64"
+	"context"
 	"net/http"
-	"strings"
-	"time"
 
 	"github.com/acoshift/middleware"
 )
 
+type (
+	managerKey struct{}
+	requestKey struct{}
+	storageKey struct{}
+)
+
 // Middleware is the session parser middleware
 func Middleware(config Config) middleware.Middleware {
-	if config.Store == nil {
-		panic("session: nil store")
-	}
-
-	if len(config.Name) == 0 {
-		config.Name = "sess"
-	}
-
-	hashID := func(id string) string {
-		h := sha256.New()
-		h.Write([]byte(id))
-		h.Write(config.Secret)
-		return strings.TrimRight(base64.URLEncoding.EncodeToString(h.Sum(nil)), "=")
-	}
-
-	if config.DisableHashID {
-		hashID = func(id string) string {
-			return id
-		}
-	}
+	m := New(config)
 
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			s := Session{
-				DisableRenew: config.DisableRenew,
-				Name:         config.Name,
-				Domain:       config.Domain,
-				Path:         config.Path,
-				HTTPOnly:     config.HTTPOnly,
-				MaxAge:       config.MaxAge,
-				Secure:       (config.Secure == ForceSecure) || (config.Secure == PreferSecure && isTLS(r)),
-			}
+			ctx := r.Context()
 
-			// get session key from cookie
-			cookie, err := r.Cookie(config.Name)
-			if err == nil && len(cookie.Value) > 0 {
-				// get session data from store
-				b, err := config.Store.Get(hashID(cookie.Value))
-				if err == nil {
-					s.id = cookie.Value
-					s.decode(b)
-				}
-				// DO NOT set session id to cookie value if not found in store
-				// to prevent session fixation attack
-			}
+			// inject manager
+			ctx = context.WithValue(ctx, managerKey{}, m)
 
-			// use defer to alway save session even panic
-			defer func() {
-				hashedID := hashID(s.id)
-				switch s.mark.(type) {
-				case markDestroy:
-					config.Store.Del(hashedID)
-				case markRotate:
-					if len(s.oldID) > 0 {
-						s.Set(timestampKey{}, int64(-1))
-						config.Store.Set(hashID(s.oldID), s.encode(), 5*time.Second)
-					}
-					s.Set(timestampKey{}, time.Now().Unix())
-					config.Store.Set(hashedID, s.encode(), s.MaxAge)
-				default:
-					if s.changed {
-						s.Set(timestampKey{}, time.Now().Unix())
-						config.Store.Set(hashedID, s.encode(), s.MaxAge)
-					}
-				}
-			}()
+			// inject request
+			ctx = context.WithValue(ctx, requestKey{}, r)
 
-			nr := r.WithContext(Set(r.Context(), &s))
+			// inject session saver
+			storage := make(map[string]*Session)
+			ctx = context.WithValue(ctx, storageKey{}, storage)
+
+			nr := r.WithContext(ctx)
 			nw := sessionWriter{
 				ResponseWriter: w,
-				s:              &s,
+				beforeWriteHeader: func() {
+					for _, s := range storage {
+						m.Save(w, s)
+					}
+				},
 			}
 			h.ServeHTTP(&nw, nr)
 		})
 	}
+}
+
+// Get gets session from context
+func Get(ctx context.Context, name string) *Session {
+	m, _ := ctx.Value(managerKey{}).(*Manager)
+	if m == nil {
+		// request not pass middleware
+		return nil
+	}
+
+	// try get session from storage first
+	// to preserve session data from difference handler
+	storage := ctx.Value(storageKey{}).(map[string]*Session)
+	if s, ok := storage[name]; ok {
+		return s
+	}
+
+	// get session from manager
+	s := m.Get(ctx.Value(requestKey{}).(*http.Request), name)
+
+	// save session to storage for later get
+	storage[name] = s
+	return s
 }

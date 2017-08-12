@@ -13,8 +13,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/acoshift/session"
+
 	"github.com/acoshift/acourse/pkg/model"
-	"github.com/acoshift/flash"
 	"github.com/acoshift/header"
 	"github.com/dustin/go-humanize"
 	"github.com/microcosm-cc/bluemonday"
@@ -240,6 +241,7 @@ func renderWithStatusCode(ctx context.Context, w http.ResponseWriter, code int, 
 		parseTemplate(key, t.set)
 		t = templates[key]
 	}
+	session.Get(ctx, "sess").Flash().Clear()
 	w.Header().Set(header.ContentType, "text/html; charset=utf-8")
 	w.Header().Set(header.CacheControl, "no-cache, no-store, must-revalidate, max-age=0")
 	w.WriteHeader(code)
@@ -254,8 +256,6 @@ func renderWithStatusCode(ctx context.Context, w http.ResponseWriter, code int, 
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	f := flash.Get(ctx)
-	f.Clear()
 }
 
 func render(ctx context.Context, w http.ResponseWriter, key, data interface{}) {
