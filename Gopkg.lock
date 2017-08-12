@@ -10,8 +10,8 @@
 [[projects]]
   name = "github.com/acoshift/cachestatic"
   packages = ["."]
-  revision = "76c349efd085b9bd50261f3b71b3b1772a359e9b"
-  version = "v1.4.0"
+  revision = "597e0ba152e95b0ffcb0e8aa40c53875523a5c83"
+  version = "v1.4.1"
 
 [[projects]]
   branch = "master"
@@ -70,8 +70,8 @@
 [[projects]]
   name = "github.com/acoshift/session"
   packages = [".","store/redis"]
-  revision = "ddd0ad2f0712c3393dfe6af2d967d6c39f187d12"
-  version = "v0.3.0"
+  revision = "646d13867b6b18cfb4ae043f0bff0cf7743fac36"
+  version = "v0.3.1"
 
 [[projects]]
   name = "github.com/asaskevich/govalidator"
@@ -238,6 +238,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "b19bdc063e42d5037f211602d04935d1ee1bfa9d9b1cf0cf1c27f24580d17e20"
+  inputs-digest = "e36ac96493c9a36ced442c9a5a50a438d1a7561739ac32fd407411b65ff5e5ba"
   solver-name = "gps-cdcl"
   solver-version = 1

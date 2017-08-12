@@ -13,7 +13,9 @@ type (
 	storageKey struct{}
 )
 
-// Middleware is the session parser middleware
+// Middleware injects session manager into request's context.
+//
+// All data changed before write response writer's header will be save.
 func Middleware(config Config) middleware.Middleware {
 	m := New(config)
 

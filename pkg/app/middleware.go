@@ -25,12 +25,11 @@ const sessName = "sess"
 // Middleware wraps handlers with app's middleware
 func Middleware(h http.Handler) http.Handler {
 	cacheInvalidator := make(chan interface{})
-	type indexIndex struct{}
 
 	go func() {
 		for {
 			time.Sleep(15 * time.Second)
-			cacheInvalidator <- indexIndex{}
+			cacheInvalidator <- cachestatic.InvalidateAll
 		}
 	}()
 
@@ -62,18 +61,18 @@ func Middleware(h http.Handler) http.Handler {
 			}),
 		}),
 		cachestatic.New(cachestatic.Config{
-			Indexer: func(r *http.Request) interface{} {
-				if r.URL.Path == "/" {
-					return indexIndex{}
-				}
-				return nil
-			},
 			Skipper: func(r *http.Request) bool {
-				s := session.Get(r.Context(), sessName)
+				// cache only get
+				if r.Method != http.MethodGet {
+					return true
+				}
+
 				// skip if signed in
+				s := session.Get(r.Context(), sessName)
 				if x := s.Get(keyUserID); x != nil {
 					return true
 				}
+
 				// cache only index
 				if r.URL.Path == "/" {
 					return false

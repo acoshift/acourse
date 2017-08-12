@@ -27,7 +27,7 @@
 
 [[constraint]]
   name = "github.com/acoshift/cachestatic"
-  version = "1.4.0"
+  version = "1.4.1"
 
 [[constraint]]
   branch = "master"
@@ -55,7 +55,7 @@
 
 [[constraint]]
   name = "github.com/acoshift/session"
-  version = "0.3.0"
+  version = "0.3.1"
 
 [[constraint]]
   name = "github.com/acoshift/redirecthttps"

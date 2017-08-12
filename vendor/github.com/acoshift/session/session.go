@@ -165,6 +165,10 @@ func (s *Session) setCookie(w http.ResponseWriter) {
 		return
 	}
 
+	if len(s.id) == 0 && !s.changed {
+		return
+	}
+
 	s.id = generateID()
 	http.SetCookie(w, &http.Cookie{
 		Name:     s.Name,

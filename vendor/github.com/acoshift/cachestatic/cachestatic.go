@@ -70,16 +70,14 @@ func New(c Config) func(http.Handler) http.Handler {
 	if c.Invalidator != nil {
 		go func() {
 			for {
-				select {
-				case p := <-c.Invalidator:
-					l.Lock()
-					if _, ok := p.(invalidateAll); ok {
-						cache = make(map[interface{}]*item)
-					} else {
-						delete(cache, p)
-					}
-					l.Unlock()
+				p := <-c.Invalidator
+				l.Lock()
+				if _, ok := p.(invalidateAll); ok {
+					cache = make(map[interface{}]*item)
+				} else {
+					delete(cache, p)
 				}
+				l.Unlock()
 			}
 		}()
 	}
@@ -116,10 +114,12 @@ func New(c Config) func(http.Handler) http.Handler {
 					}
 				}
 
+				w.Header().Set("X-Cache", "HIT")
 				io.Copy(w, bytes.NewReader(ci.data))
 				return
 			}
 			l.RUnlock()
+			w.Header().Set("X-Cache", "MISS")
 			cw := &responseWriter{
 				ResponseWriter: w,
 				cache:          &bytes.Buffer{},

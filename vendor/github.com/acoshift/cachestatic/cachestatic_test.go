@@ -61,10 +61,19 @@ func TestCachestatic(t *testing.T) {
 	ts := httptest.NewServer(New(DefaultConfig)(createTestHandler()))
 	defer ts.Close()
 
+	hit := false
+
 	verify := func(resp *http.Response, err error) {
 		if err != nil {
 			t.Fatalf("expected error to be nil; got %v", err)
 		}
+		xCache := resp.Header.Get("X-Cache")
+		if !hit && xCache != "MISS" {
+			t.Fatalf("expected X-Cache to be MISS; got %s", xCache)
+		} else if hit && xCache != "HIT" {
+			t.Fatalf("expected X-Cache to be HIT; got %s", xCache)
+		}
+		hit = true
 		if resp.Header.Get(header.ContentType) != "text/plain; charset=utf-8" {
 			t.Fatalf("invalid Content-Type; got %v", resp.Header.Get(header.ContentType))
 		}
