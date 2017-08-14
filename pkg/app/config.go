@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"cloud.google.com/go/storage"
-	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/acourse/pkg/view"
 	"github.com/acoshift/go-firebase-admin"
 	"github.com/garyburd/redigo/redis"
@@ -32,6 +31,8 @@ var (
 	slackURL      string
 	sessionSecret []byte
 	loc           *time.Location
+	cachePool     *redis.Pool
+	cachePrefix   string
 )
 
 // Config use to init app package
@@ -111,7 +112,7 @@ func Init(config Config) error {
 	db.SetMaxIdleConns(5)
 
 	// TODO: use in-memory redis for caching
-	redisPool := &redis.Pool{
+	cachePool = &redis.Pool{
 		MaxIdle:     5,
 		IdleTimeout: 5 * time.Minute,
 		Dial: func() (redis.Conn, error) {
@@ -125,12 +126,9 @@ func Init(config Config) error {
 			return err
 		},
 	}
+	cachePrefix = redisPrefix
 
 	// init other packages
-	err = model.Init(model.Config{RedisPool: redisPool, RedisPrefix: redisPrefix})
-	if err != nil {
-		return err
-	}
 	err = view.Init(view.Config{BaseURL: baseURL})
 	if err != nil {
 		return err
