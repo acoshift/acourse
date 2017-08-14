@@ -127,7 +127,7 @@ func Init(config Config) error {
 	}
 
 	// init other packages
-	err = model.Init(model.Config{DB: db, RedisPool: redisPool, RedisPrefix: redisPrefix})
+	err = model.Init(model.Config{RedisPool: redisPool, RedisPrefix: redisPrefix})
 	if err != nil {
 		return err
 	}
