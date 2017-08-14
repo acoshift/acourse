@@ -694,7 +694,7 @@ func courseAssignment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	assignments, err := model.GetAssignments(ctx, x.ID)
+	assignments, err := model.GetAssignments(ctx, db, x.ID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
