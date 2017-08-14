@@ -1,10 +1,6 @@
 package model
 
-import (
-	"time"
-
-	"github.com/garyburd/redigo/redis"
-)
+import "time"
 
 // UserAssignment model
 type UserAssignment struct {
@@ -14,9 +10,4 @@ type UserAssignment struct {
 	DownloadURL string
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
-}
-
-// GetUserAssignments gets user assignments
-func GetUserAssignments(c redis.Conn, userAssignmentIDs []string) ([]*UserAssignment, error) {
-	return nil, nil
 }
