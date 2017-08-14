@@ -14,7 +14,6 @@ import (
 	"github.com/acoshift/acourse/pkg/view"
 	"github.com/acoshift/header"
 	"github.com/acoshift/session"
-	"github.com/google/uuid"
 	"github.com/lib/pq"
 )
 
@@ -46,9 +45,9 @@ func courseView(w http.ResponseWriter, r *http.Request) {
 	link := appctx.GetCourseURL(ctx)
 
 	// if id can parse to uuid get course from id
-	id := link
-	_, err := uuid.Parse(link)
-	if err != nil {
+	id := intID(link)
+	var err error
+	if id == 0 {
 		// link can not parse to uuid get course id from url
 		id, err = model.GetCourseIDFromURL(ctx, db, link)
 		if err == model.ErrNotFound {
@@ -127,9 +126,9 @@ func courseContent(w http.ResponseWriter, r *http.Request) {
 	link := appctx.GetCourseURL(ctx)
 
 	// if id can parse to uuid get course from id
-	id := link
-	_, err := uuid.Parse(link)
-	if err != nil {
+	id := intID(link)
+	var err error
+	if id == 0 {
 		// link can not parse to uuid get course id from url
 		id, err = model.GetCourseIDFromURL(ctx, db, link)
 		if err == model.ErrNotFound {
@@ -260,7 +259,7 @@ func postEditorCreate(w http.ResponseWriter, r *http.Request) {
 	}
 	defer tx.Rollback()
 
-	var id string
+	var id int64
 	err = tx.QueryRow(`
 		insert into courses
 			(user_id, title, short_desc, long_desc, image, start)
@@ -289,9 +288,9 @@ func postEditorCreate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var link sql.NullString
-	db.QueryRowContext(ctx, `select url from courses where id = $1`, id).Scan(&link)
+	db.QueryRowContext(ctx, `select url from courses where id = $1`, strID(id)).Scan(&link)
 	if !link.Valid {
-		http.Redirect(w, r, "/course/"+id, http.StatusFound)
+		http.Redirect(w, r, "/course/"+strID(id), http.StatusFound)
 		return
 	}
 	http.Redirect(w, r, "/course/"+link.String, http.StatusFound)
@@ -303,7 +302,7 @@ func editorCourse(w http.ResponseWriter, r *http.Request) {
 		postEditorCourse(w, r)
 		return
 	}
-	id := r.FormValue("id")
+	id := intID(r.FormValue("id"))
 	course, err := model.GetCourse(ctx, db, id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -426,7 +425,7 @@ func postEditorCourse(w http.ResponseWriter, r *http.Request) {
 
 func editorContent(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	id := r.FormValue("id")
+	id := intID(r.FormValue("id"))
 
 	if r.Method == http.MethodPost {
 		if r.FormValue("action") == "delete" {
@@ -469,9 +468,9 @@ func courseEnroll(w http.ResponseWriter, r *http.Request) {
 
 	link := appctx.GetCourseURL(ctx)
 
-	id := link
-	_, err := uuid.Parse(link)
-	if err != nil {
+	id := intID(link)
+	var err error
+	if id == 0 {
 		id, err = model.GetCourseIDFromURL(ctx, db, link)
 		if err == model.ErrNotFound {
 			view.NotFound(w, r)
@@ -520,9 +519,9 @@ func postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 
 	link := appctx.GetCourseURL(ctx)
 
-	id := link
-	_, err := uuid.Parse(link)
-	if err != nil {
+	id := intID(link)
+	var err error
+	if id == 0 {
 		id, err = model.GetCourseIDFromURL(ctx, db, link)
 		if err == model.ErrNotFound {
 			view.NotFound(w, r)
@@ -653,9 +652,9 @@ func courseAssignment(w http.ResponseWriter, r *http.Request) {
 	link := appctx.GetCourseURL(ctx)
 
 	// if id can parse to int64 get course from id
-	id := link
-	_, err := uuid.Parse(link)
-	if err != nil {
+	id := intID(link)
+	var err error
+	if id == 0 {
 		// link can not parse to int64 get course id from url
 		id, err = model.GetCourseIDFromURL(ctx, db, link)
 		if err == model.ErrNotFound {
@@ -705,7 +704,7 @@ func courseAssignment(w http.ResponseWriter, r *http.Request) {
 
 func editorContentCreate(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	id := r.FormValue("id")
+	id := intID(r.FormValue("id"))
 
 	if r.Method == http.MethodPost {
 		var (
@@ -760,7 +759,7 @@ func editorContentCreate(w http.ResponseWriter, r *http.Request) {
 func editorContentEdit(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	// course content id
-	id := r.FormValue("id")
+	id := intID(r.FormValue("id"))
 
 	content, err := model.GetCourseContent(ctx, db, id)
 	if err == sql.ErrNoRows {
@@ -805,7 +804,7 @@ func editorContentEdit(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		http.Redirect(w, r, "/editor/content?id="+course.ID, http.StatusSeeOther)
+		http.Redirect(w, r, "/editor/content?id="+strID(course.ID), http.StatusSeeOther)
 		return
 	}
 

@@ -11,9 +11,9 @@ import (
 
 // Payment model
 type Payment struct {
-	ID            string
+	ID            int64
 	UserID        string
-	CourseID      string
+	CourseID      int64
 	Image         string
 	Price         float64
 	OriginalPrice float64
@@ -103,7 +103,7 @@ func CreatePayment(ctx context.Context, tx *sql.Tx, x *Payment) error {
 
 // Accept accepts a payment and create new enroll
 func (x *Payment) Accept(ctx context.Context, tx *sql.Tx) error {
-	if len(x.ID) == 0 {
+	if x.ID == 0 {
 		return fmt.Errorf("payment must be save before accept")
 	}
 
@@ -128,7 +128,7 @@ func (x *Payment) Accept(ctx context.Context, tx *sql.Tx) error {
 
 // Reject rejects a payment
 func (x *Payment) Reject(ctx context.Context, db DB) error {
-	if len(x.ID) == 0 {
+	if x.ID == 0 {
 		return fmt.Errorf("payment must be save before accept")
 	}
 	_, err := db.ExecContext(ctx, `
@@ -182,7 +182,7 @@ func GetPayments(ctx context.Context, db DB, paymentIDs []string) ([]*Payment, e
 }
 
 // GetPayment gets payment from given id
-func GetPayment(ctx context.Context, db DB, paymentID string) (*Payment, error) {
+func GetPayment(ctx context.Context, db DB, paymentID int64) (*Payment, error) {
 	var x Payment
 	err := scanPayment(db.QueryRowContext(ctx, queryGetPayment, paymentID).Scan, &x)
 	if err != nil {
@@ -192,7 +192,7 @@ func GetPayment(ctx context.Context, db DB, paymentID string) (*Payment, error) 
 }
 
 // HasPendingPayment returns ture if given user has pending payment for given course
-func HasPendingPayment(ctx context.Context, db DB, userID string, courseID string) (bool, error) {
+func HasPendingPayment(ctx context.Context, db DB, userID string, courseID int64) (bool, error) {
 	var p int
 	err := db.QueryRowContext(ctx, `
 		select 1 from payments

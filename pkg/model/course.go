@@ -13,7 +13,7 @@ import (
 
 // Course model
 type Course struct {
-	ID            string
+	ID            int64
 	Option        CourseOption
 	Owner         *User
 	EnrollCount   int64
@@ -51,7 +51,7 @@ const (
 // CourseContent type
 type CourseContent struct {
 	ID          string
-	CourseID    string
+	CourseID    int64
 	Title       string
 	Desc        string
 	VideoID     string
@@ -71,7 +71,7 @@ type CourseOption struct {
 // Link returns id if url is invalid
 func (x *Course) Link() string {
 	if !x.URL.Valid || len(x.URL.String) == 0 {
-		return x.ID
+		return strID(x.ID)
 	}
 	return x.URL.String
 }
@@ -129,10 +129,10 @@ const (
 
 // Save saves course, db must be transaction
 func (x *Course) Save(ctx context.Context, tx *sql.Tx) error {
-	if len(x.URL.String) > 0 && x.URL.String != x.ID {
+	if len(x.URL.String) > 0 && x.URL.String != strID(x.ID) {
 		x.URL.Valid = true
 	} else {
-		x.URL.String = x.ID
+		x.URL.String = strID(x.ID)
 		x.URL.Valid = false
 	}
 
@@ -168,7 +168,7 @@ func scanCourse(scan scanFunc, x *Course) error {
 		return err
 	}
 	if len(x.URL.String) == 0 {
-		x.URL.String = x.ID
+		x.URL.String = strID(x.ID)
 	}
 	return nil
 }
@@ -196,7 +196,7 @@ func GetCourses(ctx context.Context, db DB, courseIDs []string) ([]*Course, erro
 }
 
 // GetCourse gets course
-func GetCourse(ctx context.Context, db DB, courseID string) (*Course, error) {
+func GetCourse(ctx context.Context, db DB, courseID int64) (*Course, error) {
 	var x Course
 	err := db.QueryRowContext(ctx, `
 		select
@@ -218,7 +218,7 @@ func GetCourse(ctx context.Context, db DB, courseID string) (*Course, error) {
 }
 
 // GetCourseContents gets course contents for given course id
-func GetCourseContents(ctx context.Context, db DB, courseID string) ([]*CourseContent, error) {
+func GetCourseContents(ctx context.Context, db DB, courseID int64) ([]*CourseContent, error) {
 	rows, err := db.QueryContext(ctx, `
 		select
 			id,
@@ -252,7 +252,7 @@ func GetCourseContents(ctx context.Context, db DB, courseID string) ([]*CourseCo
 }
 
 // GetCourseContent gets course content from id
-func GetCourseContent(ctx context.Context, db DB, courseContentID string) (*CourseContent, error) {
+func GetCourseContent(ctx context.Context, db DB, courseContentID int64) (*CourseContent, error) {
 	var x CourseContent
 	err := db.QueryRowContext(ctx, `
 		select
@@ -273,18 +273,18 @@ func GetCourseContent(ctx context.Context, db DB, courseContentID string) (*Cour
 }
 
 // GetCourseIDFromURL gets course id from url
-func GetCourseIDFromURL(ctx context.Context, db DB, url string) (string, error) {
-	var id string
+func GetCourseIDFromURL(ctx context.Context, db DB, url string) (int64, error) {
+	var id int64
 	err := db.QueryRowContext(ctx, `
 		select id
 		from courses
 		where url = $1
 	`, url).Scan(&id)
 	if err == sql.ErrNoRows {
-		return "", ErrNotFound
+		return 0, ErrNotFound
 	}
 	if err != nil {
-		return "", err
+		return 0, err
 	}
 	return id, nil
 }
@@ -363,8 +363,8 @@ func ListPublicCourses(ctx context.Context, db DB, cachePool *redis.Pool, cacheP
 	}
 
 	xs := make([]*Course, 0)
-	m := make(map[string]*Course)
-	ids := make([]string, 0)
+	m := make(map[int64]*Course)
+	ids := make([]int64, 0)
 
 	{
 		rows, err := db.QueryContext(ctx, queryListCoursesPublic)
@@ -394,7 +394,7 @@ func ListPublicCourses(ctx context.Context, db DB, cachePool *redis.Pool, cacheP
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var courseID string
+		var courseID int64
 		var cnt int64
 		err = rows.Scan(&courseID, &cnt)
 		if err != nil {
@@ -426,8 +426,8 @@ func ListOwnCourses(ctx context.Context, db DB, userID string) ([]*Course, error
 	}
 	defer rows.Close()
 	xs := make([]*Course, 0)
-	ids := make([]string, 0)
-	m := make(map[string]*Course)
+	ids := make([]int64, 0)
+	m := make(map[int64]*Course)
 	for rows.Next() {
 		var x Course
 		err = scanCourse(rows.Scan, &x)
@@ -449,7 +449,7 @@ func ListOwnCourses(ctx context.Context, db DB, userID string) ([]*Course, error
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var courseID string
+		var courseID int64
 		var cnt int64
 		err = rows.Scan(&courseID, &cnt)
 		if err != nil {

@@ -108,7 +108,7 @@ func adminRejectPayment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := r.Context()
-	id := r.FormValue("id")
+	id := intID(r.FormValue("id"))
 	x, err := model.GetPayment(ctx, db, id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -158,7 +158,7 @@ func adminRejectPayment(w http.ResponseWriter, r *http.Request) {
 func postAdminRejectPayment(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	message := r.FormValue("Message")
-	id := r.FormValue("ID")
+	id := intID(r.FormValue("ID"))
 
 	x, err := model.GetPayment(ctx, db, id)
 	if err != nil {
@@ -190,7 +190,7 @@ func postAdminPendingPayment(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	action := r.FormValue("Action")
 
-	id := r.FormValue("ID")
+	id := intID(r.FormValue("ID"))
 	if action == "accept" {
 		tx, err := db.BeginTx(ctx, nil)
 		if err != nil {

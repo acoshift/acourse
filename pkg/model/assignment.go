@@ -11,7 +11,7 @@ type Assignment struct {
 }
 
 // GetAssignments gets assignments
-func GetAssignments(ctx context.Context, db DB, courseID string) ([]*Assignment, error) {
+func GetAssignments(ctx context.Context, db DB, courseID int64) ([]*Assignment, error) {
 	rows, err := db.QueryContext(ctx, `
 		select
 			id, title, long_desc, open

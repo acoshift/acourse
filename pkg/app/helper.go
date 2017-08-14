@@ -10,6 +10,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 
 	"github.com/microcosm-cc/bluemonday"
 	"github.com/russross/blackfriday"
@@ -97,4 +98,13 @@ func markdown(s string) string {
 	})
 	p := bluemonday.UGCPolicy()
 	return string(p.SanitizeBytes(md))
+}
+
+func strID(id int64) string {
+	return strconv.FormatInt(id, 10)
+}
+
+func intID(id string) int64 {
+	r, _ := strconv.ParseInt(id, 10, 64)
+	return r
 }

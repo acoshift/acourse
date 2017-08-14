@@ -6,7 +6,7 @@ import (
 )
 
 // Enroll an user to a course
-func Enroll(ctx context.Context, db DB, userID string, courseID string) error {
+func Enroll(ctx context.Context, db DB, userID string, courseID int64) error {
 	_, err := db.ExecContext(ctx, `
 		insert into enrolls
 			(user_id, course_id)
@@ -20,7 +20,7 @@ func Enroll(ctx context.Context, db DB, userID string, courseID string) error {
 }
 
 // IsEnrolled returns true if user enrolled a given course
-func IsEnrolled(ctx context.Context, db DB, userID string, courseID string) (bool, error) {
+func IsEnrolled(ctx context.Context, db DB, userID string, courseID int64) (bool, error) {
 	var p int
 	err := db.QueryRowContext(ctx, `select 1 from enrolls where user_id = $1 and course_id = $2`, userID, courseID).Scan(&p)
 	if err == sql.ErrNoRows {
