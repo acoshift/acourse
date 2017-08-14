@@ -50,7 +50,7 @@ func courseView(w http.ResponseWriter, r *http.Request) {
 	_, err := uuid.Parse(link)
 	if err != nil {
 		// link can not parse to uuid get course id from url
-		id, err = model.GetCourseIDFromURL(ctx, link)
+		id, err = model.GetCourseIDFromURL(ctx, db, link)
 		if err == model.ErrNotFound {
 			view.NotFound(w, r)
 			return
@@ -60,7 +60,7 @@ func courseView(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	x, err := model.GetCourse(ctx, id)
+	x, err := model.GetCourse(ctx, db, id)
 	if err == model.ErrNotFound {
 		view.NotFound(w, r)
 		return
@@ -101,7 +101,7 @@ func courseView(w http.ResponseWriter, r *http.Request) {
 
 	// if user enrolled or user is owner fetch course contents
 	if enrolled || owned {
-		x.Contents, err = model.GetCourseContents(ctx, x.ID)
+		x.Contents, err = model.GetCourseContents(ctx, db, x.ID)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -131,7 +131,7 @@ func courseContent(w http.ResponseWriter, r *http.Request) {
 	_, err := uuid.Parse(link)
 	if err != nil {
 		// link can not parse to uuid get course id from url
-		id, err = model.GetCourseIDFromURL(ctx, link)
+		id, err = model.GetCourseIDFromURL(ctx, db, link)
 		if err == model.ErrNotFound {
 			view.NotFound(w, r)
 			return
@@ -141,7 +141,7 @@ func courseContent(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	x, err := model.GetCourse(ctx, id)
+	x, err := model.GetCourse(ctx, db, id)
 	if err == model.ErrNotFound {
 		view.NotFound(w, r)
 		return
@@ -168,7 +168,7 @@ func courseContent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	x.Contents, err = model.GetCourseContents(ctx, x.ID)
+	x.Contents, err = model.GetCourseContents(ctx, db, x.ID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -304,7 +304,7 @@ func editorCourse(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	id := r.FormValue("id")
-	course, err := model.GetCourse(ctx, id)
+	course, err := model.GetCourse(ctx, db, id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -441,7 +441,7 @@ func editorContent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	course, err := model.GetCourse(ctx, id)
+	course, err := model.GetCourse(ctx, db, id)
 	if err == model.ErrNotFound {
 		view.NotFound(w, r)
 		return
@@ -450,7 +450,7 @@ func editorContent(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	course.Contents, err = model.GetCourseContents(ctx, id)
+	course.Contents, err = model.GetCourseContents(ctx, db, id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -472,7 +472,7 @@ func courseEnroll(w http.ResponseWriter, r *http.Request) {
 	id := link
 	_, err := uuid.Parse(link)
 	if err != nil {
-		id, err = model.GetCourseIDFromURL(ctx, link)
+		id, err = model.GetCourseIDFromURL(ctx, db, link)
 		if err == model.ErrNotFound {
 			view.NotFound(w, r)
 			return
@@ -483,7 +483,7 @@ func courseEnroll(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	x, err := model.GetCourse(ctx, id)
+	x, err := model.GetCourse(ctx, db, id)
 	if err == model.ErrNotFound {
 		view.NotFound(w, r)
 		return
@@ -523,7 +523,7 @@ func postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 	id := link
 	_, err := uuid.Parse(link)
 	if err != nil {
-		id, err = model.GetCourseIDFromURL(ctx, link)
+		id, err = model.GetCourseIDFromURL(ctx, db, link)
 		if err == model.ErrNotFound {
 			view.NotFound(w, r)
 			return
@@ -534,7 +534,7 @@ func postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	x, err := model.GetCourse(ctx, id)
+	x, err := model.GetCourse(ctx, db, id)
 	if err == model.ErrNotFound {
 		view.NotFound(w, r)
 		return
@@ -657,7 +657,7 @@ func courseAssignment(w http.ResponseWriter, r *http.Request) {
 	_, err := uuid.Parse(link)
 	if err != nil {
 		// link can not parse to int64 get course id from url
-		id, err = model.GetCourseIDFromURL(ctx, link)
+		id, err = model.GetCourseIDFromURL(ctx, db, link)
 		if err == model.ErrNotFound {
 			view.NotFound(w, r)
 			return
@@ -667,7 +667,7 @@ func courseAssignment(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	x, err := model.GetCourse(ctx, id)
+	x, err := model.GetCourse(ctx, db, id)
 	if err == model.ErrNotFound {
 		view.NotFound(w, r)
 		return
@@ -749,7 +749,7 @@ func editorContentCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	course, err := model.GetCourse(ctx, id)
+	course, err := model.GetCourse(ctx, db, id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -762,7 +762,7 @@ func editorContentEdit(w http.ResponseWriter, r *http.Request) {
 	// course content id
 	id := r.FormValue("id")
 
-	content, err := model.GetCourseContent(ctx, id)
+	content, err := model.GetCourseContent(ctx, db, id)
 	if err == sql.ErrNoRows {
 		view.NotFound(w, r)
 		return
@@ -772,7 +772,7 @@ func editorContentEdit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	course, err := model.GetCourse(ctx, content.CourseID)
+	course, err := model.GetCourse(ctx, db, content.CourseID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

@@ -49,7 +49,7 @@ func adminCourses(w http.ResponseWriter, r *http.Request) {
 	}
 	limit := int64(30)
 
-	cnt, err := model.CountCourses(ctx)
+	cnt, err := model.CountCourses(ctx, db)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -62,7 +62,7 @@ func adminCourses(w http.ResponseWriter, r *http.Request) {
 	}
 	totalPage := int64(math.Ceil(float64(cnt) / float64(limit)))
 
-	courses, err := model.ListCourses(ctx, limit, offset)
+	courses, err := model.ListCourses(ctx, db, limit, offset)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
