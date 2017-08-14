@@ -86,7 +86,7 @@ func courseView(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if !enrolled {
-			pendingEnroll, err = model.HasPendingPayment(ctx, user.ID, x.ID)
+			pendingEnroll, err = model.HasPendingPayment(ctx, db, user.ID, x.ID)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
@@ -615,7 +615,7 @@ func postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		err = model.CreatePayment(tx, &model.Payment{
+		err = model.CreatePayment(ctx, tx, &model.Payment{
 			CourseID:      x.ID,
 			UserID:        user.ID,
 			Image:         imageURL,

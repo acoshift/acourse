@@ -128,7 +128,7 @@ const (
 )
 
 // Save saves course, db must be transaction
-func (x *Course) Save(ctx context.Context, db DB) error {
+func (x *Course) Save(ctx context.Context, tx *sql.Tx) error {
 	if len(x.URL.String) > 0 && x.URL.String != x.ID {
 		x.URL.Valid = true
 	} else {
@@ -136,7 +136,7 @@ func (x *Course) Save(ctx context.Context, db DB) error {
 		x.URL.Valid = false
 	}
 
-	_, err := db.ExecContext(ctx, `
+	_, err := tx.ExecContext(ctx, `
 		upsert into courses
 			(id, user_id, title, short_desc, long_desc, image, start, url, type, price, discount, enroll_detail, updated_at)
 		values
@@ -145,7 +145,7 @@ func (x *Course) Save(ctx context.Context, db DB) error {
 	if err != nil {
 		return err
 	}
-	_, err = db.ExecContext(ctx, `
+	_, err = tx.ExecContext(ctx, `
 		upsert into course_options
 			(course_id, public, enroll, attend, assignment, discount)
 		values

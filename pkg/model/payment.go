@@ -87,8 +87,8 @@ const (
 )
 
 // CreatePayment creates new payment
-func CreatePayment(tx *sql.Tx, x *Payment) error {
-	_, err := tx.Exec(`
+func CreatePayment(ctx context.Context, tx *sql.Tx, x *Payment) error {
+	_, err := tx.ExecContext(ctx, `
 		insert into payments
 			(user_id, course_id, image, price, original_price, code, status)
 		values
@@ -102,16 +102,12 @@ func CreatePayment(tx *sql.Tx, x *Payment) error {
 }
 
 // Accept accepts a payment and create new enroll
-func (x *Payment) Accept(ctx context.Context) error {
+func (x *Payment) Accept(ctx context.Context, tx *sql.Tx) error {
 	if len(x.ID) == 0 {
 		return fmt.Errorf("payment must be save before accept")
 	}
-	tx, err := db.BeginTx(ctx, nil)
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback()
-	_, err = tx.Exec(`
+
+	_, err := tx.Exec(`
 		update payments
 		set
 			status = $2,
@@ -126,15 +122,12 @@ func (x *Payment) Accept(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	err = tx.Commit()
-	if err != nil {
-		return err
-	}
+
 	return nil
 }
 
 // Reject rejects a payment
-func (x *Payment) Reject(ctx context.Context) error {
+func (x *Payment) Reject(ctx context.Context, db DB) error {
 	if len(x.ID) == 0 {
 		return fmt.Errorf("payment must be save before accept")
 	}
@@ -167,7 +160,7 @@ func scanPayment(scan scanFunc, x *Payment) error {
 }
 
 // GetPayments gets payments
-func GetPayments(ctx context.Context, paymentIDs []string) ([]*Payment, error) {
+func GetPayments(ctx context.Context, db DB, paymentIDs []string) ([]*Payment, error) {
 	xs := make([]*Payment, 0, len(paymentIDs))
 	rows, err := db.QueryContext(ctx, queryGetPayments, pq.Array(paymentIDs))
 	if err != nil {
@@ -189,7 +182,7 @@ func GetPayments(ctx context.Context, paymentIDs []string) ([]*Payment, error) {
 }
 
 // GetPayment gets payment from given id
-func GetPayment(ctx context.Context, paymentID string) (*Payment, error) {
+func GetPayment(ctx context.Context, db DB, paymentID string) (*Payment, error) {
 	var x Payment
 	err := scanPayment(db.QueryRowContext(ctx, queryGetPayment, paymentID).Scan, &x)
 	if err != nil {
@@ -199,7 +192,7 @@ func GetPayment(ctx context.Context, paymentID string) (*Payment, error) {
 }
 
 // HasPendingPayment returns ture if given user has pending payment for given course
-func HasPendingPayment(ctx context.Context, userID string, courseID string) (bool, error) {
+func HasPendingPayment(ctx context.Context, db DB, userID string, courseID string) (bool, error) {
 	var p int
 	err := db.QueryRowContext(ctx, `
 		select 1 from payments
@@ -216,7 +209,7 @@ func HasPendingPayment(ctx context.Context, userID string, courseID string) (boo
 }
 
 // ListHistoryPayments lists history payments
-func ListHistoryPayments(ctx context.Context, limit, offset int64) ([]*Payment, error) {
+func ListHistoryPayments(ctx context.Context, db DB, limit, offset int64) ([]*Payment, error) {
 	xs := make([]*Payment, 0)
 	rows, err := db.QueryContext(ctx, queryListPaymentsWithStatus, pq.Array([]int{Accepted, Rejected, Refunded}), limit, offset)
 	if err != nil {
@@ -238,7 +231,7 @@ func ListHistoryPayments(ctx context.Context, limit, offset int64) ([]*Payment, 
 }
 
 // ListPendingPayments lists pending payments
-func ListPendingPayments(ctx context.Context, limit, offset int64) ([]*Payment, error) {
+func ListPendingPayments(ctx context.Context, db DB, limit, offset int64) ([]*Payment, error) {
 	xs := make([]*Payment, 0)
 	rows, err := db.QueryContext(ctx, queryListPaymentsWithStatus, pq.Array([]int{Pending}), limit, offset)
 	if err != nil {
@@ -260,7 +253,7 @@ func ListPendingPayments(ctx context.Context, limit, offset int64) ([]*Payment, 
 }
 
 // CountHistoryPayments returns history payments count
-func CountHistoryPayments(ctx context.Context) (int64, error) {
+func CountHistoryPayments(ctx context.Context, db DB) (int64, error) {
 	var cnt int64
 	err := db.QueryRowContext(ctx, queryCountPaymentsWithStatus, pq.Array([]int{Accepted, Rejected})).Scan(&cnt)
 	if err != nil {
@@ -270,7 +263,7 @@ func CountHistoryPayments(ctx context.Context) (int64, error) {
 }
 
 // CountPendingPayments returns pending payments count
-func CountPendingPayments(ctx context.Context) (int64, error) {
+func CountPendingPayments(ctx context.Context, db DB) (int64, error) {
 	var cnt int64
 	err := db.QueryRowContext(ctx, queryCountPaymentsWithStatus, pq.Array([]int{Pending})).Scan(&cnt)
 	if err != nil {
