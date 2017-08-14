@@ -19,7 +19,7 @@ func adminUsers(w http.ResponseWriter, r *http.Request) {
 	}
 	limit := int64(30)
 
-	cnt, err := model.CountUsers(ctx)
+	cnt, err := model.CountUsers(ctx, db)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -32,7 +32,7 @@ func adminUsers(w http.ResponseWriter, r *http.Request) {
 	}
 	totalPage := cnt / limit
 
-	users, err := model.ListUsers(ctx, limit, offset)
+	users, err := model.ListUsers(ctx, db, limit, offset)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

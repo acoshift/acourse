@@ -166,7 +166,7 @@ func fetchUser(h http.Handler) http.Handler {
 		s := session.Get(ctx, sessName)
 		id, _ := s.Get(keyUserID).(string)
 		if len(id) > 0 {
-			u, err := model.GetUser(ctx, id)
+			u, err := model.GetUser(ctx, db, id)
 			if err == model.ErrNotFound {
 				u = &model.User{
 					ID:       id,

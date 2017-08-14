@@ -111,7 +111,7 @@ func courseView(w http.ResponseWriter, r *http.Request) {
 	if owned {
 		x.Owner = user
 	} else {
-		x.Owner, err = model.GetUser(ctx, x.UserID)
+		x.Owner, err = model.GetUser(ctx, db, x.UserID)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -174,7 +174,7 @@ func courseContent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	x.Owner, err = model.GetUser(ctx, x.UserID)
+	x.Owner, err = model.GetUser(ctx, db, x.UserID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
