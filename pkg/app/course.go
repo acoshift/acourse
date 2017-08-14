@@ -79,7 +79,7 @@ func courseView(w http.ResponseWriter, r *http.Request) {
 	enrolled := false
 	pendingEnroll := false
 	if user != nil {
-		enrolled, err = model.IsEnrolled(ctx, user.ID, x.ID)
+		enrolled, err = model.IsEnrolled(ctx, db, user.ID, x.ID)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -157,7 +157,7 @@ func courseContent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	enrolled, err := model.IsEnrolled(ctx, user.ID, x.ID)
+	enrolled, err := model.IsEnrolled(ctx, db, user.ID, x.ID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -500,7 +500,7 @@ func courseEnroll(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// redirect enrolled user back to course page
-	enrolled, err := model.IsEnrolled(ctx, user.ID, id)
+	enrolled, err := model.IsEnrolled(ctx, db, user.ID, id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -551,7 +551,7 @@ func postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// redirect enrolled user back to course page
-	enrolled, err := model.IsEnrolled(ctx, user.ID, id)
+	enrolled, err := model.IsEnrolled(ctx, db, user.ID, id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -609,7 +609,7 @@ func postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 	}
 	defer tx.Rollback()
 	if x.Price == 0 {
-		err = model.Enroll(tx, user.ID, x.ID)
+		err = model.Enroll(ctx, tx, user.ID, x.ID)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -683,7 +683,7 @@ func courseAssignment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	enrolled, err := model.IsEnrolled(ctx, user.ID, x.ID)
+	enrolled, err := model.IsEnrolled(ctx, db, user.ID, x.ID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

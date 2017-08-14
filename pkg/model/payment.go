@@ -122,7 +122,7 @@ func (x *Payment) Accept(ctx context.Context) error {
 		return err
 	}
 
-	err = Enroll(tx, x.UserID, x.CourseID)
+	err = Enroll(ctx, tx, x.UserID, x.CourseID)
 	if err != nil {
 		return err
 	}

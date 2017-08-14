@@ -64,7 +64,7 @@ const (
 )
 
 // Save saves user
-func (x *User) Save(ctx context.Context) error {
+func (x *User) Save(ctx context.Context, db DB) error {
 	if len(x.ID) == 0 {
 		return fmt.Errorf("invalid id")
 	}
