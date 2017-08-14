@@ -1,1 +1,1 @@
-postgresql://postgres@localhost/acourse?sslmode=disable
+postgres://root@localhost:26257/acourse?sslmode=disable
