@@ -19,7 +19,7 @@ func adminUsers(w http.ResponseWriter, r *http.Request) {
 	}
 	limit := int64(30)
 
-	cnt, err := model.CountUsers(ctx)
+	cnt, err := model.CountUsers(ctx, db)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -32,7 +32,7 @@ func adminUsers(w http.ResponseWriter, r *http.Request) {
 	}
 	totalPage := cnt / limit
 
-	users, err := model.ListUsers(ctx, limit, offset)
+	users, err := model.ListUsers(ctx, db, limit, offset)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -49,7 +49,7 @@ func adminCourses(w http.ResponseWriter, r *http.Request) {
 	}
 	limit := int64(30)
 
-	cnt, err := model.CountCourses(ctx)
+	cnt, err := model.CountCourses(ctx, db)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -62,7 +62,7 @@ func adminCourses(w http.ResponseWriter, r *http.Request) {
 	}
 	totalPage := int64(math.Ceil(float64(cnt) / float64(limit)))
 
-	courses, err := model.ListCourses(ctx, limit, offset)
+	courses, err := model.ListCourses(ctx, db, limit, offset)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -71,7 +71,7 @@ func adminCourses(w http.ResponseWriter, r *http.Request) {
 	view.AdminCourses(w, r, courses, int(page), int(totalPage))
 }
 
-func adminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter func(context.Context, int64, int64) ([]*model.Payment, error), paymentsCounter func(context.Context) (int64, error)) {
+func adminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter func(context.Context, model.DB, int64, int64) ([]*model.Payment, error), paymentsCounter func(context.Context, model.DB) (int64, error)) {
 	ctx := r.Context()
 	page, _ := strconv.ParseInt(r.FormValue("page"), 10, 64)
 	if page <= 0 {
@@ -79,7 +79,7 @@ func adminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter func(c
 	}
 	limit := int64(30)
 
-	cnt, err := paymentsCounter(ctx)
+	cnt, err := paymentsCounter(ctx, db)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -92,7 +92,7 @@ func adminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter func(c
 	}
 	totalPage := cnt / limit
 
-	payments, err := paymentsGetter(ctx, limit, offset)
+	payments, err := paymentsGetter(ctx, db, limit, offset)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -109,7 +109,7 @@ func adminRejectPayment(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
 	id := r.FormValue("id")
-	x, err := model.GetPayment(ctx, id)
+	x, err := model.GetPayment(ctx, db, id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -160,12 +160,12 @@ func postAdminRejectPayment(w http.ResponseWriter, r *http.Request) {
 	message := r.FormValue("Message")
 	id := r.FormValue("ID")
 
-	x, err := model.GetPayment(ctx, id)
+	x, err := model.GetPayment(ctx, db, id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	err = x.Reject(ctx)
+	err = x.Reject(ctx, db)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -173,7 +173,7 @@ func postAdminRejectPayment(w http.ResponseWriter, r *http.Request) {
 
 	if x.User.Email.Valid {
 		go func() {
-			x, err := model.GetPayment(ctx, id)
+			x, err := model.GetPayment(ctx, db, id)
 			if err != nil {
 				return
 			}
@@ -192,12 +192,23 @@ func postAdminPendingPayment(w http.ResponseWriter, r *http.Request) {
 
 	id := r.FormValue("ID")
 	if action == "accept" {
-		x, err := model.GetPayment(ctx, id)
+		tx, err := db.BeginTx(ctx, nil)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		err = x.Accept(ctx)
+		defer tx.Rollback()
+		x, err := model.GetPayment(ctx, tx, id)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		err = x.Accept(ctx, tx)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		err = tx.Commit()
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -206,7 +217,7 @@ func postAdminPendingPayment(w http.ResponseWriter, r *http.Request) {
 		if x.User.Email.Valid {
 			go func() {
 				// re-fetch payment to get latest timestamp
-				x, err := model.GetPayment(ctx, id)
+				x, err := model.GetPayment(ctx, db, id)
 				if err != nil {
 					return
 				}
