@@ -510,6 +510,17 @@ func courseEnroll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// check is user has pending enroll
+	pendingPayment, err := model.HasPendingPayment(ctx, db, user.ID, id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if pendingPayment {
+		http.Redirect(w, r, "/course/"+link, http.StatusFound)
+		return
+	}
+
 	view.CourseEnroll(w, r, x)
 }
 
@@ -557,6 +568,17 @@ func postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if enrolled {
+		http.Redirect(w, r, "/course/"+link, http.StatusFound)
+		return
+	}
+
+	// check is user has pending enroll
+	pendingPayment, err := model.HasPendingPayment(ctx, db, user.ID, id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if pendingPayment {
 		http.Redirect(w, r, "/course/"+link, http.StatusFound)
 		return
 	}
