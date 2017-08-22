@@ -1,45 +1,34 @@
-package memory
+package memory_test
 
 import (
 	"testing"
 	"time"
+
+	store "github.com/acoshift/session/store/memory"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMemory(t *testing.T) {
-	s := New(Config{CleanupInterval: 10 * time.Millisecond})
+	s := store.New(store.Config{CleanupInterval: 10 * time.Millisecond})
 	err := s.Set("a", []byte("test"), time.Millisecond)
-	if err != nil {
-		t.Fatalf("expected set not error; got %v", err)
-	}
+	assert.NoError(t, err)
 
 	time.Sleep(5 * time.Millisecond)
 	b, err := s.Get("a")
-	if b != nil {
-		t.Fatalf("expected expired key return nil value; got %v", b)
-	}
-	if err == nil {
-		t.Fatalf("expected expired key return error; got nil")
-	}
+	assert.Nil(t, b)
+	assert.Error(t, err)
 
 	s.Set("a", []byte("test"), time.Millisecond)
 	time.Sleep(20 * time.Millisecond)
 	_, err = s.Get("a")
-	if err == nil {
-		t.Fatalf("expected expired key return error; got nil")
-	}
+	assert.Error(t, err, "expected expired key return error")
 
 	s.Set("a", []byte("test"), time.Second)
 	b, err = s.Get("a")
-	if err != nil {
-		t.Fatalf("expected get valid key return not nil error; got %v", err)
-	}
-	if string(b) != "test" {
-		t.Fatalf("expected get return same value as set")
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, "test", string(b))
 
 	s.Del("a")
 	_, err = s.Get("a")
-	if err == nil {
-		t.Fatalf("expected get deleted key to return error; got nil")
-	}
+	assert.Error(t, err)
 }

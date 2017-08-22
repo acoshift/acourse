@@ -128,6 +128,15 @@ func (s *Session) Del(key interface{}) {
 // can not use rotate and destory same time
 func (s *Session) Rotate() {
 	s.mark = markRotate{}
+	s.changed = true
+}
+
+// Renew clear all data in current session
+// and rotate session id
+func (s *Session) Renew() {
+	s.changed = true
+	s.data = make(map[interface{}]interface{})
+	s.Rotate()
 }
 
 // Destroy destroys session from store

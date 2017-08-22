@@ -79,8 +79,13 @@ func (m *Manager) Save(w http.ResponseWriter, s *Session) {
 		m.config.Store.Del(hashedID)
 	case markRotate:
 		if len(s.oldID) > 0 {
-			s.Set(timestampKey{}, int64(-1))
-			m.config.Store.Set(m.hashID(s.oldID), s.encode(), m.config.RenewalTimeout)
+			hashedOldID := m.hashID(s.oldID)
+			if m.config.RenewalTimeout <= 0 {
+				m.config.Store.Del(hashedOldID)
+			} else {
+				s.Set(timestampKey{}, int64(-1))
+				m.config.Store.Set(hashedOldID, s.encode(), m.config.RenewalTimeout)
+			}
 		}
 		s.Set(timestampKey{}, time.Now().Unix())
 		m.config.Store.Set(hashedID, s.encode(), s.MaxAge)

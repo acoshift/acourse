@@ -5,6 +5,8 @@ import (
 	"net"
 	"net/http"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 type fakeWriter struct{}
@@ -55,7 +57,5 @@ func TestWriter(t *testing.T) {
 	w.WriteHeader(200)
 	w.Write([]byte("ok"))
 
-	if called != 1 {
-		t.Fatalf("expected hook call 1 time; got %d times", called)
-	}
+	assert.Equal(t, 1, called)
 }

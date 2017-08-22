@@ -11,6 +11,7 @@ import (
 	"github.com/acoshift/middleware"
 	"github.com/acoshift/session"
 	"github.com/acoshift/session/store/memory"
+	"github.com/stretchr/testify/assert"
 )
 
 const sessName = "sess"
@@ -26,9 +27,7 @@ var mockHandler = http.HandlerFunc(mockHandlerFunc)
 func TestPanicConfig(t *testing.T) {
 	defer func() {
 		err := recover()
-		if err == nil {
-			t.Fatalf("expected panic when misconfig; but not")
-		}
+		assert.NotNil(t, err, "expected panic when misconfig")
 	}()
 	session.Middleware(session.Config{})
 }
@@ -42,24 +41,22 @@ func TestDefaultConfig(t *testing.T) {
 	r := httptest.NewRequest(http.MethodGet, "/", nil)
 	h.ServeHTTP(w, r)
 	cookie := w.Header().Get("Set-Cookie")
-	if len(cookie) == 0 {
-		t.Fatalf("expected cookie not empty; got empty")
-	}
+	assert.NotEmpty(t, cookie, "expected cookie not empty")
 }
 
 func TestEmptySession(t *testing.T) {
 	h := session.Middleware(session.Config{
 		Store: &mockStore{
 			GetFunc: func(key string) ([]byte, error) {
-				t.Fatalf("expected get was not called")
+				assert.Fail(t, "expected get was not called")
 				return nil, nil
 			},
 			SetFunc: func(key string, value []byte, ttl time.Duration) error {
-				t.Fatalf("expected set was not called")
+				assert.Fail(t, "expected set was not called")
 				return nil
 			},
 			DelFunc: func(key string) error {
-				t.Fatalf("expected del was not called")
+				assert.Fail(t, "expected del was not called")
 				return nil
 			},
 		},
@@ -71,9 +68,7 @@ func TestEmptySession(t *testing.T) {
 	r := httptest.NewRequest(http.MethodGet, "/", nil)
 	h.ServeHTTP(w, r)
 	cookie := w.Header().Get("Set-Cookie")
-	if len(cookie) > 0 {
-		t.Fatalf("expected cookie empty")
-	}
+	assert.Empty(t, cookie, "expected cookie empty")
 }
 
 func TestSessionSetInStore(t *testing.T) {
@@ -100,26 +95,14 @@ func TestSessionSetInStore(t *testing.T) {
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest(http.MethodGet, "/", nil)
 	h.ServeHTTP(w, r)
-	if !setCalled {
-		t.Fatalf("expected store was called; but not")
-	}
-	if len(setKey) == 0 {
-		t.Fatalf("expected key not empty; got empty")
-	}
-	if len(setValue) == 0 {
-		t.Fatalf("expected value not empty; got empty")
-	}
-	if setTTL != time.Second {
-		t.Fatalf("expected ttl to be 1s; got %v", setTTL)
-	}
+	assert.True(t, setCalled, "expected store was called")
+	assert.NotEmpty(t, setKey, "expected key not empty")
+	assert.NotEmpty(t, setValue, "expected value not empty")
+	assert.Equal(t, time.Second, setTTL)
 
 	cs := w.Result().Cookies()
-	if len(cs) != 1 {
-		t.Fatalf("expected response has 1 cookie; got %d", len(cs))
-	}
-	if cs[0].Value == setKey {
-		t.Fatalf("expected session id was hashed")
-	}
+	assert.Len(t, cs, 1, "expected response has 1 cookie; got %d", len(cs))
+	assert.NotEqual(t, setKey, cs[0].Value, "expected session id was hashed")
 }
 
 func TestSessionGetSet(t *testing.T) {
@@ -140,9 +123,7 @@ func TestSessionGetSet(t *testing.T) {
 				return nil
 			},
 			GetFunc: func(key string) ([]byte, error) {
-				if key != setKey {
-					t.Fatalf("expected get key \"%s\"; got \"%s\"", setKey, key)
-				}
+				assert.Equal(t, setKey, key)
 				return setValue, nil
 			},
 		},
@@ -157,21 +138,14 @@ func TestSessionGetSet(t *testing.T) {
 	r := httptest.NewRequest(http.MethodGet, "/", nil)
 	h.ServeHTTP(w, r)
 
-	if w.Body.String() != "0" {
-		t.Fatalf("expected response to be 0; got %s", w.Body.String())
-	}
+	assert.Equal(t, "0", w.Body.String())
 
 	r = httptest.NewRequest(http.MethodGet, "/", nil)
 	r.Header.Set("Cookie", w.Header().Get("Set-Cookie"))
 	w = httptest.NewRecorder()
 	h.ServeHTTP(w, r)
-	if w.Body.String() != "1" {
-		t.Fatalf("expected response to be 1; got %s", w.Body.String())
-	}
-
-	if setCalled != 2 {
-		t.Fatalf("expected store set 2 times; but got %d times", setCalled)
-	}
+	assert.Equal(t, "1", w.Body.String())
+	assert.Equal(t, 2, setCalled)
 }
 
 func TestSecureFlag(t *testing.T) {
@@ -202,16 +176,8 @@ func TestSecureFlag(t *testing.T) {
 		h.ServeHTTP(w, r)
 
 		cs := w.Result().Cookies()
-		if len(cs) != 1 {
-			t.Fatalf("expected response has 1 cookie; got %d", len(cs))
-		}
-		if cs[0].Secure != c.expected {
-			srv := "http"
-			if c.tls {
-				srv += "s"
-			}
-			t.Fatalf("expected cookie secure flag %d for %s to be %v; got %v", c.flag, srv, c.expected, cs[0].Secure)
-		}
+		assert.Len(t, cs, 1)
+		assert.Equal(t, c.expected, cs[0].Secure)
 	}
 }
 
@@ -234,12 +200,8 @@ func TestHttpOnlyFlag(t *testing.T) {
 		h.ServeHTTP(w, r)
 
 		cs := w.Result().Cookies()
-		if len(cs) != 1 {
-			t.Fatalf("expected response has 1 cookie; got %d", len(cs))
-		}
-		if cs[0].HttpOnly != c.flag {
-			t.Fatalf("expected HttpOnly flag to be %v; got %v", c.flag, cs[0].HttpOnly)
-		}
+		assert.Len(t, cs, 1)
+		assert.Equal(t, c.flag, cs[0].HttpOnly)
 	}
 }
 
@@ -261,9 +223,7 @@ func TestRotate(t *testing.T) {
 					setValue = value
 					return nil
 				}
-				if key == setKey {
-					t.Fatalf("expected key after rotate to renew")
-				}
+				assert.NotEqual(t, setKey, key, "expected key after rotate to renew")
 				return nil
 			},
 			GetFunc: func(key string) ([]byte, error) {
@@ -290,9 +250,38 @@ func TestRotate(t *testing.T) {
 	w = httptest.NewRecorder()
 	h.ServeHTTP(w, r)
 
-	if setCalled != 3 {
-		t.Fatalf("expected set was called 3 times; got %d times", setCalled)
-	}
+	assert.Equal(t, 2, setCalled)
+}
+
+func TestRenew(t *testing.T) {
+	c := 0
+
+	h := session.Middleware(session.Config{
+		MaxAge: time.Second,
+		Store:  memory.New(memory.Config{}),
+	})(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		s := session.Get(r.Context(), sessName)
+		if c == 0 {
+			s.Set("test", 1)
+			c = 1
+		} else {
+			assert.Equal(t, 1, s.Get("test"))
+		}
+		w.Write([]byte("ok"))
+	}))
+
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest(http.MethodGet, "/", nil)
+	h.ServeHTTP(w, r)
+	time.Sleep(time.Millisecond * 600)
+	oldCookie := w.Result().Cookies()[0].Value
+
+	r = httptest.NewRequest(http.MethodGet, "/", nil)
+	r.Header.Set("Cookie", w.Result().Cookies()[0].String())
+	w = httptest.NewRecorder()
+	h.ServeHTTP(w, r)
+	assert.Len(t, w.Result().Cookies(), 1)
+	assert.NotEqual(t, oldCookie, w.Result().Cookies()[0].Value)
 }
 
 func TestDestroy(t *testing.T) {
@@ -316,9 +305,7 @@ func TestDestroy(t *testing.T) {
 			},
 			DelFunc: func(key string) error {
 				delCalled = true
-				if key != setKey {
-					t.Fatalf("expected destroy old key")
-				}
+				assert.Equal(t, setKey, key, "expected destroy old key")
 				return nil
 			},
 		},
@@ -341,10 +328,7 @@ func TestDestroy(t *testing.T) {
 	r.Header.Set("Cookie", w.Header().Get("Set-Cookie"))
 	w = httptest.NewRecorder()
 	h.ServeHTTP(w, r)
-
-	if !delCalled {
-		t.Fatalf("expected del was called")
-	}
+	assert.True(t, delCalled)
 }
 
 func TestDisableHashID(t *testing.T) {
@@ -365,12 +349,8 @@ func TestDisableHashID(t *testing.T) {
 	h.ServeHTTP(w, r)
 
 	cs := w.Result().Cookies()
-	if len(cs) != 1 {
-		t.Fatalf("expected response has 1 cookie; got %d", len(cs))
-	}
-	if cs[0].Value != setKey {
-		t.Fatalf("expected session id was not hashed")
-	}
+	assert.Len(t, cs, 1)
+	assert.Equal(t, setKey, cs[0].Value, "expected session id was not hashed")
 }
 
 func TestSessionMultipleGet(t *testing.T) {
@@ -381,9 +361,7 @@ func TestSessionMultipleGet(t *testing.T) {
 		s.Set("test", 1)
 
 		s = session.Get(r.Context(), "sess")
-		if s.Get("test").(int) != 1 {
-			t.Fatalf("expected get session 2 times must preverse mutated value")
-		}
+		assert.Equal(t, 1, s.Get("test"), "expected get session 2 times must preverse mutated value")
 	}))
 
 	w := httptest.NewRecorder()
@@ -394,14 +372,10 @@ func TestSessionMultipleGet(t *testing.T) {
 func TestEmptyContext(t *testing.T) {
 	defer func() {
 		r := recover()
-		if r != nil {
-			t.Fatalf("expected get session from empty context must not panic")
-		}
+		assert.Nil(t, r, "expected get session from empty context must not panic")
 	}()
 	s := session.Get(context.Background(), "sess")
-	if s != nil {
-		t.Fatalf("expected get session from empty context returns nil")
-	}
+	assert.Nil(t, s, "expected get session from empty context returns nil")
 }
 
 func TestFlash(t *testing.T) {
@@ -417,12 +391,8 @@ func TestFlash(t *testing.T) {
 			w.Write(nil)
 			return
 		}
-		if s.Flash().Get("a") != "1" {
-			t.Fatalf("expected flash save in session")
-		}
-		if s.Flash().Get("b") != "2" {
-			t.Fatalf("expected flash save in session")
-		}
+		assert.Equal(t, "1", s.Flash().Get("a"), "expected flash save in session")
+		assert.Equal(t, "2", s.Flash().Get("b"), "expected flash save in session")
 		w.Write(nil)
 	}))
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
@@ -434,9 +404,7 @@ func TestFlash(t *testing.T) {
 	}
 	resp = httptest.NewRecorder()
 	h.ServeHTTP(resp, req)
-	if i != 1 {
-		t.Fatalf("expected handler called 2 times")
-	}
+	assert.Equal(t, 1, i)
 }
 
 func BenchmarkDefaultConfig(b *testing.B) {
