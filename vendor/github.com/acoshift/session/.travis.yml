@@ -3,6 +3,9 @@ language: go
 go:
   - 1.8.x
 
+services:
+  - redis-server
+
 before_install:
   - go get github.com/mattn/goveralls
 
