@@ -264,7 +264,7 @@ func postSignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID, err := firAuth.CreateUser(ctx, &admin.User{
+	userID, err := firAuth.CreateUser(ctx, &firebase.User{
 		Email:    email,
 		Password: pass,
 	})

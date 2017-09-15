@@ -1419,6 +1419,8 @@ type NonComplianceDetail struct {
 	// report, but is expected to be applied shortly.
 	//   "APP_INCOMPATIBLE" - The setting cannot be applied to the
 	// application because its target SDK version is not high enough.
+	//   "APP_NOT_UPDATED" - The application is installed but not updated to
+	// the minimum version code specified by policy
 	NonComplianceReason string `json:"nonComplianceReason,omitempty"`
 
 	// PackageName: The package name indicating which application is out of
@@ -1480,6 +1482,8 @@ type NonComplianceDetailCondition struct {
 	// report, but is expected to be applied shortly.
 	//   "APP_INCOMPATIBLE" - The setting cannot be applied to the
 	// application because its target SDK version is not high enough.
+	//   "APP_NOT_UPDATED" - The application is installed but not updated to
+	// the minimum version code specified by policy
 	NonComplianceReason string `json:"nonComplianceReason,omitempty"`
 
 	// PackageName: The package name indicating which application is out of
@@ -1771,6 +1775,10 @@ type Policy struct {
 	// Applications: Policy applied to apps.
 	Applications []*ApplicationPolicy `json:"applications,omitempty"`
 
+	// AutoTimeRequired: Whether auto time is required, which prevents the
+	// user from manually setting the date and time.
+	AutoTimeRequired bool `json:"autoTimeRequired,omitempty"`
+
 	// BlockApplicationsEnabled: Whether applications other than the ones
 	// configured in applications are blocked from being installed. When
 	// set, applications that were installed under a previous policy but no
@@ -1900,6 +1908,15 @@ type Policy struct {
 	// Version: The version of the policy. This is a read-only field. The
 	// version is incremented each time the policy is updated.
 	Version int64 `json:"version,omitempty,string"`
+
+	// WifiConfigDisabled: Whether configuring WiFi access points is
+	// disabled.
+	WifiConfigDisabled bool `json:"wifiConfigDisabled,omitempty"`
+
+	// WifiConfigsLockdownEnabled: Whether WiFi networks defined in Open
+	// Network Configuration are locked so they cannot be edited by the
+	// user.
+	WifiConfigsLockdownEnabled bool `json:"wifiConfigsLockdownEnabled,omitempty"`
 
 	// ServerResponse contains the HTTP response code and headers from the
 	// server.

@@ -8,3 +8,4 @@ static/script.*.js
 private/
 entrypoint
 static.yaml
+*.swp

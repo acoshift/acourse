@@ -1432,10 +1432,9 @@ type AttachedDisk struct {
 	// group.
 	DiskEncryptionKey *CustomerEncryptionKey `json:"diskEncryptionKey,omitempty"`
 
-	// Index: Assigns a zero-based index to this disk, where 0 is reserved
-	// for the boot disk. For example, if you have many disks attached to an
-	// instance, each disk would have a unique index number. If not
-	// specified, the server will choose an appropriate value.
+	// Index: [Output Only] A zero-based index to this disk, where 0 is
+	// reserved for the boot disk. If you have many disks attached to an
+	// instance, each disk would have a unique index number.
 	Index int64 `json:"index,omitempty"`
 
 	// InitializeParams: [Input Only] Specifies the parameters for a new
@@ -9701,8 +9700,8 @@ type ProjectsGetXpnResources struct {
 	// the results.
 	NextPageToken string `json:"nextPageToken,omitempty"`
 
-	// Resources: Serive resources (a.k.a service projects) attached to this
-	// project as their shared VPC host.
+	// Resources: Service resources (a.k.a service projects) attached to
+	// this project as their shared VPC host.
 	Resources []*XpnResourceId `json:"resources,omitempty"`
 
 	// ServerResponse contains the HTTP response code and headers from the
@@ -9788,6 +9787,7 @@ type Quota struct {
 	//   "LOCAL_SSD_TOTAL_GB"
 	//   "NETWORKS"
 	//   "NVIDIA_K80_GPUS"
+	//   "NVIDIA_P100_GPUS"
 	//   "PREEMPTIBLE_CPUS"
 	//   "PREEMPTIBLE_LOCAL_SSD_GB"
 	//   "REGIONAL_AUTOSCALERS"
@@ -9806,6 +9806,7 @@ type Quota struct {
 	//   "TARGET_INSTANCES"
 	//   "TARGET_POOLS"
 	//   "TARGET_SSL_PROXIES"
+	//   "TARGET_TCP_PROXIES"
 	//   "TARGET_VPN_GATEWAYS"
 	//   "URL_MAPS"
 	//   "VPN_TUNNELS"

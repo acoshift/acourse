@@ -28,8 +28,8 @@
 [[projects]]
   name = "github.com/acoshift/go-firebase-admin"
   packages = ["."]
-  revision = "e9222cf3e0e3a9dcf81a2cc91d270720f2aefc86"
-  version = "v0.0.3"
+  revision = "0ac4300b3f17db83044cb32753807dbfba9d688f"
+  version = "v0.0.6"
 
 [[projects]]
   name = "github.com/acoshift/gzip"
@@ -95,7 +95,7 @@
   branch = "master"
   name = "github.com/dustin/go-humanize"
   packages = ["."]
-  revision = "259d2a102b871d17f30e3cd9881a642961a1e486"
+  revision = "79e699ccd02f240a1f1fbbdcee7e64c1c12e41aa"
 
 [[projects]]
   name = "github.com/garyburd/redigo"
@@ -106,8 +106,8 @@
 [[projects]]
   branch = "master"
   name = "github.com/golang/protobuf"
-  packages = ["proto","protoc-gen-go/descriptor","ptypes/any"]
-  revision = "ab9f9a6dab164b7d1246e0e688b0ab7b94d8553e"
+  packages = ["proto","protoc-gen-go/descriptor","ptypes","ptypes/any","ptypes/duration","ptypes/timestamp"]
+  revision = "11b8df160996e00fd4b55cbaafb3d84ec6d50fa8"
 
 [[projects]]
   name = "github.com/google/uuid"
@@ -116,10 +116,10 @@
   version = "0.2"
 
 [[projects]]
-  branch = "master"
   name = "github.com/googleapis/gax-go"
   packages = ["."]
-  revision = "84ed26760e7f6f80887a2fbfb50db3cc415d2cea"
+  revision = "317e0006254c44a0ac427cc52a0e083ff0b9622f"
+  version = "v2.0.0"
 
 [[projects]]
   branch = "master"
@@ -131,19 +131,13 @@
   branch = "master"
   name = "github.com/microcosm-cc/bluemonday"
   packages = ["."]
-  revision = "f0d1606e9e60cb2428f85ddcbfcccfeb6b507586"
+  revision = "68fecaef60268522d2ac3f0123cec9d3bcab7b6e"
 
 [[projects]]
   name = "github.com/russross/blackfriday"
   packages = ["."]
-  revision = "0b647d0506a698cca42caca173e55559b12a69f2"
-  version = "v1.4"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/shurcooL/sanitized_anchor_name"
-  packages = ["."]
-  revision = "541ff5ee47f1dddf6a5281af78307d921524bcb5"
+  revision = "4048872b16cc0fc2c5fd9eacf0ed2c2fedaa0c8c"
+  version = "v1.5"
 
 [[projects]]
   name = "github.com/tdewolff/buffer"
@@ -173,31 +167,31 @@
   branch = "master"
   name = "golang.org/x/image"
   packages = ["bmp","tiff","tiff/lzw"]
-  revision = "426cfd8eeb6e08ab1932954e09e3c2cb2bc6e36d"
+  revision = "e20db36d77bd0cb36cea8fe49d5c37d82d21591f"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/net"
   packages = ["context","context/ctxhttp","html","html/atom","http2","http2/hpack","idna","internal/timeseries","lex/httplex","trace","xsrftoken"]
-  revision = "1c05540f6879653db88113bc4a2b70aec4bd491f"
+  revision = "859d1a86bb617c0c20d154590c3c5d3fcb670b07"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/oauth2"
   packages = [".","google","internal","jws","jwt"]
-  revision = "9a379c6b3e95a790ffc43293c2a78dee0d7b6e20"
+  revision = "13449ad91cb26cb47661c1b080790392170385fd"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/text"
-  packages = ["internal/gen","internal/triegen","internal/ucd","secure/bidirule","transform","unicode/bidi","unicode/cldr","unicode/norm","unicode/rangetable"]
-  revision = "e56139fd9c5bc7244c76116c68e500765bb6db6b"
+  packages = ["collate","collate/build","internal/colltab","internal/gen","internal/tag","internal/triegen","internal/ucd","language","secure/bidirule","transform","unicode/bidi","unicode/cldr","unicode/norm","unicode/rangetable"]
+  revision = "14c0d48ead0cd47e3104ada247d91be04afc7a5a"
 
 [[projects]]
   branch = "master"
   name = "google.golang.org/api"
   packages = ["gensupport","googleapi","googleapi/internal/uritemplates","googleapi/transport","identitytoolkit/v3","internal","iterator","option","storage/v1","transport","transport/grpc","transport/http"]
-  revision = "dd6bdadc5852eae2d133075a3690d6ad744add48"
+  revision = "39c3dd417c5a443607650f18e829ad308da08dd2"
 
 [[projects]]
   name = "google.golang.org/appengine"
@@ -209,13 +203,13 @@
   branch = "master"
   name = "google.golang.org/genproto"
   packages = ["googleapis/api/annotations","googleapis/iam/v1","googleapis/rpc/status"]
-  revision = "ee236bd376b077c7a89f260c026c4735b195e459"
+  revision = "595979c8a7bf586b2d293fb42246bf91a0b893d9"
 
 [[projects]]
   name = "google.golang.org/grpc"
-  packages = [".","codes","connectivity","credentials","credentials/oauth","grpclb/grpc_lb_v1","grpclog","internal","keepalive","metadata","naming","peer","stats","status","tap","transport"]
-  revision = "b3ddf786825de56a4178401b7e174ee332173b66"
-  version = "v1.5.2"
+  packages = [".","codes","connectivity","credentials","credentials/oauth","grpclb/grpc_lb_v1/messages","grpclog","internal","keepalive","metadata","naming","peer","stats","status","tap","transport"]
+  revision = "f92cdcd7dcdc69e81b2d7b338479a19a8723cfa3"
+  version = "v1.6.0"
 
 [[projects]]
   branch = "v3"
