@@ -1,4 +1,4 @@
-package admin
+package firebase
 
 import (
 	"context"
@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"net/http"
 	"sync"
 	"time"
 
@@ -22,6 +21,8 @@ type Auth struct {
 	keysMutex *sync.RWMutex
 	keys      map[string]*rsa.PublicKey
 	keysExp   time.Time
+
+	Leeway time.Duration
 }
 
 const (
@@ -46,9 +47,9 @@ func (auth *Auth) CreateCustomToken(userID string, claims interface{}) (string, 
 		return "", ErrRequireServiceAccount
 	}
 	now := time.Now()
-	payload := &Claims{
-		Issuer:    auth.app.jwtConfig.Email,
-		Subject:   auth.app.jwtConfig.Email,
+	payload := &customClaims{
+		Issuer:    auth.app.clientEmail,
+		Subject:   auth.app.clientEmail,
 		Audience:  customTokenAudience,
 		IssuedAt:  now.Unix(),
 		ExpiresAt: now.Add(time.Hour).Unix(),
@@ -62,8 +63,8 @@ func (auth *Auth) CreateCustomToken(userID string, claims interface{}) (string, 
 // VerifyIDToken validates given idToken
 // return Claims for that token only valid token
 // See https://firebase.google.com/docs/auth/admin/verify-id-tokens
-func (auth *Auth) VerifyIDToken(idToken string) (*Claims, error) {
-	token, err := jwt.ParseWithClaims(idToken, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+func (auth *Auth) VerifyIDToken(idToken string) (*Token, error) {
+	token, err := jwt.ParseWithClaims(idToken, &Token{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
 			return nil, &ErrTokenInvalid{fmt.Sprintf("firebaseauth: Firebase ID token has incorrect algorithm. Expected \"RSA\" but got \"%#v\"", token.Header["alg"])}
 		}
@@ -81,9 +82,18 @@ func (auth *Auth) VerifyIDToken(idToken string) (*Claims, error) {
 		return nil, &ErrTokenInvalid{err.Error()}
 	}
 
-	claims, ok := token.Claims.(*Claims)
+	claims, ok := token.Claims.(*Token)
 	if !ok || !token.Valid {
 		return nil, &ErrTokenInvalid{"firebaseauth: invalid token"}
+	}
+
+	now := time.Now().Unix()
+	if !claims.verifyExpiresAt(now) {
+		delta := time.Unix(now, 0).Sub(time.Unix(claims.ExpiresAt, 0))
+		return nil, &ErrTokenInvalid{fmt.Sprintf("token is expired by %v", delta)}
+	}
+	if !claims.verifyIssuedAt(now + int64(auth.Leeway/time.Second)) {
+		return nil, &ErrTokenInvalid{fmt.Sprintf("token used before issued")}
 	}
 	if !claims.verifyAudience(auth.app.projectID) {
 		return nil, &ErrTokenInvalid{fmt.Sprintf("firebaseauth: Firebase ID token has incorrect \"aud\" (audience) claim. Expected \"%s\" but got \"%s\"", auth.app.projectID, claims.Audience)}
@@ -98,14 +108,13 @@ func (auth *Auth) VerifyIDToken(idToken string) (*Claims, error) {
 		return nil, &ErrTokenInvalid{"firebaseauth: Firebase ID token has \"sub\" (subject) claim longer than 128 characters"}
 	}
 
-	claims.UserID = claims.Subject
 	return claims, nil
 }
 
 func (auth *Auth) fetchKeys() error {
 	auth.keysMutex.Lock()
 	defer auth.keysMutex.Unlock()
-	resp, err := http.Get(keysEndpoint)
+	resp, err := auth.app.client.Get(keysEndpoint)
 	if err != nil {
 		return err
 	}
@@ -187,6 +196,29 @@ func (auth *Auth) GetUsersByEmail(ctx context.Context, emails []string) ([]*User
 	return toUserRecords(resp.Users), nil
 }
 
+// GetUserByPhoneNumber retrieves user by phoneNumber
+func (auth *Auth) GetUserByPhoneNumber(ctx context.Context, phoneNumber string) (*UserRecord, error) {
+	users, err := auth.GetUsersByPhoneNumber(ctx, []string{phoneNumber})
+	if err != nil {
+		return nil, err
+	}
+	if len(users) == 0 {
+		return nil, ErrUserNotFound
+	}
+	return users[0], nil
+}
+
+// GetUsersByPhoneNumber retrieves users by phoneNumber
+func (auth *Auth) GetUsersByPhoneNumber(ctx context.Context, phoneNumbers []string) ([]*UserRecord, error) {
+	resp, err := auth.client.GetAccountInfo(&identitytoolkit.IdentitytoolkitRelyingpartyGetAccountInfoRequest{
+		PhoneNumber: phoneNumbers,
+	}).Context(ctx).Do()
+	if err != nil {
+		return nil, err
+	}
+	return toUserRecords(resp.Users), nil
+}
+
 // DeleteUser deletes an user by user id
 func (auth *Auth) DeleteUser(ctx context.Context, userID string) error {
 	if len(userID) == 0 {
@@ -210,6 +242,7 @@ func (auth *Auth) createUserAutoID(ctx context.Context, user *User) (string, err
 		EmailVerified: user.EmailVerified,
 		Password:      user.Password,
 		PhotoUrl:      user.PhotoURL,
+		PhoneNumber:   user.PhoneNumber,
 	}).Context(ctx).Do()
 	if err != nil {
 		return "", err
@@ -230,6 +263,7 @@ func (auth *Auth) createUserCustomID(ctx context.Context, user *User) error {
 				DisplayName:   user.DisplayName,
 				Disabled:      user.Disabled,
 				PhotoUrl:      user.PhotoURL,
+				PhoneNumber:   user.PhoneNumber,
 			},
 		},
 	}).Context(ctx).Do()
@@ -301,6 +335,7 @@ func (auth *Auth) UpdateUser(ctx context.Context, user *User) error {
 		DisplayName:   user.DisplayName,
 		DisableUser:   user.Disabled,
 		PhotoUrl:      user.PhotoURL,
+		PhoneNumber:   user.PhoneNumber,
 	}).Context(ctx).Do()
 	if err != nil {
 		return err

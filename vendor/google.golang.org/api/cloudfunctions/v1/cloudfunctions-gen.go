@@ -232,8 +232,8 @@ func (s *Location) MarshalJSON() ([]byte, error) {
 type Operation struct {
 	// Done: If the value is `false`, it means the operation is still in
 	// progress.
-	// If true, the operation is completed, and either `error` or `response`
-	// is
+	// If `true`, the operation is completed, and either `error` or
+	// `response` is
 	// available.
 	Done bool `json:"done,omitempty"`
 
@@ -319,6 +319,11 @@ type OperationMetadataV1Beta2 struct {
 	//   "UPDATE_FUNCTION" - Triggered by UpdateFunction call
 	//   "DELETE_FUNCTION" - Triggered by DeleteFunction call.
 	Type string `json:"type,omitempty"`
+
+	// VersionId: Version id of the function created or updated by an API
+	// call.
+	// This field is only pupulated for Create and Update operations.
+	VersionId int64 `json:"versionId,omitempty,string"`
 
 	// ForceSendFields is a list of field names (e.g. "Request") to
 	// unconditionally include in API requests. By default, fields with

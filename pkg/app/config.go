@@ -24,7 +24,7 @@ var (
 	baseURL       string
 	xsrfSecret    string
 	db            *sql.DB
-	firAuth       *admin.Auth
+	firAuth       *firebase.Auth
 	redisAddr     string
 	redisPass     string
 	redisPrefix   string
@@ -75,10 +75,9 @@ func Init(config Config) error {
 		return err
 	}
 
-	firApp, err := admin.InitializeApp(ctx, admin.AppOptions{
-		ProjectID:      config.ProjectID,
-		ServiceAccount: config.ServiceAccount,
-	})
+	firApp, err := firebase.InitializeApp(ctx, firebase.AppOptions{
+		ProjectID: config.ProjectID,
+	}, option.WithCredentialsFile("config/service_account"))
 	if err != nil {
 		return err
 	}
