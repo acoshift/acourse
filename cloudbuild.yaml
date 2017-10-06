@@ -11,9 +11,8 @@ steps:
   - 'GOARCH=amd64'
   - 'CGO_ENABLED=0'
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '-t', 'gcr.io/$PROJECT_ID/acourse', '.']
+  args: ['build', '-t', 'gcr.io/$PROJECT_ID/acourse:$COMMIT_SHA', '.']
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['tag', 'gcr.io/$PROJECT_ID/acourse', 'gcr.io/$PROJECT_ID/acourse:$COMMIT_SHA']
+  args: ['push', 'gcr.io/$PROJECT_ID/acourse:$COMMIT_SHA']
 images:
-  - 'gcr.io/$PROJECT_ID/acourse:latest'
-  - 'gcr.io/$PROJECT_ID/acourse:$COMMIT_SHA'
+- 'gcr.io/$PROJECT_ID/acourse:$COMMIT_SHA'
