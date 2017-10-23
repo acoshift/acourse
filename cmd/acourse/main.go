@@ -1,18 +1,19 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
+
+	_ "github.com/lib/pq"
 
 	"github.com/acoshift/acourse/pkg/app"
 	"github.com/acoshift/configfile"
-	"github.com/acoshift/gzip"
-	"github.com/acoshift/hsts"
-	"github.com/acoshift/middleware"
-	"github.com/acoshift/redirecthttps"
-	_ "github.com/lib/pq"
 )
 
 func main() {
@@ -46,12 +47,7 @@ func main() {
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "ok")
 	})
-	h := middleware.Chain(
-		redirecthttps.New(redirecthttps.Config{Mode: redirecthttps.OnlyProxy}),
-		hsts.New(hsts.PreloadConfig),
-		gzip.New(gzip.DefaultConfig),
-	)(app.Handler())
-	mux.Handle("/", h)
+	mux.Handle("/", app.Handler())
 
 	// lets reverse proxy handle other settings
 	srv := &http.Server{
@@ -59,8 +55,22 @@ func main() {
 		Handler: mux,
 	}
 
-	log.Println("Start server at :8080")
-	if err := srv.ListenAndServe(); err != nil {
-		log.Fatal(err)
+	go func() {
+		log.Printf("main: start server at %s\n", srv.Addr)
+		if err := srv.ListenAndServe(); err != http.ErrServerClosed {
+			log.Fatal(err)
+		}
+	}()
+
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, syscall.SIGTERM)
+	<-stop
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Printf("main: server shutdown error: %v\n", err)
+		return
 	}
+	log.Println("main: server shutdown")
 }

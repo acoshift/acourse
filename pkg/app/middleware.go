@@ -7,9 +7,6 @@ import (
 	"runtime/debug"
 	"time"
 
-	"github.com/acoshift/acourse/pkg/appctx"
-	"github.com/acoshift/acourse/pkg/model"
-	"github.com/acoshift/acourse/pkg/view"
 	"github.com/acoshift/cachestatic"
 	"github.com/acoshift/header"
 	"github.com/acoshift/middleware"
@@ -18,6 +15,10 @@ import (
 	redisstore "github.com/acoshift/session/store/redis"
 	"github.com/garyburd/redigo/redis"
 	"golang.org/x/net/xsrftoken"
+
+	"github.com/acoshift/acourse/pkg/appctx"
+	"github.com/acoshift/acourse/pkg/model"
+	"github.com/acoshift/acourse/pkg/view"
 )
 
 const sessName = "sess"

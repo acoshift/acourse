@@ -23,7 +23,7 @@ func TestJS(t *testing.T) {
 		{"a\n\nb", "a\nb"},
 		{"a// comment\nb", "a\nb"},
 		{"''\na", "''\na"},
-		{"''\n''", "''''"},
+		{"''\n''", "''\n''"},
 		{"]\n0", "]\n0"},
 		{"a\n{", "a\n{"},
 		{";\na", ";a"},
@@ -31,13 +31,14 @@ func TestJS(t *testing.T) {
 		{"}\na", "}\na"},
 		{"+\na", "+\na"},
 		{"+\n(", "+\n("},
-		{"+\n\"\"", "+\"\""},
+		{"+\n\"\"", "+\n\"\""},
 		{"a + ++b", "a+ ++b"},                                          // JSMin caution
 		{"var a=/\\s?auto?\\s?/i\nvar", "var a=/\\s?auto?\\s?/i\nvar"}, // #14
 		{"var a=0\n!function(){}", "var a=0\n!function(){}"},           // #107
 		{"function(){}\n\"string\"", "function(){}\n\"string\""},       // #109
 		{"false\n\"string\"", "false\n\"string\""},                     // #109
 		{"`\n", "`"},                                                   // go fuzz
+		{"a\n~b", "a\n~b"},                                             // #132
 	}
 
 	m := minify.New()
@@ -60,7 +61,6 @@ func TestWriterErrors(t *testing.T) {
 		js string
 		n  []int
 	}{
-		//01 2345
 		{"a\n{5 5", []int{0, 1, 4}},
 		{`/*!comment*/`, []int{0, 1, 2}},
 		{"false\n\"string\"", []int{1}}, // #109

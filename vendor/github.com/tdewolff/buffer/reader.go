@@ -32,3 +32,8 @@ func (r *Reader) Read(b []byte) (n int, err error) {
 func (r *Reader) Bytes() []byte {
 	return r.buf
 }
+
+// Reset resets the position of the read pointer to the beginning of the underlying byte slice
+func (r *Reader) Reset() {
+	r.pos = 0
+}

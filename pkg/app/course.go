@@ -9,13 +9,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/acoshift/acourse/pkg/appctx"
-	"github.com/acoshift/acourse/pkg/model"
-	"github.com/acoshift/acourse/pkg/view"
 	"github.com/acoshift/header"
 	"github.com/acoshift/session"
 	"github.com/google/uuid"
 	"github.com/lib/pq"
+
+	"github.com/acoshift/acourse/pkg/appctx"
+	"github.com/acoshift/acourse/pkg/model"
+	"github.com/acoshift/acourse/pkg/view"
 )
 
 func course(w http.ResponseWriter, r *http.Request) {
