@@ -7,12 +7,13 @@ import (
 	"time"
 
 	"cloud.google.com/go/storage"
-	"github.com/acoshift/acourse/pkg/view"
 	"github.com/acoshift/go-firebase-admin"
 	"github.com/garyburd/redigo/redis"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 	"gopkg.in/gomail.v2"
+
+	"github.com/acoshift/acourse/pkg/view"
 )
 
 // app shared vars
