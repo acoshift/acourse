@@ -1,14 +1,10 @@
-#<a name="minify"></a> Minify [![Build Status](https://travis-ci.org/tdewolff/minify.svg?branch=master)](https://travis-ci.org/tdewolff/minify) [![GoDoc](http://godoc.org/github.com/tdewolff/minify?status.svg)](http://godoc.org/github.com/tdewolff/minify) [![Coverage Status](https://coveralls.io/repos/github/tdewolff/minify/badge.svg?branch=master)](https://coveralls.io/github/tdewolff/minify?branch=master) [![Join the chat at https://gitter.im/tdewolff/minify](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/tdewolff/minify?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
-**The preferred stable release is v2. Master has some new changes for SVG that haven't yet endured the test of time, bug reports are appreciated.**
+# Minify <a name="minify"></a> [![Build Status](https://travis-ci.org/tdewolff/minify.svg?branch=master)](https://travis-ci.org/tdewolff/minify) [![GoDoc](http://godoc.org/github.com/tdewolff/minify?status.svg)](http://godoc.org/github.com/tdewolff/minify) [![Coverage Status](https://coveralls.io/repos/github/tdewolff/minify/badge.svg?branch=master)](https://coveralls.io/github/tdewolff/minify?branch=master) [![Join the chat at https://gitter.im/tdewolff/minify](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/tdewolff/minify?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 **[Online demo](http://go.tacodewolff.nl/minify) if you need to minify files *now*.**
 
 **[Command line tool](https://github.com/tdewolff/minify/tree/master/cmd/minify) that minifies concurrently and supports watching file changes.**
 
 **[All releases](https://dl.equinox.io/tdewolff/minify/stable) on Equinox for various platforms.**
-
-If this software is useful to you, consider making a [donation](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=27MSRR5UJQQUL)! When a significant amount has been deposited, I will write a much improved JS minifier.
 
 ---
 
@@ -35,6 +31,9 @@ The core functionality associates mimetypes with minification functions, allowin
 		- [From reader](#from-reader)
 		- [From bytes](#from-bytes)
 		- [From string](#from-string)
+		- [To reader](#to-reader)
+		- [To writer](#to-writer)
+		- [Middleware](#middleware)
 		- [Custom minifier](#custom-minifier)
 		- [Mediatypes](#mediatypes)
 	- [Examples](#examples)
@@ -54,7 +53,7 @@ The core functionality associates mimetypes with minification functions, allowin
 * XML: **fully implemented**
 
 ## Prologue
-Minifiers or bindings to minifiers exist in almost all programming languages. Some implementations are merely using several regular-expressions to trim whitespace and comments (even though regex for parsing HTML/XML is ill-advised, for a good read see [Regular Expressions: Now You Have Two Problems](http://blog.codinghorror.com/regular-expressions-now-you-have-two-problems/)). Some implementations are much more profound, such as the [YUI Compressor](http://yui.github.io/yuicompressor/) and [Google Closure Compiler](https://github.com/google/closure-compiler) for JS. As most existing implementations either use Java or JavaScript and don't focus on performance, they are pretty slow. And loading the whole file into memory is bad for really large files (or impossible for infinite streams).
+Minifiers or bindings to minifiers exist in almost all programming languages. Some implementations are merely using several regular-expressions to trim whitespace and comments (even though regex for parsing HTML/XML is ill-advised, for a good read see [Regular Expressions: Now You Have Two Problems](http://blog.codinghorror.com/regular-expressions-now-you-have-two-problems/)). Some implementations are much more profound, such as the [YUI Compressor](http://yui.github.io/yuicompressor/) and [Google Closure Compiler](https://github.com/google/closure-compiler) for JS. As most existing implementations either use Java or JavaScript and don't focus on performance, they are pretty slow. Additionally, loading the whole file into memory at once is bad for really large files (or impossible for streams).
 
 This minifier proves to be that fast and extensive minifier that can handle HTML and any other filetype it may contain (CSS, JS, ...). It streams the input and output and can minify files concurrently.
 
@@ -82,6 +81,7 @@ There is no guarantee for absolute stability, but I take issues and bugs serious
 - minify-v1.0.0 depends on parse-v1.0.0
 - minify-v1.1.0 depends on parse-v1.1.0
 - minify-v2.0.0 depends on parse-v2.0.0
+- minify-v2.1.0 depends on parse-v2.1.0
 - minify-tip will always compile with my other packages on tip
 
 The API differences between v1 and v2 are listed below. If `m := minify.New()` and `w` and `r` are your writer and reader respectfully, then **v1** &#8594; **v2**:
@@ -119,12 +119,13 @@ The HTML5 minifier uses these minifications:
 - strip unrequired tags (`html`, `head`, `body`, ...)
 - strip unrequired end tags (`tr`, `td`, `li`, ... and often `p`)
 - strip default protocols (`http:`, `https:` and `javascript:`)
-- strip comments (except conditional comments)
+- strip all comments (including conditional comments, old IE versions are not supported anymore by Microsoft)
 - shorten `doctype` and `meta` charset
 - lowercase tags, attributes and some values to enhance gzip compression
 
 Options:
 
+- `KeepConditionalComments` preserve all IE conditional comments such as `<!--[if IE 6]><![endif]-->` and `<![if IE 6]><![endif]>`, see https://msdn.microsoft.com/en-us/library/ms537512(v=vs.85).aspx#syntax
 - `KeepDefaultAttrVals` preserve default attribute values such as `<script type="text/javascript">`
 - `KeepDocumentTags` preserve `html`, `head` and `body` tags
 - `KeepEndTags` preserve all end tags
@@ -307,7 +308,7 @@ if err != nil {
 }
 ```
 
-### From reader
+### To reader
 Get a minifying reader for a specific mediatype.
 ``` go
 mr := m.Reader(mediatype, r)
@@ -316,7 +317,7 @@ if _, err := mr.Read(b); err != nil {
 }
 ```
 
-### From writer
+### To writer
 Get a minifying writer for a specific mediatype. Must be explicitly closed because it uses an `io.Pipe` underneath.
 ``` go
 mw := m.Writer(mediatype, w)
@@ -326,6 +327,13 @@ if mw.Write([]byte("input")); err != nil {
 if err := mw.Close(); err != nil {
 	panic(err)
 }
+```
+
+### Middleware
+Minify resources on the fly using middleware. It passes a wrapped response writer to the handler that removes the Content-Length header. The minifier is chosen based on the Content-Type header or, if the header is empty, by the request URI file extension. This is on-the-fly processing, you should preferably cache the results though!
+``` go
+fs := http.FileServer(http.Dir("www/"))
+http.Handle("/", m.Middleware(fs))
 ```
 
 ### Custom minifier
@@ -463,9 +471,8 @@ func main() {
 	m.AddFuncRegexp(regexp.MustCompile("[/+]json$"), json.Minify)
 	m.AddFuncRegexp(regexp.MustCompile("[/+]xml$"), xml.Minify)
 
-	http.Handle("/", m.Middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, path.Join("www", r.URL.Path))
-	})))
+	fs := http.FileServer(http.Dir("www/"))
+	http.Handle("/", m.Middleware(fs))
 }
 ```
 

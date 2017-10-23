@@ -125,14 +125,14 @@ func (z *Lexer) read(pos int) byte {
 
 	// read in new data for the rest of the buffer
 	var n int
-	n, z.err = z.r.Read(buf[d:cap(buf)])
+	for pos-z.start >= d && z.err == nil {
+		n, z.err = z.r.Read(buf[d:cap(buf)])
+		d += n
+	}
 	pos -= z.start
 	z.pos -= z.start
-	z.start, z.buf = 0, buf[:d+n]
-	if pos >= d+n {
-		if z.err == nil {
-			z.err = io.EOF
-		}
+	z.start, z.buf = 0, buf[:d]
+	if pos >= d {
 		return 0
 	}
 	return z.buf[pos]
@@ -154,12 +154,13 @@ func (z *Lexer) Free(n int) {
 
 // Peek returns the ith byte relative to the end position and possibly does an allocation.
 // Peek returns zero when an error has occurred, Err returns the error.
+// TODO: inline function
 func (z *Lexer) Peek(pos int) byte {
 	pos += z.pos
-	if pos >= len(z.buf) {
-		return z.read(pos)
+	if uint(pos) < uint(len(z.buf)) { // uint for BCE
+		return z.buf[pos]
 	}
-	return z.buf[pos]
+	return z.read(pos)
 }
 
 // PeekRune returns the rune and rune length of the ith byte relative to the end position.

@@ -40,10 +40,10 @@ func TestParse(t *testing.T) {
 		{false, "@keyframes 'diagonal-slide' {  from { left: 0; top: 0; } to { left: 100px; top: 100px; } }", "@keyframes 'diagonal-slide'{from{left:0;top:0;}to{left:100px;top:100px;}}"},
 		{false, "@keyframes movingbox{0%{left:90%;}50%{left:10%;}100%{left:90%;}}", "@keyframes movingbox{0%{left:90%;}50%{left:10%;}100%{left:90%;}}"},
 		{false, ".foo { color: #fff;}", ".foo{color:#fff;}"},
-		{false, ".foo { *color: #fff;}", ".foo{*color:#fff;}"},
 		{false, ".foo { ; _color: #fff;}", ".foo{_color:#fff;}"},
 		{false, "a { color: red; border: 0; }", "a{color:red;border:0;}"},
 		{false, "a { color: red; border: 0; } b { padding: 0; }", "a{color:red;border:0;}b{padding:0;}"},
+		{false, "/* comment */", "/* comment */"},
 
 		// extraordinary
 		{true, "color: red;;", "color:red;"},
@@ -52,6 +52,7 @@ func TestParse(t *testing.T) {
 		{true, "filter: progid : DXImageTransform.Microsoft.BasicImage(rotation=1);", "filter:progid:DXImageTransform.Microsoft.BasicImage(rotation=1);"},
 		{true, "/*a*/\n/*c*/\nkey: value;", "key:value;"},
 		{true, "@-moz-charset;", "@-moz-charset;"},
+		{true, "--custom-variable:  (0;)  ;", "--custom-variable:  (0;)  ;"},
 		{false, "@import;@import;", "@import;@import;"},
 		{false, ".a .b#c, .d<.e { x:y; }", ".a .b#c,.d<.e{x:y;}"},
 		{false, ".a[b~=c]d { x:y; }", ".a[b~=c]d{x:y;}"},
@@ -81,9 +82,14 @@ func TestParse(t *testing.T) {
 		{false, "table { @unknown }", "table{@unknown;}"},
 
 		// early endings
-		{true, "~color:red;", ""},
 		{false, "selector{", "selector{"},
 		{false, "@media{selector{", "@media{selector{"},
+
+		// bad grammar
+		{true, "~color:red", "~color:red;"},
+		{false, ".foo { *color: #fff;}", ".foo{*color:#fff;}"},
+		{true, "*color: red; font-size: 12pt;", "*color:red;font-size:12pt;"},
+		{true, "_color: red; font-size: 12pt;", "_color:red;font-size:12pt;"},
 
 		// issues
 		{false, "@media print {.class{width:5px;}}", "@media print{.class{width:5px;}}"},                  // #6
@@ -100,13 +106,19 @@ func TestParse(t *testing.T) {
 		for {
 			grammar, _, data := p.Next()
 			if grammar == ErrorGrammar {
-				err := p.Err()
-				if err != nil {
+				if err := p.Err(); err != io.EOF {
+					for _, val := range p.Values() {
+						data = append(data, val.Data...)
+					}
+					if err == ErrBadDeclaration {
+						data = append(data, ";"...)
+					}
+				} else {
 					test.Error(t, err, io.EOF, "in "+tt.css)
+					break
 				}
-				break
-			} else if grammar == AtRuleGrammar || grammar == BeginAtRuleGrammar || grammar == BeginRulesetGrammar || grammar == DeclarationGrammar {
-				if grammar == DeclarationGrammar {
+			} else if grammar == AtRuleGrammar || grammar == BeginAtRuleGrammar || grammar == BeginRulesetGrammar || grammar == DeclarationGrammar || grammar == CustomPropertyGrammar {
+				if grammar == DeclarationGrammar || grammar == CustomPropertyGrammar {
 					data = append(data, ":"...)
 				}
 				for _, val := range p.Values() {
@@ -114,7 +126,7 @@ func TestParse(t *testing.T) {
 				}
 				if grammar == BeginAtRuleGrammar || grammar == BeginRulesetGrammar {
 					data = append(data, "{"...)
-				} else if grammar == AtRuleGrammar || grammar == DeclarationGrammar {
+				} else if grammar == AtRuleGrammar || grammar == DeclarationGrammar || grammar == CustomPropertyGrammar {
 					data = append(data, ";"...)
 				}
 			}
@@ -131,6 +143,8 @@ func TestParse(t *testing.T) {
 	test.String(t, EndRulesetGrammar.String(), "EndRuleset")
 	test.String(t, DeclarationGrammar.String(), "Declaration")
 	test.String(t, TokenGrammar.String(), "Token")
+	test.String(t, CommentGrammar.String(), "Comment")
+	test.String(t, CustomPropertyGrammar.String(), "CustomProperty")
 	test.String(t, GrammarType(100).String(), "Invalid(100)")
 }
 
@@ -142,6 +156,8 @@ func TestParseError(t *testing.T) {
 	}{
 		{false, "selector", ErrBadQualifiedRule},
 		{true, "color 0", ErrBadDeclaration},
+		{true, "--color 0", ErrBadDeclaration},
+		{true, "--custom-variable:0", io.EOF},
 	}
 	for _, tt := range parseErrorTests {
 		p := NewParser(bytes.NewBufferString(tt.css), tt.inline)

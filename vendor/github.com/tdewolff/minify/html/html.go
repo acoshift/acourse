@@ -30,17 +30,21 @@ var (
 
 ////////////////////////////////////////////////////////////////
 
+// DefaultMinifier is the default minifier.
+var DefaultMinifier = &Minifier{}
+
 // Minifier is an HTML minifier.
 type Minifier struct {
-	KeepDefaultAttrVals bool
-	KeepDocumentTags    bool
-	KeepEndTags         bool
-	KeepWhitespace      bool
+	KeepConditionalComments bool
+	KeepDefaultAttrVals     bool
+	KeepDocumentTags        bool
+	KeepEndTags             bool
+	KeepWhitespace          bool
 }
 
 // Minify minifies HTML data, it reads from r and writes to w.
 func Minify(m *minify.M, w io.Writer, r io.Reader, params map[string]string) error {
-	return (&Minifier{}).Minify(m, w, r, params)
+	return DefaultMinifier.Minify(m, w, r, params)
 }
 
 // Minify minifies HTML data, it reads from r and writes to w.
@@ -74,6 +78,26 @@ func (o *Minifier) Minify(m *minify.M, w io.Writer, r io.Reader, _ map[string]st
 		case html.DoctypeToken:
 			if _, err := w.Write(doctypeBytes); err != nil {
 				return err
+			}
+		case html.CommentToken:
+			if o.KeepConditionalComments && len(t.Text) > 6 && (bytes.HasPrefix(t.Text, []byte("[if ")) || parse.Equal(t.Text, []byte("[endif]"))) {
+				// [if ...] is always 7 or more characters, [endif] is only encountered for downlevel-revealed
+				// see https://msdn.microsoft.com/en-us/library/ms537512(v=vs.85).aspx#syntax
+				if bytes.HasPrefix(t.Data, []byte("<!--[if ")) { // downlevel-hidden
+					begin := bytes.IndexByte(t.Data, '>') + 1
+					end := len(t.Data) - len("<![endif]-->")
+					if _, err := w.Write(t.Data[:begin]); err != nil {
+						return err
+					}
+					if err := o.Minify(m, w, buffer.NewReader(t.Data[begin:end]), nil); err != nil {
+						return err
+					}
+					if _, err := w.Write(t.Data[end:]); err != nil {
+						return err
+					}
+				} else if _, err := w.Write(t.Data); err != nil { // downlevel-revealed
+					return err
+				}
 			}
 		case html.SvgToken:
 			if err := m.MinifyMimetype(svgMimeBytes, w, buffer.NewReader(t.Data), nil); err != nil {
@@ -358,7 +382,7 @@ func (o *Minifier) Minify(m *minify.M, w io.Writer, r io.Reader, _ map[string]st
 						rawTagMediatype = parse.Copy(val)
 					}
 
-					// default attribute values can be ommited
+					// default attribute values can be omitted
 					if !o.KeepDefaultAttrVals && (attr.Hash == html.Type && (t.Hash == html.Script && parse.Equal(val, []byte("text/javascript")) ||
 						t.Hash == html.Style && parse.Equal(val, []byte("text/css")) ||
 						t.Hash == html.Link && parse.Equal(val, []byte("text/css")) ||

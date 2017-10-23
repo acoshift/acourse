@@ -166,7 +166,7 @@ func (s *AcknowledgeTaskRequest) MarshalJSON() ([]byte, error) {
 // has
 // Queue.app_engine_http_target set.
 //
-// Using this type of target
+// Using AppEngineHttpRequest
 // requires
 // [`appengine.applications.get`](/appengine/docs/admin-api/acce
 // ss-control)
@@ -276,8 +276,7 @@ type AppEngineHttpRequest struct {
 	// handle
 	// HTTP requests with this http_method, otherwise the task attempt will
 	// fail
-	// with error code 405 "Method Not Allowed" because "the method
-	// specified in
+	// with error code 405 (Method Not Allowed). See
 	// the Request-Line is not allowed for the resource identified by
 	// the
 	// Request-URI". See
@@ -312,7 +311,7 @@ type AppEngineHttpRequest struct {
 	//
 	// The relative URL must begin with "/" and must be a valid HTTP
 	// relative URL.
-	// It can contain a path, query string arguments, and `#` fragments.
+	// It can contain a path and query string arguments.
 	// If the relative URL is empty, then the root path "/" will be used.
 	// No spaces are allowed, and the maximum length allowed is 2083
 	// characters.
@@ -350,7 +349,7 @@ func (s *AppEngineHttpRequest) MarshalJSON() ([]byte, error) {
 // The documentation for AppEngineHttpRequest explains how the
 // task's host URL is constructed.
 //
-// Using this type of queue configuration
+// Using AppEngineHttpTarget
 // requires
 // [`appengine.applications.get`](/appengine/docs/admin-api/acce
 // ss-control)
@@ -395,10 +394,10 @@ func (s *AppEngineHttpTarget) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// AppEngineQueueConfig: Deprecated. Use AppEngineTarget.
+// AppEngineQueueConfig: Deprecated. Use AppEngineHttpTarget.
 type AppEngineQueueConfig struct {
 	// AppEngineRoutingOverride: Deprecated. Use
-	// AppEngineTarget.app_engine_routing_override.
+	// AppEngineHttpTarget.app_engine_routing_override.
 	AppEngineRoutingOverride *AppEngineRouting `json:"appEngineRoutingOverride,omitempty"`
 
 	// ForceSendFields is a list of field names (e.g.
@@ -596,140 +595,16 @@ func (s *AppEngineRouting) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// AppEngineTaskTarget: App Engine task target.
-//
-// An App Engine task is a task that has AppEngineTaskTarget set.
-//
-// This proto can only be used for tasks in a queue which
-// has
-// Queue.app_engine_queue_config set.
-//
-// Using this type of task target
-// requires
-// [`appengine.applications.get`](/appengine/docs/admin-api/acce
-// ss-control)
-// Google IAM permission for the project
-// and the following
-// scope:
-//
-// `https://www.googleapis.com/auth/cloud-platform`
-//
-// The task will be delivered to the URL specified by
-// the
-// AppEngineQueueConfig and AppEngineTaskTarget in the App Engine
-// app
-// which belongs to the same project as the queue. For more information,
-// see
-// [How Requests are
-// Routed](/appengine/docs/standard/python/how-requests-are-routed)
-// and how routing is affected by
-// [dispatch files](/appengine/docs/python/config/dispatchref).
-//
-// The AppEngineRouting used to construct the URL can be set at
-// the queue-level or task-level:
-//
-// *  If set, AppEngineQueueConfig.app_engine_routing_override is used
-// for
-//    all tasks in the queue, no matter what the setting is for the
-//    task-level app_engine_routing.
-//
-//
-// The `url` that the task will be sent to is:
-//
-// * `url =` AppEngineRouting.host `+`
-// AppEngineTaskTarget.relative_url
-//
-// The task will be sent to a task handler by an HTTP
-// request using the specified AppEngineTaskTarget.http_method (for
-// example
-// POST, HTTP GET, etc). The task attempt has succeeded if the task
-// handler
-// returns an HTTP response code in the range [200 - 299]. Error 503
-// is
-// considered an App Engine system error instead of an application
-// error.
-// Requests returning error 503 will be retried regardless of
-// retry
-// configuration and not counted against retry counts.
-// Any other response code or a failure to receive a response before
-// the
-// deadline is a failed attempt.
+// AppEngineTaskTarget: Deprecated. Use AppEngineHttpRequest.
 type AppEngineTaskTarget struct {
-	// AppEngineRouting: Task-level setting for App Engine routing.
-	//
-	// If set, AppEngineQueueConfig.app_engine_routing_override is used
-	// for
-	// all tasks in the queue, no matter what the setting is for
-	// the
-	// task-level app_engine_routing.
+	// AppEngineRouting: Deprecated. Use
+	// AppEngineHttpRequest.app_engine_routing.
 	AppEngineRouting *AppEngineRouting `json:"appEngineRouting,omitempty"`
 
-	// Headers: HTTP request headers.
-	//
-	// This map contains the header field names and values.
-	// Headers can be set when the
-	// [task is
-	// created](google.cloud.tasks.v2beta2.CloudTasks.CreateTask).
-	// Repeated headers are not supported but a header value can contain
-	// commas.
-	//
-	// Cloud Tasks sets some headers to default values:
-	//
-	// * `User-Agent`: By default, this header is
-	//   "AppEngine-Google; (+http://code.google.com/appengine)".
-	//   This header can be modified, but Cloud Tasks will append
-	//   "AppEngine-Google; (+http://code.google.com/appengine)" to the
-	//   modified `User-Agent`.
-	//
-	// If the task has an AppEngineTaskTarget.payload, Cloud Tasks sets
-	// the
-	// following headers:
-	//
-	// * `Content-Type`: By default, the `Content-Type` header is set to
-	//   "application/octet-stream". The default can be overridden by
-	// explictly
-	//   setting `Content-Type` to a particular media type when the
-	//   [task is
-	// created](google.cloud.tasks.v2beta2.CloudTasks.CreateTask).
-	//   For example, `Content-Type` can be set to "application/json".
-	// * `Content-Length`: This is computed by Cloud Tasks. This value is
-	//   output only. It cannot be changed.
-	//
-	// The headers below cannot be set or overridden:
-	//
-	// * `Host`
-	// * `X-Google-*`
-	// * `X-AppEngine-*`
-	//
-	// In addition, some App Engine headers, which contain
-	// task-specific information, are also be sent to the task handler;
-	// see
-	// [request
-	// headers](/appengine/docs/python/taskqueue/push/creating-handlers#readi
-	// ng_request_headers).
+	// Headers: Deprecated. Use AppEngineHttpRequest.headers.
 	Headers map[string]string `json:"headers,omitempty"`
 
-	// HttpMethod: The HTTP method to use for the request. The default is
-	// POST.
-	//
-	// The app's request handler for the task's target URL must be able to
-	// handle
-	// HTTP requests with this http_method, otherwise the task attempt will
-	// fail
-	// with error code 405 "Method Not Allowed" because "the method
-	// specified in
-	// the Request-Line is not allowed for the resource identified by
-	// the
-	// Request-URI". See
-	// [Writing a push task request
-	// handler](/appengine/docs/java/taskqueue/push/creating-handlers#writing
-	// _a_push_task_request_handler)
-	// and the documentation for the request handlers in the language your
-	// app is
-	// written in e.g.
-	// [python
-	// RequestHandler](/appengine/docs/python/tools/webapp/requesthandlerclas
-	// s).
+	// HttpMethod: Deprecated. Use AppEngineHttpRequest.http_method.
 	//
 	// Possible values:
 	//   "HTTP_METHOD_UNSPECIFIED" - HTTP method unspecified
@@ -740,22 +615,10 @@ type AppEngineTaskTarget struct {
 	//   "DELETE" - HTTP Delete
 	HttpMethod string `json:"httpMethod,omitempty"`
 
-	// Payload: Payload.
-	//
-	// The payload will be sent as the HTTP message body. A message
-	// body, and thus a payload, is allowed only if the HTTP method is
-	// POST or PUT. It is an error to set a data payload on a task with
-	// an incompatible HttpMethod.
+	// Payload: Deprecated. Use AppEngineHttpRequest.payload.
 	Payload string `json:"payload,omitempty"`
 
-	// RelativeUrl: The relative URL.
-	//
-	// The relative URL must begin with "/" and must be a valid HTTP
-	// relative URL.
-	// It can contain a path, query string arguments, and `#` fragments.
-	// If the relative URL is empty, then the root path "/" will be used.
-	// No spaces are allowed, and the maximum length allowed is 2083
-	// characters.
+	// RelativeUrl: Deprecated. Use AppEngineHttpRequest.relative_url.
 	RelativeUrl string `json:"relativeUrl,omitempty"`
 
 	// ForceSendFields is a list of field names (e.g. "AppEngineRouting") to
@@ -1027,27 +890,34 @@ type CreateTaskRequest struct {
 	// the
 	// response's Task.name.
 	//
-	// Explicitly specifying a Task.name enables task
-	// de-duplication. If a task's name is identical to the name of
-	// an
-	// existing task or a task that was deleted or completed within the
-	// last ~10 days then the call to CloudTasks.CreateTask will
-	// fail with google.rpc.Code.ALREADY_EXISTS. Because there is an
-	// extra lookup cost to identify duplicate task names,
-	// these
-	// CloudTasks.CreateTask calls have significantly increased
-	// latency. Using hashed strings for the task id or for the prefix
-	// of the task id is recommended. Choosing task ids that are
-	// sequential or have sequential prefixes, for example using
+	// If Task.schedule_time is not set or is in the past then Cloud
+	// Tasks will set it to the current time.
+	//
+	// Task De-duplication:
+	//
+	// Explicitly specifying a task ID enables task de-duplication.  If
+	// a task's ID is identical to that of an existing task or a task
+	// that was deleted or completed recently then the call will fail
+	// with google.rpc.Code.ALREADY_EXISTS. If the task's queue was
+	// created using Cloud Tasks, then another task with the same name
+	// can't be created for ~1hour after the original task was deleted
+	// or completed. If the task's queue was created using queue.yaml
+	// or
+	// queue.xml, then another task with the same name can't be created
+	// for ~9days after the original task was deleted or completed.
+	//
+	// Because there is an extra lookup cost to identify duplicate
+	// task
+	// names, these CloudTasks.CreateTask calls have significantly
+	// increased latency. Using hashed strings for the task id or for
+	// the prefix of the task id is recommended. Choosing task ids that
+	// are sequential or have sequential prefixes, for example using
 	// a
 	// timestamp, causes an increase in latency and error rates in all
 	// task commands. The infrastructure relies on an approximately
 	// uniform distribution of task ids to store and serve
 	// tasks
 	// efficiently.
-	//
-	// If Task.schedule_time is not set or is in the past then Cloud
-	// Tasks will set it to the current time.
 	Task *Task `json:"task,omitempty"`
 
 	// ForceSendFields is a list of field names (e.g. "ResponseView") to
@@ -1093,6 +963,43 @@ type Empty struct {
 
 // GetIamPolicyRequest: Request message for `GetIamPolicy` method.
 type GetIamPolicyRequest struct {
+}
+
+// ListLocationsResponse: The response message for
+// Locations.ListLocations.
+type ListLocationsResponse struct {
+	// Locations: A list of locations that matches the specified filter in
+	// the request.
+	Locations []*Location `json:"locations,omitempty"`
+
+	// NextPageToken: The standard List next-page token.
+	NextPageToken string `json:"nextPageToken,omitempty"`
+
+	// ServerResponse contains the HTTP response code and headers from the
+	// server.
+	googleapi.ServerResponse `json:"-"`
+
+	// ForceSendFields is a list of field names (e.g. "Locations") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Locations") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *ListLocationsResponse) MarshalJSON() ([]byte, error) {
+	type noMethod ListLocationsResponse
+	raw := noMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // ListQueuesResponse: Response message for CloudTasks.ListQueues.
@@ -1178,6 +1085,54 @@ type ListTasksResponse struct {
 
 func (s *ListTasksResponse) MarshalJSON() ([]byte, error) {
 	type noMethod ListTasksResponse
+	raw := noMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// Location: A resource that represents Google Cloud Platform location.
+type Location struct {
+	// Labels: Cross-service attributes for the location. For example
+	//
+	//     {"cloud.googleapis.com/region": "us-east1"}
+	Labels map[string]string `json:"labels,omitempty"`
+
+	// LocationId: The canonical id for this location. For example:
+	// "us-east1".
+	LocationId string `json:"locationId,omitempty"`
+
+	// Metadata: Service-specific metadata. For example the available
+	// capacity at the given
+	// location.
+	Metadata googleapi.RawMessage `json:"metadata,omitempty"`
+
+	// Name: Resource name for the location, which may vary between
+	// implementations.
+	// For example: "projects/example-project/locations/us-east1"
+	Name string `json:"name,omitempty"`
+
+	// ServerResponse contains the HTTP response code and headers from the
+	// server.
+	googleapi.ServerResponse `json:"-"`
+
+	// ForceSendFields is a list of field names (e.g. "Labels") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Labels") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *Location) MarshalJSON() ([]byte, error) {
+	type noMethod Location
 	raw := noMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
@@ -1329,25 +1284,12 @@ type PullQueueConfig struct {
 type PullTarget struct {
 }
 
-// PullTaskTarget: Pull task target.
-//
-// A pull task is a task that has PullTaskTarget set.
-//
-// This proto can only be used for tasks in a queue which
-// has
-// Queue.pull_queue_config set.
+// PullTaskTarget: Deprecated. Use PullMessage.
 type PullTaskTarget struct {
-	// Payload: A data payload consumed by the task worker to execute the
-	// task.
+	// Payload: Deprecated. Use PullMessage.payload.
 	Payload string `json:"payload,omitempty"`
 
-	// Tag: A meta-data tag for this task.
-	//
-	// This value is used by CloudTasks.PullTasks calls
-	// when
-	// PullTasksRequest.filter is `tag=<tag>`.
-	//
-	// The tag must be less than 500 bytes.
+	// Tag: Deprecated. Use PullMessage.tag.
 	Tag string `json:"tag,omitempty"`
 
 	// ForceSendFields is a list of field names (e.g. "Payload") to
@@ -1381,32 +1323,22 @@ type PullTasksRequest struct {
 	//
 	// When `filter` is set to `tag=<my-tag>` then the
 	// PullTasksResponse will contain only tasks whose
-	// PullTaskTarget.tag is equal to `<my-tag>`. `<my-tag>` can be
-	// a bytes encoded as a string and must be less than 500 bytes.
-	// If `<my-tag>` includes whitespace or special characters (characters
-	// which
-	// aren't letters, numbers, or underscores), then it must be
-	// double-quoted.
-	// Double quotes and backslashes in quoted strings must be escaped
-	// by
-	// preceding it with a backslash (`\`).
+	// PullMessage.tag is equal to `<my-tag>`. `<my-tag>` must be less
+	// than
+	// 500 bytes.
 	//
-	// When `filter` is set to `tag=oldest_tag()`, only tasks which have the
-	// same
-	// tag as the task with the oldest schedule_time will be
+	// When `filter` is set to `tag_function=oldest_tag()`, only tasks which
+	// have
+	// the same tag as the task with the oldest schedule_time will be
 	// returned.
 	//
 	// Grammar Syntax:
 	//
-	// * `filter = "tag=" comparable`
-	//
-	// *  `comparable = tag | function`
+	// * `filter = "tag=" tag | "tag_function=" function`
 	//
 	// * `tag = string | bytes`
 	//
 	// * `function = "oldest_tag()"
-	//
-	//
 	//
 	// The `oldest_tag()` function returns tasks which have the same tag as
 	// the
@@ -1636,6 +1568,25 @@ type Queue struct {
 	// CloudTasks.DeleteQueue.
 	QueueState string `json:"queueState,omitempty"`
 
+	// RateLimits: Rate limits for task dispatches.
+	//
+	// Queue.rate_limits and Queue.retry_config are related because
+	// they
+	// both control task attempts however they control how tasks are
+	// attempted in
+	// different ways:
+	//
+	// * Queue.rate_limits controls the total rate of dispatches from a
+	// queue
+	//   (i.e. all traffic dispatched from the queue, regardless of whether
+	// the
+	//   dispatch is from a first attempt or a retry).
+	// * Queue.retry_config controls what happens to particular a task
+	// after
+	//   its first attempt fails. That is, Queue.retry_config controls task
+	//   retries (the second attempt, third attempt, etc).
+	RateLimits *RateLimits `json:"rateLimits,omitempty"`
+
 	// RetryConfig: Settings that determine the retry behavior.
 	//
 	// * For tasks created using Cloud Tasks: the queue-level retry
@@ -1652,9 +1603,6 @@ type Queue struct {
 	// documentation](/appengine/docs/standard/python/taskqueue/push/retrying
 	// -tasks).
 	RetryConfig *RetryConfig `json:"retryConfig,omitempty"`
-
-	// ThrottleConfig: Config for throttling task dispatches.
-	ThrottleConfig *ThrottleConfig `json:"throttleConfig,omitempty"`
 
 	// ServerResponse contains the HTTP response code and headers from the
 	// server.
@@ -1682,6 +1630,113 @@ func (s *Queue) MarshalJSON() ([]byte, error) {
 	type noMethod Queue
 	raw := noMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// RateLimits: Rate limits.
+//
+// This message determines the maximum rate that tasks can be dispatched
+// by a
+// queue, regardless of whether the dispatch is a first task attempt or
+// a retry.
+type RateLimits struct {
+	// MaxBurstSize: Output only.
+	//
+	// The max burst size limits how fast the queue is processed when
+	// many tasks are in the queue and the rate is high. This field
+	// allows the queue to have a high rate so processing starts
+	// shortly
+	// after a task is enqueued, but still limits resource usage when
+	// many tasks are enqueued in a short period of time.
+	//
+	// * For App Engine queues, if
+	//   RateLimits.max_tasks_dispatched_per_second is 1, this
+	//   field is 10; otherwise this field is
+	//   RateLimits.max_tasks_dispatched_per_second / 5.
+	// * For pull queues, this field is output only and always
+	// 10,000.
+	//
+	// Note: For App Engine queues that were created
+	// through
+	// `queue.yaml/xml`, `max_burst_size` might not have the same
+	// settings as specified above; CloudTasks.UpdateQueue can be
+	// used to set `max_burst_size` only to the values specified
+	// above.
+	//
+	// This field has the same meaning as
+	// [bucket_size in
+	// queue.yaml](/appengine/docs/standard/python/config/queueref#bucket_siz
+	// e).
+	MaxBurstSize int64 `json:"maxBurstSize,omitempty"`
+
+	// MaxConcurrentTasks: The maximum number of concurrent tasks that Cloud
+	// Tasks allows
+	// to be dispatched for this queue. After this threshold has
+	// been
+	// reached, Cloud Tasks stops dispatching tasks until the number
+	// of
+	// concurrent requests decreases.
+	//
+	// The maximum allowed value is 5,000.
+	//
+	// * For App Engine queues, this field is 10 by default.
+	// * For pull queues, this field is output only and always -1, which
+	//   indicates no limit.
+	//
+	// This field has the same meaning as
+	// [max_concurrent_requests in
+	// queue.yaml](/appengine/docs/standard/python/config/queueref#max_concur
+	// rent_requests).
+	MaxConcurrentTasks int64 `json:"maxConcurrentTasks,omitempty"`
+
+	// MaxTasksDispatchedPerSecond: The maximum rate at which tasks are
+	// dispatched from this
+	// queue.
+	//
+	// The maximum allowed value is 500.
+	//
+	// * For App Engine queues, this field is 1 by default.
+	// * For pull queues, this field is output only and always 10,000.
+	//
+	// This field has the same meaning as
+	// [rate in
+	// queue.yaml](/appengine/docs/standard/python/config/queueref#rate).
+	MaxTasksDispatchedPerSecond float64 `json:"maxTasksDispatchedPerSecond,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "MaxBurstSize") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "MaxBurstSize") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *RateLimits) MarshalJSON() ([]byte, error) {
+	type noMethod RateLimits
+	raw := noMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+func (s *RateLimits) UnmarshalJSON(data []byte) error {
+	type noMethod RateLimits
+	var s1 struct {
+		MaxTasksDispatchedPerSecond gensupport.JSONFloat64 `json:"maxTasksDispatchedPerSecond"`
+		*noMethod
+	}
+	s1.noMethod = (*noMethod)(s)
+	if err := json.Unmarshal(data, &s1); err != nil {
+		return err
+	}
+	s.MaxTasksDispatchedPerSecond = float64(s1.MaxTasksDispatchedPerSecond)
+	return nil
 }
 
 // RenewLeaseRequest: Request message for renewing a lease using
@@ -1771,17 +1826,7 @@ type ResumeQueueRequest struct {
 
 // RetryConfig: Retry config.
 //
-// These settings determine retry behavior.
-//
-// If a task does not complete successfully, meaning that
-// an
-// acknowledgement is not received from the handler before
-// the
-// [deadline](/appengine/docs/python/taskqueue/push/#the_task_deadlin
-// e),
-// then it will be retried with exponential backoff according to
-// the
-// settings in RetryConfig.
+// These settings determine how a failed task attempt is retried.
 type RetryConfig struct {
 	// MaxAttempts: The maximum number of attempts for a task.
 	//
@@ -1802,14 +1847,22 @@ type RetryConfig struct {
 	//   is output only and always 0.
 	//
 	// `max_backoff` will be truncated to the nearest second.
+	//
+	// This field has the same meaning as
+	// [max_backoff_seconds in
+	// queue.yaml](/appengine/docs/standard/python/config/queueref#retry_para
+	// meters).
 	MaxBackoff string `json:"maxBackoff,omitempty"`
 
-	// MaxDoublings: The maximum number of times that the interval between
-	// failed task
-	// retries will be doubled before the increase becomes constant.
-	// The
-	// constant is: 2**(max_doublings - 1) *
-	// RetryConfig.min_backoff.
+	// MaxDoublings: The time between retries increases exponentially
+	// `max_doublings` times.
+	// `max_doublings` is maximum number of times that the interval between
+	// failed
+	// task retries will be doubled before the interval increases
+	// linearly.
+	// After max_doublings intervals, the retry interval will
+	// be
+	// 2^(max_doublings - 1) * RetryConfig.min_backoff.
 	//
 	// * For [App Engine
 	// queues](google.cloud.tasks.v2beta2.AppEngineHttpTarget),
@@ -1817,7 +1870,38 @@ type RetryConfig struct {
 	// * For [pull queues](google.cloud.tasks.v2beta2.PullTarget), this
 	// field
 	//   is output only and always 0.
+	//
+	// This field has the same meaning as
+	// [max_doublings in
+	// queue.yaml](/appengine/docs/standard/python/config/queueref#retry_para
+	// meters).
 	MaxDoublings int64 `json:"maxDoublings,omitempty"`
+
+	// MaxRetryDuration: If positive, `max_retry_duration` specifies the
+	// time limit for retrying a
+	// failed task, measured from when the task was first attempted.
+	// Once
+	// `max_retry_duration` time has passed *and* the task has been
+	// attempted
+	// RetryConfig.max_attempts times, no further attempts will be made
+	// and
+	// the task will be deleted.
+	//
+	// If zero, then the task age is unlimited.
+	//
+	// * For [App Engine
+	// queues](google.cloud.tasks.v2beta2.AppEngineHttpTarget),
+	//   this field is 0 seconds by default.
+	// * For [pull queues](google.cloud.tasks.v2beta2.PullTarget), this
+	//   field is output only and always 0.
+	//
+	// `max_retry_duration` will be truncated to the nearest second.
+	//
+	// This field has the same meaning as
+	// [task_age_limit in
+	// queue.yaml](/appengine/docs/standard/python/config/queueref#retry_para
+	// meters).
+	MaxRetryDuration string `json:"maxRetryDuration,omitempty"`
 
 	// MinBackoff: The minimum amount of time to wait before retrying a task
 	// after
@@ -1830,20 +1914,12 @@ type RetryConfig struct {
 	//   field is output only and always 0.
 	//
 	// `min_backoff` will be truncated to the nearest second.
+	//
+	// This field has the same meaning as
+	// [min_backoff_seconds in
+	// queue.yaml](/appengine/docs/standard/python/config/queueref#retry_para
+	// meters).
 	MinBackoff string `json:"minBackoff,omitempty"`
-
-	// TaskAgeLimit: If positive, task_age_limit specifies the time limit
-	// for retrying a failed
-	// task, measured from when the task was first run. If specified
-	// with
-	// RetryConfig.max_attempts, the task will be retried until both
-	// limits are reached.
-	//
-	// If zero, then the task age is unlimited. This field is zero by
-	// default.
-	//
-	// `task_age_limit` will be truncated to the nearest second.
-	TaskAgeLimit string `json:"taskAgeLimit,omitempty"`
 
 	// UnlimitedAttempts: If true, then the number of attempts is unlimited.
 	UnlimitedAttempts bool `json:"unlimitedAttempts,omitempty"`
@@ -2343,110 +2419,341 @@ func (s *TestIamPermissionsResponse) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// ThrottleConfig: Throttle config.
-//
-// These settings determine the throttling behavior.
-type ThrottleConfig struct {
-	// MaxBurstSize: Output only.
-	//
-	// The max burst size limits how fast the queue is processed when
-	// many tasks are in the queue and the rate is high. This field
-	// allows the queue to have a high rate so processing starts
-	// shortly
-	// after a task is enqueued, but still limits resource usage when
-	// many tasks are enqueued in a short period of time.
-	//
-	// * For App Engine queues, if
-	//   ThrottleConfig.max_tasks_dispatched_per_second is 1, this
-	//   field is 10; otherwise this field is
-	//   ThrottleConfig.max_tasks_dispatched_per_second / 5.
-	// * For pull queues, this field is output only and always
-	// 10,000.
-	//
-	// Note: For App Engine queues that were created
-	// through
-	// `queue.yaml/xml`, `max_burst_size` might not have the same
-	// settings as specified above; CloudTasks.UpdateQueue can be
-	// used to set `max_burst_size` only to the values specified
-	// above.
-	//
-	// This field has the same meaning as
-	// [bucket_size in
-	// queue.yaml](/appengine/docs/standard/python/config/queueref#bucket_siz
-	// e).
-	MaxBurstSize float64 `json:"maxBurstSize,omitempty"`
+// method id "cloudtasks.projects.locations.get":
 
-	// MaxOutstandingTasks: The maximum number of outstanding tasks that
-	// Cloud Tasks allows
-	// to be dispatched for this queue. After this threshold has
-	// been
-	// reached, Cloud Tasks stops dispatching tasks until the number
-	// of
-	// outstanding requests decreases.
-	//
-	// The maximum allowed value is 5,000.
-	//
-	// * For App Engine queues, this field is 10 by default.
-	// * For pull queues, this field is output only and always -1, which
-	//   indicates no limit.
-	//
-	// This field has the same meaning as
-	// [max_concurrent_requests in
-	// queue.yaml](/appengine/docs/standard/python/config/queueref#max_concur
-	// rent_requests).
-	MaxOutstandingTasks int64 `json:"maxOutstandingTasks,omitempty"`
-
-	// MaxTasksDispatchedPerSecond: The maximum rate at which tasks are
-	// dispatched from this
-	// queue.
-	//
-	// The maximum allowed value is 500.
-	//
-	// * For App Engine queues, this field is 1 by default.
-	// * For pull queues, this field is output only and always 10,000.
-	//
-	// This field has the same meaning as
-	// [rate in
-	// queue.yaml](/appengine/docs/standard/python/config/queueref#rate).
-	MaxTasksDispatchedPerSecond float64 `json:"maxTasksDispatchedPerSecond,omitempty"`
-
-	// ForceSendFields is a list of field names (e.g. "MaxBurstSize") to
-	// unconditionally include in API requests. By default, fields with
-	// empty values are omitted from API requests. However, any non-pointer,
-	// non-interface field appearing in ForceSendFields will be sent to the
-	// server regardless of whether the field is empty or not. This may be
-	// used to include empty fields in Patch requests.
-	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "MaxBurstSize") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
+type ProjectsLocationsGetCall struct {
+	s            *Service
+	name         string
+	urlParams_   gensupport.URLParams
+	ifNoneMatch_ string
+	ctx_         context.Context
+	header_      http.Header
 }
 
-func (s *ThrottleConfig) MarshalJSON() ([]byte, error) {
-	type noMethod ThrottleConfig
-	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+// Get: Get information about a location.
+func (r *ProjectsLocationsService) Get(name string) *ProjectsLocationsGetCall {
+	c := &ProjectsLocationsGetCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.name = name
+	return c
 }
 
-func (s *ThrottleConfig) UnmarshalJSON(data []byte) error {
-	type noMethod ThrottleConfig
-	var s1 struct {
-		MaxBurstSize                gensupport.JSONFloat64 `json:"maxBurstSize"`
-		MaxTasksDispatchedPerSecond gensupport.JSONFloat64 `json:"maxTasksDispatchedPerSecond"`
-		*noMethod
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *ProjectsLocationsGetCall) Fields(s ...googleapi.Field) *ProjectsLocationsGetCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// IfNoneMatch sets the optional parameter which makes the operation
+// fail if the object's ETag matches the given value. This is useful for
+// getting updates only after the object has changed since the last
+// request. Use googleapi.IsNotModified to check whether the response
+// error from Do is the result of In-None-Match.
+func (c *ProjectsLocationsGetCall) IfNoneMatch(entityTag string) *ProjectsLocationsGetCall {
+	c.ifNoneMatch_ = entityTag
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *ProjectsLocationsGetCall) Context(ctx context.Context) *ProjectsLocationsGetCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ProjectsLocationsGetCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
 	}
-	s1.noMethod = (*noMethod)(s)
-	if err := json.Unmarshal(data, &s1); err != nil {
-		return err
+	return c.header_
+}
+
+func (c *ProjectsLocationsGetCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
 	}
-	s.MaxBurstSize = float64(s1.MaxBurstSize)
-	s.MaxTasksDispatchedPerSecond = float64(s1.MaxTasksDispatchedPerSecond)
-	return nil
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	var body io.Reader = nil
+	c.urlParams_.Set("alt", alt)
+	urls := googleapi.ResolveRelative(c.s.BasePath, "v2beta2/{+name}")
+	urls += "?" + c.urlParams_.Encode()
+	req, _ := http.NewRequest("GET", urls, body)
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"name": c.name,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "cloudtasks.projects.locations.get" call.
+// Exactly one of *Location or error will be non-nil. Any non-2xx status
+// code is an error. Response headers are in either
+// *Location.ServerResponse.Header or (if a response was returned at
+// all) in error.(*googleapi.Error).Header. Use googleapi.IsNotModified
+// to check whether the returned error was because
+// http.StatusNotModified was returned.
+func (c *ProjectsLocationsGetCall) Do(opts ...googleapi.CallOption) (*Location, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &Location{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Get information about a location.",
+	//   "flatPath": "v2beta2/projects/{projectsId}/locations/{locationsId}",
+	//   "httpMethod": "GET",
+	//   "id": "cloudtasks.projects.locations.get",
+	//   "parameterOrder": [
+	//     "name"
+	//   ],
+	//   "parameters": {
+	//     "name": {
+	//       "description": "Resource name for the location.",
+	//       "location": "path",
+	//       "pattern": "^projects/[^/]+/locations/[^/]+$",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "v2beta2/{+name}",
+	//   "response": {
+	//     "$ref": "Location"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/cloud-platform"
+	//   ]
+	// }
+
+}
+
+// method id "cloudtasks.projects.locations.list":
+
+type ProjectsLocationsListCall struct {
+	s            *Service
+	name         string
+	urlParams_   gensupport.URLParams
+	ifNoneMatch_ string
+	ctx_         context.Context
+	header_      http.Header
+}
+
+// List: Lists information about the supported locations for this
+// service.
+func (r *ProjectsLocationsService) List(name string) *ProjectsLocationsListCall {
+	c := &ProjectsLocationsListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.name = name
+	return c
+}
+
+// Filter sets the optional parameter "filter": The standard list
+// filter.
+func (c *ProjectsLocationsListCall) Filter(filter string) *ProjectsLocationsListCall {
+	c.urlParams_.Set("filter", filter)
+	return c
+}
+
+// PageSize sets the optional parameter "pageSize": The standard list
+// page size.
+func (c *ProjectsLocationsListCall) PageSize(pageSize int64) *ProjectsLocationsListCall {
+	c.urlParams_.Set("pageSize", fmt.Sprint(pageSize))
+	return c
+}
+
+// PageToken sets the optional parameter "pageToken": The standard list
+// page token.
+func (c *ProjectsLocationsListCall) PageToken(pageToken string) *ProjectsLocationsListCall {
+	c.urlParams_.Set("pageToken", pageToken)
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *ProjectsLocationsListCall) Fields(s ...googleapi.Field) *ProjectsLocationsListCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// IfNoneMatch sets the optional parameter which makes the operation
+// fail if the object's ETag matches the given value. This is useful for
+// getting updates only after the object has changed since the last
+// request. Use googleapi.IsNotModified to check whether the response
+// error from Do is the result of In-None-Match.
+func (c *ProjectsLocationsListCall) IfNoneMatch(entityTag string) *ProjectsLocationsListCall {
+	c.ifNoneMatch_ = entityTag
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *ProjectsLocationsListCall) Context(ctx context.Context) *ProjectsLocationsListCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ProjectsLocationsListCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *ProjectsLocationsListCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	var body io.Reader = nil
+	c.urlParams_.Set("alt", alt)
+	urls := googleapi.ResolveRelative(c.s.BasePath, "v2beta2/{+name}/locations")
+	urls += "?" + c.urlParams_.Encode()
+	req, _ := http.NewRequest("GET", urls, body)
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"name": c.name,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "cloudtasks.projects.locations.list" call.
+// Exactly one of *ListLocationsResponse or error will be non-nil. Any
+// non-2xx status code is an error. Response headers are in either
+// *ListLocationsResponse.ServerResponse.Header or (if a response was
+// returned at all) in error.(*googleapi.Error).Header. Use
+// googleapi.IsNotModified to check whether the returned error was
+// because http.StatusNotModified was returned.
+func (c *ProjectsLocationsListCall) Do(opts ...googleapi.CallOption) (*ListLocationsResponse, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &ListLocationsResponse{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Lists information about the supported locations for this service.",
+	//   "flatPath": "v2beta2/projects/{projectsId}/locations",
+	//   "httpMethod": "GET",
+	//   "id": "cloudtasks.projects.locations.list",
+	//   "parameterOrder": [
+	//     "name"
+	//   ],
+	//   "parameters": {
+	//     "filter": {
+	//       "description": "The standard list filter.",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
+	//     "name": {
+	//       "description": "The resource that owns the locations collection, if applicable.",
+	//       "location": "path",
+	//       "pattern": "^projects/[^/]+$",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "pageSize": {
+	//       "description": "The standard list page size.",
+	//       "format": "int32",
+	//       "location": "query",
+	//       "type": "integer"
+	//     },
+	//     "pageToken": {
+	//       "description": "The standard list page token.",
+	//       "location": "query",
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "v2beta2/{+name}/locations",
+	//   "response": {
+	//     "$ref": "ListLocationsResponse"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/cloud-platform"
+	//   ]
+	// }
+
+}
+
+// Pages invokes f for each page of results.
+// A non-nil error returned from f will halt the iteration.
+// The provided context supersedes any context provided to the Context method.
+func (c *ProjectsLocationsListCall) Pages(ctx context.Context, f func(*ListLocationsResponse) error) error {
+	c.ctx_ = ctx
+	defer c.PageToken(c.urlParams_.Get("pageToken")) // reset paging to original point
+	for {
+		x, err := c.Do()
+		if err != nil {
+			return err
+		}
+		if err := f(x); err != nil {
+			return err
+		}
+		if x.NextPageToken == "" {
+			return nil
+		}
+		c.PageToken(x.NextPageToken)
+	}
 }
 
 // method id "cloudtasks.projects.locations.queues.create":
@@ -2889,6 +3196,7 @@ type ProjectsLocationsQueuesGetIamPolicyCall struct {
 // specified resource parent:
 //
 // * `cloudtasks.queues.getIamPolicy`
+//
 func (r *ProjectsLocationsQueuesService) GetIamPolicy(resource string, getiampolicyrequest *GetIamPolicyRequest) *ProjectsLocationsQueuesGetIamPolicyCall {
 	c := &ProjectsLocationsQueuesGetIamPolicyCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.resource = resource
@@ -2982,7 +3290,7 @@ func (c *ProjectsLocationsQueuesGetIamPolicyCall) Do(opts ...googleapi.CallOptio
 	}
 	return ret, nil
 	// {
-	//   "description": "Gets the access control policy for a Queue.\nReturns an empty policy if the resource exists and does not have a policy\nset.\n\nAuthorization requires the following [Google IAM](/iam) permission on the\nspecified resource parent:\n\n* `cloudtasks.queues.getIamPolicy`",
+	//   "description": "Gets the access control policy for a Queue.\nReturns an empty policy if the resource exists and does not have a policy\nset.\n\nAuthorization requires the following [Google IAM](/iam) permission on the\nspecified resource parent:\n\n* `cloudtasks.queues.getIamPolicy`\n",
 	//   "flatPath": "v2beta2/projects/{projectsId}/locations/{locationsId}/queues/{queuesId}:getIamPolicy",
 	//   "httpMethod": "POST",
 	//   "id": "cloudtasks.projects.locations.queues.getIamPolicy",
@@ -3195,7 +3503,6 @@ func (c *ProjectsLocationsQueuesListCall) Do(opts ...googleapi.CallOption) (*Lis
 	//     },
 	//     "pageToken": {
 	//       "description": "A token identifying the page of results to return.\n\nTo request the first page results, page_token must be empty. To\nrequest the next page of results, page_token must be the value of\nListQueuesResponse.next_page_token returned from the previous\ncall to CloudTasks.ListQueues method. It is an error to\nswitch the value of ListQueuesRequest.filter while iterating\nthrough pages.",
-	//       "format": "byte",
 	//       "location": "query",
 	//       "type": "string"
 	//     },
@@ -3868,6 +4175,7 @@ type ProjectsLocationsQueuesSetIamPolicyCall struct {
 // specified resource parent:
 //
 // * `cloudtasks.queues.setIamPolicy`
+//
 func (r *ProjectsLocationsQueuesService) SetIamPolicy(resource string, setiampolicyrequest *SetIamPolicyRequest) *ProjectsLocationsQueuesSetIamPolicyCall {
 	c := &ProjectsLocationsQueuesSetIamPolicyCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.resource = resource
@@ -3961,7 +4269,7 @@ func (c *ProjectsLocationsQueuesSetIamPolicyCall) Do(opts ...googleapi.CallOptio
 	}
 	return ret, nil
 	// {
-	//   "description": "Sets the access control policy for a Queue. Replaces any existing\npolicy.\n\nAuthorization requires the following [Google IAM](/iam) permission on the\nspecified resource parent:\n\n* `cloudtasks.queues.setIamPolicy`",
+	//   "description": "Sets the access control policy for a Queue. Replaces any existing\npolicy.\n\nAuthorization requires the following [Google IAM](/iam) permission on the\nspecified resource parent:\n\n* `cloudtasks.queues.setIamPolicy`\n",
 	//   "flatPath": "v2beta2/projects/{projectsId}/locations/{locationsId}/queues/{queuesId}:setIamPolicy",
 	//   "httpMethod": "POST",
 	//   "id": "cloudtasks.projects.locations.queues.setIamPolicy",
@@ -4013,6 +4321,7 @@ type ProjectsLocationsQueuesTestIamPermissionsCall struct {
 // UIs and command-line tools, not for authorization checking. This
 // operation
 // may "fail open" without warning.
+//
 func (r *ProjectsLocationsQueuesService) TestIamPermissions(resource string, testiampermissionsrequest *TestIamPermissionsRequest) *ProjectsLocationsQueuesTestIamPermissionsCall {
 	c := &ProjectsLocationsQueuesTestIamPermissionsCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.resource = resource
@@ -4106,7 +4415,7 @@ func (c *ProjectsLocationsQueuesTestIamPermissionsCall) Do(opts ...googleapi.Cal
 	}
 	return ret, nil
 	// {
-	//   "description": "Returns permissions that a caller has on a Queue.\nIf the resource does not exist, this will return an empty set of\npermissions, not a google.rpc.Code.NOT_FOUND error.\n\nNote: This operation is designed to be used for building permission-aware\nUIs and command-line tools, not for authorization checking. This operation\nmay \"fail open\" without warning.",
+	//   "description": "Returns permissions that a caller has on a Queue.\nIf the resource does not exist, this will return an empty set of\npermissions, not a google.rpc.Code.NOT_FOUND error.\n\nNote: This operation is designed to be used for building permission-aware\nUIs and command-line tools, not for authorization checking. This operation\nmay \"fail open\" without warning.\n",
 	//   "flatPath": "v2beta2/projects/{projectsId}/locations/{locationsId}/queues/{queuesId}:testIamPermissions",
 	//   "httpMethod": "POST",
 	//   "id": "cloudtasks.projects.locations.queues.testIamPermissions",
@@ -4446,6 +4755,12 @@ type ProjectsLocationsQueuesTasksCreateCall struct {
 //
 // Tasks cannot be updated after creation; there is no UpdateTask
 // command.
+//
+// * For [App Engine
+// queues](google.cloud.tasks.v2beta2.AppEngineHttpTarget),
+//   the maximum task size is 100KB.
+// * For [pull queues](google.cloud.tasks.v2beta2.PullTarget), this
+//   the maximum task size is 1MB.
 func (r *ProjectsLocationsQueuesTasksService) Create(parent string, createtaskrequest *CreateTaskRequest) *ProjectsLocationsQueuesTasksCreateCall {
 	c := &ProjectsLocationsQueuesTasksCreateCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.parent = parent
@@ -4539,7 +4854,7 @@ func (c *ProjectsLocationsQueuesTasksCreateCall) Do(opts ...googleapi.CallOption
 	}
 	return ret, nil
 	// {
-	//   "description": "Creates a task and adds it to a queue.\n\nTo add multiple tasks at the same time, use\n[HTTP batching](/storage/docs/json_api/v1/how-tos/batch)\nor the batching documentation for your client library, for example\nhttps://developers.google.com/api-client-library/python/guide/batch.\n\nTasks cannot be updated after creation; there is no UpdateTask command.",
+	//   "description": "Creates a task and adds it to a queue.\n\nTo add multiple tasks at the same time, use\n[HTTP batching](/storage/docs/json_api/v1/how-tos/batch)\nor the batching documentation for your client library, for example\nhttps://developers.google.com/api-client-library/python/guide/batch.\n\nTasks cannot be updated after creation; there is no UpdateTask command.\n\n* For [App Engine queues](google.cloud.tasks.v2beta2.AppEngineHttpTarget),\n  the maximum task size is 100KB.\n* For [pull queues](google.cloud.tasks.v2beta2.PullTarget), this\n  the maximum task size is 1MB.",
 	//   "flatPath": "v2beta2/projects/{projectsId}/locations/{locationsId}/queues/{queuesId}/tasks",
 	//   "httpMethod": "POST",
 	//   "id": "cloudtasks.projects.locations.queues.tasks.create",
@@ -4901,9 +5216,9 @@ func (r *ProjectsLocationsQueuesTasksService) List(parent string) *ProjectsLocat
 
 // OrderBy sets the optional parameter "orderBy": Sort order used for
 // the query. The fields supported for sorting
-// are Task.schedule_time and PullTaskTarget.tag. All results will
+// are Task.schedule_time and PullMessage.tag. All results will
 // be
-// returned in ascending order. The default ordering is
+// returned in approximately ascending order. The default ordering is
 // by
 // Task.schedule_time.
 func (c *ProjectsLocationsQueuesTasksListCall) OrderBy(orderBy string) *ProjectsLocationsQueuesTasksListCall {
@@ -5070,7 +5385,7 @@ func (c *ProjectsLocationsQueuesTasksListCall) Do(opts ...googleapi.CallOption) 
 	//   ],
 	//   "parameters": {
 	//     "orderBy": {
-	//       "description": "\nSort order used for the query. The fields supported for sorting\nare Task.schedule_time and PullTaskTarget.tag. All results will be\nreturned in ascending order. The default ordering is by\nTask.schedule_time.",
+	//       "description": "\nSort order used for the query. The fields supported for sorting\nare Task.schedule_time and PullMessage.tag. All results will be\nreturned in approximately ascending order. The default ordering is by\nTask.schedule_time.",
 	//       "location": "query",
 	//       "type": "string"
 	//     },
@@ -5082,7 +5397,6 @@ func (c *ProjectsLocationsQueuesTasksListCall) Do(opts ...googleapi.CallOption) 
 	//     },
 	//     "pageToken": {
 	//       "description": "A token identifying the page of results to return.\n\nTo request the first page results, page_token must be empty. To\nrequest the next page of results, page_token must be the value of\nListTasksResponse.next_page_token returned from the previous\ncall to CloudTasks.ListTasks method.\n\nThe page token is valid for only 2 hours.",
-	//       "format": "byte",
 	//       "location": "query",
 	//       "type": "string"
 	//     },
@@ -5162,6 +5476,14 @@ type ProjectsLocationsQueuesTasksPullCall struct {
 // to perform the work associated with the task. To return the
 // payloads in the PullTasksResponse, set
 // PullTasksRequest.response_view to Task.View.FULL.
+//
+// A maximum of 10 qps of CloudTasks.PullTasks requests are allowed
+// per
+// queue. google.rpc.Code.RESOURCE_EXHAUSTED is returned when this
+// limit
+// is exceeded. google.rpc.Code.RESOURCE_EXHAUSTED is also returned
+// when
+// RateLimits.max_tasks_dispatched_per_second is exceeded.
 func (r *ProjectsLocationsQueuesTasksService) Pull(name string, pulltasksrequest *PullTasksRequest) *ProjectsLocationsQueuesTasksPullCall {
 	c := &ProjectsLocationsQueuesTasksPullCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.name = name
@@ -5255,7 +5577,7 @@ func (c *ProjectsLocationsQueuesTasksPullCall) Do(opts ...googleapi.CallOption) 
 	}
 	return ret, nil
 	// {
-	//   "description": "Pulls tasks from a pull queue and acquires a lease on them for a\nspecified PullTasksRequest.lease_duration.\n\nThis method is invoked by the lease holder to obtain the\nlease. The lease holder must acknowledge the task via\nCloudTasks.AcknowledgeTask after they have performed the work\nassociated with the task.\n\nThe payload is intended to store data that the lease holder needs\nto perform the work associated with the task. To return the\npayloads in the PullTasksResponse, set\nPullTasksRequest.response_view to Task.View.FULL.",
+	//   "description": "Pulls tasks from a pull queue and acquires a lease on them for a\nspecified PullTasksRequest.lease_duration.\n\nThis method is invoked by the lease holder to obtain the\nlease. The lease holder must acknowledge the task via\nCloudTasks.AcknowledgeTask after they have performed the work\nassociated with the task.\n\nThe payload is intended to store data that the lease holder needs\nto perform the work associated with the task. To return the\npayloads in the PullTasksResponse, set\nPullTasksRequest.response_view to Task.View.FULL.\n\nA maximum of 10 qps of CloudTasks.PullTasks requests are allowed per\nqueue. google.rpc.Code.RESOURCE_EXHAUSTED is returned when this limit\nis exceeded. google.rpc.Code.RESOURCE_EXHAUSTED is also returned when\nRateLimits.max_tasks_dispatched_per_second is exceeded.",
 	//   "flatPath": "v2beta2/projects/{projectsId}/locations/{locationsId}/queues/{queuesId}/tasks:pull",
 	//   "httpMethod": "POST",
 	//   "id": "cloudtasks.projects.locations.queues.tasks.pull",
