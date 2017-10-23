@@ -6,13 +6,10 @@ import (
 	"net/http"
 	"time"
 
+	_ "github.com/lib/pq"
+
 	"github.com/acoshift/acourse/pkg/app"
 	"github.com/acoshift/configfile"
-	"github.com/acoshift/gzip"
-	"github.com/acoshift/hsts"
-	"github.com/acoshift/middleware"
-	"github.com/acoshift/redirecthttps"
-	_ "github.com/lib/pq"
 )
 
 func main() {
@@ -46,12 +43,7 @@ func main() {
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "ok")
 	})
-	h := middleware.Chain(
-		redirecthttps.New(redirecthttps.Config{Mode: redirecthttps.OnlyProxy}),
-		hsts.New(hsts.PreloadConfig),
-		gzip.New(gzip.DefaultConfig),
-	)(app.Handler())
-	mux.Handle("/", h)
+	mux.Handle("/", app.Handler())
 
 	// lets reverse proxy handle other settings
 	srv := &http.Server{
