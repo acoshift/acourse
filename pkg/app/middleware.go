@@ -242,6 +242,8 @@ func isCourseOwner(h http.Handler) http.Handler {
 func setHeaders(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set(header.XContentTypeOptions, "nosniff")
+		w.Header().Set(header.XXSSProtection, "1; mode=block")
+		w.Header().Set(header.XFrameOptions, "deny")
 		h.ServeHTTP(w, r)
 	})
 }

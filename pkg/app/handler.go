@@ -8,6 +8,7 @@ import (
 
 	"github.com/acoshift/go-firebase-admin"
 	"github.com/acoshift/header"
+	"github.com/acoshift/middleware"
 	"github.com/acoshift/session"
 	"github.com/asaskevich/govalidator"
 
@@ -51,7 +52,9 @@ func Handler() http.Handler {
 	mux.Handle("/~/", http.StripPrefix("/~", cache(http.FileServer(&fileFS{http.Dir("static")}))))
 	mux.Handle("/favicon.ico", fileHandler("static/favicon.ico"))
 
-	return mux
+	return middleware.Chain(
+		setHeaders,
+	)(mux)
 }
 
 type fileFS struct {
