@@ -7,6 +7,7 @@ import (
 	"html/template"
 	"io/ioutil"
 	"log"
+	"mime"
 	"net/http"
 	"path/filepath"
 	"strings"
@@ -49,6 +50,10 @@ func init() {
 		log.Fatal(err)
 	}
 
+	// add mime types
+	mime.AddExtensionType(".js", "text/javascript")
+
+	// add minifier functions
 	m.AddFunc("text/html", html.Minify)
 	m.AddFunc("text/css", css.Minify)
 	m.AddFunc("text/javascript", js.Minify)
