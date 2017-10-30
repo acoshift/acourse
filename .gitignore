@@ -6,6 +6,6 @@ node_modules/
 static/style.*.css
 static/script.*.js
 private/
-entrypoint
+acourse
 static.yaml
 *.swp

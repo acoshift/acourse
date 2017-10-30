@@ -1,9 +1,9 @@
 FROM acoshift/go-scratch
 
-ADD entrypoint /
+ADD acourse /
 COPY template /template
 COPY static /static
 COPY static.yaml /static.yaml
 EXPOSE 8080
 
-ENTRYPOINT ["/entrypoint"]
+ENTRYPOINT ["/acourse"]

@@ -56,7 +56,7 @@ func main() {
 	}
 
 	go func() {
-		log.Printf("main: start server at %s\n", srv.Addr)
+		log.Printf("acourse: start server at %s\n", srv.Addr)
 		if err := srv.ListenAndServe(); err != http.ErrServerClosed {
 			log.Fatal(err)
 		}
@@ -69,8 +69,8 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil {
-		log.Printf("main: server shutdown error: %v\n", err)
+		log.Printf("acourse: server shutdown error: %v\n", err)
 		return
 	}
-	log.Println("main: server shutdown")
+	log.Println("acourse: server shutdown")
 }

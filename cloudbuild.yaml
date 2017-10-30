@@ -4,7 +4,7 @@ steps:
 - name: 'gcr.io/cloud-builders/npm'
   args: ['run', 'build']
 - name: 'gcr.io/cloud-builders/go'
-  args: ['build', '-o', 'entrypoint', '-a', '-ldflags', '-w -s', 'cmd/acourse/main.go']
+  args: ['build', '-o', 'acourse', '-a', '-ldflags', '-w -s', 'cmd/acourse/main.go']
   env:
   - 'PROJECT_ROOT=github.com/acoshift/acourse'
   - 'GOOS=linux'
@@ -15,9 +15,9 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push', 'gcr.io/$PROJECT_ID/acourse:$COMMIT_SHA']
 - name: 'gcr.io/cloud-builders/kubectl'
-  args: ['set', 'image', 'deploy/acourse', 'acourse=gcr.io/$PROJECT_ID/acourse:$COMMIT_SHA']
+  args: ['set', 'image', 'deploy/$_DEPLOYMENT', 'acourse=gcr.io/$PROJECT_ID/acourse:$COMMIT_SHA']
   env:
-  - 'CLOUDSDK_COMPUTE_ZONE=asia-southeast1-b'
-  - 'CLOUDSDK_CONTAINER_CLUSTER=cluster-sg-1'
+  - 'CLOUDSDK_COMPUTE_ZONE=$_CLOUDSDK_COMPUTE_ZONE'
+  - 'CLOUDSDK_CONTAINER_CLUSTER=$_CLOUDSDK_CONTAINER_CLUSTER'
 images:
 - 'gcr.io/$PROJECT_ID/acourse:$COMMIT_SHA'
