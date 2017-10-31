@@ -249,6 +249,7 @@ func renderWithStatusCode(ctx context.Context, w http.ResponseWriter, code int, 
 	session.Get(ctx, "sess").Flash().Clear()
 	w.Header().Set(header.ContentType, "text/html; charset=utf-8")
 	w.Header().Set(header.CacheControl, "no-cache, no-store, must-revalidate, max-age=0")
+	w.Header().Set(header.XUACompatible, "ie=edge")
 	w.WriteHeader(code)
 	pipe := &bytes.Buffer{}
 	err := t.Execute(pipe, data)
