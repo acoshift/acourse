@@ -9,7 +9,6 @@ import (
 
 	"github.com/acoshift/acourse/pkg/appctx"
 	"github.com/acoshift/acourse/pkg/model"
-	"github.com/acoshift/flash"
 	"github.com/acoshift/header"
 	"github.com/acoshift/session"
 )
@@ -45,7 +44,7 @@ type Page struct {
 	Image string
 	URL   string
 	Me    *model.User
-	Flash flash.Flash
+	Flash url.Values
 	XSRF  template.HTML
 }
 
@@ -59,7 +58,7 @@ var defaultPage = Page{
 func newPage(ctx context.Context) *Page {
 	p := defaultPage
 	p.Me = appctx.GetUser(ctx)
-	p.Flash = session.Get(ctx, "sess").Flash().Clone()
+	p.Flash = session.Get(ctx, "sess").Flash().Values()
 	p.XSRF = template.HTML(`<input type="hidden" name="X" value="` + appctx.GetXSRFToken(ctx) + `">`)
 	return &p
 }

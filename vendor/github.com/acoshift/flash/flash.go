@@ -7,21 +7,24 @@ import (
 )
 
 // Flash type
-type Flash url.Values
+type Flash struct {
+	v       url.Values
+	changed bool
+}
 
 // New creates new flash
-func New() Flash {
-	return make(Flash)
+func New() *Flash {
+	return &Flash{v: make(url.Values)}
 }
 
 // Decode decodes flash data
-func Decode(b []byte) (Flash, error) {
+func Decode(b []byte) (*Flash, error) {
 	f := New()
 	if len(b) == 0 {
 		return f, nil
 	}
 
-	err := gob.NewDecoder(bytes.NewReader(b)).Decode(&f)
+	err := gob.NewDecoder(bytes.NewReader(b)).Decode(&f.v)
 	if err != nil {
 		return nil, err
 	}
@@ -29,14 +32,14 @@ func Decode(b []byte) (Flash, error) {
 }
 
 // Encode encodes flash
-func (f Flash) Encode() ([]byte, error) {
+func (f *Flash) Encode() ([]byte, error) {
 	// empty flash encode to empty bytes
-	if len(f) == 0 {
+	if len(f.v) == 0 {
 		return []byte{}, nil
 	}
 
 	buf := &bytes.Buffer{}
-	err := gob.NewEncoder(buf).Encode(f)
+	err := gob.NewEncoder(buf).Encode(f.v)
 	if err != nil {
 		return nil, err
 	}
@@ -44,47 +47,79 @@ func (f Flash) Encode() ([]byte, error) {
 }
 
 // Set sets value to flash
-func (f Flash) Set(key, value string) {
-	url.Values(f).Set(key, value)
+func (f *Flash) Set(key, value string) {
+	if !f.changed {
+		f.changed = true
+	}
+	f.v.Set(key, value)
 }
 
 // Get gets value from flash
-func (f Flash) Get(key string) string {
-	return url.Values(f).Get(key)
+func (f *Flash) Get(key string) string {
+	return f.v.Get(key)
+}
+
+// Values returns clone of flash's values
+func (f *Flash) Values() url.Values {
+	return cloneValues(f.v)
 }
 
 // Add adds value to flash
-func (f Flash) Add(key, value string) {
-	url.Values(f).Add(key, value)
+func (f *Flash) Add(key, value string) {
+	if !f.changed {
+		f.changed = true
+	}
+	f.v.Add(key, value)
 }
 
 // Del deletes key from flash
-func (f Flash) Del(key string) {
-	url.Values(f).Del(key)
+func (f *Flash) Del(key string) {
+	if !f.Has(key) {
+		return
+	}
+	if !f.changed {
+		f.changed = true
+	}
+	f.v.Del(key)
 }
 
 // Has checks is flash has a given key
-func (f Flash) Has(key string) bool {
-	return len(url.Values(f)[key]) > 0
+func (f *Flash) Has(key string) bool {
+	return len(f.v[key]) > 0
 }
 
 // Clear deletes all data
-func (f Flash) Clear() {
-	v := url.Values(f)
-	for k := range f {
-		v.Del(k)
+func (f *Flash) Clear() {
+	for k := range f.v {
+		if !f.changed {
+			f.changed = true
+		}
+		f.v.Del(k)
 	}
 }
 
+// Count returns count of flash's keys
+func (f *Flash) Count() int {
+	return len(f.v)
+}
+
 // Clone clones flash
-func (f Flash) Clone() Flash {
-	v := url.Values(f)
-	n := make(url.Values, len(v))
-	for k, vv := range v {
+func (f *Flash) Clone() *Flash {
+	return &Flash{v: cloneValues(f.v)}
+}
+
+// Changed returns true if value changed
+func (f *Flash) Changed() bool {
+	return f.changed
+}
+
+func cloneValues(src url.Values) url.Values {
+	n := make(url.Values, len(src))
+	for k, vv := range src {
 		n[k] = make([]string, len(vv))
 		for kk, vvv := range vv {
 			n[k][kk] = vvv
 		}
 	}
-	return Flash(n)
+	return n
 }

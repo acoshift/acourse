@@ -71,6 +71,36 @@ func TestEmptySession(t *testing.T) {
 	assert.Empty(t, cookie, "expected cookie empty")
 }
 
+func TestEmptySessionFlash(t *testing.T) {
+	h := session.Middleware(session.Config{
+		Store: &mockStore{
+			GetFunc: func(key string) ([]byte, error) {
+				assert.Fail(t, "expected get was not called")
+				return nil, nil
+			},
+			SetFunc: func(key string, value []byte, ttl time.Duration) error {
+				assert.Fail(t, "expected set was not called")
+				return nil
+			},
+			DelFunc: func(key string) error {
+				assert.Fail(t, "expected del was not called")
+				return nil
+			},
+		},
+	})(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		s := session.Get(r.Context(), sessName)
+		f := s.Flash()
+		f.Clear()
+		w.Write([]byte("ok"))
+	}))
+
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest(http.MethodGet, "/", nil)
+	h.ServeHTTP(w, r)
+	cookie := w.Header().Get("Set-Cookie")
+	assert.Empty(t, cookie, "expected cookie empty")
+}
+
 func TestSessionSetInStore(t *testing.T) {
 	var (
 		setCalled bool
