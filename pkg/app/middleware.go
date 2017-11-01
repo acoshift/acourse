@@ -244,6 +244,7 @@ func setHeaders(h http.Handler) http.Handler {
 		w.Header().Set(header.XContentTypeOptions, "nosniff")
 		w.Header().Set(header.XXSSProtection, "1; mode=block")
 		w.Header().Set(header.XFrameOptions, "deny")
+		w.Header().Set(header.ContentSecurityPolicy, "img-src https: data:; font-src https: data:; media-src https:;")
 		h.ServeHTTP(w, r)
 	})
 }
