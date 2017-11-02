@@ -2,17 +2,16 @@ package repository
 
 import (
 	"context"
+	"database/sql"
+	"fmt"
 
 	"github.com/lib/pq"
 
 	"github.com/acoshift/acourse/pkg/app"
 )
 
-func (repo) FindUsers(ctx context.Context, userIDs []string) ([]*app.User, error) {
-	db := app.GetDatabase(ctx)
-
-	xs := make([]*app.User, 0, len(userIDs))
-	rows, err := db.QueryContext(ctx, `
+const (
+	selectUsers = `
 		select
 			users.id,
 			users.name,
@@ -26,15 +25,66 @@ func (repo) FindUsers(ctx context.Context, userIDs []string) ([]*app.User, error
 			roles.instructor
 		from users
 			left join roles on users.id = roles.user_id
+	`
+
+	queryGetUsers = selectUsers + `
+		where users.id = any($1)
+	`
+
+	queryGetUser = selectUsers + `
 		where users.id = $1
-	`, pq.Array(userIDs))
+	`
+
+	queryGetUserFromUsername = selectUsers + `
+		where users.username = $1
+	`
+
+	queryListUsers = selectUsers + `
+		order by users.created_at desc
+		limit $1 offset $2
+	`
+)
+
+// SaveUser saves user
+func (repo) SaveUser(ctx context.Context, x *app.User) error {
+	db := app.GetDatabase(ctx)
+
+	if len(x.ID) == 0 {
+		return fmt.Errorf("invalid id")
+	}
+	_, err := db.ExecContext(ctx, `
+		upsert into users
+			(id, name, username, about_me, image, updated_at)
+		values
+			($1, $2, $3, $4, $5, now())
+	`, x.ID, x.Name, x.Username, x.AboutMe, x.Image)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func scanUser(scan scanFunc, x *app.User) error {
+	err := scan(&x.ID, &x.Name, &x.Username, &x.Email, &x.AboutMe, &x.Image, &x.CreatedAt, &x.UpdatedAt, &x.Role.Admin, &x.Role.Instructor)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// GetUsers gets users
+func (repo) GetUsers(ctx context.Context, userIDs []string) ([]*app.User, error) {
+	db := app.GetDatabase(ctx)
+
+	xs := make([]*app.User, 0, len(userIDs))
+	rows, err := db.QueryContext(ctx, queryGetUsers, pq.Array(userIDs))
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var x app.User
-		err = rows.Scan(&x.ID, &x.Name, &x.Username, &x.Email, &x.AboutMe, &x.Image, &x.CreatedAt, &x.UpdatedAt, &x.Role.Admin, &x.Role.Instructor)
+		err = scanUser(rows.Scan, &x)
 		if err != nil {
 			return nil, err
 		}
@@ -44,4 +94,67 @@ func (repo) FindUsers(ctx context.Context, userIDs []string) ([]*app.User, error
 		return nil, err
 	}
 	return xs, nil
+}
+
+// GetUser gets user from id
+func (repo) GetUser(ctx context.Context, userID string) (*app.User, error) {
+	db := app.GetDatabase(ctx)
+
+	var x app.User
+	err := scanUser(db.QueryRowContext(ctx, queryGetUser, userID).Scan, &x)
+	if err == sql.ErrNoRows {
+		return nil, app.ErrNotFound
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &x, nil
+}
+
+// GetUserFromUsername gets user from username
+func (repo) GetUserFromUsername(ctx context.Context, username string) (*app.User, error) {
+	db := app.GetDatabase(ctx)
+
+	var x app.User
+	err := scanUser(db.QueryRowContext(ctx, queryGetUserFromUsername, username).Scan, &x)
+	if err != nil {
+		return nil, err
+	}
+	return &x, nil
+}
+
+// ListUsers lists users
+func (repo) ListUsers(ctx context.Context, limit, offset int64) ([]*app.User, error) {
+	db := app.GetDatabase(ctx)
+
+	xs := make([]*app.User, 0)
+	rows, err := db.QueryContext(ctx, queryListUsers, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var x app.User
+		err = scanUser(rows.Scan, &x)
+		if err != nil {
+			return nil, err
+		}
+		xs = append(xs, &x)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+	return xs, nil
+}
+
+// CountUsers counts users
+func (repo) CountUsers(ctx context.Context) (int64, error) {
+	db := app.GetDatabase(ctx)
+
+	var cnt int64
+	err := db.QueryRowContext(ctx, `select count(*) from users`).Scan(&cnt)
+	if err != nil {
+		return 0, err
+	}
+	return cnt, nil
 }

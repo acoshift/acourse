@@ -10,3 +10,5 @@ func New() app.Repository {
 }
 
 type repo struct{}
+
+type scanFunc func(...interface{}) error

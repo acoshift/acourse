@@ -1,4 +1,4 @@
-package model
+package repository
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 )
 
 // GetAssignments gets assignments
-func GetAssignments(ctx context.Context, courseID string) ([]*app.Assignment, error) {
+func (repo) GetAssignments(ctx context.Context, courseID string) ([]*app.Assignment, error) {
 	db := app.GetDatabase(ctx)
 
 	rows, err := db.QueryContext(ctx, `

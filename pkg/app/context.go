@@ -45,12 +45,44 @@ func GetCourseURL(ctx context.Context) string {
 	return x
 }
 
+// DB type
+type DB interface {
+	ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error)
+	QueryContext(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error)
+	QueryRowContext(ctx context.Context, query string, args ...interface{}) *sql.Row
+}
+
+// Tx type
+type Tx interface {
+	Rollback() error
+	Commit() error
+}
+
 // WithDatabase creates new context with database connection
 func WithDatabase(ctx context.Context, v *sql.DB) context.Context {
 	return context.WithValue(ctx, dbKey{}, v)
 }
 
 // GetDatabase gets database connection from context or panic
-func GetDatabase(ctx context.Context) *sql.DB {
-	return ctx.Value(dbKey{}).(*sql.DB)
+func GetDatabase(ctx context.Context) DB {
+	return ctx.Value(dbKey{}).(DB)
+}
+
+// WithTransaction creates new context with transaction
+func WithTransaction(ctx context.Context) (context.Context, Tx) {
+	db := ctx.Value(dbKey{}).(*sql.DB)
+	tx, err := db.BeginTx(ctx, nil)
+	if err != nil {
+		panic(err)
+	}
+	return context.WithValue(ctx, dbKey{}, tx), tx
+}
+
+// GetTransaction gets database but panic if db is not transaction
+func GetTransaction(ctx context.Context) DB {
+	x := ctx.Value(dbKey{})
+	if _, ok := x.(Tx); !ok {
+		panic("database is not transaction")
+	}
+	return x.(DB)
 }

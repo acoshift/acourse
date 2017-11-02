@@ -1,12 +1,16 @@
-package model
+package repository
 
 import (
 	"context"
 	"database/sql"
+
+	"github.com/acoshift/acourse/pkg/app"
 )
 
 // Enroll an user to a course
-func Enroll(ctx context.Context, db DB, userID string, courseID string) error {
+func (repo) Enroll(ctx context.Context, userID string, courseID string) error {
+	db := app.GetDatabase(ctx)
+
 	_, err := db.ExecContext(ctx, `
 		insert into enrolls
 			(user_id, course_id)
@@ -20,7 +24,9 @@ func Enroll(ctx context.Context, db DB, userID string, courseID string) error {
 }
 
 // IsEnrolled returns true if user enrolled a given course
-func IsEnrolled(ctx context.Context, db DB, userID string, courseID string) (bool, error) {
+func (repo) IsEnrolled(ctx context.Context, userID string, courseID string) (bool, error) {
+	db := app.GetDatabase(ctx)
+
 	var p int
 	err := db.QueryRowContext(ctx, `select 1 from enrolls where user_id = $1 and course_id = $2`, userID, courseID).Scan(&p)
 	if err == sql.ErrNoRows {
