@@ -64,7 +64,7 @@ var (
 	staticConf = make(map[string]string)
 )
 
-type templateStruct struct {
+type tmpl struct {
 	*template.Template
 	set []string
 }
@@ -99,7 +99,7 @@ func joinTemplateDir(files []string) []string {
 	return r
 }
 
-func parse(set ...string) *templateStruct {
+func parse(set ...string) *tmpl {
 	templateName := strings.TrimSuffix(set[0], ".tmpl")
 	t := template.New("")
 	t.Funcs(template.FuncMap{
@@ -228,17 +228,22 @@ func parse(set ...string) *templateStruct {
 	if t == nil {
 		log.Fatalf("view: root template not found in %s", templateName)
 	}
-	return &templateStruct{
+	return &tmpl{
 		Template: t,
 		set:      set,
 	}
 }
 
-func renderWithStatusCode(ctx context.Context, w http.ResponseWriter, code int, t *templateStruct, data interface{}) {
+func renderWithStatusCode(ctx context.Context, w http.ResponseWriter, code int, t *tmpl, data interface{}) {
 	if dev {
+		// reload template for dev env
 		t = parse(t.set...)
 	}
+
+	// clear flash after render
 	session.Get(ctx, "sess").Flash().Clear()
+
+	// set header for html
 	w.Header().Set(header.ContentType, "text/html; charset=utf-8")
 	w.Header().Set(header.CacheControl, "no-cache, no-store, must-revalidate, max-age=0")
 	w.Header().Set(header.XUACompatible, "ie=edge")
@@ -258,6 +263,6 @@ func renderWithStatusCode(ctx context.Context, w http.ResponseWriter, code int, 
 	}
 }
 
-func render(ctx context.Context, w http.ResponseWriter, t *templateStruct, data interface{}) {
+func render(ctx context.Context, w http.ResponseWriter, t *tmpl, data interface{}) {
 	renderWithStatusCode(ctx, w, http.StatusOK, t, data)
 }
