@@ -4,7 +4,9 @@ import (
 	"net/http"
 	"time"
 
+	"cloud.google.com/go/storage"
 	"github.com/acoshift/go-firebase-admin"
+	"github.com/garyburd/redigo/redis"
 	"gopkg.in/gomail.v2"
 
 	"github.com/acoshift/acourse/pkg/app"
@@ -16,14 +18,18 @@ func New() app.Controller {
 }
 
 type ctrl struct {
-	repo        app.Repository
-	view        app.View
-	firAuth     firebase.Auth
-	loc         *time.Location
-	slackURL    string
-	emailFrom   string
-	emailDialer *gomail.Dialer
-	baseURL     string
+	repo         app.Repository
+	view         app.View
+	firAuth      firebase.Auth
+	loc          *time.Location
+	slackURL     string
+	emailFrom    string
+	emailDialer  *gomail.Dialer
+	baseURL      string
+	cachePool    *redis.Pool
+	cachePrefix  string
+	bucketHandle *storage.BucketHandle
+	bucketName   string
 }
 
 func back(w http.ResponseWriter, r *http.Request) {

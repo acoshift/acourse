@@ -5,9 +5,10 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/acoshift/acourse/pkg/app"
 	"github.com/acoshift/header"
 	"github.com/asaskevich/govalidator"
+
+	"github.com/acoshift/acourse/pkg/app"
 )
 
 func (c *ctrl) Profile(w http.ResponseWriter, r *http.Request) {
@@ -68,7 +69,7 @@ func (c *ctrl) postProfileEdit(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		imageURL, err = UploadProfileImage(ctx, image)
+		imageURL, err = c.uploadProfileImage(ctx, image)
 		if err != nil {
 			f.Add("Errors", err.Error())
 			back(w, r)
@@ -102,15 +103,17 @@ func (c *ctrl) postProfileEdit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tx, err := db.BeginTx(ctx, nil)
+	ctx, tx, err := app.WithTransaction(ctx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	defer tx.Rollback()
 
+	db := app.GetDatabase(ctx)
+
 	if len(imageURL) > 0 {
-		_, err = tx.Exec(`
+		_, err = db.ExecContext(ctx, `
 			update users
 			set image = $2
 			where id = $1
@@ -120,7 +123,7 @@ func (c *ctrl) postProfileEdit(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	_, err = tx.Exec(`
+	_, err = db.ExecContext(ctx, `
 		update users
 		set
 			username = $2,

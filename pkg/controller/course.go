@@ -16,7 +16,7 @@ import (
 	"github.com/acoshift/acourse/pkg/app"
 )
 
-func (c *ctrl) courseView(w http.ResponseWriter, r *http.Request) {
+func (c *ctrl) CourseView(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	user := app.GetUser(ctx)
 	link := app.GetCourseURL(ctx)
@@ -97,7 +97,7 @@ func (c *ctrl) courseView(w http.ResponseWriter, r *http.Request) {
 	c.view.Course(w, r, x, enrolled, owned, pendingEnroll)
 }
 
-func (c *ctrl) courseContent(w http.ResponseWriter, r *http.Request) {
+func (c *ctrl) CourseContent(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	user := app.GetUser(ctx)
 	link := app.GetCourseURL(ctx)
@@ -171,7 +171,7 @@ func (c *ctrl) courseContent(w http.ResponseWriter, r *http.Request) {
 	c.view.CourseContent(w, r, x, content)
 }
 
-func (c *ctrl) editorCreate(w http.ResponseWriter, r *http.Request) {
+func (c *ctrl) EditorCreate(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		c.postEditorCreate(w, r)
 		return
@@ -220,7 +220,7 @@ func (c *ctrl) postEditorCreate(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		imageURL, err = UploadCourseCoverImage(ctx, image)
+		imageURL, err = c.uploadCourseCoverImage(ctx, image)
 		if err != nil {
 			f.Add("Errors", err.Error())
 			back(w, r)
@@ -274,7 +274,7 @@ func (c *ctrl) postEditorCreate(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/course/"+link.String, http.StatusFound)
 }
 
-func (c *ctrl) editorCourse(w http.ResponseWriter, r *http.Request) {
+func (c *ctrl) EditorCourse(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	if r.Method == http.MethodPost {
 		c.postEditorCourse(w, r)
@@ -332,7 +332,7 @@ func (c *ctrl) postEditorCourse(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		imageURL, err = UploadCourseCoverImage(ctx, image)
+		imageURL, err = c.uploadCourseCoverImage(ctx, image)
 		if err != nil {
 			f.Add("Errors", err.Error())
 			back(w, r)
@@ -402,7 +402,7 @@ func (c *ctrl) postEditorCourse(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/course/"+link.String, http.StatusSeeOther)
 }
 
-func (c *ctrl) editorContent(w http.ResponseWriter, r *http.Request) {
+func (c *ctrl) EditorContent(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	id := r.FormValue("id")
 
@@ -438,7 +438,7 @@ func (c *ctrl) editorContent(w http.ResponseWriter, r *http.Request) {
 	c.view.EditorContent(w, r, course)
 }
 
-func (c *ctrl) courseEnroll(w http.ResponseWriter, r *http.Request) {
+func (c *ctrl) CourseEnroll(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		c.postCourseEnroll(w, r)
 		return
@@ -594,7 +594,7 @@ func (c *ctrl) postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		imageURL, err = UploadPaymentImage(ctx, image)
+		imageURL, err = c.uploadPaymentImage(ctx, image)
 		if err != nil {
 			f.Add("Errors", err.Error())
 			back(w, r)
@@ -650,7 +650,7 @@ func (c *ctrl) postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/course/"+link, http.StatusFound)
 }
 
-func (c *ctrl) courseAssignment(w http.ResponseWriter, r *http.Request) {
+func (c *ctrl) CourseAssignment(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	user := app.GetUser(ctx)
 	link := app.GetCourseURL(ctx)
@@ -706,7 +706,7 @@ func (c *ctrl) courseAssignment(w http.ResponseWriter, r *http.Request) {
 	c.view.Assignment(w, r, x, assignments)
 }
 
-func (c *ctrl) editorContentCreate(w http.ResponseWriter, r *http.Request) {
+func (c *ctrl) EditorContentCreate(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	id := r.FormValue("id")
 

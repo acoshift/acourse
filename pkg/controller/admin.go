@@ -274,7 +274,7 @@ https://acourse.io
 	http.Redirect(w, r, "/admin/payments/pending", http.StatusSeeOther)
 }
 
-func (c *ctrl) adminPendingPayments(w http.ResponseWriter, r *http.Request) {
+func (c *ctrl) AdminPendingPayments(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		c.postAdminPendingPayment(w, r)
 		return
@@ -282,6 +282,6 @@ func (c *ctrl) adminPendingPayments(w http.ResponseWriter, r *http.Request) {
 	c.adminPayments(w, r, c.repo.ListPendingPayments, c.repo.CountPendingPayments)
 }
 
-func (c *ctrl) adminHistoryPayments(w http.ResponseWriter, r *http.Request) {
+func (c *ctrl) AdminHistoryPayments(w http.ResponseWriter, r *http.Request) {
 	c.adminPayments(w, r, c.repo.ListHistoryPayments, c.repo.CountHistoryPayments)
 }

@@ -12,11 +12,11 @@ import (
 )
 
 // Upload upload files
-func Upload(ctx context.Context, r io.Reader, filename string) error {
+func (c *ctrl) upload(ctx context.Context, r io.Reader, filename string) error {
 	if len(filename) == 0 {
 		return fmt.Errorf("invalid filename")
 	}
-	obj := bucketHandle.Object(filename)
+	obj := c.bucketHandle.Object(filename)
 	writer := obj.NewWriter(ctx)
 	defer writer.Close()
 	writer.CacheControl = "public, max-age=31536000"
@@ -31,20 +31,20 @@ func generateFilename() string {
 	return "upload/" + uuid.New().String()
 }
 
-func generateDownloadURL(filename string) string {
-	return fmt.Sprintf("https://storage.googleapis.com/%s/%s", bucketName, filename)
+func (c *ctrl) generateDownloadURL(filename string) string {
+	return fmt.Sprintf("https://storage.googleapis.com/%s/%s", c.bucketName, filename)
 }
 
 // UploadPaymentImage uploads payment image
-func UploadPaymentImage(ctx context.Context, r io.Reader) (string, error) {
+func (c *ctrl) uploadPaymentImage(ctx context.Context, r io.Reader) (string, error) {
 	buf := &bytes.Buffer{}
 	err := resizeEncode(buf, r, 700, 0, 60)
 	if err != nil {
 		return "", err
 	}
 	filename := generateFilename() + ".jpg"
-	downloadURL := generateDownloadURL(filename)
-	err = Upload(ctx, buf, filename)
+	downloadURL := c.generateDownloadURL(filename)
+	err = c.upload(ctx, buf, filename)
 	if err != nil {
 		return "", err
 	}
@@ -52,15 +52,15 @@ func UploadPaymentImage(ctx context.Context, r io.Reader) (string, error) {
 }
 
 // UploadProfileImage uploads profile image and return url
-func UploadProfileImage(ctx context.Context, r io.Reader) (string, error) {
+func (c *ctrl) uploadProfileImage(ctx context.Context, r io.Reader) (string, error) {
 	buf := &bytes.Buffer{}
 	err := resizeCropEncode(buf, r, 500, 500, 90)
 	if err != nil {
 		return "", err
 	}
 	filename := generateFilename() + ".jpg"
-	downloadURL := generateDownloadURL(filename)
-	err = Upload(ctx, buf, filename)
+	downloadURL := c.generateDownloadURL(filename)
+	err = c.upload(ctx, buf, filename)
 	if err != nil {
 		return "", err
 	}
@@ -69,7 +69,7 @@ func UploadProfileImage(ctx context.Context, r io.Reader) (string, error) {
 
 // UploadProfileFromURLAsync copies data from given url and upload profile in background,
 // returns url of destination file
-func UploadProfileFromURLAsync(url string) string {
+func (c *ctrl) uploadProfileFromURLAsync(url string) string {
 	if len(url) == 0 {
 		return ""
 	}
@@ -96,24 +96,24 @@ func UploadProfileFromURLAsync(url string) string {
 		cancel()
 		ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
-		err = Upload(ctx, buf, filename)
+		err = c.upload(ctx, buf, filename)
 		if err != nil {
 			return
 		}
 	}()
-	return generateDownloadURL(filename)
+	return c.generateDownloadURL(filename)
 }
 
 // UploadCourseCoverImage uploads course cover image
-func UploadCourseCoverImage(ctx context.Context, r io.Reader) (string, error) {
+func (c *ctrl) uploadCourseCoverImage(ctx context.Context, r io.Reader) (string, error) {
 	buf := &bytes.Buffer{}
 	err := resizeEncode(buf, r, 1200, 0, 90)
 	if err != nil {
 		return "", err
 	}
 	filename := generateFilename() + ".jpg"
-	downloadURL := generateDownloadURL(filename)
-	err = Upload(ctx, buf, filename)
+	downloadURL := c.generateDownloadURL(filename)
+	err = c.upload(ctx, buf, filename)
 	if err != nil {
 		return "", err
 	}

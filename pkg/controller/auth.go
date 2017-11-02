@@ -20,7 +20,7 @@ func generateSessionID() string {
 	return base64.RawURLEncoding.EncodeToString(b)
 }
 
-func (c *ctrl) signIn(w http.ResponseWriter, r *http.Request) {
+func (c *ctrl) SignIn(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		c.postSignIn(w, r)
 		return
@@ -88,7 +88,7 @@ var allowProvider = map[string]bool{
 	"github.com":   true,
 }
 
-func (c *ctrl) openID(w http.ResponseWriter, r *http.Request) {
+func (c *ctrl) OpenID(w http.ResponseWriter, r *http.Request) {
 	p := r.FormValue("p")
 	if !allowProvider[p] {
 		http.Error(w, "provider not allowed", http.StatusBadRequest)
@@ -131,7 +131,7 @@ func (c *ctrl) OpenIDCallback(w http.ResponseWriter, r *http.Request) {
 	err = db.QueryRowContext(ctx, `select 1 from users where id = $1`, user.UserID).Scan(&cnt)
 	if err == sql.ErrNoRows {
 		// user not found, insert new user
-		imageURL := UploadProfileFromURLAsync(user.PhotoURL)
+		imageURL := c.uploadProfileFromURLAsync(user.PhotoURL)
 		_, err = db.ExecContext(ctx, `
 			insert into users
 				(id, name, username, email, image)
@@ -158,7 +158,7 @@ func (c *ctrl) OpenIDCallback(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-func (c *ctrl) signUp(w http.ResponseWriter, r *http.Request) {
+func (c *ctrl) SignUp(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		c.postSignUp(w, r)
 		return
