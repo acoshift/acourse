@@ -7,10 +7,11 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/acoshift/acourse/pkg/appctx"
-	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/header"
 	"github.com/acoshift/session"
+
+	"github.com/acoshift/acourse/pkg/appctx"
+	"github.com/acoshift/acourse/pkg/model"
 )
 
 type (

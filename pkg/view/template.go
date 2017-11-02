@@ -14,10 +14,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/acoshift/session"
-
-	"github.com/acoshift/acourse/pkg/model"
 	"github.com/acoshift/header"
+	"github.com/acoshift/session"
 	"github.com/dustin/go-humanize"
 	"github.com/microcosm-cc/bluemonday"
 	"github.com/russross/blackfriday"
@@ -26,6 +24,8 @@ import (
 	"github.com/tdewolff/minify/html"
 	"github.com/tdewolff/minify/js"
 	"gopkg.in/yaml.v2"
+
+	"github.com/acoshift/acourse/pkg/model"
 )
 
 const templateDir = "template"

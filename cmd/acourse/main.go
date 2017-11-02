@@ -10,10 +10,10 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/acoshift/configfile"
 	_ "github.com/lib/pq"
 
 	"github.com/acoshift/acourse/pkg/app"
-	"github.com/acoshift/configfile"
 )
 
 func main() {
