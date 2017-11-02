@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"path/filepath"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/acoshift/header"
@@ -61,7 +60,6 @@ const templateDir = "template"
 
 var (
 	m          = minify.New()
-	muExecute  = &sync.Mutex{}
 	loc        *time.Location
 	staticConf = make(map[string]string)
 )
@@ -238,8 +236,6 @@ func parse(set ...string) *templateStruct {
 
 func renderWithStatusCode(ctx context.Context, w http.ResponseWriter, code int, t *templateStruct, data interface{}) {
 	if dev {
-		muExecute.Lock()
-		defer muExecute.Unlock()
 		t = parse(t.set...)
 	}
 	session.Get(ctx, "sess").Flash().Clear()
