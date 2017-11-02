@@ -3,7 +3,6 @@ package view
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"html/template"
 	"io/ioutil"
 	"log"
@@ -28,12 +27,41 @@ import (
 	"github.com/acoshift/acourse/pkg/model"
 )
 
+// templates
+var (
+	tmplIndex         = parse("index.tmpl", "app.tmpl", "layout.tmpl", "component/course-card.tmpl")
+	tmplNotFound      = parse("not-found.tmpl", "app.tmpl", "layout.tmpl")
+	tmplSignIn        = parse("signin.tmpl", "auth.tmpl", "layout.tmpl")
+	tmplSignUp        = parse("signup.tmpl", "auth.tmpl", "layout.tmpl")
+	tmplResetPassword = parse("reset-password.tmpl", "auth.tmpl", "layout.tmpl")
+	tmplProfile       = parse(
+		"profile.tmpl", "app.tmpl", "layout.tmpl",
+		"component/user-profile.tmpl",
+		"component/own-course-card.tmpl",
+		"component/enrolled-course-card.tmpl",
+	)
+	tmplProfileEdit = parse("profile-edit.tmpl", "app.tmpl", "layout.tmpl")
+	// tmplUser                = parse()
+	tmplCourse              = parse("course.tmpl", "app.tmpl", "layout.tmpl")
+	tmplCourseContent       = parse("course-content.tmpl", "app.tmpl", "layout.tmpl")
+	tmplCourseEnroll        = parse("enroll.tmpl", "app.tmpl", "layout.tmpl")
+	tmplAssignment          = parse("assignment.tmpl", "app.tmpl", "layout.tmpl")
+	tmplEditorCreate        = parse("editor/create.tmpl", "app.tmpl", "layout.tmpl")
+	tmplEditorCourse        = parse("editor/course.tmpl", "app.tmpl", "layout.tmpl")
+	tmplEditorContent       = parse("editor/content.tmpl", "app.tmpl", "layout.tmpl")
+	tmplEditorContentCreate = parse("editor/content-create.tmpl", "app.tmpl", "layout.tmpl")
+	tmplEditorContentEdit   = parse("editor/content-edit.tmpl", "app.tmpl", "layout.tmpl")
+	tmplAdminUsers          = parse("admin/users.tmpl", "app.tmpl", "layout.tmpl")
+	tmplAdminCourses        = parse("admin/courses.tmpl", "app.tmpl", "layout.tmpl")
+	tmplAdminPayments       = parse("admin/payments.tmpl", "app.tmpl", "layout.tmpl")
+	tmplAdminPaymentReject  = parse("admin/payment-reject.tmpl", "app.tmpl", "layout.tmpl")
+)
+
 const templateDir = "template"
 
 var (
 	m          = minify.New()
 	muExecute  = &sync.Mutex{}
-	templates  = make(map[interface{}]*templateStruct)
 	loc        *time.Location
 	staticConf = make(map[string]string)
 )
@@ -63,32 +91,6 @@ func init() {
 		bs, _ := ioutil.ReadFile("static.yaml")
 		yaml.Unmarshal(bs, &staticConf)
 	}
-
-	parseTemplate(keyIndex{}, []string{"index.tmpl", "app.tmpl", "layout.tmpl", "component/course-card.tmpl"})
-	parseTemplate(keySignIn{}, []string{"signin.tmpl", "auth.tmpl", "layout.tmpl"})
-	parseTemplate(keySignUp{}, []string{"signup.tmpl", "auth.tmpl", "layout.tmpl"})
-	parseTemplate(keyResetPassword{}, []string{"reset-password.tmpl", "auth.tmpl", "layout.tmpl"})
-	parseTemplate(keyProfile{}, []string{
-		"profile.tmpl", "app.tmpl", "layout.tmpl",
-		"component/user-profile.tmpl",
-		"component/own-course-card.tmpl",
-		"component/enrolled-course-card.tmpl",
-	})
-	parseTemplate(keyProfileEdit{}, []string{"profile-edit.tmpl", "app.tmpl", "layout.tmpl"})
-	parseTemplate(keyCourse{}, []string{"course.tmpl", "app.tmpl", "layout.tmpl"})
-	parseTemplate(keyCourseContent{}, []string{"course-content.tmpl", "app.tmpl", "layout.tmpl"})
-	parseTemplate(keyAssignment{}, []string{"assignment.tmpl", "app.tmpl", "layout.tmpl"})
-	parseTemplate(keyCourseEnroll{}, []string{"enroll.tmpl", "app.tmpl", "layout.tmpl"})
-	parseTemplate(keyEditorCreate{}, []string{"editor/create.tmpl", "app.tmpl", "layout.tmpl"})
-	parseTemplate(keyEditorCourse{}, []string{"editor/course.tmpl", "app.tmpl", "layout.tmpl"})
-	parseTemplate(keyEditorContent{}, []string{"editor/content.tmpl", "app.tmpl", "layout.tmpl"})
-	parseTemplate(keyEditorContentCreate{}, []string{"editor/content-create.tmpl", "app.tmpl", "layout.tmpl"})
-	parseTemplate(keyEditorContentEdit{}, []string{"editor/content-edit.tmpl", "app.tmpl", "layout.tmpl"})
-	parseTemplate(keyAdminUsers{}, []string{"admin/users.tmpl", "app.tmpl", "layout.tmpl"})
-	parseTemplate(keyAdminCourses{}, []string{"admin/courses.tmpl", "app.tmpl", "layout.tmpl"})
-	parseTemplate(keyAdminPayments{}, []string{"admin/payments.tmpl", "app.tmpl", "layout.tmpl"})
-	parseTemplate(keyAdminPaymentReject{}, []string{"admin/payment-reject.tmpl", "app.tmpl", "layout.tmpl"})
-	parseTemplate(keyNotFound{}, []string{"not-found.tmpl", "app.tmpl", "layout.tmpl"})
 }
 
 func joinTemplateDir(files []string) []string {
@@ -99,7 +101,7 @@ func joinTemplateDir(files []string) []string {
 	return r
 }
 
-func parseTemplate(key interface{}, set []string) {
+func parse(set ...string) *templateStruct {
 	templateName := strings.TrimSuffix(set[0], ".tmpl")
 	t := template.New("")
 	t.Funcs(template.FuncMap{
@@ -228,23 +230,17 @@ func parseTemplate(key interface{}, set []string) {
 	if t == nil {
 		log.Fatalf("view: root template not found in %s", templateName)
 	}
-	templates[key] = &templateStruct{
+	return &templateStruct{
 		Template: t,
 		set:      set,
 	}
 }
 
-func renderWithStatusCode(ctx context.Context, w http.ResponseWriter, code int, key, data interface{}) {
-	t := templates[key]
-	if t == nil {
-		http.Error(w, fmt.Sprintf("template not found"), http.StatusInternalServerError)
-		return
-	}
+func renderWithStatusCode(ctx context.Context, w http.ResponseWriter, code int, t *templateStruct, data interface{}) {
 	if dev {
 		muExecute.Lock()
 		defer muExecute.Unlock()
-		parseTemplate(key, t.set)
-		t = templates[key]
+		t = parse(t.set...)
 	}
 	session.Get(ctx, "sess").Flash().Clear()
 	w.Header().Set(header.ContentType, "text/html; charset=utf-8")
@@ -264,6 +260,6 @@ func renderWithStatusCode(ctx context.Context, w http.ResponseWriter, code int, 
 	}
 }
 
-func render(ctx context.Context, w http.ResponseWriter, key, data interface{}) {
-	renderWithStatusCode(ctx, w, http.StatusOK, key, data)
+func render(ctx context.Context, w http.ResponseWriter, t *templateStruct, data interface{}) {
+	renderWithStatusCode(ctx, w, http.StatusOK, t, data)
 }

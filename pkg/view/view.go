@@ -14,30 +14,6 @@ import (
 	"github.com/acoshift/acourse/pkg/model"
 )
 
-type (
-	keyIndex               struct{}
-	keyNotFound            struct{}
-	keySignIn              struct{}
-	keySignUp              struct{}
-	keyResetPassword       struct{}
-	keyProfile             struct{}
-	keyProfileEdit         struct{}
-	keyUser                struct{}
-	keyCourse              struct{}
-	keyCourseContent       struct{}
-	keyAssignment          struct{}
-	keyEditorCreate        struct{}
-	keyEditorCourse        struct{}
-	keyEditorContent       struct{}
-	keyEditorContentCreate struct{}
-	keyEditorContentEdit   struct{}
-	keyCourseEnroll        struct{}
-	keyAdminUsers          struct{}
-	keyAdminCourses        struct{}
-	keyAdminPayments       struct{}
-	keyAdminPaymentReject  struct{}
-)
-
 // Page type provides layout data like title, description, and og
 type Page struct {
 	Title string
@@ -71,7 +47,7 @@ func Index(w http.ResponseWriter, r *http.Request, courses []*model.Course) {
 		*Page
 		Courses []*model.Course
 	}{newPage(ctx), courses}
-	render(ctx, w, keyIndex{}, &data)
+	render(ctx, w, tmplIndex, &data)
 }
 
 var notFoundImages = []string{
@@ -90,7 +66,7 @@ func NotFound(w http.ResponseWriter, r *http.Request) {
 	}{page}
 
 	w.Header().Set(header.XContentTypeOptions, "nosniff")
-	renderWithStatusCode(ctx, w, http.StatusNotFound, keyNotFound{}, &data)
+	renderWithStatusCode(ctx, w, http.StatusNotFound, tmplNotFound, &data)
 }
 
 // SignIn renders signin view
@@ -99,7 +75,7 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 	data := struct {
 		*Page
 	}{newPage(ctx)}
-	render(ctx, w, keySignIn{}, &data)
+	render(ctx, w, tmplSignIn, &data)
 }
 
 // SignUp renders signup view
@@ -108,7 +84,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	data := struct {
 		*Page
 	}{newPage(ctx)}
-	render(ctx, w, keySignUp{}, &data)
+	render(ctx, w, tmplSignUp, &data)
 }
 
 // ResetPassword render reset password view
@@ -118,7 +94,7 @@ func ResetPassword(w http.ResponseWriter, r *http.Request) {
 	data := struct {
 		*Page
 	}{page}
-	render(ctx, w, keyResetPassword{}, &data)
+	render(ctx, w, tmplResetPassword, &data)
 }
 
 // Profile renders profile view
@@ -133,7 +109,7 @@ func Profile(w http.ResponseWriter, r *http.Request, ownCourses, enrolledCourses
 		OwnCourses      []*model.Course
 		EnrolledCourses []*model.Course
 	}{page, ownCourses, enrolledCourses}
-	render(ctx, w, keyProfile{}, &data)
+	render(ctx, w, tmplProfile, &data)
 }
 
 // ProfileEdit renders profile edit view
@@ -146,7 +122,7 @@ func ProfileEdit(w http.ResponseWriter, r *http.Request) {
 	data := struct {
 		*Page
 	}{page}
-	render(ctx, w, keyProfileEdit{}, &data)
+	render(ctx, w, tmplProfileEdit, &data)
 }
 
 // Course renders course view
@@ -165,7 +141,7 @@ func Course(w http.ResponseWriter, r *http.Request, course *model.Course, enroll
 		Owned         bool
 		PendingEnroll bool
 	}{page, course, enrolled, owned, pendingEnroll}
-	render(ctx, w, keyCourse{}, &data)
+	render(ctx, w, tmplCourse, &data)
 }
 
 // CourseContent renders course content view
@@ -181,7 +157,7 @@ func CourseContent(w http.ResponseWriter, r *http.Request, course *model.Course,
 		Course  *model.Course
 		Content *model.CourseContent
 	}{page, course, content}
-	render(ctx, w, keyCourseContent{}, &data)
+	render(ctx, w, tmplCourseContent, &data)
 }
 
 // EditorCreate renders course create view
@@ -192,7 +168,7 @@ func EditorCreate(w http.ResponseWriter, r *http.Request) {
 	data := struct {
 		*Page
 	}{page}
-	render(ctx, w, keyEditorCreate{}, &data)
+	render(ctx, w, tmplEditorCreate, &data)
 }
 
 // EditorCourse renders course edit view
@@ -204,7 +180,7 @@ func EditorCourse(w http.ResponseWriter, r *http.Request, course *model.Course) 
 		*Page
 		Course *model.Course
 	}{page, course}
-	render(ctx, w, keyEditorCourse{}, &data)
+	render(ctx, w, tmplEditorCourse, &data)
 }
 
 // EditorContent renders editor content view
@@ -216,7 +192,7 @@ func EditorContent(w http.ResponseWriter, r *http.Request, course *model.Course)
 		*Page
 		Course *model.Course
 	}{page, course}
-	render(ctx, w, keyEditorContent{}, &data)
+	render(ctx, w, tmplEditorContent, &data)
 }
 
 // EditorContentCreate renders editor content create view
@@ -228,7 +204,7 @@ func EditorContentCreate(w http.ResponseWriter, r *http.Request, course *model.C
 		*Page
 		Course *model.Course
 	}{page, course}
-	render(ctx, w, keyEditorContentCreate{}, &data)
+	render(ctx, w, tmplEditorContentCreate, &data)
 }
 
 // EditorContentEdit renders editor content edit view
@@ -241,7 +217,7 @@ func EditorContentEdit(w http.ResponseWriter, r *http.Request, course *model.Cou
 		Course  *model.Course
 		Content *model.CourseContent
 	}{page, course, content}
-	render(ctx, w, keyEditorContentEdit{}, &data)
+	render(ctx, w, tmplEditorContentEdit, &data)
 }
 
 // CourseEnroll renders course enroll view
@@ -257,7 +233,7 @@ func CourseEnroll(w http.ResponseWriter, r *http.Request, course *model.Course) 
 		*Page
 		Course *model.Course
 	}{page, course}
-	render(ctx, w, keyCourseEnroll{}, &data)
+	render(ctx, w, tmplCourseEnroll, &data)
 }
 
 // Assignment render assignment view
@@ -274,7 +250,7 @@ func Assignment(w http.ResponseWriter, r *http.Request, course *model.Course, as
 		Course      *model.Course
 		Assignments []*model.Assignment
 	}{page, course, assignments}
-	render(ctx, w, keyAssignment{}, &data)
+	render(ctx, w, tmplAssignment, &data)
 }
 
 // AdminUsers renders admin users view
@@ -288,7 +264,7 @@ func AdminUsers(w http.ResponseWriter, r *http.Request, users []*model.User, cur
 		CurrentPage int
 		TotalPage   int
 	}{page, users, currentPage, totalPage}
-	render(ctx, w, keyAdminUsers{}, &data)
+	render(ctx, w, tmplAdminUsers, &data)
 }
 
 // AdminCourses renders admin courses view
@@ -302,7 +278,7 @@ func AdminCourses(w http.ResponseWriter, r *http.Request, courses []*model.Cours
 		CurrentPage int
 		TotalPage   int
 	}{page, courses, currentPage, totalPage}
-	render(ctx, w, keyAdminCourses{}, &data)
+	render(ctx, w, tmplAdminCourses, &data)
 }
 
 // AdminPayments renders admin payments view
@@ -316,7 +292,7 @@ func AdminPayments(w http.ResponseWriter, r *http.Request, payments []*model.Pay
 		CurrentPage int
 		TotalPage   int
 	}{page, payments, currentPage, totalPage}
-	render(ctx, w, keyAdminPayments{}, &data)
+	render(ctx, w, tmplAdminPayments, &data)
 }
 
 // AdminPaymentReject renders admin payment reject view
@@ -329,5 +305,5 @@ func AdminPaymentReject(w http.ResponseWriter, r *http.Request, payment *model.P
 		Payment *model.Payment
 		Message string
 	}{page, payment, message}
-	render(ctx, w, keyAdminPaymentReject{}, &data)
+	render(ctx, w, tmplAdminPaymentReject, &data)
 }
