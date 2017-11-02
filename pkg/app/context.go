@@ -3,6 +3,8 @@ package app
 import (
 	"context"
 	"database/sql"
+
+	"github.com/acoshift/session"
 )
 
 type (
@@ -45,6 +47,11 @@ func GetCourseURL(ctx context.Context) string {
 	return x
 }
 
+// GetSession gets session from context
+func GetSession(ctx context.Context) *session.Session {
+	return session.Get(ctx, sessName)
+}
+
 // DB type
 type DB interface {
 	ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error)
@@ -69,13 +76,13 @@ func GetDatabase(ctx context.Context) DB {
 }
 
 // WithTransaction creates new context with transaction
-func WithTransaction(ctx context.Context) (context.Context, Tx) {
+func WithTransaction(ctx context.Context) (context.Context, Tx, error) {
 	db := ctx.Value(dbKey{}).(*sql.DB)
 	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
-		panic(err)
+		return nil, nil, err
 	}
-	return context.WithValue(ctx, dbKey{}, tx), tx
+	return context.WithValue(ctx, dbKey{}, tx), tx, nil
 }
 
 // GetTransaction gets database but panic if db is not transaction

@@ -7,7 +7,6 @@ import (
 
 	"github.com/acoshift/acourse/pkg/app"
 	"github.com/acoshift/header"
-	"github.com/acoshift/session"
 	"github.com/asaskevich/govalidator"
 )
 
@@ -36,7 +35,7 @@ func (c *ctrl) ProfileEdit(w http.ResponseWriter, r *http.Request) {
 	}
 	ctx := r.Context()
 	user := app.GetUser(ctx)
-	f := session.Get(ctx, sessName).Flash()
+	f := app.GetSession(ctx).Flash()
 	if !f.Has("Username") {
 		f.Set("Username", user.Username)
 	}
@@ -52,7 +51,7 @@ func (c *ctrl) ProfileEdit(w http.ResponseWriter, r *http.Request) {
 func (c *ctrl) postProfileEdit(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	user := app.GetUser(ctx)
-	f := session.Get(ctx, sessName).Flash()
+	f := app.GetSession(ctx).Flash()
 
 	image, info, err := r.FormFile("Image")
 	var imageURL string

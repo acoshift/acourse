@@ -158,3 +158,27 @@ func (repo) CountUsers(ctx context.Context) (int64, error) {
 	}
 	return cnt, nil
 }
+
+func (repo) IsUserExists(ctx context.Context, id string) (bool, error) {
+	db := app.GetDatabase(ctx)
+
+	var cnt int64
+	err := db.QueryRowContext(ctx, `select count(*) from users where id = $1`, id).Scan(&cnt)
+	if err != nil {
+		return false, err
+	}
+	return cnt > 0, nil
+}
+
+func (repo) CreateUser(ctx context.Context, x *app.User) error {
+	db := app.GetDatabase(ctx)
+
+	_, err := db.ExecContext(ctx,
+		`insert into users (id, username, name, email) values ($1, $2, $3, $4)`,
+		x.ID, x.ID, "", x.Email,
+	)
+	if err != nil {
+		return err
+	}
+	return nil
+}

@@ -1,15 +1,24 @@
 package controller
 
 import (
+	"crypto/rand"
 	"database/sql"
+	"encoding/base64"
+	"io"
 	"net/http"
 	"unicode/utf8"
 
-	"github.com/acoshift/acourse/pkg/app"
 	"github.com/acoshift/go-firebase-admin"
-	"github.com/acoshift/session"
 	"github.com/asaskevich/govalidator"
+
+	"github.com/acoshift/acourse/pkg/app"
 )
+
+func generateSessionID() string {
+	b := make([]byte, 24)
+	io.ReadFull(rand.Reader, b)
+	return base64.RawURLEncoding.EncodeToString(b)
+}
 
 func (c *ctrl) signIn(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
@@ -21,7 +30,7 @@ func (c *ctrl) signIn(w http.ResponseWriter, r *http.Request) {
 
 func (c *ctrl) postSignIn(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	f := session.Get(ctx, sessName).Flash()
+	f := app.GetSession(ctx).Flash()
 
 	email := r.FormValue("Email")
 	if len(email) == 0 {
@@ -44,17 +53,24 @@ func (c *ctrl) postSignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s := session.Get(ctx, sessName)
+	s := app.GetSession(ctx)
 	app.SetUserID(s, userID)
 	s.Rotate()
 
 	// if user not found in our database, insert new user
 	// this happend when database out of sync with firebase authentication
 	{
-		var id string
-		err = db.QueryRowContext(ctx, `select id from users where id = $1`, userID).Scan(&id)
-		if err == sql.ErrNoRows {
-			db.ExecContext(ctx, `insert into users (id, username, name, email) values ($1, $2, $3, $4)`, userID, userID, "", email)
+		ok, err := c.repo.IsUserExists(ctx, userID)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		if !ok {
+			err = c.repo.CreateUser(ctx, &app.User{ID: userID, Email: sql.NullString{String: email, Valid: len(email) > 0}})
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
 		}
 	}
 
@@ -81,41 +97,42 @@ func (c *ctrl) openID(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
 	sessID := generateSessionID()
-	redirectURL, err := firAuth.CreateAuthURI(ctx, p, baseURL+"/openid/callback", sessID)
+	redirectURL, err := c.firAuth.CreateAuthURI(ctx, p, c.baseURL+"/openid/callback", sessID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	s := session.Get(ctx, sessName)
-	s.Set(keyOpenIDSessionID, sessID)
+	s := app.GetSession(ctx)
+	app.SetOpenIDSessionID(s, sessID)
 	http.Redirect(w, r, redirectURL, http.StatusSeeOther)
 }
 
-func openIDCallback(w http.ResponseWriter, r *http.Request) {
+func (c *ctrl) OpenIDCallback(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	s := session.Get(ctx, sessName)
-	sessID, _ := s.Get(keyOpenIDSessionID).(string)
-	s.Del(keyOpenIDSessionID)
-	user, err := firAuth.VerifyAuthCallbackURI(ctx, baseURL+r.RequestURI, sessID)
+	s := app.GetSession(ctx)
+	sessID := app.GetOpenIDSessionID(s)
+	app.DelOpenIDSessionID(s)
+	user, err := c.firAuth.VerifyAuthCallbackURI(ctx, c.baseURL+r.RequestURI, sessID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	tx, err := db.BeginTx(ctx, nil)
+	ctx, tx, err := app.WithTransaction(ctx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	defer tx.Rollback()
 
+	db := app.GetTransaction(ctx)
 	// check is user sign up
 	var cnt int64
-	err = tx.QueryRow(`select 1 from users where id = $1`, user.UserID).Scan(&cnt)
+	err = db.QueryRowContext(ctx, `select 1 from users where id = $1`, user.UserID).Scan(&cnt)
 	if err == sql.ErrNoRows {
 		// user not found, insert new user
 		imageURL := UploadProfileFromURLAsync(user.PhotoURL)
-		_, err = tx.Exec(`
+		_, err = db.ExecContext(ctx, `
 			insert into users
 				(id, name, username, email, image)
 			values
@@ -143,15 +160,15 @@ func openIDCallback(w http.ResponseWriter, r *http.Request) {
 
 func (c *ctrl) signUp(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
-		postSignUp(w, r)
+		c.postSignUp(w, r)
 		return
 	}
 	c.view.SignUp(w, r)
 }
 
-func postSignUp(w http.ResponseWriter, r *http.Request) {
+func (c *ctrl) postSignUp(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	f := session.Get(ctx, sessName).Flash()
+	f := app.GetSession(ctx).Flash()
 
 	email := r.FormValue("Email")
 	if len(email) == 0 {
@@ -176,7 +193,7 @@ func postSignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID, err := firAuth.CreateUser(ctx, &firebase.User{
+	userID, err := c.firAuth.CreateUser(ctx, &firebase.User{
 		Email:    email,
 		Password: pass,
 	})
@@ -186,6 +203,7 @@ func postSignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	db := app.GetDatabase(ctx)
 	_, err = db.ExecContext(ctx, `
 		insert into users
 			(id, username, name, email)
@@ -197,7 +215,7 @@ func postSignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s := session.Get(ctx, sessName)
+	s := app.GetSession(ctx)
 	app.SetUserID(s, userID)
 
 	rURL := r.FormValue("r")
@@ -208,25 +226,24 @@ func postSignUp(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, rURL, http.StatusSeeOther)
 }
 
-func (c *ctrl) signOut(w http.ResponseWriter, r *http.Request) {
-	s := session.Get(r.Context(), sessName)
-	s.Destroy()
+func (c *ctrl) SignOut(w http.ResponseWriter, r *http.Request) {
+	app.GetSession(r.Context()).Destroy()
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-func (c *ctrl) resetPassword(w http.ResponseWriter, r *http.Request) {
+func (c *ctrl) ResetPassword(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		defer back(w, r)
 		ctx := r.Context()
-		f := session.Get(ctx, sessName).Flash()
+		f := app.GetSession(ctx).Flash()
 		f.Set("OK", "1")
 		email := r.FormValue("email")
-		user, err := firAuth.GetUserByEmail(ctx, email)
+		user, err := c.firAuth.GetUserByEmail(ctx, email)
 		if err != nil {
 			// don't send any error back to user
 			return
 		}
-		firAuth.SendPasswordResetEmail(ctx, user.Email)
+		c.firAuth.SendPasswordResetEmail(ctx, user.Email)
 		return
 	}
 	c.view.ResetPassword(w, r)

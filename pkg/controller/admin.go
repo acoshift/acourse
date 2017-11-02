@@ -8,7 +8,6 @@ import (
 	"strconv"
 
 	"github.com/acoshift/acourse/pkg/app"
-	"github.com/acoshift/acourse/pkg/view"
 )
 
 func (c *ctrl) AdminUsers(w http.ResponseWriter, r *http.Request) {
@@ -38,7 +37,7 @@ func (c *ctrl) AdminUsers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	view.AdminUsers(w, r, users, int(page), int(totalPage))
+	c.view.AdminUsers(w, r, users, int(page), int(totalPage))
 }
 
 func (c *ctrl) AdminCourses(w http.ResponseWriter, r *http.Request) {
@@ -68,10 +67,10 @@ func (c *ctrl) AdminCourses(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	view.AdminCourses(w, r, courses, int(page), int(totalPage))
+	c.view.AdminCourses(w, r, courses, int(page), int(totalPage))
 }
 
-func (c *ctrl) AdminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter func(context.Context, int64, int64) ([]*app.Payment, error), paymentsCounter func(context.Context) (int64, error)) {
+func (c *ctrl) adminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter func(context.Context, int64, int64) ([]*app.Payment, error), paymentsCounter func(context.Context) (int64, error)) {
 	ctx := r.Context()
 	page, _ := strconv.ParseInt(r.FormValue("page"), 10, 64)
 	if page <= 0 {
@@ -98,7 +97,7 @@ func (c *ctrl) AdminPayments(w http.ResponseWriter, r *http.Request, paymentsGet
 		return
 	}
 
-	view.AdminPayments(w, r, payments, int(page), int(totalPage))
+	c.view.AdminPayments(w, r, payments, int(page), int(totalPage))
 }
 
 func (c *ctrl) AdminRejectPayment(w http.ResponseWriter, r *http.Request) {
@@ -148,11 +147,11 @@ func (c *ctrl) AdminRejectPayment(w http.ResponseWriter, r *http.Request) {
 `,
 		name,
 		x.Course.Title,
-		x.CreatedAt.In(loc).Format("02/01/2006 15:04:05"),
+		x.CreatedAt.In(c.loc).Format("02/01/2006 15:04:05"),
 		x.Course.Link(),
 	)
 
-	view.AdminPaymentReject(w, r, x, message)
+	c.view.AdminPaymentReject(w, r, x, message)
 }
 
 func (c *ctrl) postAdminRejectPayment(w http.ResponseWriter, r *http.Request) {
@@ -179,7 +178,7 @@ func (c *ctrl) postAdminRejectPayment(w http.ResponseWriter, r *http.Request) {
 			}
 			body := markdown(message)
 			title := fmt.Sprintf("คำขอเพื่อเรียนหลักสูตร %s ได้รับการปฏิเสธ", x.Course.Title)
-			sendEmail(x.User.Email.String, title, body)
+			c.sendEmail(x.User.Email.String, title, body)
 		}()
 	}
 
@@ -192,18 +191,19 @@ func (c *ctrl) postAdminPendingPayment(w http.ResponseWriter, r *http.Request) {
 
 	id := r.FormValue("ID")
 	if action == "accept" {
-		tx, err := db.BeginTx(ctx, nil)
+		txctx, tx, err := app.WithTransaction(ctx)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		defer tx.Rollback()
-		x, err := c.repo.GetPayment(ctx, id)
+
+		x, err := c.repo.GetPayment(txctx, id)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		err = c.repo.AcceptPayment(ctx, x)
+		err = c.repo.AcceptPayment(txctx, x)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -260,14 +260,14 @@ https://acourse.io
 					x.ID,
 					x.Course.Title,
 					x.Price,
-					x.CreatedAt.In(loc).Format("02/01/2006 15:04:05"),
-					x.At.Time.In(loc).Format("02/01/2006 15:04:05"),
+					x.CreatedAt.In(c.loc).Format("02/01/2006 15:04:05"),
+					x.At.Time.In(c.loc).Format("02/01/2006 15:04:05"),
 					name,
 					x.User.Email.String,
 				))
 
 				title := fmt.Sprintf("ยืนยันการชำระเงิน หลักสูตร %s", x.Course.Title)
-				sendEmail(x.User.Email.String, title, body)
+				c.sendEmail(x.User.Email.String, title, body)
 			}()
 		}
 	}

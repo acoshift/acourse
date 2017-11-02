@@ -15,6 +15,8 @@ type Repository interface {
 	GetUserFromUsername(ctx context.Context, username string) (*User, error)
 	ListUsers(ctx context.Context, limit, offset int64) ([]*User, error)
 	CountUsers(ctx context.Context) (int64, error)
+	IsUserExists(ctx context.Context, id string) (bool, error)
+	CreateUser(ctx context.Context, x *User) error
 
 	// Course
 	SaveCourse(ctx context.Context, x *Course) error

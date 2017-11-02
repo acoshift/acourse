@@ -28,6 +28,11 @@ func SetOpenIDSessionID(sess *session.Session, openIDSessionID string) {
 	sess.Set(keyOpenIDSessionID, openIDSessionID)
 }
 
+// DelOpenIDSessionID deletes open id session id from session
+func DelOpenIDSessionID(sess *session.Session) {
+	sess.Del(keyOpenIDSessionID)
+}
+
 // GetOpenIDSessionID gets open id session id from session
 func GetOpenIDSessionID(sess *session.Session) string {
 	id, _ := sess.Get(keyOpenIDSessionID).(string)

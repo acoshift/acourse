@@ -3,6 +3,7 @@ package app
 import (
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/acoshift/header"
 	"github.com/acoshift/middleware"
@@ -39,7 +40,7 @@ func Handler() http.Handler {
 	main.Handle("/reset/password", mustNotSignedIn(http.HandlerFunc(ctrl.ResetPassword)))
 	main.Handle("/profile", mustSignedIn(http.HandlerFunc(ctrl.Profile)))
 	main.Handle("/profile/edit", mustSignedIn(http.HandlerFunc(ctrl.ProfileEdit)))
-	main.Handle("/course/", http.StripPrefix("/course/", http.HandlerFunc(ctrl.Course)))
+	main.Handle("/course/", http.StripPrefix("/course/", http.HandlerFunc(course)))
 	main.Handle("/admin/", http.StripPrefix("/admin", onlyAdmin(admin)))
 	main.Handle("/editor/", http.StripPrefix("/editor", editor))
 
@@ -82,4 +83,26 @@ func fileHandler(name string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, name)
 	})
+}
+
+func course(w http.ResponseWriter, r *http.Request) {
+	s := strings.SplitN(r.URL.Path, "/", 2)
+	var p string
+	if len(s) > 1 {
+		p = strings.TrimSuffix(s[1], "/")
+	}
+
+	r = r.WithContext(WithCourseURL(r.Context(), s[0]))
+	switch p {
+	case "":
+		ctrl.CourseView(w, r)
+	case "content":
+		mustSignedIn(http.HandlerFunc(ctrl.CourseContent)).ServeHTTP(w, r)
+	case "enroll":
+		mustSignedIn(http.HandlerFunc(ctrl.CourseEnroll)).ServeHTTP(w, r)
+	case "assignment":
+		mustSignedIn(http.HandlerFunc(ctrl.CourseAssignment)).ServeHTTP(w, r)
+	default:
+		view.NotFound(w, r)
+	}
 }

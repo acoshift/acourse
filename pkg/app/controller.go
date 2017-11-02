@@ -16,7 +16,10 @@ type Controller interface {
 	ResetPassword(w http.ResponseWriter, r *http.Request)
 
 	// Course
-	Course(w http.ResponseWriter, r *http.Request)
+	CourseView(w http.ResponseWriter, r *http.Request)
+	CourseContent(w http.ResponseWriter, r *http.Request)
+	CourseEnroll(w http.ResponseWriter, r *http.Request)
+	CourseAssignment(w http.ResponseWriter, r *http.Request)
 
 	// Admin
 	AdminUsers(w http.ResponseWriter, r *http.Request)
