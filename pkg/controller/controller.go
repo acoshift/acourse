@@ -13,14 +13,43 @@ import (
 )
 
 // New creates new app's controller
-func New() app.Controller {
-	return &ctrl{}
+func New(config Config) app.Controller {
+	return &ctrl{
+		repo:         config.Repository,
+		view:         config.View,
+		auth:         config.Auth,
+		loc:          config.loc,
+		slackURL:     config.SlackURL,
+		emailFrom:    config.EmailFrom,
+		emailDialer:  config.EmailDialer,
+		baseURL:      config.BaseURL,
+		cachePool:    config.CachePool,
+		cachePrefix:  config.CachePrefix,
+		bucketHandle: config.BucketHandle,
+		bucketName:   config.BucketName,
+	}
+}
+
+// Config is the controller config
+type Config struct {
+	Repository   app.Repository
+	View         app.View
+	Auth         firebase.Auth
+	loc          *time.Location
+	SlackURL     string
+	EmailFrom    string
+	EmailDialer  *gomail.Dialer
+	BaseURL      string
+	CachePool    *redis.Pool
+	CachePrefix  string
+	BucketHandle *storage.BucketHandle
+	BucketName   string
 }
 
 type ctrl struct {
 	repo         app.Repository
 	view         app.View
-	firAuth      firebase.Auth
+	auth         firebase.Auth
 	loc          *time.Location
 	slackURL     string
 	emailFrom    string

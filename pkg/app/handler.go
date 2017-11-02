@@ -6,52 +6,7 @@ import (
 	"strings"
 
 	"github.com/acoshift/header"
-	"github.com/acoshift/middleware"
 )
-
-// TODO: fixme
-var ctrl Controller
-
-// Handler returns app's handlers
-func Handler() http.Handler {
-	mux := http.NewServeMux()
-
-	editor := http.NewServeMux()
-	editor.Handle("/create", onlyInstructor(http.HandlerFunc(ctrl.EditorCreate)))
-	editor.Handle("/course", isCourseOwner(http.HandlerFunc(ctrl.EditorCourse)))
-	editor.Handle("/content", isCourseOwner(http.HandlerFunc(ctrl.EditorContent)))
-	editor.Handle("/content/create", isCourseOwner(http.HandlerFunc(ctrl.EditorContentCreate)))
-	editor.Handle("/content/edit", http.HandlerFunc(ctrl.EditorContentEdit))
-
-	admin := http.NewServeMux()
-	admin.Handle("/users", http.HandlerFunc(ctrl.AdminUsers))
-	admin.Handle("/courses", http.HandlerFunc(ctrl.AdminCourses))
-	admin.Handle("/payments/pending", http.HandlerFunc(ctrl.AdminPendingPayments))
-	admin.Handle("/payments/history", http.HandlerFunc(ctrl.AdminHistoryPayments))
-	admin.Handle("/payments/reject", http.HandlerFunc(ctrl.AdminRejectPayment))
-
-	main := http.NewServeMux()
-	main.Handle("/", http.HandlerFunc(ctrl.Index))
-	main.Handle("/signin", mustNotSignedIn(http.HandlerFunc(ctrl.SignIn)))
-	main.Handle("/openid", mustNotSignedIn(http.HandlerFunc(ctrl.OpenID)))
-	main.Handle("/openid/callback", mustNotSignedIn(http.HandlerFunc(ctrl.OpenIDCallback)))
-	main.Handle("/signup", mustNotSignedIn(http.HandlerFunc(ctrl.SignUp)))
-	main.Handle("/signout", http.HandlerFunc(ctrl.SignOut))
-	main.Handle("/reset/password", mustNotSignedIn(http.HandlerFunc(ctrl.ResetPassword)))
-	main.Handle("/profile", mustSignedIn(http.HandlerFunc(ctrl.Profile)))
-	main.Handle("/profile/edit", mustSignedIn(http.HandlerFunc(ctrl.ProfileEdit)))
-	main.Handle("/course/", http.StripPrefix("/course/", http.HandlerFunc(course)))
-	main.Handle("/admin/", http.StripPrefix("/admin", onlyAdmin(admin)))
-	main.Handle("/editor/", http.StripPrefix("/editor", editor))
-
-	mux.Handle("/", Middleware(main))
-	mux.Handle("/~/", http.StripPrefix("/~", cache(http.FileServer(&fileFS{http.Dir("static")}))))
-	mux.Handle("/favicon.ico", fileHandler("static/favicon.ico"))
-
-	return middleware.Chain(
-		setHeaders,
-	)(mux)
-}
 
 type fileFS struct {
 	http.FileSystem
@@ -85,24 +40,26 @@ func fileHandler(name string) http.Handler {
 	})
 }
 
-func course(w http.ResponseWriter, r *http.Request) {
-	s := strings.SplitN(r.URL.Path, "/", 2)
-	var p string
-	if len(s) > 1 {
-		p = strings.TrimSuffix(s[1], "/")
-	}
+func courseHandler(ctrl Controller, view View) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		s := strings.SplitN(r.URL.Path, "/", 2)
+		var p string
+		if len(s) > 1 {
+			p = strings.TrimSuffix(s[1], "/")
+		}
 
-	r = r.WithContext(WithCourseURL(r.Context(), s[0]))
-	switch p {
-	case "":
-		ctrl.CourseView(w, r)
-	case "content":
-		mustSignedIn(http.HandlerFunc(ctrl.CourseContent)).ServeHTTP(w, r)
-	case "enroll":
-		mustSignedIn(http.HandlerFunc(ctrl.CourseEnroll)).ServeHTTP(w, r)
-	case "assignment":
-		mustSignedIn(http.HandlerFunc(ctrl.CourseAssignment)).ServeHTTP(w, r)
-	default:
-		view.NotFound(w, r)
-	}
+		r = r.WithContext(WithCourseURL(r.Context(), s[0]))
+		switch p {
+		case "":
+			ctrl.CourseView(w, r)
+		case "content":
+			mustSignedIn(http.HandlerFunc(ctrl.CourseContent)).ServeHTTP(w, r)
+		case "enroll":
+			mustSignedIn(http.HandlerFunc(ctrl.CourseEnroll)).ServeHTTP(w, r)
+		case "assignment":
+			mustSignedIn(http.HandlerFunc(ctrl.CourseAssignment)).ServeHTTP(w, r)
+		default:
+			view.NotFound(w, r)
+		}
+	})
 }

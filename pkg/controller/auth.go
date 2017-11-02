@@ -46,7 +46,7 @@ func (c *ctrl) postSignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID, err := c.firAuth.VerifyPassword(ctx, email, pass)
+	userID, err := c.auth.VerifyPassword(ctx, email, pass)
 	if err != nil {
 		f.Add("Errors", err.Error())
 		back(w, r)
@@ -97,7 +97,7 @@ func (c *ctrl) OpenID(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
 	sessID := generateSessionID()
-	redirectURL, err := c.firAuth.CreateAuthURI(ctx, p, c.baseURL+"/openid/callback", sessID)
+	redirectURL, err := c.auth.CreateAuthURI(ctx, p, c.baseURL+"/openid/callback", sessID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -112,7 +112,7 @@ func (c *ctrl) OpenIDCallback(w http.ResponseWriter, r *http.Request) {
 	s := app.GetSession(ctx)
 	sessID := app.GetOpenIDSessionID(s)
 	app.DelOpenIDSessionID(s)
-	user, err := c.firAuth.VerifyAuthCallbackURI(ctx, c.baseURL+r.RequestURI, sessID)
+	user, err := c.auth.VerifyAuthCallbackURI(ctx, c.baseURL+r.RequestURI, sessID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -193,7 +193,7 @@ func (c *ctrl) postSignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID, err := c.firAuth.CreateUser(ctx, &firebase.User{
+	userID, err := c.auth.CreateUser(ctx, &firebase.User{
 		Email:    email,
 		Password: pass,
 	})
@@ -238,12 +238,12 @@ func (c *ctrl) ResetPassword(w http.ResponseWriter, r *http.Request) {
 		f := app.GetSession(ctx).Flash()
 		f.Set("OK", "1")
 		email := r.FormValue("email")
-		user, err := c.firAuth.GetUserByEmail(ctx, email)
+		user, err := c.auth.GetUserByEmail(ctx, email)
 		if err != nil {
 			// don't send any error back to user
 			return
 		}
-		c.firAuth.SendPasswordResetEmail(ctx, user.Email)
+		c.auth.SendPasswordResetEmail(ctx, user.Email)
 		return
 	}
 	c.view.ResetPassword(w, r)

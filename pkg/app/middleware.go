@@ -5,85 +5,16 @@ import (
 	"net/http"
 	"net/url"
 	"runtime/debug"
-	"time"
 
-	"github.com/acoshift/cachestatic"
 	"github.com/acoshift/header"
 	"github.com/acoshift/middleware"
-	"github.com/acoshift/servertiming"
 	"github.com/acoshift/session"
-	redisstore "github.com/acoshift/session/store/redis"
-	"github.com/garyburd/redigo/redis"
 	"golang.org/x/net/xsrftoken"
 )
 
-var view View // TODO: fixme
-
-const sessName = "sess"
-
-// Middleware wraps handlers with app's middleware
-func Middleware(h http.Handler) http.Handler {
-	cacheInvalidator := make(chan interface{})
-
-	go func() {
-		for {
-			time.Sleep(15 * time.Second)
-			cacheInvalidator <- cachestatic.InvalidateAll
-		}
-	}()
-
-	return middleware.Chain(
-		servertiming.Middleware(),
-		panicLogger,
-		session.Middleware(session.Config{
-			Secret:   sessionSecret,
-			Path:     "/",
-			MaxAge:   5 * 24 * time.Hour,
-			HTTPOnly: true,
-			Secure:   session.PreferSecure,
-			Store: redisstore.New(redisstore.Config{
-				Prefix: redisPrefix,
-				Pool: &redis.Pool{
-					MaxIdle:     5,
-					IdleTimeout: 5 * time.Minute,
-					Dial: func() (redis.Conn, error) {
-						return redis.Dial("tcp", redisAddr, redis.DialPassword(redisPass))
-					},
-					TestOnBorrow: func(c redis.Conn, t time.Time) error {
-						if time.Since(t) > time.Minute {
-							return nil
-						}
-						_, err := c.Do("PING")
-						return err
-					},
-				},
-			}),
-		}),
-		cachestatic.New(cachestatic.Config{
-			Skipper: func(r *http.Request) bool {
-				// cache only get
-				if r.Method != http.MethodGet {
-					return true
-				}
-
-				// skip if signed in
-				s := session.Get(r.Context(), sessName)
-				if x := GetUserID(s); len(x) > 0 {
-					return true
-				}
-
-				// cache only index
-				if r.URL.Path == "/" {
-					return false
-				}
-				return true
-			},
-			Invalidator: cacheInvalidator,
-		}),
-		setDatabase,
-		fetchUser,
-		csrf,
-	)(h)
+// Middleware is the app's middleware
+func Middleware() middleware.Middleware {
+	return middleware.Chain()
 }
 
 func panicLogger(h http.Handler) http.Handler {
@@ -107,33 +38,35 @@ func panicLogger(h http.Handler) http.Handler {
 	})
 }
 
-func csrf(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var id string
-		if u := GetUser(r.Context()); u != nil {
-			id = u.ID
-		}
-		if r.Method == http.MethodPost {
-			origin := r.Header.Get(header.Origin)
-			if len(origin) > 0 {
-				if origin != baseURL {
-					http.Error(w, "Not allow cross-site post", http.StatusBadRequest)
+func csrf(baseURL, xsrfSecret string) middleware.Middleware {
+	return func(h http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			var id string
+			if u := GetUser(r.Context()); u != nil {
+				id = u.ID
+			}
+			if r.Method == http.MethodPost {
+				origin := r.Header.Get(header.Origin)
+				if len(origin) > 0 {
+					if origin != baseURL {
+						http.Error(w, "Not allow cross-site post", http.StatusBadRequest)
+						return
+					}
+				}
+
+				x := r.FormValue("X")
+				if !xsrftoken.Valid(x, xsrfSecret, id, r.URL.Path) {
+					http.Error(w, "invalid xsrf token, go back, refresh and try again...", http.StatusBadRequest)
 					return
 				}
-			}
-
-			x := r.FormValue("X")
-			if !xsrftoken.Valid(x, xsrfSecret, id, r.URL.Path) {
-				http.Error(w, "invalid xsrf token, go back, refresh and try again...", http.StatusBadRequest)
+				h.ServeHTTP(w, r)
 				return
 			}
-			h.ServeHTTP(w, r)
-			return
-		}
-		token := xsrftoken.Generate(xsrfSecret, id, r.URL.Path)
-		ctx := WithXSRFToken(r.Context(), token)
-		h.ServeHTTP(w, r.WithContext(ctx))
-	})
+			token := xsrftoken.Generate(xsrfSecret, id, r.URL.Path)
+			ctx := WithXSRFToken(r.Context(), token)
+			h.ServeHTTP(w, r.WithContext(ctx))
+		})
+	}
 }
 
 func mustSignedIn(h http.Handler) http.Handler {
@@ -160,23 +93,25 @@ func mustNotSignedIn(h http.Handler) http.Handler {
 	})
 }
 
-func fetchUser(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-		s := session.Get(ctx, sessName)
-		id := GetUserID(s)
-		if len(id) > 0 {
-			u, err := repo.GetUser(ctx, id)
-			if err == ErrNotFound {
-				u = &User{
-					ID:       id,
-					Username: id,
+func fetchUser(repo Repository) middleware.Middleware {
+	return func(h http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ctx := r.Context()
+			s := session.Get(ctx, sessName)
+			id := GetUserID(s)
+			if len(id) > 0 {
+				u, err := repo.GetUser(ctx, id)
+				if err == ErrNotFound {
+					u = &User{
+						ID:       id,
+						Username: id,
+					}
 				}
+				r = r.WithContext(WithUser(ctx, u))
 			}
-			r = r.WithContext(WithUser(ctx, u))
-		}
-		h.ServeHTTP(w, r)
-	})
+			h.ServeHTTP(w, r)
+		})
+	}
 }
 
 func onlyAdmin(h http.Handler) http.Handler {
@@ -209,33 +144,35 @@ func onlyInstructor(h http.Handler) http.Handler {
 	})
 }
 
-func isCourseOwner(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-		u := GetUser(ctx)
-		if u == nil {
-			http.Redirect(w, r, "/signin", http.StatusFound)
-			return
-		}
+func isCourseOwner(db *sql.DB, view View) middleware.Middleware {
+	return func(h http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ctx := r.Context()
+			u := GetUser(ctx)
+			if u == nil {
+				http.Redirect(w, r, "/signin", http.StatusFound)
+				return
+			}
 
-		id := r.FormValue("id")
+			id := r.FormValue("id")
 
-		var ownerID string
-		err := db.QueryRowContext(ctx, `select user_id from courses where id = $1`, id).Scan(&ownerID)
-		if err == sql.ErrNoRows {
-			view.NotFound(w, r)
-			return
-		}
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		if ownerID != u.ID {
-			http.Redirect(w, r, "/", http.StatusFound)
-			return
-		}
-		h.ServeHTTP(w, r)
-	})
+			var ownerID string
+			err := db.QueryRowContext(ctx, `select user_id from courses where id = $1`, id).Scan(&ownerID)
+			if err == sql.ErrNoRows {
+				view.NotFound(w, r)
+				return
+			}
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			if ownerID != u.ID {
+				http.Redirect(w, r, "/", http.StatusFound)
+				return
+			}
+			h.ServeHTTP(w, r)
+		})
+	}
 }
 
 func setHeaders(h http.Handler) http.Handler {
@@ -248,10 +185,12 @@ func setHeaders(h http.Handler) http.Handler {
 	})
 }
 
-func setDatabase(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := WithDatabase(r.Context(), db)
-		r = r.WithContext(ctx)
-		h.ServeHTTP(w, r)
-	})
+func setDatabase(db *sql.DB) middleware.Middleware {
+	return func(h http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ctx := WithDatabase(r.Context(), db)
+			r = r.WithContext(ctx)
+			h.ServeHTTP(w, r)
+		})
+	}
 }

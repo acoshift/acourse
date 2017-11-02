@@ -14,6 +14,9 @@ type (
 	dbKey        struct{}
 )
 
+// session id
+const sessName = "sess"
+
 // WithUser creates new context with user value
 func WithUser(ctx context.Context, user *User) context.Context {
 	return context.WithValue(ctx, userKey{}, user)
