@@ -18,7 +18,7 @@ func New(config Config) app.Controller {
 		repo:         config.Repository,
 		view:         config.View,
 		auth:         config.Auth,
-		loc:          config.loc,
+		loc:          config.Location,
 		slackURL:     config.SlackURL,
 		emailFrom:    config.EmailFrom,
 		emailDialer:  config.EmailDialer,
@@ -34,8 +34,8 @@ func New(config Config) app.Controller {
 type Config struct {
 	Repository   app.Repository
 	View         app.View
-	Auth         firebase.Auth
-	loc          *time.Location
+	Auth         *firebase.Auth
+	Location     *time.Location
 	SlackURL     string
 	EmailFrom    string
 	EmailDialer  *gomail.Dialer
@@ -49,7 +49,7 @@ type Config struct {
 type ctrl struct {
 	repo         app.Repository
 	view         app.View
-	auth         firebase.Auth
+	auth         *firebase.Auth
 	loc          *time.Location
 	slackURL     string
 	emailFrom    string

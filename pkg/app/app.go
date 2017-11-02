@@ -13,7 +13,7 @@ import (
 )
 
 // New creates new app
-func New(config Config) (http.Handler, error) {
+func New(config Config) http.Handler {
 	ctrl := config.Controller
 	repo := config.Repository
 	view := config.View
@@ -127,7 +127,7 @@ func New(config Config) (http.Handler, error) {
 		setHeaders,
 	)(mux)
 
-	return app, nil
+	return app
 }
 
 type app struct {

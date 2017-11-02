@@ -80,7 +80,7 @@ func main() {
 	}
 
 	// init databases
-	db, err = sql.Open("postgres", config.String("sql_url"))
+	db, err := sql.Open("postgres", config.String("sql_url"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -93,7 +93,8 @@ func main() {
 	ctrl := controller.New(controller.Config{
 		Repository:   repo,
 		View:         view,
-		loc:          loc,
+		Auth:         firAuth,
+		Location:     loc,
 		SlackURL:     config.String("slack_url"),
 		EmailFrom:    config.String("email_from"),
 		EmailDialer:  emailDialer,
@@ -104,38 +105,23 @@ func main() {
 		BucketName:   config.String("bucket"),
 	})
 	app := app.New(app.Config{
-		Controller: ctrl,
-		Repository: repo,
-		View:       view,
+		Controller:    ctrl,
+		Repository:    repo,
+		View:          view,
+		DB:            db,
+		BaseURL:       config.String("base_url"),
+		XSRFSecret:    config.String("xsrf_key"),
+		RedisAddr:     config.String("redis_addr"),
+		RedisPass:     config.String("redis_pass"),
+		RedisPrefix:   config.String("redis_prefix"),
+		SessionSecret: config.Bytes("session_secret"),
 	})
-
-	// err = app.Init(app.Config{
-	// 	ProjectID:      config.String("project_id"),
-	// 	ServiceAccount: config.Bytes("service_account"),
-	// 	BucketName:     config.String("bucket"),
-	// 	EmailServer:    config.String("email_server"),
-	// 	EmailPort:      config.Int("email_port"),
-	// 	EmailUser:      config.String("email_user"),
-	// 	EmailPassword:  config.String("email_password"),
-	// 	EmailFrom:      config.String("email_from"),
-	// 	BaseURL:        config.String("base_url"),
-	// 	XSRFSecret:     config.String("xsrf_key"),
-	// 	SQLURL:         config.String("sql_url"),
-	// 	RedisAddr:      config.String("redis_addr"),
-	// 	RedisPass:      config.String("redis_pass"),
-	// 	RedisPrefix:    config.String("redis_prefix"),
-	// 	SessionSecret:  config.Bytes("session_secret"),
-	// 	SlackURL:       config.String("slack_url"),
-	// })
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "ok")
 	})
-	mux.Handle("/", app.Handler())
+	mux.Handle("/", app)
 
 	// lets reverse proxy handle other settings
 	srv := &http.Server{
