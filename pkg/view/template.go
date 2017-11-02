@@ -243,6 +243,8 @@ func renderWithStatusCode(ctx context.Context, w http.ResponseWriter, code int, 
 	w.Header().Set(header.CacheControl, "no-cache, no-store, must-revalidate, max-age=0")
 	w.Header().Set(header.XUACompatible, "ie=edge")
 	w.WriteHeader(code)
+
+	// use buffer is faster than pipe stream for this case
 	pipe := &bytes.Buffer{}
 	err := t.Execute(pipe, data)
 	if err != nil {
