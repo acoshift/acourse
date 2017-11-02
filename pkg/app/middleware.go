@@ -12,11 +12,6 @@ import (
 	"golang.org/x/net/xsrftoken"
 )
 
-// Middleware is the app's middleware
-func Middleware() middleware.Middleware {
-	return middleware.Chain()
-}
-
 func panicLogger(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
@@ -193,4 +188,11 @@ func setDatabase(db *sql.DB) middleware.Middleware {
 			h.ServeHTTP(w, r)
 		})
 	}
+}
+
+func cache(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set(header.CacheControl, "public, max-age=31536000")
+		h.ServeHTTP(w, r)
+	})
 }

@@ -4,8 +4,6 @@ import (
 	"net/http"
 	"os"
 	"strings"
-
-	"github.com/acoshift/header"
 )
 
 type fileFS struct {
@@ -25,13 +23,6 @@ func (fs *fileFS) Open(name string) (http.File, error) {
 		return nil, os.ErrNotExist
 	}
 	return f, nil
-}
-
-func cache(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set(header.CacheControl, "public, max-age=31536000")
-		h.ServeHTTP(w, r)
-	})
 }
 
 func fileHandler(name string) http.Handler {
