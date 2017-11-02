@@ -1,4 +1,4 @@
-package app
+package controller
 
 import (
 	"context"
@@ -10,50 +10,25 @@ import (
 	"time"
 
 	"github.com/acoshift/header"
-	"github.com/acoshift/session"
 	"github.com/google/uuid"
 	"github.com/lib/pq"
 
-	"github.com/acoshift/acourse/pkg/appctx"
-	"github.com/acoshift/acourse/pkg/model"
-	"github.com/acoshift/acourse/pkg/view"
+	"github.com/acoshift/acourse/pkg/app"
 )
 
-func course(w http.ResponseWriter, r *http.Request) {
-	s := strings.SplitN(r.URL.Path, "/", 2)
-	var p string
-	if len(s) > 1 {
-		p = strings.TrimSuffix(s[1], "/")
-	}
-
-	r = r.WithContext(appctx.WithCourseURL(r.Context(), s[0]))
-	switch p {
-	case "":
-		courseView(w, r)
-	case "content":
-		mustSignedIn(http.HandlerFunc(courseContent)).ServeHTTP(w, r)
-	case "enroll":
-		mustSignedIn(http.HandlerFunc(courseEnroll)).ServeHTTP(w, r)
-	case "assignment":
-		mustSignedIn(http.HandlerFunc(courseAssignment)).ServeHTTP(w, r)
-	default:
-		view.NotFound(w, r)
-	}
-}
-
-func courseView(w http.ResponseWriter, r *http.Request) {
+func (c *ctrl) CourseView(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	user := appctx.GetUser(ctx)
-	link := appctx.GetCourseURL(ctx)
+	user := app.GetUser(ctx)
+	link := app.GetCourseURL(ctx)
 
 	// if id can parse to uuid get course from id
 	id := link
 	_, err := uuid.Parse(link)
 	if err != nil {
 		// link can not parse to uuid get course id from url
-		id, err = model.GetCourseIDFromURL(ctx, db, link)
-		if err == model.ErrNotFound {
-			view.NotFound(w, r)
+		id, err = c.repo.GetCourseIDFromURL(ctx, link)
+		if err == app.ErrNotFound {
+			c.view.NotFound(w, r)
 			return
 		}
 		if err != nil {
@@ -61,9 +36,9 @@ func courseView(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	x, err := model.GetCourse(ctx, db, id)
-	if err == model.ErrNotFound {
-		view.NotFound(w, r)
+	x, err := c.repo.GetCourse(ctx, id)
+	if err == app.ErrNotFound {
+		c.view.NotFound(w, r)
 		return
 	}
 	if err != nil {
@@ -80,14 +55,14 @@ func courseView(w http.ResponseWriter, r *http.Request) {
 	enrolled := false
 	pendingEnroll := false
 	if user != nil {
-		enrolled, err = model.IsEnrolled(ctx, db, user.ID, x.ID)
+		enrolled, err = c.repo.IsEnrolled(ctx, user.ID, x.ID)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
 		if !enrolled {
-			pendingEnroll, err = model.HasPendingPayment(ctx, db, user.ID, x.ID)
+			pendingEnroll, err = c.repo.HasPendingPayment(ctx, user.ID, x.ID)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
@@ -102,7 +77,7 @@ func courseView(w http.ResponseWriter, r *http.Request) {
 
 	// if user enrolled or user is owner fetch course contents
 	if enrolled || owned {
-		x.Contents, err = model.GetCourseContents(ctx, db, x.ID)
+		x.Contents, err = c.repo.GetCourseContents(ctx, x.ID)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -112,29 +87,29 @@ func courseView(w http.ResponseWriter, r *http.Request) {
 	if owned {
 		x.Owner = user
 	} else {
-		x.Owner, err = model.GetUser(ctx, db, x.UserID)
+		x.Owner, err = c.repo.GetUser(ctx, x.UserID)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 	}
 
-	view.Course(w, r, x, enrolled, owned, pendingEnroll)
+	c.view.Course(w, r, x, enrolled, owned, pendingEnroll)
 }
 
-func courseContent(w http.ResponseWriter, r *http.Request) {
+func (c *ctrl) CourseContent(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	user := appctx.GetUser(ctx)
-	link := appctx.GetCourseURL(ctx)
+	user := app.GetUser(ctx)
+	link := app.GetCourseURL(ctx)
 
 	// if id can parse to uuid get course from id
 	id := link
 	_, err := uuid.Parse(link)
 	if err != nil {
 		// link can not parse to uuid get course id from url
-		id, err = model.GetCourseIDFromURL(ctx, db, link)
-		if err == model.ErrNotFound {
-			view.NotFound(w, r)
+		id, err = c.repo.GetCourseIDFromURL(ctx, link)
+		if err == app.ErrNotFound {
+			c.view.NotFound(w, r)
 			return
 		}
 		if err != nil {
@@ -142,9 +117,9 @@ func courseContent(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	x, err := model.GetCourse(ctx, db, id)
-	if err == model.ErrNotFound {
-		view.NotFound(w, r)
+	x, err := c.repo.GetCourse(ctx, id)
+	if err == app.ErrNotFound {
+		c.view.NotFound(w, r)
 		return
 	}
 	if err != nil {
@@ -158,7 +133,7 @@ func courseContent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	enrolled, err := model.IsEnrolled(ctx, db, user.ID, x.ID)
+	enrolled, err := c.repo.IsEnrolled(ctx, user.ID, x.ID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -169,19 +144,19 @@ func courseContent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	x.Contents, err = model.GetCourseContents(ctx, db, x.ID)
+	x.Contents, err = c.repo.GetCourseContents(ctx, x.ID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	x.Owner, err = model.GetUser(ctx, db, x.UserID)
+	x.Owner, err = c.repo.GetUser(ctx, x.UserID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	var content *model.CourseContent
+	var content *app.CourseContent
 	p, _ := strconv.Atoi(r.FormValue("p"))
 	if p < 0 {
 		p = 0
@@ -193,21 +168,21 @@ func courseContent(w http.ResponseWriter, r *http.Request) {
 		content = x.Contents[p]
 	}
 
-	view.CourseContent(w, r, x, content)
+	c.view.CourseContent(w, r, x, content)
 }
 
-func editorCreate(w http.ResponseWriter, r *http.Request) {
+func (c *ctrl) EditorCreate(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
-		postEditorCreate(w, r)
+		c.postEditorCreate(w, r)
 		return
 	}
-	view.EditorCreate(w, r)
+	c.view.EditorCreate(w, r)
 }
 
-func postEditorCreate(w http.ResponseWriter, r *http.Request) {
+func (c *ctrl) postEditorCreate(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	f := session.Get(ctx, sessName).Flash()
-	user := appctx.GetUser(ctx)
+	f := app.GetSession(ctx).Flash()
+	user := app.GetUser(ctx)
 
 	var (
 		title     = r.FormValue("Title")
@@ -245,7 +220,7 @@ func postEditorCreate(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		imageURL, err = UploadCourseCoverImage(ctx, image)
+		imageURL, err = c.uploadCourseCoverImage(ctx, image)
 		if err != nil {
 			f.Add("Errors", err.Error())
 			back(w, r)
@@ -253,7 +228,7 @@ func postEditorCreate(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	tx, err := db.BeginTx(ctx, nil)
+	ctx, tx, err := app.WithTransaction(ctx)
 	if err != nil {
 		f.Add("Errors", err.Error())
 		back(w, r)
@@ -261,8 +236,9 @@ func postEditorCreate(w http.ResponseWriter, r *http.Request) {
 	}
 	defer tx.Rollback()
 
+	db := app.GetDatabase(ctx)
 	var id string
-	err = tx.QueryRow(`
+	err = db.QueryRowContext(ctx, `
 		insert into courses
 			(user_id, title, short_desc, long_desc, image, start)
 		values
@@ -273,7 +249,7 @@ func postEditorCreate(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	_, err = tx.Exec(`
+	_, err = db.ExecContext(ctx, `
 		insert into course_options
 			(course_id)
 		values
@@ -298,27 +274,27 @@ func postEditorCreate(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/course/"+link.String, http.StatusFound)
 }
 
-func editorCourse(w http.ResponseWriter, r *http.Request) {
+func (c *ctrl) EditorCourse(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	if r.Method == http.MethodPost {
-		postEditorCourse(w, r)
+		c.postEditorCourse(w, r)
 		return
 	}
 	id := r.FormValue("id")
-	course, err := model.GetCourse(ctx, db, id)
+	course, err := c.repo.GetCourse(ctx, id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	view.EditorCourse(w, r, course)
+	c.view.EditorCourse(w, r, course)
 }
 
-func postEditorCourse(w http.ResponseWriter, r *http.Request) {
+func (c *ctrl) postEditorCourse(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	id := r.FormValue("id")
 
-	f := session.Get(ctx, sessName).Flash()
+	f := app.GetSession(ctx).Flash()
 
 	var (
 		title     = r.FormValue("Title")
@@ -356,7 +332,7 @@ func postEditorCourse(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		imageURL, err = UploadCourseCoverImage(ctx, image)
+		imageURL, err = c.uploadCourseCoverImage(ctx, image)
 		if err != nil {
 			f.Add("Errors", err.Error())
 			back(w, r)
@@ -364,7 +340,7 @@ func postEditorCourse(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	tx, err := db.BeginTx(ctx, nil)
+	ctx, tx, err := app.WithTransaction(ctx)
 	if err != nil {
 		f.Add("Errors", err.Error())
 		back(w, r)
@@ -372,7 +348,8 @@ func postEditorCourse(w http.ResponseWriter, r *http.Request) {
 	}
 	defer tx.Rollback()
 
-	_, err = tx.Exec(`
+	db := app.GetDatabase(ctx)
+	_, err = db.ExecContext(ctx, `
 		update courses
 		set
 			title = $2,
@@ -388,7 +365,7 @@ func postEditorCourse(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(imageURL) > 0 {
-		_, err = tx.Exec(`
+		_, err = db.ExecContext(ctx, `
 			update courses
 			set
 				image = $2
@@ -425,12 +402,13 @@ func postEditorCourse(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/course/"+link.String, http.StatusSeeOther)
 }
 
-func editorContent(w http.ResponseWriter, r *http.Request) {
+func (c *ctrl) EditorContent(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	id := r.FormValue("id")
 
 	if r.Method == http.MethodPost {
 		if r.FormValue("action") == "delete" {
+			db := app.GetDatabase(ctx)
 			contentID := r.FormValue("contentId")
 			_, err := db.ExecContext(ctx, `delete from course_contents where id = $1 and course_id = $2`, contentID, id)
 			if err != nil {
@@ -442,40 +420,40 @@ func editorContent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	course, err := model.GetCourse(ctx, db, id)
-	if err == model.ErrNotFound {
-		view.NotFound(w, r)
+	course, err := c.repo.GetCourse(ctx, id)
+	if err == app.ErrNotFound {
+		c.view.NotFound(w, r)
 		return
 	}
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	course.Contents, err = model.GetCourseContents(ctx, db, id)
+	course.Contents, err = c.repo.GetCourseContents(ctx, id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	view.EditorContent(w, r, course)
+	c.view.EditorContent(w, r, course)
 }
 
-func courseEnroll(w http.ResponseWriter, r *http.Request) {
+func (c *ctrl) CourseEnroll(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
-		postCourseEnroll(w, r)
+		c.postCourseEnroll(w, r)
 		return
 	}
 	ctx := r.Context()
-	user := appctx.GetUser(ctx)
+	user := app.GetUser(ctx)
 
-	link := appctx.GetCourseURL(ctx)
+	link := app.GetCourseURL(ctx)
 
 	id := link
 	_, err := uuid.Parse(link)
 	if err != nil {
-		id, err = model.GetCourseIDFromURL(ctx, db, link)
-		if err == model.ErrNotFound {
-			view.NotFound(w, r)
+		id, err = c.repo.GetCourseIDFromURL(ctx, link)
+		if err == app.ErrNotFound {
+			c.view.NotFound(w, r)
 			return
 		}
 		if err != nil {
@@ -484,9 +462,9 @@ func courseEnroll(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	x, err := model.GetCourse(ctx, db, id)
-	if err == model.ErrNotFound {
-		view.NotFound(w, r)
+	x, err := c.repo.GetCourse(ctx, id)
+	if err == app.ErrNotFound {
+		c.view.NotFound(w, r)
 		return
 	}
 	if err != nil {
@@ -501,7 +479,7 @@ func courseEnroll(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// redirect enrolled user back to course page
-	enrolled, err := model.IsEnrolled(ctx, db, user.ID, id)
+	enrolled, err := c.repo.IsEnrolled(ctx, user.ID, id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -512,7 +490,7 @@ func courseEnroll(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// check is user has pending enroll
-	pendingPayment, err := model.HasPendingPayment(ctx, db, user.ID, id)
+	pendingPayment, err := c.repo.HasPendingPayment(ctx, user.ID, id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -522,22 +500,22 @@ func courseEnroll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	view.CourseEnroll(w, r, x)
+	c.view.CourseEnroll(w, r, x)
 }
 
-func postCourseEnroll(w http.ResponseWriter, r *http.Request) {
+func (c *ctrl) postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	user := appctx.GetUser(ctx)
-	f := session.Get(ctx, sessName).Flash()
+	user := app.GetUser(ctx)
+	f := app.GetSession(ctx).Flash()
 
-	link := appctx.GetCourseURL(ctx)
+	link := app.GetCourseURL(ctx)
 
 	id := link
 	_, err := uuid.Parse(link)
 	if err != nil {
-		id, err = model.GetCourseIDFromURL(ctx, db, link)
-		if err == model.ErrNotFound {
-			view.NotFound(w, r)
+		id, err = c.repo.GetCourseIDFromURL(ctx, link)
+		if err == app.ErrNotFound {
+			c.view.NotFound(w, r)
 			return
 		}
 		if err != nil {
@@ -546,9 +524,9 @@ func postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	x, err := model.GetCourse(ctx, db, id)
-	if err == model.ErrNotFound {
-		view.NotFound(w, r)
+	x, err := c.repo.GetCourse(ctx, id)
+	if err == app.ErrNotFound {
+		c.view.NotFound(w, r)
 		return
 	}
 	if err != nil {
@@ -563,7 +541,7 @@ func postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// redirect enrolled user back to course page
-	enrolled, err := model.IsEnrolled(ctx, db, user.ID, id)
+	enrolled, err := c.repo.IsEnrolled(ctx, user.ID, id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -574,7 +552,7 @@ func postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// check is user has pending enroll
-	pendingPayment, err := model.HasPendingPayment(ctx, db, user.ID, id)
+	pendingPayment, err := c.repo.HasPendingPayment(ctx, user.ID, id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -616,7 +594,7 @@ func postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		imageURL, err = UploadPaymentImage(ctx, image)
+		imageURL, err = c.uploadPaymentImage(ctx, image)
 		if err != nil {
 			f.Add("Errors", err.Error())
 			back(w, r)
@@ -625,20 +603,22 @@ func postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 	}
 
 	newPayment := false
-	tx, err := db.BeginTx(ctx, nil)
+
+	ctx, tx, err := app.WithTransaction(ctx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	defer tx.Rollback()
+
 	if x.Price == 0 {
-		err = model.Enroll(ctx, tx, user.ID, x.ID)
+		err = c.repo.Enroll(ctx, user.ID, x.ID)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 	} else {
-		err = model.CreatePayment(ctx, tx, &model.Payment{
+		err = c.repo.CreatePayment(ctx, &app.Payment{
 			CourseID:      x.ID,
 			UserID:        user.ID,
 			Image:         imageURL,
@@ -660,9 +640,9 @@ func postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 	go func() {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		if newPayment {
-			sendSlackMessage(ctx, fmt.Sprintf("New payment for course %s, price %.2f", x.Title, price))
+			c.sendSlackMessage(ctx, fmt.Sprintf("New payment for course %s, price %.2f", x.Title, price))
 		} else {
-			sendSlackMessage(ctx, fmt.Sprintf("New enroll for course %s", x.Title))
+			c.sendSlackMessage(ctx, fmt.Sprintf("New enroll for course %s", x.Title))
 		}
 		cancel()
 	}()
@@ -670,19 +650,19 @@ func postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/course/"+link, http.StatusFound)
 }
 
-func courseAssignment(w http.ResponseWriter, r *http.Request) {
+func (c *ctrl) CourseAssignment(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	user := appctx.GetUser(ctx)
-	link := appctx.GetCourseURL(ctx)
+	user := app.GetUser(ctx)
+	link := app.GetCourseURL(ctx)
 
 	// if id can parse to int64 get course from id
 	id := link
 	_, err := uuid.Parse(link)
 	if err != nil {
 		// link can not parse to int64 get course id from url
-		id, err = model.GetCourseIDFromURL(ctx, db, link)
-		if err == model.ErrNotFound {
-			view.NotFound(w, r)
+		id, err = c.repo.GetCourseIDFromURL(ctx, link)
+		if err == app.ErrNotFound {
+			c.view.NotFound(w, r)
 			return
 		}
 		if err != nil {
@@ -690,9 +670,9 @@ func courseAssignment(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	x, err := model.GetCourse(ctx, db, id)
-	if err == model.ErrNotFound {
-		view.NotFound(w, r)
+	x, err := c.repo.GetCourse(ctx, id)
+	if err == app.ErrNotFound {
+		c.view.NotFound(w, r)
 		return
 	}
 	if err != nil {
@@ -706,7 +686,7 @@ func courseAssignment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	enrolled, err := model.IsEnrolled(ctx, db, user.ID, x.ID)
+	enrolled, err := c.repo.IsEnrolled(ctx, user.ID, x.ID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -717,16 +697,16 @@ func courseAssignment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	assignments, err := model.GetAssignments(ctx, db, x.ID)
+	assignments, err := c.repo.GetAssignments(ctx, x.ID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	view.Assignment(w, r, x, assignments)
+	c.view.Assignment(w, r, x, assignments)
 }
 
-func editorContentCreate(w http.ResponseWriter, r *http.Request) {
+func (c *ctrl) EditorContentCreate(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	id := r.FormValue("id")
 
@@ -738,26 +718,27 @@ func editorContentCreate(w http.ResponseWriter, r *http.Request) {
 			i       int64
 		)
 
-		tx, err := db.BeginTx(ctx, nil)
+		ctx, tx, err := app.WithTransaction(ctx)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		defer tx.Rollback()
 
+		db := app.GetDatabase(ctx)
 		// get content index
-		err = tx.QueryRow(`
+		err = db.QueryRowContext(ctx, `
 			select i from course_contents where course_id = $1 order by i desc limit 1
 		`, id).Scan(&i)
 		if err == sql.ErrNoRows {
 			i = -1
 		}
-		_, err = tx.Exec(`
+		_, err = db.ExecContext(ctx, `
 			insert into course_contents
 				(course_id, i, title, long_desc, video_id, video_type)
 			values
 				($1, $2, $3, $4, $5, $6)
-		`, id, i+1, title, desc, videoID, model.Youtube)
+		`, id, i+1, title, desc, videoID, app.Youtube)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -772,22 +753,22 @@ func editorContentCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	course, err := model.GetCourse(ctx, db, id)
+	course, err := c.repo.GetCourse(ctx, id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	view.EditorContentCreate(w, r, course)
+	c.view.EditorContentCreate(w, r, course)
 }
 
-func editorContentEdit(w http.ResponseWriter, r *http.Request) {
+func (c *ctrl) EditorContentEdit(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	// course content id
 	id := r.FormValue("id")
 
-	content, err := model.GetCourseContent(ctx, db, id)
+	content, err := c.repo.GetCourseContent(ctx, id)
 	if err == sql.ErrNoRows {
-		view.NotFound(w, r)
+		c.view.NotFound(w, r)
 		return
 	}
 	if err != nil {
@@ -795,13 +776,13 @@ func editorContentEdit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	course, err := model.GetCourse(ctx, db, content.CourseID)
+	course, err := c.repo.GetCourse(ctx, content.CourseID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	user := appctx.GetUser(r.Context())
+	user := app.GetUser(r.Context())
 	// user is not course owner
 	if user.ID != course.UserID {
 		http.Error(w, "Forbidden", http.StatusForbidden)
@@ -815,6 +796,7 @@ func editorContentEdit(w http.ResponseWriter, r *http.Request) {
 			videoID = r.FormValue("VideoID")
 		)
 
+		db := app.GetDatabase(ctx)
 		_, err = db.ExecContext(ctx, `
 			update course_contents
 			set
@@ -832,5 +814,5 @@ func editorContentEdit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	view.EditorContentEdit(w, r, course, content)
+	c.view.EditorContentEdit(w, r, course, content)
 }

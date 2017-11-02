@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
@@ -10,10 +11,19 @@ import (
 	"syscall"
 	"time"
 
+	"cloud.google.com/go/storage"
 	"github.com/acoshift/configfile"
+	"github.com/acoshift/go-firebase-admin"
+	"github.com/garyburd/redigo/redis"
 	_ "github.com/lib/pq"
+	"golang.org/x/oauth2/google"
+	"google.golang.org/api/option"
+	"gopkg.in/gomail.v2"
 
 	"github.com/acoshift/acourse/pkg/app"
+	"github.com/acoshift/acourse/pkg/controller"
+	"github.com/acoshift/acourse/pkg/repository"
+	"github.com/acoshift/acourse/pkg/view"
 )
 
 func main() {
@@ -21,33 +31,97 @@ func main() {
 
 	config := configfile.NewReader("config")
 
-	err := app.Init(app.Config{
-		ProjectID:      config.String("project_id"),
-		ServiceAccount: config.Bytes("service_account"),
-		BucketName:     config.String("bucket"),
-		EmailServer:    config.String("email_server"),
-		EmailPort:      config.Int("email_port"),
-		EmailUser:      config.String("email_user"),
-		EmailPassword:  config.String("email_password"),
-		EmailFrom:      config.String("email_from"),
-		BaseURL:        config.String("base_url"),
-		XSRFSecret:     config.String("xsrf_key"),
-		SQLURL:         config.String("sql_url"),
-		RedisAddr:      config.String("redis_addr"),
-		RedisPass:      config.String("redis_pass"),
-		RedisPrefix:    config.String("redis_prefix"),
-		SessionSecret:  config.Bytes("session_secret"),
-		SlackURL:       config.String("slack_url"),
-	})
+	// email location
+	loc, err := time.LoadLocation("Asia/Bangkok")
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	ctx := context.Background()
+
+	// init google cloud config
+	gconf, err := google.JWTConfigFromJSON(config.Bytes("service_account"), storage.ScopeReadWrite)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	firApp, err := firebase.InitializeApp(ctx, firebase.AppOptions{
+		ProjectID: config.String("project_id"),
+	}, option.WithCredentialsFile("config/service_account"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	firAuth := firApp.Auth()
+
+	// init google storage
+	storageClient, err := storage.NewClient(ctx, option.WithTokenSource(gconf.TokenSource(ctx)))
+	if err != nil {
+		log.Fatal(err)
+	}
+	bucketHandle := storageClient.Bucket(config.String("bucket"))
+
+	// init email client
+	emailDialer := gomail.NewPlainDialer(config.String("email_server"), config.Int("email_port"), config.String("email_user"), config.String("email_password"))
+
+	// TODO: use in-memory redis for caching
+	cachePool := &redis.Pool{
+		MaxIdle:     5,
+		IdleTimeout: 5 * time.Minute,
+		Dial: func() (redis.Conn, error) {
+			return redis.Dial("tcp", config.String("redis_addr"), redis.DialPassword(config.String("redis_pass")))
+		},
+		TestOnBorrow: func(c redis.Conn, t time.Time) error {
+			if time.Since(t) > time.Minute {
+				return nil
+			}
+			_, err := c.Do("PING")
+			return err
+		},
+	}
+
+	// init databases
+	db, err := sql.Open("postgres", config.String("sql_url"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	db.SetMaxIdleConns(5)
+
+	view := view.New(view.Config{
+		BaseURL: config.String("base_url"),
+	})
+	repo := repository.New()
+	ctrl := controller.New(controller.Config{
+		Repository:   repo,
+		View:         view,
+		Auth:         firAuth,
+		Location:     loc,
+		SlackURL:     config.String("slack_url"),
+		EmailFrom:    config.String("email_from"),
+		EmailDialer:  emailDialer,
+		BaseURL:      config.String("base_url"),
+		CachePool:    cachePool,
+		CachePrefix:  config.String("redis_prefix"),
+		BucketHandle: bucketHandle,
+		BucketName:   config.String("bucket"),
+	})
+	app := app.New(app.Config{
+		Controller:    ctrl,
+		Repository:    repo,
+		View:          view,
+		DB:            db,
+		BaseURL:       config.String("base_url"),
+		XSRFSecret:    config.String("xsrf_key"),
+		RedisAddr:     config.String("redis_addr"),
+		RedisPass:     config.String("redis_pass"),
+		RedisPrefix:   config.String("redis_prefix"),
+		SessionSecret: config.Bytes("session_secret"),
+	})
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "ok")
 	})
-	mux.Handle("/", app.Handler())
+	mux.Handle("/", app)
 
 	// lets reverse proxy handle other settings
 	srv := &http.Server{

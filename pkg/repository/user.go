@@ -1,32 +1,14 @@
-package model
+package repository
 
 import (
 	"context"
 	"database/sql"
 	"fmt"
-	"time"
 
 	"github.com/lib/pq"
+
+	"github.com/acoshift/acourse/pkg/app"
 )
-
-// User model
-type User struct {
-	ID        string
-	Role      UserRole
-	Username  string
-	Name      string
-	Email     sql.NullString
-	AboutMe   string
-	Image     string
-	CreatedAt time.Time
-	UpdatedAt time.Time
-}
-
-// UserRole type
-type UserRole struct {
-	Admin      sql.NullBool
-	Instructor sql.NullBool
-}
 
 const (
 	selectUsers = `
@@ -63,8 +45,10 @@ const (
 	`
 )
 
-// Save saves user
-func (x *User) Save(ctx context.Context, db DB) error {
+// SaveUser saves user
+func (repo) SaveUser(ctx context.Context, x *app.User) error {
+	db := app.GetDatabase(ctx)
+
 	if len(x.ID) == 0 {
 		return fmt.Errorf("invalid id")
 	}
@@ -80,7 +64,7 @@ func (x *User) Save(ctx context.Context, db DB) error {
 	return nil
 }
 
-func scanUser(scan scanFunc, x *User) error {
+func scanUser(scan scanFunc, x *app.User) error {
 	err := scan(&x.ID, &x.Name, &x.Username, &x.Email, &x.AboutMe, &x.Image, &x.CreatedAt, &x.UpdatedAt, &x.Role.Admin, &x.Role.Instructor)
 	if err != nil {
 		return err
@@ -89,15 +73,17 @@ func scanUser(scan scanFunc, x *User) error {
 }
 
 // GetUsers gets users
-func GetUsers(ctx context.Context, db DB, userIDs []string) ([]*User, error) {
-	xs := make([]*User, 0, len(userIDs))
+func (repo) GetUsers(ctx context.Context, userIDs []string) ([]*app.User, error) {
+	db := app.GetDatabase(ctx)
+
+	xs := make([]*app.User, 0, len(userIDs))
 	rows, err := db.QueryContext(ctx, queryGetUsers, pq.Array(userIDs))
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var x User
+		var x app.User
 		err = scanUser(rows.Scan, &x)
 		if err != nil {
 			return nil, err
@@ -111,11 +97,13 @@ func GetUsers(ctx context.Context, db DB, userIDs []string) ([]*User, error) {
 }
 
 // GetUser gets user from id
-func GetUser(ctx context.Context, db DB, userID string) (*User, error) {
-	var x User
+func (repo) GetUser(ctx context.Context, userID string) (*app.User, error) {
+	db := app.GetDatabase(ctx)
+
+	var x app.User
 	err := scanUser(db.QueryRowContext(ctx, queryGetUser, userID).Scan, &x)
 	if err == sql.ErrNoRows {
-		return nil, ErrNotFound
+		return nil, app.ErrNotFound
 	}
 	if err != nil {
 		return nil, err
@@ -124,8 +112,10 @@ func GetUser(ctx context.Context, db DB, userID string) (*User, error) {
 }
 
 // GetUserFromUsername gets user from username
-func GetUserFromUsername(ctx context.Context, db DB, username string) (*User, error) {
-	var x User
+func (repo) GetUserFromUsername(ctx context.Context, username string) (*app.User, error) {
+	db := app.GetDatabase(ctx)
+
+	var x app.User
 	err := scanUser(db.QueryRowContext(ctx, queryGetUserFromUsername, username).Scan, &x)
 	if err != nil {
 		return nil, err
@@ -134,15 +124,17 @@ func GetUserFromUsername(ctx context.Context, db DB, username string) (*User, er
 }
 
 // ListUsers lists users
-func ListUsers(ctx context.Context, db DB, limit, offset int64) ([]*User, error) {
-	xs := make([]*User, 0)
+func (repo) ListUsers(ctx context.Context, limit, offset int64) ([]*app.User, error) {
+	db := app.GetDatabase(ctx)
+
+	xs := make([]*app.User, 0)
 	rows, err := db.QueryContext(ctx, queryListUsers, limit, offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var x User
+		var x app.User
 		err = scanUser(rows.Scan, &x)
 		if err != nil {
 			return nil, err
@@ -156,11 +148,37 @@ func ListUsers(ctx context.Context, db DB, limit, offset int64) ([]*User, error)
 }
 
 // CountUsers counts users
-func CountUsers(ctx context.Context, db DB) (int64, error) {
+func (repo) CountUsers(ctx context.Context) (int64, error) {
+	db := app.GetDatabase(ctx)
+
 	var cnt int64
 	err := db.QueryRowContext(ctx, `select count(*) from users`).Scan(&cnt)
 	if err != nil {
 		return 0, err
 	}
 	return cnt, nil
+}
+
+func (repo) IsUserExists(ctx context.Context, id string) (bool, error) {
+	db := app.GetDatabase(ctx)
+
+	var cnt int64
+	err := db.QueryRowContext(ctx, `select count(*) from users where id = $1`, id).Scan(&cnt)
+	if err != nil {
+		return false, err
+	}
+	return cnt > 0, nil
+}
+
+func (repo) CreateUser(ctx context.Context, x *app.User) error {
+	db := app.GetDatabase(ctx)
+
+	_, err := db.ExecContext(ctx,
+		`insert into users (id, username, name, email) values ($1, $2, $3, $4)`,
+		x.ID, x.ID, "", x.Email,
+	)
+	if err != nil {
+		return err
+	}
+	return nil
 }
