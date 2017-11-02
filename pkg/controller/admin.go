@@ -1,4 +1,4 @@
-package app
+package controller
 
 import (
 	"context"
@@ -7,11 +7,11 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/acoshift/acourse/pkg/model"
+	"github.com/acoshift/acourse/pkg/app"
 	"github.com/acoshift/acourse/pkg/view"
 )
 
-func adminUsers(w http.ResponseWriter, r *http.Request) {
+func (c *ctrl) AdminUsers(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	page, _ := strconv.ParseInt(r.FormValue("page"), 10, 64)
 	if page <= 0 {
@@ -19,7 +19,7 @@ func adminUsers(w http.ResponseWriter, r *http.Request) {
 	}
 	limit := int64(30)
 
-	cnt, err := model.CountUsers(ctx, db)
+	cnt, err := c.repo.CountUsers(ctx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -32,7 +32,7 @@ func adminUsers(w http.ResponseWriter, r *http.Request) {
 	}
 	totalPage := cnt / limit
 
-	users, err := model.ListUsers(ctx, db, limit, offset)
+	users, err := c.repo.ListUsers(ctx, limit, offset)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -41,7 +41,7 @@ func adminUsers(w http.ResponseWriter, r *http.Request) {
 	view.AdminUsers(w, r, users, int(page), int(totalPage))
 }
 
-func adminCourses(w http.ResponseWriter, r *http.Request) {
+func (c *ctrl) AdminCourses(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	page, _ := strconv.ParseInt(r.FormValue("page"), 10, 64)
 	if page <= 0 {
@@ -49,7 +49,7 @@ func adminCourses(w http.ResponseWriter, r *http.Request) {
 	}
 	limit := int64(30)
 
-	cnt, err := model.CountCourses(ctx, db)
+	cnt, err := c.repo.CountCourses(ctx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -62,7 +62,7 @@ func adminCourses(w http.ResponseWriter, r *http.Request) {
 	}
 	totalPage := int64(math.Ceil(float64(cnt) / float64(limit)))
 
-	courses, err := model.ListCourses(ctx, db, limit, offset)
+	courses, err := c.repo.ListCourses(ctx, limit, offset)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -71,7 +71,7 @@ func adminCourses(w http.ResponseWriter, r *http.Request) {
 	view.AdminCourses(w, r, courses, int(page), int(totalPage))
 }
 
-func adminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter func(context.Context, model.DB, int64, int64) ([]*model.Payment, error), paymentsCounter func(context.Context, model.DB) (int64, error)) {
+func (c *ctrl) AdminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter func(context.Context, int64, int64) ([]*app.Payment, error), paymentsCounter func(context.Context) (int64, error)) {
 	ctx := r.Context()
 	page, _ := strconv.ParseInt(r.FormValue("page"), 10, 64)
 	if page <= 0 {
@@ -79,7 +79,7 @@ func adminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter func(c
 	}
 	limit := int64(30)
 
-	cnt, err := paymentsCounter(ctx, db)
+	cnt, err := paymentsCounter(ctx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -92,7 +92,7 @@ func adminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter func(c
 	}
 	totalPage := cnt / limit
 
-	payments, err := paymentsGetter(ctx, db, limit, offset)
+	payments, err := paymentsGetter(ctx, limit, offset)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -101,15 +101,15 @@ func adminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter func(c
 	view.AdminPayments(w, r, payments, int(page), int(totalPage))
 }
 
-func adminRejectPayment(w http.ResponseWriter, r *http.Request) {
+func (c *ctrl) AdminRejectPayment(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
-		postAdminRejectPayment(w, r)
+		c.postAdminRejectPayment(w, r)
 		return
 	}
 
 	ctx := r.Context()
 	id := r.FormValue("id")
-	x, err := model.GetPayment(ctx, db, id)
+	x, err := c.repo.GetPayment(ctx, id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -155,17 +155,17 @@ func adminRejectPayment(w http.ResponseWriter, r *http.Request) {
 	view.AdminPaymentReject(w, r, x, message)
 }
 
-func postAdminRejectPayment(w http.ResponseWriter, r *http.Request) {
+func (c *ctrl) postAdminRejectPayment(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	message := r.FormValue("Message")
 	id := r.FormValue("ID")
 
-	x, err := model.GetPayment(ctx, db, id)
+	x, err := c.repo.GetPayment(ctx, id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	err = x.Reject(ctx, db)
+	err = c.repo.RejectPayment(ctx, x)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -173,7 +173,7 @@ func postAdminRejectPayment(w http.ResponseWriter, r *http.Request) {
 
 	if x.User.Email.Valid {
 		go func() {
-			x, err := model.GetPayment(ctx, db, id)
+			x, err := c.repo.GetPayment(ctx, id)
 			if err != nil {
 				return
 			}
@@ -186,7 +186,7 @@ func postAdminRejectPayment(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/admin/payments/pending", http.StatusSeeOther)
 }
 
-func postAdminPendingPayment(w http.ResponseWriter, r *http.Request) {
+func (c *ctrl) postAdminPendingPayment(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	action := r.FormValue("Action")
 
@@ -198,12 +198,12 @@ func postAdminPendingPayment(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		defer tx.Rollback()
-		x, err := model.GetPayment(ctx, tx, id)
+		x, err := c.repo.GetPayment(ctx, id)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		err = x.Accept(ctx, tx)
+		err = c.repo.AcceptPayment(ctx, x)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -217,7 +217,7 @@ func postAdminPendingPayment(w http.ResponseWriter, r *http.Request) {
 		if x.User.Email.Valid {
 			go func() {
 				// re-fetch payment to get latest timestamp
-				x, err := model.GetPayment(ctx, db, id)
+				x, err := c.repo.GetPayment(ctx, id)
 				if err != nil {
 					return
 				}
@@ -274,14 +274,14 @@ https://acourse.io
 	http.Redirect(w, r, "/admin/payments/pending", http.StatusSeeOther)
 }
 
-func adminPendingPayments(w http.ResponseWriter, r *http.Request) {
+func (c *ctrl) adminPendingPayments(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
-		postAdminPendingPayment(w, r)
+		c.postAdminPendingPayment(w, r)
 		return
 	}
-	adminPayments(w, r, model.ListPendingPayments, model.CountPendingPayments)
+	c.adminPayments(w, r, c.repo.ListPendingPayments, c.repo.CountPendingPayments)
 }
 
-func adminHistoryPayments(w http.ResponseWriter, r *http.Request) {
-	adminPayments(w, r, model.ListHistoryPayments, model.CountHistoryPayments)
+func (c *ctrl) adminHistoryPayments(w http.ResponseWriter, r *http.Request) {
+	c.adminPayments(w, r, c.repo.ListHistoryPayments, c.repo.CountHistoryPayments)
 }

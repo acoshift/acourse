@@ -5,76 +5,12 @@ import (
 	"context"
 	"database/sql"
 	"encoding/gob"
-	"time"
 
 	"github.com/garyburd/redigo/redis"
 	"github.com/lib/pq"
+
+	"github.com/acoshift/acourse/pkg/app"
 )
-
-// Course model
-type Course struct {
-	ID            string
-	Option        CourseOption
-	Owner         *User
-	EnrollCount   int64
-	Title         string
-	ShortDesc     string
-	Desc          string
-	Image         string
-	UserID        string
-	Start         pq.NullTime
-	URL           sql.NullString // MUST not parsable to int
-	Type          int
-	Price         float64
-	Discount      float64
-	Contents      []*CourseContent
-	EnrollDetail  string
-	AssignmentIDs []string
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
-}
-
-// Course type values
-const (
-	_ = iota
-	Live
-	Video
-	EBook
-)
-
-// Video type values
-const (
-	_ = iota
-	Youtube
-)
-
-// CourseContent type
-type CourseContent struct {
-	ID          string
-	CourseID    string
-	Title       string
-	Desc        string
-	VideoID     string
-	VideoType   int
-	DownloadURL string
-}
-
-// CourseOption type
-type CourseOption struct {
-	Public     bool
-	Enroll     bool
-	Attend     bool
-	Assignment bool
-	Discount   bool
-}
-
-// Link returns id if url is invalid
-func (x *Course) Link() string {
-	if !x.URL.Valid || len(x.URL.String) == 0 {
-		return x.ID
-	}
-	return x.URL.String
-}
 
 const (
 	selectCourses = `
@@ -127,8 +63,8 @@ const (
 	`
 )
 
-// Save saves course, db must be transaction
-func (x *Course) Save(ctx context.Context, tx *sql.Tx) error {
+// SaveCourse saves course, db must be transaction
+func SaveCourse(ctx context.Context, tx *sql.Tx, x *app.Course) error {
 	if len(x.URL.String) > 0 && x.URL.String != x.ID {
 		x.URL.Valid = true
 	} else {
@@ -158,7 +94,7 @@ func (x *Course) Save(ctx context.Context, tx *sql.Tx) error {
 	return nil
 }
 
-func scanCourse(scan scanFunc, x *Course) error {
+func scanCourse(scan scanFunc, x *app.Course) error {
 	err := scan(&x.ID,
 		&x.Title, &x.ShortDesc, &x.Desc, &x.Image, &x.Start, &x.URL, &x.Type, &x.Price, &x.Discount, &x.EnrollDetail,
 		&x.CreatedAt, &x.UpdatedAt,
@@ -174,15 +110,15 @@ func scanCourse(scan scanFunc, x *Course) error {
 }
 
 // GetCourses gets courses
-func GetCourses(ctx context.Context, db DB, courseIDs []string) ([]*Course, error) {
-	xs := make([]*Course, 0, len(courseIDs))
+func GetCourses(ctx context.Context, db DB, courseIDs []string) ([]*app.Course, error) {
+	xs := make([]*app.Course, 0, len(courseIDs))
 	rows, err := db.QueryContext(ctx, queryGetCourses, pq.Array(courseIDs))
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var x Course
+		var x app.Course
 		err = scanCourse(rows.Scan, &x)
 		if err != nil {
 			return nil, err
@@ -196,8 +132,8 @@ func GetCourses(ctx context.Context, db DB, courseIDs []string) ([]*Course, erro
 }
 
 // GetCourse gets course
-func GetCourse(ctx context.Context, db DB, courseID string) (*Course, error) {
-	var x Course
+func GetCourse(ctx context.Context, db DB, courseID string) (*app.Course, error) {
+	var x app.Course
 	err := db.QueryRowContext(ctx, `
 		select
 			id, user_id, title, short_desc, long_desc, image, start, url, type, price, courses.discount, enroll_detail,
@@ -252,8 +188,8 @@ func GetCourseContents(ctx context.Context, db DB, courseID string) ([]*CourseCo
 }
 
 // GetCourseContent gets course content from id
-func GetCourseContent(ctx context.Context, db DB, courseContentID string) (*CourseContent, error) {
-	var x CourseContent
+func GetCourseContent(ctx context.Context, db DB, courseContentID string) (*app.CourseContent, error) {
+	var x app.CourseContent
 	err := db.QueryRowContext(ctx, `
 		select
 			id,

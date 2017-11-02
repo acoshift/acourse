@@ -4,29 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"time"
 
 	"github.com/lib/pq"
+
+	"github.com/acoshift/acourse/pkg/app"
 )
-
-// User model
-type User struct {
-	ID        string
-	Role      UserRole
-	Username  string
-	Name      string
-	Email     sql.NullString
-	AboutMe   string
-	Image     string
-	CreatedAt time.Time
-	UpdatedAt time.Time
-}
-
-// UserRole type
-type UserRole struct {
-	Admin      sql.NullBool
-	Instructor sql.NullBool
-}
 
 const (
 	selectUsers = `
@@ -63,8 +45,8 @@ const (
 	`
 )
 
-// Save saves user
-func (x *User) Save(ctx context.Context, db DB) error {
+// SaveUser saves user
+func SaveUser(ctx context.Context, db DB, x *app.User) error {
 	if len(x.ID) == 0 {
 		return fmt.Errorf("invalid id")
 	}
@@ -80,7 +62,7 @@ func (x *User) Save(ctx context.Context, db DB) error {
 	return nil
 }
 
-func scanUser(scan scanFunc, x *User) error {
+func scanUser(scan scanFunc, x *app.User) error {
 	err := scan(&x.ID, &x.Name, &x.Username, &x.Email, &x.AboutMe, &x.Image, &x.CreatedAt, &x.UpdatedAt, &x.Role.Admin, &x.Role.Instructor)
 	if err != nil {
 		return err
@@ -89,15 +71,15 @@ func scanUser(scan scanFunc, x *User) error {
 }
 
 // GetUsers gets users
-func GetUsers(ctx context.Context, db DB, userIDs []string) ([]*User, error) {
-	xs := make([]*User, 0, len(userIDs))
+func GetUsers(ctx context.Context, db DB, userIDs []string) ([]*app.User, error) {
+	xs := make([]*app.User, 0, len(userIDs))
 	rows, err := db.QueryContext(ctx, queryGetUsers, pq.Array(userIDs))
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var x User
+		var x app.User
 		err = scanUser(rows.Scan, &x)
 		if err != nil {
 			return nil, err

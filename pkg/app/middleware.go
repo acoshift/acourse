@@ -15,11 +15,9 @@ import (
 	redisstore "github.com/acoshift/session/store/redis"
 	"github.com/garyburd/redigo/redis"
 	"golang.org/x/net/xsrftoken"
-
-	"github.com/acoshift/acourse/pkg/appctx"
-	"github.com/acoshift/acourse/pkg/model"
-	"github.com/acoshift/acourse/pkg/view"
 )
+
+var view View // TODO: fixme
 
 const sessName = "sess"
 
@@ -70,7 +68,7 @@ func Middleware(h http.Handler) http.Handler {
 
 				// skip if signed in
 				s := session.Get(r.Context(), sessName)
-				if x := s.Get(keyUserID); x != nil {
+				if x := GetUserID(s); len(x) > 0 {
 					return true
 				}
 
@@ -82,6 +80,7 @@ func Middleware(h http.Handler) http.Handler {
 			},
 			Invalidator: cacheInvalidator,
 		}),
+		setDatabase,
 		fetchUser,
 		csrf,
 	)(h)
@@ -111,7 +110,7 @@ func panicLogger(h http.Handler) http.Handler {
 func csrf(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var id string
-		if u := appctx.GetUser(r.Context()); u != nil {
+		if u := GetUser(r.Context()); u != nil {
 			id = u.ID
 		}
 		if r.Method == http.MethodPost {
@@ -132,7 +131,7 @@ func csrf(h http.Handler) http.Handler {
 			return
 		}
 		token := xsrftoken.Generate(xsrfSecret, id, r.URL.Path)
-		ctx := appctx.WithXSRFToken(r.Context(), token)
+		ctx := WithXSRFToken(r.Context(), token)
 		h.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -140,7 +139,7 @@ func csrf(h http.Handler) http.Handler {
 func mustSignedIn(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		s := session.Get(r.Context(), sessName)
-		id, _ := s.Get(keyUserID).(string)
+		id := GetUserID(s)
 		if len(id) == 0 {
 			http.Redirect(w, r, "/signin?r="+url.QueryEscape(r.RequestURI), http.StatusFound)
 			return
@@ -152,7 +151,7 @@ func mustSignedIn(h http.Handler) http.Handler {
 func mustNotSignedIn(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		s := session.Get(r.Context(), sessName)
-		id, _ := s.Get(keyUserID).(string)
+		id := GetUserID(s)
 		if len(id) > 0 {
 			http.Redirect(w, r, "/", http.StatusFound)
 			return
@@ -165,16 +164,16 @@ func fetchUser(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		s := session.Get(ctx, sessName)
-		id, _ := s.Get(keyUserID).(string)
+		id := GetUserID(s)
 		if len(id) > 0 {
-			u, err := model.GetUser(ctx, db, id)
-			if err == model.ErrNotFound {
-				u = &model.User{
+			u, err := repo.GetUser(ctx, id)
+			if err == ErrNotFound {
+				u = &User{
 					ID:       id,
 					Username: id,
 				}
 			}
-			r = r.WithContext(appctx.WithUser(ctx, u))
+			r = r.WithContext(WithUser(ctx, u))
 		}
 		h.ServeHTTP(w, r)
 	})
@@ -182,7 +181,7 @@ func fetchUser(h http.Handler) http.Handler {
 
 func onlyAdmin(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		u := appctx.GetUser(r.Context())
+		u := GetUser(r.Context())
 		if u == nil {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
@@ -197,7 +196,7 @@ func onlyAdmin(h http.Handler) http.Handler {
 
 func onlyInstructor(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		u := appctx.GetUser(r.Context())
+		u := GetUser(r.Context())
 		if u == nil {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
@@ -213,7 +212,7 @@ func onlyInstructor(h http.Handler) http.Handler {
 func isCourseOwner(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		u := appctx.GetUser(ctx)
+		u := GetUser(ctx)
 		if u == nil {
 			http.Redirect(w, r, "/signin", http.StatusFound)
 			return
@@ -245,6 +244,14 @@ func setHeaders(h http.Handler) http.Handler {
 		w.Header().Set(header.XXSSProtection, "1; mode=block")
 		w.Header().Set(header.XFrameOptions, "deny")
 		w.Header().Set(header.ContentSecurityPolicy, "img-src https: data:; font-src https: data:; media-src https:;")
+		h.ServeHTTP(w, r)
+	})
+}
+
+func setDatabase(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := WithDatabase(r.Context(), db)
+		r = r.WithContext(ctx)
 		h.ServeHTTP(w, r)
 	})
 }

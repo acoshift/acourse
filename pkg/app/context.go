@@ -1,25 +1,25 @@
-package appctx
+package app
 
 import (
 	"context"
-
-	"github.com/acoshift/acourse/pkg/model"
+	"database/sql"
 )
 
 type (
 	userKey      struct{}
 	xsrfKey      struct{}
 	courseURLKey struct{}
+	dbKey        struct{}
 )
 
 // WithUser creates new context with user value
-func WithUser(ctx context.Context, user *model.User) context.Context {
+func WithUser(ctx context.Context, user *User) context.Context {
 	return context.WithValue(ctx, userKey{}, user)
 }
 
 // GetUser gets user from context
-func GetUser(ctx context.Context) *model.User {
-	x, _ := ctx.Value(userKey{}).(*model.User)
+func GetUser(ctx context.Context) *User {
+	x, _ := ctx.Value(userKey{}).(*User)
 	return x
 }
 
@@ -43,4 +43,14 @@ func WithCourseURL(ctx context.Context, v string) context.Context {
 func GetCourseURL(ctx context.Context) string {
 	x, _ := ctx.Value(courseURLKey{}).(string)
 	return x
+}
+
+// WithDatabase creates new context with database connection
+func WithDatabase(ctx context.Context, v *sql.DB) context.Context {
+	return context.WithValue(ctx, dbKey{}, v)
+}
+
+// GetDatabase gets database connection from context or panic
+func GetDatabase(ctx context.Context) *sql.DB {
+	return ctx.Value(dbKey{}).(*sql.DB)
 }

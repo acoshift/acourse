@@ -12,8 +12,6 @@ import (
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 	"gopkg.in/gomail.v2"
-
-	"github.com/acoshift/acourse/pkg/view"
 )
 
 // app shared vars
@@ -25,6 +23,7 @@ var (
 	baseURL       string
 	xsrfSecret    string
 	db            *sql.DB
+	repo          Repository // TODO: fixme
 	firAuth       *firebase.Auth
 	redisAddr     string
 	redisPass     string
@@ -129,10 +128,11 @@ func Init(config Config) error {
 	cachePrefix = redisPrefix
 
 	// init other packages
-	err = view.Init(view.Config{BaseURL: baseURL})
-	if err != nil {
-		return err
-	}
+	// TODO: fixme
+	// err = view.Init(view.Config{BaseURL: baseURL})
+	// if err != nil {
+	// 	return err
+	// }
 
 	return nil
 }

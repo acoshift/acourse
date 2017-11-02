@@ -4,35 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"time"
 
 	"github.com/lib/pq"
-)
-
-// Payment model
-type Payment struct {
-	ID            string
-	UserID        string
-	CourseID      string
-	Image         string
-	Price         float64
-	OriginalPrice float64
-	Code          string
-	Status        int
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
-	At            pq.NullTime
-
-	User   User
-	Course Course
-}
-
-// PaymentStatus values
-const (
-	Pending = iota
-	Accepted
-	Rejected
-	Refunded
 )
 
 const (

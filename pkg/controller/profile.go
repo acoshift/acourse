@@ -1,44 +1,41 @@
-package app
+package controller
 
 import (
 	"net/http"
 	"strings"
 	"unicode/utf8"
 
+	"github.com/acoshift/acourse/pkg/app"
 	"github.com/acoshift/header"
 	"github.com/acoshift/session"
 	"github.com/asaskevich/govalidator"
-
-	"github.com/acoshift/acourse/pkg/appctx"
-	"github.com/acoshift/acourse/pkg/model"
-	"github.com/acoshift/acourse/pkg/view"
 )
 
-func profile(w http.ResponseWriter, r *http.Request) {
+func (c *ctrl) Profile(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	user := appctx.GetUser(r.Context())
+	user := app.GetUser(r.Context())
 
-	ownCourses, err := model.ListOwnCourses(ctx, db, user.ID)
+	ownCourses, err := c.repo.ListOwnCourses(ctx, user.ID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	enrolledCourses, err := model.ListEnrolledCourses(ctx, db, user.ID)
+	enrolledCourses, err := c.repo.ListEnrolledCourses(ctx, user.ID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	view.Profile(w, r, ownCourses, enrolledCourses)
+	c.view.Profile(w, r, ownCourses, enrolledCourses)
 }
 
-func profileEdit(w http.ResponseWriter, r *http.Request) {
+func (c *ctrl) ProfileEdit(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
-		postProfileEdit(w, r)
+		c.postProfileEdit(w, r)
 		return
 	}
 	ctx := r.Context()
-	user := appctx.GetUser(ctx)
+	user := app.GetUser(ctx)
 	f := session.Get(ctx, sessName).Flash()
 	if !f.Has("Username") {
 		f.Set("Username", user.Username)
@@ -49,12 +46,12 @@ func profileEdit(w http.ResponseWriter, r *http.Request) {
 	if !f.Has("AboutMe") {
 		f.Set("AboutMe", user.AboutMe)
 	}
-	view.ProfileEdit(w, r)
+	c.view.ProfileEdit(w, r)
 }
 
-func postProfileEdit(w http.ResponseWriter, r *http.Request) {
+func (c *ctrl) postProfileEdit(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	user := appctx.GetUser(ctx)
+	user := app.GetUser(ctx)
 	f := session.Get(ctx, sessName).Flash()
 
 	image, info, err := r.FormFile("Image")

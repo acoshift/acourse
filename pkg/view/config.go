@@ -9,10 +9,3 @@ var (
 type Config struct {
 	BaseURL string
 }
-
-// Init inits view package
-func Init(config Config) error {
-	baseURL = config.BaseURL
-
-	return nil
-}

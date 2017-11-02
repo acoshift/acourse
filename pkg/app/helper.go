@@ -22,10 +22,6 @@ func generateSessionID() string {
 	return base64.URLEncoding.EncodeToString(b)
 }
 
-func back(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, r.RequestURI, http.StatusSeeOther)
-}
-
 func sendSlackMessage(ctx context.Context, message string) error {
 	if len(slackURL) == 0 {
 		return nil

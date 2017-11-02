@@ -23,7 +23,7 @@ import (
 	"github.com/tdewolff/minify/js"
 	"gopkg.in/yaml.v2"
 
-	"github.com/acoshift/acourse/pkg/model"
+	"github.com/acoshift/acourse/pkg/app"
 )
 
 // templates
@@ -143,11 +143,11 @@ func parse(set ...string) *tmpl {
 		},
 		"courseType": func(v int) string {
 			switch v {
-			case model.Live:
+			case app.Live:
 				return "Live"
-			case model.Video:
+			case app.Video:
 				return "Video"
-			case model.EBook:
+			case app.EBook:
 				return "eBook"
 			default:
 				return ""
@@ -190,25 +190,25 @@ func parse(set ...string) *tmpl {
 			return template.HTML(r)
 		},
 		"live": func() int {
-			return model.Live
+			return app.Live
 		},
 		"video": func() int {
-			return model.Video
+			return app.Video
 		},
 		"eBook": func() int {
-			return model.EBook
+			return app.EBook
 		},
 		"pending": func() int {
-			return model.Pending
+			return app.Pending
 		},
 		"accepted": func() int {
-			return model.Accepted
+			return app.Accepted
 		},
 		"rejected": func() int {
-			return model.Rejected
+			return app.Rejected
 		},
 		"refunded": func() int {
-			return model.Refunded
+			return app.Refunded
 		},
 		"html": func(v string) template.HTML {
 			return template.HTML(v)
