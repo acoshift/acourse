@@ -28,6 +28,9 @@ func (repo) FindMagicLink(ctx context.Context, linkID string) (string, error) {
 
 	key := prefix + "magic:" + linkID
 	userID, err := redis.String(db.Do("GET", key))
+	if err == redis.ErrNil {
+		return "", app.ErrNotFound
+	}
 	if err != nil {
 		return "", err
 	}

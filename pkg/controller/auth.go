@@ -119,7 +119,7 @@ func (c *ctrl) SignInLink(w http.ResponseWriter, r *http.Request) {
 
 	userID, err := c.repo.FindMagicLink(ctx, linkID)
 	if err != nil {
-		f.Add("Errors", err.Error())
+		f.Add("Errors", "ไม่พบ Magic Link ของคุณ")
 		http.Redirect(w, r, "/signin", http.StatusFound)
 		return
 	}
