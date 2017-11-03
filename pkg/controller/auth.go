@@ -77,7 +77,7 @@ func (c *ctrl) postSignIn(w http.ResponseWriter, r *http.Request) {
 	message := fmt.Sprintf(`สวัสดีครับคุณ %s,
 
 
-ตามที่ท่านได้ขอ Magic Link เพื่อเข้าสู่ระบบสำหรับ acourse.io ท่านสามารถเข้าได้ผ่าน Link ข้างล่างนี้
+ตามที่ท่านได้ขอ Magic Link เพื่อเข้าสู่ระบบสำหรับ acourse.io นั้นท่านสามารถเข้าได้ผ่าน Link ข้างล่างนี้ ภายใน 1 ชม.
 
 %s
 
