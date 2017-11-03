@@ -108,7 +108,8 @@ func New(config Config) http.Handler {
 			Invalidator: cacheInvalidator,
 		}),
 		setDatabase(config.DB),
-		setRedisPool(config.RedisPool),
+		setRedisPool(config.RedisPool, config.RedisPrefix),
+		setCachePool(config.CachePool, config.CachePrefix),
 		fetchUser(repo),
 		csrf(config.BaseURL, config.XSRFSecret),
 	)(main))

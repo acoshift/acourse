@@ -6,7 +6,6 @@ import (
 
 	"cloud.google.com/go/storage"
 	"github.com/acoshift/go-firebase-admin"
-	"github.com/garyburd/redigo/redis"
 	"gopkg.in/gomail.v2"
 
 	"github.com/acoshift/acourse/pkg/app"
@@ -23,7 +22,6 @@ func New(config Config) app.Controller {
 		emailFrom:    config.EmailFrom,
 		emailDialer:  config.EmailDialer,
 		baseURL:      config.BaseURL,
-		cachePool:    config.CachePool,
 		cachePrefix:  config.CachePrefix,
 		bucketHandle: config.BucketHandle,
 		bucketName:   config.BucketName,
@@ -40,7 +38,6 @@ type Config struct {
 	EmailFrom    string
 	EmailDialer  *gomail.Dialer
 	BaseURL      string
-	CachePool    *redis.Pool
 	CachePrefix  string
 	BucketHandle *storage.BucketHandle
 	BucketName   string
@@ -55,7 +52,6 @@ type ctrl struct {
 	emailFrom    string
 	emailDialer  *gomail.Dialer
 	baseURL      string
-	cachePool    *redis.Pool
 	cachePrefix  string
 	bucketHandle *storage.BucketHandle
 	bucketName   string

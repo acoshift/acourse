@@ -17,6 +17,8 @@ type Config struct {
 	XSRFSecret    string
 	RedisPool     *redis.Pool
 	RedisPrefix   string
+	CachePool     *redis.Pool
+	CachePrefix   string
 	SessionSecret []byte
 }
 

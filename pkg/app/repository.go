@@ -2,8 +2,6 @@ package app
 
 import (
 	"context"
-
-	"github.com/garyburd/redigo/redis"
 )
 
 // Repository is the app's repository
@@ -31,7 +29,7 @@ type Repository interface {
 	GetCourseContent(ctx context.Context, courseContentID string) (*CourseContent, error)
 	GetCourseIDFromURL(ctx context.Context, url string) (string, error)
 	ListCourses(ctx context.Context, limit, offset int64) ([]*Course, error)
-	ListPublicCourses(ctx context.Context, cachePool *redis.Pool, cachePrefix string) ([]*Course, error)
+	ListPublicCourses(ctx context.Context) ([]*Course, error)
 	ListOwnCourses(ctx context.Context, userID string) ([]*Course, error)
 	ListEnrolledCourses(ctx context.Context, userID string) ([]*Course, error)
 	CountCourses(ctx context.Context) (int64, error)

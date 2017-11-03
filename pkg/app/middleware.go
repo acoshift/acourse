@@ -191,10 +191,20 @@ func setDatabase(db *sql.DB) middleware.Middleware {
 	}
 }
 
-func setRedisPool(pool *redis.Pool) middleware.Middleware {
+func setRedisPool(pool *redis.Pool, prefix string) middleware.Middleware {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			ctx := NewRedisPoolContext(r.Context(), pool)
+			ctx := NewRedisPoolContext(r.Context(), pool, prefix)
+			r = r.WithContext(ctx)
+			h.ServeHTTP(w, r)
+		})
+	}
+}
+
+func setCachePool(pool *redis.Pool, prefix string) middleware.Middleware {
+	return func(h http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ctx := NewCachePoolContext(r.Context(), pool, prefix)
 			r = r.WithContext(ctx)
 			h.ServeHTTP(w, r)
 		})

@@ -10,7 +10,7 @@ func (c *ctrl) Index(w http.ResponseWriter, r *http.Request) {
 		c.view.NotFound(w, r)
 		return
 	}
-	courses, err := c.repo.ListPublicCourses(ctx, c.cachePool, c.cachePrefix)
+	courses, err := c.repo.ListPublicCourses(ctx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

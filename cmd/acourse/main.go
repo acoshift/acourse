@@ -103,8 +103,6 @@ func main() {
 		EmailFrom:    config.String("email_from"),
 		EmailDialer:  emailDialer,
 		BaseURL:      config.String("base_url"),
-		CachePool:    cachePool,
-		CachePrefix:  config.String("redis_prefix"),
 		BucketHandle: bucketHandle,
 		BucketName:   config.String("bucket"),
 	})
@@ -117,6 +115,8 @@ func main() {
 		XSRFSecret:    config.String("xsrf_key"),
 		RedisPool:     redisPool,
 		RedisPrefix:   config.String("redis_prefix"),
+		CachePool:     cachePool,
+		CachePrefix:   config.String("redis_prefix"),
 		SessionSecret: config.Bytes("session_secret"),
 	})
 

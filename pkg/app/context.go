@@ -9,11 +9,14 @@ import (
 )
 
 type (
-	userKey      struct{}
-	xsrfKey      struct{}
-	courseURLKey struct{}
-	dbKey        struct{}
-	redisPoolKey struct{}
+	userKey        struct{}
+	xsrfKey        struct{}
+	courseURLKey   struct{}
+	dbKey          struct{}
+	redisPoolKey   struct{}
+	redisPrefixKey struct{}
+	cachePoolKey   struct{}
+	cachePrefixKey struct{}
 )
 
 // session id
@@ -100,11 +103,25 @@ func GetTransaction(ctx context.Context) DB {
 }
 
 // NewRedisPoolContext creates new context with redis pool
-func NewRedisPoolContext(ctx context.Context, pool *redis.Pool) context.Context {
-	return context.WithValue(ctx, redisPoolKey{}, pool)
+func NewRedisPoolContext(ctx context.Context, pool *redis.Pool, prefix string) context.Context {
+	ctx = context.WithValue(ctx, redisPoolKey{}, pool)
+	ctx = context.WithValue(ctx, redisPrefixKey{}, prefix)
+	return ctx
 }
 
 // GetRedisPool gets redis pool from context
-func GetRedisPool(ctx context.Context) *redis.Pool {
-	return ctx.Value(redisPoolKey{}).(*redis.Pool)
+func GetRedisPool(ctx context.Context) (*redis.Pool, string) {
+	return ctx.Value(redisPoolKey{}).(*redis.Pool), ctx.Value(redisPrefixKey{}).(string)
+}
+
+// NewCachePoolContext creates new context with cache pool
+func NewCachePoolContext(ctx context.Context, pool *redis.Pool, prefix string) context.Context {
+	ctx = context.WithValue(ctx, cachePoolKey{}, pool)
+	ctx = context.WithValue(ctx, cachePrefixKey{}, prefix)
+	return ctx
+}
+
+// GetCachePool gets cache pool from context
+func GetCachePool(ctx context.Context) (*redis.Pool, string) {
+	return ctx.Value(cachePoolKey{}).(*redis.Pool), ctx.Value(cachePrefixKey{}).(string)
 }
