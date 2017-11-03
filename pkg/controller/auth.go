@@ -86,10 +86,17 @@ func (c *ctrl) postSignIn(w http.ResponseWriter, r *http.Request) {
 
 	go c.sendEmail(user.Email.String, "Magic Link Request", markdown(message))
 
+	f.Set("CheckEmail", "1")
+
 	http.Redirect(w, r, "/signin/check-email", http.StatusSeeOther)
 }
 
 func (c *ctrl) CheckEmail(w http.ResponseWriter, r *http.Request) {
+	f := app.GetSession(r.Context()).Flash()
+	if !f.Has("CheckEmail") {
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
 	c.view.CheckEmail(w, r)
 }
 
