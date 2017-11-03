@@ -77,7 +77,7 @@ func (c *ctrl) postSignIn(w http.ResponseWriter, r *http.Request) {
 	message := fmt.Sprintf(`สวัสดีครับคุณ %s,
 
 
-ตามที่ท่านได้ขอ Magic Link เพิ่อเข้าสู่ระบบสำหรับ acourse.io ท่านสามารถเข้าได้ผ่าน Link ข้างล่างนี้
+ตามที่ท่านได้ขอ Magic Link เพื่อเข้าสู่ระบบสำหรับ acourse.io ท่านสามารถเข้าได้ผ่าน Link ข้างล่างนี้
 
 %s
 
@@ -91,6 +91,29 @@ func (c *ctrl) postSignIn(w http.ResponseWriter, r *http.Request) {
 
 func (c *ctrl) CheckEmail(w http.ResponseWriter, r *http.Request) {
 	c.view.CheckEmail(w, r)
+}
+
+func (c *ctrl) SignInLink(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	linkID := r.FormValue("id")
+	if len(linkID) == 0 {
+		http.Redirect(w, r, "/signin", http.StatusFound)
+		return
+	}
+
+	s := app.GetSession(ctx)
+	f := s.Flash()
+
+	userID, err := c.repo.FindMagicLink(ctx, linkID)
+	if err != nil {
+		f.Add("Errors", err.Error())
+		http.Redirect(w, r, "/signin", http.StatusFound)
+		return
+	}
+
+	app.SetUserID(s, userID)
+	http.Redirect(w, r, "/", http.StatusFound)
 }
 
 func (c *ctrl) SignInPassword(w http.ResponseWriter, r *http.Request) {

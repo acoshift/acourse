@@ -58,6 +58,7 @@ func New(config Config) http.Handler {
 	main.Handle("/signin", mustNotSignedIn(http.HandlerFunc(ctrl.SignIn)))
 	main.Handle("/signin/password", mustNotSignedIn(http.HandlerFunc(ctrl.SignInPassword)))
 	main.Handle("/signin/check-email", mustNotSignedIn(http.HandlerFunc(ctrl.CheckEmail)))
+	main.Handle("/signin/link", mustNotSignedIn(http.HandlerFunc(ctrl.SignInLink)))
 	main.Handle("/openid", mustNotSignedIn(http.HandlerFunc(ctrl.OpenID)))
 	main.Handle("/openid/callback", mustNotSignedIn(http.HandlerFunc(ctrl.OpenIDCallback)))
 	main.Handle("/signup", mustNotSignedIn(http.HandlerFunc(ctrl.SignUp)))

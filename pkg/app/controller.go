@@ -11,6 +11,7 @@ type Controller interface {
 	SignIn(w http.ResponseWriter, r *http.Request)
 	SignInPassword(w http.ResponseWriter, r *http.Request)
 	CheckEmail(w http.ResponseWriter, r *http.Request)
+	SignInLink(w http.ResponseWriter, r *http.Request)
 	OpenID(w http.ResponseWriter, r *http.Request)
 	OpenIDCallback(w http.ResponseWriter, r *http.Request)
 	SignUp(w http.ResponseWriter, r *http.Request)
