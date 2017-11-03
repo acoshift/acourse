@@ -20,15 +20,15 @@ func generateSessionID() string {
 	return base64.RawURLEncoding.EncodeToString(b)
 }
 
-func (c *ctrl) SignIn(w http.ResponseWriter, r *http.Request) {
+func (c *ctrl) SignInPassword(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
-		c.postSignIn(w, r)
+		c.postSignInPassword(w, r)
 		return
 	}
-	c.view.SignIn(w, r)
+	c.view.SignInPassword(w, r)
 }
 
-func (c *ctrl) postSignIn(w http.ResponseWriter, r *http.Request) {
+func (c *ctrl) postSignInPassword(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	f := app.GetSession(ctx).Flash()
 

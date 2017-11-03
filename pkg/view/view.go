@@ -84,13 +84,13 @@ func (v *view) NotFound(w http.ResponseWriter, r *http.Request) {
 	renderWithStatusCode(ctx, w, http.StatusNotFound, tmplNotFound, &data)
 }
 
-// SignIn renders signin view
-func (v *view) SignIn(w http.ResponseWriter, r *http.Request) {
+// SignInPassword renders signin-password view
+func (v *view) SignInPassword(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	data := struct {
 		*Page
 	}{newPage(ctx)}
-	render(ctx, w, tmplSignIn, &data)
+	render(ctx, w, tmplSignInPassword, &data)
 }
 
 // SignUp renders signup view

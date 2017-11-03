@@ -28,12 +28,12 @@ import (
 
 // templates
 var (
-	tmplIndex         = parse("index.tmpl", "app.tmpl", "layout.tmpl", "component/course-card.tmpl")
-	tmplNotFound      = parse("not-found.tmpl", "app.tmpl", "layout.tmpl")
-	tmplSignIn        = parse("signin.tmpl", "auth.tmpl", "layout.tmpl")
-	tmplSignUp        = parse("signup.tmpl", "auth.tmpl", "layout.tmpl")
-	tmplResetPassword = parse("reset-password.tmpl", "auth.tmpl", "layout.tmpl")
-	tmplProfile       = parse(
+	tmplIndex          = parse("index.tmpl", "app.tmpl", "layout.tmpl", "component/course-card.tmpl")
+	tmplNotFound       = parse("not-found.tmpl", "app.tmpl", "layout.tmpl")
+	tmplSignInPassword = parse("signin-password.tmpl", "auth.tmpl", "layout.tmpl")
+	tmplSignUp         = parse("signup.tmpl", "auth.tmpl", "layout.tmpl")
+	tmplResetPassword  = parse("reset-password.tmpl", "auth.tmpl", "layout.tmpl")
+	tmplProfile        = parse(
 		"profile.tmpl", "app.tmpl", "layout.tmpl",
 		"component/user-profile.tmpl",
 		"component/own-course-card.tmpl",
