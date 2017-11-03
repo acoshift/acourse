@@ -63,8 +63,8 @@ func main() {
 	// init email client
 	emailDialer := gomail.NewPlainDialer(config.String("email_server"), config.Int("email_port"), config.String("email_user"), config.String("email_password"))
 
-	// TODO: use in-memory redis for caching
-	cachePool := &redis.Pool{
+	// init redis pool
+	redisPool := &redis.Pool{
 		MaxIdle:     5,
 		IdleTimeout: 5 * time.Minute,
 		Dial: func() (redis.Conn, error) {
@@ -78,6 +78,10 @@ func main() {
 			return err
 		},
 	}
+
+	// init cache pool
+	// TODO: use in-memory redis for caching
+	cachePool := redisPool
 
 	// init databases
 	db, err := sql.Open("postgres", config.String("sql_url"))
@@ -99,8 +103,6 @@ func main() {
 		EmailFrom:    config.String("email_from"),
 		EmailDialer:  emailDialer,
 		BaseURL:      config.String("base_url"),
-		CachePool:    cachePool,
-		CachePrefix:  config.String("redis_prefix"),
 		BucketHandle: bucketHandle,
 		BucketName:   config.String("bucket"),
 	})
@@ -111,9 +113,10 @@ func main() {
 		DB:            db,
 		BaseURL:       config.String("base_url"),
 		XSRFSecret:    config.String("xsrf_key"),
-		RedisAddr:     config.String("redis_addr"),
-		RedisPass:     config.String("redis_pass"),
+		RedisPool:     redisPool,
 		RedisPrefix:   config.String("redis_prefix"),
+		CachePool:     cachePool,
+		CachePrefix:   config.String("redis_prefix"),
 		SessionSecret: config.Bytes("session_secret"),
 	})
 

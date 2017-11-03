@@ -4,8 +4,10 @@ import (
 	"crypto/rand"
 	"database/sql"
 	"encoding/base64"
+	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"unicode/utf8"
 
 	"github.com/acoshift/go-firebase-admin"
@@ -14,10 +16,18 @@ import (
 	"github.com/acoshift/acourse/pkg/app"
 )
 
-func generateSessionID() string {
-	b := make([]byte, 24)
+func generateRandomString(n int) string {
+	b := make([]byte, n)
 	io.ReadFull(rand.Reader, b)
 	return base64.RawURLEncoding.EncodeToString(b)
+}
+
+func generateSessionID() string {
+	return generateRandomString(24)
+}
+
+func generateMagicLinkID() string {
+	return generateRandomString(64)
 }
 
 func (c *ctrl) SignIn(w http.ResponseWriter, r *http.Request) {
@@ -30,7 +40,106 @@ func (c *ctrl) SignIn(w http.ResponseWriter, r *http.Request) {
 
 func (c *ctrl) postSignIn(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	f := app.GetSession(ctx).Flash()
+	s := app.GetSession(ctx)
+	f := s.Flash()
+
+	email := r.FormValue("Email")
+	if len(email) == 0 {
+		f.Add("Errors", "email required")
+	}
+	if f.Has("Errors") {
+		f.Set("Email", email)
+		back(w, r)
+		return
+	}
+
+	f.Set("CheckEmail", "1")
+
+	user, err := c.repo.FindUserByEmail(ctx, email)
+	// don't lets user know if email is wrong
+	if err == app.ErrNotFound {
+		http.Redirect(w, r, "/signin/check-email", http.StatusSeeOther)
+		return
+	}
+	if err != nil {
+		f.Add("Errors", err.Error())
+		back(w, r)
+		return
+	}
+
+	linkID := generateMagicLinkID()
+
+	err = c.repo.StoreMagicLink(ctx, linkID, user.ID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	linkQuery := make(url.Values)
+	linkQuery.Set("id", linkID)
+	if x := r.FormValue("r"); len(x) > 0 {
+		linkQuery.Set("r", x)
+	}
+
+	message := fmt.Sprintf(`สวัสดีครับคุณ %s,
+
+
+ตามที่ท่านได้ขอ Magic Link เพื่อเข้าสู่ระบบสำหรับ acourse.io นั้นท่านสามารถเข้าได้ผ่าน Link ข้างล่างนี้ ภายใน 1 ชม.
+
+%s
+
+ทีมงาน acourse.io
+	`, user.Name, c.makeLink("/signin/link", linkQuery))
+
+	go c.sendEmail(user.Email.String, "Magic Link Request", markdown(message))
+
+	http.Redirect(w, r, "/signin/check-email", http.StatusSeeOther)
+}
+
+func (c *ctrl) CheckEmail(w http.ResponseWriter, r *http.Request) {
+	f := app.GetSession(r.Context()).Flash()
+	if !f.Has("CheckEmail") {
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
+	c.view.CheckEmail(w, r)
+}
+
+func (c *ctrl) SignInLink(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	linkID := r.FormValue("id")
+	if len(linkID) == 0 {
+		http.Redirect(w, r, "/signin", http.StatusFound)
+		return
+	}
+
+	s := app.GetSession(ctx)
+	f := s.Flash()
+
+	userID, err := c.repo.FindMagicLink(ctx, linkID)
+	if err != nil {
+		f.Add("Errors", err.Error())
+		http.Redirect(w, r, "/signin", http.StatusFound)
+		return
+	}
+
+	app.SetUserID(s, userID)
+	http.Redirect(w, r, "/", http.StatusFound)
+}
+
+func (c *ctrl) SignInPassword(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		c.postSignInPassword(w, r)
+		return
+	}
+	c.view.SignInPassword(w, r)
+}
+
+func (c *ctrl) postSignInPassword(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	s := app.GetSession(ctx)
+	f := s.Flash()
 
 	email := r.FormValue("Email")
 	if len(email) == 0 {
@@ -53,7 +162,6 @@ func (c *ctrl) postSignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s := app.GetSession(ctx)
 	app.SetUserID(s, userID)
 	s.Rotate()
 
@@ -118,7 +226,7 @@ func (c *ctrl) OpenIDCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx, tx, err := app.WithTransaction(ctx)
+	ctx, tx, err := app.NewTransactionContext(ctx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

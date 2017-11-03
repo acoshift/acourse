@@ -39,7 +39,7 @@ func courseHandler(ctrl Controller, view View) http.Handler {
 			p = strings.TrimSuffix(s[1], "/")
 		}
 
-		r = r.WithContext(WithCourseURL(r.Context(), s[0]))
+		r = r.WithContext(NewCourseURLContext(r.Context(), s[0]))
 		switch p {
 		case "":
 			ctrl.CourseView(w, r)

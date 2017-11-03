@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/acoshift/header"
-	"github.com/acoshift/session"
 	"github.com/dustin/go-humanize"
 	"github.com/microcosm-cc/bluemonday"
 	"github.com/russross/blackfriday"
@@ -28,12 +27,14 @@ import (
 
 // templates
 var (
-	tmplIndex         = parse("index.tmpl", "app.tmpl", "layout.tmpl", "component/course-card.tmpl")
-	tmplNotFound      = parse("not-found.tmpl", "app.tmpl", "layout.tmpl")
-	tmplSignIn        = parse("signin.tmpl", "auth.tmpl", "layout.tmpl")
-	tmplSignUp        = parse("signup.tmpl", "auth.tmpl", "layout.tmpl")
-	tmplResetPassword = parse("reset-password.tmpl", "auth.tmpl", "layout.tmpl")
-	tmplProfile       = parse(
+	tmplIndex          = parse("index.tmpl", "app.tmpl", "layout.tmpl", "component/course-card.tmpl")
+	tmplNotFound       = parse("not-found.tmpl", "app.tmpl", "layout.tmpl")
+	tmplSignIn         = parse("signin.tmpl", "auth.tmpl", "layout.tmpl")
+	tmplSignInPassword = parse("signin-password.tmpl", "auth.tmpl", "layout.tmpl")
+	tmplSignUp         = parse("signup.tmpl", "auth.tmpl", "layout.tmpl")
+	tmplResetPassword  = parse("reset-password.tmpl", "auth.tmpl", "layout.tmpl")
+	tmplCheckEmail     = parse("check-email.tmpl", "auth.tmpl", "layout.tmpl")
+	tmplProfile        = parse(
 		"profile.tmpl", "app.tmpl", "layout.tmpl",
 		"component/user-profile.tmpl",
 		"component/own-course-card.tmpl",
@@ -241,12 +242,11 @@ func renderWithStatusCode(ctx context.Context, w http.ResponseWriter, code int, 
 	}
 
 	// clear flash after render
-	session.Get(ctx, "sess").Flash().Clear()
+	app.GetSession(ctx).Flash().Clear()
 
 	// set header for html
 	w.Header().Set(header.ContentType, "text/html; charset=utf-8")
 	w.Header().Set(header.CacheControl, "no-cache, no-store, must-revalidate, max-age=0")
-	w.Header().Set(header.XUACompatible, "ie=edge")
 	w.WriteHeader(code)
 
 	// use buffer is faster than pipe stream for this case

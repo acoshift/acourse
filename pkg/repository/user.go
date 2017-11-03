@@ -39,6 +39,10 @@ const (
 		where users.username = $1
 	`
 
+	queryGetUserFromEmail = selectUsers + `
+		where users.email = $1
+	`
+
 	queryListUsers = selectUsers + `
 		order by users.created_at desc
 		limit $1 offset $2
@@ -117,6 +121,20 @@ func (repo) GetUserFromUsername(ctx context.Context, username string) (*app.User
 
 	var x app.User
 	err := scanUser(db.QueryRowContext(ctx, queryGetUserFromUsername, username).Scan, &x)
+	if err != nil {
+		return nil, err
+	}
+	return &x, nil
+}
+
+func (repo) FindUserByEmail(ctx context.Context, email string) (*app.User, error) {
+	db := app.GetDatabase(ctx)
+
+	var x app.User
+	err := scanUser(db.QueryRowContext(ctx, queryGetUserFromEmail, email).Scan, &x)
+	if err == sql.ErrNoRows {
+		return nil, app.ErrNotFound
+	}
 	if err != nil {
 		return nil, err
 	}

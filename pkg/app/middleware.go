@@ -9,6 +9,7 @@ import (
 	"github.com/acoshift/header"
 	"github.com/acoshift/middleware"
 	"github.com/acoshift/session"
+	"github.com/garyburd/redigo/redis"
 	"golang.org/x/net/xsrftoken"
 )
 
@@ -58,7 +59,7 @@ func csrf(baseURL, xsrfSecret string) middleware.Middleware {
 				return
 			}
 			token := xsrftoken.Generate(xsrfSecret, id, r.URL.Path)
-			ctx := WithXSRFToken(r.Context(), token)
+			ctx := NewXSRFTokenContext(r.Context(), token)
 			h.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
@@ -102,7 +103,7 @@ func fetchUser(repo Repository) middleware.Middleware {
 						Username: id,
 					}
 				}
-				r = r.WithContext(WithUser(ctx, u))
+				r = r.WithContext(NewUserContext(ctx, u))
 			}
 			h.ServeHTTP(w, r)
 		})
@@ -183,7 +184,27 @@ func setHeaders(h http.Handler) http.Handler {
 func setDatabase(db *sql.DB) middleware.Middleware {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			ctx := WithDatabase(r.Context(), db)
+			ctx := NewDatabaseContext(r.Context(), db)
+			r = r.WithContext(ctx)
+			h.ServeHTTP(w, r)
+		})
+	}
+}
+
+func setRedisPool(pool *redis.Pool, prefix string) middleware.Middleware {
+	return func(h http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ctx := NewRedisPoolContext(r.Context(), pool, prefix)
+			r = r.WithContext(ctx)
+			h.ServeHTTP(w, r)
+		})
+	}
+}
+
+func setCachePool(pool *redis.Pool, prefix string) middleware.Middleware {
+	return func(h http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ctx := NewCachePoolContext(r.Context(), pool, prefix)
 			r = r.WithContext(ctx)
 			h.ServeHTTP(w, r)
 		})

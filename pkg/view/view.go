@@ -93,6 +93,15 @@ func (v *view) SignIn(w http.ResponseWriter, r *http.Request) {
 	render(ctx, w, tmplSignIn, &data)
 }
 
+// SignInPassword renders signin-password view
+func (v *view) SignInPassword(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	data := struct {
+		*Page
+	}{newPage(ctx)}
+	render(ctx, w, tmplSignInPassword, &data)
+}
+
 // SignUp renders signup view
 func (v *view) SignUp(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -110,6 +119,16 @@ func (v *view) ResetPassword(w http.ResponseWriter, r *http.Request) {
 		*Page
 	}{page}
 	render(ctx, w, tmplResetPassword, &data)
+}
+
+// CheckEmail render check email view
+func (v *view) CheckEmail(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	page := newPage(ctx)
+	data := struct {
+		*Page
+	}{page}
+	render(ctx, w, tmplCheckEmail, &data)
 }
 
 // Profile renders profile view

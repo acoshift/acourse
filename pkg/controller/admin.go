@@ -191,7 +191,7 @@ func (c *ctrl) postAdminPendingPayment(w http.ResponseWriter, r *http.Request) {
 
 	id := r.FormValue("ID")
 	if action == "accept" {
-		txctx, tx, err := app.WithTransaction(ctx)
+		txctx, tx, err := app.NewTransactionContext(ctx)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

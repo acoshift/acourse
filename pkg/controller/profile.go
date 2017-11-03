@@ -103,7 +103,7 @@ func (c *ctrl) postProfileEdit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx, tx, err := app.WithTransaction(ctx)
+	ctx, tx, err := app.NewTransactionContext(ctx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
