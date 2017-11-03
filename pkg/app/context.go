@@ -17,8 +17,7 @@ type (
 // session id
 const sessName = "sess"
 
-// WithUser creates new context with user value
-func WithUser(ctx context.Context, user *User) context.Context {
+func withUser(ctx context.Context, user *User) context.Context {
 	return context.WithValue(ctx, userKey{}, user)
 }
 
@@ -28,8 +27,7 @@ func GetUser(ctx context.Context) *User {
 	return x
 }
 
-// WithXSRFToken creates new context with xsrf value
-func WithXSRFToken(ctx context.Context, token string) context.Context {
+func withXSRFToken(ctx context.Context, token string) context.Context {
 	return context.WithValue(ctx, xsrfKey{}, token)
 }
 
@@ -39,8 +37,7 @@ func GetXSRFToken(ctx context.Context) string {
 	return x
 }
 
-// WithCourseURL creates new context with course url value
-func WithCourseURL(ctx context.Context, v string) context.Context {
+func withCourseURL(ctx context.Context, v string) context.Context {
 	return context.WithValue(ctx, courseURLKey{}, v)
 }
 
@@ -68,8 +65,7 @@ type Tx interface {
 	Commit() error
 }
 
-// WithDatabase creates new context with database connection
-func WithDatabase(ctx context.Context, v *sql.DB) context.Context {
+func withDatabase(ctx context.Context, v *sql.DB) context.Context {
 	return context.WithValue(ctx, dbKey{}, v)
 }
 
