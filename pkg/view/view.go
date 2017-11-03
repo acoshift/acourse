@@ -121,6 +121,16 @@ func (v *view) ResetPassword(w http.ResponseWriter, r *http.Request) {
 	render(ctx, w, tmplResetPassword, &data)
 }
 
+// CheckEmail render check email view
+func (v *view) CheckEmail(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	page := newPage(ctx)
+	data := struct {
+		*Page
+	}{page}
+	render(ctx, w, tmplCheckEmail, &data)
+}
+
 // Profile renders profile view
 func (v *view) Profile(w http.ResponseWriter, r *http.Request, ownCourses, enrolledCourses []*app.Course) {
 	ctx := r.Context()

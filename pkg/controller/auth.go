@@ -89,6 +89,10 @@ func (c *ctrl) postSignIn(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/signin/check-email", http.StatusSeeOther)
 }
 
+func (c *ctrl) CheckEmail(w http.ResponseWriter, r *http.Request) {
+	c.view.CheckEmail(w, r)
+}
+
 func (c *ctrl) SignInPassword(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		c.postSignInPassword(w, r)

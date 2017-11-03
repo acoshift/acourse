@@ -10,6 +10,7 @@ type View interface {
 	SignInPassword(w http.ResponseWriter, r *http.Request)
 	SignUp(w http.ResponseWriter, r *http.Request)
 	ResetPassword(w http.ResponseWriter, r *http.Request)
+	CheckEmail(w http.ResponseWriter, r *http.Request)
 	Profile(w http.ResponseWriter, r *http.Request, ownCourses, enrolledCourses []*Course)
 	ProfileEdit(w http.ResponseWriter, r *http.Request)
 	Course(w http.ResponseWriter, r *http.Request, course *Course, enrolled bool, owned bool, pendingEnroll bool)

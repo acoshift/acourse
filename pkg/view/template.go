@@ -33,6 +33,7 @@ var (
 	tmplSignInPassword = parse("signin-password.tmpl", "auth.tmpl", "layout.tmpl")
 	tmplSignUp         = parse("signup.tmpl", "auth.tmpl", "layout.tmpl")
 	tmplResetPassword  = parse("reset-password.tmpl", "auth.tmpl", "layout.tmpl")
+	tmplCheckEmail     = parse("check-email.tmpl", "auth.tmpl", "layout.tmpl")
 	tmplProfile        = parse(
 		"profile.tmpl", "app.tmpl", "layout.tmpl",
 		"component/user-profile.tmpl",
