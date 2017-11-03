@@ -9,6 +9,7 @@ import (
 	"github.com/acoshift/header"
 	"github.com/acoshift/middleware"
 	"github.com/acoshift/session"
+	"github.com/garyburd/redigo/redis"
 	"golang.org/x/net/xsrftoken"
 )
 
@@ -184,6 +185,16 @@ func setDatabase(db *sql.DB) middleware.Middleware {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := NewDatabaseContext(r.Context(), db)
+			r = r.WithContext(ctx)
+			h.ServeHTTP(w, r)
+		})
+	}
+}
+
+func setRedisPool(pool *redis.Pool) middleware.Middleware {
+	return func(h http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ctx := NewRedisPoolContext(r.Context(), pool)
 			r = r.WithContext(ctx)
 			h.ServeHTTP(w, r)
 		})

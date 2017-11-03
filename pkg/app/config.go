@@ -3,6 +3,8 @@ package app
 import (
 	"database/sql"
 	"encoding/gob"
+
+	"github.com/garyburd/redigo/redis"
 )
 
 // Config use to init app package
@@ -13,8 +15,7 @@ type Config struct {
 	DB            *sql.DB
 	BaseURL       string
 	XSRFSecret    string
-	RedisAddr     string
-	RedisPass     string
+	RedisPool     *redis.Pool
 	RedisPrefix   string
 	SessionSecret []byte
 }

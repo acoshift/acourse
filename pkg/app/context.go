@@ -5,6 +5,7 @@ import (
 	"database/sql"
 
 	"github.com/acoshift/session"
+	"github.com/garyburd/redigo/redis"
 )
 
 type (
@@ -12,6 +13,7 @@ type (
 	xsrfKey      struct{}
 	courseURLKey struct{}
 	dbKey        struct{}
+	redisPoolKey struct{}
 )
 
 // session id
@@ -95,4 +97,14 @@ func GetTransaction(ctx context.Context) DB {
 		panic("database is not transaction")
 	}
 	return x.(DB)
+}
+
+// NewRedisPoolContext creates new context with redis pool
+func NewRedisPoolContext(ctx context.Context, pool *redis.Pool) context.Context {
+	return context.WithValue(ctx, redisPoolKey{}, pool)
+}
+
+// GetRedisPool gets redis pool from context
+func GetRedisPool(ctx context.Context) *redis.Pool {
+	return ctx.Value(redisPoolKey{}).(*redis.Pool)
 }

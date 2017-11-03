@@ -9,7 +9,6 @@ import (
 	"github.com/acoshift/servertiming"
 	"github.com/acoshift/session"
 	redisstore "github.com/acoshift/session/store/redis"
-	"github.com/garyburd/redigo/redis"
 )
 
 // New creates new app
@@ -84,20 +83,7 @@ func New(config Config) http.Handler {
 			Secure:   session.PreferSecure,
 			Store: redisstore.New(redisstore.Config{
 				Prefix: config.RedisPrefix,
-				Pool: &redis.Pool{
-					MaxIdle:     5,
-					IdleTimeout: 5 * time.Minute,
-					Dial: func() (redis.Conn, error) {
-						return redis.Dial("tcp", config.RedisAddr, redis.DialPassword(config.RedisPass))
-					},
-					TestOnBorrow: func(c redis.Conn, t time.Time) error {
-						if time.Since(t) > time.Minute {
-							return nil
-						}
-						_, err := c.Do("PING")
-						return err
-					},
-				},
+				Pool:   config.RedisPool,
 			}),
 		}),
 		cachestatic.New(cachestatic.Config{
@@ -122,6 +108,7 @@ func New(config Config) http.Handler {
 			Invalidator: cacheInvalidator,
 		}),
 		setDatabase(config.DB),
+		setRedisPool(config.RedisPool),
 		fetchUser(repo),
 		csrf(config.BaseURL, config.XSRFSecret),
 	)(main))
