@@ -53,7 +53,14 @@ func (c *ctrl) postSignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	f.Set("CheckEmail", "1")
+
 	user, err := c.repo.FindUserByEmail(ctx, email)
+	// don't lets user know if email is wrong
+	if err == app.ErrNotFound {
+		http.Redirect(w, r, "/signin/check-email", http.StatusSeeOther)
+		return
+	}
 	if err != nil {
 		f.Add("Errors", err.Error())
 		back(w, r)
@@ -85,8 +92,6 @@ func (c *ctrl) postSignIn(w http.ResponseWriter, r *http.Request) {
 	`, user.Name, c.makeLink("/signin/link", linkQuery))
 
 	go c.sendEmail(user.Email.String, "Magic Link Request", markdown(message))
-
-	f.Set("CheckEmail", "1")
 
 	http.Redirect(w, r, "/signin/check-email", http.StatusSeeOther)
 }

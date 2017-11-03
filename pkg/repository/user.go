@@ -132,6 +132,9 @@ func (repo) FindUserByEmail(ctx context.Context, email string) (*app.User, error
 
 	var x app.User
 	err := scanUser(db.QueryRowContext(ctx, queryGetUserFromEmail, email).Scan, &x)
+	if err == sql.ErrNoRows {
+		return nil, app.ErrNotFound
+	}
 	if err != nil {
 		return nil, err
 	}
