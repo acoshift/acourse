@@ -17,7 +17,8 @@ type (
 // session id
 const sessName = "sess"
 
-func withUser(ctx context.Context, user *User) context.Context {
+// NewUserContext creates new context with user
+func NewUserContext(ctx context.Context, user *User) context.Context {
 	return context.WithValue(ctx, userKey{}, user)
 }
 
@@ -27,7 +28,8 @@ func GetUser(ctx context.Context) *User {
 	return x
 }
 
-func withXSRFToken(ctx context.Context, token string) context.Context {
+// NewXSRFTokenContext creates new context with XSRF Token
+func NewXSRFTokenContext(ctx context.Context, token string) context.Context {
 	return context.WithValue(ctx, xsrfKey{}, token)
 }
 
@@ -37,7 +39,8 @@ func GetXSRFToken(ctx context.Context) string {
 	return x
 }
 
-func withCourseURL(ctx context.Context, v string) context.Context {
+// NewCourseURLContext creates new context with course url
+func NewCourseURLContext(ctx context.Context, v string) context.Context {
 	return context.WithValue(ctx, courseURLKey{}, v)
 }
 
@@ -65,7 +68,8 @@ type Tx interface {
 	Commit() error
 }
 
-func withDatabase(ctx context.Context, v *sql.DB) context.Context {
+// NewDatabaseContext creates new context with database connection
+func NewDatabaseContext(ctx context.Context, v *sql.DB) context.Context {
 	return context.WithValue(ctx, dbKey{}, v)
 }
 
@@ -74,8 +78,8 @@ func GetDatabase(ctx context.Context) DB {
 	return ctx.Value(dbKey{}).(DB)
 }
 
-// WithTransaction creates new context with transaction
-func WithTransaction(ctx context.Context) (context.Context, Tx, error) {
+// NewTransactionContext creates new context with transaction
+func NewTransactionContext(ctx context.Context) (context.Context, Tx, error) {
 	db := ctx.Value(dbKey{}).(*sql.DB)
 	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {

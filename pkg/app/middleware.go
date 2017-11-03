@@ -58,7 +58,7 @@ func csrf(baseURL, xsrfSecret string) middleware.Middleware {
 				return
 			}
 			token := xsrftoken.Generate(xsrfSecret, id, r.URL.Path)
-			ctx := withXSRFToken(r.Context(), token)
+			ctx := NewXSRFTokenContext(r.Context(), token)
 			h.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
@@ -102,7 +102,7 @@ func fetchUser(repo Repository) middleware.Middleware {
 						Username: id,
 					}
 				}
-				r = r.WithContext(withUser(ctx, u))
+				r = r.WithContext(NewUserContext(ctx, u))
 			}
 			h.ServeHTTP(w, r)
 		})
@@ -183,7 +183,7 @@ func setHeaders(h http.Handler) http.Handler {
 func setDatabase(db *sql.DB) middleware.Middleware {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			ctx := withDatabase(r.Context(), db)
+			ctx := NewDatabaseContext(r.Context(), db)
 			r = r.WithContext(ctx)
 			h.ServeHTTP(w, r)
 		})
