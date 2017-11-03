@@ -8,11 +8,15 @@ import (
 
 // Repository is the app's repository
 type Repository interface {
+	// Auth
+	StoreMagicLink(ctx context.Context, linkID string, userID string) error
+
 	// User
 	SaveUser(ctx context.Context, x *User) error
 	GetUsers(ctx context.Context, userIDs []string) ([]*User, error)
 	GetUser(ctx context.Context, userID string) (*User, error)
 	GetUserFromUsername(ctx context.Context, username string) (*User, error)
+	FindUserByEmail(ctx context.Context, email string) (*User, error)
 	ListUsers(ctx context.Context, limit, offset int64) ([]*User, error)
 	CountUsers(ctx context.Context) (int64, error)
 	IsUserExists(ctx context.Context, id string) (bool, error)
