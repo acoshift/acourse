@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/acoshift/header"
-	"github.com/acoshift/session"
 	"github.com/dustin/go-humanize"
 	"github.com/microcosm-cc/bluemonday"
 	"github.com/russross/blackfriday"
@@ -241,7 +240,7 @@ func renderWithStatusCode(ctx context.Context, w http.ResponseWriter, code int, 
 	}
 
 	// clear flash after render
-	session.Get(ctx, "sess").Flash().Clear()
+	app.GetSession(ctx).Flash().Clear()
 
 	// set header for html
 	w.Header().Set(header.ContentType, "text/html; charset=utf-8")
