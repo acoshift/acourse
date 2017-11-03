@@ -20,6 +20,18 @@ func generateSessionID() string {
 	return base64.RawURLEncoding.EncodeToString(b)
 }
 
+func (c *ctrl) SignIn(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		c.postSignIn(w, r)
+		return
+	}
+	c.view.SignIn(w, r)
+}
+
+func (c *ctrl) postSignIn(w http.ResponseWriter, r *http.Request) {
+	// TODO:
+}
+
 func (c *ctrl) SignInPassword(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		c.postSignInPassword(w, r)

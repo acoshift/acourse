@@ -6,6 +6,7 @@ import "net/http"
 type View interface {
 	Index(w http.ResponseWriter, r *http.Request, courses []*Course)
 	NotFound(w http.ResponseWriter, r *http.Request)
+	SignIn(w http.ResponseWriter, r *http.Request)
 	SignInPassword(w http.ResponseWriter, r *http.Request)
 	SignUp(w http.ResponseWriter, r *http.Request)
 	ResetPassword(w http.ResponseWriter, r *http.Request)
