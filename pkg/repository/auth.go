@@ -37,3 +37,23 @@ func (repo) FindMagicLink(ctx context.Context, linkID string) (string, error) {
 	db.Do("DEL", key)
 	return userID, nil
 }
+
+func (repo) CanAcquireMagicLink(ctx context.Context, email string) (bool, error) {
+	pool, prefix := app.GetRedisPool(ctx)
+	db := pool.Get()
+	defer db.Close()
+
+	key := prefix + "magic-rate:" + email
+	current, err := redis.Int(db.Do("INCR", key))
+	if err != nil {
+		return false, err
+	}
+	if current > 1 {
+		return false, nil
+	}
+	_, err = db.Do("EXPIRE", key, int64(5*time.Minute/time.Second))
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}

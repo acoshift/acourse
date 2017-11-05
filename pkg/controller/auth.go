@@ -53,6 +53,16 @@ func (c *ctrl) postSignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	ok, err := c.repo.CanAcquireMagicLink(ctx, email)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if !ok {
+		f.Add("Errors", "อีเมลของคุณได้ขอ Magic Link จากเราไปแล้ว กรุณาตรวจสอบอีเมล")
+		back(w, r)
+	}
+
 	f.Set("CheckEmail", "1")
 
 	user, err := c.repo.FindUserByEmail(ctx, email)
