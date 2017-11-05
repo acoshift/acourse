@@ -9,6 +9,7 @@ type Repository interface {
 	// Auth
 	StoreMagicLink(ctx context.Context, linkID string, userID string) error
 	FindMagicLink(ctx context.Context, linkID string) (string, error)
+	CanAcquireMagicLink(ctx context.Context, email string) (bool, error)
 
 	// User
 	SaveUser(ctx context.Context, x *User) error
