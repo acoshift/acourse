@@ -88,7 +88,7 @@ func (c *ctrl) postSignIn(w http.ResponseWriter, r *http.Request) {
 	linkQuery := make(url.Values)
 	linkQuery.Set("id", linkID)
 	if x := r.FormValue("r"); len(x) > 0 {
-		linkQuery.Set("r", x)
+		linkQuery.Set("r", parsePath(x))
 	}
 
 	message := fmt.Sprintf(`สวัสดีครับคุณ %s,
@@ -192,11 +192,7 @@ func (c *ctrl) postSignInPassword(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	rURL := r.FormValue("r")
-	if len(rURL) == 0 {
-		rURL = "/"
-	}
-
+	rURL := parsePath(r.FormValue("r"))
 	http.Redirect(w, r, rURL, http.StatusSeeOther)
 }
 
@@ -336,11 +332,7 @@ func (c *ctrl) postSignUp(w http.ResponseWriter, r *http.Request) {
 	s := app.GetSession(ctx)
 	app.SetUserID(s, userID)
 
-	rURL := r.FormValue("r")
-	if len(rURL) == 0 {
-		rURL = "/"
-	}
-
+	rURL := parsePath(r.FormValue("r"))
 	http.Redirect(w, r, rURL, http.StatusSeeOther)
 }
 
