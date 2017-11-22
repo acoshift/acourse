@@ -81,6 +81,7 @@ func New(config Config) http.Handler {
 			MaxAge:   30 * 24 * time.Hour,
 			HTTPOnly: true,
 			Secure:   session.PreferSecure,
+			SameSite: session.SameSiteLax,
 			Store: redisstore.New(redisstore.Config{
 				Prefix: config.RedisPrefix,
 				Pool:   config.RedisPool,
