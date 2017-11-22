@@ -52,6 +52,8 @@ func main() {
 		Secure:   session.PreferSecure,
 		Store:    store.New(store.Config{}),
 	})(mux)
+	// equals to
+	// h := session.New(session.Config{...}).Middleware()(mux)
 
 	log.Fatal(http.ListenAndServe(":8080", h))
 }

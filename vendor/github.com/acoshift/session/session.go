@@ -9,17 +9,14 @@ import (
 	"github.com/acoshift/flash"
 )
 
-type (
-	markDestroy struct{}
-	markRotate  struct{}
-)
-
 // Session type
 type Session struct {
-	id      string
-	oldID   string // for rotate
+	id      string // id is the hashed id if enable hash
+	rawID   string
+	oldID   string // for rotate, is the hashed old id if enable hash
+	oldData []byte // is the old encoded data before rotate
 	data    map[interface{}]interface{}
-	mark    interface{}
+	destroy bool
 	changed bool
 	flash   *flash.Flash
 
@@ -30,21 +27,19 @@ type Session struct {
 	HTTPOnly bool
 	MaxAge   time.Duration
 	Secure   bool
+	SameSite SameSite
 
-	// disable
-	DisableRenew bool
+	IDHashFunc func(id string) string
 }
 
 func init() {
 	gob.Register(map[interface{}]interface{}{})
-	gob.Register(timestampKey{})
 	gob.Register(flashKey{})
 }
 
 // session internal data
 type (
-	timestampKey struct{}
-	flashKey     struct{}
+	flashKey struct{}
 )
 
 func (s *Session) encode() []byte {
@@ -55,7 +50,7 @@ func (s *Session) encode() []byte {
 	buf := bytes.Buffer{}
 	err := gob.NewEncoder(&buf).Encode(s.data)
 	if err != nil {
-		// this should never happended
+		// this should never happened
 		// or developer don't register type into gob
 		panic("session: can not encode data; " + err.Error())
 	}
@@ -69,23 +64,21 @@ func (s *Session) decode(b []byte) {
 	}
 }
 
-func (s *Session) shouldRenew() bool {
-	if s.DisableRenew {
-		return false
-	}
-	sec, _ := s.Get(timestampKey{}).(int64)
-	if sec < 0 {
-		return false
-	}
-	if sec == 0 {
-		// backward-compability
+// ID returns session id or hashed session id if enable hash id
+func (s *Session) ID() string {
+	return s.id
+}
+
+// Changed returns is session data changed
+func (s *Session) Changed() bool {
+	if s.changed {
 		return true
 	}
-	t := time.Unix(sec, 0)
-	if time.Now().Sub(t) < s.MaxAge/2 {
-		return false
+	if s.flash != nil && s.flash.Changed() {
+		s.changed = true
+		return true
 	}
-	return true
+	return false
 }
 
 // Get gets data from session
@@ -116,30 +109,56 @@ func (s *Session) Del(key interface{}) {
 	}
 }
 
+// Pop gets data from session then delete it
+func (s *Session) Pop(key interface{}) interface{} {
+	if s.data == nil {
+		return nil
+	}
+	r := s.data[key]
+	s.changed = true
+	delete(s.data, key)
+	return r
+}
+
 // Rotate rotates session id
 // use when change user access level to prevent session fixation
 //
 // can not use rotate and destory same time
+// Rotate can call only one time
 func (s *Session) Rotate() {
-	s.mark = markRotate{}
+	if len(s.oldID) > 0 {
+		return
+	}
+
+	if s.destroy {
+		return
+	}
+
+	s.oldID = s.id
+	s.oldData = s.encode()
+	s.rawID = generateID()
+	if s.IDHashFunc != nil {
+		s.id = s.IDHashFunc(s.rawID)
+	} else {
+		s.id = s.rawID
+	}
 	s.changed = true
 }
 
 // Renew clear all data in current session
 // and rotate session id
 func (s *Session) Renew() {
-	s.changed = true
 	s.data = make(map[interface{}]interface{})
 	s.Rotate()
 }
 
 // Destroy destroys session from store
 func (s *Session) Destroy() {
-	s.mark = markDestroy{}
+	s.destroy = true
 }
 
 func (s *Session) setCookie(w http.ResponseWriter) {
-	if _, ok := s.mark.(markDestroy); ok {
+	if s.destroy {
 		http.SetCookie(w, &http.Cookie{
 			Name:     s.Name,
 			Domain:   s.Domain,
@@ -153,42 +172,34 @@ func (s *Session) setCookie(w http.ResponseWriter) {
 		return
 	}
 
+	// if session don't have raw id, don't set cookie
+	if len(s.rawID) == 0 {
+		return
+	}
+
+	// if session not modified, don't set cookie
+	if !s.Changed() {
+		return
+	}
+
 	// detect is flash changed and encode new flash data
 	if s.flash != nil && s.flash.Changed() {
-		s.changed = true
 		b, _ := s.flash.Encode()
 		s.Set(flashKey{}, b)
 	}
 
-	if len(s.id) > 0 && s.shouldRenew() {
-		s.Rotate()
-	}
-
-	// if session was modified, save session to store,
-	// if not don't save to store to prevent store overflow
-	if _, ok := s.mark.(markRotate); ok {
-		s.oldID = s.id
-		s.id = ""
-	}
-
-	if len(s.id) > 0 {
-		return
-	}
-
-	if len(s.id) == 0 && !s.changed {
-		return
-	}
-
-	s.id = generateID()
-	http.SetCookie(w, &http.Cookie{
-		Name:     s.Name,
-		Domain:   s.Domain,
-		Path:     s.Path,
-		HttpOnly: s.HTTPOnly,
-		Value:    s.id,
-		MaxAge:   int(s.MaxAge / time.Second),
-		Expires:  time.Now().Add(s.MaxAge),
-		Secure:   s.Secure,
+	setCookie(w, &cookie{
+		Cookie: http.Cookie{
+			Name:     s.Name,
+			Domain:   s.Domain,
+			Path:     s.Path,
+			HttpOnly: s.HTTPOnly,
+			Value:    s.rawID,
+			MaxAge:   int(s.MaxAge / time.Second),
+			Expires:  time.Now().Add(s.MaxAge),
+			Secure:   s.Secure,
+		},
+		SameSite: s.SameSite,
 	})
 }
 
@@ -204,4 +215,15 @@ func (s *Session) Flash() *flash.Flash {
 		s.flash = flash.New()
 	}
 	return s.flash
+}
+
+// Hijacked checks is session was hijacked,
+// can use only with Manager
+func (s *Session) Hijacked() bool {
+	if t, ok := s.Get(destroyedKey{}).(int64); ok {
+		if t < time.Now().UnixNano()-int64(HijackedTime) {
+			return true
+		}
+	}
+	return false
 }

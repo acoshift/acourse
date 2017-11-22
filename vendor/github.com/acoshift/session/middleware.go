@@ -13,12 +13,17 @@ type (
 	storageKey struct{}
 )
 
+// Middleware is the Manager middleware wrapper
+//
+// New(config).Middleware()
+func Middleware(config Config) middleware.Middleware {
+	return New(config).Middleware()
+}
+
 // Middleware injects session manager into request's context.
 //
 // All data changed before write response writer's header will be save.
-func Middleware(config Config) middleware.Middleware {
-	m := New(config)
-
+func (m *Manager) Middleware() middleware.Middleware {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()

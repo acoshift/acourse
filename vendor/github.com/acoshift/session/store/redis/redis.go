@@ -35,7 +35,12 @@ func (s *redisStore) Get(key string) ([]byte, error) {
 func (s *redisStore) Set(key string, value []byte, ttl time.Duration) error {
 	c := s.pool.Get()
 	defer c.Close()
-	_, err := c.Do("SETEX", s.prefix+key, int64(ttl/time.Second), value)
+	var err error
+	if ttl > 0 {
+		_, err = c.Do("SETEX", s.prefix+key, int64(ttl/time.Second), value)
+	} else {
+		_, err = c.Do("SET", s.prefix+key, value)
+	}
 	return err
 }
 
