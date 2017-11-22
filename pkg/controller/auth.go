@@ -172,8 +172,8 @@ func (c *ctrl) postSignInPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app.SetUserID(s, userID)
 	s.Rotate()
+	app.SetUserID(s, userID)
 
 	// if user not found in our database, insert new user
 	// this happend when database out of sync with firebase authentication
@@ -267,8 +267,8 @@ func (c *ctrl) OpenIDCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app.SetUserID(s, user.UserID)
 	s.Rotate()
+	app.SetUserID(s, user.UserID)
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
