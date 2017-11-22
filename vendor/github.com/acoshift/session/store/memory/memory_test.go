@@ -9,7 +9,7 @@ import (
 )
 
 func TestMemory(t *testing.T) {
-	s := store.New(store.Config{CleanupInterval: 10 * time.Millisecond})
+	s := store.New(store.Config{GCInterval: 10 * time.Millisecond})
 	err := s.Set("a", []byte("test"), time.Millisecond)
 	assert.NoError(t, err)
 
@@ -31,4 +31,14 @@ func TestMemory(t *testing.T) {
 	s.Del("a")
 	_, err = s.Get("a")
 	assert.Error(t, err)
+}
+
+func TestMemoryWithoutTTL(t *testing.T) {
+	s := store.New(store.Config{GCInterval: 10 * time.Millisecond})
+	err := s.Set("a", []byte("test"), 0)
+	assert.NoError(t, err)
+
+	b, err := s.Get("a")
+	assert.NoError(t, err)
+	assert.Equal(t, "test", string(b))
 }

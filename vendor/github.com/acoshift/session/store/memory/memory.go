@@ -10,17 +10,17 @@ import (
 
 // Config is the memory store config
 type Config struct {
-	CleanupInterval time.Duration
+	GCInterval time.Duration
 }
 
 // New creates new memory store
 func New(config Config) session.Store {
 	s := &memoryStore{
-		cleanupInterval: config.CleanupInterval,
-		l:               make(map[interface{}]*item),
+		gcInterval: config.GCInterval,
+		l:          make(map[interface{}]*item),
 	}
-	if config.CleanupInterval > 0 {
-		go s.cleanupWorker()
+	if s.gcInterval > 0 {
+		time.AfterFunc(s.gcInterval, s.gcWorker)
 	}
 	return s
 }
@@ -31,12 +31,17 @@ type item struct {
 }
 
 type memoryStore struct {
-	cleanupInterval time.Duration
-	m               sync.RWMutex
-	l               map[interface{}]*item
+	gcInterval time.Duration
+	m          sync.RWMutex
+	l          map[interface{}]*item
 }
 
-func (s *memoryStore) cleanupWorker() {
+func (s *memoryStore) gcWorker() {
+	s.GC()
+	time.AfterFunc(s.gcInterval, s.gcWorker)
+}
+
+func (s *memoryStore) GC() {
 	now := time.Now()
 	s.m.Lock()
 	for k, v := range s.l {
@@ -45,7 +50,6 @@ func (s *memoryStore) cleanupWorker() {
 		}
 	}
 	s.m.Unlock()
-	time.AfterFunc(s.cleanupInterval, s.cleanupWorker)
 }
 
 var errNotFound = errors.New("memory: session not found")
@@ -65,10 +69,11 @@ func (s *memoryStore) Get(key string) ([]byte, error) {
 
 func (s *memoryStore) Set(key string, value []byte, ttl time.Duration) error {
 	s.m.Lock()
-	s.l[key] = &item{
-		data: value,
-		exp:  time.Now().Add(ttl),
+	it := &item{data: value}
+	if ttl > 0 {
+		it.exp = time.Now().Add(ttl)
 	}
+	s.l[key] = it
 	s.m.Unlock()
 	return nil
 }
