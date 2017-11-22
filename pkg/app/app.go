@@ -78,7 +78,7 @@ func New(config Config) http.Handler {
 		session.Middleware(session.Config{
 			Secret:   config.SessionSecret,
 			Path:     "/",
-			MaxAge:   5 * 24 * time.Hour,
+			MaxAge:   30 * 24 * time.Hour,
 			HTTPOnly: true,
 			Secure:   session.PreferSecure,
 			Store: redisstore.New(redisstore.Config{
