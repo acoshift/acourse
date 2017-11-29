@@ -513,7 +513,7 @@ func TestSessionMultipleGet(t *testing.T) {
 		s.Set("test", 1)
 
 		s = session.Get(r.Context(), "sess")
-		assert.Equal(t, 1, s.Get("test"), "expected get session 2 times must preverse mutated value")
+		assert.Equal(t, 1, s.Get("test"), "expected get session 2 times must not mutated value")
 	}))
 
 	w := httptest.NewRecorder()

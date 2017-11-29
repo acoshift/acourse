@@ -104,6 +104,12 @@ func (m *Manager) Save(w http.ResponseWriter, s *Session) {
 		return
 	}
 
+	// detect is flash changed and encode new flash data
+	if s.flash != nil && s.flash.Changed() {
+		b, _ := s.flash.Encode()
+		s.Set(flashKey{}, b)
+	}
+
 	// if session not modified, don't save to store to prevent store overflow
 	if !s.Changed() {
 		return

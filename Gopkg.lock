@@ -52,8 +52,8 @@
 [[projects]]
   name = "github.com/acoshift/session"
   packages = [".","store/redis"]
-  revision = "36db2de1ff90384cc873eaf30df3d62e76c67cc8"
-  version = "v0.4.0"
+  revision = "01bf3e4593772b5aaf64efa0d18956559ee41e27"
+  version = "v0.4.1"
 
 [[projects]]
   name = "github.com/asaskevich/govalidator"

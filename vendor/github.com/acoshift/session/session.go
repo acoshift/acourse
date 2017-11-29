@@ -123,7 +123,7 @@ func (s *Session) Pop(key interface{}) interface{} {
 // Rotate rotates session id
 // use when change user access level to prevent session fixation
 //
-// can not use rotate and destory same time
+// can not use rotate and destroy same time
 // Rotate can call only one time
 func (s *Session) Rotate() {
 	if len(s.oldID) > 0 {
@@ -180,12 +180,6 @@ func (s *Session) setCookie(w http.ResponseWriter) {
 	// if session not modified, don't set cookie
 	if !s.Changed() {
 		return
-	}
-
-	// detect is flash changed and encode new flash data
-	if s.flash != nil && s.flash.Changed() {
-		b, _ := s.flash.Encode()
-		s.Set(flashKey{}, b)
 	}
 
 	setCookie(w, &cookie{

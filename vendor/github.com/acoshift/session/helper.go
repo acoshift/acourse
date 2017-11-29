@@ -20,7 +20,7 @@ func isTLS(r *http.Request) bool {
 func generateID() string {
 	b := make([]byte, 32)
 	if _, err := io.ReadFull(rand.Reader, b); err != nil {
-		// this should never happended
+		// this should never happened
 		// or something wrong with OS's crypto pseudorandom generator
 		panic(err)
 	}
