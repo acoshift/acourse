@@ -90,13 +90,11 @@ func main() {
 	}
 	db.SetMaxIdleConns(5)
 
-	view := view.New(view.Config{
-		BaseURL: config.String("base_url"),
-	})
+	view.BaseURL = config.String("base_url")
+
 	repo := repository.New()
 	ctrl := controller.New(controller.Config{
 		Repository:   repo,
-		View:         view,
 		Auth:         firAuth,
 		Location:     loc,
 		SlackURL:     config.String("slack_url"),
@@ -109,7 +107,6 @@ func main() {
 	app := app.New(app.Config{
 		Controller:    ctrl,
 		Repository:    repo,
-		View:          view,
 		DB:            db,
 		BaseURL:       config.String("base_url"),
 		XSRFSecret:    config.String("xsrf_key"),

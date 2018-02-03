@@ -15,7 +15,6 @@ import (
 func New(config Config) app.Controller {
 	return &ctrl{
 		repo:         config.Repository,
-		view:         config.View,
 		auth:         config.Auth,
 		loc:          config.Location,
 		slackURL:     config.SlackURL,
@@ -31,7 +30,6 @@ func New(config Config) app.Controller {
 // Config is the controller config
 type Config struct {
 	Repository   app.Repository
-	View         app.View
 	Auth         *firebase.Auth
 	Location     *time.Location
 	SlackURL     string
@@ -45,7 +43,6 @@ type Config struct {
 
 type ctrl struct {
 	repo         app.Repository
-	view         app.View
 	auth         *firebase.Auth
 	loc          *time.Location
 	slackURL     string

@@ -7,10 +7,11 @@ import (
 	"github.com/garyburd/redigo/redis"
 
 	"github.com/acoshift/acourse/pkg/app"
+	"github.com/acoshift/acourse/pkg/appctx"
 )
 
 func (repo) StoreMagicLink(ctx context.Context, linkID string, userID string) error {
-	pool, prefix := app.GetRedisPool(ctx)
+	pool, prefix := appctx.GetRedisPool(ctx)
 	db := pool.Get()
 	defer db.Close()
 
@@ -22,7 +23,7 @@ func (repo) StoreMagicLink(ctx context.Context, linkID string, userID string) er
 }
 
 func (repo) FindMagicLink(ctx context.Context, linkID string) (string, error) {
-	pool, prefix := app.GetRedisPool(ctx)
+	pool, prefix := appctx.GetRedisPool(ctx)
 	db := pool.Get()
 	defer db.Close()
 
@@ -39,7 +40,7 @@ func (repo) FindMagicLink(ctx context.Context, linkID string) (string, error) {
 }
 
 func (repo) CanAcquireMagicLink(ctx context.Context, email string) (bool, error) {
-	pool, prefix := app.GetRedisPool(ctx)
+	pool, prefix := appctx.GetRedisPool(ctx)
 	db := pool.Get()
 	defer db.Close()
 

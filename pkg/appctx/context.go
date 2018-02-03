@@ -1,4 +1,4 @@
-package app
+package appctx
 
 import (
 	"context"
@@ -6,6 +6,8 @@ import (
 
 	"github.com/acoshift/session"
 	"github.com/garyburd/redigo/redis"
+
+	"github.com/acoshift/acourse/pkg/entity"
 )
 
 type (
@@ -23,13 +25,13 @@ type (
 const sessName = "sess"
 
 // NewUserContext creates new context with user
-func NewUserContext(ctx context.Context, user *User) context.Context {
+func NewUserContext(ctx context.Context, user *entity.User) context.Context {
 	return context.WithValue(ctx, userKey{}, user)
 }
 
 // GetUser gets user from context
-func GetUser(ctx context.Context) *User {
-	x, _ := ctx.Value(userKey{}).(*User)
+func GetUser(ctx context.Context) *entity.User {
+	x, _ := ctx.Value(userKey{}).(*entity.User)
 	return x
 }
 

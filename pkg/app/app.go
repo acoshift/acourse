@@ -9,18 +9,18 @@ import (
 	"github.com/acoshift/servertiming"
 	"github.com/acoshift/session"
 	redisstore "github.com/acoshift/session/store/redis"
+
+	"github.com/acoshift/acourse/pkg/appctx"
 )
 
 // New creates new app
 func New(config Config) http.Handler {
 	ctrl := config.Controller
 	repo := config.Repository
-	view := config.View
 
 	app := &app{
 		ctrl: ctrl,
 		repo: repo,
-		view: view,
 	}
 
 	cacheInvalidator := make(chan interface{})
@@ -33,7 +33,7 @@ func New(config Config) http.Handler {
 	}()
 
 	// create middlewares
-	isCourseOwner := isCourseOwner(config.DB, config.View)
+	isCourseOwner := isCourseOwner(config.DB)
 
 	// create mux
 	mux := http.NewServeMux()
@@ -65,7 +65,7 @@ func New(config Config) http.Handler {
 	main.Handle("/reset/password", mustNotSignedIn(http.HandlerFunc(ctrl.ResetPassword)))
 	main.Handle("/profile", mustSignedIn(http.HandlerFunc(ctrl.Profile)))
 	main.Handle("/profile/edit", mustSignedIn(http.HandlerFunc(ctrl.ProfileEdit)))
-	main.Handle("/course/", http.StripPrefix("/course/", courseHandler(ctrl, view)))
+	main.Handle("/course/", http.StripPrefix("/course/", courseHandler(ctrl)))
 	main.Handle("/admin/", http.StripPrefix("/admin", onlyAdmin(admin)))
 	main.Handle("/editor/", http.StripPrefix("/editor", editor))
 
@@ -95,7 +95,7 @@ func New(config Config) http.Handler {
 				}
 
 				// skip if signed in
-				s := session.Get(r.Context(), sessName)
+				s := appctx.GetSession(r.Context())
 				if x := GetUserID(s); len(x) > 0 {
 					return true
 				}
@@ -126,5 +126,4 @@ type app struct {
 	http.Handler
 	ctrl Controller
 	repo Repository
-	view View
 }

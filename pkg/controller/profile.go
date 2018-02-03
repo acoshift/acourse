@@ -8,12 +8,13 @@ import (
 	"github.com/acoshift/header"
 	"github.com/asaskevich/govalidator"
 
-	"github.com/acoshift/acourse/pkg/app"
+	"github.com/acoshift/acourse/pkg/appctx"
+	"github.com/acoshift/acourse/pkg/view"
 )
 
 func (c *ctrl) Profile(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	user := app.GetUser(r.Context())
+	user := appctx.GetUser(r.Context())
 
 	ownCourses, err := c.repo.ListOwnCourses(ctx, user.ID)
 	if err != nil {
@@ -26,7 +27,7 @@ func (c *ctrl) Profile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c.view.Profile(w, r, ownCourses, enrolledCourses)
+	view.Profile(w, r, ownCourses, enrolledCourses)
 }
 
 func (c *ctrl) ProfileEdit(w http.ResponseWriter, r *http.Request) {
@@ -35,8 +36,8 @@ func (c *ctrl) ProfileEdit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	ctx := r.Context()
-	user := app.GetUser(ctx)
-	f := app.GetSession(ctx).Flash()
+	user := appctx.GetUser(ctx)
+	f := appctx.GetSession(ctx).Flash()
 	if !f.Has("Username") {
 		f.Set("Username", user.Username)
 	}
@@ -46,13 +47,13 @@ func (c *ctrl) ProfileEdit(w http.ResponseWriter, r *http.Request) {
 	if !f.Has("AboutMe") {
 		f.Set("AboutMe", user.AboutMe)
 	}
-	c.view.ProfileEdit(w, r)
+	view.ProfileEdit(w, r)
 }
 
 func (c *ctrl) postProfileEdit(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	user := app.GetUser(ctx)
-	f := app.GetSession(ctx).Flash()
+	user := appctx.GetUser(ctx)
+	f := appctx.GetSession(ctx).Flash()
 
 	var imageURL string
 	if image, info, err := r.FormFile("Image"); err != http.ErrMissingFile && info.Size > 0 {
@@ -102,14 +103,14 @@ func (c *ctrl) postProfileEdit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx, tx, err := app.NewTransactionContext(ctx)
+	ctx, tx, err := appctx.NewTransactionContext(ctx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	defer tx.Rollback()
 
-	db := app.GetDatabase(ctx)
+	db := appctx.GetDatabase(ctx)
 
 	if len(imageURL) > 0 {
 		_, err = db.ExecContext(ctx, `

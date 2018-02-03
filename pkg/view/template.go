@@ -22,7 +22,8 @@ import (
 	"github.com/tdewolff/minify/js"
 	"gopkg.in/yaml.v2"
 
-	"github.com/acoshift/acourse/pkg/app"
+	"github.com/acoshift/acourse/pkg/appctx"
+	"github.com/acoshift/acourse/pkg/entity"
 )
 
 // templates
@@ -144,11 +145,11 @@ func parse(set ...string) *tmpl {
 		},
 		"courseType": func(v int) string {
 			switch v {
-			case app.Live:
+			case entity.Live:
 				return "Live"
-			case app.Video:
+			case entity.Video:
 				return "Video"
-			case app.EBook:
+			case entity.EBook:
 				return "eBook"
 			default:
 				return ""
@@ -191,25 +192,25 @@ func parse(set ...string) *tmpl {
 			return template.HTML(r)
 		},
 		"live": func() int {
-			return app.Live
+			return entity.Live
 		},
 		"video": func() int {
-			return app.Video
+			return entity.Video
 		},
 		"eBook": func() int {
-			return app.EBook
+			return entity.EBook
 		},
 		"pending": func() int {
-			return app.Pending
+			return entity.Pending
 		},
 		"accepted": func() int {
-			return app.Accepted
+			return entity.Accepted
 		},
 		"rejected": func() int {
-			return app.Rejected
+			return entity.Rejected
 		},
 		"refunded": func() int {
-			return app.Refunded
+			return entity.Refunded
 		},
 		"html": func(v string) template.HTML {
 			return template.HTML(v)
@@ -242,7 +243,7 @@ func renderWithStatusCode(ctx context.Context, w http.ResponseWriter, code int, 
 	}
 
 	// clear flash after render
-	app.GetSession(ctx).Flash().Clear()
+	appctx.GetSession(ctx).Flash().Clear()
 
 	// set header for html
 	w.Header().Set(header.ContentType, "text/html; charset=utf-8")

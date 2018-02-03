@@ -4,6 +4,9 @@ import (
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/acoshift/acourse/pkg/appctx"
+	"github.com/acoshift/acourse/pkg/view"
 )
 
 type fileFS struct {
@@ -31,7 +34,7 @@ func fileHandler(name string) http.Handler {
 	})
 }
 
-func courseHandler(ctrl Controller, view View) http.Handler {
+func courseHandler(ctrl Controller) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		s := strings.SplitN(r.URL.Path, "/", 2)
 		var p string
@@ -39,7 +42,7 @@ func courseHandler(ctrl Controller, view View) http.Handler {
 			p = strings.TrimSuffix(s[1], "/")
 		}
 
-		r = r.WithContext(NewCourseURLContext(r.Context(), s[0]))
+		r = r.WithContext(appctx.NewCourseURLContext(r.Context(), s[0]))
 		switch p {
 		case "":
 			ctrl.CourseView(w, r)

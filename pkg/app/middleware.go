@@ -8,9 +8,12 @@ import (
 
 	"github.com/acoshift/header"
 	"github.com/acoshift/middleware"
-	"github.com/acoshift/session"
 	"github.com/garyburd/redigo/redis"
 	"golang.org/x/net/xsrftoken"
+
+	"github.com/acoshift/acourse/pkg/appctx"
+	"github.com/acoshift/acourse/pkg/entity"
+	"github.com/acoshift/acourse/pkg/view"
 )
 
 func panicLogger(h http.Handler) http.Handler {
@@ -38,7 +41,7 @@ func csrf(baseURL, xsrfSecret string) middleware.Middleware {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			var id string
-			if u := GetUser(r.Context()); u != nil {
+			if u := appctx.GetUser(r.Context()); u != nil {
 				id = u.ID
 			}
 			if r.Method == http.MethodPost {
@@ -59,7 +62,7 @@ func csrf(baseURL, xsrfSecret string) middleware.Middleware {
 				return
 			}
 			token := xsrftoken.Generate(xsrfSecret, id, r.URL.Path)
-			ctx := NewXSRFTokenContext(r.Context(), token)
+			ctx := appctx.NewXSRFTokenContext(r.Context(), token)
 			h.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
@@ -67,7 +70,7 @@ func csrf(baseURL, xsrfSecret string) middleware.Middleware {
 
 func mustSignedIn(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		s := session.Get(r.Context(), sessName)
+		s := appctx.GetSession(r.Context())
 		id := GetUserID(s)
 		if len(id) == 0 {
 			http.Redirect(w, r, "/signin?r="+url.QueryEscape(r.RequestURI), http.StatusFound)
@@ -79,7 +82,7 @@ func mustSignedIn(h http.Handler) http.Handler {
 
 func mustNotSignedIn(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		s := session.Get(r.Context(), sessName)
+		s := appctx.GetSession(r.Context())
 		id := GetUserID(s)
 		if len(id) > 0 {
 			http.Redirect(w, r, "/", http.StatusFound)
@@ -93,17 +96,17 @@ func fetchUser(repo Repository) middleware.Middleware {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
-			s := session.Get(ctx, sessName)
+			s := appctx.GetSession(ctx)
 			id := GetUserID(s)
 			if len(id) > 0 {
 				u, err := repo.GetUser(ctx, id)
 				if err == ErrNotFound {
-					u = &User{
+					u = &entity.User{
 						ID:       id,
 						Username: id,
 					}
 				}
-				r = r.WithContext(NewUserContext(ctx, u))
+				r = r.WithContext(appctx.NewUserContext(ctx, u))
 			}
 			h.ServeHTTP(w, r)
 		})
@@ -112,7 +115,7 @@ func fetchUser(repo Repository) middleware.Middleware {
 
 func onlyAdmin(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		u := GetUser(r.Context())
+		u := appctx.GetUser(r.Context())
 		if u == nil {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
@@ -127,7 +130,7 @@ func onlyAdmin(h http.Handler) http.Handler {
 
 func onlyInstructor(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		u := GetUser(r.Context())
+		u := appctx.GetUser(r.Context())
 		if u == nil {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
@@ -140,11 +143,11 @@ func onlyInstructor(h http.Handler) http.Handler {
 	})
 }
 
-func isCourseOwner(db *sql.DB, view View) middleware.Middleware {
+func isCourseOwner(db *sql.DB) middleware.Middleware {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
-			u := GetUser(ctx)
+			u := appctx.GetUser(ctx)
 			if u == nil {
 				http.Redirect(w, r, "/signin", http.StatusFound)
 				return
@@ -184,7 +187,7 @@ func setHeaders(h http.Handler) http.Handler {
 func setDatabase(db *sql.DB) middleware.Middleware {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			ctx := NewDatabaseContext(r.Context(), db)
+			ctx := appctx.NewDatabaseContext(r.Context(), db)
 			r = r.WithContext(ctx)
 			h.ServeHTTP(w, r)
 		})
@@ -194,7 +197,7 @@ func setDatabase(db *sql.DB) middleware.Middleware {
 func setRedisPool(pool *redis.Pool, prefix string) middleware.Middleware {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			ctx := NewRedisPoolContext(r.Context(), pool, prefix)
+			ctx := appctx.NewRedisPoolContext(r.Context(), pool, prefix)
 			r = r.WithContext(ctx)
 			h.ServeHTTP(w, r)
 		})
@@ -204,7 +207,7 @@ func setRedisPool(pool *redis.Pool, prefix string) middleware.Middleware {
 func setCachePool(pool *redis.Pool, prefix string) middleware.Middleware {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			ctx := NewCachePoolContext(r.Context(), pool, prefix)
+			ctx := appctx.NewCachePoolContext(r.Context(), pool, prefix)
 			r = r.WithContext(ctx)
 			h.ServeHTTP(w, r)
 		})
