@@ -66,7 +66,7 @@ const (
 )
 
 // SaveCourse saves course
-func (repo) SaveCourse(ctx context.Context, x *entity.Course) error {
+func SaveCourse(ctx context.Context, x *entity.Course) error {
 	tx := appctx.GetTransaction(ctx)
 
 	if len(x.URL.String) > 0 && x.URL.String != x.ID {
@@ -114,7 +114,7 @@ func scanCourse(scan scanFunc, x *entity.Course) error {
 }
 
 // GetCourses gets courses
-func (repo) GetCourses(ctx context.Context, courseIDs []string) ([]*entity.Course, error) {
+func GetCourses(ctx context.Context, courseIDs []string) ([]*entity.Course, error) {
 	db := appctx.GetDatabase(ctx)
 
 	xs := make([]*entity.Course, 0, len(courseIDs))
@@ -138,7 +138,7 @@ func (repo) GetCourses(ctx context.Context, courseIDs []string) ([]*entity.Cours
 }
 
 // GetCourse gets course
-func (repo) GetCourse(ctx context.Context, courseID string) (*entity.Course, error) {
+func GetCourse(ctx context.Context, courseID string) (*entity.Course, error) {
 	db := appctx.GetDatabase(ctx)
 
 	var x entity.Course
@@ -162,7 +162,7 @@ func (repo) GetCourse(ctx context.Context, courseID string) (*entity.Course, err
 }
 
 // GetCourseContents gets course contents for given course id
-func (repo) GetCourseContents(ctx context.Context, courseID string) ([]*entity.CourseContent, error) {
+func GetCourseContents(ctx context.Context, courseID string) ([]*entity.CourseContent, error) {
 	db := appctx.GetDatabase(ctx)
 
 	rows, err := db.QueryContext(ctx, `
@@ -198,7 +198,7 @@ func (repo) GetCourseContents(ctx context.Context, courseID string) ([]*entity.C
 }
 
 // GetCourseContent gets course content from id
-func (repo) GetCourseContent(ctx context.Context, courseContentID string) (*entity.CourseContent, error) {
+func GetCourseContent(ctx context.Context, courseContentID string) (*entity.CourseContent, error) {
 	db := appctx.GetDatabase(ctx)
 
 	var x entity.CourseContent
@@ -221,7 +221,7 @@ func (repo) GetCourseContent(ctx context.Context, courseContentID string) (*enti
 }
 
 // GetCourseIDFromURL gets course id from url
-func (repo) GetCourseIDFromURL(ctx context.Context, url string) (string, error) {
+func GetCourseIDFromURL(ctx context.Context, url string) (string, error) {
 	db := appctx.GetDatabase(ctx)
 
 	var id string
@@ -240,7 +240,7 @@ func (repo) GetCourseIDFromURL(ctx context.Context, url string) (string, error) 
 }
 
 // ListCourses lists all courses
-func (repo) ListCourses(ctx context.Context, limit, offset int64) ([]*entity.Course, error) {
+func ListCourses(ctx context.Context, limit, offset int64) ([]*entity.Course, error) {
 	db := appctx.GetDatabase(ctx)
 
 	xs := make([]*entity.Course, 0)
@@ -299,7 +299,7 @@ func (repo) ListCourses(ctx context.Context, limit, offset int64) ([]*entity.Cou
 
 // ListPublicCourses lists public course sort by created at desc
 // TODO: add pagination
-func (repo) ListPublicCourses(ctx context.Context) ([]*entity.Course, error) {
+func ListPublicCourses(ctx context.Context) ([]*entity.Course, error) {
 	db := appctx.GetDatabase(ctx)
 	pool, prefix := appctx.GetCachePool(ctx)
 
@@ -374,7 +374,7 @@ func (repo) ListPublicCourses(ctx context.Context) ([]*entity.Course, error) {
 
 // ListOwnCourses lists courses that owned by given user
 // TODO: add pagination
-func (repo) ListOwnCourses(ctx context.Context, userID string) ([]*entity.Course, error) {
+func ListOwnCourses(ctx context.Context, userID string) ([]*entity.Course, error) {
 	db := appctx.GetDatabase(ctx)
 
 	rows, err := db.QueryContext(ctx, queryListCoursesOwn, userID)
@@ -419,7 +419,7 @@ func (repo) ListOwnCourses(ctx context.Context, userID string) ([]*entity.Course
 
 // ListEnrolledCourses lists courses that enrolled by given user
 // TODO: add pagination
-func (repo) ListEnrolledCourses(ctx context.Context, userID string) ([]*entity.Course, error) {
+func ListEnrolledCourses(ctx context.Context, userID string) ([]*entity.Course, error) {
 	db := appctx.GetDatabase(ctx)
 
 	xs := make([]*entity.Course, 0)
@@ -443,7 +443,7 @@ func (repo) ListEnrolledCourses(ctx context.Context, userID string) ([]*entity.C
 }
 
 // CountCourses counts courses
-func (repo) CountCourses(ctx context.Context) (int64, error) {
+func CountCourses(ctx context.Context) (int64, error) {
 	db := appctx.GetDatabase(ctx)
 
 	var cnt int64

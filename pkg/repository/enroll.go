@@ -8,7 +8,7 @@ import (
 )
 
 // Enroll an user to a course
-func (repo) Enroll(ctx context.Context, userID string, courseID string) error {
+func Enroll(ctx context.Context, userID string, courseID string) error {
 	db := appctx.GetDatabase(ctx)
 
 	_, err := db.ExecContext(ctx, `
@@ -24,7 +24,7 @@ func (repo) Enroll(ctx context.Context, userID string, courseID string) error {
 }
 
 // IsEnrolled returns true if user enrolled a given course
-func (repo) IsEnrolled(ctx context.Context, userID string, courseID string) (bool, error) {
+func IsEnrolled(ctx context.Context, userID string, courseID string) (bool, error) {
 	db := appctx.GetDatabase(ctx)
 
 	var p int

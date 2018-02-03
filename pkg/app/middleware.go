@@ -92,14 +92,14 @@ func mustNotSignedIn(h http.Handler) http.Handler {
 	})
 }
 
-func fetchUser(repo Repository) middleware.Middleware {
+func fetchUser() middleware.Middleware {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
 			s := appctx.GetSession(ctx)
 			id := GetUserID(s)
 			if len(id) > 0 {
-				u, err := repo.GetUser(ctx, id)
+				u, err := repository.GetUser(ctx, id)
 				if err == ErrNotFound {
 					u = &entity.User{
 						ID:       id,

@@ -10,7 +10,8 @@ import (
 	"github.com/acoshift/acourse/pkg/appctx"
 )
 
-func (repo) StoreMagicLink(ctx context.Context, linkID string, userID string) error {
+// StoreMagicLink stores magic link to redis
+func StoreMagicLink(ctx context.Context, linkID string, userID string) error {
 	pool, prefix := appctx.GetRedisPool(ctx)
 	db := pool.Get()
 	defer db.Close()
@@ -22,7 +23,8 @@ func (repo) StoreMagicLink(ctx context.Context, linkID string, userID string) er
 	return nil
 }
 
-func (repo) FindMagicLink(ctx context.Context, linkID string) (string, error) {
+// FindMagicLink finds magic link from redis
+func FindMagicLink(ctx context.Context, linkID string) (string, error) {
 	pool, prefix := appctx.GetRedisPool(ctx)
 	db := pool.Get()
 	defer db.Close()
@@ -39,7 +41,8 @@ func (repo) FindMagicLink(ctx context.Context, linkID string) (string, error) {
 	return userID, nil
 }
 
-func (repo) CanAcquireMagicLink(ctx context.Context, email string) (bool, error) {
+// CanAcquireMagicLink checks rate limit to acquire magic link
+func CanAcquireMagicLink(ctx context.Context, email string) (bool, error) {
 	pool, prefix := appctx.GetRedisPool(ctx)
 	db := pool.Get()
 	defer db.Close()
