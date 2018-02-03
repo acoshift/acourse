@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"unicode"
 
-	"github.com/tdewolff/buffer"
+	"github.com/tdewolff/parse/buffer"
 )
 
 var identifierStart = []*unicode.RangeTable{unicode.Lu, unicode.Ll, unicode.Lt, unicode.Lm, unicode.Lo, unicode.Nl, unicode.Other_ID_Start}
@@ -90,18 +90,18 @@ func (tt TokenType) String() string {
 
 // Lexer is the state for the lexer.
 type Lexer struct {
-	r     *buffer.Lexer
-	stack []ParsingContext
-	state TokenState
-	emptyLine     bool
+	r         *buffer.Lexer
+	stack     []ParsingContext
+	state     TokenState
+	emptyLine bool
 }
 
 // NewLexer returns a new Lexer for a given io.Reader.
 func NewLexer(r io.Reader) *Lexer {
 	return &Lexer{
-		r:     buffer.NewLexer(r),
-		stack: make([]ParsingContext, 0),
-		state: ExprState,
+		r:         buffer.NewLexer(r),
+		stack:     make([]ParsingContext, 0, 16),
+		state:     ExprState,
 		emptyLine: true,
 	}
 }
@@ -123,9 +123,9 @@ func (l *Lexer) Err() error {
 	return l.r.Err()
 }
 
-// Free frees up bytes of length n from previously shifted tokens.
-func (l *Lexer) Free(n int) {
-	l.r.Free(n)
+// Restore restores the NULL byte at the end of the buffer.
+func (l *Lexer) Restore() {
+	l.r.Restore()
 }
 
 // Next returns the next Token. It returns ErrorToken when an error was encountered. Using Err() one can retrieve the error message.
@@ -599,6 +599,8 @@ func (l *Lexer) consumeRegexpToken() bool {
 			if l.consumeLineTerminator() {
 				l.r.Rewind(mark)
 				return false
+			} else if l.r.Peek(0) == 0 {
+				return true
 			}
 		} else if l.consumeLineTerminator() {
 			l.r.Rewind(mark)

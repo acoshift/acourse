@@ -54,9 +54,8 @@ func (c *ctrl) postProfileEdit(w http.ResponseWriter, r *http.Request) {
 	user := app.GetUser(ctx)
 	f := app.GetSession(ctx).Flash()
 
-	image, info, err := r.FormFile("Image")
 	var imageURL string
-	if err != http.ErrMissingFile {
+	if image, info, err := r.FormFile("Image"); err != http.ErrMissingFile && info.Size > 0 {
 		if err != nil {
 			f.Add("Errors", err.Error())
 			back(w, r)

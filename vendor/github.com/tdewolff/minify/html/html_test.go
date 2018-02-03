@@ -2,6 +2,7 @@ package html // import "github.com/tdewolff/minify/html"
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/url"
@@ -115,6 +116,11 @@ func TestHTML(t *testing.T) {
 		{`<meta e t n content=ful><a b`, `<meta e t n content=ful><a b>`},
 		{`<img alt=a'b="">`, `<img alt='a&#39;b=""'>`},
 		{`</b`, `</b`},
+		{`<title></`, `<title></`},
+		{`<svg <`, `<svg <`},
+		{`<svg "`, `<svg "`},
+		{`<svg></`, `<svg></`},
+		{`<script><!--<`, `<script><!--<`},
 
 		// bugs
 		{`<p>text</p><br>text`, `<p>text</p><br>text`},                         // #122
@@ -135,9 +141,12 @@ func TestHTML(t *testing.T) {
 		return err
 	})
 	for _, tt := range htmlTests {
-		r := bytes.NewBufferString(tt.html)
-		w := &bytes.Buffer{}
-		test.Minify(t, tt.html, Minify(m, w, r, nil), w.String(), tt.expected)
+		t.Run(tt.html, func(t *testing.T) {
+			r := bytes.NewBufferString(tt.html)
+			w := &bytes.Buffer{}
+			err := Minify(m, w, r, nil)
+			test.Minify(t, tt.html, err, w.String(), tt.expected)
+		})
 	}
 }
 
@@ -153,9 +162,12 @@ func TestHTMLKeepEndTags(t *testing.T) {
 	m := minify.New()
 	htmlMinifier := &Minifier{KeepEndTags: true}
 	for _, tt := range htmlTests {
-		r := bytes.NewBufferString(tt.html)
-		w := &bytes.Buffer{}
-		test.Minify(t, tt.html, htmlMinifier.Minify(m, w, r, nil), w.String(), tt.expected)
+		t.Run(tt.html, func(t *testing.T) {
+			r := bytes.NewBufferString(tt.html)
+			w := &bytes.Buffer{}
+			err := htmlMinifier.Minify(m, w, r, nil)
+			test.Minify(t, tt.html, err, w.String(), tt.expected)
+		})
 	}
 }
 
@@ -171,9 +183,12 @@ func TestHTMLKeepConditionalComments(t *testing.T) {
 	m := minify.New()
 	htmlMinifier := &Minifier{KeepConditionalComments: true}
 	for _, tt := range htmlTests {
-		r := bytes.NewBufferString(tt.html)
-		w := &bytes.Buffer{}
-		test.Minify(t, tt.html, htmlMinifier.Minify(m, w, r, nil), w.String(), tt.expected)
+		t.Run(tt.html, func(t *testing.T) {
+			r := bytes.NewBufferString(tt.html)
+			w := &bytes.Buffer{}
+			err := htmlMinifier.Minify(m, w, r, nil)
+			test.Minify(t, tt.html, err, w.String(), tt.expected)
+		})
 	}
 }
 
@@ -205,9 +220,12 @@ func TestHTMLKeepWhitespace(t *testing.T) {
 	m := minify.New()
 	htmlMinifier := &Minifier{KeepWhitespace: true}
 	for _, tt := range htmlTests {
-		r := bytes.NewBufferString(tt.html)
-		w := &bytes.Buffer{}
-		test.Minify(t, tt.html, htmlMinifier.Minify(m, w, r, nil), w.String(), tt.expected)
+		t.Run(tt.html, func(t *testing.T) {
+			r := bytes.NewBufferString(tt.html)
+			w := &bytes.Buffer{}
+			err := htmlMinifier.Minify(m, w, r, nil)
+			test.Minify(t, tt.html, err, w.String(), tt.expected)
+		})
 	}
 }
 
@@ -234,10 +252,13 @@ func TestHTMLURL(t *testing.T) {
 	m := minify.New()
 	m.AddFunc("text/html", Minify)
 	for _, tt := range htmlTests {
-		r := bytes.NewBufferString(tt.html)
-		w := &bytes.Buffer{}
-		m.URL, _ = url.Parse(tt.url)
-		test.Minify(t, tt.html, Minify(m, w, r, nil), w.String(), tt.expected)
+		t.Run(tt.url, func(t *testing.T) {
+			r := bytes.NewBufferString(tt.html)
+			w := &bytes.Buffer{}
+			m.URL, _ = url.Parse(tt.url)
+			err := Minify(m, w, r, nil)
+			test.Minify(t, tt.html, err, w.String(), tt.expected)
+		})
 	}
 }
 
@@ -255,14 +276,16 @@ func TestSpecialTagClosing(t *testing.T) {
 	html := `<style></script></style>`
 	r := bytes.NewBufferString(html)
 	w := &bytes.Buffer{}
-	test.Minify(t, html, Minify(m, w, r, nil), w.String(), html)
+	err := Minify(m, w, r, nil)
+	test.Minify(t, html, err, w.String(), html)
 }
 
 func TestReaderErrors(t *testing.T) {
-	m := minify.New()
 	r := test.NewErrorReader(0)
 	w := &bytes.Buffer{}
-	test.Error(t, Minify(m, w, r, nil), test.ErrPlain, "return error at first read")
+	m := minify.New()
+	err := Minify(m, w, r, nil)
+	test.T(t, err, test.ErrPlain, "return error at first read")
 }
 
 func TestWriterErrors(t *testing.T) {
@@ -291,9 +314,12 @@ func TestWriterErrors(t *testing.T) {
 
 	for _, tt := range errorTests {
 		for _, n := range tt.n {
-			r := bytes.NewBufferString(tt.html)
-			w := test.NewErrorWriter(n)
-			test.Error(t, m.Minify("text/html", w, r), test.ErrPlain, "return error at write", n, "in", tt.html)
+			t.Run(fmt.Sprint(tt.html, " ", tt.n), func(t *testing.T) {
+				r := bytes.NewBufferString(tt.html)
+				w := test.NewErrorWriter(n)
+				err := m.Minify("text/html", w, r)
+				test.T(t, err, test.ErrPlain)
+			})
 		}
 	}
 }
@@ -324,9 +350,12 @@ func TestMinifyErrors(t *testing.T) {
 		return test.ErrPlain
 	})
 	for _, tt := range errorTests {
-		r := bytes.NewBufferString(tt.html)
-		w := &bytes.Buffer{}
-		test.Error(t, Minify(m, w, r, nil), tt.err, "return error", tt.err, "in", tt.html)
+		t.Run(tt.html, func(t *testing.T) {
+			r := bytes.NewBufferString(tt.html)
+			w := &bytes.Buffer{}
+			err := Minify(m, w, r, nil)
+			test.T(t, err, tt.err)
+		})
 	}
 }
 

@@ -1,6 +1,7 @@
 package configfile
 
 import (
+	"io"
 	"io/ioutil"
 	"path/filepath"
 	"strconv"
@@ -47,7 +48,10 @@ func (r *Reader) readBool(name string) (bool, error) {
 		return false, err
 	}
 	s := string(b)
-	if len(s) == 0 || s == "0" {
+	if s == "" {
+		return false, io.EOF
+	}
+	if s == "0" {
 		return false, nil
 	}
 	if strings.ToLower(s) == "false" {
@@ -67,7 +71,16 @@ func (r *Reader) BytesDefault(name string, def []byte) []byte {
 
 // Bytes reads bytes from config file
 func (r *Reader) Bytes(name string) []byte {
-	return r.BytesDefault(name, nil)
+	return r.BytesDefault(name, []byte{})
+}
+
+// MustBytes reads bytes from config file, panic if file not exists
+func (r *Reader) MustBytes(name string) []byte {
+	s, err := r.read(name)
+	if err != nil {
+		panic(err)
+	}
+	return s
 }
 
 // StringDefault reads string from config file with default value

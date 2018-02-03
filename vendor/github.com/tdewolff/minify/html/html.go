@@ -5,9 +5,9 @@ import (
 	"bytes"
 	"io"
 
-	"github.com/tdewolff/buffer"
 	"github.com/tdewolff/minify"
 	"github.com/tdewolff/parse"
+	"github.com/tdewolff/parse/buffer"
 	"github.com/tdewolff/parse/html"
 )
 
@@ -15,8 +15,6 @@ var (
 	gtBytes         = []byte(">")
 	isBytes         = []byte("=")
 	spaceBytes      = []byte(" ")
-	cdataBytes      = []byte("<![CDATA[")
-	cdataEndBytes   = []byte("]]>")
 	doctypeBytes    = []byte("<!doctype html>")
 	jsMimeBytes     = []byte("text/javascript")
 	cssMimeBytes    = []byte("text/css")
@@ -65,6 +63,8 @@ func (o *Minifier) Minify(m *minify.M, w io.Writer, r io.Reader, _ map[string]st
 	attrByteBuffer := make([]byte, 0, 64)
 
 	l := html.NewLexer(r)
+	defer l.Restore()
+
 	tb := NewTokenBuffer(l)
 	for {
 		t := *tb.Shift()
@@ -80,7 +80,7 @@ func (o *Minifier) Minify(m *minify.M, w io.Writer, r io.Reader, _ map[string]st
 				return err
 			}
 		case html.CommentToken:
-			if o.KeepConditionalComments && len(t.Text) > 6 && (bytes.HasPrefix(t.Text, []byte("[if ")) || parse.Equal(t.Text, []byte("[endif]"))) {
+			if o.KeepConditionalComments && len(t.Text) > 6 && (bytes.HasPrefix(t.Text, []byte("[if ")) || bytes.Equal(t.Text, []byte("[endif]"))) {
 				// [if ...] is always 7 or more characters, [endif] is only encountered for downlevel-revealed
 				// see https://msdn.microsoft.com/en-us/library/ms537512(v=vs.85).aspx#syntax
 				if bytes.HasPrefix(t.Data, []byte("<!--[if ")) { // downlevel-hidden
@@ -277,35 +277,12 @@ func (o *Minifier) Minify(m *minify.M, w io.Writer, r io.Reader, _ map[string]st
 			}
 
 			if hasAttributes {
-				// rewrite attributes with interdependent conditions
-				if t.Hash == html.A {
-					attrs := tb.Attributes(html.Id, html.Name, html.Href)
-					if id, name := attrs[0], attrs[1]; id != nil && name != nil && parse.Equal(id.AttrVal, name.AttrVal) {
-						name.Text = nil
-					}
-					if href := attrs[2]; href != nil {
-						if len(href.AttrVal) > 5 && parse.EqualFold(href.AttrVal[:4], httpBytes) {
-							if href.AttrVal[4] == ':' {
-								if m.URL != nil && m.URL.Scheme == "http" {
-									href.AttrVal = href.AttrVal[5:]
-								} else {
-									parse.ToLower(href.AttrVal[:4])
-								}
-							} else if (href.AttrVal[4] == 's' || href.AttrVal[4] == 'S') && href.AttrVal[5] == ':' {
-								if m.URL != nil && m.URL.Scheme == "https" {
-									href.AttrVal = href.AttrVal[6:]
-								} else {
-									parse.ToLower(href.AttrVal[:5])
-								}
-							}
-						}
-					}
-				} else if t.Hash == html.Meta {
+				if t.Hash == html.Meta {
 					attrs := tb.Attributes(html.Content, html.Http_Equiv, html.Charset, html.Name)
 					if content := attrs[0]; content != nil {
 						if httpEquiv := attrs[1]; httpEquiv != nil {
 							content.AttrVal = minify.ContentType(content.AttrVal)
-							if charset := attrs[2]; charset == nil && parse.EqualFold(httpEquiv.AttrVal, []byte("content-type")) && parse.Equal(content.AttrVal, []byte("text/html;charset=utf-8")) {
+							if charset := attrs[2]; charset == nil && parse.EqualFold(httpEquiv.AttrVal, []byte("content-type")) && bytes.Equal(content.AttrVal, []byte("text/html;charset=utf-8")) {
 								httpEquiv.Text = nil
 								content.Text = []byte("charset")
 								content.Hash = html.Charset
@@ -353,12 +330,25 @@ func (o *Minifier) Minify(m *minify.M, w io.Writer, r io.Reader, _ map[string]st
 				}
 
 				// write attributes
+				htmlEqualIdName := false
 				for {
 					attr := *tb.Shift()
 					if attr.TokenType != html.AttributeToken {
 						break
 					} else if attr.Text == nil {
 						continue // removed attribute
+					}
+
+					if t.Hash == html.A && (attr.Hash == html.Id || attr.Hash == html.Name) {
+						if attr.Hash == html.Id {
+							if name := tb.Attributes(html.Name)[0]; name != nil && bytes.Equal(attr.AttrVal, name.AttrVal) {
+								htmlEqualIdName = true
+							}
+						} else if htmlEqualIdName {
+							continue
+						} else if id := tb.Attributes(html.Id)[0]; id != nil && bytes.Equal(id.AttrVal, attr.AttrVal) {
+							continue
+						}
 					}
 
 					val := attr.AttrVal
@@ -383,25 +373,26 @@ func (o *Minifier) Minify(m *minify.M, w io.Writer, r io.Reader, _ map[string]st
 					}
 
 					// default attribute values can be omitted
-					if !o.KeepDefaultAttrVals && (attr.Hash == html.Type && (t.Hash == html.Script && parse.Equal(val, []byte("text/javascript")) ||
-						t.Hash == html.Style && parse.Equal(val, []byte("text/css")) ||
-						t.Hash == html.Link && parse.Equal(val, []byte("text/css")) ||
-						t.Hash == html.Input && parse.Equal(val, []byte("text")) ||
-						t.Hash == html.Button && parse.Equal(val, []byte("submit"))) ||
+					if !o.KeepDefaultAttrVals && (attr.Hash == html.Type && (t.Hash == html.Script && bytes.Equal(val, []byte("text/javascript")) ||
+						t.Hash == html.Style && bytes.Equal(val, []byte("text/css")) ||
+						t.Hash == html.Link && bytes.Equal(val, []byte("text/css")) ||
+						t.Hash == html.Input && bytes.Equal(val, []byte("text")) ||
+						t.Hash == html.Button && bytes.Equal(val, []byte("submit"))) ||
 						attr.Hash == html.Language && t.Hash == html.Script ||
-						attr.Hash == html.Method && parse.Equal(val, []byte("get")) ||
-						attr.Hash == html.Enctype && parse.Equal(val, []byte("application/x-www-form-urlencoded")) ||
-						attr.Hash == html.Colspan && parse.Equal(val, []byte("1")) ||
-						attr.Hash == html.Rowspan && parse.Equal(val, []byte("1")) ||
-						attr.Hash == html.Shape && parse.Equal(val, []byte("rect")) ||
-						attr.Hash == html.Span && parse.Equal(val, []byte("1")) ||
-						attr.Hash == html.Clear && parse.Equal(val, []byte("none")) ||
-						attr.Hash == html.Frameborder && parse.Equal(val, []byte("1")) ||
-						attr.Hash == html.Scrolling && parse.Equal(val, []byte("auto")) ||
-						attr.Hash == html.Valuetype && parse.Equal(val, []byte("data")) ||
-						attr.Hash == html.Media && t.Hash == html.Style && parse.Equal(val, []byte("all"))) {
+						attr.Hash == html.Method && bytes.Equal(val, []byte("get")) ||
+						attr.Hash == html.Enctype && bytes.Equal(val, []byte("application/x-www-form-urlencoded")) ||
+						attr.Hash == html.Colspan && bytes.Equal(val, []byte("1")) ||
+						attr.Hash == html.Rowspan && bytes.Equal(val, []byte("1")) ||
+						attr.Hash == html.Shape && bytes.Equal(val, []byte("rect")) ||
+						attr.Hash == html.Span && bytes.Equal(val, []byte("1")) ||
+						attr.Hash == html.Clear && bytes.Equal(val, []byte("none")) ||
+						attr.Hash == html.Frameborder && bytes.Equal(val, []byte("1")) ||
+						attr.Hash == html.Scrolling && bytes.Equal(val, []byte("auto")) ||
+						attr.Hash == html.Valuetype && bytes.Equal(val, []byte("data")) ||
+						attr.Hash == html.Media && t.Hash == html.Style && bytes.Equal(val, []byte("all"))) {
 						continue
 					}
+
 					// CSS and JS minifiers for attribute inline code
 					if attr.Hash == html.Style {
 						attrMinifyBuffer.Reset()
@@ -427,24 +418,21 @@ func (o *Minifier) Minify(m *minify.M, w io.Writer, r io.Reader, _ map[string]st
 							continue
 						}
 					} else if len(val) > 5 && attr.Traits&urlAttr != 0 { // anchors are already handled
-						if t.Hash != html.A {
-							if parse.EqualFold(val[:4], httpBytes) {
-								if val[4] == ':' {
-									if m.URL != nil && m.URL.Scheme == "http" {
-										val = val[5:]
-									} else {
-										parse.ToLower(val[:4])
-									}
-								} else if (val[4] == 's' || val[4] == 'S') && val[5] == ':' {
-									if m.URL != nil && m.URL.Scheme == "https" {
-										val = val[6:]
-									} else {
-										parse.ToLower(val[:5])
-									}
+						if parse.EqualFold(val[:4], httpBytes) {
+							if val[4] == ':' {
+								if m.URL != nil && m.URL.Scheme == "http" {
+									val = val[5:]
+								} else {
+									parse.ToLower(val[:4])
+								}
+							} else if (val[4] == 's' || val[4] == 'S') && val[5] == ':' {
+								if m.URL != nil && m.URL.Scheme == "https" {
+									val = val[6:]
+								} else {
+									parse.ToLower(val[:5])
 								}
 							}
-						}
-						if parse.EqualFold(val[:5], dataSchemeBytes) {
+						} else if parse.EqualFold(val[:5], dataSchemeBytes) {
 							val = minify.DataURI(m, val)
 						}
 					}

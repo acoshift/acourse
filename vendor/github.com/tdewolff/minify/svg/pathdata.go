@@ -5,7 +5,7 @@ import (
 
 	"github.com/tdewolff/minify"
 	"github.com/tdewolff/parse"
-	"github.com/tdewolff/strconv"
+	"github.com/tdewolff/parse/strconv"
 )
 
 type PathData struct {
@@ -28,7 +28,9 @@ type PathDataState struct {
 }
 
 func NewPathData(o *Minifier) *PathData {
-	return &PathData{o: o}
+	return &PathData{
+		o: o,
+	}
 }
 
 func (p *PathData) ShortenPathData(b []byte) []byte {
@@ -259,9 +261,8 @@ func (state *PathDataState) copyNumber(buffer *[]byte, coord []byte, isFlag bool
 				// prevDigit stays true and prevDigitIsInt stays false
 			}
 			return
-		} else {
-			*buffer = append(*buffer, ' ')
 		}
+		*buffer = append(*buffer, ' ')
 	}
 	state.prevDigit = true
 	state.prevDigitIsInt = true

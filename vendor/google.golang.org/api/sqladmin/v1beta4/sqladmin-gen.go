@@ -205,8 +205,8 @@ type AclEntry struct {
 }
 
 func (s *AclEntry) MarshalJSON() ([]byte, error) {
-	type noMethod AclEntry
-	raw := noMethod(*s)
+	type NoMethod AclEntry
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -221,6 +221,11 @@ type BackupConfiguration struct {
 
 	// Kind: This is always sql#backupConfiguration.
 	Kind string `json:"kind,omitempty"`
+
+	// ReplicationLogArchivingEnabled: Whether replication log archiving is
+	// enabled. Replication log archiving is required for the point-in-time
+	// recovery (PITR) feature. PostgreSQL instances only.
+	ReplicationLogArchivingEnabled bool `json:"replicationLogArchivingEnabled,omitempty"`
 
 	// StartTime: Start time for the daily backup configuration in UTC
 	// timezone in the 24 hour format - HH:MM.
@@ -245,8 +250,8 @@ type BackupConfiguration struct {
 }
 
 func (s *BackupConfiguration) MarshalJSON() ([]byte, error) {
-	type noMethod BackupConfiguration
-	raw := noMethod(*s)
+	type NoMethod BackupConfiguration
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -318,8 +323,8 @@ type BackupRun struct {
 }
 
 func (s *BackupRun) MarshalJSON() ([]byte, error) {
-	type noMethod BackupRun
-	raw := noMethod(*s)
+	type NoMethod BackupRun
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -359,8 +364,8 @@ type BackupRunsListResponse struct {
 }
 
 func (s *BackupRunsListResponse) MarshalJSON() ([]byte, error) {
-	type noMethod BackupRunsListResponse
-	raw := noMethod(*s)
+	type NoMethod BackupRunsListResponse
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -394,8 +399,8 @@ type BinLogCoordinates struct {
 }
 
 func (s *BinLogCoordinates) MarshalJSON() ([]byte, error) {
-	type noMethod BinLogCoordinates
-	raw := noMethod(*s)
+	type NoMethod BinLogCoordinates
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -413,6 +418,12 @@ type CloneContext struct {
 
 	// Kind: This is always sql#cloneContext.
 	Kind string `json:"kind,omitempty"`
+
+	// PitrTimestampMs: The epoch timestamp, in milliseconds, of the time to
+	// which a point-in-time recovery (PITR) is performed. PostgreSQL
+	// instances only. For MySQL instances, use the binLogCoordinates
+	// property.
+	PitrTimestampMs int64 `json:"pitrTimestampMs,omitempty,string"`
 
 	// ForceSendFields is a list of field names (e.g. "BinLogCoordinates")
 	// to unconditionally include in API requests. By default, fields with
@@ -433,8 +444,8 @@ type CloneContext struct {
 }
 
 func (s *CloneContext) MarshalJSON() ([]byte, error) {
-	type noMethod CloneContext
-	raw := noMethod(*s)
+	type NoMethod CloneContext
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -489,8 +500,8 @@ type Database struct {
 }
 
 func (s *Database) MarshalJSON() ([]byte, error) {
-	type noMethod Database
-	raw := noMethod(*s)
+	type NoMethod Database
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -527,8 +538,8 @@ type DatabaseFlags struct {
 }
 
 func (s *DatabaseFlags) MarshalJSON() ([]byte, error) {
-	type noMethod DatabaseFlags
-	raw := noMethod(*s)
+	type NoMethod DatabaseFlags
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -567,9 +578,10 @@ type DatabaseInstance struct {
 	// property is applicable only to Second Generation instances.
 	FailoverReplica *DatabaseInstanceFailoverReplica `json:"failoverReplica,omitempty"`
 
-	// GceZone: The GCE zone that the instance is serving from. In case when
-	// the instance is failed over to standby zone, this value may be
-	// different with what user specified in the settings.
+	// GceZone: The Compute Engine zone that the instance is currently
+	// serving from. This value could be different from the zone that was
+	// specified when the instance was created if the instance has failed
+	// over to its secondary zone.
 	GceZone string `json:"gceZone,omitempty"`
 
 	// InstanceType: The instance type. This can be one of the
@@ -677,8 +689,8 @@ type DatabaseInstance struct {
 }
 
 func (s *DatabaseInstance) MarshalJSON() ([]byte, error) {
-	type noMethod DatabaseInstance
-	raw := noMethod(*s)
+	type NoMethod DatabaseInstance
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -715,8 +727,8 @@ type DatabaseInstanceFailoverReplica struct {
 }
 
 func (s *DatabaseInstanceFailoverReplica) MarshalJSON() ([]byte, error) {
-	type noMethod DatabaseInstanceFailoverReplica
-	raw := noMethod(*s)
+	type NoMethod DatabaseInstanceFailoverReplica
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -750,8 +762,8 @@ type DatabasesListResponse struct {
 }
 
 func (s *DatabasesListResponse) MarshalJSON() ([]byte, error) {
-	type noMethod DatabasesListResponse
-	raw := noMethod(*s)
+	type NoMethod DatabasesListResponse
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -788,8 +800,8 @@ type DemoteMasterConfiguration struct {
 }
 
 func (s *DemoteMasterConfiguration) MarshalJSON() ([]byte, error) {
-	type noMethod DemoteMasterConfiguration
-	raw := noMethod(*s)
+	type NoMethod DemoteMasterConfiguration
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -824,8 +836,8 @@ type DemoteMasterContext struct {
 }
 
 func (s *DemoteMasterContext) MarshalJSON() ([]byte, error) {
-	type noMethod DemoteMasterContext
-	raw := noMethod(*s)
+	type NoMethod DemoteMasterContext
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -872,8 +884,8 @@ type DemoteMasterMySqlReplicaConfiguration struct {
 }
 
 func (s *DemoteMasterMySqlReplicaConfiguration) MarshalJSON() ([]byte, error) {
-	type noMethod DemoteMasterMySqlReplicaConfiguration
-	raw := noMethod(*s)
+	type NoMethod DemoteMasterMySqlReplicaConfiguration
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -903,8 +915,9 @@ type ExportContext struct {
 
 	// Uri: The path to the file in Google Cloud Storage where the export
 	// will be stored. The URI is in the form gs://bucketName/fileName. If
-	// the file already exists, the operation fails. If fileType is SQL and
-	// the filename ends with .gz, the contents are compressed.
+	// the file already exists, the requests succeeds, but the operation
+	// fails. If fileType is SQL and the filename ends with .gz, the
+	// contents are compressed.
 	Uri string `json:"uri,omitempty"`
 
 	// ForceSendFields is a list of field names (e.g. "CsvExportOptions") to
@@ -926,8 +939,8 @@ type ExportContext struct {
 }
 
 func (s *ExportContext) MarshalJSON() ([]byte, error) {
-	type noMethod ExportContext
-	raw := noMethod(*s)
+	type NoMethod ExportContext
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -954,8 +967,8 @@ type ExportContextCsvExportOptions struct {
 }
 
 func (s *ExportContextCsvExportOptions) MarshalJSON() ([]byte, error) {
-	type noMethod ExportContextCsvExportOptions
-	raw := noMethod(*s)
+	type NoMethod ExportContextCsvExportOptions
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -987,8 +1000,8 @@ type ExportContextSqlExportOptions struct {
 }
 
 func (s *ExportContextSqlExportOptions) MarshalJSON() ([]byte, error) {
-	type noMethod ExportContextSqlExportOptions
-	raw := noMethod(*s)
+	type NoMethod ExportContextSqlExportOptions
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -1020,8 +1033,8 @@ type FailoverContext struct {
 }
 
 func (s *FailoverContext) MarshalJSON() ([]byte, error) {
-	type noMethod FailoverContext
-	raw := noMethod(*s)
+	type NoMethod FailoverContext
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -1077,8 +1090,8 @@ type Flag struct {
 }
 
 func (s *Flag) MarshalJSON() ([]byte, error) {
-	type noMethod Flag
-	raw := noMethod(*s)
+	type NoMethod Flag
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -1112,8 +1125,8 @@ type FlagsListResponse struct {
 }
 
 func (s *FlagsListResponse) MarshalJSON() ([]byte, error) {
-	type noMethod FlagsListResponse
-	raw := noMethod(*s)
+	type NoMethod FlagsListResponse
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -1164,8 +1177,8 @@ type ImportContext struct {
 }
 
 func (s *ImportContext) MarshalJSON() ([]byte, error) {
-	type noMethod ImportContext
-	raw := noMethod(*s)
+	type NoMethod ImportContext
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -1196,8 +1209,8 @@ type ImportContextCsvImportOptions struct {
 }
 
 func (s *ImportContextCsvImportOptions) MarshalJSON() ([]byte, error) {
-	type noMethod ImportContextCsvImportOptions
-	raw := noMethod(*s)
+	type NoMethod ImportContextCsvImportOptions
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -1224,8 +1237,8 @@ type InstancesCloneRequest struct {
 }
 
 func (s *InstancesCloneRequest) MarshalJSON() ([]byte, error) {
-	type noMethod InstancesCloneRequest
-	raw := noMethod(*s)
+	type NoMethod InstancesCloneRequest
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -1254,8 +1267,8 @@ type InstancesDemoteMasterRequest struct {
 }
 
 func (s *InstancesDemoteMasterRequest) MarshalJSON() ([]byte, error) {
-	type noMethod InstancesDemoteMasterRequest
-	raw := noMethod(*s)
+	type NoMethod InstancesDemoteMasterRequest
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -1282,8 +1295,8 @@ type InstancesExportRequest struct {
 }
 
 func (s *InstancesExportRequest) MarshalJSON() ([]byte, error) {
-	type noMethod InstancesExportRequest
-	raw := noMethod(*s)
+	type NoMethod InstancesExportRequest
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -1311,8 +1324,8 @@ type InstancesFailoverRequest struct {
 }
 
 func (s *InstancesFailoverRequest) MarshalJSON() ([]byte, error) {
-	type noMethod InstancesFailoverRequest
-	raw := noMethod(*s)
+	type NoMethod InstancesFailoverRequest
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -1339,8 +1352,8 @@ type InstancesImportRequest struct {
 }
 
 func (s *InstancesImportRequest) MarshalJSON() ([]byte, error) {
-	type noMethod InstancesImportRequest
-	raw := noMethod(*s)
+	type NoMethod InstancesImportRequest
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -1379,8 +1392,8 @@ type InstancesListResponse struct {
 }
 
 func (s *InstancesListResponse) MarshalJSON() ([]byte, error) {
-	type noMethod InstancesListResponse
-	raw := noMethod(*s)
+	type NoMethod InstancesListResponse
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -1411,8 +1424,8 @@ type InstancesRestoreBackupRequest struct {
 }
 
 func (s *InstancesRestoreBackupRequest) MarshalJSON() ([]byte, error) {
-	type noMethod InstancesRestoreBackupRequest
-	raw := noMethod(*s)
+	type NoMethod InstancesRestoreBackupRequest
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -1441,8 +1454,8 @@ type InstancesTruncateLogRequest struct {
 }
 
 func (s *InstancesTruncateLogRequest) MarshalJSON() ([]byte, error) {
-	type noMethod InstancesTruncateLogRequest
-	raw := noMethod(*s)
+	type NoMethod InstancesTruncateLogRequest
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -1480,8 +1493,8 @@ type IpConfiguration struct {
 }
 
 func (s *IpConfiguration) MarshalJSON() ([]byte, error) {
-	type noMethod IpConfiguration
-	raw := noMethod(*s)
+	type NoMethod IpConfiguration
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -1519,8 +1532,8 @@ type IpMapping struct {
 }
 
 func (s *IpMapping) MarshalJSON() ([]byte, error) {
-	type noMethod IpMapping
-	raw := noMethod(*s)
+	type NoMethod IpMapping
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -1562,8 +1575,8 @@ type LocationPreference struct {
 }
 
 func (s *LocationPreference) MarshalJSON() ([]byte, error) {
-	type noMethod LocationPreference
-	raw := noMethod(*s)
+	type NoMethod LocationPreference
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -1580,6 +1593,9 @@ type MaintenanceWindow struct {
 	// Kind: This is always sql#maintenanceWindow.
 	Kind string `json:"kind,omitempty"`
 
+	// UpdateTrack: Maintenance timing setting: canary (Earlier) or stable
+	// (Later).
+	//  Learn more.
 	UpdateTrack string `json:"updateTrack,omitempty"`
 
 	// ForceSendFields is a list of field names (e.g. "Day") to
@@ -1600,8 +1616,8 @@ type MaintenanceWindow struct {
 }
 
 func (s *MaintenanceWindow) MarshalJSON() ([]byte, error) {
-	type noMethod MaintenanceWindow
-	raw := noMethod(*s)
+	type NoMethod MaintenanceWindow
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -1670,8 +1686,8 @@ type MySqlReplicaConfiguration struct {
 }
 
 func (s *MySqlReplicaConfiguration) MarshalJSON() ([]byte, error) {
-	type noMethod MySqlReplicaConfiguration
-	raw := noMethod(*s)
+	type NoMethod MySqlReplicaConfiguration
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -1702,8 +1718,8 @@ type OnPremisesConfiguration struct {
 }
 
 func (s *OnPremisesConfiguration) MarshalJSON() ([]byte, error) {
-	type noMethod OnPremisesConfiguration
-	raw := noMethod(*s)
+	type NoMethod OnPremisesConfiguration
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -1789,8 +1805,8 @@ type Operation struct {
 }
 
 func (s *Operation) MarshalJSON() ([]byte, error) {
-	type noMethod Operation
-	raw := noMethod(*s)
+	type NoMethod Operation
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -1823,8 +1839,8 @@ type OperationError struct {
 }
 
 func (s *OperationError) MarshalJSON() ([]byte, error) {
-	type noMethod OperationError
-	raw := noMethod(*s)
+	type NoMethod OperationError
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -1855,8 +1871,8 @@ type OperationErrors struct {
 }
 
 func (s *OperationErrors) MarshalJSON() ([]byte, error) {
-	type noMethod OperationErrors
-	raw := noMethod(*s)
+	type NoMethod OperationErrors
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -1895,8 +1911,8 @@ type OperationsListResponse struct {
 }
 
 func (s *OperationsListResponse) MarshalJSON() ([]byte, error) {
-	type noMethod OperationsListResponse
-	raw := noMethod(*s)
+	type NoMethod OperationsListResponse
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -1942,8 +1958,8 @@ type ReplicaConfiguration struct {
 }
 
 func (s *ReplicaConfiguration) MarshalJSON() ([]byte, error) {
-	type noMethod ReplicaConfiguration
-	raw := noMethod(*s)
+	type NoMethod ReplicaConfiguration
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -1976,8 +1992,8 @@ type RestoreBackupContext struct {
 }
 
 func (s *RestoreBackupContext) MarshalJSON() ([]byte, error) {
-	type noMethod RestoreBackupContext
-	raw := noMethod(*s)
+	type NoMethod RestoreBackupContext
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -1985,16 +2001,16 @@ func (s *RestoreBackupContext) MarshalJSON() ([]byte, error) {
 type Settings struct {
 	// ActivationPolicy: The activation policy specifies when the instance
 	// is activated; it is applicable only when the instance state is
-	// RUNNABLE. The activation policy cannot be updated together with other
-	// settings for Second Generation instances. Valid values:
-	// ALWAYS: The instance is on; it is not deactivated by
-	// inactivity.
+	// RUNNABLE. Valid values:
+	// ALWAYS: The instance is on, and remains so even in the absence of
+	// connection requests.
 	// NEVER: The instance is off; it is not activated, even if a connection
 	// request arrives.
-	// ON_DEMAND: The instance responds to incoming requests, and turns
-	// itself off when not in use. Instances with PER_USE pricing turn off
-	// after 15 minutes of inactivity. Instances with PER_PACKAGE pricing
-	// turn off after 12 hours of inactivity.
+	// ON_DEMAND: First Generation instances only. The instance responds to
+	// incoming requests, and turns itself off when not in use. Instances
+	// with PER_USE pricing turn off after 15 minutes of inactivity.
+	// Instances with PER_PACKAGE pricing turn off after 12 hours of
+	// inactivity.
 	ActivationPolicy string `json:"activationPolicy,omitempty"`
 
 	// AuthorizedGaeApplications: The App Engine app IDs that can access
@@ -2002,7 +2018,14 @@ type Settings struct {
 	// instances.
 	AuthorizedGaeApplications []string `json:"authorizedGaeApplications,omitempty"`
 
-	// AvailabilityType: Reserved for future use.
+	// AvailabilityType: Availability type (PostgreSQL instances only).
+	// Potential values:
+	// ZONAL: The instance serves data from only one zone. Outages in that
+	// zone affect data accessibility.
+	// REGIONAL: The instance can serve data from more than one zone in a
+	// region (it is highly available).
+	// For more information, see Overview of the High Availability
+	// Configuration.
 	AvailabilityType string `json:"availabilityType,omitempty"`
 
 	// BackupConfiguration: The daily backup configuration for the instance.
@@ -2041,8 +2064,8 @@ type Settings struct {
 
 	// LocationPreference: The location preference settings. This allows the
 	// instance to be located as near as possible to either an App Engine
-	// app or GCE zone for better performance. App Engine co-location is
-	// only applicable to First Generation instances.
+	// app or Compute Engine zone for better performance. App Engine
+	// co-location is only applicable to First Generation instances.
 	LocationPreference *LocationPreference `json:"locationPreference,omitempty"`
 
 	// MaintenanceWindow: The maintenance window for this instance. This
@@ -2104,8 +2127,8 @@ type Settings struct {
 }
 
 func (s *Settings) MarshalJSON() ([]byte, error) {
-	type noMethod Settings
-	raw := noMethod(*s)
+	type NoMethod Settings
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -2162,8 +2185,8 @@ type SslCert struct {
 }
 
 func (s *SslCert) MarshalJSON() ([]byte, error) {
-	type noMethod SslCert
-	raw := noMethod(*s)
+	type NoMethod SslCert
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -2194,8 +2217,8 @@ type SslCertDetail struct {
 }
 
 func (s *SslCertDetail) MarshalJSON() ([]byte, error) {
-	type noMethod SslCertDetail
-	raw := noMethod(*s)
+	type NoMethod SslCertDetail
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -2224,8 +2247,8 @@ type SslCertsCreateEphemeralRequest struct {
 }
 
 func (s *SslCertsCreateEphemeralRequest) MarshalJSON() ([]byte, error) {
-	type noMethod SslCertsCreateEphemeralRequest
-	raw := noMethod(*s)
+	type NoMethod SslCertsCreateEphemeralRequest
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -2254,16 +2277,16 @@ type SslCertsInsertRequest struct {
 }
 
 func (s *SslCertsInsertRequest) MarshalJSON() ([]byte, error) {
-	type noMethod SslCertsInsertRequest
-	raw := noMethod(*s)
+	type NoMethod SslCertsInsertRequest
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // SslCertsInsertResponse: SslCert insert response.
 type SslCertsInsertResponse struct {
-	// ClientCert: The new client certificate and private key. The new
-	// certificate will not work until the instance is restarted for First
-	// Generation instances.
+	// ClientCert: The new client certificate and private key. For First
+	// Generation instances, the new certificate does not take effect until
+	// the instance is restarted.
 	ClientCert *SslCertDetail `json:"clientCert,omitempty"`
 
 	// Kind: This is always sql#sslCertsInsert.
@@ -2299,8 +2322,8 @@ type SslCertsInsertResponse struct {
 }
 
 func (s *SslCertsInsertResponse) MarshalJSON() ([]byte, error) {
-	type noMethod SslCertsInsertResponse
-	raw := noMethod(*s)
+	type NoMethod SslCertsInsertResponse
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -2334,8 +2357,8 @@ type SslCertsListResponse struct {
 }
 
 func (s *SslCertsListResponse) MarshalJSON() ([]byte, error) {
-	type noMethod SslCertsListResponse
-	raw := noMethod(*s)
+	type NoMethod SslCertsListResponse
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -2375,8 +2398,8 @@ type Tier struct {
 }
 
 func (s *Tier) MarshalJSON() ([]byte, error) {
-	type noMethod Tier
-	raw := noMethod(*s)
+	type NoMethod Tier
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -2410,8 +2433,8 @@ type TiersListResponse struct {
 }
 
 func (s *TiersListResponse) MarshalJSON() ([]byte, error) {
-	type noMethod TiersListResponse
-	raw := noMethod(*s)
+	type NoMethod TiersListResponse
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -2442,8 +2465,8 @@ type TruncateLogContext struct {
 }
 
 func (s *TruncateLogContext) MarshalJSON() ([]byte, error) {
-	type noMethod TruncateLogContext
-	raw := noMethod(*s)
+	type NoMethod TruncateLogContext
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -2496,8 +2519,8 @@ type User struct {
 }
 
 func (s *User) MarshalJSON() ([]byte, error) {
-	type noMethod User
-	raw := noMethod(*s)
+	type NoMethod User
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -2536,8 +2559,8 @@ type UsersListResponse struct {
 }
 
 func (s *UsersListResponse) MarshalJSON() ([]byte, error) {
-	type noMethod UsersListResponse
-	raw := noMethod(*s)
+	type NoMethod UsersListResponse
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -2640,7 +2663,7 @@ func (c *BackupRunsDeleteCall) Do(opts ...googleapi.CallOption) (*Operation, err
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -2799,7 +2822,7 @@ func (c *BackupRunsGetCall) Do(opts ...googleapi.CallOption) (*BackupRun, error)
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -2949,7 +2972,7 @@ func (c *BackupRunsInsertCall) Do(opts ...googleapi.CallOption) (*Operation, err
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -3117,7 +3140,7 @@ func (c *BackupRunsListCall) Do(opts ...googleapi.CallOption) (*BackupRunsListRe
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -3286,7 +3309,7 @@ func (c *DatabasesDeleteCall) Do(opts ...googleapi.CallOption) (*Operation, erro
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -3445,7 +3468,7 @@ func (c *DatabasesGetCall) Do(opts ...googleapi.CallOption) (*Database, error) {
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -3594,7 +3617,7 @@ func (c *DatabasesInsertCall) Do(opts ...googleapi.CallOption) (*Operation, erro
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -3745,7 +3768,7 @@ func (c *DatabasesListCall) Do(opts ...googleapi.CallOption) (*DatabasesListResp
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -3890,7 +3913,7 @@ func (c *DatabasesPatchCall) Do(opts ...googleapi.CallOption) (*Operation, error
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -4045,7 +4068,7 @@ func (c *DatabasesUpdateCall) Do(opts ...googleapi.CallOption) (*Operation, erro
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -4204,7 +4227,7 @@ func (c *FlagsListCall) Do(opts ...googleapi.CallOption) (*FlagsListResponse, er
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -4335,7 +4358,7 @@ func (c *InstancesCloneCall) Do(opts ...googleapi.CallOption) (*Operation, error
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -4472,7 +4495,7 @@ func (c *InstancesDeleteCall) Do(opts ...googleapi.CallOption) (*Operation, erro
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -4522,8 +4545,7 @@ type InstancesDemoteMasterCall struct {
 	header_                      http.Header
 }
 
-// DemoteMaster: Demotes the standalone instance to be a read replica
-// Cloud SQL instance of an on-premises master.
+// DemoteMaster: Reserved for future use.
 func (r *InstancesService) DemoteMaster(project string, instance string, instancesdemotemasterrequest *InstancesDemoteMasterRequest) *InstancesDemoteMasterCall {
 	c := &InstancesDemoteMasterCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.project = project
@@ -4614,12 +4636,12 @@ func (c *InstancesDemoteMasterCall) Do(opts ...googleapi.CallOption) (*Operation
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
 	// {
-	//   "description": "Demotes the standalone instance to be a read replica Cloud SQL instance of an on-premises master.",
+	//   "description": "Reserved for future use.",
 	//   "httpMethod": "POST",
 	//   "id": "sql.instances.demoteMaster",
 	//   "parameterOrder": [
@@ -4759,7 +4781,7 @@ func (c *InstancesExportCall) Do(opts ...googleapi.CallOption) (*Operation, erro
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -4902,7 +4924,7 @@ func (c *InstancesFailoverCall) Do(opts ...googleapi.CallOption) (*Operation, er
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -5054,7 +5076,7 @@ func (c *InstancesGetCall) Do(opts ...googleapi.CallOption) (*DatabaseInstance, 
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -5196,7 +5218,7 @@ func (c *InstancesImportCall) Do(opts ...googleapi.CallOption) (*Operation, erro
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -5336,7 +5358,7 @@ func (c *InstancesInsertCall) Do(opts ...googleapi.CallOption) (*Operation, erro
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -5500,7 +5522,7 @@ func (c *InstancesListCall) Do(opts ...googleapi.CallOption) (*InstancesListResp
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -5674,7 +5696,7 @@ func (c *InstancesPatchCall) Do(opts ...googleapi.CallOption) (*Operation, error
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -5812,7 +5834,7 @@ func (c *InstancesPromoteReplicaCall) Do(opts ...googleapi.CallOption) (*Operati
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -5950,7 +5972,7 @@ func (c *InstancesResetSslConfigCall) Do(opts ...googleapi.CallOption) (*Operati
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -6084,7 +6106,7 @@ func (c *InstancesRestartCall) Do(opts ...googleapi.CallOption) (*Operation, err
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -6225,7 +6247,7 @@ func (c *InstancesRestoreBackupCall) Do(opts ...googleapi.CallOption) (*Operatio
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -6362,7 +6384,7 @@ func (c *InstancesStartReplicaCall) Do(opts ...googleapi.CallOption) (*Operation
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -6496,7 +6518,7 @@ func (c *InstancesStopReplicaCall) Do(opts ...googleapi.CallOption) (*Operation,
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -6637,7 +6659,7 @@ func (c *InstancesTruncateLogCall) Do(opts ...googleapi.CallOption) (*Operation,
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -6783,7 +6805,7 @@ func (c *InstancesUpdateCall) Do(opts ...googleapi.CallOption) (*Operation, erro
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -6936,7 +6958,7 @@ func (c *OperationsGetCall) Do(opts ...googleapi.CallOption) (*Operation, error)
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -7099,7 +7121,7 @@ func (c *OperationsListCall) Do(opts ...googleapi.CallOption) (*OperationsListRe
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -7275,7 +7297,7 @@ func (c *SslCertsCreateEphemeralCall) Do(opts ...googleapi.CallOption) (*SslCert
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -7416,7 +7438,7 @@ func (c *SslCertsDeleteCall) Do(opts ...googleapi.CallOption) (*Operation, error
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -7576,7 +7598,7 @@ func (c *SslCertsGetCall) Do(opts ...googleapi.CallOption) (*SslCert, error) {
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -7726,7 +7748,7 @@ func (c *SslCertsInsertCall) Do(opts ...googleapi.CallOption) (*SslCertsInsertRe
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -7877,7 +7899,7 @@ func (c *SslCertsListCall) Do(opts ...googleapi.CallOption) (*SslCertsListRespon
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -8023,7 +8045,7 @@ func (c *TiersListCall) Do(opts ...googleapi.CallOption) (*TiersListResponse, er
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -8152,7 +8174,7 @@ func (c *UsersDeleteCall) Do(opts ...googleapi.CallOption) (*Operation, error) {
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -8307,7 +8329,7 @@ func (c *UsersInsertCall) Do(opts ...googleapi.CallOption) (*Operation, error) {
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -8458,7 +8480,7 @@ func (c *UsersListCall) Do(opts ...googleapi.CallOption) (*UsersListResponse, er
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -8601,7 +8623,7 @@ func (c *UsersUpdateCall) Do(opts ...googleapi.CallOption) (*Operation, error) {
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
