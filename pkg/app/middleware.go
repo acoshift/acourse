@@ -13,6 +13,7 @@ import (
 
 	"github.com/acoshift/acourse/pkg/appctx"
 	"github.com/acoshift/acourse/pkg/entity"
+	"github.com/acoshift/acourse/pkg/repository"
 	"github.com/acoshift/acourse/pkg/view"
 )
 
@@ -92,15 +93,15 @@ func mustNotSignedIn(h http.Handler) http.Handler {
 	})
 }
 
-func fetchUser(repo Repository) middleware.Middleware {
+func fetchUser() middleware.Middleware {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
 			s := appctx.GetSession(ctx)
 			id := GetUserID(s)
 			if len(id) > 0 {
-				u, err := repo.GetUser(ctx, id)
-				if err == ErrNotFound {
+				u, err := repository.GetUser(ctx, id)
+				if err == appctx.ErrNotFound {
 					u = &entity.User{
 						ID:       id,
 						Username: id,

@@ -7,7 +7,6 @@ import (
 
 	"github.com/lib/pq"
 
-	"github.com/acoshift/acourse/pkg/app"
 	"github.com/acoshift/acourse/pkg/appctx"
 	"github.com/acoshift/acourse/pkg/entity"
 )
@@ -52,7 +51,7 @@ const (
 )
 
 // SaveUser saves user
-func (repo) SaveUser(ctx context.Context, x *entity.User) error {
+func SaveUser(ctx context.Context, x *entity.User) error {
 	db := appctx.GetDatabase(ctx)
 
 	if len(x.ID) == 0 {
@@ -79,7 +78,7 @@ func scanUser(scan scanFunc, x *entity.User) error {
 }
 
 // GetUsers gets users
-func (repo) GetUsers(ctx context.Context, userIDs []string) ([]*entity.User, error) {
+func GetUsers(ctx context.Context, userIDs []string) ([]*entity.User, error) {
 	db := appctx.GetDatabase(ctx)
 
 	xs := make([]*entity.User, 0, len(userIDs))
@@ -103,13 +102,13 @@ func (repo) GetUsers(ctx context.Context, userIDs []string) ([]*entity.User, err
 }
 
 // GetUser gets user from id
-func (repo) GetUser(ctx context.Context, userID string) (*entity.User, error) {
+func GetUser(ctx context.Context, userID string) (*entity.User, error) {
 	db := appctx.GetDatabase(ctx)
 
 	var x entity.User
 	err := scanUser(db.QueryRowContext(ctx, queryGetUser, userID).Scan, &x)
 	if err == sql.ErrNoRows {
-		return nil, app.ErrNotFound
+		return nil, appctx.ErrNotFound
 	}
 	if err != nil {
 		return nil, err
@@ -118,7 +117,7 @@ func (repo) GetUser(ctx context.Context, userID string) (*entity.User, error) {
 }
 
 // GetUserFromUsername gets user from username
-func (repo) GetUserFromUsername(ctx context.Context, username string) (*entity.User, error) {
+func GetUserFromUsername(ctx context.Context, username string) (*entity.User, error) {
 	db := appctx.GetDatabase(ctx)
 
 	var x entity.User
@@ -129,13 +128,13 @@ func (repo) GetUserFromUsername(ctx context.Context, username string) (*entity.U
 	return &x, nil
 }
 
-func (repo) FindUserByEmail(ctx context.Context, email string) (*entity.User, error) {
+func FindUserByEmail(ctx context.Context, email string) (*entity.User, error) {
 	db := appctx.GetDatabase(ctx)
 
 	var x entity.User
 	err := scanUser(db.QueryRowContext(ctx, queryGetUserFromEmail, email).Scan, &x)
 	if err == sql.ErrNoRows {
-		return nil, app.ErrNotFound
+		return nil, appctx.ErrNotFound
 	}
 	if err != nil {
 		return nil, err
@@ -144,7 +143,7 @@ func (repo) FindUserByEmail(ctx context.Context, email string) (*entity.User, er
 }
 
 // ListUsers lists users
-func (repo) ListUsers(ctx context.Context, limit, offset int64) ([]*entity.User, error) {
+func ListUsers(ctx context.Context, limit, offset int64) ([]*entity.User, error) {
 	db := appctx.GetDatabase(ctx)
 
 	xs := make([]*entity.User, 0)
@@ -168,7 +167,7 @@ func (repo) ListUsers(ctx context.Context, limit, offset int64) ([]*entity.User,
 }
 
 // CountUsers counts users
-func (repo) CountUsers(ctx context.Context) (int64, error) {
+func CountUsers(ctx context.Context) (int64, error) {
 	db := appctx.GetDatabase(ctx)
 
 	var cnt int64
@@ -179,7 +178,8 @@ func (repo) CountUsers(ctx context.Context) (int64, error) {
 	return cnt, nil
 }
 
-func (repo) IsUserExists(ctx context.Context, id string) (bool, error) {
+// IsUserExists checks is user exists
+func IsUserExists(ctx context.Context, id string) (bool, error) {
 	db := appctx.GetDatabase(ctx)
 
 	var cnt int64
@@ -190,7 +190,8 @@ func (repo) IsUserExists(ctx context.Context, id string) (bool, error) {
 	return cnt > 0, nil
 }
 
-func (repo) CreateUser(ctx context.Context, x *entity.User) error {
+// CreateUser creates new users
+func CreateUser(ctx context.Context, x *entity.User) error {
 	db := appctx.GetDatabase(ctx)
 
 	_, err := db.ExecContext(ctx,

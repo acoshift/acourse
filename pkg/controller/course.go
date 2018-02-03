@@ -13,9 +13,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/lib/pq"
 
-	"github.com/acoshift/acourse/pkg/app"
 	"github.com/acoshift/acourse/pkg/appctx"
 	"github.com/acoshift/acourse/pkg/entity"
+	"github.com/acoshift/acourse/pkg/repository"
 	"github.com/acoshift/acourse/pkg/view"
 )
 
@@ -29,8 +29,8 @@ func (c *ctrl) CourseView(w http.ResponseWriter, r *http.Request) {
 	_, err := uuid.Parse(link)
 	if err != nil {
 		// link can not parse to uuid get course id from url
-		id, err = c.repo.GetCourseIDFromURL(ctx, link)
-		if err == app.ErrNotFound {
+		id, err = repository.GetCourseIDFromURL(ctx, link)
+		if err == appctx.ErrNotFound {
 			view.NotFound(w, r)
 			return
 		}
@@ -39,8 +39,8 @@ func (c *ctrl) CourseView(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	x, err := c.repo.GetCourse(ctx, id)
-	if err == app.ErrNotFound {
+	x, err := repository.GetCourse(ctx, id)
+	if err == appctx.ErrNotFound {
 		view.NotFound(w, r)
 		return
 	}
@@ -58,14 +58,14 @@ func (c *ctrl) CourseView(w http.ResponseWriter, r *http.Request) {
 	enrolled := false
 	pendingEnroll := false
 	if user != nil {
-		enrolled, err = c.repo.IsEnrolled(ctx, user.ID, x.ID)
+		enrolled, err = repository.IsEnrolled(ctx, user.ID, x.ID)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
 		if !enrolled {
-			pendingEnroll, err = c.repo.HasPendingPayment(ctx, user.ID, x.ID)
+			pendingEnroll, err = repository.HasPendingPayment(ctx, user.ID, x.ID)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
@@ -80,7 +80,7 @@ func (c *ctrl) CourseView(w http.ResponseWriter, r *http.Request) {
 
 	// if user enrolled or user is owner fetch course contents
 	if enrolled || owned {
-		x.Contents, err = c.repo.GetCourseContents(ctx, x.ID)
+		x.Contents, err = repository.GetCourseContents(ctx, x.ID)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -90,7 +90,7 @@ func (c *ctrl) CourseView(w http.ResponseWriter, r *http.Request) {
 	if owned {
 		x.Owner = user
 	} else {
-		x.Owner, err = c.repo.GetUser(ctx, x.UserID)
+		x.Owner, err = repository.GetUser(ctx, x.UserID)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -110,8 +110,8 @@ func (c *ctrl) CourseContent(w http.ResponseWriter, r *http.Request) {
 	_, err := uuid.Parse(link)
 	if err != nil {
 		// link can not parse to uuid get course id from url
-		id, err = c.repo.GetCourseIDFromURL(ctx, link)
-		if err == app.ErrNotFound {
+		id, err = repository.GetCourseIDFromURL(ctx, link)
+		if err == appctx.ErrNotFound {
 			view.NotFound(w, r)
 			return
 		}
@@ -120,8 +120,8 @@ func (c *ctrl) CourseContent(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	x, err := c.repo.GetCourse(ctx, id)
-	if err == app.ErrNotFound {
+	x, err := repository.GetCourse(ctx, id)
+	if err == appctx.ErrNotFound {
 		view.NotFound(w, r)
 		return
 	}
@@ -136,7 +136,7 @@ func (c *ctrl) CourseContent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	enrolled, err := c.repo.IsEnrolled(ctx, user.ID, x.ID)
+	enrolled, err := repository.IsEnrolled(ctx, user.ID, x.ID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -147,13 +147,13 @@ func (c *ctrl) CourseContent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	x.Contents, err = c.repo.GetCourseContents(ctx, x.ID)
+	x.Contents, err = repository.GetCourseContents(ctx, x.ID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	x.Owner, err = c.repo.GetUser(ctx, x.UserID)
+	x.Owner, err = repository.GetUser(ctx, x.UserID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -283,7 +283,7 @@ func (c *ctrl) EditorCourse(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	id := r.FormValue("id")
-	course, err := c.repo.GetCourse(ctx, id)
+	course, err := repository.GetCourse(ctx, id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -421,8 +421,8 @@ func (c *ctrl) EditorContent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	course, err := c.repo.GetCourse(ctx, id)
-	if err == app.ErrNotFound {
+	course, err := repository.GetCourse(ctx, id)
+	if err == appctx.ErrNotFound {
 		view.NotFound(w, r)
 		return
 	}
@@ -430,7 +430,7 @@ func (c *ctrl) EditorContent(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	course.Contents, err = c.repo.GetCourseContents(ctx, id)
+	course.Contents, err = repository.GetCourseContents(ctx, id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -452,8 +452,8 @@ func (c *ctrl) CourseEnroll(w http.ResponseWriter, r *http.Request) {
 	id := link
 	_, err := uuid.Parse(link)
 	if err != nil {
-		id, err = c.repo.GetCourseIDFromURL(ctx, link)
-		if err == app.ErrNotFound {
+		id, err = repository.GetCourseIDFromURL(ctx, link)
+		if err == appctx.ErrNotFound {
 			view.NotFound(w, r)
 			return
 		}
@@ -463,8 +463,8 @@ func (c *ctrl) CourseEnroll(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	x, err := c.repo.GetCourse(ctx, id)
-	if err == app.ErrNotFound {
+	x, err := repository.GetCourse(ctx, id)
+	if err == appctx.ErrNotFound {
 		view.NotFound(w, r)
 		return
 	}
@@ -480,7 +480,7 @@ func (c *ctrl) CourseEnroll(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// redirect enrolled user back to course page
-	enrolled, err := c.repo.IsEnrolled(ctx, user.ID, id)
+	enrolled, err := repository.IsEnrolled(ctx, user.ID, id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -491,7 +491,7 @@ func (c *ctrl) CourseEnroll(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// check is user has pending enroll
-	pendingPayment, err := c.repo.HasPendingPayment(ctx, user.ID, id)
+	pendingPayment, err := repository.HasPendingPayment(ctx, user.ID, id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -514,8 +514,8 @@ func (c *ctrl) postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 	id := link
 	_, err := uuid.Parse(link)
 	if err != nil {
-		id, err = c.repo.GetCourseIDFromURL(ctx, link)
-		if err == app.ErrNotFound {
+		id, err = repository.GetCourseIDFromURL(ctx, link)
+		if err == appctx.ErrNotFound {
 			view.NotFound(w, r)
 			return
 		}
@@ -525,8 +525,8 @@ func (c *ctrl) postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	x, err := c.repo.GetCourse(ctx, id)
-	if err == app.ErrNotFound {
+	x, err := repository.GetCourse(ctx, id)
+	if err == appctx.ErrNotFound {
 		view.NotFound(w, r)
 		return
 	}
@@ -542,7 +542,7 @@ func (c *ctrl) postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// redirect enrolled user back to course page
-	enrolled, err := c.repo.IsEnrolled(ctx, user.ID, id)
+	enrolled, err := repository.IsEnrolled(ctx, user.ID, id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -553,7 +553,7 @@ func (c *ctrl) postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// check is user has pending enroll
-	pendingPayment, err := c.repo.HasPendingPayment(ctx, user.ID, id)
+	pendingPayment, err := repository.HasPendingPayment(ctx, user.ID, id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -613,13 +613,13 @@ func (c *ctrl) postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 	defer tx.Rollback()
 
 	if x.Price == 0 {
-		err = c.repo.Enroll(ctx, user.ID, x.ID)
+		err = repository.Enroll(ctx, user.ID, x.ID)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 	} else {
-		err = c.repo.CreatePayment(ctx, &entity.Payment{
+		err = repository.CreatePayment(ctx, &entity.Payment{
 			CourseID:      x.ID,
 			UserID:        user.ID,
 			Image:         imageURL,
@@ -661,8 +661,8 @@ func (c *ctrl) CourseAssignment(w http.ResponseWriter, r *http.Request) {
 	_, err := uuid.Parse(link)
 	if err != nil {
 		// link can not parse to int64 get course id from url
-		id, err = c.repo.GetCourseIDFromURL(ctx, link)
-		if err == app.ErrNotFound {
+		id, err = repository.GetCourseIDFromURL(ctx, link)
+		if err == appctx.ErrNotFound {
 			view.NotFound(w, r)
 			return
 		}
@@ -671,8 +671,8 @@ func (c *ctrl) CourseAssignment(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	x, err := c.repo.GetCourse(ctx, id)
-	if err == app.ErrNotFound {
+	x, err := repository.GetCourse(ctx, id)
+	if err == appctx.ErrNotFound {
 		view.NotFound(w, r)
 		return
 	}
@@ -687,7 +687,7 @@ func (c *ctrl) CourseAssignment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	enrolled, err := c.repo.IsEnrolled(ctx, user.ID, x.ID)
+	enrolled, err := repository.IsEnrolled(ctx, user.ID, x.ID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -698,7 +698,7 @@ func (c *ctrl) CourseAssignment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	assignments, err := c.repo.GetAssignments(ctx, x.ID)
+	assignments, err := repository.GetAssignments(ctx, x.ID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -754,7 +754,7 @@ func (c *ctrl) EditorContentCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	course, err := c.repo.GetCourse(ctx, id)
+	course, err := repository.GetCourse(ctx, id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -767,7 +767,7 @@ func (c *ctrl) EditorContentEdit(w http.ResponseWriter, r *http.Request) {
 	// course content id
 	id := r.FormValue("id")
 
-	content, err := c.repo.GetCourseContent(ctx, id)
+	content, err := repository.GetCourseContent(ctx, id)
 	if err == sql.ErrNoRows {
 		view.NotFound(w, r)
 		return
@@ -777,7 +777,7 @@ func (c *ctrl) EditorContentEdit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	course, err := c.repo.GetCourse(ctx, content.CourseID)
+	course, err := repository.GetCourse(ctx, content.CourseID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

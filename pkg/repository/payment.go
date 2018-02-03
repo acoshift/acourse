@@ -62,7 +62,7 @@ const (
 )
 
 // CreatePayment creates new payment
-func (repo) CreatePayment(ctx context.Context, x *entity.Payment) error {
+func CreatePayment(ctx context.Context, x *entity.Payment) error {
 	tx := appctx.GetTransaction(ctx)
 
 	_, err := tx.ExecContext(ctx, `
@@ -78,8 +78,8 @@ func (repo) CreatePayment(ctx context.Context, x *entity.Payment) error {
 	return nil
 }
 
-// Accept accepts a payment and create new enroll
-func (repo *repo) AcceptPayment(ctx context.Context, x *entity.Payment) error {
+// AcceptPayment accepts a payment and create new enroll
+func AcceptPayment(ctx context.Context, x *entity.Payment) error {
 	tx := appctx.GetTransaction(ctx)
 
 	if len(x.ID) == 0 {
@@ -97,7 +97,7 @@ func (repo *repo) AcceptPayment(ctx context.Context, x *entity.Payment) error {
 		return err
 	}
 
-	err = repo.Enroll(ctx, x.UserID, x.CourseID)
+	err = Enroll(ctx, x.UserID, x.CourseID)
 	if err != nil {
 		return err
 	}
@@ -105,8 +105,8 @@ func (repo *repo) AcceptPayment(ctx context.Context, x *entity.Payment) error {
 	return nil
 }
 
-// Reject rejects a payment
-func (repo) RejectPayment(ctx context.Context, x *entity.Payment) error {
+// RejectPayment rejects a payment
+func RejectPayment(ctx context.Context, x *entity.Payment) error {
 	db := appctx.GetDatabase(ctx)
 
 	if len(x.ID) == 0 {
@@ -141,7 +141,7 @@ func scanPayment(scan scanFunc, x *entity.Payment) error {
 }
 
 // GetPayments gets payments
-func (repo) GetPayments(ctx context.Context, paymentIDs []string) ([]*entity.Payment, error) {
+func GetPayments(ctx context.Context, paymentIDs []string) ([]*entity.Payment, error) {
 	db := appctx.GetDatabase(ctx)
 
 	xs := make([]*entity.Payment, 0, len(paymentIDs))
@@ -165,7 +165,7 @@ func (repo) GetPayments(ctx context.Context, paymentIDs []string) ([]*entity.Pay
 }
 
 // GetPayment gets payment from given id
-func (repo) GetPayment(ctx context.Context, paymentID string) (*entity.Payment, error) {
+func GetPayment(ctx context.Context, paymentID string) (*entity.Payment, error) {
 	db := appctx.GetDatabase(ctx)
 
 	var x entity.Payment
@@ -177,7 +177,7 @@ func (repo) GetPayment(ctx context.Context, paymentID string) (*entity.Payment, 
 }
 
 // HasPendingPayment returns ture if given user has pending payment for given course
-func (repo) HasPendingPayment(ctx context.Context, userID string, courseID string) (bool, error) {
+func HasPendingPayment(ctx context.Context, userID string, courseID string) (bool, error) {
 	db := appctx.GetDatabase(ctx)
 
 	var p int
@@ -196,7 +196,7 @@ func (repo) HasPendingPayment(ctx context.Context, userID string, courseID strin
 }
 
 // ListHistoryPayments lists history payments
-func (repo) ListHistoryPayments(ctx context.Context, limit, offset int64) ([]*entity.Payment, error) {
+func ListHistoryPayments(ctx context.Context, limit, offset int64) ([]*entity.Payment, error) {
 	db := appctx.GetDatabase(ctx)
 
 	xs := make([]*entity.Payment, 0)
@@ -220,7 +220,7 @@ func (repo) ListHistoryPayments(ctx context.Context, limit, offset int64) ([]*en
 }
 
 // ListPendingPayments lists pending payments
-func (repo) ListPendingPayments(ctx context.Context, limit, offset int64) ([]*entity.Payment, error) {
+func ListPendingPayments(ctx context.Context, limit, offset int64) ([]*entity.Payment, error) {
 	db := appctx.GetDatabase(ctx)
 
 	xs := make([]*entity.Payment, 0)
@@ -244,7 +244,7 @@ func (repo) ListPendingPayments(ctx context.Context, limit, offset int64) ([]*en
 }
 
 // CountHistoryPayments returns history payments count
-func (repo) CountHistoryPayments(ctx context.Context) (int64, error) {
+func CountHistoryPayments(ctx context.Context) (int64, error) {
 	db := appctx.GetDatabase(ctx)
 
 	var cnt int64
@@ -256,7 +256,7 @@ func (repo) CountHistoryPayments(ctx context.Context) (int64, error) {
 }
 
 // CountPendingPayments returns pending payments count
-func (repo) CountPendingPayments(ctx context.Context) (int64, error) {
+func CountPendingPayments(ctx context.Context) (int64, error) {
 	db := appctx.GetDatabase(ctx)
 
 	var cnt int64

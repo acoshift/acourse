@@ -22,7 +22,6 @@ import (
 
 	"github.com/acoshift/acourse/pkg/app"
 	"github.com/acoshift/acourse/pkg/controller"
-	"github.com/acoshift/acourse/pkg/repository"
 	"github.com/acoshift/acourse/pkg/view"
 )
 
@@ -92,9 +91,7 @@ func main() {
 
 	view.BaseURL = config.String("base_url")
 
-	repo := repository.New()
 	ctrl := controller.New(controller.Config{
-		Repository:   repo,
 		Auth:         firAuth,
 		Location:     loc,
 		SlackURL:     config.String("slack_url"),
@@ -106,7 +103,6 @@ func main() {
 	})
 	app := app.New(app.Config{
 		Controller:    ctrl,
-		Repository:    repo,
 		DB:            db,
 		BaseURL:       config.String("base_url"),
 		XSRFSecret:    config.String("xsrf_key"),

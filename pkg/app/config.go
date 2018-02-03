@@ -10,7 +10,6 @@ import (
 // Config use to init app package
 type Config struct {
 	Controller    Controller
-	Repository    Repository
 	DB            *sql.DB
 	BaseURL       string
 	XSRFSecret    string

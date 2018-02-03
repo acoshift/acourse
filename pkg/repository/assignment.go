@@ -8,7 +8,7 @@ import (
 )
 
 // GetAssignments gets assignments
-func (repo) GetAssignments(ctx context.Context, courseID string) ([]*entity.Assignment, error) {
+func GetAssignments(ctx context.Context, courseID string) ([]*entity.Assignment, error) {
 	db := appctx.GetDatabase(ctx)
 
 	rows, err := db.QueryContext(ctx, `

@@ -16,11 +16,9 @@ import (
 // New creates new app
 func New(config Config) http.Handler {
 	ctrl := config.Controller
-	repo := config.Repository
 
 	app := &app{
 		ctrl: ctrl,
-		repo: repo,
 	}
 
 	cacheInvalidator := make(chan interface{})
@@ -111,7 +109,7 @@ func New(config Config) http.Handler {
 		setDatabase(config.DB),
 		setRedisPool(config.RedisPool, config.RedisPrefix),
 		setCachePool(config.CachePool, config.CachePrefix),
-		fetchUser(repo),
+		fetchUser(),
 		csrf(config.BaseURL, config.XSRFSecret),
 	)(main))
 
@@ -125,5 +123,4 @@ func New(config Config) http.Handler {
 type app struct {
 	http.Handler
 	ctrl Controller
-	repo Repository
 }
