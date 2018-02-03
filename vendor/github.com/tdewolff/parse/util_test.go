@@ -31,23 +31,19 @@ func TestCopy(t *testing.T) {
 	foo := []byte("abc")
 	bar := Copy(foo)
 	foo[0] = 'b'
-	test.Bytes(t, foo, []byte("bbc"))
-	test.Bytes(t, bar, []byte("abc"))
+	test.String(t, string(foo), "bbc")
+	test.String(t, string(bar), "abc")
 }
 
 func TestToLower(t *testing.T) {
 	foo := []byte("Abc")
 	bar := ToLower(foo)
 	bar[1] = 'B'
-	test.Bytes(t, foo, []byte("aBc"))
-	test.Bytes(t, bar, []byte("aBc"))
+	test.String(t, string(foo), "aBc")
+	test.String(t, string(bar), "aBc")
 }
 
-func TestEqual(t *testing.T) {
-	test.That(t, Equal([]byte("abc"), []byte("abc")))
-	test.That(t, !Equal([]byte("abcd"), []byte("abc")))
-	test.That(t, !Equal([]byte("bbc"), []byte("abc")))
-
+func TestEqualFold(t *testing.T) {
 	test.That(t, EqualFold([]byte("Abc"), []byte("abc")))
 	test.That(t, !EqualFold([]byte("Abcd"), []byte("abc")))
 	test.That(t, !EqualFold([]byte("Bbc"), []byte("abc")))
@@ -80,7 +76,7 @@ func TestTrim(t *testing.T) {
 func BenchmarkBytesTrim(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		for _, e := range wsSlices {
-			e = bytes.TrimSpace(e)
+			bytes.TrimSpace(e)
 		}
 	}
 }
@@ -88,7 +84,7 @@ func BenchmarkBytesTrim(b *testing.B) {
 func BenchmarkTrim(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		for _, e := range wsSlices {
-			e = TrimWhitespace(e)
+			TrimWhitespace(e)
 		}
 	}
 }
@@ -96,7 +92,7 @@ func BenchmarkTrim(b *testing.B) {
 func BenchmarkReplace(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		for _, e := range wsSlices {
-			e = ReplaceMultipleWhitespace(e)
+			ReplaceMultipleWhitespace(e)
 		}
 	}
 }

@@ -12,12 +12,13 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"sort"
 	"strings"
 	"sync/atomic"
 	"time"
 
-	"github.com/dustin/go-humanize"
+	humanize "github.com/dustin/go-humanize"
 	"github.com/matryer/try"
 	flag "github.com/spf13/pflag"
 	min "github.com/tdewolff/minify"
@@ -29,8 +30,9 @@ import (
 	"github.com/tdewolff/minify/xml"
 )
 
-const Concurrency = 50
-const Version = "2.1.0-dev"
+var Version = "master"
+var Commit = ""
+var Date = ""
 
 var filetypeMime = map[string]string{
 	"css":  "text/css",
@@ -50,7 +52,6 @@ var (
 	recursive bool
 	verbose   bool
 	version   bool
-	update    bool
 	watch     bool
 )
 
@@ -93,7 +94,6 @@ func main() {
 	flag.BoolVarP(&list, "list", "l", false, "List all accepted filetypes")
 	flag.BoolVarP(&verbose, "verbose", "v", false, "Verbose")
 	flag.BoolVarP(&watch, "watch", "w", false, "Watch files and minify upon changes")
-	flag.BoolVarP(&update, "update", "u", false, "Update binary")
 	flag.BoolVarP(&version, "version", "", false, "Version")
 
 	flag.StringVar(&siteurl, "url", "", "URL of file to enable URL minification")
@@ -116,13 +116,10 @@ func main() {
 	}
 
 	if version {
-		fmt.Println("minify", Version)
-		return
-	}
-
-	if update {
-		if err := equinoxUpdate(); err != nil {
-			Error.Fatalln(err)
+		if Version == "devel" {
+			fmt.Printf("minify version devel+%.7s %s\n", Commit, Date)
+		} else {
+			fmt.Printf("minify version %s\n", Version)
 		}
 		return
 	}
@@ -202,18 +199,27 @@ func main() {
 			}
 		}
 	} else {
-		sem := make(chan bool, Concurrency)
+		numWorkers := 4
+		if n := runtime.NumCPU(); n > numWorkers {
+			numWorkers = n
+		}
+
+		sem := make(chan struct{}, numWorkers)
 		for _, t := range tasks {
-			sem <- true
+			sem <- struct{}{}
 			go func(t task) {
-				defer func() { <-sem }()
+				defer func() {
+					<-sem
+				}()
 				if ok := minify(mimetype, t); !ok {
 					atomic.AddInt32(&fails, 1)
 				}
 			}(t)
 		}
+
+		// wait for all jobs to be done
 		for i := 0; i < cap(sem); i++ {
-			sem <- true
+			sem <- struct{}{}
 		}
 	}
 
@@ -535,7 +541,7 @@ func minify(mimetype string, t task) bool {
 		dstName = "stdin"
 	} else {
 		// rename original when overwriting
-		for i, _ := range t.srcs {
+		for i := range t.srcs {
 			if t.srcs[i] == t.dst {
 				t.srcs[i] += ".bak"
 				err := try.Do(func(attempt int) (bool, error) {
@@ -618,7 +624,7 @@ func minify(mimetype string, t task) bool {
 	fw.Close()
 
 	// remove original that was renamed, when overwriting files
-	for i, _ := range t.srcs {
+	for i := range t.srcs {
 		if t.srcs[i] == t.dst+".bak" {
 			if err == nil {
 				if err = os.Remove(t.srcs[i]); err != nil {

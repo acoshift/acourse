@@ -148,8 +148,8 @@ type RemoteConfig struct {
 }
 
 func (s *RemoteConfig) MarshalJSON() ([]byte, error) {
-	type noMethod RemoteConfig
-	raw := noMethod(*s)
+	type NoMethod RemoteConfig
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -157,7 +157,8 @@ func (s *RemoteConfig) MarshalJSON() ([]byte, error) {
 // these (because order matters) are
 // part of a single RemoteConfig template.
 type RemoteConfigCondition struct {
-	// Description: Optional.
+	// Description: DO NOT USE. Implementation removed and will not be added
+	// unless requested.
 	// A description for this Condition. Length must be less than or equal
 	// to
 	// 100 characters (or more precisely, unicode code points, which is
@@ -225,8 +226,8 @@ type RemoteConfigCondition struct {
 }
 
 func (s *RemoteConfigCondition) MarshalJSON() ([]byte, error) {
-	type noMethod RemoteConfigCondition
-	raw := noMethod(*s)
+	type NoMethod RemoteConfigCondition
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -277,8 +278,8 @@ type RemoteConfigParameter struct {
 }
 
 func (s *RemoteConfigParameter) MarshalJSON() ([]byte, error) {
-	type noMethod RemoteConfigParameter
-	raw := noMethod(*s)
+	type NoMethod RemoteConfigParameter
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -320,8 +321,8 @@ type RemoteConfigParameterValue struct {
 }
 
 func (s *RemoteConfigParameterValue) MarshalJSON() ([]byte, error) {
-	type noMethod RemoteConfigParameterValue
-	raw := noMethod(*s)
+	type NoMethod RemoteConfigParameterValue
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -436,7 +437,7 @@ func (c *ProjectsGetRemoteConfigCall) Do(opts ...googleapi.CallOption) (*RemoteC
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -612,7 +613,7 @@ func (c *ProjectsUpdateRemoteConfigCall) Do(opts ...googleapi.CallOption) (*Remo
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil

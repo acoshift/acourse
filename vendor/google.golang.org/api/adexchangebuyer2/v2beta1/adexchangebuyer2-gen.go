@@ -472,8 +472,8 @@ type AbsoluteDateRange struct {
 }
 
 func (s *AbsoluteDateRange) MarshalJSON() ([]byte, error) {
-	type noMethod AbsoluteDateRange
-	raw := noMethod(*s)
+	type NoMethod AbsoluteDateRange
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -502,8 +502,8 @@ type AddDealAssociationRequest struct {
 }
 
 func (s *AddDealAssociationRequest) MarshalJSON() ([]byte, error) {
-	type noMethod AddDealAssociationRequest
-	raw := noMethod(*s)
+	type NoMethod AddDealAssociationRequest
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -535,8 +535,8 @@ type AppContext struct {
 }
 
 func (s *AppContext) MarshalJSON() ([]byte, error) {
-	type noMethod AppContext
-	raw := noMethod(*s)
+	type NoMethod AppContext
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -568,8 +568,8 @@ type AuctionContext struct {
 }
 
 func (s *AuctionContext) MarshalJSON() ([]byte, error) {
-	type noMethod AuctionContext
-	raw := noMethod(*s)
+	type NoMethod AuctionContext
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -624,8 +624,8 @@ type BidMetricsRow struct {
 }
 
 func (s *BidMetricsRow) MarshalJSON() ([]byte, error) {
-	type noMethod BidMetricsRow
-	raw := noMethod(*s)
+	type NoMethod BidMetricsRow
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -680,8 +680,8 @@ type BidResponseWithoutBidsStatusRow struct {
 }
 
 func (s *BidResponseWithoutBidsStatusRow) MarshalJSON() ([]byte, error) {
-	type noMethod BidResponseWithoutBidsStatusRow
-	raw := noMethod(*s)
+	type NoMethod BidResponseWithoutBidsStatusRow
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -725,8 +725,8 @@ type CalloutStatusRow struct {
 }
 
 func (s *CalloutStatusRow) MarshalJSON() ([]byte, error) {
-	type noMethod CalloutStatusRow
-	raw := noMethod(*s)
+	type NoMethod CalloutStatusRow
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -792,6 +792,22 @@ type Client struct {
 	//   "AGENCY" - An advertising agency.
 	EntityType string `json:"entityType,omitempty"`
 
+	// PartnerClientId: Optional arbitrary unique identifier of this client
+	// buyer from the
+	// standpoint of its Ad Exchange sponsor buyer.
+	//
+	// This field can be used to associate a client buyer with the
+	// identifier
+	// in the namespace of its sponsor buyer, lookup client buyers by
+	// that
+	// identifier and verify whether an Ad Exchange counterpart of a given
+	// client
+	// buyer already exists.
+	//
+	// If present, must be unique among all the client buyers for its
+	// Ad Exchange sponsor buyer.
+	PartnerClientId string `json:"partnerClientId,omitempty"`
+
 	// Role: The role which is assigned to the client buyer. Each role
 	// implies a set of
 	// permissions granted to the client. Must be one of
@@ -855,8 +871,8 @@ type Client struct {
 }
 
 func (s *Client) MarshalJSON() ([]byte, error) {
-	type noMethod Client
-	raw := noMethod(*s)
+	type NoMethod Client
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -924,8 +940,8 @@ type ClientUser struct {
 }
 
 func (s *ClientUser) MarshalJSON() ([]byte, error) {
-	type noMethod ClientUser
-	raw := noMethod(*s)
+	type NoMethod ClientUser
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -974,8 +990,8 @@ type ClientUserInvitation struct {
 }
 
 func (s *ClientUserInvitation) MarshalJSON() ([]byte, error) {
-	type noMethod ClientUserInvitation
-	raw := noMethod(*s)
+	type NoMethod ClientUserInvitation
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -1043,8 +1059,8 @@ type Correction struct {
 }
 
 func (s *Correction) MarshalJSON() ([]byte, error) {
-	type noMethod Correction
-	raw := noMethod(*s)
+	type NoMethod Correction
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -1270,8 +1286,8 @@ type Creative struct {
 }
 
 func (s *Creative) MarshalJSON() ([]byte, error) {
-	type noMethod Creative
-	raw := noMethod(*s)
+	type NoMethod Creative
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -1306,8 +1322,8 @@ type CreativeDealAssociation struct {
 }
 
 func (s *CreativeDealAssociation) MarshalJSON() ([]byte, error) {
-	type noMethod CreativeDealAssociation
-	raw := noMethod(*s)
+	type NoMethod CreativeDealAssociation
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -1348,8 +1364,8 @@ type CreativeStatusRow struct {
 }
 
 func (s *CreativeStatusRow) MarshalJSON() ([]byte, error) {
-	type noMethod CreativeStatusRow
-	raw := noMethod(*s)
+	type NoMethod CreativeStatusRow
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -1398,8 +1414,8 @@ type Date struct {
 }
 
 func (s *Date) MarshalJSON() ([]byte, error) {
-	type noMethod Date
-	raw := noMethod(*s)
+	type NoMethod Date
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -1589,8 +1605,8 @@ type Disapproval struct {
 }
 
 func (s *Disapproval) MarshalJSON() ([]byte, error) {
-	type noMethod Disapproval
-	raw := noMethod(*s)
+	type NoMethod Disapproval
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -1631,17 +1647,19 @@ type FilterSet struct {
 
 	// CreativeId: The ID of the creative on which to filter; optional. This
 	// field may be set
-	// only for a filter set that accesses buyer-level troubleshooting data,
-	// i.e.
-	// one whose name matches the `bidders/*/accounts/*/filterSets/*`
+	// only for a filter set that accesses account-level troubleshooting
+	// data,
+	// i.e. one whose name matches the
+	// `bidders/*/accounts/*/filterSets/*`
 	// pattern.
 	CreativeId string `json:"creativeId,omitempty"`
 
 	// DealId: The ID of the deal on which to filter; optional. This field
 	// may be set
-	// only for a filter set that accesses buyer-level troubleshooting data,
-	// i.e.
-	// one whose name matches the `bidders/*/accounts/*/filterSets/*`
+	// only for a filter set that accesses account-level troubleshooting
+	// data,
+	// i.e. one whose name matches the
+	// `bidders/*/accounts/*/filterSets/*`
 	// pattern.
 	DealId int64 `json:"dealId,omitempty,string"`
 
@@ -1655,13 +1673,8 @@ type FilterSet struct {
 	//   "APP" - The ad impression appears in an app.
 	Environment string `json:"environment,omitempty"`
 
-	// FilterSetId: The ID of the filter set; unique within the account of
-	// the filter set
-	// owner.
-	// The value of this field is ignored in create operations.
-	FilterSetId int64 `json:"filterSetId,omitempty,string"`
-
-	// Format: The format on which to filter; optional.
+	// Format: DEPRECATED: use repeated formats field instead.
+	// The format on which to filter; optional.
 	//
 	// Possible values:
 	//   "FORMAT_UNSPECIFIED" - A placeholder for an undefined format;
@@ -1671,6 +1684,20 @@ type FilterSet struct {
 	//   "VIDEO" - The ad impression is video format.
 	Format string `json:"format,omitempty"`
 
+	// Formats: The list of formats on which to filter; may be empty. The
+	// filters
+	// represented by multiple formats are ORed together (i.e. if
+	// non-empty,
+	// results must match any one of the formats).
+	//
+	// Possible values:
+	//   "FORMAT_UNSPECIFIED" - A placeholder for an undefined format;
+	// indicates that no format filter
+	// will be applied.
+	//   "DISPLAY" - The ad impression is display format (i.e. an image).
+	//   "VIDEO" - The ad impression is video format.
+	Formats []string `json:"formats,omitempty"`
+
 	// Name: A user-defined name of the filter set. Filter set names must be
 	// unique
 	// globally and match one of the patterns:
@@ -1679,7 +1706,7 @@ type FilterSet struct {
 	// troubleshooting
 	// data)
 	// - `bidders/*/accounts/*/filterSets/*` (for accessing
-	// buyer-level
+	// account-level
 	// troubleshooting data)
 	//
 	// This field is required in create operations.
@@ -1759,8 +1786,8 @@ type FilterSet struct {
 }
 
 func (s *FilterSet) MarshalJSON() ([]byte, error) {
-	type noMethod FilterSet
-	raw := noMethod(*s)
+	type NoMethod FilterSet
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -1796,8 +1823,8 @@ type FilteredBidCreativeRow struct {
 }
 
 func (s *FilteredBidCreativeRow) MarshalJSON() ([]byte, error) {
-	type noMethod FilteredBidCreativeRow
-	raw := noMethod(*s)
+	type NoMethod FilteredBidCreativeRow
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -1838,8 +1865,8 @@ type FilteredBidDetailRow struct {
 }
 
 func (s *FilteredBidDetailRow) MarshalJSON() ([]byte, error) {
-	type noMethod FilteredBidDetailRow
-	raw := noMethod(*s)
+	type NoMethod FilteredBidDetailRow
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -1874,8 +1901,8 @@ type FilteringStats struct {
 }
 
 func (s *FilteringStats) MarshalJSON() ([]byte, error) {
-	type noMethod FilteringStats
-	raw := noMethod(*s)
+	type NoMethod FilteringStats
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -1909,8 +1936,8 @@ type HtmlContent struct {
 }
 
 func (s *HtmlContent) MarshalJSON() ([]byte, error) {
-	type noMethod HtmlContent
-	raw := noMethod(*s)
+	type NoMethod HtmlContent
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -1945,8 +1972,8 @@ type Image struct {
 }
 
 func (s *Image) MarshalJSON() ([]byte, error) {
-	type noMethod Image
-	raw := noMethod(*s)
+	type NoMethod Image
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -2004,8 +2031,8 @@ type ImpressionMetricsRow struct {
 }
 
 func (s *ImpressionMetricsRow) MarshalJSON() ([]byte, error) {
-	type noMethod ImpressionMetricsRow
-	raw := noMethod(*s)
+	type NoMethod ImpressionMetricsRow
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -2045,8 +2072,8 @@ type ListBidMetricsResponse struct {
 }
 
 func (s *ListBidMetricsResponse) MarshalJSON() ([]byte, error) {
-	type noMethod ListBidMetricsResponse
-	raw := noMethod(*s)
+	type NoMethod ListBidMetricsResponse
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -2088,8 +2115,8 @@ type ListBidResponseErrorsResponse struct {
 }
 
 func (s *ListBidResponseErrorsResponse) MarshalJSON() ([]byte, error) {
-	type noMethod ListBidResponseErrorsResponse
-	raw := noMethod(*s)
+	type NoMethod ListBidResponseErrorsResponse
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -2135,8 +2162,8 @@ type ListBidResponsesWithoutBidsResponse struct {
 }
 
 func (s *ListBidResponsesWithoutBidsResponse) MarshalJSON() ([]byte, error) {
-	type noMethod ListBidResponsesWithoutBidsResponse
-	raw := noMethod(*s)
+	type NoMethod ListBidResponsesWithoutBidsResponse
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -2176,8 +2203,8 @@ type ListClientUserInvitationsResponse struct {
 }
 
 func (s *ListClientUserInvitationsResponse) MarshalJSON() ([]byte, error) {
-	type noMethod ListClientUserInvitationsResponse
-	raw := noMethod(*s)
+	type NoMethod ListClientUserInvitationsResponse
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -2216,8 +2243,8 @@ type ListClientUsersResponse struct {
 }
 
 func (s *ListClientUsersResponse) MarshalJSON() ([]byte, error) {
-	type noMethod ListClientUsersResponse
-	raw := noMethod(*s)
+	type NoMethod ListClientUsersResponse
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -2255,8 +2282,8 @@ type ListClientsResponse struct {
 }
 
 func (s *ListClientsResponse) MarshalJSON() ([]byte, error) {
-	type noMethod ListClientsResponse
-	raw := noMethod(*s)
+	type NoMethod ListClientsResponse
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -2302,8 +2329,8 @@ type ListCreativeStatusBreakdownByCreativeResponse struct {
 }
 
 func (s *ListCreativeStatusBreakdownByCreativeResponse) MarshalJSON() ([]byte, error) {
-	type noMethod ListCreativeStatusBreakdownByCreativeResponse
-	raw := noMethod(*s)
+	type NoMethod ListCreativeStatusBreakdownByCreativeResponse
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -2379,8 +2406,8 @@ type ListCreativeStatusBreakdownByDetailResponse struct {
 }
 
 func (s *ListCreativeStatusBreakdownByDetailResponse) MarshalJSON() ([]byte, error) {
-	type noMethod ListCreativeStatusBreakdownByDetailResponse
-	raw := noMethod(*s)
+	type NoMethod ListCreativeStatusBreakdownByDetailResponse
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -2419,8 +2446,8 @@ type ListCreativesResponse struct {
 }
 
 func (s *ListCreativesResponse) MarshalJSON() ([]byte, error) {
-	type noMethod ListCreativesResponse
-	raw := noMethod(*s)
+	type NoMethod ListCreativesResponse
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -2460,8 +2487,8 @@ type ListDealAssociationsResponse struct {
 }
 
 func (s *ListDealAssociationsResponse) MarshalJSON() ([]byte, error) {
-	type noMethod ListDealAssociationsResponse
-	raw := noMethod(*s)
+	type NoMethod ListDealAssociationsResponse
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -2500,8 +2527,8 @@ type ListFilterSetsResponse struct {
 }
 
 func (s *ListFilterSetsResponse) MarshalJSON() ([]byte, error) {
-	type noMethod ListFilterSetsResponse
-	raw := noMethod(*s)
+	type NoMethod ListFilterSetsResponse
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -2544,8 +2571,8 @@ type ListFilteredBidRequestsResponse struct {
 }
 
 func (s *ListFilteredBidRequestsResponse) MarshalJSON() ([]byte, error) {
-	type noMethod ListFilteredBidRequestsResponse
-	raw := noMethod(*s)
+	type NoMethod ListFilteredBidRequestsResponse
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -2588,8 +2615,8 @@ type ListFilteredBidsResponse struct {
 }
 
 func (s *ListFilteredBidsResponse) MarshalJSON() ([]byte, error) {
-	type noMethod ListFilteredBidsResponse
-	raw := noMethod(*s)
+	type NoMethod ListFilteredBidsResponse
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -2632,8 +2659,8 @@ type ListImpressionMetricsResponse struct {
 }
 
 func (s *ListImpressionMetricsResponse) MarshalJSON() ([]byte, error) {
-	type noMethod ListImpressionMetricsResponse
-	raw := noMethod(*s)
+	type NoMethod ListImpressionMetricsResponse
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -2675,8 +2702,8 @@ type ListLosingBidsResponse struct {
 }
 
 func (s *ListLosingBidsResponse) MarshalJSON() ([]byte, error) {
-	type noMethod ListLosingBidsResponse
-	raw := noMethod(*s)
+	type NoMethod ListLosingBidsResponse
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -2719,8 +2746,8 @@ type ListNonBillableWinningBidsResponse struct {
 }
 
 func (s *ListNonBillableWinningBidsResponse) MarshalJSON() ([]byte, error) {
-	type noMethod ListNonBillableWinningBidsResponse
-	raw := noMethod(*s)
+	type NoMethod ListNonBillableWinningBidsResponse
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -2755,8 +2782,8 @@ type LocationContext struct {
 }
 
 func (s *LocationContext) MarshalJSON() ([]byte, error) {
-	type noMethod LocationContext
-	raw := noMethod(*s)
+	type NoMethod LocationContext
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -2799,8 +2826,8 @@ type MetricValue struct {
 }
 
 func (s *MetricValue) MarshalJSON() ([]byte, error) {
-	type noMethod MetricValue
-	raw := noMethod(*s)
+	type NoMethod MetricValue
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -2870,18 +2897,18 @@ type NativeContent struct {
 }
 
 func (s *NativeContent) MarshalJSON() ([]byte, error) {
-	type noMethod NativeContent
-	raw := noMethod(*s)
+	type NoMethod NativeContent
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 func (s *NativeContent) UnmarshalJSON(data []byte) error {
-	type noMethod NativeContent
+	type NoMethod NativeContent
 	var s1 struct {
 		StarRating gensupport.JSONFloat64 `json:"starRating"`
-		*noMethod
+		*NoMethod
 	}
-	s1.noMethod = (*noMethod)(s)
+	s1.NoMethod = (*NoMethod)(s)
 	if err := json.Unmarshal(data, &s1); err != nil {
 		return err
 	}
@@ -2931,8 +2958,8 @@ type NonBillableWinningBidStatusRow struct {
 }
 
 func (s *NonBillableWinningBidStatusRow) MarshalJSON() ([]byte, error) {
-	type noMethod NonBillableWinningBidStatusRow
-	raw := noMethod(*s)
+	type NoMethod NonBillableWinningBidStatusRow
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -2965,8 +2992,8 @@ type PlatformContext struct {
 }
 
 func (s *PlatformContext) MarshalJSON() ([]byte, error) {
-	type noMethod PlatformContext
-	raw := noMethod(*s)
+	type NoMethod PlatformContext
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -2999,8 +3026,8 @@ type RealtimeTimeRange struct {
 }
 
 func (s *RealtimeTimeRange) MarshalJSON() ([]byte, error) {
-	type noMethod RealtimeTimeRange
-	raw := noMethod(*s)
+	type NoMethod RealtimeTimeRange
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -3036,8 +3063,8 @@ type Reason struct {
 }
 
 func (s *Reason) MarshalJSON() ([]byte, error) {
-	type noMethod Reason
-	raw := noMethod(*s)
+	type NoMethod Reason
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -3078,8 +3105,8 @@ type RelativeDateRange struct {
 }
 
 func (s *RelativeDateRange) MarshalJSON() ([]byte, error) {
-	type noMethod RelativeDateRange
-	raw := noMethod(*s)
+	type NoMethod RelativeDateRange
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -3108,8 +3135,8 @@ type RemoveDealAssociationRequest struct {
 }
 
 func (s *RemoveDealAssociationRequest) MarshalJSON() ([]byte, error) {
-	type noMethod RemoveDealAssociationRequest
-	raw := noMethod(*s)
+	type NoMethod RemoveDealAssociationRequest
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -3138,8 +3165,8 @@ type RowDimensions struct {
 }
 
 func (s *RowDimensions) MarshalJSON() ([]byte, error) {
-	type noMethod RowDimensions
-	raw := noMethod(*s)
+	type NoMethod RowDimensions
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -3171,8 +3198,8 @@ type SecurityContext struct {
 }
 
 func (s *SecurityContext) MarshalJSON() ([]byte, error) {
-	type noMethod SecurityContext
-	raw := noMethod(*s)
+	type NoMethod SecurityContext
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -3219,8 +3246,8 @@ type ServingContext struct {
 }
 
 func (s *ServingContext) MarshalJSON() ([]byte, error) {
-	type noMethod ServingContext
-	raw := noMethod(*s)
+	type NoMethod ServingContext
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -3270,8 +3297,8 @@ type ServingRestriction struct {
 }
 
 func (s *ServingRestriction) MarshalJSON() ([]byte, error) {
-	type noMethod ServingRestriction
-	raw := noMethod(*s)
+	type NoMethod ServingRestriction
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -3310,8 +3337,8 @@ type TimeInterval struct {
 }
 
 func (s *TimeInterval) MarshalJSON() ([]byte, error) {
-	type noMethod TimeInterval
-	raw := noMethod(*s)
+	type NoMethod TimeInterval
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -3319,6 +3346,10 @@ func (s *TimeInterval) MarshalJSON() ([]byte, error) {
 type VideoContent struct {
 	// VideoUrl: The URL to fetch a video ad.
 	VideoUrl string `json:"videoUrl,omitempty"`
+
+	// VideoVastXml: The contents of a VAST document for a video ad.
+	// This document should conform to the VAST 2.0 or 3.0 standard.
+	VideoVastXml string `json:"videoVastXml,omitempty"`
 
 	// ForceSendFields is a list of field names (e.g. "VideoUrl") to
 	// unconditionally include in API requests. By default, fields with
@@ -3338,8 +3369,8 @@ type VideoContent struct {
 }
 
 func (s *VideoContent) MarshalJSON() ([]byte, error) {
-	type noMethod VideoContent
-	raw := noMethod(*s)
+	type NoMethod VideoContent
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -3373,8 +3404,8 @@ type WatchCreativeRequest struct {
 }
 
 func (s *WatchCreativeRequest) MarshalJSON() ([]byte, error) {
-	type noMethod WatchCreativeRequest
-	raw := noMethod(*s)
+	type NoMethod WatchCreativeRequest
+	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
@@ -3478,7 +3509,7 @@ func (c *AccountsClientsCreateCall) Do(opts ...googleapi.CallOption) (*Client, e
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -3623,7 +3654,7 @@ func (c *AccountsClientsGetCall) Do(opts ...googleapi.CallOption) (*Client, erro
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -3698,6 +3729,16 @@ func (c *AccountsClientsListCall) PageSize(pageSize int64) *AccountsClientsListC
 // accounts.clients.list method.
 func (c *AccountsClientsListCall) PageToken(pageToken string) *AccountsClientsListCall {
 	c.urlParams_.Set("pageToken", pageToken)
+	return c
+}
+
+// PartnerClientId sets the optional parameter "partnerClientId":
+// Optional unique identifier (from the standpoint of an Ad Exchange
+// sponsor
+// buyer partner) of the client to return.
+// If specified, at most one client will be returned in the response.
+func (c *AccountsClientsListCall) PartnerClientId(partnerClientId string) *AccountsClientsListCall {
+	c.urlParams_.Set("partnerClientId", partnerClientId)
 	return c
 }
 
@@ -3790,7 +3831,7 @@ func (c *AccountsClientsListCall) Do(opts ...googleapi.CallOption) (*ListClients
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -3818,6 +3859,11 @@ func (c *AccountsClientsListCall) Do(opts ...googleapi.CallOption) (*ListClients
 	//     },
 	//     "pageToken": {
 	//       "description": "A token identifying a page of results the server should return.\nTypically, this is the value of\nListClientsResponse.nextPageToken\nreturned from the previous call to the\naccounts.clients.list method.",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
+	//     "partnerClientId": {
+	//       "description": "Optional unique identifier (from the standpoint of an Ad Exchange sponsor\nbuyer partner) of the client to return.\nIf specified, at most one client will be returned in the response.",
 	//       "location": "query",
 	//       "type": "string"
 	//     }
@@ -3957,7 +4003,7 @@ func (c *AccountsClientsUpdateCall) Do(opts ...googleapi.CallOption) (*Client, e
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -4104,7 +4150,7 @@ func (c *AccountsClientsInvitationsCreateCall) Do(opts ...googleapi.CallOption) 
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -4260,7 +4306,7 @@ func (c *AccountsClientsInvitationsGetCall) Do(opts ...googleapi.CallOption) (*C
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -4442,7 +4488,7 @@ func (c *AccountsClientsInvitationsListCall) Do(opts ...googleapi.CallOption) (*
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -4626,7 +4672,7 @@ func (c *AccountsClientsUsersGetCall) Do(opts ...googleapi.CallOption) (*ClientU
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -4805,7 +4851,7 @@ func (c *AccountsClientsUsersListCall) Do(opts ...googleapi.CallOption) (*ListCl
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -4983,7 +5029,7 @@ func (c *AccountsClientsUsersUpdateCall) Do(opts ...googleapi.CallOption) (*Clie
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -5050,6 +5096,13 @@ func (r *AccountsCreativesService) Create(accountId string, creative *Creative) 
 	c := &AccountsCreativesCreateCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.accountId = accountId
 	c.creative = creative
+	return c
+}
+
+// AccountId1 sets the optional parameter "accountId1": The account the
+// creative belongs to.
+func (c *AccountsCreativesCreateCall) AccountId1(accountId1 string) *AccountsCreativesCreateCall {
+	c.urlParams_.Set("accountId1", accountId1)
 	return c
 }
 
@@ -5147,7 +5200,7 @@ func (c *AccountsCreativesCreateCall) Do(opts ...googleapi.CallOption) (*Creativ
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -5164,6 +5217,11 @@ func (c *AccountsCreativesCreateCall) Do(opts ...googleapi.CallOption) (*Creativ
 	//       "description": "The account that this creative belongs to.\nCan be used to filter the response of the\ncreatives.list\nmethod.",
 	//       "location": "path",
 	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "accountId1": {
+	//       "description": "The account the creative belongs to.",
+	//       "location": "query",
 	//       "type": "string"
 	//     },
 	//     "duplicateIdMode": {
@@ -5300,7 +5358,7 @@ func (c *AccountsCreativesGetCall) Do(opts ...googleapi.CallOption) (*Creative, 
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -5396,7 +5454,7 @@ func (c *AccountsCreativesListCall) PageToken(pageToken string) *AccountsCreativ
 // attributes}
 // <li>disapprovalReason: {a reason
 // from
-// DisapprovalReason
+// DisapprovalReason}
 // </ul>
 // Example: 'accountId=12345 AND (dealsStatus:disapproved
 // AND
@@ -5495,7 +5553,7 @@ func (c *AccountsCreativesListCall) Do(opts ...googleapi.CallOption) (*ListCreat
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -5526,7 +5584,7 @@ func (c *AccountsCreativesListCall) Do(opts ...googleapi.CallOption) (*ListCreat
 	//       "type": "string"
 	//     },
 	//     "query": {
-	//       "description": "An optional query string to filter creatives. If no filter is specified,\nall active creatives will be returned.\nSupported queries are:\n\u003cul\u003e\n\u003cli\u003eaccountId=\u003ci\u003eaccount_id_string\u003c/i\u003e\n\u003cli\u003ecreativeId=\u003ci\u003ecreative_id_string\u003c/i\u003e\n\u003cli\u003edealsStatus: {approved, conditionally_approved, disapproved,\n                   not_checked}\n\u003cli\u003eopenAuctionStatus: {approved, conditionally_approved, disapproved,\n                          not_checked}\n\u003cli\u003eattribute: {a numeric attribute from the list of attributes}\n\u003cli\u003edisapprovalReason: {a reason from\nDisapprovalReason\n\u003c/ul\u003e\nExample: 'accountId=12345 AND (dealsStatus:disapproved AND\ndisapprovalReason:unacceptable_content) OR attribute:47'",
+	//       "description": "An optional query string to filter creatives. If no filter is specified,\nall active creatives will be returned.\nSupported queries are:\n\u003cul\u003e\n\u003cli\u003eaccountId=\u003ci\u003eaccount_id_string\u003c/i\u003e\n\u003cli\u003ecreativeId=\u003ci\u003ecreative_id_string\u003c/i\u003e\n\u003cli\u003edealsStatus: {approved, conditionally_approved, disapproved,\n                   not_checked}\n\u003cli\u003eopenAuctionStatus: {approved, conditionally_approved, disapproved,\n                          not_checked}\n\u003cli\u003eattribute: {a numeric attribute from the list of attributes}\n\u003cli\u003edisapprovalReason: {a reason from\nDisapprovalReason}\n\u003c/ul\u003e\nExample: 'accountId=12345 AND (dealsStatus:disapproved AND\ndisapprovalReason:unacceptable_content) OR attribute:47'",
 	//       "location": "query",
 	//       "type": "string"
 	//     }
@@ -5668,7 +5726,7 @@ func (c *AccountsCreativesStopWatchingCall) Do(opts ...googleapi.CallOption) (*E
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -5727,6 +5785,13 @@ func (r *AccountsCreativesService) Update(accountId string, creativeId string, c
 	c.accountId = accountId
 	c.creativeId = creativeId
 	c.creative = creative
+	return c
+}
+
+// AccountId1 sets the optional parameter "accountId1": The account the
+// creative belongs to.
+func (c *AccountsCreativesUpdateCall) AccountId1(accountId1 string) *AccountsCreativesUpdateCall {
+	c.urlParams_.Set("accountId1", accountId1)
 	return c
 }
 
@@ -5812,7 +5877,7 @@ func (c *AccountsCreativesUpdateCall) Do(opts ...googleapi.CallOption) (*Creativ
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -5830,6 +5895,11 @@ func (c *AccountsCreativesUpdateCall) Do(opts ...googleapi.CallOption) (*Creativ
 	//       "description": "The account that this creative belongs to.\nCan be used to filter the response of the\ncreatives.list\nmethod.",
 	//       "location": "path",
 	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "accountId1": {
+	//       "description": "The account the creative belongs to.",
+	//       "location": "query",
 	//       "type": "string"
 	//     },
 	//     "creativeId": {
@@ -5958,7 +6028,7 @@ func (c *AccountsCreativesWatchCall) Do(opts ...googleapi.CallOption) (*Empty, e
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -6102,7 +6172,7 @@ func (c *AccountsCreativesDealAssociationsAddCall) Do(opts ...googleapi.CallOpti
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -6295,7 +6365,7 @@ func (c *AccountsCreativesDealAssociationsListCall) Do(opts ...googleapi.CallOpt
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -6473,7 +6543,7 @@ func (c *AccountsCreativesDealAssociationsRemoveCall) Do(opts ...googleapi.CallO
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -6531,13 +6601,6 @@ func (r *BiddersAccountsFilterSetsService) Create(ownerName string, filterset *F
 	c := &BiddersAccountsFilterSetsCreateCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.ownerName = ownerName
 	c.filterset = filterset
-	return c
-}
-
-// AccountId sets the optional parameter "accountId": Account ID of the
-// buyer.
-func (c *BiddersAccountsFilterSetsCreateCall) AccountId(accountId int64) *BiddersAccountsFilterSetsCreateCall {
-	c.urlParams_.Set("accountId", fmt.Sprint(accountId))
 	return c
 }
 
@@ -6632,7 +6695,7 @@ func (c *BiddersAccountsFilterSetsCreateCall) Do(opts ...googleapi.CallOption) (
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -6645,12 +6708,6 @@ func (c *BiddersAccountsFilterSetsCreateCall) Do(opts ...googleapi.CallOption) (
 	//     "ownerName"
 	//   ],
 	//   "parameters": {
-	//     "accountId": {
-	//       "description": "Account ID of the buyer.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "isTransient": {
 	//       "description": "Whether the filter set is transient, or should be persisted indefinitely.\nBy default, filter sets are not transient.\nIf transient, it will be available for at least 1 hour after creation.",
 	//       "location": "query",
@@ -6694,20 +6751,6 @@ type BiddersAccountsFilterSetsDeleteCall struct {
 func (r *BiddersAccountsFilterSetsService) Delete(name string) *BiddersAccountsFilterSetsDeleteCall {
 	c := &BiddersAccountsFilterSetsDeleteCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.name = name
-	return c
-}
-
-// AccountId sets the optional parameter "accountId": Account ID of the
-// buyer.
-func (c *BiddersAccountsFilterSetsDeleteCall) AccountId(accountId int64) *BiddersAccountsFilterSetsDeleteCall {
-	c.urlParams_.Set("accountId", fmt.Sprint(accountId))
-	return c
-}
-
-// FilterSetId sets the optional parameter "filterSetId": The ID of the
-// filter set to delete.
-func (c *BiddersAccountsFilterSetsDeleteCall) FilterSetId(filterSetId int64) *BiddersAccountsFilterSetsDeleteCall {
-	c.urlParams_.Set("filterSetId", fmt.Sprint(filterSetId))
 	return c
 }
 
@@ -6787,7 +6830,7 @@ func (c *BiddersAccountsFilterSetsDeleteCall) Do(opts ...googleapi.CallOption) (
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -6800,18 +6843,6 @@ func (c *BiddersAccountsFilterSetsDeleteCall) Do(opts ...googleapi.CallOption) (
 	//     "name"
 	//   ],
 	//   "parameters": {
-	//     "accountId": {
-	//       "description": "Account ID of the buyer.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
-	//     "filterSetId": {
-	//       "description": "The ID of the filter set to delete.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "name": {
 	//       "description": "Full name of the resource to delete.\nFor example:\n\n- For a bidder-level filter set for bidder 123:\n  `bidders/123/filterSets/abc`\n\n- For an account-level filter set for the buyer account representing bidder\n  123: `bidders/123/accounts/123/filterSets/abc`\n\n- For an account-level filter set for the child seat buyer account 456\n  whose bidder is 123: `bidders/123/accounts/456/filterSets/abc`",
 	//       "location": "path",
@@ -6848,20 +6879,6 @@ type BiddersAccountsFilterSetsGetCall struct {
 func (r *BiddersAccountsFilterSetsService) Get(name string) *BiddersAccountsFilterSetsGetCall {
 	c := &BiddersAccountsFilterSetsGetCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.name = name
-	return c
-}
-
-// AccountId sets the optional parameter "accountId": Account ID of the
-// buyer.
-func (c *BiddersAccountsFilterSetsGetCall) AccountId(accountId int64) *BiddersAccountsFilterSetsGetCall {
-	c.urlParams_.Set("accountId", fmt.Sprint(accountId))
-	return c
-}
-
-// FilterSetId sets the optional parameter "filterSetId": The ID of the
-// filter set to get.
-func (c *BiddersAccountsFilterSetsGetCall) FilterSetId(filterSetId int64) *BiddersAccountsFilterSetsGetCall {
-	c.urlParams_.Set("filterSetId", fmt.Sprint(filterSetId))
 	return c
 }
 
@@ -6954,7 +6971,7 @@ func (c *BiddersAccountsFilterSetsGetCall) Do(opts ...googleapi.CallOption) (*Fi
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -6967,18 +6984,6 @@ func (c *BiddersAccountsFilterSetsGetCall) Do(opts ...googleapi.CallOption) (*Fi
 	//     "name"
 	//   ],
 	//   "parameters": {
-	//     "accountId": {
-	//       "description": "Account ID of the buyer.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
-	//     "filterSetId": {
-	//       "description": "The ID of the filter set to get.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "name": {
 	//       "description": "Full name of the resource being requested.\nFor example:\n\n- For a bidder-level filter set for bidder 123:\n  `bidders/123/filterSets/abc`\n\n- For an account-level filter set for the buyer account representing bidder\n  123: `bidders/123/accounts/123/filterSets/abc`\n\n- For an account-level filter set for the child seat buyer account 456\n  whose bidder is 123: `bidders/123/accounts/456/filterSets/abc`",
 	//       "location": "path",
@@ -7014,13 +7019,6 @@ type BiddersAccountsFilterSetsListCall struct {
 func (r *BiddersAccountsFilterSetsService) List(ownerName string) *BiddersAccountsFilterSetsListCall {
 	c := &BiddersAccountsFilterSetsListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.ownerName = ownerName
-	return c
-}
-
-// AccountId sets the optional parameter "accountId": Account ID of the
-// buyer.
-func (c *BiddersAccountsFilterSetsListCall) AccountId(accountId int64) *BiddersAccountsFilterSetsListCall {
-	c.urlParams_.Set("accountId", fmt.Sprint(accountId))
 	return c
 }
 
@@ -7135,7 +7133,7 @@ func (c *BiddersAccountsFilterSetsListCall) Do(opts ...googleapi.CallOption) (*L
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -7148,12 +7146,6 @@ func (c *BiddersAccountsFilterSetsListCall) Do(opts ...googleapi.CallOption) (*L
 	//     "ownerName"
 	//   ],
 	//   "parameters": {
-	//     "accountId": {
-	//       "description": "Account ID of the buyer.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "ownerName": {
 	//       "description": "Name of the owner (bidder or account) of the filter sets to be listed.\nFor example:\n\n- For a bidder-level filter set for bidder 123: `bidders/123`\n\n- For an account-level filter set for the buyer account representing bidder\n  123: `bidders/123/accounts/123`\n\n- For an account-level filter set for the child seat buyer account 456\n  whose bidder is 123: `bidders/123/accounts/456`",
 	//       "location": "path",
@@ -7220,20 +7212,6 @@ type BiddersAccountsFilterSetsBidMetricsListCall struct {
 func (r *BiddersAccountsFilterSetsBidMetricsService) List(filterSetName string) *BiddersAccountsFilterSetsBidMetricsListCall {
 	c := &BiddersAccountsFilterSetsBidMetricsListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.filterSetName = filterSetName
-	return c
-}
-
-// AccountId sets the optional parameter "accountId": Account ID of the
-// buyer.
-func (c *BiddersAccountsFilterSetsBidMetricsListCall) AccountId(accountId int64) *BiddersAccountsFilterSetsBidMetricsListCall {
-	c.urlParams_.Set("accountId", fmt.Sprint(accountId))
-	return c
-}
-
-// FilterSetId sets the optional parameter "filterSetId": The ID of the
-// filter set to apply.
-func (c *BiddersAccountsFilterSetsBidMetricsListCall) FilterSetId(filterSetId int64) *BiddersAccountsFilterSetsBidMetricsListCall {
-	c.urlParams_.Set("filterSetId", fmt.Sprint(filterSetId))
 	return c
 }
 
@@ -7346,7 +7324,7 @@ func (c *BiddersAccountsFilterSetsBidMetricsListCall) Do(opts ...googleapi.CallO
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -7359,18 +7337,6 @@ func (c *BiddersAccountsFilterSetsBidMetricsListCall) Do(opts ...googleapi.CallO
 	//     "filterSetName"
 	//   ],
 	//   "parameters": {
-	//     "accountId": {
-	//       "description": "Account ID of the buyer.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
-	//     "filterSetId": {
-	//       "description": "The ID of the filter set to apply.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "filterSetName": {
 	//       "description": "Name of the filter set that should be applied to the requested metrics.\nFor example:\n\n- For a bidder-level filter set for bidder 123:\n  `bidders/123/filterSets/abc`\n\n- For an account-level filter set for the buyer account representing bidder\n  123: `bidders/123/accounts/123/filterSets/abc`\n\n- For an account-level filter set for the child seat buyer account 456\n  whose bidder is 123: `bidders/123/accounts/456/filterSets/abc`",
 	//       "location": "path",
@@ -7439,20 +7405,6 @@ type BiddersAccountsFilterSetsBidResponseErrorsListCall struct {
 func (r *BiddersAccountsFilterSetsBidResponseErrorsService) List(filterSetName string) *BiddersAccountsFilterSetsBidResponseErrorsListCall {
 	c := &BiddersAccountsFilterSetsBidResponseErrorsListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.filterSetName = filterSetName
-	return c
-}
-
-// AccountId sets the optional parameter "accountId": Account ID of the
-// buyer.
-func (c *BiddersAccountsFilterSetsBidResponseErrorsListCall) AccountId(accountId int64) *BiddersAccountsFilterSetsBidResponseErrorsListCall {
-	c.urlParams_.Set("accountId", fmt.Sprint(accountId))
-	return c
-}
-
-// FilterSetId sets the optional parameter "filterSetId": The ID of the
-// filter set to apply.
-func (c *BiddersAccountsFilterSetsBidResponseErrorsListCall) FilterSetId(filterSetId int64) *BiddersAccountsFilterSetsBidResponseErrorsListCall {
-	c.urlParams_.Set("filterSetId", fmt.Sprint(filterSetId))
 	return c
 }
 
@@ -7565,7 +7517,7 @@ func (c *BiddersAccountsFilterSetsBidResponseErrorsListCall) Do(opts ...googleap
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -7578,18 +7530,6 @@ func (c *BiddersAccountsFilterSetsBidResponseErrorsListCall) Do(opts ...googleap
 	//     "filterSetName"
 	//   ],
 	//   "parameters": {
-	//     "accountId": {
-	//       "description": "Account ID of the buyer.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
-	//     "filterSetId": {
-	//       "description": "The ID of the filter set to apply.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "filterSetName": {
 	//       "description": "Name of the filter set that should be applied to the requested metrics.\nFor example:\n\n- For a bidder-level filter set for bidder 123:\n  `bidders/123/filterSets/abc`\n\n- For an account-level filter set for the buyer account representing bidder\n  123: `bidders/123/accounts/123/filterSets/abc`\n\n- For an account-level filter set for the child seat buyer account 456\n  whose bidder is 123: `bidders/123/accounts/456/filterSets/abc`",
 	//       "location": "path",
@@ -7659,20 +7599,6 @@ type BiddersAccountsFilterSetsBidResponsesWithoutBidsListCall struct {
 func (r *BiddersAccountsFilterSetsBidResponsesWithoutBidsService) List(filterSetName string) *BiddersAccountsFilterSetsBidResponsesWithoutBidsListCall {
 	c := &BiddersAccountsFilterSetsBidResponsesWithoutBidsListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.filterSetName = filterSetName
-	return c
-}
-
-// AccountId sets the optional parameter "accountId": Account ID of the
-// buyer.
-func (c *BiddersAccountsFilterSetsBidResponsesWithoutBidsListCall) AccountId(accountId int64) *BiddersAccountsFilterSetsBidResponsesWithoutBidsListCall {
-	c.urlParams_.Set("accountId", fmt.Sprint(accountId))
-	return c
-}
-
-// FilterSetId sets the optional parameter "filterSetId": The ID of the
-// filter set to apply.
-func (c *BiddersAccountsFilterSetsBidResponsesWithoutBidsListCall) FilterSetId(filterSetId int64) *BiddersAccountsFilterSetsBidResponsesWithoutBidsListCall {
-	c.urlParams_.Set("filterSetId", fmt.Sprint(filterSetId))
 	return c
 }
 
@@ -7787,7 +7713,7 @@ func (c *BiddersAccountsFilterSetsBidResponsesWithoutBidsListCall) Do(opts ...go
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -7800,18 +7726,6 @@ func (c *BiddersAccountsFilterSetsBidResponsesWithoutBidsListCall) Do(opts ...go
 	//     "filterSetName"
 	//   ],
 	//   "parameters": {
-	//     "accountId": {
-	//       "description": "Account ID of the buyer.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
-	//     "filterSetId": {
-	//       "description": "The ID of the filter set to apply.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "filterSetName": {
 	//       "description": "Name of the filter set that should be applied to the requested metrics.\nFor example:\n\n- For a bidder-level filter set for bidder 123:\n  `bidders/123/filterSets/abc`\n\n- For an account-level filter set for the buyer account representing bidder\n  123: `bidders/123/accounts/123/filterSets/abc`\n\n- For an account-level filter set for the child seat buyer account 456\n  whose bidder is 123: `bidders/123/accounts/456/filterSets/abc`",
 	//       "location": "path",
@@ -7880,20 +7794,6 @@ type BiddersAccountsFilterSetsFilteredBidRequestsListCall struct {
 func (r *BiddersAccountsFilterSetsFilteredBidRequestsService) List(filterSetName string) *BiddersAccountsFilterSetsFilteredBidRequestsListCall {
 	c := &BiddersAccountsFilterSetsFilteredBidRequestsListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.filterSetName = filterSetName
-	return c
-}
-
-// AccountId sets the optional parameter "accountId": Account ID of the
-// buyer.
-func (c *BiddersAccountsFilterSetsFilteredBidRequestsListCall) AccountId(accountId int64) *BiddersAccountsFilterSetsFilteredBidRequestsListCall {
-	c.urlParams_.Set("accountId", fmt.Sprint(accountId))
-	return c
-}
-
-// FilterSetId sets the optional parameter "filterSetId": The ID of the
-// filter set to apply.
-func (c *BiddersAccountsFilterSetsFilteredBidRequestsListCall) FilterSetId(filterSetId int64) *BiddersAccountsFilterSetsFilteredBidRequestsListCall {
-	c.urlParams_.Set("filterSetId", fmt.Sprint(filterSetId))
 	return c
 }
 
@@ -8007,7 +7907,7 @@ func (c *BiddersAccountsFilterSetsFilteredBidRequestsListCall) Do(opts ...google
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -8020,18 +7920,6 @@ func (c *BiddersAccountsFilterSetsFilteredBidRequestsListCall) Do(opts ...google
 	//     "filterSetName"
 	//   ],
 	//   "parameters": {
-	//     "accountId": {
-	//       "description": "Account ID of the buyer.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
-	//     "filterSetId": {
-	//       "description": "The ID of the filter set to apply.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "filterSetName": {
 	//       "description": "Name of the filter set that should be applied to the requested metrics.\nFor example:\n\n- For a bidder-level filter set for bidder 123:\n  `bidders/123/filterSets/abc`\n\n- For an account-level filter set for the buyer account representing bidder\n  123: `bidders/123/accounts/123/filterSets/abc`\n\n- For an account-level filter set for the child seat buyer account 456\n  whose bidder is 123: `bidders/123/accounts/456/filterSets/abc`",
 	//       "location": "path",
@@ -8100,20 +7988,6 @@ type BiddersAccountsFilterSetsFilteredBidsListCall struct {
 func (r *BiddersAccountsFilterSetsFilteredBidsService) List(filterSetName string) *BiddersAccountsFilterSetsFilteredBidsListCall {
 	c := &BiddersAccountsFilterSetsFilteredBidsListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.filterSetName = filterSetName
-	return c
-}
-
-// AccountId sets the optional parameter "accountId": Account ID of the
-// buyer.
-func (c *BiddersAccountsFilterSetsFilteredBidsListCall) AccountId(accountId int64) *BiddersAccountsFilterSetsFilteredBidsListCall {
-	c.urlParams_.Set("accountId", fmt.Sprint(accountId))
-	return c
-}
-
-// FilterSetId sets the optional parameter "filterSetId": The ID of the
-// filter set to apply.
-func (c *BiddersAccountsFilterSetsFilteredBidsListCall) FilterSetId(filterSetId int64) *BiddersAccountsFilterSetsFilteredBidsListCall {
-	c.urlParams_.Set("filterSetId", fmt.Sprint(filterSetId))
 	return c
 }
 
@@ -8226,7 +8100,7 @@ func (c *BiddersAccountsFilterSetsFilteredBidsListCall) Do(opts ...googleapi.Cal
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -8239,18 +8113,6 @@ func (c *BiddersAccountsFilterSetsFilteredBidsListCall) Do(opts ...googleapi.Cal
 	//     "filterSetName"
 	//   ],
 	//   "parameters": {
-	//     "accountId": {
-	//       "description": "Account ID of the buyer.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
-	//     "filterSetId": {
-	//       "description": "The ID of the filter set to apply.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "filterSetName": {
 	//       "description": "Name of the filter set that should be applied to the requested metrics.\nFor example:\n\n- For a bidder-level filter set for bidder 123:\n  `bidders/123/filterSets/abc`\n\n- For an account-level filter set for the buyer account representing bidder\n  123: `bidders/123/accounts/123/filterSets/abc`\n\n- For an account-level filter set for the child seat buyer account 456\n  whose bidder is 123: `bidders/123/accounts/456/filterSets/abc`",
 	//       "location": "path",
@@ -8321,20 +8183,6 @@ func (r *BiddersAccountsFilterSetsFilteredBidsCreativesService) List(filterSetNa
 	c := &BiddersAccountsFilterSetsFilteredBidsCreativesListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.filterSetName = filterSetName
 	c.creativeStatusId = creativeStatusId
-	return c
-}
-
-// AccountId sets the optional parameter "accountId": Account ID of the
-// buyer.
-func (c *BiddersAccountsFilterSetsFilteredBidsCreativesListCall) AccountId(accountId int64) *BiddersAccountsFilterSetsFilteredBidsCreativesListCall {
-	c.urlParams_.Set("accountId", fmt.Sprint(accountId))
-	return c
-}
-
-// FilterSetId sets the optional parameter "filterSetId": The ID of the
-// filter set to apply.
-func (c *BiddersAccountsFilterSetsFilteredBidsCreativesListCall) FilterSetId(filterSetId int64) *BiddersAccountsFilterSetsFilteredBidsCreativesListCall {
-	c.urlParams_.Set("filterSetId", fmt.Sprint(filterSetId))
 	return c
 }
 
@@ -8451,7 +8299,7 @@ func (c *BiddersAccountsFilterSetsFilteredBidsCreativesListCall) Do(opts ...goog
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -8465,24 +8313,12 @@ func (c *BiddersAccountsFilterSetsFilteredBidsCreativesListCall) Do(opts ...goog
 	//     "creativeStatusId"
 	//   ],
 	//   "parameters": {
-	//     "accountId": {
-	//       "description": "Account ID of the buyer.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "creativeStatusId": {
 	//       "description": "The ID of the creative status for which to retrieve a breakdown by\ncreative.\nSee\n[creative-status-codes](https://developers.google.com/ad-exchange/rtb/downloads/creative-status-codes).",
 	//       "format": "int32",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "integer"
-	//     },
-	//     "filterSetId": {
-	//       "description": "The ID of the filter set to apply.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
 	//     },
 	//     "filterSetName": {
 	//       "description": "Name of the filter set that should be applied to the requested metrics.\nFor example:\n\n- For a bidder-level filter set for bidder 123:\n  `bidders/123/filterSets/abc`\n\n- For an account-level filter set for the buyer account representing bidder\n  123: `bidders/123/accounts/123/filterSets/abc`\n\n- For an account-level filter set for the child seat buyer account 456\n  whose bidder is 123: `bidders/123/accounts/456/filterSets/abc`",
@@ -8554,20 +8390,6 @@ func (r *BiddersAccountsFilterSetsFilteredBidsDetailsService) List(filterSetName
 	c := &BiddersAccountsFilterSetsFilteredBidsDetailsListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.filterSetName = filterSetName
 	c.creativeStatusId = creativeStatusId
-	return c
-}
-
-// AccountId sets the optional parameter "accountId": Account ID of the
-// buyer.
-func (c *BiddersAccountsFilterSetsFilteredBidsDetailsListCall) AccountId(accountId int64) *BiddersAccountsFilterSetsFilteredBidsDetailsListCall {
-	c.urlParams_.Set("accountId", fmt.Sprint(accountId))
-	return c
-}
-
-// FilterSetId sets the optional parameter "filterSetId": The ID of the
-// filter set to apply.
-func (c *BiddersAccountsFilterSetsFilteredBidsDetailsListCall) FilterSetId(filterSetId int64) *BiddersAccountsFilterSetsFilteredBidsDetailsListCall {
-	c.urlParams_.Set("filterSetId", fmt.Sprint(filterSetId))
 	return c
 }
 
@@ -8684,7 +8506,7 @@ func (c *BiddersAccountsFilterSetsFilteredBidsDetailsListCall) Do(opts ...google
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -8698,24 +8520,12 @@ func (c *BiddersAccountsFilterSetsFilteredBidsDetailsListCall) Do(opts ...google
 	//     "creativeStatusId"
 	//   ],
 	//   "parameters": {
-	//     "accountId": {
-	//       "description": "Account ID of the buyer.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "creativeStatusId": {
 	//       "description": "The ID of the creative status for which to retrieve a breakdown by detail.\nSee\n[creative-status-codes](https://developers.google.com/ad-exchange/rtb/downloads/creative-status-codes).\nDetails are only available for statuses 10, 14, 15, 17, 18, 19, 86, and 87.",
 	//       "format": "int32",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "integer"
-	//     },
-	//     "filterSetId": {
-	//       "description": "The ID of the filter set to apply.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
 	//     },
 	//     "filterSetName": {
 	//       "description": "Name of the filter set that should be applied to the requested metrics.\nFor example:\n\n- For a bidder-level filter set for bidder 123:\n  `bidders/123/filterSets/abc`\n\n- For an account-level filter set for the buyer account representing bidder\n  123: `bidders/123/accounts/123/filterSets/abc`\n\n- For an account-level filter set for the child seat buyer account 456\n  whose bidder is 123: `bidders/123/accounts/456/filterSets/abc`",
@@ -8784,20 +8594,6 @@ type BiddersAccountsFilterSetsImpressionMetricsListCall struct {
 func (r *BiddersAccountsFilterSetsImpressionMetricsService) List(filterSetName string) *BiddersAccountsFilterSetsImpressionMetricsListCall {
 	c := &BiddersAccountsFilterSetsImpressionMetricsListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.filterSetName = filterSetName
-	return c
-}
-
-// AccountId sets the optional parameter "accountId": Account ID of the
-// buyer.
-func (c *BiddersAccountsFilterSetsImpressionMetricsListCall) AccountId(accountId int64) *BiddersAccountsFilterSetsImpressionMetricsListCall {
-	c.urlParams_.Set("accountId", fmt.Sprint(accountId))
-	return c
-}
-
-// FilterSetId sets the optional parameter "filterSetId": The ID of the
-// filter set to apply.
-func (c *BiddersAccountsFilterSetsImpressionMetricsListCall) FilterSetId(filterSetId int64) *BiddersAccountsFilterSetsImpressionMetricsListCall {
-	c.urlParams_.Set("filterSetId", fmt.Sprint(filterSetId))
 	return c
 }
 
@@ -8910,7 +8706,7 @@ func (c *BiddersAccountsFilterSetsImpressionMetricsListCall) Do(opts ...googleap
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -8923,18 +8719,6 @@ func (c *BiddersAccountsFilterSetsImpressionMetricsListCall) Do(opts ...googleap
 	//     "filterSetName"
 	//   ],
 	//   "parameters": {
-	//     "accountId": {
-	//       "description": "Account ID of the buyer.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
-	//     "filterSetId": {
-	//       "description": "The ID of the filter set to apply.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "filterSetName": {
 	//       "description": "Name of the filter set that should be applied to the requested metrics.\nFor example:\n\n- For a bidder-level filter set for bidder 123:\n  `bidders/123/filterSets/abc`\n\n- For an account-level filter set for the buyer account representing bidder\n  123: `bidders/123/accounts/123/filterSets/abc`\n\n- For an account-level filter set for the child seat buyer account 456\n  whose bidder is 123: `bidders/123/accounts/456/filterSets/abc`",
 	//       "location": "path",
@@ -9003,20 +8787,6 @@ type BiddersAccountsFilterSetsLosingBidsListCall struct {
 func (r *BiddersAccountsFilterSetsLosingBidsService) List(filterSetName string) *BiddersAccountsFilterSetsLosingBidsListCall {
 	c := &BiddersAccountsFilterSetsLosingBidsListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.filterSetName = filterSetName
-	return c
-}
-
-// AccountId sets the optional parameter "accountId": Account ID of the
-// buyer.
-func (c *BiddersAccountsFilterSetsLosingBidsListCall) AccountId(accountId int64) *BiddersAccountsFilterSetsLosingBidsListCall {
-	c.urlParams_.Set("accountId", fmt.Sprint(accountId))
-	return c
-}
-
-// FilterSetId sets the optional parameter "filterSetId": The ID of the
-// filter set to apply.
-func (c *BiddersAccountsFilterSetsLosingBidsListCall) FilterSetId(filterSetId int64) *BiddersAccountsFilterSetsLosingBidsListCall {
-	c.urlParams_.Set("filterSetId", fmt.Sprint(filterSetId))
 	return c
 }
 
@@ -9129,7 +8899,7 @@ func (c *BiddersAccountsFilterSetsLosingBidsListCall) Do(opts ...googleapi.CallO
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -9142,18 +8912,6 @@ func (c *BiddersAccountsFilterSetsLosingBidsListCall) Do(opts ...googleapi.CallO
 	//     "filterSetName"
 	//   ],
 	//   "parameters": {
-	//     "accountId": {
-	//       "description": "Account ID of the buyer.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
-	//     "filterSetId": {
-	//       "description": "The ID of the filter set to apply.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "filterSetName": {
 	//       "description": "Name of the filter set that should be applied to the requested metrics.\nFor example:\n\n- For a bidder-level filter set for bidder 123:\n  `bidders/123/filterSets/abc`\n\n- For an account-level filter set for the buyer account representing bidder\n  123: `bidders/123/accounts/123/filterSets/abc`\n\n- For an account-level filter set for the child seat buyer account 456\n  whose bidder is 123: `bidders/123/accounts/456/filterSets/abc`",
 	//       "location": "path",
@@ -9222,20 +8980,6 @@ type BiddersAccountsFilterSetsNonBillableWinningBidsListCall struct {
 func (r *BiddersAccountsFilterSetsNonBillableWinningBidsService) List(filterSetName string) *BiddersAccountsFilterSetsNonBillableWinningBidsListCall {
 	c := &BiddersAccountsFilterSetsNonBillableWinningBidsListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.filterSetName = filterSetName
-	return c
-}
-
-// AccountId sets the optional parameter "accountId": Account ID of the
-// buyer.
-func (c *BiddersAccountsFilterSetsNonBillableWinningBidsListCall) AccountId(accountId int64) *BiddersAccountsFilterSetsNonBillableWinningBidsListCall {
-	c.urlParams_.Set("accountId", fmt.Sprint(accountId))
-	return c
-}
-
-// FilterSetId sets the optional parameter "filterSetId": The ID of the
-// filter set to apply.
-func (c *BiddersAccountsFilterSetsNonBillableWinningBidsListCall) FilterSetId(filterSetId int64) *BiddersAccountsFilterSetsNonBillableWinningBidsListCall {
-	c.urlParams_.Set("filterSetId", fmt.Sprint(filterSetId))
 	return c
 }
 
@@ -9350,7 +9094,7 @@ func (c *BiddersAccountsFilterSetsNonBillableWinningBidsListCall) Do(opts ...goo
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -9363,18 +9107,6 @@ func (c *BiddersAccountsFilterSetsNonBillableWinningBidsListCall) Do(opts ...goo
 	//     "filterSetName"
 	//   ],
 	//   "parameters": {
-	//     "accountId": {
-	//       "description": "Account ID of the buyer.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
-	//     "filterSetId": {
-	//       "description": "The ID of the filter set to apply.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "filterSetName": {
 	//       "description": "Name of the filter set that should be applied to the requested metrics.\nFor example:\n\n- For a bidder-level filter set for bidder 123:\n  `bidders/123/filterSets/abc`\n\n- For an account-level filter set for the buyer account representing bidder\n  123: `bidders/123/accounts/123/filterSets/abc`\n\n- For an account-level filter set for the child seat buyer account 456\n  whose bidder is 123: `bidders/123/accounts/456/filterSets/abc`",
 	//       "location": "path",
@@ -9443,13 +9175,6 @@ func (r *BiddersFilterSetsService) Create(ownerName string, filterset *FilterSet
 	c := &BiddersFilterSetsCreateCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.ownerName = ownerName
 	c.filterset = filterset
-	return c
-}
-
-// AccountId sets the optional parameter "accountId": Account ID of the
-// buyer.
-func (c *BiddersFilterSetsCreateCall) AccountId(accountId int64) *BiddersFilterSetsCreateCall {
-	c.urlParams_.Set("accountId", fmt.Sprint(accountId))
 	return c
 }
 
@@ -9544,7 +9269,7 @@ func (c *BiddersFilterSetsCreateCall) Do(opts ...googleapi.CallOption) (*FilterS
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -9557,12 +9282,6 @@ func (c *BiddersFilterSetsCreateCall) Do(opts ...googleapi.CallOption) (*FilterS
 	//     "ownerName"
 	//   ],
 	//   "parameters": {
-	//     "accountId": {
-	//       "description": "Account ID of the buyer.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "isTransient": {
 	//       "description": "Whether the filter set is transient, or should be persisted indefinitely.\nBy default, filter sets are not transient.\nIf transient, it will be available for at least 1 hour after creation.",
 	//       "location": "query",
@@ -9606,20 +9325,6 @@ type BiddersFilterSetsDeleteCall struct {
 func (r *BiddersFilterSetsService) Delete(name string) *BiddersFilterSetsDeleteCall {
 	c := &BiddersFilterSetsDeleteCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.name = name
-	return c
-}
-
-// AccountId sets the optional parameter "accountId": Account ID of the
-// buyer.
-func (c *BiddersFilterSetsDeleteCall) AccountId(accountId int64) *BiddersFilterSetsDeleteCall {
-	c.urlParams_.Set("accountId", fmt.Sprint(accountId))
-	return c
-}
-
-// FilterSetId sets the optional parameter "filterSetId": The ID of the
-// filter set to delete.
-func (c *BiddersFilterSetsDeleteCall) FilterSetId(filterSetId int64) *BiddersFilterSetsDeleteCall {
-	c.urlParams_.Set("filterSetId", fmt.Sprint(filterSetId))
 	return c
 }
 
@@ -9699,7 +9404,7 @@ func (c *BiddersFilterSetsDeleteCall) Do(opts ...googleapi.CallOption) (*Empty, 
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -9712,18 +9417,6 @@ func (c *BiddersFilterSetsDeleteCall) Do(opts ...googleapi.CallOption) (*Empty, 
 	//     "name"
 	//   ],
 	//   "parameters": {
-	//     "accountId": {
-	//       "description": "Account ID of the buyer.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
-	//     "filterSetId": {
-	//       "description": "The ID of the filter set to delete.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "name": {
 	//       "description": "Full name of the resource to delete.\nFor example:\n\n- For a bidder-level filter set for bidder 123:\n  `bidders/123/filterSets/abc`\n\n- For an account-level filter set for the buyer account representing bidder\n  123: `bidders/123/accounts/123/filterSets/abc`\n\n- For an account-level filter set for the child seat buyer account 456\n  whose bidder is 123: `bidders/123/accounts/456/filterSets/abc`",
 	//       "location": "path",
@@ -9760,20 +9453,6 @@ type BiddersFilterSetsGetCall struct {
 func (r *BiddersFilterSetsService) Get(name string) *BiddersFilterSetsGetCall {
 	c := &BiddersFilterSetsGetCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.name = name
-	return c
-}
-
-// AccountId sets the optional parameter "accountId": Account ID of the
-// buyer.
-func (c *BiddersFilterSetsGetCall) AccountId(accountId int64) *BiddersFilterSetsGetCall {
-	c.urlParams_.Set("accountId", fmt.Sprint(accountId))
-	return c
-}
-
-// FilterSetId sets the optional parameter "filterSetId": The ID of the
-// filter set to get.
-func (c *BiddersFilterSetsGetCall) FilterSetId(filterSetId int64) *BiddersFilterSetsGetCall {
-	c.urlParams_.Set("filterSetId", fmt.Sprint(filterSetId))
 	return c
 }
 
@@ -9866,7 +9545,7 @@ func (c *BiddersFilterSetsGetCall) Do(opts ...googleapi.CallOption) (*FilterSet,
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -9879,18 +9558,6 @@ func (c *BiddersFilterSetsGetCall) Do(opts ...googleapi.CallOption) (*FilterSet,
 	//     "name"
 	//   ],
 	//   "parameters": {
-	//     "accountId": {
-	//       "description": "Account ID of the buyer.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
-	//     "filterSetId": {
-	//       "description": "The ID of the filter set to get.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "name": {
 	//       "description": "Full name of the resource being requested.\nFor example:\n\n- For a bidder-level filter set for bidder 123:\n  `bidders/123/filterSets/abc`\n\n- For an account-level filter set for the buyer account representing bidder\n  123: `bidders/123/accounts/123/filterSets/abc`\n\n- For an account-level filter set for the child seat buyer account 456\n  whose bidder is 123: `bidders/123/accounts/456/filterSets/abc`",
 	//       "location": "path",
@@ -9926,13 +9593,6 @@ type BiddersFilterSetsListCall struct {
 func (r *BiddersFilterSetsService) List(ownerName string) *BiddersFilterSetsListCall {
 	c := &BiddersFilterSetsListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.ownerName = ownerName
-	return c
-}
-
-// AccountId sets the optional parameter "accountId": Account ID of the
-// buyer.
-func (c *BiddersFilterSetsListCall) AccountId(accountId int64) *BiddersFilterSetsListCall {
-	c.urlParams_.Set("accountId", fmt.Sprint(accountId))
 	return c
 }
 
@@ -10047,7 +9707,7 @@ func (c *BiddersFilterSetsListCall) Do(opts ...googleapi.CallOption) (*ListFilte
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -10060,12 +9720,6 @@ func (c *BiddersFilterSetsListCall) Do(opts ...googleapi.CallOption) (*ListFilte
 	//     "ownerName"
 	//   ],
 	//   "parameters": {
-	//     "accountId": {
-	//       "description": "Account ID of the buyer.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "ownerName": {
 	//       "description": "Name of the owner (bidder or account) of the filter sets to be listed.\nFor example:\n\n- For a bidder-level filter set for bidder 123: `bidders/123`\n\n- For an account-level filter set for the buyer account representing bidder\n  123: `bidders/123/accounts/123`\n\n- For an account-level filter set for the child seat buyer account 456\n  whose bidder is 123: `bidders/123/accounts/456`",
 	//       "location": "path",
@@ -10132,20 +9786,6 @@ type BiddersFilterSetsBidMetricsListCall struct {
 func (r *BiddersFilterSetsBidMetricsService) List(filterSetName string) *BiddersFilterSetsBidMetricsListCall {
 	c := &BiddersFilterSetsBidMetricsListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.filterSetName = filterSetName
-	return c
-}
-
-// AccountId sets the optional parameter "accountId": Account ID of the
-// buyer.
-func (c *BiddersFilterSetsBidMetricsListCall) AccountId(accountId int64) *BiddersFilterSetsBidMetricsListCall {
-	c.urlParams_.Set("accountId", fmt.Sprint(accountId))
-	return c
-}
-
-// FilterSetId sets the optional parameter "filterSetId": The ID of the
-// filter set to apply.
-func (c *BiddersFilterSetsBidMetricsListCall) FilterSetId(filterSetId int64) *BiddersFilterSetsBidMetricsListCall {
-	c.urlParams_.Set("filterSetId", fmt.Sprint(filterSetId))
 	return c
 }
 
@@ -10258,7 +9898,7 @@ func (c *BiddersFilterSetsBidMetricsListCall) Do(opts ...googleapi.CallOption) (
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -10271,18 +9911,6 @@ func (c *BiddersFilterSetsBidMetricsListCall) Do(opts ...googleapi.CallOption) (
 	//     "filterSetName"
 	//   ],
 	//   "parameters": {
-	//     "accountId": {
-	//       "description": "Account ID of the buyer.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
-	//     "filterSetId": {
-	//       "description": "The ID of the filter set to apply.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "filterSetName": {
 	//       "description": "Name of the filter set that should be applied to the requested metrics.\nFor example:\n\n- For a bidder-level filter set for bidder 123:\n  `bidders/123/filterSets/abc`\n\n- For an account-level filter set for the buyer account representing bidder\n  123: `bidders/123/accounts/123/filterSets/abc`\n\n- For an account-level filter set for the child seat buyer account 456\n  whose bidder is 123: `bidders/123/accounts/456/filterSets/abc`",
 	//       "location": "path",
@@ -10351,20 +9979,6 @@ type BiddersFilterSetsBidResponseErrorsListCall struct {
 func (r *BiddersFilterSetsBidResponseErrorsService) List(filterSetName string) *BiddersFilterSetsBidResponseErrorsListCall {
 	c := &BiddersFilterSetsBidResponseErrorsListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.filterSetName = filterSetName
-	return c
-}
-
-// AccountId sets the optional parameter "accountId": Account ID of the
-// buyer.
-func (c *BiddersFilterSetsBidResponseErrorsListCall) AccountId(accountId int64) *BiddersFilterSetsBidResponseErrorsListCall {
-	c.urlParams_.Set("accountId", fmt.Sprint(accountId))
-	return c
-}
-
-// FilterSetId sets the optional parameter "filterSetId": The ID of the
-// filter set to apply.
-func (c *BiddersFilterSetsBidResponseErrorsListCall) FilterSetId(filterSetId int64) *BiddersFilterSetsBidResponseErrorsListCall {
-	c.urlParams_.Set("filterSetId", fmt.Sprint(filterSetId))
 	return c
 }
 
@@ -10477,7 +10091,7 @@ func (c *BiddersFilterSetsBidResponseErrorsListCall) Do(opts ...googleapi.CallOp
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -10490,18 +10104,6 @@ func (c *BiddersFilterSetsBidResponseErrorsListCall) Do(opts ...googleapi.CallOp
 	//     "filterSetName"
 	//   ],
 	//   "parameters": {
-	//     "accountId": {
-	//       "description": "Account ID of the buyer.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
-	//     "filterSetId": {
-	//       "description": "The ID of the filter set to apply.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "filterSetName": {
 	//       "description": "Name of the filter set that should be applied to the requested metrics.\nFor example:\n\n- For a bidder-level filter set for bidder 123:\n  `bidders/123/filterSets/abc`\n\n- For an account-level filter set for the buyer account representing bidder\n  123: `bidders/123/accounts/123/filterSets/abc`\n\n- For an account-level filter set for the child seat buyer account 456\n  whose bidder is 123: `bidders/123/accounts/456/filterSets/abc`",
 	//       "location": "path",
@@ -10571,20 +10173,6 @@ type BiddersFilterSetsBidResponsesWithoutBidsListCall struct {
 func (r *BiddersFilterSetsBidResponsesWithoutBidsService) List(filterSetName string) *BiddersFilterSetsBidResponsesWithoutBidsListCall {
 	c := &BiddersFilterSetsBidResponsesWithoutBidsListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.filterSetName = filterSetName
-	return c
-}
-
-// AccountId sets the optional parameter "accountId": Account ID of the
-// buyer.
-func (c *BiddersFilterSetsBidResponsesWithoutBidsListCall) AccountId(accountId int64) *BiddersFilterSetsBidResponsesWithoutBidsListCall {
-	c.urlParams_.Set("accountId", fmt.Sprint(accountId))
-	return c
-}
-
-// FilterSetId sets the optional parameter "filterSetId": The ID of the
-// filter set to apply.
-func (c *BiddersFilterSetsBidResponsesWithoutBidsListCall) FilterSetId(filterSetId int64) *BiddersFilterSetsBidResponsesWithoutBidsListCall {
-	c.urlParams_.Set("filterSetId", fmt.Sprint(filterSetId))
 	return c
 }
 
@@ -10699,7 +10287,7 @@ func (c *BiddersFilterSetsBidResponsesWithoutBidsListCall) Do(opts ...googleapi.
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -10712,18 +10300,6 @@ func (c *BiddersFilterSetsBidResponsesWithoutBidsListCall) Do(opts ...googleapi.
 	//     "filterSetName"
 	//   ],
 	//   "parameters": {
-	//     "accountId": {
-	//       "description": "Account ID of the buyer.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
-	//     "filterSetId": {
-	//       "description": "The ID of the filter set to apply.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "filterSetName": {
 	//       "description": "Name of the filter set that should be applied to the requested metrics.\nFor example:\n\n- For a bidder-level filter set for bidder 123:\n  `bidders/123/filterSets/abc`\n\n- For an account-level filter set for the buyer account representing bidder\n  123: `bidders/123/accounts/123/filterSets/abc`\n\n- For an account-level filter set for the child seat buyer account 456\n  whose bidder is 123: `bidders/123/accounts/456/filterSets/abc`",
 	//       "location": "path",
@@ -10792,20 +10368,6 @@ type BiddersFilterSetsFilteredBidRequestsListCall struct {
 func (r *BiddersFilterSetsFilteredBidRequestsService) List(filterSetName string) *BiddersFilterSetsFilteredBidRequestsListCall {
 	c := &BiddersFilterSetsFilteredBidRequestsListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.filterSetName = filterSetName
-	return c
-}
-
-// AccountId sets the optional parameter "accountId": Account ID of the
-// buyer.
-func (c *BiddersFilterSetsFilteredBidRequestsListCall) AccountId(accountId int64) *BiddersFilterSetsFilteredBidRequestsListCall {
-	c.urlParams_.Set("accountId", fmt.Sprint(accountId))
-	return c
-}
-
-// FilterSetId sets the optional parameter "filterSetId": The ID of the
-// filter set to apply.
-func (c *BiddersFilterSetsFilteredBidRequestsListCall) FilterSetId(filterSetId int64) *BiddersFilterSetsFilteredBidRequestsListCall {
-	c.urlParams_.Set("filterSetId", fmt.Sprint(filterSetId))
 	return c
 }
 
@@ -10919,7 +10481,7 @@ func (c *BiddersFilterSetsFilteredBidRequestsListCall) Do(opts ...googleapi.Call
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -10932,18 +10494,6 @@ func (c *BiddersFilterSetsFilteredBidRequestsListCall) Do(opts ...googleapi.Call
 	//     "filterSetName"
 	//   ],
 	//   "parameters": {
-	//     "accountId": {
-	//       "description": "Account ID of the buyer.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
-	//     "filterSetId": {
-	//       "description": "The ID of the filter set to apply.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "filterSetName": {
 	//       "description": "Name of the filter set that should be applied to the requested metrics.\nFor example:\n\n- For a bidder-level filter set for bidder 123:\n  `bidders/123/filterSets/abc`\n\n- For an account-level filter set for the buyer account representing bidder\n  123: `bidders/123/accounts/123/filterSets/abc`\n\n- For an account-level filter set for the child seat buyer account 456\n  whose bidder is 123: `bidders/123/accounts/456/filterSets/abc`",
 	//       "location": "path",
@@ -11012,20 +10562,6 @@ type BiddersFilterSetsFilteredBidsListCall struct {
 func (r *BiddersFilterSetsFilteredBidsService) List(filterSetName string) *BiddersFilterSetsFilteredBidsListCall {
 	c := &BiddersFilterSetsFilteredBidsListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.filterSetName = filterSetName
-	return c
-}
-
-// AccountId sets the optional parameter "accountId": Account ID of the
-// buyer.
-func (c *BiddersFilterSetsFilteredBidsListCall) AccountId(accountId int64) *BiddersFilterSetsFilteredBidsListCall {
-	c.urlParams_.Set("accountId", fmt.Sprint(accountId))
-	return c
-}
-
-// FilterSetId sets the optional parameter "filterSetId": The ID of the
-// filter set to apply.
-func (c *BiddersFilterSetsFilteredBidsListCall) FilterSetId(filterSetId int64) *BiddersFilterSetsFilteredBidsListCall {
-	c.urlParams_.Set("filterSetId", fmt.Sprint(filterSetId))
 	return c
 }
 
@@ -11138,7 +10674,7 @@ func (c *BiddersFilterSetsFilteredBidsListCall) Do(opts ...googleapi.CallOption)
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -11151,18 +10687,6 @@ func (c *BiddersFilterSetsFilteredBidsListCall) Do(opts ...googleapi.CallOption)
 	//     "filterSetName"
 	//   ],
 	//   "parameters": {
-	//     "accountId": {
-	//       "description": "Account ID of the buyer.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
-	//     "filterSetId": {
-	//       "description": "The ID of the filter set to apply.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "filterSetName": {
 	//       "description": "Name of the filter set that should be applied to the requested metrics.\nFor example:\n\n- For a bidder-level filter set for bidder 123:\n  `bidders/123/filterSets/abc`\n\n- For an account-level filter set for the buyer account representing bidder\n  123: `bidders/123/accounts/123/filterSets/abc`\n\n- For an account-level filter set for the child seat buyer account 456\n  whose bidder is 123: `bidders/123/accounts/456/filterSets/abc`",
 	//       "location": "path",
@@ -11233,20 +10757,6 @@ func (r *BiddersFilterSetsFilteredBidsCreativesService) List(filterSetName strin
 	c := &BiddersFilterSetsFilteredBidsCreativesListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.filterSetName = filterSetName
 	c.creativeStatusId = creativeStatusId
-	return c
-}
-
-// AccountId sets the optional parameter "accountId": Account ID of the
-// buyer.
-func (c *BiddersFilterSetsFilteredBidsCreativesListCall) AccountId(accountId int64) *BiddersFilterSetsFilteredBidsCreativesListCall {
-	c.urlParams_.Set("accountId", fmt.Sprint(accountId))
-	return c
-}
-
-// FilterSetId sets the optional parameter "filterSetId": The ID of the
-// filter set to apply.
-func (c *BiddersFilterSetsFilteredBidsCreativesListCall) FilterSetId(filterSetId int64) *BiddersFilterSetsFilteredBidsCreativesListCall {
-	c.urlParams_.Set("filterSetId", fmt.Sprint(filterSetId))
 	return c
 }
 
@@ -11363,7 +10873,7 @@ func (c *BiddersFilterSetsFilteredBidsCreativesListCall) Do(opts ...googleapi.Ca
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -11377,24 +10887,12 @@ func (c *BiddersFilterSetsFilteredBidsCreativesListCall) Do(opts ...googleapi.Ca
 	//     "creativeStatusId"
 	//   ],
 	//   "parameters": {
-	//     "accountId": {
-	//       "description": "Account ID of the buyer.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "creativeStatusId": {
 	//       "description": "The ID of the creative status for which to retrieve a breakdown by\ncreative.\nSee\n[creative-status-codes](https://developers.google.com/ad-exchange/rtb/downloads/creative-status-codes).",
 	//       "format": "int32",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "integer"
-	//     },
-	//     "filterSetId": {
-	//       "description": "The ID of the filter set to apply.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
 	//     },
 	//     "filterSetName": {
 	//       "description": "Name of the filter set that should be applied to the requested metrics.\nFor example:\n\n- For a bidder-level filter set for bidder 123:\n  `bidders/123/filterSets/abc`\n\n- For an account-level filter set for the buyer account representing bidder\n  123: `bidders/123/accounts/123/filterSets/abc`\n\n- For an account-level filter set for the child seat buyer account 456\n  whose bidder is 123: `bidders/123/accounts/456/filterSets/abc`",
@@ -11466,20 +10964,6 @@ func (r *BiddersFilterSetsFilteredBidsDetailsService) List(filterSetName string,
 	c := &BiddersFilterSetsFilteredBidsDetailsListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.filterSetName = filterSetName
 	c.creativeStatusId = creativeStatusId
-	return c
-}
-
-// AccountId sets the optional parameter "accountId": Account ID of the
-// buyer.
-func (c *BiddersFilterSetsFilteredBidsDetailsListCall) AccountId(accountId int64) *BiddersFilterSetsFilteredBidsDetailsListCall {
-	c.urlParams_.Set("accountId", fmt.Sprint(accountId))
-	return c
-}
-
-// FilterSetId sets the optional parameter "filterSetId": The ID of the
-// filter set to apply.
-func (c *BiddersFilterSetsFilteredBidsDetailsListCall) FilterSetId(filterSetId int64) *BiddersFilterSetsFilteredBidsDetailsListCall {
-	c.urlParams_.Set("filterSetId", fmt.Sprint(filterSetId))
 	return c
 }
 
@@ -11596,7 +11080,7 @@ func (c *BiddersFilterSetsFilteredBidsDetailsListCall) Do(opts ...googleapi.Call
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -11610,24 +11094,12 @@ func (c *BiddersFilterSetsFilteredBidsDetailsListCall) Do(opts ...googleapi.Call
 	//     "creativeStatusId"
 	//   ],
 	//   "parameters": {
-	//     "accountId": {
-	//       "description": "Account ID of the buyer.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "creativeStatusId": {
 	//       "description": "The ID of the creative status for which to retrieve a breakdown by detail.\nSee\n[creative-status-codes](https://developers.google.com/ad-exchange/rtb/downloads/creative-status-codes).\nDetails are only available for statuses 10, 14, 15, 17, 18, 19, 86, and 87.",
 	//       "format": "int32",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "integer"
-	//     },
-	//     "filterSetId": {
-	//       "description": "The ID of the filter set to apply.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
 	//     },
 	//     "filterSetName": {
 	//       "description": "Name of the filter set that should be applied to the requested metrics.\nFor example:\n\n- For a bidder-level filter set for bidder 123:\n  `bidders/123/filterSets/abc`\n\n- For an account-level filter set for the buyer account representing bidder\n  123: `bidders/123/accounts/123/filterSets/abc`\n\n- For an account-level filter set for the child seat buyer account 456\n  whose bidder is 123: `bidders/123/accounts/456/filterSets/abc`",
@@ -11696,20 +11168,6 @@ type BiddersFilterSetsImpressionMetricsListCall struct {
 func (r *BiddersFilterSetsImpressionMetricsService) List(filterSetName string) *BiddersFilterSetsImpressionMetricsListCall {
 	c := &BiddersFilterSetsImpressionMetricsListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.filterSetName = filterSetName
-	return c
-}
-
-// AccountId sets the optional parameter "accountId": Account ID of the
-// buyer.
-func (c *BiddersFilterSetsImpressionMetricsListCall) AccountId(accountId int64) *BiddersFilterSetsImpressionMetricsListCall {
-	c.urlParams_.Set("accountId", fmt.Sprint(accountId))
-	return c
-}
-
-// FilterSetId sets the optional parameter "filterSetId": The ID of the
-// filter set to apply.
-func (c *BiddersFilterSetsImpressionMetricsListCall) FilterSetId(filterSetId int64) *BiddersFilterSetsImpressionMetricsListCall {
-	c.urlParams_.Set("filterSetId", fmt.Sprint(filterSetId))
 	return c
 }
 
@@ -11822,7 +11280,7 @@ func (c *BiddersFilterSetsImpressionMetricsListCall) Do(opts ...googleapi.CallOp
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -11835,18 +11293,6 @@ func (c *BiddersFilterSetsImpressionMetricsListCall) Do(opts ...googleapi.CallOp
 	//     "filterSetName"
 	//   ],
 	//   "parameters": {
-	//     "accountId": {
-	//       "description": "Account ID of the buyer.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
-	//     "filterSetId": {
-	//       "description": "The ID of the filter set to apply.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "filterSetName": {
 	//       "description": "Name of the filter set that should be applied to the requested metrics.\nFor example:\n\n- For a bidder-level filter set for bidder 123:\n  `bidders/123/filterSets/abc`\n\n- For an account-level filter set for the buyer account representing bidder\n  123: `bidders/123/accounts/123/filterSets/abc`\n\n- For an account-level filter set for the child seat buyer account 456\n  whose bidder is 123: `bidders/123/accounts/456/filterSets/abc`",
 	//       "location": "path",
@@ -11915,20 +11361,6 @@ type BiddersFilterSetsLosingBidsListCall struct {
 func (r *BiddersFilterSetsLosingBidsService) List(filterSetName string) *BiddersFilterSetsLosingBidsListCall {
 	c := &BiddersFilterSetsLosingBidsListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.filterSetName = filterSetName
-	return c
-}
-
-// AccountId sets the optional parameter "accountId": Account ID of the
-// buyer.
-func (c *BiddersFilterSetsLosingBidsListCall) AccountId(accountId int64) *BiddersFilterSetsLosingBidsListCall {
-	c.urlParams_.Set("accountId", fmt.Sprint(accountId))
-	return c
-}
-
-// FilterSetId sets the optional parameter "filterSetId": The ID of the
-// filter set to apply.
-func (c *BiddersFilterSetsLosingBidsListCall) FilterSetId(filterSetId int64) *BiddersFilterSetsLosingBidsListCall {
-	c.urlParams_.Set("filterSetId", fmt.Sprint(filterSetId))
 	return c
 }
 
@@ -12041,7 +11473,7 @@ func (c *BiddersFilterSetsLosingBidsListCall) Do(opts ...googleapi.CallOption) (
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -12054,18 +11486,6 @@ func (c *BiddersFilterSetsLosingBidsListCall) Do(opts ...googleapi.CallOption) (
 	//     "filterSetName"
 	//   ],
 	//   "parameters": {
-	//     "accountId": {
-	//       "description": "Account ID of the buyer.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
-	//     "filterSetId": {
-	//       "description": "The ID of the filter set to apply.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "filterSetName": {
 	//       "description": "Name of the filter set that should be applied to the requested metrics.\nFor example:\n\n- For a bidder-level filter set for bidder 123:\n  `bidders/123/filterSets/abc`\n\n- For an account-level filter set for the buyer account representing bidder\n  123: `bidders/123/accounts/123/filterSets/abc`\n\n- For an account-level filter set for the child seat buyer account 456\n  whose bidder is 123: `bidders/123/accounts/456/filterSets/abc`",
 	//       "location": "path",
@@ -12134,20 +11554,6 @@ type BiddersFilterSetsNonBillableWinningBidsListCall struct {
 func (r *BiddersFilterSetsNonBillableWinningBidsService) List(filterSetName string) *BiddersFilterSetsNonBillableWinningBidsListCall {
 	c := &BiddersFilterSetsNonBillableWinningBidsListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.filterSetName = filterSetName
-	return c
-}
-
-// AccountId sets the optional parameter "accountId": Account ID of the
-// buyer.
-func (c *BiddersFilterSetsNonBillableWinningBidsListCall) AccountId(accountId int64) *BiddersFilterSetsNonBillableWinningBidsListCall {
-	c.urlParams_.Set("accountId", fmt.Sprint(accountId))
-	return c
-}
-
-// FilterSetId sets the optional parameter "filterSetId": The ID of the
-// filter set to apply.
-func (c *BiddersFilterSetsNonBillableWinningBidsListCall) FilterSetId(filterSetId int64) *BiddersFilterSetsNonBillableWinningBidsListCall {
-	c.urlParams_.Set("filterSetId", fmt.Sprint(filterSetId))
 	return c
 }
 
@@ -12262,7 +11668,7 @@ func (c *BiddersFilterSetsNonBillableWinningBidsListCall) Do(opts ...googleapi.C
 		},
 	}
 	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := gensupport.DecodeResponse(target, res); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -12275,18 +11681,6 @@ func (c *BiddersFilterSetsNonBillableWinningBidsListCall) Do(opts ...googleapi.C
 	//     "filterSetName"
 	//   ],
 	//   "parameters": {
-	//     "accountId": {
-	//       "description": "Account ID of the buyer.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
-	//     "filterSetId": {
-	//       "description": "The ID of the filter set to apply.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "filterSetName": {
 	//       "description": "Name of the filter set that should be applied to the requested metrics.\nFor example:\n\n- For a bidder-level filter set for bidder 123:\n  `bidders/123/filterSets/abc`\n\n- For an account-level filter set for the buyer account representing bidder\n  123: `bidders/123/accounts/123/filterSets/abc`\n\n- For an account-level filter set for the child seat buyer account 456\n  whose bidder is 123: `bidders/123/accounts/456/filterSets/abc`",
 	//       "location": "path",
