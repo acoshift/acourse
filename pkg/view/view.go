@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/acoshift/flash"
 	"github.com/acoshift/header"
 	"github.com/acoshift/session"
 
@@ -36,7 +37,7 @@ type Page struct {
 	Image string
 	URL   string
 	Me    *app.User
-	Flash url.Values
+	Flash flash.Data
 	XSRF  template.HTML
 }
 
