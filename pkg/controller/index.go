@@ -2,12 +2,14 @@ package controller
 
 import (
 	"net/http"
+
+	"github.com/acoshift/acourse/pkg/view"
 )
 
 func (c *ctrl) Index(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	if r.URL.Path != "/" {
-		c.view.NotFound(w, r)
+		view.NotFound(w, r)
 		return
 	}
 	courses, err := c.repo.ListPublicCourses(ctx)
@@ -15,5 +17,5 @@ func (c *ctrl) Index(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	c.view.Index(w, r, courses)
+	view.Index(w, r, courses)
 }

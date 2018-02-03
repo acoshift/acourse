@@ -3,12 +3,13 @@ package repository
 import (
 	"context"
 
-	"github.com/acoshift/acourse/pkg/app"
+	"github.com/acoshift/acourse/pkg/appctx"
+	"github.com/acoshift/acourse/pkg/entity"
 )
 
 // GetAssignments gets assignments
-func (repo) GetAssignments(ctx context.Context, courseID string) ([]*app.Assignment, error) {
-	db := app.GetDatabase(ctx)
+func (repo) GetAssignments(ctx context.Context, courseID string) ([]*entity.Assignment, error) {
+	db := appctx.GetDatabase(ctx)
 
 	rows, err := db.QueryContext(ctx, `
 		select
@@ -21,9 +22,9 @@ func (repo) GetAssignments(ctx context.Context, courseID string) ([]*app.Assignm
 		return nil, err
 	}
 	defer rows.Close()
-	xs := make([]*app.Assignment, 0)
+	xs := make([]*entity.Assignment, 0)
 	for rows.Next() {
-		var x app.Assignment
+		var x entity.Assignment
 		err = rows.Scan(&x.ID, &x.Title, &x.Desc, &x.Open)
 		if err != nil {
 			return nil, err

@@ -11,7 +11,6 @@ import (
 type Config struct {
 	Controller    Controller
 	Repository    Repository
-	View          View
 	DB            *sql.DB
 	BaseURL       string
 	XSRFSecret    string

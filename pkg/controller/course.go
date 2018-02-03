@@ -14,12 +14,15 @@ import (
 	"github.com/lib/pq"
 
 	"github.com/acoshift/acourse/pkg/app"
+	"github.com/acoshift/acourse/pkg/appctx"
+	"github.com/acoshift/acourse/pkg/entity"
+	"github.com/acoshift/acourse/pkg/view"
 )
 
 func (c *ctrl) CourseView(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	user := app.GetUser(ctx)
-	link := app.GetCourseURL(ctx)
+	user := appctx.GetUser(ctx)
+	link := appctx.GetCourseURL(ctx)
 
 	// if id can parse to uuid get course from id
 	id := link
@@ -28,7 +31,7 @@ func (c *ctrl) CourseView(w http.ResponseWriter, r *http.Request) {
 		// link can not parse to uuid get course id from url
 		id, err = c.repo.GetCourseIDFromURL(ctx, link)
 		if err == app.ErrNotFound {
-			c.view.NotFound(w, r)
+			view.NotFound(w, r)
 			return
 		}
 		if err != nil {
@@ -38,7 +41,7 @@ func (c *ctrl) CourseView(w http.ResponseWriter, r *http.Request) {
 	}
 	x, err := c.repo.GetCourse(ctx, id)
 	if err == app.ErrNotFound {
-		c.view.NotFound(w, r)
+		view.NotFound(w, r)
 		return
 	}
 	if err != nil {
@@ -94,13 +97,13 @@ func (c *ctrl) CourseView(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	c.view.Course(w, r, x, enrolled, owned, pendingEnroll)
+	view.Course(w, r, x, enrolled, owned, pendingEnroll)
 }
 
 func (c *ctrl) CourseContent(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	user := app.GetUser(ctx)
-	link := app.GetCourseURL(ctx)
+	user := appctx.GetUser(ctx)
+	link := appctx.GetCourseURL(ctx)
 
 	// if id can parse to uuid get course from id
 	id := link
@@ -109,7 +112,7 @@ func (c *ctrl) CourseContent(w http.ResponseWriter, r *http.Request) {
 		// link can not parse to uuid get course id from url
 		id, err = c.repo.GetCourseIDFromURL(ctx, link)
 		if err == app.ErrNotFound {
-			c.view.NotFound(w, r)
+			view.NotFound(w, r)
 			return
 		}
 		if err != nil {
@@ -119,7 +122,7 @@ func (c *ctrl) CourseContent(w http.ResponseWriter, r *http.Request) {
 	}
 	x, err := c.repo.GetCourse(ctx, id)
 	if err == app.ErrNotFound {
-		c.view.NotFound(w, r)
+		view.NotFound(w, r)
 		return
 	}
 	if err != nil {
@@ -156,7 +159,7 @@ func (c *ctrl) CourseContent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var content *app.CourseContent
+	var content *entity.CourseContent
 	p, _ := strconv.Atoi(r.FormValue("p"))
 	if p < 0 {
 		p = 0
@@ -168,7 +171,7 @@ func (c *ctrl) CourseContent(w http.ResponseWriter, r *http.Request) {
 		content = x.Contents[p]
 	}
 
-	c.view.CourseContent(w, r, x, content)
+	view.CourseContent(w, r, x, content)
 }
 
 func (c *ctrl) EditorCreate(w http.ResponseWriter, r *http.Request) {
@@ -176,13 +179,13 @@ func (c *ctrl) EditorCreate(w http.ResponseWriter, r *http.Request) {
 		c.postEditorCreate(w, r)
 		return
 	}
-	c.view.EditorCreate(w, r)
+	view.EditorCreate(w, r)
 }
 
 func (c *ctrl) postEditorCreate(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	f := app.GetSession(ctx).Flash()
-	user := app.GetUser(ctx)
+	f := appctx.GetSession(ctx).Flash()
+	user := appctx.GetUser(ctx)
 
 	var (
 		title     = r.FormValue("Title")
@@ -227,7 +230,7 @@ func (c *ctrl) postEditorCreate(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	ctx, tx, err := app.NewTransactionContext(ctx)
+	ctx, tx, err := appctx.NewTransactionContext(ctx)
 	if err != nil {
 		f.Add("Errors", err.Error())
 		back(w, r)
@@ -235,7 +238,7 @@ func (c *ctrl) postEditorCreate(w http.ResponseWriter, r *http.Request) {
 	}
 	defer tx.Rollback()
 
-	db := app.GetDatabase(ctx)
+	db := appctx.GetDatabase(ctx)
 	var id string
 	err = db.QueryRowContext(ctx, `
 		insert into courses
@@ -286,14 +289,14 @@ func (c *ctrl) EditorCourse(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c.view.EditorCourse(w, r, course)
+	view.EditorCourse(w, r, course)
 }
 
 func (c *ctrl) postEditorCourse(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	id := r.FormValue("id")
 
-	f := app.GetSession(ctx).Flash()
+	f := appctx.GetSession(ctx).Flash()
 
 	var (
 		title     = r.FormValue("Title")
@@ -338,7 +341,7 @@ func (c *ctrl) postEditorCourse(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	ctx, tx, err := app.NewTransactionContext(ctx)
+	ctx, tx, err := appctx.NewTransactionContext(ctx)
 	if err != nil {
 		f.Add("Errors", err.Error())
 		back(w, r)
@@ -346,7 +349,7 @@ func (c *ctrl) postEditorCourse(w http.ResponseWriter, r *http.Request) {
 	}
 	defer tx.Rollback()
 
-	db := app.GetDatabase(ctx)
+	db := appctx.GetDatabase(ctx)
 	_, err = db.ExecContext(ctx, `
 		update courses
 		set
@@ -406,7 +409,7 @@ func (c *ctrl) EditorContent(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodPost {
 		if r.FormValue("action") == "delete" {
-			db := app.GetDatabase(ctx)
+			db := appctx.GetDatabase(ctx)
 			contentID := r.FormValue("contentId")
 			_, err := db.ExecContext(ctx, `delete from course_contents where id = $1 and course_id = $2`, contentID, id)
 			if err != nil {
@@ -420,7 +423,7 @@ func (c *ctrl) EditorContent(w http.ResponseWriter, r *http.Request) {
 
 	course, err := c.repo.GetCourse(ctx, id)
 	if err == app.ErrNotFound {
-		c.view.NotFound(w, r)
+		view.NotFound(w, r)
 		return
 	}
 	if err != nil {
@@ -433,7 +436,7 @@ func (c *ctrl) EditorContent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c.view.EditorContent(w, r, course)
+	view.EditorContent(w, r, course)
 }
 
 func (c *ctrl) CourseEnroll(w http.ResponseWriter, r *http.Request) {
@@ -442,16 +445,16 @@ func (c *ctrl) CourseEnroll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	ctx := r.Context()
-	user := app.GetUser(ctx)
+	user := appctx.GetUser(ctx)
 
-	link := app.GetCourseURL(ctx)
+	link := appctx.GetCourseURL(ctx)
 
 	id := link
 	_, err := uuid.Parse(link)
 	if err != nil {
 		id, err = c.repo.GetCourseIDFromURL(ctx, link)
 		if err == app.ErrNotFound {
-			c.view.NotFound(w, r)
+			view.NotFound(w, r)
 			return
 		}
 		if err != nil {
@@ -462,7 +465,7 @@ func (c *ctrl) CourseEnroll(w http.ResponseWriter, r *http.Request) {
 
 	x, err := c.repo.GetCourse(ctx, id)
 	if err == app.ErrNotFound {
-		c.view.NotFound(w, r)
+		view.NotFound(w, r)
 		return
 	}
 	if err != nil {
@@ -498,22 +501,22 @@ func (c *ctrl) CourseEnroll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c.view.CourseEnroll(w, r, x)
+	view.CourseEnroll(w, r, x)
 }
 
 func (c *ctrl) postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	user := app.GetUser(ctx)
-	f := app.GetSession(ctx).Flash()
+	user := appctx.GetUser(ctx)
+	f := appctx.GetSession(ctx).Flash()
 
-	link := app.GetCourseURL(ctx)
+	link := appctx.GetCourseURL(ctx)
 
 	id := link
 	_, err := uuid.Parse(link)
 	if err != nil {
 		id, err = c.repo.GetCourseIDFromURL(ctx, link)
 		if err == app.ErrNotFound {
-			c.view.NotFound(w, r)
+			view.NotFound(w, r)
 			return
 		}
 		if err != nil {
@@ -524,7 +527,7 @@ func (c *ctrl) postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 
 	x, err := c.repo.GetCourse(ctx, id)
 	if err == app.ErrNotFound {
-		c.view.NotFound(w, r)
+		view.NotFound(w, r)
 		return
 	}
 	if err != nil {
@@ -602,7 +605,7 @@ func (c *ctrl) postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 
 	newPayment := false
 
-	ctx, tx, err := app.NewTransactionContext(ctx)
+	ctx, tx, err := appctx.NewTransactionContext(ctx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -616,7 +619,7 @@ func (c *ctrl) postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		err = c.repo.CreatePayment(ctx, &app.Payment{
+		err = c.repo.CreatePayment(ctx, &entity.Payment{
 			CourseID:      x.ID,
 			UserID:        user.ID,
 			Image:         imageURL,
@@ -650,8 +653,8 @@ func (c *ctrl) postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 
 func (c *ctrl) CourseAssignment(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	user := app.GetUser(ctx)
-	link := app.GetCourseURL(ctx)
+	user := appctx.GetUser(ctx)
+	link := appctx.GetCourseURL(ctx)
 
 	// if id can parse to int64 get course from id
 	id := link
@@ -660,7 +663,7 @@ func (c *ctrl) CourseAssignment(w http.ResponseWriter, r *http.Request) {
 		// link can not parse to int64 get course id from url
 		id, err = c.repo.GetCourseIDFromURL(ctx, link)
 		if err == app.ErrNotFound {
-			c.view.NotFound(w, r)
+			view.NotFound(w, r)
 			return
 		}
 		if err != nil {
@@ -670,7 +673,7 @@ func (c *ctrl) CourseAssignment(w http.ResponseWriter, r *http.Request) {
 	}
 	x, err := c.repo.GetCourse(ctx, id)
 	if err == app.ErrNotFound {
-		c.view.NotFound(w, r)
+		view.NotFound(w, r)
 		return
 	}
 	if err != nil {
@@ -701,7 +704,7 @@ func (c *ctrl) CourseAssignment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c.view.Assignment(w, r, x, assignments)
+	view.Assignment(w, r, x, assignments)
 }
 
 func (c *ctrl) EditorContentCreate(w http.ResponseWriter, r *http.Request) {
@@ -716,14 +719,14 @@ func (c *ctrl) EditorContentCreate(w http.ResponseWriter, r *http.Request) {
 			i       int64
 		)
 
-		ctx, tx, err := app.NewTransactionContext(ctx)
+		ctx, tx, err := appctx.NewTransactionContext(ctx)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		defer tx.Rollback()
 
-		db := app.GetDatabase(ctx)
+		db := appctx.GetDatabase(ctx)
 		// get content index
 		err = db.QueryRowContext(ctx, `
 			select i from course_contents where course_id = $1 order by i desc limit 1
@@ -736,7 +739,7 @@ func (c *ctrl) EditorContentCreate(w http.ResponseWriter, r *http.Request) {
 				(course_id, i, title, long_desc, video_id, video_type)
 			values
 				($1, $2, $3, $4, $5, $6)
-		`, id, i+1, title, desc, videoID, app.Youtube)
+		`, id, i+1, title, desc, videoID, entity.Youtube)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -756,7 +759,7 @@ func (c *ctrl) EditorContentCreate(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	c.view.EditorContentCreate(w, r, course)
+	view.EditorContentCreate(w, r, course)
 }
 
 func (c *ctrl) EditorContentEdit(w http.ResponseWriter, r *http.Request) {
@@ -766,7 +769,7 @@ func (c *ctrl) EditorContentEdit(w http.ResponseWriter, r *http.Request) {
 
 	content, err := c.repo.GetCourseContent(ctx, id)
 	if err == sql.ErrNoRows {
-		c.view.NotFound(w, r)
+		view.NotFound(w, r)
 		return
 	}
 	if err != nil {
@@ -780,7 +783,7 @@ func (c *ctrl) EditorContentEdit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := app.GetUser(r.Context())
+	user := appctx.GetUser(r.Context())
 	// user is not course owner
 	if user.ID != course.UserID {
 		http.Error(w, "Forbidden", http.StatusForbidden)
@@ -794,7 +797,7 @@ func (c *ctrl) EditorContentEdit(w http.ResponseWriter, r *http.Request) {
 			videoID = r.FormValue("VideoID")
 		)
 
-		db := app.GetDatabase(ctx)
+		db := appctx.GetDatabase(ctx)
 		_, err = db.ExecContext(ctx, `
 			update course_contents
 			set
@@ -812,5 +815,5 @@ func (c *ctrl) EditorContentEdit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c.view.EditorContentEdit(w, r, course, content)
+	view.EditorContentEdit(w, r, course, content)
 }

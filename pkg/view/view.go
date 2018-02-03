@@ -11,24 +11,14 @@ import (
 	"github.com/acoshift/header"
 	"github.com/acoshift/session"
 
-	"github.com/acoshift/acourse/pkg/app"
+	"github.com/acoshift/acourse/pkg/appctx"
+	"github.com/acoshift/acourse/pkg/entity"
 )
 
-// New creates new view
-func New(config Config) app.View {
-	return &view{
-		baseURL: config.BaseURL,
-	}
-}
-
-// Config is the view config
-type Config struct {
+// view's config
+var (
 	BaseURL string
-}
-
-type view struct {
-	baseURL string
-}
+)
 
 // Page type provides layout data like title, description, and og
 type Page struct {
@@ -36,7 +26,7 @@ type Page struct {
 	Desc  string
 	Image string
 	URL   string
-	Me    *app.User
+	Me    *entity.User
 	Flash flash.Data
 	XSRF  template.HTML
 }
@@ -50,18 +40,18 @@ var defaultPage = Page{
 
 func newPage(ctx context.Context) *Page {
 	p := defaultPage
-	p.Me = app.GetUser(ctx)
+	p.Me = appctx.GetUser(ctx)
 	p.Flash = session.Get(ctx, "sess").Flash().Values()
-	p.XSRF = template.HTML(`<input type="hidden" name="X" value="` + app.GetXSRFToken(ctx) + `">`)
+	p.XSRF = template.HTML(`<input type="hidden" name="X" value="` + appctx.GetXSRFToken(ctx) + `">`)
 	return &p
 }
 
 // Index renders index view
-func (v *view) Index(w http.ResponseWriter, r *http.Request, courses []*app.Course) {
+func Index(w http.ResponseWriter, r *http.Request, courses []*entity.Course) {
 	ctx := r.Context()
 	data := struct {
 		*Page
-		Courses []*app.Course
+		Courses []*entity.Course
 	}{newPage(ctx), courses}
 	render(ctx, w, tmplIndex, &data)
 }
@@ -72,7 +62,7 @@ var notFoundImages = []string{
 }
 
 // NotFound renders not found view
-func (v *view) NotFound(w http.ResponseWriter, r *http.Request) {
+func NotFound(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	page := newPage(ctx)
 	page.Image = notFoundImages[rand.Intn(len(notFoundImages))]
@@ -86,7 +76,7 @@ func (v *view) NotFound(w http.ResponseWriter, r *http.Request) {
 }
 
 // SignIn renders signin view
-func (v *view) SignIn(w http.ResponseWriter, r *http.Request) {
+func SignIn(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	data := struct {
 		*Page
@@ -95,7 +85,7 @@ func (v *view) SignIn(w http.ResponseWriter, r *http.Request) {
 }
 
 // SignInPassword renders signin-password view
-func (v *view) SignInPassword(w http.ResponseWriter, r *http.Request) {
+func SignInPassword(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	data := struct {
 		*Page
@@ -104,7 +94,7 @@ func (v *view) SignInPassword(w http.ResponseWriter, r *http.Request) {
 }
 
 // SignUp renders signup view
-func (v *view) SignUp(w http.ResponseWriter, r *http.Request) {
+func SignUp(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	data := struct {
 		*Page
@@ -113,7 +103,7 @@ func (v *view) SignUp(w http.ResponseWriter, r *http.Request) {
 }
 
 // ResetPassword render reset password view
-func (v *view) ResetPassword(w http.ResponseWriter, r *http.Request) {
+func ResetPassword(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	page := newPage(ctx)
 	data := struct {
@@ -123,7 +113,7 @@ func (v *view) ResetPassword(w http.ResponseWriter, r *http.Request) {
 }
 
 // CheckEmail render check email view
-func (v *view) CheckEmail(w http.ResponseWriter, r *http.Request) {
+func CheckEmail(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	page := newPage(ctx)
 	data := struct {
@@ -133,24 +123,24 @@ func (v *view) CheckEmail(w http.ResponseWriter, r *http.Request) {
 }
 
 // Profile renders profile view
-func (v *view) Profile(w http.ResponseWriter, r *http.Request, ownCourses, enrolledCourses []*app.Course) {
+func Profile(w http.ResponseWriter, r *http.Request, ownCourses, enrolledCourses []*entity.Course) {
 	ctx := r.Context()
 	page := newPage(ctx)
-	me := app.GetUser(ctx)
+	me := appctx.GetUser(ctx)
 	page.Title = me.Username + " | " + page.Title
 
 	data := struct {
 		*Page
-		OwnCourses      []*app.Course
-		EnrolledCourses []*app.Course
+		OwnCourses      []*entity.Course
+		EnrolledCourses []*entity.Course
 	}{page, ownCourses, enrolledCourses}
 	render(ctx, w, tmplProfile, &data)
 }
 
 // ProfileEdit renders profile edit view
-func (v *view) ProfileEdit(w http.ResponseWriter, r *http.Request) {
+func ProfileEdit(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	me := app.GetUser(ctx)
+	me := appctx.GetUser(ctx)
 	page := newPage(ctx)
 	page.Title = me.Username + " | " + page.Title
 
@@ -161,17 +151,17 @@ func (v *view) ProfileEdit(w http.ResponseWriter, r *http.Request) {
 }
 
 // Course renders course view
-func (v *view) Course(w http.ResponseWriter, r *http.Request, course *app.Course, enrolled bool, owned bool, pendingEnroll bool) {
+func Course(w http.ResponseWriter, r *http.Request, course *entity.Course, enrolled bool, owned bool, pendingEnroll bool) {
 	ctx := r.Context()
 	page := newPage(ctx)
 	page.Title = course.Title + " | " + page.Title
 	page.Desc = course.ShortDesc
 	page.Image = course.Image
-	page.URL = v.baseURL + "/course/" + url.PathEscape(course.Link())
+	page.URL = BaseURL + "/course/" + url.PathEscape(course.Link())
 
 	data := struct {
 		*Page
-		Course        *app.Course
+		Course        *entity.Course
 		Enrolled      bool
 		Owned         bool
 		PendingEnroll bool
@@ -180,7 +170,7 @@ func (v *view) Course(w http.ResponseWriter, r *http.Request, course *app.Course
 }
 
 // CourseContent renders course content view
-func (v *view) CourseContent(w http.ResponseWriter, r *http.Request, course *app.Course, content *app.CourseContent) {
+func CourseContent(w http.ResponseWriter, r *http.Request, course *entity.Course, content *entity.CourseContent) {
 	ctx := r.Context()
 	page := newPage(ctx)
 	page.Title = course.Title + " | " + page.Title
@@ -189,14 +179,14 @@ func (v *view) CourseContent(w http.ResponseWriter, r *http.Request, course *app
 
 	data := struct {
 		*Page
-		Course  *app.Course
-		Content *app.CourseContent
+		Course  *entity.Course
+		Content *entity.CourseContent
 	}{page, course, content}
 	render(ctx, w, tmplCourseContent, &data)
 }
 
 // EditorCreate renders course create view
-func (v *view) EditorCreate(w http.ResponseWriter, r *http.Request) {
+func EditorCreate(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	page := newPage(ctx)
 
@@ -207,95 +197,95 @@ func (v *view) EditorCreate(w http.ResponseWriter, r *http.Request) {
 }
 
 // EditorCourse renders course edit view
-func (v *view) EditorCourse(w http.ResponseWriter, r *http.Request, course *app.Course) {
+func EditorCourse(w http.ResponseWriter, r *http.Request, course *entity.Course) {
 	ctx := r.Context()
 	page := newPage(ctx)
 
 	data := struct {
 		*Page
-		Course *app.Course
+		Course *entity.Course
 	}{page, course}
 	render(ctx, w, tmplEditorCourse, &data)
 }
 
 // EditorContent renders editor content view
-func (v *view) EditorContent(w http.ResponseWriter, r *http.Request, course *app.Course) {
+func EditorContent(w http.ResponseWriter, r *http.Request, course *entity.Course) {
 	ctx := r.Context()
 	page := newPage(ctx)
 
 	data := struct {
 		*Page
-		Course *app.Course
+		Course *entity.Course
 	}{page, course}
 	render(ctx, w, tmplEditorContent, &data)
 }
 
 // EditorContentCreate renders editor content create view
-func (v *view) EditorContentCreate(w http.ResponseWriter, r *http.Request, course *app.Course) {
+func EditorContentCreate(w http.ResponseWriter, r *http.Request, course *entity.Course) {
 	ctx := r.Context()
 	page := newPage(ctx)
 
 	data := struct {
 		*Page
-		Course *app.Course
+		Course *entity.Course
 	}{page, course}
 	render(ctx, w, tmplEditorContentCreate, &data)
 }
 
 // EditorContentEdit renders editor content edit view
-func (v *view) EditorContentEdit(w http.ResponseWriter, r *http.Request, course *app.Course, content *app.CourseContent) {
+func EditorContentEdit(w http.ResponseWriter, r *http.Request, course *entity.Course, content *entity.CourseContent) {
 	ctx := r.Context()
 	page := newPage(ctx)
 
 	data := struct {
 		*Page
-		Course  *app.Course
-		Content *app.CourseContent
+		Course  *entity.Course
+		Content *entity.CourseContent
 	}{page, course, content}
 	render(ctx, w, tmplEditorContentEdit, &data)
 }
 
 // CourseEnroll renders course enroll view
-func (v *view) CourseEnroll(w http.ResponseWriter, r *http.Request, course *app.Course) {
+func CourseEnroll(w http.ResponseWriter, r *http.Request, course *entity.Course) {
 	ctx := r.Context()
 	page := newPage(ctx)
 	page.Title = course.Title + " | " + page.Title
 	page.Desc = course.ShortDesc
 	page.Image = course.Image
-	page.URL = v.baseURL + "/course/" + url.PathEscape(course.Link())
+	page.URL = BaseURL + "/course/" + url.PathEscape(course.Link())
 
 	data := struct {
 		*Page
-		Course *app.Course
+		Course *entity.Course
 	}{page, course}
 	render(ctx, w, tmplCourseEnroll, &data)
 }
 
 // Assignment render assignment view
-func (v *view) Assignment(w http.ResponseWriter, r *http.Request, course *app.Course, assignments []*app.Assignment) {
+func Assignment(w http.ResponseWriter, r *http.Request, course *entity.Course, assignments []*entity.Assignment) {
 	ctx := r.Context()
 	page := newPage(ctx)
 	page.Title = course.Title + " | " + page.Title
 	page.Desc = course.ShortDesc
 	page.Image = course.Image
-	page.URL = v.baseURL + "/course/" + url.PathEscape(course.Link())
+	page.URL = BaseURL + "/course/" + url.PathEscape(course.Link())
 
 	data := struct {
 		*Page
-		Course      *app.Course
-		Assignments []*app.Assignment
+		Course      *entity.Course
+		Assignments []*entity.Assignment
 	}{page, course, assignments}
 	render(ctx, w, tmplAssignment, &data)
 }
 
 // AdminUsers renders admin users view
-func (v *view) AdminUsers(w http.ResponseWriter, r *http.Request, users []*app.User, currentPage, totalPage int) {
+func AdminUsers(w http.ResponseWriter, r *http.Request, users []*entity.User, currentPage, totalPage int) {
 	ctx := r.Context()
 	page := newPage(ctx)
 
 	data := struct {
 		*Page
-		Users       []*app.User
+		Users       []*entity.User
 		CurrentPage int
 		TotalPage   int
 	}{page, users, currentPage, totalPage}
@@ -303,13 +293,13 @@ func (v *view) AdminUsers(w http.ResponseWriter, r *http.Request, users []*app.U
 }
 
 // AdminCourses renders admin courses view
-func (v *view) AdminCourses(w http.ResponseWriter, r *http.Request, courses []*app.Course, currentPage, totalPage int) {
+func AdminCourses(w http.ResponseWriter, r *http.Request, courses []*entity.Course, currentPage, totalPage int) {
 	ctx := r.Context()
 	page := newPage(ctx)
 
 	data := struct {
 		*Page
-		Courses     []*app.Course
+		Courses     []*entity.Course
 		CurrentPage int
 		TotalPage   int
 	}{page, courses, currentPage, totalPage}
@@ -317,13 +307,13 @@ func (v *view) AdminCourses(w http.ResponseWriter, r *http.Request, courses []*a
 }
 
 // AdminPayments renders admin payments view
-func (v *view) AdminPayments(w http.ResponseWriter, r *http.Request, payments []*app.Payment, currentPage, totalPage int) {
+func AdminPayments(w http.ResponseWriter, r *http.Request, payments []*entity.Payment, currentPage, totalPage int) {
 	ctx := r.Context()
 	page := newPage(ctx)
 
 	data := struct {
 		*Page
-		Payments    []*app.Payment
+		Payments    []*entity.Payment
 		CurrentPage int
 		TotalPage   int
 	}{page, payments, currentPage, totalPage}
@@ -331,13 +321,13 @@ func (v *view) AdminPayments(w http.ResponseWriter, r *http.Request, payments []
 }
 
 // AdminPaymentReject renders admin payment reject view
-func (v *view) AdminPaymentReject(w http.ResponseWriter, r *http.Request, payment *app.Payment, message string) {
+func AdminPaymentReject(w http.ResponseWriter, r *http.Request, payment *entity.Payment, message string) {
 	ctx := r.Context()
 	page := newPage(ctx)
 
 	data := struct {
 		*Page
-		Payment *app.Payment
+		Payment *entity.Payment
 		Message string
 	}{page, payment, message}
 	render(ctx, w, tmplAdminPaymentReject, &data)

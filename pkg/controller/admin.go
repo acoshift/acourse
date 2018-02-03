@@ -7,7 +7,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/acoshift/acourse/pkg/app"
+	"github.com/acoshift/acourse/pkg/appctx"
+	"github.com/acoshift/acourse/pkg/entity"
+	"github.com/acoshift/acourse/pkg/view"
 )
 
 func (c *ctrl) AdminUsers(w http.ResponseWriter, r *http.Request) {
@@ -37,7 +39,7 @@ func (c *ctrl) AdminUsers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c.view.AdminUsers(w, r, users, int(page), int(totalPage))
+	view.AdminUsers(w, r, users, int(page), int(totalPage))
 }
 
 func (c *ctrl) AdminCourses(w http.ResponseWriter, r *http.Request) {
@@ -67,10 +69,10 @@ func (c *ctrl) AdminCourses(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c.view.AdminCourses(w, r, courses, int(page), int(totalPage))
+	view.AdminCourses(w, r, courses, int(page), int(totalPage))
 }
 
-func (c *ctrl) adminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter func(context.Context, int64, int64) ([]*app.Payment, error), paymentsCounter func(context.Context) (int64, error)) {
+func (c *ctrl) adminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter func(context.Context, int64, int64) ([]*entity.Payment, error), paymentsCounter func(context.Context) (int64, error)) {
 	ctx := r.Context()
 	page, _ := strconv.ParseInt(r.FormValue("page"), 10, 64)
 	if page <= 0 {
@@ -97,7 +99,7 @@ func (c *ctrl) adminPayments(w http.ResponseWriter, r *http.Request, paymentsGet
 		return
 	}
 
-	c.view.AdminPayments(w, r, payments, int(page), int(totalPage))
+	view.AdminPayments(w, r, payments, int(page), int(totalPage))
 }
 
 func (c *ctrl) AdminRejectPayment(w http.ResponseWriter, r *http.Request) {
@@ -151,7 +153,7 @@ func (c *ctrl) AdminRejectPayment(w http.ResponseWriter, r *http.Request) {
 		x.Course.Link(),
 	)
 
-	c.view.AdminPaymentReject(w, r, x, message)
+	view.AdminPaymentReject(w, r, x, message)
 }
 
 func (c *ctrl) postAdminRejectPayment(w http.ResponseWriter, r *http.Request) {
@@ -191,7 +193,7 @@ func (c *ctrl) postAdminPendingPayment(w http.ResponseWriter, r *http.Request) {
 
 	id := r.FormValue("ID")
 	if action == "accept" {
-		txctx, tx, err := app.NewTransactionContext(ctx)
+		txctx, tx, err := appctx.NewTransactionContext(ctx)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

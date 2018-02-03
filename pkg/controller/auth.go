@@ -14,6 +14,9 @@ import (
 	"github.com/asaskevich/govalidator"
 
 	"github.com/acoshift/acourse/pkg/app"
+	"github.com/acoshift/acourse/pkg/appctx"
+	"github.com/acoshift/acourse/pkg/entity"
+	"github.com/acoshift/acourse/pkg/view"
 )
 
 func generateRandomString(n int) string {
@@ -35,12 +38,12 @@ func (c *ctrl) SignIn(w http.ResponseWriter, r *http.Request) {
 		c.postSignIn(w, r)
 		return
 	}
-	c.view.SignIn(w, r)
+	view.SignIn(w, r)
 }
 
 func (c *ctrl) postSignIn(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	s := app.GetSession(ctx)
+	s := appctx.GetSession(ctx)
 	f := s.Flash()
 
 	email := r.FormValue("Email")
@@ -107,12 +110,12 @@ func (c *ctrl) postSignIn(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *ctrl) CheckEmail(w http.ResponseWriter, r *http.Request) {
-	f := app.GetSession(r.Context()).Flash()
+	f := appctx.GetSession(r.Context()).Flash()
 	if !f.Has("CheckEmail") {
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
-	c.view.CheckEmail(w, r)
+	view.CheckEmail(w, r)
 }
 
 func (c *ctrl) SignInLink(w http.ResponseWriter, r *http.Request) {
@@ -124,7 +127,7 @@ func (c *ctrl) SignInLink(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s := app.GetSession(ctx)
+	s := appctx.GetSession(ctx)
 	f := s.Flash()
 
 	userID, err := c.repo.FindMagicLink(ctx, linkID)
@@ -143,12 +146,12 @@ func (c *ctrl) SignInPassword(w http.ResponseWriter, r *http.Request) {
 		c.postSignInPassword(w, r)
 		return
 	}
-	c.view.SignInPassword(w, r)
+	view.SignInPassword(w, r)
 }
 
 func (c *ctrl) postSignInPassword(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	s := app.GetSession(ctx)
+	s := appctx.GetSession(ctx)
 	f := s.Flash()
 
 	email := r.FormValue("Email")
@@ -184,7 +187,7 @@ func (c *ctrl) postSignInPassword(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if !ok {
-			err = c.repo.CreateUser(ctx, &app.User{ID: userID, Email: sql.NullString{String: email, Valid: len(email) > 0}})
+			err = c.repo.CreateUser(ctx, &entity.User{ID: userID, Email: sql.NullString{String: email, Valid: len(email) > 0}})
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
@@ -216,14 +219,14 @@ func (c *ctrl) OpenID(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	s := app.GetSession(ctx)
+	s := appctx.GetSession(ctx)
 	app.SetOpenIDSessionID(s, sessID)
 	http.Redirect(w, r, redirectURL, http.StatusSeeOther)
 }
 
 func (c *ctrl) OpenIDCallback(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	s := app.GetSession(ctx)
+	s := appctx.GetSession(ctx)
 	sessID := app.GetOpenIDSessionID(s)
 	app.DelOpenIDSessionID(s)
 	user, err := c.auth.VerifyAuthCallbackURI(ctx, c.baseURL+r.RequestURI, sessID)
@@ -232,14 +235,14 @@ func (c *ctrl) OpenIDCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx, tx, err := app.NewTransactionContext(ctx)
+	ctx, tx, err := appctx.NewTransactionContext(ctx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	defer tx.Rollback()
 
-	db := app.GetTransaction(ctx)
+	db := appctx.GetTransaction(ctx)
 	// check is user sign up
 	var cnt int64
 	err = db.QueryRowContext(ctx, `select 1 from users where id = $1`, user.UserID).Scan(&cnt)
@@ -277,12 +280,12 @@ func (c *ctrl) SignUp(w http.ResponseWriter, r *http.Request) {
 		c.postSignUp(w, r)
 		return
 	}
-	c.view.SignUp(w, r)
+	view.SignUp(w, r)
 }
 
 func (c *ctrl) postSignUp(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	f := app.GetSession(ctx).Flash()
+	f := appctx.GetSession(ctx).Flash()
 
 	email := r.FormValue("Email")
 	if len(email) == 0 {
@@ -317,7 +320,7 @@ func (c *ctrl) postSignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db := app.GetDatabase(ctx)
+	db := appctx.GetDatabase(ctx)
 	_, err = db.ExecContext(ctx, `
 		insert into users
 			(id, username, name, email)
@@ -329,7 +332,7 @@ func (c *ctrl) postSignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s := app.GetSession(ctx)
+	s := appctx.GetSession(ctx)
 	app.SetUserID(s, userID)
 
 	rURL := parsePath(r.FormValue("r"))
@@ -337,7 +340,7 @@ func (c *ctrl) postSignUp(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *ctrl) SignOut(w http.ResponseWriter, r *http.Request) {
-	app.GetSession(r.Context()).Destroy()
+	appctx.GetSession(r.Context()).Destroy()
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
@@ -345,7 +348,7 @@ func (c *ctrl) ResetPassword(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		defer back(w, r)
 		ctx := r.Context()
-		f := app.GetSession(ctx).Flash()
+		f := appctx.GetSession(ctx).Flash()
 		f.Set("OK", "1")
 		email := r.FormValue("email")
 		user, err := c.auth.GetUserByEmail(ctx, email)
@@ -356,5 +359,5 @@ func (c *ctrl) ResetPassword(w http.ResponseWriter, r *http.Request) {
 		c.auth.SendPasswordResetEmail(ctx, user.Email)
 		return
 	}
-	c.view.ResetPassword(w, r)
+	view.ResetPassword(w, r)
 }
