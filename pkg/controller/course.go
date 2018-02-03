@@ -206,8 +206,7 @@ func (c *ctrl) postEditorCreate(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	image, info, err := r.FormFile("Image")
-	if err != http.ErrMissingFile {
+	if image, info, err := r.FormFile("Image"); err != http.ErrMissingFile && info.Size > 0 {
 		if err != nil {
 			f.Add("Errors", err.Error())
 			back(w, r)
@@ -318,8 +317,7 @@ func (c *ctrl) postEditorCourse(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	image, info, err := r.FormFile("Image")
-	if err != http.ErrMissingFile {
+	if image, info, err := r.FormFile("Image"); err != http.ErrMissingFile && info.Size > 0 {
 		if err != nil {
 			f.Add("Errors", err.Error())
 			back(w, r)
@@ -578,7 +576,7 @@ func (c *ctrl) postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 	var imageURL string
 	if originalPrice != 0 {
 		image, info, err := r.FormFile("Image")
-		if err == http.ErrMissingFile {
+		if err == http.ErrMissingFile || info.Size == 0 {
 			f.Add("Errors", "image required")
 			back(w, r)
 			return
