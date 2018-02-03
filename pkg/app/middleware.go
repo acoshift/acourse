@@ -13,6 +13,7 @@ import (
 
 	"github.com/acoshift/acourse/pkg/appctx"
 	"github.com/acoshift/acourse/pkg/entity"
+	"github.com/acoshift/acourse/pkg/repository"
 	"github.com/acoshift/acourse/pkg/view"
 )
 
@@ -100,7 +101,7 @@ func fetchUser() middleware.Middleware {
 			id := GetUserID(s)
 			if len(id) > 0 {
 				u, err := repository.GetUser(ctx, id)
-				if err == ErrNotFound {
+				if err == appctx.ErrNotFound {
 					u = &entity.User{
 						ID:       id,
 						Username: id,

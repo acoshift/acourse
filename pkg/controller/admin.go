@@ -9,6 +9,7 @@ import (
 
 	"github.com/acoshift/acourse/pkg/appctx"
 	"github.com/acoshift/acourse/pkg/entity"
+	"github.com/acoshift/acourse/pkg/repository"
 	"github.com/acoshift/acourse/pkg/view"
 )
 
@@ -20,7 +21,7 @@ func (c *ctrl) AdminUsers(w http.ResponseWriter, r *http.Request) {
 	}
 	limit := int64(30)
 
-	cnt, err := c.repo.CountUsers(ctx)
+	cnt, err := repository.CountUsers(ctx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -33,7 +34,7 @@ func (c *ctrl) AdminUsers(w http.ResponseWriter, r *http.Request) {
 	}
 	totalPage := cnt / limit
 
-	users, err := c.repo.ListUsers(ctx, limit, offset)
+	users, err := repository.ListUsers(ctx, limit, offset)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -50,7 +51,7 @@ func (c *ctrl) AdminCourses(w http.ResponseWriter, r *http.Request) {
 	}
 	limit := int64(30)
 
-	cnt, err := c.repo.CountCourses(ctx)
+	cnt, err := repository.CountCourses(ctx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -63,7 +64,7 @@ func (c *ctrl) AdminCourses(w http.ResponseWriter, r *http.Request) {
 	}
 	totalPage := int64(math.Ceil(float64(cnt) / float64(limit)))
 
-	courses, err := c.repo.ListCourses(ctx, limit, offset)
+	courses, err := repository.ListCourses(ctx, limit, offset)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -110,7 +111,7 @@ func (c *ctrl) AdminRejectPayment(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
 	id := r.FormValue("id")
-	x, err := c.repo.GetPayment(ctx, id)
+	x, err := repository.GetPayment(ctx, id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -161,12 +162,12 @@ func (c *ctrl) postAdminRejectPayment(w http.ResponseWriter, r *http.Request) {
 	message := r.FormValue("Message")
 	id := r.FormValue("ID")
 
-	x, err := c.repo.GetPayment(ctx, id)
+	x, err := repository.GetPayment(ctx, id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	err = c.repo.RejectPayment(ctx, x)
+	err = repository.RejectPayment(ctx, x)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -174,7 +175,7 @@ func (c *ctrl) postAdminRejectPayment(w http.ResponseWriter, r *http.Request) {
 
 	if x.User.Email.Valid {
 		go func() {
-			x, err := c.repo.GetPayment(ctx, id)
+			x, err := repository.GetPayment(ctx, id)
 			if err != nil {
 				return
 			}
@@ -200,12 +201,12 @@ func (c *ctrl) postAdminPendingPayment(w http.ResponseWriter, r *http.Request) {
 		}
 		defer tx.Rollback()
 
-		x, err := c.repo.GetPayment(txctx, id)
+		x, err := repository.GetPayment(txctx, id)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		err = c.repo.AcceptPayment(txctx, x)
+		err = repository.AcceptPayment(txctx, x)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -219,7 +220,7 @@ func (c *ctrl) postAdminPendingPayment(w http.ResponseWriter, r *http.Request) {
 		if x.User.Email.Valid {
 			go func() {
 				// re-fetch payment to get latest timestamp
-				x, err := c.repo.GetPayment(ctx, id)
+				x, err := repository.GetPayment(ctx, id)
 				if err != nil {
 					return
 				}
@@ -281,9 +282,9 @@ func (c *ctrl) AdminPendingPayments(w http.ResponseWriter, r *http.Request) {
 		c.postAdminPendingPayment(w, r)
 		return
 	}
-	c.adminPayments(w, r, c.repo.ListPendingPayments, c.repo.CountPendingPayments)
+	c.adminPayments(w, r, repository.ListPendingPayments, repository.CountPendingPayments)
 }
 
 func (c *ctrl) AdminHistoryPayments(w http.ResponseWriter, r *http.Request) {
-	c.adminPayments(w, r, c.repo.ListHistoryPayments, c.repo.CountHistoryPayments)
+	c.adminPayments(w, r, repository.ListHistoryPayments, repository.CountHistoryPayments)
 }

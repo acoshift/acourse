@@ -6,7 +6,6 @@ import (
 
 	"github.com/garyburd/redigo/redis"
 
-	"github.com/acoshift/acourse/pkg/app"
 	"github.com/acoshift/acourse/pkg/appctx"
 )
 
@@ -32,7 +31,7 @@ func FindMagicLink(ctx context.Context, linkID string) (string, error) {
 	key := prefix + "magic:" + linkID
 	userID, err := redis.String(db.Do("GET", key))
 	if err == redis.ErrNil {
-		return "", app.ErrNotFound
+		return "", appctx.ErrNotFound
 	}
 	if err != nil {
 		return "", err

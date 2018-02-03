@@ -9,7 +9,6 @@ import (
 	"github.com/garyburd/redigo/redis"
 	"github.com/lib/pq"
 
-	"github.com/acoshift/acourse/pkg/app"
 	"github.com/acoshift/acourse/pkg/appctx"
 	"github.com/acoshift/acourse/pkg/entity"
 )
@@ -153,7 +152,7 @@ func GetCourse(ctx context.Context, courseID string) (*entity.Course, error) {
 		&x.Option.Public, &x.Option.Enroll, &x.Option.Attend, &x.Option.Assignment, &x.Option.Discount,
 	)
 	if err == sql.ErrNoRows {
-		return nil, app.ErrNotFound
+		return nil, appctx.ErrNotFound
 	}
 	if err != nil {
 		return nil, err
@@ -231,7 +230,7 @@ func GetCourseIDFromURL(ctx context.Context, url string) (string, error) {
 		where url = $1
 	`, url).Scan(&id)
 	if err == sql.ErrNoRows {
-		return "", app.ErrNotFound
+		return "", appctx.ErrNotFound
 	}
 	if err != nil {
 		return "", err

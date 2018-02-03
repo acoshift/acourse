@@ -9,6 +9,7 @@ import (
 	"github.com/asaskevich/govalidator"
 
 	"github.com/acoshift/acourse/pkg/appctx"
+	"github.com/acoshift/acourse/pkg/repository"
 	"github.com/acoshift/acourse/pkg/view"
 )
 
@@ -16,12 +17,12 @@ func (c *ctrl) Profile(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	user := appctx.GetUser(r.Context())
 
-	ownCourses, err := c.repo.ListOwnCourses(ctx, user.ID)
+	ownCourses, err := repository.ListOwnCourses(ctx, user.ID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	enrolledCourses, err := c.repo.ListEnrolledCourses(ctx, user.ID)
+	enrolledCourses, err := repository.ListEnrolledCourses(ctx, user.ID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

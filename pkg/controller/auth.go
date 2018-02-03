@@ -16,6 +16,7 @@ import (
 	"github.com/acoshift/acourse/pkg/app"
 	"github.com/acoshift/acourse/pkg/appctx"
 	"github.com/acoshift/acourse/pkg/entity"
+	"github.com/acoshift/acourse/pkg/repository"
 	"github.com/acoshift/acourse/pkg/view"
 )
 
@@ -56,7 +57,7 @@ func (c *ctrl) postSignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ok, err := c.repo.CanAcquireMagicLink(ctx, email)
+	ok, err := repository.CanAcquireMagicLink(ctx, email)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -68,9 +69,9 @@ func (c *ctrl) postSignIn(w http.ResponseWriter, r *http.Request) {
 
 	f.Set("CheckEmail", "1")
 
-	user, err := c.repo.FindUserByEmail(ctx, email)
+	user, err := repository.FindUserByEmail(ctx, email)
 	// don't lets user know if email is wrong
-	if err == app.ErrNotFound {
+	if err == appctx.ErrNotFound {
 		http.Redirect(w, r, "/signin/check-email", http.StatusSeeOther)
 		return
 	}
@@ -82,7 +83,7 @@ func (c *ctrl) postSignIn(w http.ResponseWriter, r *http.Request) {
 
 	linkID := generateMagicLinkID()
 
-	err = c.repo.StoreMagicLink(ctx, linkID, user.ID)
+	err = repository.StoreMagicLink(ctx, linkID, user.ID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -130,7 +131,7 @@ func (c *ctrl) SignInLink(w http.ResponseWriter, r *http.Request) {
 	s := appctx.GetSession(ctx)
 	f := s.Flash()
 
-	userID, err := c.repo.FindMagicLink(ctx, linkID)
+	userID, err := repository.FindMagicLink(ctx, linkID)
 	if err != nil {
 		f.Add("Errors", "ไม่พบ Magic Link ของคุณ")
 		http.Redirect(w, r, "/signin", http.StatusFound)
@@ -181,13 +182,13 @@ func (c *ctrl) postSignInPassword(w http.ResponseWriter, r *http.Request) {
 	// if user not found in our database, insert new user
 	// this happend when database out of sync with firebase authentication
 	{
-		ok, err := c.repo.IsUserExists(ctx, userID)
+		ok, err := repository.IsUserExists(ctx, userID)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		if !ok {
-			err = c.repo.CreateUser(ctx, &entity.User{ID: userID, Email: sql.NullString{String: email, Valid: len(email) > 0}})
+			err = repository.CreateUser(ctx, &entity.User{ID: userID, Email: sql.NullString{String: email, Valid: len(email) > 0}})
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return

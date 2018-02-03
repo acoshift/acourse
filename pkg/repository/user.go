@@ -7,7 +7,6 @@ import (
 
 	"github.com/lib/pq"
 
-	"github.com/acoshift/acourse/pkg/app"
 	"github.com/acoshift/acourse/pkg/appctx"
 	"github.com/acoshift/acourse/pkg/entity"
 )
@@ -109,7 +108,7 @@ func GetUser(ctx context.Context, userID string) (*entity.User, error) {
 	var x entity.User
 	err := scanUser(db.QueryRowContext(ctx, queryGetUser, userID).Scan, &x)
 	if err == sql.ErrNoRows {
-		return nil, app.ErrNotFound
+		return nil, appctx.ErrNotFound
 	}
 	if err != nil {
 		return nil, err
@@ -135,7 +134,7 @@ func FindUserByEmail(ctx context.Context, email string) (*entity.User, error) {
 	var x entity.User
 	err := scanUser(db.QueryRowContext(ctx, queryGetUserFromEmail, email).Scan, &x)
 	if err == sql.ErrNoRows {
-		return nil, app.ErrNotFound
+		return nil, appctx.ErrNotFound
 	}
 	if err != nil {
 		return nil, err
