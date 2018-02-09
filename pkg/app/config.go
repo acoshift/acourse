@@ -3,13 +3,16 @@ package app
 import (
 	"database/sql"
 	"encoding/gob"
+	"time"
 
+	"cloud.google.com/go/storage"
+	firebase "github.com/acoshift/go-firebase-admin"
 	"github.com/garyburd/redigo/redis"
+	gomail "gopkg.in/gomail.v2"
 )
 
 // Config use to init app package
 type Config struct {
-	Controller    Controller
 	DB            *sql.DB
 	BaseURL       string
 	XSRFSecret    string
@@ -18,6 +21,13 @@ type Config struct {
 	CachePool     *redis.Pool
 	CachePrefix   string
 	SessionSecret []byte
+	Auth          *firebase.Auth
+	Location      *time.Location
+	SlackURL      string
+	EmailFrom     string
+	EmailDialer   *gomail.Dialer
+	BucketHandle  *storage.BucketHandle
+	BucketName    string
 }
 
 func init() {

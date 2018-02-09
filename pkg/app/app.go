@@ -4,22 +4,43 @@ import (
 	"net/http"
 	"time"
 
+	"cloud.google.com/go/storage"
 	"github.com/acoshift/cachestatic"
+	firebase "github.com/acoshift/go-firebase-admin"
 	"github.com/acoshift/middleware"
 	"github.com/acoshift/servertiming"
 	"github.com/acoshift/session"
 	redisstore "github.com/acoshift/session/store/redis"
+	gomail "gopkg.in/gomail.v2"
 
 	"github.com/acoshift/acourse/pkg/appctx"
 )
 
+var (
+	auth         *firebase.Auth
+	loc          *time.Location
+	slackURL     string
+	emailFrom    string
+	emailDialer  *gomail.Dialer
+	baseURL      string
+	cachePrefix  string
+	bucketHandle *storage.BucketHandle
+	bucketName   string
+)
+
 // New creates new app
 func New(config Config) http.Handler {
-	ctrl := config.Controller
+	auth = config.Auth
+	loc = config.Location
+	slackURL = config.SlackURL
+	emailFrom = config.EmailFrom
+	emailDialer = config.EmailDialer
+	baseURL = config.BaseURL
+	cachePrefix = config.CachePrefix
+	bucketHandle = config.BucketHandle
+	bucketName = config.BucketName
 
-	app := &app{
-		ctrl: ctrl,
-	}
+	app := &app{}
 
 	cacheInvalidator := make(chan interface{})
 
@@ -37,33 +58,33 @@ func New(config Config) http.Handler {
 	mux := http.NewServeMux()
 
 	editor := http.NewServeMux()
-	editor.Handle("/create", onlyInstructor(http.HandlerFunc(ctrl.EditorCreate)))
-	editor.Handle("/course", isCourseOwner(http.HandlerFunc(ctrl.EditorCourse)))
-	editor.Handle("/content", isCourseOwner(http.HandlerFunc(ctrl.EditorContent)))
-	editor.Handle("/content/create", isCourseOwner(http.HandlerFunc(ctrl.EditorContentCreate)))
-	editor.Handle("/content/edit", http.HandlerFunc(ctrl.EditorContentEdit))
+	editor.Handle("/create", onlyInstructor(http.HandlerFunc(editorCreate)))
+	editor.Handle("/course", isCourseOwner(http.HandlerFunc(editorCourse)))
+	editor.Handle("/content", isCourseOwner(http.HandlerFunc(editorContent)))
+	editor.Handle("/content/create", isCourseOwner(http.HandlerFunc(editorContentCreate)))
+	editor.Handle("/content/edit", http.HandlerFunc(editorContentEdit))
 
 	admin := http.NewServeMux()
-	admin.Handle("/users", http.HandlerFunc(ctrl.AdminUsers))
-	admin.Handle("/courses", http.HandlerFunc(ctrl.AdminCourses))
-	admin.Handle("/payments/pending", http.HandlerFunc(ctrl.AdminPendingPayments))
-	admin.Handle("/payments/history", http.HandlerFunc(ctrl.AdminHistoryPayments))
-	admin.Handle("/payments/reject", http.HandlerFunc(ctrl.AdminRejectPayment))
+	admin.Handle("/users", http.HandlerFunc(adminUsers))
+	admin.Handle("/courses", http.HandlerFunc(adminCourses))
+	admin.Handle("/payments/pending", http.HandlerFunc(adminPendingPayments))
+	admin.Handle("/payments/history", http.HandlerFunc(adminHistoryPayments))
+	admin.Handle("/payments/reject", http.HandlerFunc(adminRejectPayment))
 
 	main := http.NewServeMux()
-	main.Handle("/", http.HandlerFunc(ctrl.Index))
-	main.Handle("/signin", mustNotSignedIn(http.HandlerFunc(ctrl.SignIn)))
-	main.Handle("/signin/password", mustNotSignedIn(http.HandlerFunc(ctrl.SignInPassword)))
-	main.Handle("/signin/check-email", mustNotSignedIn(http.HandlerFunc(ctrl.CheckEmail)))
-	main.Handle("/signin/link", mustNotSignedIn(http.HandlerFunc(ctrl.SignInLink)))
-	main.Handle("/openid", mustNotSignedIn(http.HandlerFunc(ctrl.OpenID)))
-	main.Handle("/openid/callback", mustNotSignedIn(http.HandlerFunc(ctrl.OpenIDCallback)))
-	main.Handle("/signup", mustNotSignedIn(http.HandlerFunc(ctrl.SignUp)))
-	main.Handle("/signout", http.HandlerFunc(ctrl.SignOut))
-	main.Handle("/reset/password", mustNotSignedIn(http.HandlerFunc(ctrl.ResetPassword)))
-	main.Handle("/profile", mustSignedIn(http.HandlerFunc(ctrl.Profile)))
-	main.Handle("/profile/edit", mustSignedIn(http.HandlerFunc(ctrl.ProfileEdit)))
-	main.Handle("/course/", http.StripPrefix("/course/", courseHandler(ctrl)))
+	main.Handle("/", http.HandlerFunc(index))
+	main.Handle("/signin", mustNotSignedIn(http.HandlerFunc(signIn)))
+	main.Handle("/signin/password", mustNotSignedIn(http.HandlerFunc(signInPassword)))
+	main.Handle("/signin/check-email", mustNotSignedIn(http.HandlerFunc(checkEmail)))
+	main.Handle("/signin/link", mustNotSignedIn(http.HandlerFunc(signInLink)))
+	main.Handle("/openid", mustNotSignedIn(http.HandlerFunc(openID)))
+	main.Handle("/openid/callback", mustNotSignedIn(http.HandlerFunc(openIDCallback)))
+	main.Handle("/signup", mustNotSignedIn(http.HandlerFunc(signUp)))
+	main.Handle("/signout", http.HandlerFunc(signOut))
+	main.Handle("/reset/password", mustNotSignedIn(http.HandlerFunc(resetPassword)))
+	main.Handle("/profile", mustSignedIn(http.HandlerFunc(profile)))
+	main.Handle("/profile/edit", mustSignedIn(http.HandlerFunc(profileEdit)))
+	main.Handle("/course/", http.StripPrefix("/course/", courseHandler()))
 	main.Handle("/admin/", http.StripPrefix("/admin", onlyAdmin(admin)))
 	main.Handle("/editor/", http.StripPrefix("/editor", editor))
 
@@ -94,7 +115,7 @@ func New(config Config) http.Handler {
 
 				// skip if signed in
 				s := appctx.GetSession(r.Context())
-				if x := GetUserID(s); len(x) > 0 {
+				if x := getUserID(s); len(x) > 0 {
 					return true
 				}
 
@@ -122,5 +143,8 @@ func New(config Config) http.Handler {
 
 type app struct {
 	http.Handler
-	ctrl Controller
+}
+
+func back(w http.ResponseWriter, r *http.Request) {
+	http.Redirect(w, r, r.RequestURI, http.StatusSeeOther)
 }

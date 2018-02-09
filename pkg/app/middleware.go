@@ -72,7 +72,7 @@ func csrf(baseURL, xsrfSecret string) middleware.Middleware {
 func mustSignedIn(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		s := appctx.GetSession(r.Context())
-		id := GetUserID(s)
+		id := getUserID(s)
 		if len(id) == 0 {
 			http.Redirect(w, r, "/signin?r="+url.QueryEscape(r.RequestURI), http.StatusFound)
 			return
@@ -84,7 +84,7 @@ func mustSignedIn(h http.Handler) http.Handler {
 func mustNotSignedIn(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		s := appctx.GetSession(r.Context())
-		id := GetUserID(s)
+		id := getUserID(s)
 		if len(id) > 0 {
 			http.Redirect(w, r, "/", http.StatusFound)
 			return
@@ -98,7 +98,7 @@ func fetchUser() middleware.Middleware {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
 			s := appctx.GetSession(ctx)
-			id := GetUserID(s)
+			id := getUserID(s)
 			if len(id) > 0 {
 				u, err := repository.GetUser(ctx, id)
 				if err == appctx.ErrNotFound {

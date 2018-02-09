@@ -34,7 +34,7 @@ func fileHandler(name string) http.Handler {
 	})
 }
 
-func courseHandler(ctrl Controller) http.Handler {
+func courseHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		s := strings.SplitN(r.URL.Path, "/", 2)
 		var p string
@@ -45,13 +45,13 @@ func courseHandler(ctrl Controller) http.Handler {
 		r = r.WithContext(appctx.NewCourseURLContext(r.Context(), s[0]))
 		switch p {
 		case "":
-			ctrl.CourseView(w, r)
+			courseView(w, r)
 		case "content":
-			mustSignedIn(http.HandlerFunc(ctrl.CourseContent)).ServeHTTP(w, r)
+			mustSignedIn(http.HandlerFunc(courseContent)).ServeHTTP(w, r)
 		case "enroll":
-			mustSignedIn(http.HandlerFunc(ctrl.CourseEnroll)).ServeHTTP(w, r)
+			mustSignedIn(http.HandlerFunc(courseEnroll)).ServeHTTP(w, r)
 		case "assignment":
-			mustSignedIn(http.HandlerFunc(ctrl.CourseAssignment)).ServeHTTP(w, r)
+			mustSignedIn(http.HandlerFunc(courseAssignment)).ServeHTTP(w, r)
 		default:
 			view.NotFound(w, r)
 		}

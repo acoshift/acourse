@@ -12,29 +12,29 @@ const (
 	keyOpenIDSessionID
 )
 
-// SetUserID sets user id to session
-func SetUserID(sess *session.Session, userID string) {
+// setUserID sets user id to session
+func setUserID(sess *session.Session, userID string) {
 	sess.Set(keyUserID, userID)
 }
 
-// GetUserID gets user id from session
-func GetUserID(sess *session.Session) string {
+// getUserID gets user id from session
+func getUserID(sess *session.Session) string {
 	id, _ := sess.Get(keyUserID).(string)
 	return id
 }
 
-// SetOpenIDSessionID sets open id session id to session
-func SetOpenIDSessionID(sess *session.Session, openIDSessionID string) {
+// setOpenIDSessionID sets open id session id to session
+func setOpenIDSessionID(sess *session.Session, openIDSessionID string) {
 	sess.Set(keyOpenIDSessionID, openIDSessionID)
 }
 
-// DelOpenIDSessionID deletes open id session id from session
-func DelOpenIDSessionID(sess *session.Session) {
+// delOpenIDSessionID deletes open id session id from session
+func delOpenIDSessionID(sess *session.Session) {
 	sess.Del(keyOpenIDSessionID)
 }
 
-// GetOpenIDSessionID gets open id session id from session
-func GetOpenIDSessionID(sess *session.Session) string {
+// getOpenIDSessionID gets open id session id from session
+func getOpenIDSessionID(sess *session.Session) string {
 	id, _ := sess.Get(keyOpenIDSessionID).(string)
 	return id
 }
