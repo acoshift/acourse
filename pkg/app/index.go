@@ -1,4 +1,4 @@
-package controller
+package app
 
 import (
 	"net/http"
@@ -7,7 +7,7 @@ import (
 	"github.com/acoshift/acourse/pkg/view"
 )
 
-func (c *ctrl) Index(w http.ResponseWriter, r *http.Request) {
+func index(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	if r.URL.Path != "/" {
 		view.NotFound(w, r)

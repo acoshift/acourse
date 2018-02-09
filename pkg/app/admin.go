@@ -1,4 +1,4 @@
-package controller
+package app
 
 import (
 	"context"
@@ -13,7 +13,7 @@ import (
 	"github.com/acoshift/acourse/pkg/view"
 )
 
-func (c *ctrl) AdminUsers(w http.ResponseWriter, r *http.Request) {
+func adminUsers(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	page, _ := strconv.ParseInt(r.FormValue("page"), 10, 64)
 	if page <= 0 {
@@ -43,7 +43,7 @@ func (c *ctrl) AdminUsers(w http.ResponseWriter, r *http.Request) {
 	view.AdminUsers(w, r, users, int(page), int(totalPage))
 }
 
-func (c *ctrl) AdminCourses(w http.ResponseWriter, r *http.Request) {
+func adminCourses(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	page, _ := strconv.ParseInt(r.FormValue("page"), 10, 64)
 	if page <= 0 {
@@ -73,7 +73,7 @@ func (c *ctrl) AdminCourses(w http.ResponseWriter, r *http.Request) {
 	view.AdminCourses(w, r, courses, int(page), int(totalPage))
 }
 
-func (c *ctrl) adminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter func(context.Context, int64, int64) ([]*entity.Payment, error), paymentsCounter func(context.Context) (int64, error)) {
+func adminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter func(context.Context, int64, int64) ([]*entity.Payment, error), paymentsCounter func(context.Context) (int64, error)) {
 	ctx := r.Context()
 	page, _ := strconv.ParseInt(r.FormValue("page"), 10, 64)
 	if page <= 0 {
@@ -103,9 +103,9 @@ func (c *ctrl) adminPayments(w http.ResponseWriter, r *http.Request, paymentsGet
 	view.AdminPayments(w, r, payments, int(page), int(totalPage))
 }
 
-func (c *ctrl) AdminRejectPayment(w http.ResponseWriter, r *http.Request) {
+func adminRejectPayment(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
-		c.postAdminRejectPayment(w, r)
+		postAdminRejectPayment(w, r)
 		return
 	}
 
@@ -150,14 +150,14 @@ func (c *ctrl) AdminRejectPayment(w http.ResponseWriter, r *http.Request) {
 `,
 		name,
 		x.Course.Title,
-		x.CreatedAt.In(c.loc).Format("02/01/2006 15:04:05"),
+		x.CreatedAt.In(loc).Format("02/01/2006 15:04:05"),
 		x.Course.Link(),
 	)
 
 	view.AdminPaymentReject(w, r, x, message)
 }
 
-func (c *ctrl) postAdminRejectPayment(w http.ResponseWriter, r *http.Request) {
+func postAdminRejectPayment(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	message := r.FormValue("Message")
 	id := r.FormValue("ID")
@@ -181,14 +181,14 @@ func (c *ctrl) postAdminRejectPayment(w http.ResponseWriter, r *http.Request) {
 			}
 			body := markdown(message)
 			title := fmt.Sprintf("คำขอเพื่อเรียนหลักสูตร %s ได้รับการปฏิเสธ", x.Course.Title)
-			c.sendEmail(x.User.Email.String, title, body)
+			sendEmail(x.User.Email.String, title, body)
 		}()
 	}
 
 	http.Redirect(w, r, "/admin/payments/pending", http.StatusSeeOther)
 }
 
-func (c *ctrl) postAdminPendingPayment(w http.ResponseWriter, r *http.Request) {
+func postAdminPendingPayment(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	action := r.FormValue("Action")
 
@@ -263,28 +263,28 @@ https://acourse.io
 					x.ID,
 					x.Course.Title,
 					x.Price,
-					x.CreatedAt.In(c.loc).Format("02/01/2006 15:04:05"),
-					x.At.Time.In(c.loc).Format("02/01/2006 15:04:05"),
+					x.CreatedAt.In(loc).Format("02/01/2006 15:04:05"),
+					x.At.Time.In(loc).Format("02/01/2006 15:04:05"),
 					name,
 					x.User.Email.String,
 				))
 
 				title := fmt.Sprintf("ยืนยันการชำระเงิน หลักสูตร %s", x.Course.Title)
-				c.sendEmail(x.User.Email.String, title, body)
+				sendEmail(x.User.Email.String, title, body)
 			}()
 		}
 	}
 	http.Redirect(w, r, "/admin/payments/pending", http.StatusSeeOther)
 }
 
-func (c *ctrl) AdminPendingPayments(w http.ResponseWriter, r *http.Request) {
+func adminPendingPayments(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
-		c.postAdminPendingPayment(w, r)
+		postAdminPendingPayment(w, r)
 		return
 	}
-	c.adminPayments(w, r, repository.ListPendingPayments, repository.CountPendingPayments)
+	adminPayments(w, r, repository.ListPendingPayments, repository.CountPendingPayments)
 }
 
-func (c *ctrl) AdminHistoryPayments(w http.ResponseWriter, r *http.Request) {
-	c.adminPayments(w, r, repository.ListHistoryPayments, repository.CountHistoryPayments)
+func adminHistoryPayments(w http.ResponseWriter, r *http.Request) {
+	adminPayments(w, r, repository.ListHistoryPayments, repository.CountHistoryPayments)
 }

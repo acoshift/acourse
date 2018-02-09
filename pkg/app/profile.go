@@ -1,4 +1,4 @@
-package controller
+package app
 
 import (
 	"net/http"
@@ -13,7 +13,7 @@ import (
 	"github.com/acoshift/acourse/pkg/view"
 )
 
-func (c *ctrl) Profile(w http.ResponseWriter, r *http.Request) {
+func profile(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	user := appctx.GetUser(r.Context())
 
@@ -31,9 +31,9 @@ func (c *ctrl) Profile(w http.ResponseWriter, r *http.Request) {
 	view.Profile(w, r, ownCourses, enrolledCourses)
 }
 
-func (c *ctrl) ProfileEdit(w http.ResponseWriter, r *http.Request) {
+func profileEdit(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
-		c.postProfileEdit(w, r)
+		postProfileEdit(w, r)
 		return
 	}
 	ctx := r.Context()
@@ -51,7 +51,7 @@ func (c *ctrl) ProfileEdit(w http.ResponseWriter, r *http.Request) {
 	view.ProfileEdit(w, r)
 }
 
-func (c *ctrl) postProfileEdit(w http.ResponseWriter, r *http.Request) {
+func postProfileEdit(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	user := appctx.GetUser(ctx)
 	f := appctx.GetSession(ctx).Flash()
@@ -70,7 +70,7 @@ func (c *ctrl) postProfileEdit(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		imageURL, err = c.uploadProfileImage(ctx, image)
+		imageURL, err = uploadProfileImage(ctx, image)
 		if err != nil {
 			f.Add("Errors", err.Error())
 			back(w, r)

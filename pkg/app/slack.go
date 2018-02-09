@@ -1,4 +1,4 @@
-package controller
+package app
 
 import (
 	"bytes"
@@ -10,8 +10,8 @@ import (
 	"net/http"
 )
 
-func (c *ctrl) sendSlackMessage(ctx context.Context, message string) error {
-	if len(c.slackURL) == 0 {
+func sendSlackMessage(ctx context.Context, message string) error {
+	if len(slackURL) == 0 {
 		return nil
 	}
 
@@ -23,7 +23,7 @@ func (c *ctrl) sendSlackMessage(ctx context.Context, message string) error {
 	if err != nil {
 		return err
 	}
-	req, err := http.NewRequest(http.MethodPost, c.slackURL, &buf)
+	req, err := http.NewRequest(http.MethodPost, slackURL, &buf)
 	if err != nil {
 		return err
 	}

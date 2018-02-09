@@ -21,7 +21,6 @@ import (
 	"gopkg.in/gomail.v2"
 
 	"github.com/acoshift/acourse/pkg/app"
-	"github.com/acoshift/acourse/pkg/controller"
 	"github.com/acoshift/acourse/pkg/view"
 )
 
@@ -87,22 +86,10 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	db.SetMaxIdleConns(5)
 
 	view.BaseURL = config.String("base_url")
 
-	ctrl := controller.New(controller.Config{
-		Auth:         firAuth,
-		Location:     loc,
-		SlackURL:     config.String("slack_url"),
-		EmailFrom:    config.String("email_from"),
-		EmailDialer:  emailDialer,
-		BaseURL:      config.String("base_url"),
-		BucketHandle: bucketHandle,
-		BucketName:   config.String("bucket"),
-	})
 	app := app.New(app.Config{
-		Controller:    ctrl,
 		DB:            db,
 		BaseURL:       config.String("base_url"),
 		XSRFSecret:    config.String("xsrf_key"),
@@ -111,6 +98,13 @@ func main() {
 		CachePool:     cachePool,
 		CachePrefix:   config.String("redis_prefix"),
 		SessionSecret: config.Bytes("session_secret"),
+		Auth:          firAuth,
+		Location:      loc,
+		SlackURL:      config.String("slack_url"),
+		EmailFrom:     config.String("email_from"),
+		EmailDialer:   emailDialer,
+		BucketHandle:  bucketHandle,
+		BucketName:    config.String("bucket"),
 	})
 
 	mux := http.NewServeMux()

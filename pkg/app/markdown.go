@@ -1,4 +1,4 @@
-package controller
+package app
 
 import (
 	"github.com/microcosm-cc/bluemonday"
