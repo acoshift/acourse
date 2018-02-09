@@ -13,10 +13,10 @@ import (
 	"github.com/acoshift/go-firebase-admin"
 	"github.com/asaskevich/govalidator"
 
-	"github.com/acoshift/acourse/pkg/appctx"
-	"github.com/acoshift/acourse/pkg/entity"
-	"github.com/acoshift/acourse/pkg/repository"
-	"github.com/acoshift/acourse/pkg/view"
+	"github.com/acoshift/acourse/appctx"
+	"github.com/acoshift/acourse/entity"
+	"github.com/acoshift/acourse/repository"
+	"github.com/acoshift/acourse/view"
 )
 
 func generateRandomString(n int) string {

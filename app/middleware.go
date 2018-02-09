@@ -11,10 +11,10 @@ import (
 	"github.com/garyburd/redigo/redis"
 	"golang.org/x/net/xsrftoken"
 
-	"github.com/acoshift/acourse/pkg/appctx"
-	"github.com/acoshift/acourse/pkg/entity"
-	"github.com/acoshift/acourse/pkg/repository"
-	"github.com/acoshift/acourse/pkg/view"
+	"github.com/acoshift/acourse/appctx"
+	"github.com/acoshift/acourse/entity"
+	"github.com/acoshift/acourse/repository"
+	"github.com/acoshift/acourse/view"
 )
 
 func panicLogger(h http.Handler) http.Handler {

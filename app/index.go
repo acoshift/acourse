@@ -3,8 +3,8 @@ package app
 import (
 	"net/http"
 
-	"github.com/acoshift/acourse/pkg/repository"
-	"github.com/acoshift/acourse/pkg/view"
+	"github.com/acoshift/acourse/repository"
+	"github.com/acoshift/acourse/view"
 )
 
 func index(w http.ResponseWriter, r *http.Request) {

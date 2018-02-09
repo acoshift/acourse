@@ -6,7 +6,7 @@ import (
 
 	"github.com/garyburd/redigo/redis"
 
-	"github.com/acoshift/acourse/pkg/appctx"
+	"github.com/acoshift/acourse/appctx"
 )
 
 // StoreMagicLink stores magic link to redis

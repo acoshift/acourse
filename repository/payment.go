@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/acoshift/acourse/pkg/appctx"
-	"github.com/acoshift/acourse/pkg/entity"
+	"github.com/acoshift/acourse/appctx"
+	"github.com/acoshift/acourse/entity"
 	"github.com/lib/pq"
 )
 

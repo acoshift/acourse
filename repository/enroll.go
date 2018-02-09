@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/acoshift/acourse/pkg/appctx"
+	"github.com/acoshift/acourse/appctx"
 )
 
 // Enroll an user to a course

@@ -11,8 +11,8 @@ import (
 	"github.com/acoshift/header"
 	"github.com/acoshift/session"
 
-	"github.com/acoshift/acourse/pkg/appctx"
-	"github.com/acoshift/acourse/pkg/entity"
+	"github.com/acoshift/acourse/appctx"
+	"github.com/acoshift/acourse/entity"
 )
 
 // view's config

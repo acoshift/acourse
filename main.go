@@ -20,8 +20,8 @@ import (
 	"google.golang.org/api/option"
 	"gopkg.in/gomail.v2"
 
-	"github.com/acoshift/acourse/pkg/app"
-	"github.com/acoshift/acourse/pkg/view"
+	"github.com/acoshift/acourse/app"
+	"github.com/acoshift/acourse/view"
 )
 
 func main() {

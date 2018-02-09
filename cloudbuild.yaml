@@ -4,7 +4,7 @@ steps:
 - name: 'gcr.io/cloud-builders/npm'
   args: ['run', 'build']
 - name: 'gcr.io/cloud-builders/go'
-  args: ['build', '-o', 'acourse', '-a', '-ldflags', '-w -s', 'cmd/acourse/main.go']
+  args: ['build', '-o', 'acourse', '-a', '-ldflags', '-w -s', 'main.go']
   env:
   - 'PROJECT_ROOT=github.com/acoshift/acourse'
   - 'GOOS=linux'

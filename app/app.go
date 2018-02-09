@@ -13,7 +13,7 @@ import (
 	redisstore "github.com/acoshift/session/store/redis"
 	gomail "gopkg.in/gomail.v2"
 
-	"github.com/acoshift/acourse/pkg/appctx"
+	"github.com/acoshift/acourse/appctx"
 )
 
 var (

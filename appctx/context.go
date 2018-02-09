@@ -7,7 +7,7 @@ import (
 	"github.com/acoshift/session"
 	"github.com/garyburd/redigo/redis"
 
-	"github.com/acoshift/acourse/pkg/entity"
+	"github.com/acoshift/acourse/entity"
 )
 
 type (

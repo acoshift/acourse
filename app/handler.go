@@ -5,8 +5,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/acoshift/acourse/pkg/appctx"
-	"github.com/acoshift/acourse/pkg/view"
+	"github.com/acoshift/acourse/appctx"
+	"github.com/acoshift/acourse/view"
 )
 
 type fileFS struct {
