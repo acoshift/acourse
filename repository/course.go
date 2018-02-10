@@ -298,14 +298,15 @@ func ListCourses(ctx context.Context, limit, offset int64) ([]*entity.Course, er
 
 // ListPublicCourses lists public course sort by created at desc
 // TODO: add pagination
-func ListPublicCourses(ctx context.Context) ([]*entity.Course, error) {
+func ListPublicCourses(ctx context.Context, cachePool *redis.Pool, cachePrefix string) ([]*entity.Course, error) {
+	// TODO: move cache logic out from repo
+
 	db := appctx.GetDatabase(ctx)
-	pool, prefix := appctx.GetCachePool(ctx)
 
 	// look from cache
 	{
-		c := pool.Get()
-		bs, err := redis.Bytes(c.Do("GET", prefix+"cache:list_public_course"))
+		c := cachePool.Get()
+		bs, err := redis.Bytes(c.Do("GET", cachePrefix+"cache:list_public_course"))
 		c.Close()
 		if err == nil {
 			var xs []*entity.Course
@@ -362,8 +363,8 @@ func ListPublicCourses(ctx context.Context) ([]*entity.Course, error) {
 		buf := bytes.Buffer{}
 		err := gob.NewEncoder(&buf).Encode(xs)
 		if err == nil {
-			c := pool.Get()
-			c.Do("SETEX", prefix+"cache:list_public_course", 5, buf.Bytes())
+			c := cachePool.Get()
+			c.Do("SETEX", cachePrefix+"cache:list_public_course", 5, buf.Bytes())
 			c.Close()
 		}
 	}()

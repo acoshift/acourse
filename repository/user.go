@@ -128,6 +128,7 @@ func GetUserFromUsername(ctx context.Context, username string) (*entity.User, er
 	return &x, nil
 }
 
+// FindUserByEmail finds user by email
 func FindUserByEmail(ctx context.Context, email string) (*entity.User, error) {
 	db := appctx.GetDatabase(ctx)
 

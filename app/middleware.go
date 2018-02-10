@@ -8,7 +8,6 @@ import (
 
 	"github.com/acoshift/header"
 	"github.com/acoshift/middleware"
-	"github.com/garyburd/redigo/redis"
 	"golang.org/x/net/xsrftoken"
 
 	"github.com/acoshift/acourse/appctx"
@@ -189,16 +188,6 @@ func setDatabase(db *sql.DB) middleware.Middleware {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := appctx.NewDatabaseContext(r.Context(), db)
-			r = r.WithContext(ctx)
-			h.ServeHTTP(w, r)
-		})
-	}
-}
-
-func setCachePool(pool *redis.Pool, prefix string) middleware.Middleware {
-	return func(h http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			ctx := appctx.NewCachePoolContext(r.Context(), pool, prefix)
 			r = r.WithContext(ctx)
 			h.ServeHTTP(w, r)
 		})

@@ -13,7 +13,7 @@ func index(w http.ResponseWriter, r *http.Request) {
 		view.NotFound(w, r)
 		return
 	}
-	courses, err := repository.ListPublicCourses(ctx)
+	courses, err := repository.ListPublicCourses(ctx, cachePool, cachePrefix)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

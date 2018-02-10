@@ -24,11 +24,12 @@ var (
 	emailFrom    string
 	emailDialer  *gomail.Dialer
 	baseURL      string
-	cachePrefix  string
 	bucketHandle *storage.BucketHandle
 	bucketName   string
 	redisPool    *redis.Pool
 	redisPrefix  string
+	cachePool    *redis.Pool
+	cachePrefix  string
 )
 
 // New creates new app
@@ -39,11 +40,12 @@ func New(config Config) http.Handler {
 	emailFrom = config.EmailFrom
 	emailDialer = config.EmailDialer
 	baseURL = config.BaseURL
-	cachePrefix = config.CachePrefix
 	bucketHandle = config.BucketHandle
 	bucketName = config.BucketName
 	redisPool = config.RedisPool
 	redisPrefix = config.RedisPrefix
+	cachePool = config.CachePool
+	cachePrefix = config.CachePrefix
 
 	cacheInvalidator := make(chan interface{})
 
@@ -131,7 +133,6 @@ func New(config Config) http.Handler {
 			Invalidator: cacheInvalidator,
 		}),
 		setDatabase(config.DB),
-		setCachePool(config.CachePool, config.CachePrefix),
 		fetchUser(),
 		csrf(config.BaseURL, config.XSRFSecret),
 	)(main))

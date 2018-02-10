@@ -5,7 +5,6 @@ import (
 	"database/sql"
 
 	"github.com/acoshift/session"
-	"github.com/garyburd/redigo/redis"
 
 	"github.com/acoshift/acourse/entity"
 )
@@ -102,16 +101,4 @@ func GetTransaction(ctx context.Context) DB {
 		panic("database is not transaction")
 	}
 	return x.(DB)
-}
-
-// NewCachePoolContext creates new context with cache pool
-func NewCachePoolContext(ctx context.Context, pool *redis.Pool, prefix string) context.Context {
-	ctx = context.WithValue(ctx, cachePoolKey{}, pool)
-	ctx = context.WithValue(ctx, cachePrefixKey{}, prefix)
-	return ctx
-}
-
-// GetCachePool gets cache pool from context
-func GetCachePool(ctx context.Context) (*redis.Pool, string) {
-	return ctx.Value(cachePoolKey{}).(*redis.Pool), ctx.Value(cachePrefixKey{}).(string)
 }
