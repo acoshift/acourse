@@ -11,6 +11,7 @@ import (
 	"github.com/acoshift/servertiming"
 	"github.com/acoshift/session"
 	redisstore "github.com/acoshift/session/store/redis"
+	"github.com/garyburd/redigo/redis"
 	"gopkg.in/gomail.v2"
 
 	"github.com/acoshift/acourse/appctx"
@@ -26,6 +27,8 @@ var (
 	cachePrefix  string
 	bucketHandle *storage.BucketHandle
 	bucketName   string
+	redisPool    *redis.Pool
+	redisPrefix  string
 )
 
 // New creates new app
@@ -39,6 +42,8 @@ func New(config Config) http.Handler {
 	cachePrefix = config.CachePrefix
 	bucketHandle = config.BucketHandle
 	bucketName = config.BucketName
+	redisPool = config.RedisPool
+	redisPrefix = config.RedisPrefix
 
 	cacheInvalidator := make(chan interface{})
 
@@ -126,7 +131,6 @@ func New(config Config) http.Handler {
 			Invalidator: cacheInvalidator,
 		}),
 		setDatabase(config.DB),
-		setRedisPool(config.RedisPool, config.RedisPrefix),
 		setCachePool(config.CachePool, config.CachePrefix),
 		fetchUser(),
 		csrf(config.BaseURL, config.XSRFSecret),

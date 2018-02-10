@@ -104,18 +104,6 @@ func GetTransaction(ctx context.Context) DB {
 	return x.(DB)
 }
 
-// NewRedisPoolContext creates new context with redis pool
-func NewRedisPoolContext(ctx context.Context, pool *redis.Pool, prefix string) context.Context {
-	ctx = context.WithValue(ctx, redisPoolKey{}, pool)
-	ctx = context.WithValue(ctx, redisPrefixKey{}, prefix)
-	return ctx
-}
-
-// GetRedisPool gets redis pool from context
-func GetRedisPool(ctx context.Context) (*redis.Pool, string) {
-	return ctx.Value(redisPoolKey{}).(*redis.Pool), ctx.Value(redisPrefixKey{}).(string)
-}
-
 // NewCachePoolContext creates new context with cache pool
 func NewCachePoolContext(ctx context.Context, pool *redis.Pool, prefix string) context.Context {
 	ctx = context.WithValue(ctx, cachePoolKey{}, pool)

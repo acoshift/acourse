@@ -56,7 +56,7 @@ func postSignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ok, err := repository.CanAcquireMagicLink(ctx, email)
+	ok, err := repository.CanAcquireMagicLink(redisPool, redisPrefix, email)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -82,7 +82,7 @@ func postSignIn(w http.ResponseWriter, r *http.Request) {
 
 	linkID := generateMagicLinkID()
 
-	err = repository.StoreMagicLink(ctx, linkID, user.ID)
+	err = repository.StoreMagicLink(redisPool, redisPrefix, linkID, user.ID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -130,7 +130,7 @@ func signInLink(w http.ResponseWriter, r *http.Request) {
 	s := appctx.GetSession(ctx)
 	f := s.Flash()
 
-	userID, err := repository.FindMagicLink(ctx, linkID)
+	userID, err := repository.FindMagicLink(redisPool, redisPrefix, linkID)
 	if err != nil {
 		f.Add("Errors", "ไม่พบ Magic Link ของคุณ")
 		http.Redirect(w, r, "/signin", http.StatusFound)
