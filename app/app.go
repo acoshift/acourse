@@ -11,7 +11,7 @@ import (
 	"github.com/acoshift/servertiming"
 	"github.com/acoshift/session"
 	redisstore "github.com/acoshift/session/store/redis"
-	gomail "gopkg.in/gomail.v2"
+	"gopkg.in/gomail.v2"
 
 	"github.com/acoshift/acourse/appctx"
 )
@@ -39,8 +39,6 @@ func New(config Config) http.Handler {
 	cachePrefix = config.CachePrefix
 	bucketHandle = config.BucketHandle
 	bucketName = config.BucketName
-
-	app := &app{}
 
 	cacheInvalidator := make(chan interface{})
 
@@ -134,15 +132,9 @@ func New(config Config) http.Handler {
 		csrf(config.BaseURL, config.XSRFSecret),
 	)(main))
 
-	app.Handler = middleware.Chain(
+	return middleware.Chain(
 		setHeaders,
 	)(mux)
-
-	return app
-}
-
-type app struct {
-	http.Handler
 }
 
 func back(w http.ResponseWriter, r *http.Request) {
