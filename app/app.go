@@ -5,16 +5,12 @@ import (
 	"time"
 
 	"cloud.google.com/go/storage"
-	"github.com/acoshift/cachestatic"
-	firebase "github.com/acoshift/go-firebase-admin"
+	"github.com/acoshift/go-firebase-admin"
 	"github.com/acoshift/middleware"
-	"github.com/acoshift/servertiming"
 	"github.com/acoshift/session"
 	redisstore "github.com/acoshift/session/store/redis"
 	"github.com/garyburd/redigo/redis"
 	"gopkg.in/gomail.v2"
-
-	"github.com/acoshift/acourse/appctx"
 )
 
 var (
@@ -46,15 +42,6 @@ func New(config Config) http.Handler {
 	redisPrefix = config.RedisPrefix
 	cachePool = config.CachePool
 	cachePrefix = config.CachePrefix
-
-	cacheInvalidator := make(chan interface{})
-
-	go func() {
-		for {
-			time.Sleep(15 * time.Second)
-			cacheInvalidator <- cachestatic.InvalidateAll
-		}
-	}()
 
 	// create middlewares
 	isCourseOwner := isCourseOwner(config.DB)
@@ -97,7 +84,6 @@ func New(config Config) http.Handler {
 	mux.Handle("/favicon.ico", fileHandler("static/favicon.ico"))
 
 	mux.Handle("/", middleware.Chain(
-		servertiming.Middleware(),
 		panicLogger,
 		session.Middleware(session.Config{
 			Secret:   config.SessionSecret,
@@ -110,27 +96,6 @@ func New(config Config) http.Handler {
 				Prefix: config.RedisPrefix,
 				Pool:   config.RedisPool,
 			}),
-		}),
-		cachestatic.New(cachestatic.Config{
-			Skipper: func(r *http.Request) bool {
-				// cache only get
-				if r.Method != http.MethodGet {
-					return true
-				}
-
-				// skip if signed in
-				s := appctx.GetSession(r.Context())
-				if x := getUserID(s); len(x) > 0 {
-					return true
-				}
-
-				// cache only index
-				if r.URL.Path == "/" {
-					return false
-				}
-				return true
-			},
-			Invalidator: cacheInvalidator,
 		}),
 		setDatabase(config.DB),
 		fetchUser(),
