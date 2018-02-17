@@ -39,6 +39,12 @@
   revision = "5c88c77f50897ba89140829b44b9d96c5050ff5a"
 
 [[projects]]
+  name = "github.com/acoshift/hime"
+  packages = ["."]
+  revision = "f1cf9edd4b1d35de350e0ed16019881ca7a36dc1"
+  version = "v0.0.14"
+
+[[projects]]
   name = "github.com/acoshift/middleware"
   packages = ["."]
   revision = "eb528086425529ef1d014404066c11b3bfa15a92"
@@ -322,6 +328,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "1645beaf32a7f28a3ab99ebc2cad2649ff1a7fe9e48454b89be639ba7ae5aa50"
+  inputs-digest = "10495d7500eac0dc7d5d7f964778cc32232ef332e33da4f9674d4d2b12c71acf"
   solver-name = "gps-cdcl"
   solver-version = 1

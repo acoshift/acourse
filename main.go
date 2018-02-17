@@ -4,15 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"log"
-	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
 	"time"
 
 	"cloud.google.com/go/storage"
 	"github.com/acoshift/configfile"
 	"github.com/acoshift/go-firebase-admin"
+	"github.com/acoshift/hime"
 	"github.com/garyburd/redigo/redis"
 	_ "github.com/lib/pq"
 	"golang.org/x/oauth2/google"
@@ -106,28 +103,11 @@ func main() {
 		BucketName:    config.String("bucket"),
 	})
 
-	// lets reverse proxy handle other settings
-	srv := &http.Server{
-		Addr:    ":8080",
-		Handler: app,
+	err = hime.New().
+		Handler(hime.Factory(app)).
+		GracefulShutdown().
+		ListenAndServe(":8080")
+	if err != nil {
+		log.Fatal(err)
 	}
-
-	go func() {
-		log.Printf("acourse: start server at %s\n", srv.Addr)
-		if err := srv.ListenAndServe(); err != http.ErrServerClosed {
-			log.Fatal(err)
-		}
-	}()
-
-	stop := make(chan os.Signal, 1)
-	signal.Notify(stop, syscall.SIGTERM)
-	<-stop
-
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-	if err := srv.Shutdown(ctx); err != nil {
-		log.Printf("acourse: server shutdown error: %v\n", err)
-		return
-	}
-	log.Println("acourse: server shutdown")
 }
