@@ -176,10 +176,6 @@ func courseContent(w http.ResponseWriter, r *http.Request) {
 }
 
 func editorCreate(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodPost {
-		postEditorCreate(w, r)
-		return
-	}
 	view.EditorCreate(w, r)
 }
 
@@ -266,10 +262,6 @@ func postEditorCreate(w http.ResponseWriter, r *http.Request) {
 }
 
 func editorCourse(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodPost {
-		postEditorCourse(w, r)
-		return
-	}
 	id := r.FormValue("id")
 	course, err := repository.GetCourse(db, id)
 	if err != nil {
@@ -384,19 +376,6 @@ func postEditorCourse(w http.ResponseWriter, r *http.Request) {
 func editorContent(w http.ResponseWriter, r *http.Request) {
 	id := r.FormValue("id")
 
-	if r.Method == http.MethodPost {
-		if r.FormValue("action") == "delete" {
-			contentID := r.FormValue("contentId")
-			_, err := db.Exec(`delete from course_contents where id = $1 and course_id = $2`, contentID, id)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-		}
-		back(w, r)
-		return
-	}
-
 	course, err := repository.GetCourse(db, id)
 	if err == entity.ErrNotFound {
 		view.NotFound(w, r)
@@ -413,6 +392,20 @@ func editorContent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	view.EditorContent(w, r, course)
+}
+
+func postEditorContent(w http.ResponseWriter, r *http.Request) {
+	id := r.FormValue("id")
+
+	if r.FormValue("action") == "delete" {
+		contentID := r.FormValue("contentId")
+		_, err := db.Exec(`delete from course_contents where id = $1 and course_id = $2`, contentID, id)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+	back(w, r)
 }
 
 func courseEnroll(w http.ResponseWriter, r *http.Request) {
@@ -677,48 +670,49 @@ func courseAssignment(w http.ResponseWriter, r *http.Request) {
 func editorContentCreate(w http.ResponseWriter, r *http.Request) {
 	id := r.FormValue("id")
 
-	if r.Method == http.MethodPost {
-		var (
-			title   = r.FormValue("Title")
-			desc    = r.FormValue("Desc")
-			videoID = r.FormValue("VideoID")
-			i       int64
-		)
-
-		err := pgsql.RunInTx(db, nil, func(tx *sql.Tx) error {
-			// get content index
-			err := tx.QueryRow(`
-				select i from course_contents where course_id = $1 order by i desc limit 1
-			`, id).Scan(&i)
-			if err == sql.ErrNoRows {
-				i = -1
-			}
-			_, err = tx.Exec(`
-				insert into course_contents
-					(course_id, i, title, long_desc, video_id, video_type)
-				values
-					($1, $2, $3, $4, $5, $6)
-			`, id, i+1, title, desc, videoID, entity.Youtube)
-			if err != nil {
-				return err
-			}
-			return nil
-		})
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		http.Redirect(w, r, "/editor/content?id="+r.FormValue("id"), http.StatusFound)
-		return
-	}
-
 	course, err := repository.GetCourse(db, id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	view.EditorContentCreate(w, r, course)
+}
+
+func postEditorContentCreate(w http.ResponseWriter, r *http.Request) {
+	id := r.FormValue("id")
+
+	var (
+		title   = r.FormValue("Title")
+		desc    = r.FormValue("Desc")
+		videoID = r.FormValue("VideoID")
+		i       int64
+	)
+
+	err := pgsql.RunInTx(db, nil, func(tx *sql.Tx) error {
+		// get content index
+		err := tx.QueryRow(`
+			select i from course_contents where course_id = $1 order by i desc limit 1
+		`, id).Scan(&i)
+		if err == sql.ErrNoRows {
+			i = -1
+		}
+		_, err = tx.Exec(`
+			insert into course_contents
+				(course_id, i, title, long_desc, video_id, video_type)
+			values
+				($1, $2, $3, $4, $5, $6)
+		`, id, i+1, title, desc, videoID, entity.Youtube)
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, "/editor/content?id="+r.FormValue("id"), http.StatusFound)
 }
 
 func editorContentEdit(w http.ResponseWriter, r *http.Request) {
@@ -748,29 +742,55 @@ func editorContentEdit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if r.Method == http.MethodPost {
-		var (
-			title   = r.FormValue("Title")
-			desc    = r.FormValue("Desc")
-			videoID = r.FormValue("VideoID")
-		)
+	view.EditorContentEdit(w, r, course, content)
+}
 
-		_, err = db.Exec(`
-			update course_contents
-			set
-				title = $3,
-				long_desc = $4,
-				video_id = $5,
-				updated_at = now()
-			where id = $1 and course_id = $2
-		`, id, course.ID, title, desc, videoID)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		http.Redirect(w, r, "/editor/content?id="+course.ID, http.StatusSeeOther)
+func postEditorContentEdit(w http.ResponseWriter, r *http.Request) {
+	// course content id
+	id := r.FormValue("id")
+
+	content, err := repository.GetCourseContent(db, id)
+	if err == sql.ErrNoRows {
+		view.NotFound(w, r)
+		return
+	}
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	view.EditorContentEdit(w, r, course, content)
+	course, err := repository.GetCourse(db, content.CourseID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	user := appctx.GetUser(r.Context())
+	// user is not course owner
+	if user.ID != course.UserID {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
+
+	var (
+		title   = r.FormValue("Title")
+		desc    = r.FormValue("Desc")
+		videoID = r.FormValue("VideoID")
+	)
+
+	_, err = db.Exec(`
+		update course_contents
+		set
+			title = $3,
+			long_desc = $4,
+			video_id = $5,
+			updated_at = now()
+		where id = $1 and course_id = $2
+	`, id, course.ID, title, desc, videoID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	http.Redirect(w, r, "/editor/content?id="+course.ID, http.StatusSeeOther)
+	return
 }

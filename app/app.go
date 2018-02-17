@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/storage"
+	"github.com/acoshift/acourse/view"
 	"github.com/acoshift/go-firebase-admin"
 	"github.com/acoshift/hime"
 	"github.com/acoshift/httprouter"
@@ -56,14 +57,25 @@ func New(config Config) hime.HandlerFactory {
 			w.WriteHeader(http.StatusOK)
 		})
 
-		editor := http.NewServeMux()
-		editor.Handle("/create", onlyInstructor(http.HandlerFunc(editorCreate)))
-		editor.Handle("/course", isCourseOwner(http.HandlerFunc(editorCourse)))
-		editor.Handle("/content", isCourseOwner(http.HandlerFunc(editorContent)))
-		editor.Handle("/content/create", isCourseOwner(http.HandlerFunc(editorContentCreate)))
-		editor.Handle("/content/edit", http.HandlerFunc(editorContentEdit))
+		editor := httprouter.New()
+		editor.HandleMethodNotAllowed = false
+		editor.HandleOPTIONS = false
+		editor.NotFound = http.HandlerFunc(notFound)
+		editor.Get("/create", onlyInstructor(http.HandlerFunc(editorCreate)))
+		editor.Post("/create", onlyInstructor(http.HandlerFunc(postEditorCreate)))
+		editor.Get("/course", isCourseOwner(http.HandlerFunc(editorCourse)))
+		editor.Post("/course", isCourseOwner(http.HandlerFunc(postEditorCourse)))
+		editor.Get("/content", isCourseOwner(http.HandlerFunc(editorContent)))
+		editor.Post("/content", isCourseOwner(http.HandlerFunc(postEditorContent)))
+		editor.Get("/content/create", isCourseOwner(http.HandlerFunc(editorContentCreate)))
+		editor.Post("/content/create", isCourseOwner(http.HandlerFunc(postEditorContentCreate)))
+		editor.Get("/content/edit", http.HandlerFunc(editorContentEdit))
+		editor.Post("/content/edit", http.HandlerFunc(postEditorContentEdit))
 
 		admin := httprouter.New()
+		admin.HandleMethodNotAllowed = false
+		admin.HandleOPTIONS = false
+		admin.NotFound = http.HandlerFunc(notFound)
 		admin.Get("/users", http.HandlerFunc(adminUsers))
 		admin.Get("/courses", http.HandlerFunc(adminCourses))
 		admin.Get("/payments/pending", http.HandlerFunc(adminPendingPayments))
@@ -118,4 +130,8 @@ func New(config Config) hime.HandlerFactory {
 
 func back(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, r.RequestURI, http.StatusSeeOther)
+}
+
+func notFound(w http.ResponseWriter, r *http.Request) {
+	view.NotFound(w, r)
 }
