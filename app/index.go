@@ -8,12 +8,11 @@ import (
 )
 
 func index(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
 	if r.URL.Path != "/" {
 		view.NotFound(w, r)
 		return
 	}
-	courses, err := repository.ListPublicCourses(ctx)
+	courses, err := repository.ListPublicCourses(db, cachePool, cachePrefix)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

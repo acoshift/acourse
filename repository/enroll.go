@@ -1,17 +1,12 @@
 package repository
 
 import (
-	"context"
 	"database/sql"
-
-	"github.com/acoshift/acourse/appctx"
 )
 
 // Enroll an user to a course
-func Enroll(ctx context.Context, userID string, courseID string) error {
-	db := appctx.GetDatabase(ctx)
-
-	_, err := db.ExecContext(ctx, `
+func Enroll(q Queryer, userID string, courseID string) error {
+	_, err := q.Exec(`
 		insert into enrolls
 			(user_id, course_id)
 		values
@@ -24,11 +19,9 @@ func Enroll(ctx context.Context, userID string, courseID string) error {
 }
 
 // IsEnrolled returns true if user enrolled a given course
-func IsEnrolled(ctx context.Context, userID string, courseID string) (bool, error) {
-	db := appctx.GetDatabase(ctx)
-
+func IsEnrolled(q Queryer, userID string, courseID string) (bool, error) {
 	var p int
-	err := db.QueryRowContext(ctx, `select 1 from enrolls where user_id = $1 and course_id = $2`, userID, courseID).Scan(&p)
+	err := q.QueryRow(`select 1 from enrolls where user_id = $1 and course_id = $2`, userID, courseID).Scan(&p)
 	if err == sql.ErrNoRows {
 		return false, nil
 	}

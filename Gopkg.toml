@@ -3,10 +3,6 @@
   version = "0.10.0"
 
 [[constraint]]
-  name = "github.com/acoshift/cachestatic"
-  version = "1.4.1"
-
-[[constraint]]
   branch = "master"
   name = "github.com/acoshift/configfile"
 
@@ -21,10 +17,6 @@
 [[constraint]]
   name = "github.com/acoshift/middleware"
   version = "0.2.0"
-
-[[constraint]]
-  branch = "master"
-  name = "github.com/acoshift/servertiming"
 
 [[constraint]]
   name = "github.com/acoshift/session"

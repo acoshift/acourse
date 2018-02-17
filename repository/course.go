@@ -2,14 +2,12 @@ package repository
 
 import (
 	"bytes"
-	"context"
 	"database/sql"
 	"encoding/gob"
 
 	"github.com/garyburd/redigo/redis"
 	"github.com/lib/pq"
 
-	"github.com/acoshift/acourse/appctx"
 	"github.com/acoshift/acourse/entity"
 )
 
@@ -65,9 +63,7 @@ const (
 )
 
 // SaveCourse saves course
-func SaveCourse(ctx context.Context, x *entity.Course) error {
-	tx := appctx.GetTransaction(ctx)
-
+func SaveCourse(q Queryer, x *entity.Course) error {
 	if len(x.URL.String) > 0 && x.URL.String != x.ID {
 		x.URL.Valid = true
 	} else {
@@ -75,7 +71,7 @@ func SaveCourse(ctx context.Context, x *entity.Course) error {
 		x.URL.Valid = false
 	}
 
-	_, err := tx.ExecContext(ctx, `
+	_, err := q.Exec(`
 		upsert into courses
 			(id, user_id, title, short_desc, long_desc, image, start, url, type, price, discount, enroll_detail, updated_at)
 		values
@@ -84,7 +80,7 @@ func SaveCourse(ctx context.Context, x *entity.Course) error {
 	if err != nil {
 		return err
 	}
-	_, err = tx.ExecContext(ctx, `
+	_, err = q.Exec(`
 		upsert into course_options
 			(course_id, public, enroll, attend, assignment, discount)
 		values
@@ -113,11 +109,9 @@ func scanCourse(scan scanFunc, x *entity.Course) error {
 }
 
 // GetCourses gets courses
-func GetCourses(ctx context.Context, courseIDs []string) ([]*entity.Course, error) {
-	db := appctx.GetDatabase(ctx)
-
+func GetCourses(q Queryer, courseIDs []string) ([]*entity.Course, error) {
 	xs := make([]*entity.Course, 0, len(courseIDs))
-	rows, err := db.QueryContext(ctx, queryGetCourses, pq.Array(courseIDs))
+	rows, err := q.Query(queryGetCourses, pq.Array(courseIDs))
 	if err != nil {
 		return nil, err
 	}
@@ -137,11 +131,9 @@ func GetCourses(ctx context.Context, courseIDs []string) ([]*entity.Course, erro
 }
 
 // GetCourse gets course
-func GetCourse(ctx context.Context, courseID string) (*entity.Course, error) {
-	db := appctx.GetDatabase(ctx)
-
+func GetCourse(q Queryer, courseID string) (*entity.Course, error) {
 	var x entity.Course
-	err := db.QueryRowContext(ctx, `
+	err := q.QueryRow(`
 		select
 			id, user_id, title, short_desc, long_desc, image, start, url, type, price, courses.discount, enroll_detail,
 			opt.public, opt.enroll, opt.attend, opt.assignment, opt.discount
@@ -152,7 +144,7 @@ func GetCourse(ctx context.Context, courseID string) (*entity.Course, error) {
 		&x.Option.Public, &x.Option.Enroll, &x.Option.Attend, &x.Option.Assignment, &x.Option.Discount,
 	)
 	if err == sql.ErrNoRows {
-		return nil, appctx.ErrNotFound
+		return nil, entity.ErrNotFound
 	}
 	if err != nil {
 		return nil, err
@@ -161,10 +153,8 @@ func GetCourse(ctx context.Context, courseID string) (*entity.Course, error) {
 }
 
 // GetCourseContents gets course contents for given course id
-func GetCourseContents(ctx context.Context, courseID string) ([]*entity.CourseContent, error) {
-	db := appctx.GetDatabase(ctx)
-
-	rows, err := db.QueryContext(ctx, `
+func GetCourseContents(q Queryer, courseID string) ([]*entity.CourseContent, error) {
+	rows, err := q.Query(`
 		select
 			id,
 			course_id,
@@ -197,11 +187,9 @@ func GetCourseContents(ctx context.Context, courseID string) ([]*entity.CourseCo
 }
 
 // GetCourseContent gets course content from id
-func GetCourseContent(ctx context.Context, courseContentID string) (*entity.CourseContent, error) {
-	db := appctx.GetDatabase(ctx)
-
+func GetCourseContent(q Queryer, courseContentID string) (*entity.CourseContent, error) {
 	var x entity.CourseContent
-	err := db.QueryRowContext(ctx, `
+	err := q.QueryRow(`
 		select
 			id,
 			course_id,
@@ -220,17 +208,15 @@ func GetCourseContent(ctx context.Context, courseContentID string) (*entity.Cour
 }
 
 // GetCourseIDFromURL gets course id from url
-func GetCourseIDFromURL(ctx context.Context, url string) (string, error) {
-	db := appctx.GetDatabase(ctx)
-
+func GetCourseIDFromURL(q Queryer, url string) (string, error) {
 	var id string
-	err := db.QueryRowContext(ctx, `
+	err := q.QueryRow(`
 		select id
 		from courses
 		where url = $1
 	`, url).Scan(&id)
 	if err == sql.ErrNoRows {
-		return "", appctx.ErrNotFound
+		return "", entity.ErrNotFound
 	}
 	if err != nil {
 		return "", err
@@ -239,11 +225,9 @@ func GetCourseIDFromURL(ctx context.Context, url string) (string, error) {
 }
 
 // ListCourses lists all courses
-func ListCourses(ctx context.Context, limit, offset int64) ([]*entity.Course, error) {
-	db := appctx.GetDatabase(ctx)
-
+func ListCourses(q Queryer, limit, offset int64) ([]*entity.Course, error) {
 	xs := make([]*entity.Course, 0)
-	rows, err := db.QueryContext(ctx, `
+	rows, err := q.Query(`
 		select
 			courses.id,
 			courses.title,
@@ -298,14 +282,13 @@ func ListCourses(ctx context.Context, limit, offset int64) ([]*entity.Course, er
 
 // ListPublicCourses lists public course sort by created at desc
 // TODO: add pagination
-func ListPublicCourses(ctx context.Context) ([]*entity.Course, error) {
-	db := appctx.GetDatabase(ctx)
-	pool, prefix := appctx.GetCachePool(ctx)
+func ListPublicCourses(q Queryer, cachePool *redis.Pool, cachePrefix string) ([]*entity.Course, error) {
+	// TODO: move cache logic out from repo
 
 	// look from cache
 	{
-		c := pool.Get()
-		bs, err := redis.Bytes(c.Do("GET", prefix+"cache:list_public_course"))
+		c := cachePool.Get()
+		bs, err := redis.Bytes(c.Do("GET", cachePrefix+"cache:list_public_course"))
 		c.Close()
 		if err == nil {
 			var xs []*entity.Course
@@ -321,7 +304,7 @@ func ListPublicCourses(ctx context.Context) ([]*entity.Course, error) {
 	ids := make([]string, 0)
 
 	{
-		rows, err := db.QueryContext(ctx, queryListCoursesPublic)
+		rows, err := q.Query(queryListCoursesPublic)
 		if err != nil {
 			return nil, err
 		}
@@ -342,7 +325,7 @@ func ListPublicCourses(ctx context.Context) ([]*entity.Course, error) {
 		rows.Close()
 	}
 
-	rows, err := db.QueryContext(ctx, `select course_id, count(*) from enrolls where course_id = any($1) group by course_id`, pq.Array(ids))
+	rows, err := q.Query(`select course_id, count(*) from enrolls where course_id = any($1) group by course_id`, pq.Array(ids))
 	if err != nil {
 		return nil, err
 	}
@@ -362,8 +345,8 @@ func ListPublicCourses(ctx context.Context) ([]*entity.Course, error) {
 		buf := bytes.Buffer{}
 		err := gob.NewEncoder(&buf).Encode(xs)
 		if err == nil {
-			c := pool.Get()
-			c.Do("SETEX", prefix+"cache:list_public_course", 5, buf.Bytes())
+			c := cachePool.Get()
+			c.Do("SETEX", cachePrefix+"cache:list_public_course", 5, buf.Bytes())
 			c.Close()
 		}
 	}()
@@ -373,10 +356,8 @@ func ListPublicCourses(ctx context.Context) ([]*entity.Course, error) {
 
 // ListOwnCourses lists courses that owned by given user
 // TODO: add pagination
-func ListOwnCourses(ctx context.Context, userID string) ([]*entity.Course, error) {
-	db := appctx.GetDatabase(ctx)
-
-	rows, err := db.QueryContext(ctx, queryListCoursesOwn, userID)
+func ListOwnCourses(q Queryer, userID string) ([]*entity.Course, error) {
+	rows, err := q.Query(queryListCoursesOwn, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -399,7 +380,7 @@ func ListOwnCourses(ctx context.Context, userID string) ([]*entity.Course, error
 	}
 	rows.Close()
 
-	rows, err = db.QueryContext(ctx, `select course_id, count(*) from enrolls where course_id = any($1) group by course_id`, pq.Array(ids))
+	rows, err = q.Query(`select course_id, count(*) from enrolls where course_id = any($1) group by course_id`, pq.Array(ids))
 	if err != nil {
 		return nil, err
 	}
@@ -418,11 +399,9 @@ func ListOwnCourses(ctx context.Context, userID string) ([]*entity.Course, error
 
 // ListEnrolledCourses lists courses that enrolled by given user
 // TODO: add pagination
-func ListEnrolledCourses(ctx context.Context, userID string) ([]*entity.Course, error) {
-	db := appctx.GetDatabase(ctx)
-
+func ListEnrolledCourses(q Queryer, userID string) ([]*entity.Course, error) {
 	xs := make([]*entity.Course, 0)
-	rows, err := db.QueryContext(ctx, queryListCoursesEnrolled, userID)
+	rows, err := q.Query(queryListCoursesEnrolled, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -442,11 +421,9 @@ func ListEnrolledCourses(ctx context.Context, userID string) ([]*entity.Course, 
 }
 
 // CountCourses counts courses
-func CountCourses(ctx context.Context) (int64, error) {
-	db := appctx.GetDatabase(ctx)
-
+func CountCourses(q Queryer) (int64, error) {
 	var cnt int64
-	err := db.QueryRowContext(ctx, `select count(*) from courses`).Scan(&cnt)
+	err := q.QueryRow(`select count(*) from courses`).Scan(&cnt)
 	if err != nil {
 		return 0, err
 	}

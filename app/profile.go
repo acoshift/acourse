@@ -1,11 +1,13 @@
 package app
 
 import (
+	"database/sql"
 	"net/http"
 	"strings"
 	"unicode/utf8"
 
 	"github.com/acoshift/header"
+	"github.com/acoshift/pgsql"
 	"github.com/asaskevich/govalidator"
 
 	"github.com/acoshift/acourse/appctx"
@@ -14,15 +16,14 @@ import (
 )
 
 func profile(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
 	user := appctx.GetUser(r.Context())
 
-	ownCourses, err := repository.ListOwnCourses(ctx, user.ID)
+	ownCourses, err := repository.ListOwnCourses(db, user.ID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	enrolledCourses, err := repository.ListEnrolledCourses(ctx, user.ID)
+	enrolledCourses, err := repository.ListEnrolledCourses(db, user.ID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -104,41 +105,31 @@ func postProfileEdit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx, tx, err := appctx.NewTransactionContext(ctx)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer tx.Rollback()
-
-	db := appctx.GetDatabase(ctx)
-
-	if len(imageURL) > 0 {
-		_, err = db.ExecContext(ctx, `
-			update users
-			set image = $2
-			where id = $1
-		`, user.ID, imageURL)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+	err := pgsql.RunInTx(db, nil, func(tx *sql.Tx) error {
+		if len(imageURL) > 0 {
+			_, err := tx.Exec(`
+				update users
+				set image = $2
+				where id = $1
+			`, user.ID, imageURL)
+			if err != nil {
+				return err
+			}
 		}
-	}
-	_, err = db.ExecContext(ctx, `
-		update users
-		set
-			username = $2,
-			name = $3,
-			about_me = $4,
-			updated_at = now()
-		where id = $1
-	`, user.ID, username, name, aboutMe)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	err = tx.Commit()
+		_, err := tx.Exec(`
+			update users
+			set
+				username = $2,
+				name = $3,
+				about_me = $4,
+				updated_at = now()
+			where id = $1
+		`, user.ID, username, name, aboutMe)
+		if err != nil {
+			return err
+		}
+		return nil
+	})
 	if err != nil {
 		f.Add("Errors", err.Error())
 		back(w, r)

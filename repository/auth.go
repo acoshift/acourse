@@ -1,17 +1,14 @@
 package repository
 
 import (
-	"context"
 	"time"
 
+	"github.com/acoshift/acourse/entity"
 	"github.com/garyburd/redigo/redis"
-
-	"github.com/acoshift/acourse/appctx"
 )
 
 // StoreMagicLink stores magic link to redis
-func StoreMagicLink(ctx context.Context, linkID string, userID string) error {
-	pool, prefix := appctx.GetRedisPool(ctx)
+func StoreMagicLink(pool *redis.Pool, prefix string, linkID string, userID string) error {
 	db := pool.Get()
 	defer db.Close()
 
@@ -23,15 +20,14 @@ func StoreMagicLink(ctx context.Context, linkID string, userID string) error {
 }
 
 // FindMagicLink finds magic link from redis
-func FindMagicLink(ctx context.Context, linkID string) (string, error) {
-	pool, prefix := appctx.GetRedisPool(ctx)
+func FindMagicLink(pool *redis.Pool, prefix string, linkID string) (string, error) {
 	db := pool.Get()
 	defer db.Close()
 
 	key := prefix + "magic:" + linkID
 	userID, err := redis.String(db.Do("GET", key))
 	if err == redis.ErrNil {
-		return "", appctx.ErrNotFound
+		return "", entity.ErrNotFound
 	}
 	if err != nil {
 		return "", err
@@ -41,8 +37,7 @@ func FindMagicLink(ctx context.Context, linkID string) (string, error) {
 }
 
 // CanAcquireMagicLink checks rate limit to acquire magic link
-func CanAcquireMagicLink(ctx context.Context, email string) (bool, error) {
-	pool, prefix := appctx.GetRedisPool(ctx)
+func CanAcquireMagicLink(pool *redis.Pool, prefix string, email string) (bool, error) {
 	db := pool.Get()
 	defer db.Close()
 

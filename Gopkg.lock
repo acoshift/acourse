@@ -15,12 +15,6 @@
   version = "v0.10.0"
 
 [[projects]]
-  name = "github.com/acoshift/cachestatic"
-  packages = ["."]
-  revision = "597e0ba152e95b0ffcb0e8aa40c53875523a5c83"
-  version = "v1.4.1"
-
-[[projects]]
   name = "github.com/acoshift/configfile"
   packages = ["."]
   revision = "2c3aa5321b8695857ce46359da075e5cd2c050f5"
@@ -51,10 +45,10 @@
   version = "v0.2.0"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/acoshift/servertiming"
+  name = "github.com/acoshift/pgsql"
   packages = ["."]
-  revision = "87b7a21e4eb43ec7d54da072aebf88cb2af97c0a"
+  revision = "58848b9ae8aee9b2f77320ca2288b17f39ad9324"
+  version = "v0.2.0"
 
 [[projects]]
   name = "github.com/acoshift/session"
@@ -328,6 +322,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "0927bd4c869de57d4ee820400b4c17a2dfb02ebc2288d19fc94b6140653db5d4"
+  inputs-digest = "1645beaf32a7f28a3ab99ebc2cad2649ff1a7fe9e48454b89be639ba7ae5aa50"
   solver-name = "gps-cdcl"
   solver-version = 1

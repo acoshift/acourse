@@ -1,19 +1,17 @@
 package app
 
 import (
+	"database/sql"
 	"net/http"
 	"time"
 
 	"cloud.google.com/go/storage"
-	"github.com/acoshift/cachestatic"
-	firebase "github.com/acoshift/go-firebase-admin"
+	"github.com/acoshift/go-firebase-admin"
 	"github.com/acoshift/middleware"
-	"github.com/acoshift/servertiming"
 	"github.com/acoshift/session"
 	redisstore "github.com/acoshift/session/store/redis"
-	gomail "gopkg.in/gomail.v2"
-
-	"github.com/acoshift/acourse/appctx"
+	"github.com/garyburd/redigo/redis"
+	"gopkg.in/gomail.v2"
 )
 
 var (
@@ -23,9 +21,13 @@ var (
 	emailFrom    string
 	emailDialer  *gomail.Dialer
 	baseURL      string
-	cachePrefix  string
 	bucketHandle *storage.BucketHandle
 	bucketName   string
+	redisPool    *redis.Pool
+	redisPrefix  string
+	cachePool    *redis.Pool
+	cachePrefix  string
+	db           *sql.DB
 )
 
 // New creates new app
@@ -36,20 +38,13 @@ func New(config Config) http.Handler {
 	emailFrom = config.EmailFrom
 	emailDialer = config.EmailDialer
 	baseURL = config.BaseURL
-	cachePrefix = config.CachePrefix
 	bucketHandle = config.BucketHandle
 	bucketName = config.BucketName
-
-	app := &app{}
-
-	cacheInvalidator := make(chan interface{})
-
-	go func() {
-		for {
-			time.Sleep(15 * time.Second)
-			cacheInvalidator <- cachestatic.InvalidateAll
-		}
-	}()
+	redisPool = config.RedisPool
+	redisPrefix = config.RedisPrefix
+	cachePool = config.CachePool
+	cachePrefix = config.CachePrefix
+	db = config.DB
 
 	// create middlewares
 	isCourseOwner := isCourseOwner(config.DB)
@@ -92,7 +87,6 @@ func New(config Config) http.Handler {
 	mux.Handle("/favicon.ico", fileHandler("static/favicon.ico"))
 
 	mux.Handle("/", middleware.Chain(
-		servertiming.Middleware(),
 		panicLogger,
 		session.Middleware(session.Config{
 			Secret:   config.SessionSecret,
@@ -106,43 +100,13 @@ func New(config Config) http.Handler {
 				Pool:   config.RedisPool,
 			}),
 		}),
-		cachestatic.New(cachestatic.Config{
-			Skipper: func(r *http.Request) bool {
-				// cache only get
-				if r.Method != http.MethodGet {
-					return true
-				}
-
-				// skip if signed in
-				s := appctx.GetSession(r.Context())
-				if x := getUserID(s); len(x) > 0 {
-					return true
-				}
-
-				// cache only index
-				if r.URL.Path == "/" {
-					return false
-				}
-				return true
-			},
-			Invalidator: cacheInvalidator,
-		}),
-		setDatabase(config.DB),
-		setRedisPool(config.RedisPool, config.RedisPrefix),
-		setCachePool(config.CachePool, config.CachePrefix),
 		fetchUser(),
 		csrf(config.BaseURL, config.XSRFSecret),
 	)(main))
 
-	app.Handler = middleware.Chain(
+	return middleware.Chain(
 		setHeaders,
 	)(mux)
-
-	return app
-}
-
-type app struct {
-	http.Handler
 }
 
 func back(w http.ResponseWriter, r *http.Request) {

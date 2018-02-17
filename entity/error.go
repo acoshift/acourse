@@ -1,4 +1,4 @@
-package appctx
+package entity
 
 import "errors"
 

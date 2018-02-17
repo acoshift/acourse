@@ -8,7 +8,6 @@ import (
 
 	"github.com/acoshift/header"
 	"github.com/acoshift/middleware"
-	"github.com/garyburd/redigo/redis"
 	"golang.org/x/net/xsrftoken"
 
 	"github.com/acoshift/acourse/appctx"
@@ -100,8 +99,8 @@ func fetchUser() middleware.Middleware {
 			s := appctx.GetSession(ctx)
 			id := getUserID(s)
 			if len(id) > 0 {
-				u, err := repository.GetUser(ctx, id)
-				if err == appctx.ErrNotFound {
+				u, err := repository.GetUser(db, id)
+				if err == entity.ErrNotFound {
 					u = &entity.User{
 						ID:       id,
 						Username: id,
@@ -183,36 +182,6 @@ func setHeaders(h http.Handler) http.Handler {
 		w.Header().Set(header.ContentSecurityPolicy, "img-src https: data:; font-src https: data:; media-src https:;")
 		h.ServeHTTP(w, r)
 	})
-}
-
-func setDatabase(db *sql.DB) middleware.Middleware {
-	return func(h http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			ctx := appctx.NewDatabaseContext(r.Context(), db)
-			r = r.WithContext(ctx)
-			h.ServeHTTP(w, r)
-		})
-	}
-}
-
-func setRedisPool(pool *redis.Pool, prefix string) middleware.Middleware {
-	return func(h http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			ctx := appctx.NewRedisPoolContext(r.Context(), pool, prefix)
-			r = r.WithContext(ctx)
-			h.ServeHTTP(w, r)
-		})
-	}
-}
-
-func setCachePool(pool *redis.Pool, prefix string) middleware.Middleware {
-	return func(h http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			ctx := appctx.NewCachePoolContext(r.Context(), pool, prefix)
-			r = r.WithContext(ctx)
-			h.ServeHTTP(w, r)
-		})
-	}
 }
 
 func cache(h http.Handler) http.Handler {
