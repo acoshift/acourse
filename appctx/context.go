@@ -13,7 +13,6 @@ type (
 	userKey        struct{}
 	xsrfKey        struct{}
 	courseURLKey   struct{}
-	dbKey          struct{}
 	redisPoolKey   struct{}
 	redisPrefixKey struct{}
 	cachePoolKey   struct{}
@@ -66,39 +65,4 @@ type DB interface {
 	ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error)
 	QueryContext(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error)
 	QueryRowContext(ctx context.Context, query string, args ...interface{}) *sql.Row
-}
-
-// Tx type
-type Tx interface {
-	Rollback() error
-	Commit() error
-}
-
-// NewDatabaseContext creates new context with database connection
-func NewDatabaseContext(ctx context.Context, v *sql.DB) context.Context {
-	return context.WithValue(ctx, dbKey{}, v)
-}
-
-// GetDatabase gets database connection from context or panic
-func GetDatabase(ctx context.Context) DB {
-	return ctx.Value(dbKey{}).(DB)
-}
-
-// NewTransactionContext creates new context with transaction
-func NewTransactionContext(ctx context.Context) (context.Context, Tx, error) {
-	db := ctx.Value(dbKey{}).(*sql.DB)
-	tx, err := db.BeginTx(ctx, nil)
-	if err != nil {
-		return nil, nil, err
-	}
-	return context.WithValue(ctx, dbKey{}, tx), tx, nil
-}
-
-// GetTransaction gets database but panic if db is not transaction
-func GetTransaction(ctx context.Context) DB {
-	x := ctx.Value(dbKey{})
-	if _, ok := x.(Tx); !ok {
-		panic("database is not transaction")
-	}
-	return x.(DB)
 }

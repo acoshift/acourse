@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
 
@@ -51,11 +50,11 @@ const (
 )
 
 // SaveUser saves user
-func SaveUser(ctx context.Context, q Queryer, x *entity.User) error {
+func SaveUser(q Queryer, x *entity.User) error {
 	if len(x.ID) == 0 {
 		return fmt.Errorf("invalid id")
 	}
-	_, err := q.ExecContext(ctx, `
+	_, err := q.Exec(`
 		upsert into users
 			(id, name, username, about_me, image, updated_at)
 		values
@@ -76,9 +75,9 @@ func scanUser(scan scanFunc, x *entity.User) error {
 }
 
 // GetUsers gets users
-func GetUsers(ctx context.Context, q Queryer, userIDs []string) ([]*entity.User, error) {
+func GetUsers(q Queryer, userIDs []string) ([]*entity.User, error) {
 	xs := make([]*entity.User, 0, len(userIDs))
-	rows, err := q.QueryContext(ctx, queryGetUsers, pq.Array(userIDs))
+	rows, err := q.Query(queryGetUsers, pq.Array(userIDs))
 	if err != nil {
 		return nil, err
 	}
@@ -98,9 +97,9 @@ func GetUsers(ctx context.Context, q Queryer, userIDs []string) ([]*entity.User,
 }
 
 // GetUser gets user from id
-func GetUser(ctx context.Context, q Queryer, userID string) (*entity.User, error) {
+func GetUser(q Queryer, userID string) (*entity.User, error) {
 	var x entity.User
-	err := scanUser(q.QueryRowContext(ctx, queryGetUser, userID).Scan, &x)
+	err := scanUser(q.QueryRow(queryGetUser, userID).Scan, &x)
 	if err == sql.ErrNoRows {
 		return nil, appctx.ErrNotFound
 	}
@@ -111,9 +110,9 @@ func GetUser(ctx context.Context, q Queryer, userID string) (*entity.User, error
 }
 
 // GetUserFromUsername gets user from username
-func GetUserFromUsername(ctx context.Context, q Queryer, username string) (*entity.User, error) {
+func GetUserFromUsername(q Queryer, username string) (*entity.User, error) {
 	var x entity.User
-	err := scanUser(q.QueryRowContext(ctx, queryGetUserFromUsername, username).Scan, &x)
+	err := scanUser(q.QueryRow(queryGetUserFromUsername, username).Scan, &x)
 	if err != nil {
 		return nil, err
 	}
@@ -121,9 +120,9 @@ func GetUserFromUsername(ctx context.Context, q Queryer, username string) (*enti
 }
 
 // FindUserByEmail finds user by email
-func FindUserByEmail(ctx context.Context, q Queryer, email string) (*entity.User, error) {
+func FindUserByEmail(q Queryer, email string) (*entity.User, error) {
 	var x entity.User
-	err := scanUser(q.QueryRowContext(ctx, queryGetUserFromEmail, email).Scan, &x)
+	err := scanUser(q.QueryRow(queryGetUserFromEmail, email).Scan, &x)
 	if err == sql.ErrNoRows {
 		return nil, appctx.ErrNotFound
 	}
@@ -134,9 +133,9 @@ func FindUserByEmail(ctx context.Context, q Queryer, email string) (*entity.User
 }
 
 // ListUsers lists users
-func ListUsers(ctx context.Context, q Queryer, limit, offset int64) ([]*entity.User, error) {
+func ListUsers(q Queryer, limit, offset int64) ([]*entity.User, error) {
 	xs := make([]*entity.User, 0)
-	rows, err := q.QueryContext(ctx, queryListUsers, limit, offset)
+	rows, err := q.Query(queryListUsers, limit, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -156,9 +155,9 @@ func ListUsers(ctx context.Context, q Queryer, limit, offset int64) ([]*entity.U
 }
 
 // CountUsers counts users
-func CountUsers(ctx context.Context, q Queryer) (int64, error) {
+func CountUsers(q Queryer) (int64, error) {
 	var cnt int64
-	err := q.QueryRowContext(ctx, `select count(*) from users`).Scan(&cnt)
+	err := q.QueryRow(`select count(*) from users`).Scan(&cnt)
 	if err != nil {
 		return 0, err
 	}
@@ -166,9 +165,9 @@ func CountUsers(ctx context.Context, q Queryer) (int64, error) {
 }
 
 // IsUserExists checks is user exists
-func IsUserExists(ctx context.Context, q Queryer, id string) (bool, error) {
+func IsUserExists(q Queryer, id string) (bool, error) {
 	var cnt int64
-	err := q.QueryRowContext(ctx, `select count(*) from users where id = $1`, id).Scan(&cnt)
+	err := q.QueryRow(`select count(*) from users where id = $1`, id).Scan(&cnt)
 	if err != nil {
 		return false, err
 	}
@@ -176,8 +175,8 @@ func IsUserExists(ctx context.Context, q Queryer, id string) (bool, error) {
 }
 
 // CreateUser creates new users
-func CreateUser(ctx context.Context, q Queryer, x *entity.User) error {
-	_, err := q.ExecContext(ctx,
+func CreateUser(q Queryer, x *entity.User) error {
+	_, err := q.Exec(
 		`insert into users (id, username, name, email) values ($1, $2, $3, $4)`,
 		x.ID, x.ID, "", x.Email,
 	)

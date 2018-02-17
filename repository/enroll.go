@@ -1,13 +1,12 @@
 package repository
 
 import (
-	"context"
 	"database/sql"
 )
 
 // Enroll an user to a course
-func Enroll(ctx context.Context, q Queryer, userID string, courseID string) error {
-	_, err := q.ExecContext(ctx, `
+func Enroll(q Queryer, userID string, courseID string) error {
+	_, err := q.Exec(`
 		insert into enrolls
 			(user_id, course_id)
 		values
@@ -20,9 +19,9 @@ func Enroll(ctx context.Context, q Queryer, userID string, courseID string) erro
 }
 
 // IsEnrolled returns true if user enrolled a given course
-func IsEnrolled(ctx context.Context, q Queryer, userID string, courseID string) (bool, error) {
+func IsEnrolled(q Queryer, userID string, courseID string) (bool, error) {
 	var p int
-	err := q.QueryRowContext(ctx, `select 1 from enrolls where user_id = $1 and course_id = $2`, userID, courseID).Scan(&p)
+	err := q.QueryRow(`select 1 from enrolls where user_id = $1 and course_id = $2`, userID, courseID).Scan(&p)
 	if err == sql.ErrNoRows {
 		return false, nil
 	}

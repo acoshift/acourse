@@ -1,27 +1,27 @@
 package app
 
 import (
-	"context"
+	"database/sql"
 	"fmt"
 	"math"
 	"net/http"
 	"strconv"
 
-	"github.com/acoshift/acourse/appctx"
+	"github.com/acoshift/pgsql"
+
 	"github.com/acoshift/acourse/entity"
 	"github.com/acoshift/acourse/repository"
 	"github.com/acoshift/acourse/view"
 )
 
 func adminUsers(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
 	page, _ := strconv.ParseInt(r.FormValue("page"), 10, 64)
 	if page <= 0 {
 		page = 1
 	}
 	limit := int64(30)
 
-	cnt, err := repository.CountUsers(ctx)
+	cnt, err := repository.CountUsers(db)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -34,7 +34,7 @@ func adminUsers(w http.ResponseWriter, r *http.Request) {
 	}
 	totalPage := cnt / limit
 
-	users, err := repository.ListUsers(ctx, limit, offset)
+	users, err := repository.ListUsers(db, limit, offset)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -44,14 +44,13 @@ func adminUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func adminCourses(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
 	page, _ := strconv.ParseInt(r.FormValue("page"), 10, 64)
 	if page <= 0 {
 		page = 1
 	}
 	limit := int64(30)
 
-	cnt, err := repository.CountCourses(ctx)
+	cnt, err := repository.CountCourses(db)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -64,7 +63,7 @@ func adminCourses(w http.ResponseWriter, r *http.Request) {
 	}
 	totalPage := int64(math.Ceil(float64(cnt) / float64(limit)))
 
-	courses, err := repository.ListCourses(ctx, limit, offset)
+	courses, err := repository.ListCourses(db, limit, offset)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -73,15 +72,20 @@ func adminCourses(w http.ResponseWriter, r *http.Request) {
 	view.AdminCourses(w, r, courses, int(page), int(totalPage))
 }
 
-func adminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter func(context.Context, int64, int64) ([]*entity.Payment, error), paymentsCounter func(context.Context) (int64, error)) {
-	ctx := r.Context()
+func adminPayments(w http.ResponseWriter, r *http.Request, history bool) {
 	page, _ := strconv.ParseInt(r.FormValue("page"), 10, 64)
 	if page <= 0 {
 		page = 1
 	}
 	limit := int64(30)
 
-	cnt, err := paymentsCounter(ctx)
+	var err error
+	var cnt int64
+	if history {
+		cnt, err = repository.CountHistoryPayments(db)
+	} else {
+		cnt, err = repository.CountPendingPayments(db)
+	}
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -94,7 +98,12 @@ func adminPayments(w http.ResponseWriter, r *http.Request, paymentsGetter func(c
 	}
 	totalPage := cnt / limit
 
-	payments, err := paymentsGetter(ctx, limit, offset)
+	var payments []*entity.Payment
+	if history {
+		payments, err = repository.ListHistoryPayments(db, limit, offset)
+	} else {
+		payments, err = repository.ListPendingPayments(db, limit, offset)
+	}
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -109,9 +118,8 @@ func adminRejectPayment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx := r.Context()
 	id := r.FormValue("id")
-	x, err := repository.GetPayment(ctx, id)
+	x, err := repository.GetPayment(db, id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -158,16 +166,18 @@ func adminRejectPayment(w http.ResponseWriter, r *http.Request) {
 }
 
 func postAdminRejectPayment(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
 	message := r.FormValue("Message")
 	id := r.FormValue("ID")
 
-	x, err := repository.GetPayment(ctx, id)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	err = repository.RejectPayment(ctx, x)
+	var x *entity.Payment
+	err := pgsql.RunInTx(db, nil, func(tx *sql.Tx) error {
+		var err error
+		x, err = repository.GetPayment(tx, id)
+		if err != nil {
+			return err
+		}
+		return repository.RejectPayment(tx, x)
+	})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -175,7 +185,7 @@ func postAdminRejectPayment(w http.ResponseWriter, r *http.Request) {
 
 	if x.User.Email.Valid {
 		go func() {
-			x, err := repository.GetPayment(ctx, id)
+			x, err := repository.GetPayment(db, id)
 			if err != nil {
 				return
 			}
@@ -189,38 +199,27 @@ func postAdminRejectPayment(w http.ResponseWriter, r *http.Request) {
 }
 
 func postAdminPendingPayment(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
 	action := r.FormValue("Action")
 
 	id := r.FormValue("ID")
 	if action == "accept" {
-		txctx, tx, err := appctx.NewTransactionContext(ctx)
+		var x *entity.Payment
+		err := pgsql.RunInTx(db, nil, func(tx *sql.Tx) error {
+			var err error
+			x, err = repository.GetPayment(tx, id)
+			if err != nil {
+				return err
+			}
+			return repository.AcceptPayment(tx, x)
+		})
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		defer tx.Rollback()
-
-		x, err := repository.GetPayment(txctx, id)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		err = repository.AcceptPayment(txctx, x)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		err = tx.Commit()
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
 		if x.User.Email.Valid {
 			go func() {
 				// re-fetch payment to get latest timestamp
-				x, err := repository.GetPayment(ctx, id)
+				x, err := repository.GetPayment(db, id)
 				if err != nil {
 					return
 				}
@@ -282,9 +281,9 @@ func adminPendingPayments(w http.ResponseWriter, r *http.Request) {
 		postAdminPendingPayment(w, r)
 		return
 	}
-	adminPayments(w, r, repository.ListPendingPayments, repository.CountPendingPayments)
+	adminPayments(w, r, false)
 }
 
 func adminHistoryPayments(w http.ResponseWriter, r *http.Request) {
-	adminPayments(w, r, repository.ListHistoryPayments, repository.CountHistoryPayments)
+	adminPayments(w, r, true)
 }

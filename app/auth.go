@@ -11,6 +11,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/acoshift/go-firebase-admin"
+	"github.com/acoshift/pgsql"
 	"github.com/asaskevich/govalidator"
 
 	"github.com/acoshift/acourse/appctx"
@@ -68,7 +69,7 @@ func postSignIn(w http.ResponseWriter, r *http.Request) {
 
 	f.Set("CheckEmail", "1")
 
-	user, err := repository.FindUserByEmail(ctx, email)
+	user, err := repository.FindUserByEmail(db, email)
 	// don't lets user know if email is wrong
 	if err == appctx.ErrNotFound {
 		http.Redirect(w, r, "/signin/check-email", http.StatusSeeOther)
@@ -181,13 +182,13 @@ func postSignInPassword(w http.ResponseWriter, r *http.Request) {
 	// if user not found in our database, insert new user
 	// this happend when database out of sync with firebase authentication
 	{
-		ok, err := repository.IsUserExists(ctx, userID)
+		ok, err := repository.IsUserExists(db, userID)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		if !ok {
-			err = repository.CreateUser(ctx, &entity.User{ID: userID, Email: sql.NullString{String: email, Valid: len(email) > 0}})
+			err = repository.CreateUser(db, &entity.User{ID: userID, Email: sql.NullString{String: email, Valid: len(email) > 0}})
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
@@ -235,36 +236,25 @@ func openIDCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx, tx, err := appctx.NewTransactionContext(ctx)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer tx.Rollback()
-
-	db := appctx.GetTransaction(ctx)
-	// check is user sign up
-	var cnt int64
-	err = db.QueryRowContext(ctx, `select 1 from users where id = $1`, user.UserID).Scan(&cnt)
-	if err == sql.ErrNoRows {
-		// user not found, insert new user
-		imageURL := uploadProfileFromURLAsync(user.PhotoURL)
-		_, err = db.ExecContext(ctx, `
-			insert into users
-				(id, name, username, email, image)
-			values
-				($1, $2, $3, $4, $5)
-		`, user.UserID, user.DisplayName, user.UserID, sql.NullString{String: user.Email, Valid: len(user.Email) > 0}, imageURL)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+	err = pgsql.RunInTx(db, nil, func(tx *sql.Tx) error {
+		// check is user sign up
+		var cnt int64
+		err = tx.QueryRowContext(ctx, `select 1 from users where id = $1`, user.UserID).Scan(&cnt)
+		if err == sql.ErrNoRows {
+			// user not found, insert new user
+			imageURL := uploadProfileFromURLAsync(user.PhotoURL)
+			_, err = tx.ExecContext(ctx, `
+				insert into users
+					(id, name, username, email, image)
+				values
+					($1, $2, $3, $4, $5)
+			`, user.UserID, user.DisplayName, user.UserID, sql.NullString{String: user.Email, Valid: len(user.Email) > 0}, imageURL)
+			if err != nil {
+				return err
+			}
 		}
-		err = tx.Commit()
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-	}
+		return nil
+	})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -320,7 +310,6 @@ func postSignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db := appctx.GetDatabase(ctx)
 	_, err = db.ExecContext(ctx, `
 		insert into users
 			(id, username, name, email)

@@ -2,7 +2,6 @@ package repository
 
 import (
 	"bytes"
-	"context"
 	"database/sql"
 	"encoding/gob"
 
@@ -65,7 +64,7 @@ const (
 )
 
 // SaveCourse saves course
-func SaveCourse(ctx context.Context, q Queryer, x *entity.Course) error {
+func SaveCourse(q Queryer, x *entity.Course) error {
 	if len(x.URL.String) > 0 && x.URL.String != x.ID {
 		x.URL.Valid = true
 	} else {
@@ -73,7 +72,7 @@ func SaveCourse(ctx context.Context, q Queryer, x *entity.Course) error {
 		x.URL.Valid = false
 	}
 
-	_, err := q.ExecContext(ctx, `
+	_, err := q.Exec(`
 		upsert into courses
 			(id, user_id, title, short_desc, long_desc, image, start, url, type, price, discount, enroll_detail, updated_at)
 		values
@@ -82,7 +81,7 @@ func SaveCourse(ctx context.Context, q Queryer, x *entity.Course) error {
 	if err != nil {
 		return err
 	}
-	_, err = q.ExecContext(ctx, `
+	_, err = q.Exec(`
 		upsert into course_options
 			(course_id, public, enroll, attend, assignment, discount)
 		values
@@ -111,9 +110,9 @@ func scanCourse(scan scanFunc, x *entity.Course) error {
 }
 
 // GetCourses gets courses
-func GetCourses(ctx context.Context, q Queryer, courseIDs []string) ([]*entity.Course, error) {
+func GetCourses(q Queryer, courseIDs []string) ([]*entity.Course, error) {
 	xs := make([]*entity.Course, 0, len(courseIDs))
-	rows, err := q.QueryContext(ctx, queryGetCourses, pq.Array(courseIDs))
+	rows, err := q.Query(queryGetCourses, pq.Array(courseIDs))
 	if err != nil {
 		return nil, err
 	}
@@ -133,9 +132,9 @@ func GetCourses(ctx context.Context, q Queryer, courseIDs []string) ([]*entity.C
 }
 
 // GetCourse gets course
-func GetCourse(ctx context.Context, q Queryer, courseID string) (*entity.Course, error) {
+func GetCourse(q Queryer, courseID string) (*entity.Course, error) {
 	var x entity.Course
-	err := q.QueryRowContext(ctx, `
+	err := q.QueryRow(`
 		select
 			id, user_id, title, short_desc, long_desc, image, start, url, type, price, courses.discount, enroll_detail,
 			opt.public, opt.enroll, opt.attend, opt.assignment, opt.discount
@@ -155,8 +154,8 @@ func GetCourse(ctx context.Context, q Queryer, courseID string) (*entity.Course,
 }
 
 // GetCourseContents gets course contents for given course id
-func GetCourseContents(ctx context.Context, q Queryer, courseID string) ([]*entity.CourseContent, error) {
-	rows, err := q.QueryContext(ctx, `
+func GetCourseContents(q Queryer, courseID string) ([]*entity.CourseContent, error) {
+	rows, err := q.Query(`
 		select
 			id,
 			course_id,
@@ -189,9 +188,9 @@ func GetCourseContents(ctx context.Context, q Queryer, courseID string) ([]*enti
 }
 
 // GetCourseContent gets course content from id
-func GetCourseContent(ctx context.Context, q Queryer, courseContentID string) (*entity.CourseContent, error) {
+func GetCourseContent(q Queryer, courseContentID string) (*entity.CourseContent, error) {
 	var x entity.CourseContent
-	err := q.QueryRowContext(ctx, `
+	err := q.QueryRow(`
 		select
 			id,
 			course_id,
@@ -210,9 +209,9 @@ func GetCourseContent(ctx context.Context, q Queryer, courseContentID string) (*
 }
 
 // GetCourseIDFromURL gets course id from url
-func GetCourseIDFromURL(ctx context.Context, q Queryer, url string) (string, error) {
+func GetCourseIDFromURL(q Queryer, url string) (string, error) {
 	var id string
-	err := q.QueryRowContext(ctx, `
+	err := q.QueryRow(`
 		select id
 		from courses
 		where url = $1
@@ -227,9 +226,9 @@ func GetCourseIDFromURL(ctx context.Context, q Queryer, url string) (string, err
 }
 
 // ListCourses lists all courses
-func ListCourses(ctx context.Context, q Queryer, limit, offset int64) ([]*entity.Course, error) {
+func ListCourses(q Queryer, limit, offset int64) ([]*entity.Course, error) {
 	xs := make([]*entity.Course, 0)
-	rows, err := q.QueryContext(ctx, `
+	rows, err := q.Query(`
 		select
 			courses.id,
 			courses.title,
@@ -284,7 +283,7 @@ func ListCourses(ctx context.Context, q Queryer, limit, offset int64) ([]*entity
 
 // ListPublicCourses lists public course sort by created at desc
 // TODO: add pagination
-func ListPublicCourses(ctx context.Context, q Queryer, cachePool *redis.Pool, cachePrefix string) ([]*entity.Course, error) {
+func ListPublicCourses(q Queryer, cachePool *redis.Pool, cachePrefix string) ([]*entity.Course, error) {
 	// TODO: move cache logic out from repo
 
 	// look from cache
@@ -306,7 +305,7 @@ func ListPublicCourses(ctx context.Context, q Queryer, cachePool *redis.Pool, ca
 	ids := make([]string, 0)
 
 	{
-		rows, err := q.QueryContext(ctx, queryListCoursesPublic)
+		rows, err := q.Query(queryListCoursesPublic)
 		if err != nil {
 			return nil, err
 		}
@@ -327,7 +326,7 @@ func ListPublicCourses(ctx context.Context, q Queryer, cachePool *redis.Pool, ca
 		rows.Close()
 	}
 
-	rows, err := q.QueryContext(ctx, `select course_id, count(*) from enrolls where course_id = any($1) group by course_id`, pq.Array(ids))
+	rows, err := q.Query(`select course_id, count(*) from enrolls where course_id = any($1) group by course_id`, pq.Array(ids))
 	if err != nil {
 		return nil, err
 	}
@@ -358,8 +357,8 @@ func ListPublicCourses(ctx context.Context, q Queryer, cachePool *redis.Pool, ca
 
 // ListOwnCourses lists courses that owned by given user
 // TODO: add pagination
-func ListOwnCourses(ctx context.Context, q Queryer, userID string) ([]*entity.Course, error) {
-	rows, err := q.QueryContext(ctx, queryListCoursesOwn, userID)
+func ListOwnCourses(q Queryer, userID string) ([]*entity.Course, error) {
+	rows, err := q.Query(queryListCoursesOwn, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -382,7 +381,7 @@ func ListOwnCourses(ctx context.Context, q Queryer, userID string) ([]*entity.Co
 	}
 	rows.Close()
 
-	rows, err = q.QueryContext(ctx, `select course_id, count(*) from enrolls where course_id = any($1) group by course_id`, pq.Array(ids))
+	rows, err = q.Query(`select course_id, count(*) from enrolls where course_id = any($1) group by course_id`, pq.Array(ids))
 	if err != nil {
 		return nil, err
 	}
@@ -401,9 +400,9 @@ func ListOwnCourses(ctx context.Context, q Queryer, userID string) ([]*entity.Co
 
 // ListEnrolledCourses lists courses that enrolled by given user
 // TODO: add pagination
-func ListEnrolledCourses(ctx context.Context, q Queryer, userID string) ([]*entity.Course, error) {
+func ListEnrolledCourses(q Queryer, userID string) ([]*entity.Course, error) {
 	xs := make([]*entity.Course, 0)
-	rows, err := q.QueryContext(ctx, queryListCoursesEnrolled, userID)
+	rows, err := q.Query(queryListCoursesEnrolled, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -423,9 +422,9 @@ func ListEnrolledCourses(ctx context.Context, q Queryer, userID string) ([]*enti
 }
 
 // CountCourses counts courses
-func CountCourses(ctx context.Context, q Queryer) (int64, error) {
+func CountCourses(q Queryer) (int64, error) {
 	var cnt int64
-	err := q.QueryRowContext(ctx, `select count(*) from courses`).Scan(&cnt)
+	err := q.QueryRow(`select count(*) from courses`).Scan(&cnt)
 	if err != nil {
 		return 0, err
 	}

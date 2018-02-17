@@ -45,6 +45,12 @@
   version = "v0.2.0"
 
 [[projects]]
+  name = "github.com/acoshift/pgsql"
+  packages = ["."]
+  revision = "58848b9ae8aee9b2f77320ca2288b17f39ad9324"
+  version = "v0.2.0"
+
+[[projects]]
   name = "github.com/acoshift/session"
   packages = [
     ".",
@@ -316,6 +322,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "026ef6bb8fbf16d8077bdc7ad2c9b31fcc2b7504092bd9828d6b9d3f0f9ac7fd"
+  inputs-digest = "1645beaf32a7f28a3ab99ebc2cad2649ff1a7fe9e48454b89be639ba7ae5aa50"
   solver-name = "gps-cdcl"
   solver-version = 1

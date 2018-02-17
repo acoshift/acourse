@@ -1,6 +1,7 @@
 package app
 
 import (
+	"database/sql"
 	"net/http"
 	"time"
 
@@ -26,6 +27,7 @@ var (
 	redisPrefix  string
 	cachePool    *redis.Pool
 	cachePrefix  string
+	db           *sql.DB
 )
 
 // New creates new app
@@ -42,6 +44,7 @@ func New(config Config) http.Handler {
 	redisPrefix = config.RedisPrefix
 	cachePool = config.CachePool
 	cachePrefix = config.CachePrefix
+	db = config.DB
 
 	// create middlewares
 	isCourseOwner := isCourseOwner(config.DB)
@@ -97,7 +100,6 @@ func New(config Config) http.Handler {
 				Pool:   config.RedisPool,
 			}),
 		}),
-		setDatabase(config.DB),
 		fetchUser(),
 		csrf(config.BaseURL, config.XSRFSecret),
 	)(main))
