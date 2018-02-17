@@ -49,6 +49,10 @@ func New(config Config) http.Handler {
 	// create mux
 	mux := http.NewServeMux()
 
+	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+
 	editor := http.NewServeMux()
 	editor.Handle("/create", onlyInstructor(http.HandlerFunc(editorCreate)))
 	editor.Handle("/course", isCourseOwner(http.HandlerFunc(editorCourse)))

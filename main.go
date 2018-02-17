@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -107,16 +106,10 @@ func main() {
 		BucketName:    config.String("bucket"),
 	})
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "ok")
-	})
-	mux.Handle("/", app)
-
 	// lets reverse proxy handle other settings
 	srv := &http.Server{
 		Addr:    ":8080",
-		Handler: mux,
+		Handler: app,
 	}
 
 	go func() {
