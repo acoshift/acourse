@@ -2,31 +2,11 @@ package app
 
 import (
 	"net/http"
-	"os"
 	"strings"
 
 	"github.com/acoshift/acourse/appctx"
 	"github.com/acoshift/acourse/view"
 )
-
-type fileFS struct {
-	http.FileSystem
-}
-
-func (fs *fileFS) Open(name string) (http.File, error) {
-	f, err := fs.FileSystem.Open(name)
-	if err != nil {
-		return nil, err
-	}
-	stat, err := f.Stat()
-	if err != nil {
-		return nil, err
-	}
-	if stat.IsDir() {
-		return nil, os.ErrNotExist
-	}
-	return f, nil
-}
 
 func fileHandler(name string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

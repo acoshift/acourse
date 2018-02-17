@@ -11,6 +11,7 @@ import (
 	"github.com/acoshift/middleware"
 	"github.com/acoshift/session"
 	redisstore "github.com/acoshift/session/store/redis"
+	"github.com/acoshift/webstatic"
 	"github.com/garyburd/redigo/redis"
 	"gopkg.in/gomail.v2"
 )
@@ -85,11 +86,10 @@ func New(config Config) hime.HandlerFactory {
 		main.Handle("/admin/", http.StripPrefix("/admin", onlyAdmin(admin)))
 		main.Handle("/editor/", http.StripPrefix("/editor", editor))
 
-		mux.Handle("/~/", http.StripPrefix("/~", cache(http.FileServer(&fileFS{http.Dir("static")}))))
+		mux.Handle("/~/", http.StripPrefix("/~", cache(webstatic.New("static"))))
 		mux.Handle("/favicon.ico", fileHandler("static/favicon.ico"))
 
 		mux.Handle("/", middleware.Chain(
-			errorRecovery,
 			session.Middleware(session.Config{
 				Secret:   config.SessionSecret,
 				Path:     "/",
@@ -107,6 +107,7 @@ func New(config Config) hime.HandlerFactory {
 		)(main))
 
 		return middleware.Chain(
+			errorRecovery,
 			setHeaders,
 		)(mux)
 	}
