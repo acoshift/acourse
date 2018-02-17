@@ -136,35 +136,33 @@ func onlyInstructor(h http.Handler) http.Handler {
 	})
 }
 
-func isCourseOwner(db *sql.DB) middleware.Middleware {
-	return func(h http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			ctx := r.Context()
-			u := appctx.GetUser(ctx)
-			if u == nil {
-				http.Redirect(w, r, "/signin", http.StatusFound)
-				return
-			}
+func isCourseOwner(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		u := appctx.GetUser(ctx)
+		if u == nil {
+			http.Redirect(w, r, "/signin", http.StatusFound)
+			return
+		}
 
-			id := r.FormValue("id")
+		id := r.FormValue("id")
 
-			var ownerID string
-			err := db.QueryRowContext(ctx, `select user_id from courses where id = $1`, id).Scan(&ownerID)
-			if err == sql.ErrNoRows {
-				view.NotFound(w, r)
-				return
-			}
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			if ownerID != u.ID {
-				http.Redirect(w, r, "/", http.StatusFound)
-				return
-			}
-			h.ServeHTTP(w, r)
-		})
-	}
+		var ownerID string
+		err := db.QueryRowContext(ctx, `select user_id from courses where id = $1`, id).Scan(&ownerID)
+		if err == sql.ErrNoRows {
+			view.NotFound(w, r)
+			return
+		}
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		if ownerID != u.ID {
+			http.Redirect(w, r, "/", http.StatusFound)
+			return
+		}
+		h.ServeHTTP(w, r)
+	})
 }
 
 func setHeaders(h http.Handler) http.Handler {

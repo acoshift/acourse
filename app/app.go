@@ -46,9 +46,6 @@ func New(config Config) http.Handler {
 	cachePrefix = config.CachePrefix
 	db = config.DB
 
-	// create middlewares
-	isCourseOwner := isCourseOwner(config.DB)
-
 	// create mux
 	mux := http.NewServeMux()
 
