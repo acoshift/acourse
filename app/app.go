@@ -87,7 +87,7 @@ func New(config Config) http.Handler {
 	mux.Handle("/favicon.ico", fileHandler("static/favicon.ico"))
 
 	mux.Handle("/", middleware.Chain(
-		panicLogger,
+		errorRecovery,
 		session.Middleware(session.Config{
 			Secret:   config.SessionSecret,
 			Path:     "/",
