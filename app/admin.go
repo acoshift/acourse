@@ -113,11 +113,6 @@ func adminPayments(w http.ResponseWriter, r *http.Request, history bool) {
 }
 
 func adminRejectPayment(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodPost {
-		postAdminRejectPayment(w, r)
-		return
-	}
-
 	id := r.FormValue("id")
 	x, err := repository.GetPayment(db, id)
 	if err != nil {
@@ -277,10 +272,6 @@ https://acourse.io
 }
 
 func adminPendingPayments(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodPost {
-		postAdminPendingPayment(w, r)
-		return
-	}
 	adminPayments(w, r, false)
 }
 

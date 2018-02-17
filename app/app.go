@@ -8,6 +8,7 @@ import (
 	"cloud.google.com/go/storage"
 	"github.com/acoshift/go-firebase-admin"
 	"github.com/acoshift/hime"
+	"github.com/acoshift/httprouter"
 	"github.com/acoshift/middleware"
 	"github.com/acoshift/session"
 	redisstore "github.com/acoshift/session/store/redis"
@@ -62,12 +63,14 @@ func New(config Config) hime.HandlerFactory {
 		editor.Handle("/content/create", isCourseOwner(http.HandlerFunc(editorContentCreate)))
 		editor.Handle("/content/edit", http.HandlerFunc(editorContentEdit))
 
-		admin := http.NewServeMux()
-		admin.Handle("/users", http.HandlerFunc(adminUsers))
-		admin.Handle("/courses", http.HandlerFunc(adminCourses))
-		admin.Handle("/payments/pending", http.HandlerFunc(adminPendingPayments))
-		admin.Handle("/payments/history", http.HandlerFunc(adminHistoryPayments))
-		admin.Handle("/payments/reject", http.HandlerFunc(adminRejectPayment))
+		admin := httprouter.New()
+		admin.Get("/users", http.HandlerFunc(adminUsers))
+		admin.Get("/courses", http.HandlerFunc(adminCourses))
+		admin.Get("/payments/pending", http.HandlerFunc(adminPendingPayments))
+		admin.Post("/payments/pending", http.HandlerFunc(postAdminPendingPayment))
+		admin.Get("/payments/history", http.HandlerFunc(adminHistoryPayments))
+		admin.Get("/payments/reject", http.HandlerFunc(adminRejectPayment))
+		admin.Post("/payments/reject", http.HandlerFunc(postAdminRejectPayment))
 
 		main := http.NewServeMux()
 		main.Handle("/", http.HandlerFunc(index))

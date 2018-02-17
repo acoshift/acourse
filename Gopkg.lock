@@ -45,6 +45,12 @@
   version = "v0.0.14"
 
 [[projects]]
+  name = "github.com/acoshift/httprouter"
+  packages = ["."]
+  revision = "fecd5a0a4ef0f46879ac1b1f5286156b2fd8b63b"
+  version = "v2.1.0"
+
+[[projects]]
   name = "github.com/acoshift/middleware"
   packages = ["."]
   revision = "eb528086425529ef1d014404066c11b3bfa15a92"
@@ -334,6 +340,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "8e5926ce15001dcd7d4f8f2b42e17cad751b30508bff1acf8ced50d8ca5fe5eb"
+  inputs-digest = "1cd48e528ccd8d2874925adb9b6bd5b5fcd3839962aec47d65a5e7a7017c78b1"
   solver-name = "gps-cdcl"
   solver-version = 1
