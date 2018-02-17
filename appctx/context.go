@@ -2,7 +2,6 @@ package appctx
 
 import (
 	"context"
-	"database/sql"
 
 	"github.com/acoshift/session"
 
@@ -58,11 +57,4 @@ func GetCourseURL(ctx context.Context) string {
 // GetSession gets session from context
 func GetSession(ctx context.Context) *session.Session {
 	return session.Get(ctx, sessName)
-}
-
-// DB type
-type DB interface {
-	ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error)
-	QueryContext(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error)
-	QueryRowContext(ctx context.Context, query string, args ...interface{}) *sql.Row
 }
