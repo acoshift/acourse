@@ -71,7 +71,7 @@ func postSignIn(w http.ResponseWriter, r *http.Request) {
 
 	user, err := repository.FindUserByEmail(db, email)
 	// don't lets user know if email is wrong
-	if err == appctx.ErrNotFound {
+	if err == entity.ErrNotFound {
 		http.Redirect(w, r, "/signin/check-email", http.StatusSeeOther)
 		return
 	}

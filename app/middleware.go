@@ -100,7 +100,7 @@ func fetchUser() middleware.Middleware {
 			id := getUserID(s)
 			if len(id) > 0 {
 				u, err := repository.GetUser(db, id)
-				if err == appctx.ErrNotFound {
+				if err == entity.ErrNotFound {
 					u = &entity.User{
 						ID:       id,
 						Username: id,

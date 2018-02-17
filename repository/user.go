@@ -6,7 +6,6 @@ import (
 
 	"github.com/lib/pq"
 
-	"github.com/acoshift/acourse/appctx"
 	"github.com/acoshift/acourse/entity"
 )
 
@@ -101,7 +100,7 @@ func GetUser(q Queryer, userID string) (*entity.User, error) {
 	var x entity.User
 	err := scanUser(q.QueryRow(queryGetUser, userID).Scan, &x)
 	if err == sql.ErrNoRows {
-		return nil, appctx.ErrNotFound
+		return nil, entity.ErrNotFound
 	}
 	if err != nil {
 		return nil, err
@@ -124,7 +123,7 @@ func FindUserByEmail(q Queryer, email string) (*entity.User, error) {
 	var x entity.User
 	err := scanUser(q.QueryRow(queryGetUserFromEmail, email).Scan, &x)
 	if err == sql.ErrNoRows {
-		return nil, appctx.ErrNotFound
+		return nil, entity.ErrNotFound
 	}
 	if err != nil {
 		return nil, err

@@ -3,9 +3,8 @@ package repository
 import (
 	"time"
 
+	"github.com/acoshift/acourse/entity"
 	"github.com/garyburd/redigo/redis"
-
-	"github.com/acoshift/acourse/appctx"
 )
 
 // StoreMagicLink stores magic link to redis
@@ -28,7 +27,7 @@ func FindMagicLink(pool *redis.Pool, prefix string, linkID string) (string, erro
 	key := prefix + "magic:" + linkID
 	userID, err := redis.String(db.Do("GET", key))
 	if err == redis.ErrNil {
-		return "", appctx.ErrNotFound
+		return "", entity.ErrNotFound
 	}
 	if err != nil {
 		return "", err

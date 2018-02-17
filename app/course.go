@@ -31,7 +31,7 @@ func courseView(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		// link can not parse to uuid get course id from url
 		id, err = repository.GetCourseIDFromURL(db, link)
-		if err == appctx.ErrNotFound {
+		if err == entity.ErrNotFound {
 			view.NotFound(w, r)
 			return
 		}
@@ -41,7 +41,7 @@ func courseView(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	x, err := repository.GetCourse(db, id)
-	if err == appctx.ErrNotFound {
+	if err == entity.ErrNotFound {
 		view.NotFound(w, r)
 		return
 	}
@@ -112,7 +112,7 @@ func courseContent(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		// link can not parse to uuid get course id from url
 		id, err = repository.GetCourseIDFromURL(db, link)
-		if err == appctx.ErrNotFound {
+		if err == entity.ErrNotFound {
 			view.NotFound(w, r)
 			return
 		}
@@ -122,7 +122,7 @@ func courseContent(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	x, err := repository.GetCourse(db, id)
-	if err == appctx.ErrNotFound {
+	if err == entity.ErrNotFound {
 		view.NotFound(w, r)
 		return
 	}
@@ -398,7 +398,7 @@ func editorContent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	course, err := repository.GetCourse(db, id)
-	if err == appctx.ErrNotFound {
+	if err == entity.ErrNotFound {
 		view.NotFound(w, r)
 		return
 	}
@@ -429,7 +429,7 @@ func courseEnroll(w http.ResponseWriter, r *http.Request) {
 	_, err := uuid.Parse(link)
 	if err != nil {
 		id, err = repository.GetCourseIDFromURL(db, link)
-		if err == appctx.ErrNotFound {
+		if err == entity.ErrNotFound {
 			view.NotFound(w, r)
 			return
 		}
@@ -440,7 +440,7 @@ func courseEnroll(w http.ResponseWriter, r *http.Request) {
 	}
 
 	x, err := repository.GetCourse(db, id)
-	if err == appctx.ErrNotFound {
+	if err == entity.ErrNotFound {
 		view.NotFound(w, r)
 		return
 	}
@@ -491,7 +491,7 @@ func postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 	_, err := uuid.Parse(link)
 	if err != nil {
 		id, err = repository.GetCourseIDFromURL(db, link)
-		if err == appctx.ErrNotFound {
+		if err == entity.ErrNotFound {
 			view.NotFound(w, r)
 			return
 		}
@@ -502,7 +502,7 @@ func postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 	}
 
 	x, err := repository.GetCourse(db, id)
-	if err == appctx.ErrNotFound {
+	if err == entity.ErrNotFound {
 		view.NotFound(w, r)
 		return
 	}
@@ -631,7 +631,7 @@ func courseAssignment(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		// link can not parse to int64 get course id from url
 		id, err = repository.GetCourseIDFromURL(db, link)
-		if err == appctx.ErrNotFound {
+		if err == entity.ErrNotFound {
 			view.NotFound(w, r)
 			return
 		}
@@ -641,7 +641,7 @@ func courseAssignment(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	x, err := repository.GetCourse(db, id)
-	if err == appctx.ErrNotFound {
+	if err == entity.ErrNotFound {
 		view.NotFound(w, r)
 		return
 	}
