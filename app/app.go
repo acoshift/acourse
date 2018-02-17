@@ -7,6 +7,7 @@ import (
 
 	"cloud.google.com/go/storage"
 	"github.com/acoshift/go-firebase-admin"
+	"github.com/acoshift/hime"
 	"github.com/acoshift/middleware"
 	"github.com/acoshift/session"
 	redisstore "github.com/acoshift/session/store/redis"
@@ -31,7 +32,7 @@ var (
 )
 
 // New creates new app
-func New(config Config) http.Handler {
+func New(config Config) hime.HandlerFactory {
 	auth = config.Auth
 	loc = config.Location
 	slackURL = config.SlackURL
@@ -46,68 +47,69 @@ func New(config Config) http.Handler {
 	cachePrefix = config.CachePrefix
 	db = config.DB
 
-	// create mux
-	mux := http.NewServeMux()
+	return func(app hime.App) http.Handler {
+		mux := http.NewServeMux()
 
-	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-	})
+		mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+		})
 
-	editor := http.NewServeMux()
-	editor.Handle("/create", onlyInstructor(http.HandlerFunc(editorCreate)))
-	editor.Handle("/course", isCourseOwner(http.HandlerFunc(editorCourse)))
-	editor.Handle("/content", isCourseOwner(http.HandlerFunc(editorContent)))
-	editor.Handle("/content/create", isCourseOwner(http.HandlerFunc(editorContentCreate)))
-	editor.Handle("/content/edit", http.HandlerFunc(editorContentEdit))
+		editor := http.NewServeMux()
+		editor.Handle("/create", onlyInstructor(http.HandlerFunc(editorCreate)))
+		editor.Handle("/course", isCourseOwner(http.HandlerFunc(editorCourse)))
+		editor.Handle("/content", isCourseOwner(http.HandlerFunc(editorContent)))
+		editor.Handle("/content/create", isCourseOwner(http.HandlerFunc(editorContentCreate)))
+		editor.Handle("/content/edit", http.HandlerFunc(editorContentEdit))
 
-	admin := http.NewServeMux()
-	admin.Handle("/users", http.HandlerFunc(adminUsers))
-	admin.Handle("/courses", http.HandlerFunc(adminCourses))
-	admin.Handle("/payments/pending", http.HandlerFunc(adminPendingPayments))
-	admin.Handle("/payments/history", http.HandlerFunc(adminHistoryPayments))
-	admin.Handle("/payments/reject", http.HandlerFunc(adminRejectPayment))
+		admin := http.NewServeMux()
+		admin.Handle("/users", http.HandlerFunc(adminUsers))
+		admin.Handle("/courses", http.HandlerFunc(adminCourses))
+		admin.Handle("/payments/pending", http.HandlerFunc(adminPendingPayments))
+		admin.Handle("/payments/history", http.HandlerFunc(adminHistoryPayments))
+		admin.Handle("/payments/reject", http.HandlerFunc(adminRejectPayment))
 
-	main := http.NewServeMux()
-	main.Handle("/", http.HandlerFunc(index))
-	main.Handle("/signin", mustNotSignedIn(http.HandlerFunc(signIn)))
-	main.Handle("/signin/password", mustNotSignedIn(http.HandlerFunc(signInPassword)))
-	main.Handle("/signin/check-email", mustNotSignedIn(http.HandlerFunc(checkEmail)))
-	main.Handle("/signin/link", mustNotSignedIn(http.HandlerFunc(signInLink)))
-	main.Handle("/openid", mustNotSignedIn(http.HandlerFunc(openID)))
-	main.Handle("/openid/callback", mustNotSignedIn(http.HandlerFunc(openIDCallback)))
-	main.Handle("/signup", mustNotSignedIn(http.HandlerFunc(signUp)))
-	main.Handle("/signout", http.HandlerFunc(signOut))
-	main.Handle("/reset/password", mustNotSignedIn(http.HandlerFunc(resetPassword)))
-	main.Handle("/profile", mustSignedIn(http.HandlerFunc(profile)))
-	main.Handle("/profile/edit", mustSignedIn(http.HandlerFunc(profileEdit)))
-	main.Handle("/course/", http.StripPrefix("/course/", courseHandler()))
-	main.Handle("/admin/", http.StripPrefix("/admin", onlyAdmin(admin)))
-	main.Handle("/editor/", http.StripPrefix("/editor", editor))
+		main := http.NewServeMux()
+		main.Handle("/", http.HandlerFunc(index))
+		main.Handle("/signin", mustNotSignedIn(http.HandlerFunc(signIn)))
+		main.Handle("/signin/password", mustNotSignedIn(http.HandlerFunc(signInPassword)))
+		main.Handle("/signin/check-email", mustNotSignedIn(http.HandlerFunc(checkEmail)))
+		main.Handle("/signin/link", mustNotSignedIn(http.HandlerFunc(signInLink)))
+		main.Handle("/openid", mustNotSignedIn(http.HandlerFunc(openID)))
+		main.Handle("/openid/callback", mustNotSignedIn(http.HandlerFunc(openIDCallback)))
+		main.Handle("/signup", mustNotSignedIn(http.HandlerFunc(signUp)))
+		main.Handle("/signout", http.HandlerFunc(signOut))
+		main.Handle("/reset/password", mustNotSignedIn(http.HandlerFunc(resetPassword)))
+		main.Handle("/profile", mustSignedIn(http.HandlerFunc(profile)))
+		main.Handle("/profile/edit", mustSignedIn(http.HandlerFunc(profileEdit)))
+		main.Handle("/course/", http.StripPrefix("/course/", courseHandler()))
+		main.Handle("/admin/", http.StripPrefix("/admin", onlyAdmin(admin)))
+		main.Handle("/editor/", http.StripPrefix("/editor", editor))
 
-	mux.Handle("/~/", http.StripPrefix("/~", cache(http.FileServer(&fileFS{http.Dir("static")}))))
-	mux.Handle("/favicon.ico", fileHandler("static/favicon.ico"))
+		mux.Handle("/~/", http.StripPrefix("/~", cache(http.FileServer(&fileFS{http.Dir("static")}))))
+		mux.Handle("/favicon.ico", fileHandler("static/favicon.ico"))
 
-	mux.Handle("/", middleware.Chain(
-		errorRecovery,
-		session.Middleware(session.Config{
-			Secret:   config.SessionSecret,
-			Path:     "/",
-			MaxAge:   30 * 24 * time.Hour,
-			HTTPOnly: true,
-			Secure:   session.PreferSecure,
-			SameSite: session.SameSiteLax,
-			Store: redisstore.New(redisstore.Config{
-				Prefix: config.RedisPrefix,
-				Pool:   config.RedisPool,
+		mux.Handle("/", middleware.Chain(
+			errorRecovery,
+			session.Middleware(session.Config{
+				Secret:   config.SessionSecret,
+				Path:     "/",
+				MaxAge:   30 * 24 * time.Hour,
+				HTTPOnly: true,
+				Secure:   session.PreferSecure,
+				SameSite: session.SameSiteLax,
+				Store: redisstore.New(redisstore.Config{
+					Prefix: config.RedisPrefix,
+					Pool:   config.RedisPool,
+				}),
 			}),
-		}),
-		fetchUser(),
-		csrf(config.BaseURL, config.XSRFSecret),
-	)(main))
+			fetchUser(),
+			csrf(config.BaseURL, config.XSRFSecret),
+		)(main))
 
-	return middleware.Chain(
-		setHeaders,
-	)(mux)
+		return middleware.Chain(
+			setHeaders,
+		)(mux)
+	}
 }
 
 func back(w http.ResponseWriter, r *http.Request) {
