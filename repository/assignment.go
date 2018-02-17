@@ -3,15 +3,12 @@ package repository
 import (
 	"context"
 
-	"github.com/acoshift/acourse/appctx"
 	"github.com/acoshift/acourse/entity"
 )
 
 // GetAssignments gets assignments
-func GetAssignments(ctx context.Context, courseID string) ([]*entity.Assignment, error) {
-	db := appctx.GetDatabase(ctx)
-
-	rows, err := db.QueryContext(ctx, `
+func GetAssignments(ctx context.Context, q Queryer, courseID string) ([]*entity.Assignment, error) {
+	rows, err := q.QueryContext(ctx, `
 		select
 			id, title, long_desc, open
 		from assignments

@@ -5,9 +5,9 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/acoshift/acourse/appctx"
-	"github.com/acoshift/acourse/entity"
 	"github.com/lib/pq"
+
+	"github.com/acoshift/acourse/entity"
 )
 
 const (
@@ -62,10 +62,8 @@ const (
 )
 
 // CreatePayment creates new payment
-func CreatePayment(ctx context.Context, x *entity.Payment) error {
-	tx := appctx.GetTransaction(ctx)
-
-	_, err := tx.ExecContext(ctx, `
+func CreatePayment(ctx context.Context, q Queryer, x *entity.Payment) error {
+	_, err := q.ExecContext(ctx, `
 		insert into payments
 			(user_id, course_id, image, price, original_price, code, status)
 		values
@@ -79,14 +77,12 @@ func CreatePayment(ctx context.Context, x *entity.Payment) error {
 }
 
 // AcceptPayment accepts a payment and create new enroll
-func AcceptPayment(ctx context.Context, x *entity.Payment) error {
-	tx := appctx.GetTransaction(ctx)
-
+func AcceptPayment(ctx context.Context, q Queryer, x *entity.Payment) error {
 	if len(x.ID) == 0 {
 		return fmt.Errorf("payment must be save before accept")
 	}
 
-	_, err := tx.ExecContext(ctx, `
+	_, err := q.ExecContext(ctx, `
 		update payments
 		set
 			status = $2,
@@ -97,7 +93,7 @@ func AcceptPayment(ctx context.Context, x *entity.Payment) error {
 		return err
 	}
 
-	err = Enroll(ctx, x.UserID, x.CourseID)
+	err = Enroll(ctx, q, x.UserID, x.CourseID)
 	if err != nil {
 		return err
 	}
@@ -106,13 +102,11 @@ func AcceptPayment(ctx context.Context, x *entity.Payment) error {
 }
 
 // RejectPayment rejects a payment
-func RejectPayment(ctx context.Context, x *entity.Payment) error {
-	db := appctx.GetDatabase(ctx)
-
+func RejectPayment(ctx context.Context, q Queryer, x *entity.Payment) error {
 	if len(x.ID) == 0 {
 		return fmt.Errorf("payment must be save before accept")
 	}
-	_, err := db.ExecContext(ctx, `
+	_, err := q.ExecContext(ctx, `
 		update payments
 		set
 			status = $2,
@@ -141,11 +135,9 @@ func scanPayment(scan scanFunc, x *entity.Payment) error {
 }
 
 // GetPayments gets payments
-func GetPayments(ctx context.Context, paymentIDs []string) ([]*entity.Payment, error) {
-	db := appctx.GetDatabase(ctx)
-
+func GetPayments(ctx context.Context, q Queryer, paymentIDs []string) ([]*entity.Payment, error) {
 	xs := make([]*entity.Payment, 0, len(paymentIDs))
-	rows, err := db.QueryContext(ctx, queryGetPayments, pq.Array(paymentIDs))
+	rows, err := q.QueryContext(ctx, queryGetPayments, pq.Array(paymentIDs))
 	if err != nil {
 		return nil, err
 	}
@@ -165,11 +157,9 @@ func GetPayments(ctx context.Context, paymentIDs []string) ([]*entity.Payment, e
 }
 
 // GetPayment gets payment from given id
-func GetPayment(ctx context.Context, paymentID string) (*entity.Payment, error) {
-	db := appctx.GetDatabase(ctx)
-
+func GetPayment(ctx context.Context, q Queryer, paymentID string) (*entity.Payment, error) {
 	var x entity.Payment
-	err := scanPayment(db.QueryRowContext(ctx, queryGetPayment, paymentID).Scan, &x)
+	err := scanPayment(q.QueryRowContext(ctx, queryGetPayment, paymentID).Scan, &x)
 	if err != nil {
 		return nil, err
 	}
@@ -177,11 +167,9 @@ func GetPayment(ctx context.Context, paymentID string) (*entity.Payment, error) 
 }
 
 // HasPendingPayment returns ture if given user has pending payment for given course
-func HasPendingPayment(ctx context.Context, userID string, courseID string) (bool, error) {
-	db := appctx.GetDatabase(ctx)
-
+func HasPendingPayment(ctx context.Context, q Queryer, userID string, courseID string) (bool, error) {
 	var p int
-	err := db.QueryRowContext(ctx, `
+	err := q.QueryRowContext(ctx, `
 		select 1 from payments
 		where user_id = $1 and course_id = $2 and status = $3`,
 		userID, courseID, entity.Pending,
@@ -196,11 +184,9 @@ func HasPendingPayment(ctx context.Context, userID string, courseID string) (boo
 }
 
 // ListHistoryPayments lists history payments
-func ListHistoryPayments(ctx context.Context, limit, offset int64) ([]*entity.Payment, error) {
-	db := appctx.GetDatabase(ctx)
-
+func ListHistoryPayments(ctx context.Context, q Queryer, limit, offset int64) ([]*entity.Payment, error) {
 	xs := make([]*entity.Payment, 0)
-	rows, err := db.QueryContext(ctx, queryListPaymentsWithStatus, pq.Array([]int{entity.Accepted, entity.Rejected, entity.Refunded}), limit, offset)
+	rows, err := q.QueryContext(ctx, queryListPaymentsWithStatus, pq.Array([]int{entity.Accepted, entity.Rejected, entity.Refunded}), limit, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -220,11 +206,9 @@ func ListHistoryPayments(ctx context.Context, limit, offset int64) ([]*entity.Pa
 }
 
 // ListPendingPayments lists pending payments
-func ListPendingPayments(ctx context.Context, limit, offset int64) ([]*entity.Payment, error) {
-	db := appctx.GetDatabase(ctx)
-
+func ListPendingPayments(ctx context.Context, q Queryer, limit, offset int64) ([]*entity.Payment, error) {
 	xs := make([]*entity.Payment, 0)
-	rows, err := db.QueryContext(ctx, queryListPaymentsWithStatus, pq.Array([]int{entity.Pending}), limit, offset)
+	rows, err := q.QueryContext(ctx, queryListPaymentsWithStatus, pq.Array([]int{entity.Pending}), limit, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -244,11 +228,9 @@ func ListPendingPayments(ctx context.Context, limit, offset int64) ([]*entity.Pa
 }
 
 // CountHistoryPayments returns history payments count
-func CountHistoryPayments(ctx context.Context) (int64, error) {
-	db := appctx.GetDatabase(ctx)
-
+func CountHistoryPayments(ctx context.Context, q Queryer) (int64, error) {
 	var cnt int64
-	err := db.QueryRowContext(ctx, queryCountPaymentsWithStatus, pq.Array([]int{entity.Accepted, entity.Rejected})).Scan(&cnt)
+	err := q.QueryRowContext(ctx, queryCountPaymentsWithStatus, pq.Array([]int{entity.Accepted, entity.Rejected})).Scan(&cnt)
 	if err != nil {
 		return 0, err
 	}
@@ -256,11 +238,9 @@ func CountHistoryPayments(ctx context.Context) (int64, error) {
 }
 
 // CountPendingPayments returns pending payments count
-func CountPendingPayments(ctx context.Context) (int64, error) {
-	db := appctx.GetDatabase(ctx)
-
+func CountPendingPayments(ctx context.Context, q Queryer) (int64, error) {
 	var cnt int64
-	err := db.QueryRowContext(ctx, queryCountPaymentsWithStatus, pq.Array([]int{entity.Pending})).Scan(&cnt)
+	err := q.QueryRowContext(ctx, queryCountPaymentsWithStatus, pq.Array([]int{entity.Pending})).Scan(&cnt)
 	if err != nil {
 		return 0, err
 	}
