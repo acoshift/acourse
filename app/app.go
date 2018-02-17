@@ -53,6 +53,19 @@ func New(config Config) hime.HandlerFactory {
 	return func(app hime.App) http.Handler {
 		mux := http.NewServeMux()
 
+		app.Routes(hime.Routes{
+			"index":              "/",
+			"signin":             "/signin",
+			"signin.password":    "/signin/password",
+			"signin.check-email": "/signin/check-email",
+			"signin.link":        "/signin/link",
+			"openid":             "/openid",
+			"openid.callback":    "/openid/callback",
+			"signup":             "/signup",
+			"signout":            "/signout",
+			"reset.password":     "/reset/password",
+		})
+
 		mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
 		})
@@ -86,15 +99,15 @@ func New(config Config) hime.HandlerFactory {
 
 		main := http.NewServeMux()
 		main.Handle("/", http.HandlerFunc(index))
-		main.Handle("/signin", mustNotSignedIn(http.HandlerFunc(signIn)))
-		main.Handle("/signin/password", mustNotSignedIn(http.HandlerFunc(signInPassword)))
-		main.Handle("/signin/check-email", mustNotSignedIn(http.HandlerFunc(checkEmail)))
-		main.Handle("/signin/link", mustNotSignedIn(http.HandlerFunc(signInLink)))
-		main.Handle("/openid", mustNotSignedIn(http.HandlerFunc(openID)))
-		main.Handle("/openid/callback", mustNotSignedIn(http.HandlerFunc(openIDCallback)))
-		main.Handle("/signup", mustNotSignedIn(http.HandlerFunc(signUp)))
-		main.Handle("/signout", http.HandlerFunc(signOut))
-		main.Handle("/reset/password", mustNotSignedIn(http.HandlerFunc(resetPassword)))
+		main.Handle(app.Route("signin"), mustNotSignedIn(http.HandlerFunc(signIn)))
+		main.Handle(app.Route("signin.password"), mustNotSignedIn(http.HandlerFunc(signInPassword)))
+		main.Handle(app.Route("signin.check-email"), mustNotSignedIn(http.HandlerFunc(checkEmail)))
+		main.Handle(app.Route("signin.link"), mustNotSignedIn(http.HandlerFunc(signInLink)))
+		main.Handle(app.Route("openid"), mustNotSignedIn(http.HandlerFunc(openID)))
+		main.Handle(app.Route("openid.callback"), mustNotSignedIn(http.HandlerFunc(openIDCallback)))
+		main.Handle(app.Route("signup"), mustNotSignedIn(http.HandlerFunc(signUp)))
+		main.Handle(app.Route("signout"), http.HandlerFunc(signOut))
+		main.Handle(app.Route("reset.password"), mustNotSignedIn(http.HandlerFunc(resetPassword)))
 		main.Handle("/profile", mustSignedIn(http.HandlerFunc(profile)))
 		main.Handle("/profile/edit", mustSignedIn(http.HandlerFunc(profileEdit)))
 		main.Handle("/course/", http.StripPrefix("/course/", courseHandler()))
