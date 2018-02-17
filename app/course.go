@@ -607,15 +607,13 @@ func postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	go func() {
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		if newPayment {
+	if newPayment {
+		go func() {
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
 			sendSlackMessage(ctx, fmt.Sprintf("New payment for course %s, price %.2f", x.Title, price))
-		} else {
-			sendSlackMessage(ctx, fmt.Sprintf("New enroll for course %s", x.Title))
-		}
-		cancel()
-	}()
+		}()
+	}
 
 	http.Redirect(w, r, "/course/"+link, http.StatusFound)
 }
