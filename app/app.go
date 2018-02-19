@@ -164,6 +164,8 @@ func New(config Config) hime.HandlerFactory {
 				HTTPOnly: true,
 				Secure:   session.PreferSecure,
 				SameSite: session.SameSiteLax,
+				Rolling:  true,
+				Proxy:    true,
 				Store: redisstore.New(redisstore.Config{
 					Prefix: config.RedisPrefix,
 					Pool:   config.RedisPool,

@@ -4,12 +4,9 @@ import (
 	"github.com/acoshift/session"
 )
 
-type sessionKey int
-
 const (
-	_ sessionKey = iota
-	keyUserID
-	keyOpenIDSessionID
+	keyUserID          = "user_id"
+	keyOpenIDSessionID = "openid_session"
 )
 
 // setUserID sets user id to session
@@ -19,8 +16,7 @@ func setUserID(sess *session.Session, userID string) {
 
 // getUserID gets user id from session
 func getUserID(sess *session.Session) string {
-	id, _ := sess.Get(keyUserID).(string)
-	return id
+	return sess.GetString(keyUserID)
 }
 
 // setOpenIDSessionID sets open id session id to session
@@ -35,6 +31,5 @@ func delOpenIDSessionID(sess *session.Session) {
 
 // getOpenIDSessionID gets open id session id from session
 func getOpenIDSessionID(sess *session.Session) string {
-	id, _ := sess.Get(keyOpenIDSessionID).(string)
-	return id
+	return sess.GetString(keyOpenIDSessionID)
 }

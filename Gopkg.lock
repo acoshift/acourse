@@ -74,8 +74,8 @@
     ".",
     "store/redis"
   ]
-  revision = "01bf3e4593772b5aaf64efa0d18956559ee41e27"
-  version = "v0.4.1"
+  revision = "73d03b64ce7ae0c68b36cace99ac6ca0e5e99450"
+  version = "v0.6.0"
 
 [[projects]]
   name = "github.com/acoshift/webstatic"
@@ -346,6 +346,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "ea33010a534bd392a3974310c3b19596d6d45e29af83dfc2862d6142963f3de2"
+  inputs-digest = "7d4d6be7a0d4458e0902d3d98d081471d6b024d10365f5de831d775cd182e09b"
   solver-name = "gps-cdcl"
   solver-version = 1
