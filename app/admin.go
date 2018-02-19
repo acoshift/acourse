@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"math"
-	"net/http"
 	"strconv"
 
 	"github.com/acoshift/hime"
@@ -12,59 +11,66 @@ import (
 
 	"github.com/acoshift/acourse/entity"
 	"github.com/acoshift/acourse/repository"
-	"github.com/acoshift/acourse/view"
 )
 
 func adminUsers(ctx hime.Context) hime.Result {
-	page, _ := strconv.ParseInt(ctx.FormValue("page"), 10, 64)
-	if page <= 0 {
-		page = 1
+	p, _ := strconv.ParseInt(ctx.FormValue("page"), 10, 64)
+	if p <= 0 {
+		p = 1
 	}
 	limit := int64(30)
 
 	cnt, err := repository.CountUsers(db)
 	must(err)
 
-	offset := (page - 1) * limit
+	offset := (p - 1) * limit
 	for offset > cnt {
-		page--
-		offset = (page - 1) * limit
+		p--
+		offset = (p - 1) * limit
 	}
 	totalPage := cnt / limit
 
 	users, err := repository.ListUsers(db, limit, offset)
 	must(err)
 
-	view.AdminUsers(w, r, users, int(page), int(totalPage))
+	page := newPage(ctx)
+	page["Users"] = users
+	page["CurrentPage"] = int(p)
+	page["TotalPage"] = int(totalPage)
+	return ctx.View("admin.users", page)
 }
 
 func adminCourses(ctx hime.Context) hime.Result {
-	page, _ := strconv.ParseInt(ctx.FormValue("page"), 10, 64)
-	if page <= 0 {
-		page = 1
+	p, _ := strconv.ParseInt(ctx.FormValue("page"), 10, 64)
+	if p <= 0 {
+		p = 1
 	}
 	limit := int64(30)
 
 	cnt, err := repository.CountCourses(db)
 	must(err)
 
-	offset := (page - 1) * limit
+	offset := (p - 1) * limit
 	for offset > cnt {
-		page--
-		offset = (page - 1) * limit
+		p--
+		offset = (p - 1) * limit
 	}
 	totalPage := int64(math.Ceil(float64(cnt) / float64(limit)))
 
 	courses, err := repository.ListCourses(db, limit, offset)
 	must(err)
 
-	view.AdminCourses(w, r, courses, int(page), int(totalPage))
+	page := newPage(ctx)
+	page["Courses"] = courses
+	page["CurrentPage"] = int(p)
+	page["TotalPage"] = int(totalPage)
+	return ctx.View("admin.courses", page)
 }
 
-func adminPayments(w http.ResponseWriter, r *http.Request, history bool) {
-	page, _ := strconv.ParseInt(ctx.FormValue("page"), 10, 64)
-	if page <= 0 {
-		page = 1
+func adminPayments(ctx hime.Context, history bool) hime.Result {
+	p, _ := strconv.ParseInt(ctx.FormValue("page"), 10, 64)
+	if p <= 0 {
+		p = 1
 	}
 	limit := int64(30)
 
@@ -77,10 +83,10 @@ func adminPayments(w http.ResponseWriter, r *http.Request, history bool) {
 	}
 	must(err)
 
-	offset := (page - 1) * limit
+	offset := (p - 1) * limit
 	for offset > cnt {
-		page--
-		offset = (page - 1) * limit
+		p--
+		offset = (p - 1) * limit
 	}
 	totalPage := cnt / limit
 
@@ -92,7 +98,11 @@ func adminPayments(w http.ResponseWriter, r *http.Request, history bool) {
 	}
 	must(err)
 
-	view.AdminPayments(w, r, payments, int(page), int(totalPage))
+	page := newPage(ctx)
+	page["Payments"] = payments
+	page["CurrentPage"] = int(p)
+	page["TotalPage"] = int(totalPage)
+	return ctx.View("admin.payments", page)
 }
 
 func adminRejectPayment(ctx hime.Context) hime.Result {
@@ -137,7 +147,10 @@ func adminRejectPayment(ctx hime.Context) hime.Result {
 		x.Course.Link(),
 	)
 
-	view.AdminPaymentReject(w, r, x, message)
+	page := newPage(ctx)
+	page["Payment"] = x
+	page["message"] = message
+	return ctx.View("admin.payment.reject", page)
 }
 
 func postAdminRejectPayment(ctx hime.Context) hime.Result {
@@ -167,7 +180,7 @@ func postAdminRejectPayment(ctx hime.Context) hime.Result {
 		}()
 	}
 
-	http.Redirect(w, r, "/admin/payments/pending", http.StatusSeeOther)
+	return ctx.RedirectTo("admin.payments.pending")
 }
 
 func postAdminPendingPayment(ctx hime.Context) hime.Result {
@@ -242,13 +255,13 @@ https://acourse.io
 			}()
 		}
 	}
-	http.Redirect(w, r, "/admin/payments/pending", http.StatusSeeOther)
+	return ctx.RedirectTo("admin.payments.pending")
 }
 
 func adminPendingPayments(ctx hime.Context) hime.Result {
-	adminPayments(w, r, false)
+	return adminPayments(ctx, false)
 }
 
 func adminHistoryPayments(ctx hime.Context) hime.Result {
-	adminPayments(w, r, true)
+	return adminPayments(ctx, true)
 }

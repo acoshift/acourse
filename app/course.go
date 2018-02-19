@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -19,7 +20,6 @@ import (
 	"github.com/acoshift/acourse/appctx"
 	"github.com/acoshift/acourse/entity"
 	"github.com/acoshift/acourse/repository"
-	"github.com/acoshift/acourse/view"
 )
 
 func courseView(ctx hime.Context) hime.Result {
@@ -78,7 +78,16 @@ func courseView(ctx hime.Context) hime.Result {
 		must(err)
 	}
 
-	view.Course(w, r, x, enrolled, owned, pendingEnroll)
+	page := newPage(ctx)
+	page["Title"] = x.Title + " | " + page["Title"].(string)
+	page["Desc"] = x.ShortDesc
+	page["Image"] = x.Image
+	page["URL"] = baseURL + "/course/" + url.PathEscape(x.Link())
+	page["Course"] = x
+	page["Enrolled"] = enrolled
+	page["Owned"] = owned
+	page["pendingEnroll"] = pendingEnroll
+	return ctx.View("course", page)
 }
 
 func courseContent(ctx hime.Context) hime.Result {
@@ -133,8 +142,8 @@ func courseContent(ctx hime.Context) hime.Result {
 	}
 
 	page := newPage(ctx)
-	page["Title"] = x.Title + " | " + page["Title"]
-	page["Descc"] = x.ShortDesc
+	page["Title"] = x.Title + " | " + page["Title"].(string)
+	page["Desc"] = x.ShortDesc
 	page["Image"] = x.Image
 	page["Course"] = x
 	page["Content"] = content
@@ -312,10 +321,9 @@ func postEditorCourse(ctx hime.Context) hime.Result {
 	var link sql.NullString
 	db.QueryRow(`select url from courses where id = $1`, id).Scan(&link)
 	if !link.Valid {
-		http.Redirect(w, r, "/course/"+id, http.StatusFound)
-		return
+		return ctx.RedirectTo("course", id)
 	}
-	http.Redirect(w, r, "/course/"+link.String, http.StatusSeeOther)
+	return ctx.RedirectTo("course", link.String)
 }
 
 func editorContent(ctx hime.Context) hime.Result {
@@ -329,7 +337,9 @@ func editorContent(ctx hime.Context) hime.Result {
 	course.Contents, err = repository.GetCourseContents(db, id)
 	must(err)
 
-	view.EditorContent(w, r, course)
+	page := newPage(ctx)
+	page["Course"] = course
+	return ctx.View("editor.content", page)
 }
 
 func postEditorContent(ctx hime.Context) hime.Result {
@@ -366,27 +376,30 @@ func courseEnroll(ctx hime.Context) hime.Result {
 
 	// if user is course owner redirect back to course page
 	if user.ID == x.UserID {
-		http.Redirect(w, r, "/course/"+link, http.StatusFound)
-		return
+		return ctx.RedirectTo("course", link)
 	}
 
 	// redirect enrolled user back to course page
 	enrolled, err := repository.IsEnrolled(db, user.ID, id)
 	must(err)
 	if enrolled {
-		http.Redirect(w, r, "/course/"+link, http.StatusFound)
-		return
+		return ctx.RedirectTo("course", link)
 	}
 
 	// check is user has pending enroll
 	pendingPayment, err := repository.HasPendingPayment(db, user.ID, id)
 	must(err)
 	if pendingPayment {
-		http.Redirect(w, r, "/course/"+link, http.StatusFound)
-		return
+		return ctx.RedirectTo("course", link)
 	}
 
-	view.CourseEnroll(w, r, x)
+	page := newPage(ctx)
+	page["Title"] = x.Title + " | " + page["Title"].(string)
+	page["Desc"] = x.ShortDesc
+	page["Image"] = x.Image
+	page["URL"] = baseURL + "/course/" + url.PathEscape(x.Link())
+	page["Course"] = x
+	return ctx.View("course.enroll", page)
 }
 
 func postCourseEnroll(ctx hime.Context) hime.Result {
@@ -413,24 +426,21 @@ func postCourseEnroll(ctx hime.Context) hime.Result {
 
 	// if user is course owner redirect back to course page
 	if user.ID == x.UserID {
-		http.Redirect(w, r, "/course/"+link, http.StatusFound)
-		return
+		return ctx.RedirectTo("course", link)
 	}
 
 	// redirect enrolled user back to course page
 	enrolled, err := repository.IsEnrolled(db, user.ID, id)
 	must(err)
 	if enrolled {
-		http.Redirect(w, r, "/course/"+link, http.StatusFound)
-		return
+		return ctx.RedirectTo("course", link)
 	}
 
 	// check is user has pending enroll
 	pendingPayment, err := repository.HasPendingPayment(db, user.ID, id)
 	must(err)
 	if pendingPayment {
-		http.Redirect(w, r, "/course/"+link, http.StatusFound)
-		return
+		return ctx.RedirectTo("course", link)
 	}
 
 	originalPrice := x.Price
@@ -501,7 +511,7 @@ func postCourseEnroll(ctx hime.Context) hime.Result {
 		}()
 	}
 
-	http.Redirect(w, r, "/course/"+link, http.StatusFound)
+	return ctx.RedirectTo("course", link)
 }
 
 func courseAssignment(ctx hime.Context) hime.Result {
@@ -527,22 +537,27 @@ func courseAssignment(ctx hime.Context) hime.Result {
 
 	// if course has url, redirect to course url
 	if x.URL.Valid && x.URL.String != link {
-		http.Redirect(w, r, "/course/"+x.URL.String+"/assignment", http.StatusFound)
-		return
+		return ctx.RedirectTo("course", x.URL.String, "assignment")
 	}
 
 	enrolled, err := repository.IsEnrolled(db, user.ID, x.ID)
 	must(err)
 
 	if !enrolled && user.ID != x.UserID {
-		http.Error(w, "Forbidden", http.StatusForbidden)
-		return
+		return ctx.Status(http.StatusForbidden).StatusText()
 	}
 
 	assignments, err := repository.GetAssignments(db, x.ID)
 	must(err)
 
-	view.Assignment(w, r, x, assignments)
+	page := newPage(ctx)
+	page["Title"] = x.Title + " | " + page["Title"].(string)
+	page["Desc"] = x.ShortDesc
+	page["Image"] = x.Image
+	page["URL"] = baseURL + "/course/" + url.PathEscape(x.Link())
+	page["Course"] = x
+	page["Assignments"] = assignments
+	return ctx.View("assignment", page)
 }
 
 func editorContentCreate(ctx hime.Context) hime.Result {
@@ -587,7 +602,7 @@ func postEditorContentCreate(ctx hime.Context) hime.Result {
 	})
 	must(err)
 
-	http.Redirect(w, r, "/editor/content?id="+ctx.FormValue("id"), http.StatusFound)
+	return ctx.Redirect(ctx.Route("editor.content") + "?id=" + ctx.FormValue("id"))
 }
 
 func editorContentEdit(ctx hime.Context) hime.Result {
@@ -606,11 +621,13 @@ func editorContentEdit(ctx hime.Context) hime.Result {
 	user := appctx.GetUser(ctx)
 	// user is not course owner
 	if user.ID != course.UserID {
-		http.Error(w, "Forbidden", http.StatusForbidden)
-		return
+		return ctx.Status(http.StatusForbidden).StatusText()
 	}
 
-	view.EditorContentEdit(w, r, course, content)
+	page := newPage(ctx)
+	page["Course"] = course
+	page["Content"] = content
+	return ctx.View("editor.content.edit", page)
 }
 
 func postEditorContentEdit(ctx hime.Context) hime.Result {
@@ -648,6 +665,6 @@ func postEditorContentEdit(ctx hime.Context) hime.Result {
 		where id = $1 and course_id = $2
 	`, id, course.ID, title, desc, videoID)
 	must(err)
-	http.Redirect(w, r, "/editor/content?id="+course.ID, http.StatusSeeOther)
-	return
+
+	return ctx.Redirect(ctx.Route("editor.content") + "?id=" + course.ID)
 }
