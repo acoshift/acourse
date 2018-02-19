@@ -5,6 +5,15 @@ import (
 	"net/http"
 )
 
+// NewContext creates new hime's context
+func NewContext(w http.ResponseWriter, r *http.Request) Context {
+	app, ok := r.Context().Value(ctxKeyApp).(*app)
+	if !ok {
+		panic(ErrAppNotFound)
+	}
+	return newContext(app, w, r)
+}
+
 type appContext struct {
 	context.Context
 

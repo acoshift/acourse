@@ -602,7 +602,7 @@ func postEditorContentCreate(ctx hime.Context) hime.Result {
 	})
 	must(err)
 
-	return ctx.Redirect(ctx.Route("editor.content") + "?id=" + ctx.FormValue("id"))
+	return ctx.RedirectTo("editor.content", map[string]interface{}{"id": ctx.FormValue("id")})
 }
 
 func editorContentEdit(ctx hime.Context) hime.Result {
@@ -666,5 +666,5 @@ func postEditorContentEdit(ctx hime.Context) hime.Result {
 	`, id, course.ID, title, desc, videoID)
 	must(err)
 
-	return ctx.Redirect(ctx.Route("editor.content") + "?id=" + course.ID)
+	return ctx.RedirectTo("editor.content", map[string]interface{}{"id": course.ID})
 }
