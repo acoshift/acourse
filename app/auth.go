@@ -11,6 +11,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/acoshift/go-firebase-admin"
+	"github.com/acoshift/hime"
 	"github.com/acoshift/pgsql"
 	"github.com/asaskevich/govalidator"
 
@@ -34,33 +35,28 @@ func generateMagicLinkID() string {
 	return generateRandomString(64)
 }
 
-func signIn(w http.ResponseWriter, r *http.Request) {
-	view.SignIn(w, r)
+func signIn(ctx hime.Context) hime.Result {
+	return ctx.View("signin", newPage(ctx))
 }
 
-func postSignIn(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
+func postSignIn(ctx hime.Context) hime.Result {
 	s := appctx.GetSession(ctx)
 	f := s.Flash()
 
-	email := r.FormValue("Email")
+	email := ctx.FormValue("Email")
 	if len(email) == 0 {
 		f.Add("Errors", "email required")
 	}
 	if f.Has("Errors") {
 		f.Set("Email", email)
-		back(w, r)
-		return
+		return ctx.RedirectToGet()
 	}
 
 	ok, err := repository.CanAcquireMagicLink(redisPool, redisPrefix, email)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	must(err)
 	if !ok {
 		f.Add("Errors", "อีเมลของคุณได้ขอ Magic Link จากเราไปแล้ว กรุณาตรวจสอบอีเมล")
-		back(w, r)
+		return ctx.RedirectToGet()
 	}
 
 	f.Set("CheckEmail", "1")
@@ -68,26 +64,21 @@ func postSignIn(w http.ResponseWriter, r *http.Request) {
 	user, err := repository.FindUserByEmail(db, email)
 	// don't lets user know if email is wrong
 	if err == entity.ErrNotFound {
-		http.Redirect(w, r, "/signin/check-email", http.StatusSeeOther)
-		return
+		return ctx.RedirectTo("signin.check-email")
 	}
 	if err != nil {
 		f.Add("Errors", err.Error())
-		back(w, r)
-		return
+		return ctx.RedirectToGet()
 	}
 
 	linkID := generateMagicLinkID()
 
 	err = repository.StoreMagicLink(redisPool, redisPrefix, linkID, user.ID)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	must(err)
 
 	linkQuery := make(url.Values)
 	linkQuery.Set("id", linkID)
-	if x := r.FormValue("r"); len(x) > 0 {
+	if x := ctx.FormValue("r"); len(x) > 0 {
 		linkQuery.Set("r", parsePath(x))
 	}
 
@@ -103,7 +94,7 @@ func postSignIn(w http.ResponseWriter, r *http.Request) {
 
 	go sendEmail(user.Email.String, "Magic Link Request", markdown(message))
 
-	http.Redirect(w, r, "/signin/check-email", http.StatusSeeOther)
+	return ctx.RedirectTo("signin.check-email")
 }
 
 func checkEmail(w http.ResponseWriter, r *http.Request) {

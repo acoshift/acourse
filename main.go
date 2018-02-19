@@ -25,7 +25,6 @@ func main() {
 
 	config := configfile.NewReader("config")
 
-	// email location
 	loc, err := time.LoadLocation("Asia/Bangkok")
 	if err != nil {
 		log.Fatal(err)
@@ -86,6 +85,8 @@ func main() {
 	view.BaseURL = config.String("base_url")
 
 	err = hime.New().
+		TemplateDir("template").
+		TemplateRoot("root").
 		Handler(app.New(app.Config{
 			DB:            db,
 			BaseURL:       config.String("base_url"),

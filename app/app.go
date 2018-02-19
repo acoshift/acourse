@@ -2,12 +2,14 @@ package app
 
 import (
 	"database/sql"
+	"io/ioutil"
+	"math/rand"
 	"net/http"
 	"time"
 
 	"cloud.google.com/go/storage"
-	"github.com/acoshift/acourse/view"
 	"github.com/acoshift/go-firebase-admin"
+	"github.com/acoshift/header"
 	"github.com/acoshift/hime"
 	"github.com/acoshift/httprouter"
 	"github.com/acoshift/middleware"
@@ -16,6 +18,7 @@ import (
 	"github.com/acoshift/webstatic"
 	"github.com/garyburd/redigo/redis"
 	"gopkg.in/gomail.v2"
+	yaml "gopkg.in/yaml.v2"
 )
 
 var (
@@ -32,6 +35,7 @@ var (
 	cachePool    *redis.Pool
 	cachePrefix  string
 	db           *sql.DB
+	staticConf   = make(map[string]string)
 )
 
 // New creates new app
@@ -50,7 +54,16 @@ func New(config Config) hime.HandlerFactory {
 	cachePrefix = config.CachePrefix
 	db = config.DB
 
+	// load static config
+	// TODO: move to main
+	{
+		bs, _ := ioutil.ReadFile("static.yaml")
+		yaml.Unmarshal(bs, &staticConf)
+	}
+
 	return func(app hime.App) http.Handler {
+		loadTemplates(app)
+
 		app.Routes(hime.Routes{
 			"index":                  "/",
 			"signin":                 "/signin",
@@ -89,9 +102,11 @@ func New(config Config) hime.HandlerFactory {
 		r := httprouter.New()
 		r.HandleMethodNotAllowed = false
 		r.HandleOPTIONS = false
-		r.NotFound = http.HandlerFunc(notFound)
+		r.NotFound = hime.H(notFound)
 
 		r.Get("/", http.HandlerFunc(index))
+
+		// auth
 		r.Get(app.Route("signin"), mustNotSignedIn(http.HandlerFunc(signIn)))
 		r.Post(app.Route("signin"), mustNotSignedIn(http.HandlerFunc(postSignIn)))
 		r.Get(app.Route("signin.password"), mustNotSignedIn(http.HandlerFunc(signInPassword)))
@@ -106,9 +121,13 @@ func New(config Config) hime.HandlerFactory {
 		r.Post(app.Route("signup"), mustNotSignedIn(http.HandlerFunc(postSignUp)))
 		r.Get(app.Route("signout"), http.HandlerFunc(signOut)) // TODO: remove get signout
 		r.Post(app.Route("signout"), http.HandlerFunc(signOut))
+
+		// profile
 		r.Get(app.Route("profile"), mustSignedIn(http.HandlerFunc(profile)))
 		r.Get(app.Route("profile.edit"), mustSignedIn(http.HandlerFunc(profileEdit)))
 		r.Post(app.Route("profile.edit"), mustSignedIn(http.HandlerFunc(postProfileEdit)))
+
+		// course
 		r.Get(app.Route("course", ":courseURL"), http.HandlerFunc(courseView))
 		r.Get(app.Route("course", ":courseURL", "content"), http.HandlerFunc(courseContent))
 		r.Get(app.Route("course", ":courseURL", "enroll"), http.HandlerFunc(courseEnroll))
@@ -160,10 +179,20 @@ func New(config Config) hime.HandlerFactory {
 	}
 }
 
-func back(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, r.RequestURI, http.StatusSeeOther)
+func must(err error) {
+	if err != nil {
+		panic(err)
+	}
 }
 
-func notFound(w http.ResponseWriter, r *http.Request) {
-	view.NotFound(w, r)
+var notFoundImages = []string{
+	"https://storage.googleapis.com/acourse/static/9961f3c1-575f-4b98-af4f-447566ee1cb3.png",
+	"https://storage.googleapis.com/acourse/static/b14a40c9-d3a4-465d-9453-ce7fcfbc594c.png",
+}
+
+func notFound(ctx hime.Context) hime.Result {
+	page := newPage(ctx)
+	page["Image"] = notFoundImages[rand.Intn(len(notFoundImages))]
+	ctx.ResponseWriter().Header().Set(header.XContentTypeOptions, "nosniff")
+	return ctx.Status(http.StatusNotFound).View("error.not-found", page)
 }
