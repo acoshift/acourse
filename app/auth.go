@@ -147,7 +147,7 @@ func postSignInPassword(ctx hime.Context) hime.Result {
 		return ctx.RedirectToGet()
 	}
 
-	s.Rotate()
+	s.Regenerate()
 	setUserID(s, userID)
 
 	// if user not found in our database, insert new user
@@ -213,7 +213,7 @@ func openIDCallback(ctx hime.Context) hime.Result {
 	})
 	must(err)
 
-	s.Rotate()
+	s.Regenerate()
 	setUserID(s, user.UserID)
 	return ctx.RedirectTo("index")
 }

@@ -21,6 +21,12 @@
   version = "v1.1.0"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/acoshift/csrf"
+  packages = ["."]
+  revision = "535e29cd193bb8756530e74e298206a8e7324a57"
+
+[[projects]]
   name = "github.com/acoshift/flash"
   packages = ["."]
   revision = "d8b6eafa9dff18a17ecebe034b6cba0af4fae5bc"
@@ -68,8 +74,8 @@
     ".",
     "store/redis"
   ]
-  revision = "01bf3e4593772b5aaf64efa0d18956559ee41e27"
-  version = "v0.4.1"
+  revision = "73d03b64ce7ae0c68b36cace99ac6ca0e5e99450"
+  version = "v0.6.0"
 
 [[projects]]
   name = "github.com/acoshift/webstatic"
@@ -108,7 +114,7 @@
     "redis"
   ]
   revision = "d1ed5c67e5794de818ea85e6b522fda02623a484"
-  version = "v1.4.0"
+  version = "v1.5.0"
 
 [[projects]]
   name = "github.com/golang/protobuf"
@@ -203,10 +209,9 @@
     "idna",
     "internal/timeseries",
     "lex/httplex",
-    "trace",
-    "xsrftoken"
+    "trace"
   ]
-  revision = "2fb46b16b8dda405028c50f7c7f0f9dd1fa6bfb1"
+  revision = "cbe0f9307d0156177f9dd5dc85da1a31abc5f2fb"
 
 [[projects]]
   branch = "master"
@@ -218,7 +223,7 @@
     "jws",
     "jwt"
   ]
-  revision = "a032972e28060ca4f5644acffae3dfc268cc09db"
+  revision = "543e37812f10c46c622c9575afd7ad22f22a12ba"
 
 [[projects]]
   branch = "master"
@@ -239,7 +244,7 @@
     "unicode/norm",
     "unicode/rangetable"
   ]
-  revision = "e19ae1496984b1c655b8044a65c0300a3c878dd3"
+  revision = "4e4a3210bb54bb31f6ab2cdca2edcc0b50c420c1"
 
 [[projects]]
   branch = "master"
@@ -258,7 +263,7 @@
     "transport/grpc",
     "transport/http"
   ]
-  revision = "4c1b07210d562506ab52117997c3b7e294627ac9"
+  revision = "c76a25da6c114df45a86acb8873ae83eda1430b9"
 
 [[projects]]
   name = "google.golang.org/appengine"
@@ -287,7 +292,7 @@
     "googleapis/iam/v1",
     "googleapis/rpc/status"
   ]
-  revision = "4eb30f4778eed4c258ba66527a0d4f9ec8a36c45"
+  revision = "2b5a72b8730b0b16380010cfe5286c42108d88e7"
 
 [[projects]]
   name = "google.golang.org/grpc"
@@ -301,6 +306,7 @@
     "credentials",
     "credentials/oauth",
     "encoding",
+    "encoding/proto",
     "grpclb/grpc_lb_v1/messages",
     "grpclog",
     "internal",
@@ -316,8 +322,8 @@
     "tap",
     "transport"
   ]
-  revision = "6b51017f791ae1cfbec89c52efdf444b13b550ef"
-  version = "v1.9.2"
+  revision = "8e4536a86ab602859c20df5ebfd0bd4228d08655"
+  version = "v1.10.0"
 
 [[projects]]
   branch = "v3"
@@ -340,6 +346,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "1cd48e528ccd8d2874925adb9b6bd5b5fcd3839962aec47d65a5e7a7017c78b1"
+  inputs-digest = "7d4d6be7a0d4458e0902d3d98d081471d6b024d10365f5de831d775cd182e09b"
   solver-name = "gps-cdcl"
   solver-version = 1

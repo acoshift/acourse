@@ -84,10 +84,10 @@ func main() {
 	err = hime.New().
 		TemplateDir("template").
 		TemplateRoot("root").
+		Minify().
 		Handler(app.New(app.Config{
 			DB:            db,
 			BaseURL:       config.String("base_url"),
-			XSRFSecret:    config.String("xsrf_key"),
 			RedisPool:     redisPool,
 			RedisPrefix:   config.String("redis_prefix"),
 			CachePool:     cachePool,

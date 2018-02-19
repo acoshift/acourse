@@ -2,20 +2,18 @@ package app
 
 import (
 	"database/sql"
-	"encoding/gob"
 	"time"
 
 	"cloud.google.com/go/storage"
-	firebase "github.com/acoshift/go-firebase-admin"
+	"github.com/acoshift/go-firebase-admin"
 	"github.com/garyburd/redigo/redis"
-	gomail "gopkg.in/gomail.v2"
+	"gopkg.in/gomail.v2"
 )
 
 // Config use to init app package
 type Config struct {
 	DB            *sql.DB
 	BaseURL       string
-	XSRFSecret    string
 	RedisPool     *redis.Pool
 	RedisPrefix   string
 	CachePool     *redis.Pool
@@ -28,8 +26,4 @@ type Config struct {
 	EmailDialer   *gomail.Dialer
 	BucketHandle  *storage.BucketHandle
 	BucketName    string
-}
-
-func init() {
-	gob.Register(sessionKey(0))
 }

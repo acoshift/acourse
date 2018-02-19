@@ -1,23 +1,25 @@
 package session
 
 import (
-	"bytes"
-	"encoding/gob"
 	"net/http"
 	"time"
 
 	"github.com/acoshift/flash"
 )
 
+// Data stores session data
+type Data map[string]interface{}
+
 // Session type
 type Session struct {
 	id      string // id is the hashed id if enable hash
 	rawID   string
-	oldID   string // for rotate, is the hashed old id if enable hash
-	oldData []byte // is the old encoded data before rotate
-	data    map[interface{}]interface{}
+	oldID   string // for regenerate, is the hashed old id if enable hash
+	oldData Data   // is the old data before regenerate
+	data    Data
 	destroy bool
 	changed bool
+	isNew   bool
 	flash   *flash.Flash
 
 	// cookie config
@@ -28,40 +30,18 @@ type Session struct {
 	MaxAge   time.Duration
 	Secure   bool
 	SameSite SameSite
+	Rolling  bool
 
-	IDHashFunc func(id string) string
+	manager *Manager
 }
 
-func init() {
-	gob.Register(map[interface{}]interface{}{})
-	gob.Register(flashKey{})
-}
-
-// session internal data
-type (
-	flashKey struct{}
-)
-
-func (s *Session) encode() []byte {
-	if len(s.data) == 0 {
-		return []byte{}
+// Clone clones session data
+func (data Data) Clone() Data {
+	r := make(Data)
+	for k, v := range data {
+		r[k] = v
 	}
-
-	buf := bytes.Buffer{}
-	err := gob.NewEncoder(&buf).Encode(s.data)
-	if err != nil {
-		// this should never happened
-		// or developer don't register type into gob
-		panic("session: can not encode data; " + err.Error())
-	}
-	return buf.Bytes()
-}
-
-func (s *Session) decode(b []byte) {
-	s.data = make(map[interface{}]interface{})
-	if len(b) > 0 {
-		gob.NewDecoder(bytes.NewReader(b)).Decode(&s.data)
-	}
+	return r
 }
 
 // ID returns session id or hashed session id if enable hash id
@@ -82,24 +62,60 @@ func (s *Session) Changed() bool {
 }
 
 // Get gets data from session
-func (s *Session) Get(key interface{}) interface{} {
+func (s *Session) Get(key string) interface{} {
 	if s.data == nil {
 		return nil
 	}
 	return s.data[key]
 }
 
+// GetString gets string from session
+func (s *Session) GetString(key string) string {
+	r, _ := s.Get(key).(string)
+	return r
+}
+
+// GetInt gets int from session
+func (s *Session) GetInt(key string) int {
+	r, _ := s.Get(key).(int)
+	return r
+}
+
+// GetInt64 gets int64 from session
+func (s *Session) GetInt64(key string) int64 {
+	r, _ := s.Get(key).(int64)
+	return r
+}
+
+// GetFloat32 gets float32 from session
+func (s *Session) GetFloat32(key string) float32 {
+	r, _ := s.Get(key).(float32)
+	return r
+}
+
+// GetFloat64 gets float64 from session
+func (s *Session) GetFloat64(key string) float64 {
+	r, _ := s.Get(key).(float64)
+	return r
+}
+
+// GetBool gets bool from session
+func (s *Session) GetBool(key string) bool {
+	r, _ := s.Get(key).(bool)
+	return r
+}
+
 // Set sets data to session
-func (s *Session) Set(key, value interface{}) {
+func (s *Session) Set(key string, value interface{}) {
 	if s.data == nil {
-		s.data = make(map[interface{}]interface{})
+		s.data = make(Data)
 	}
 	s.changed = true
 	s.data[key] = value
 }
 
 // Del deletes data from session
-func (s *Session) Del(key interface{}) {
+func (s *Session) Del(key string) {
 	if s.data == nil {
 		return
 	}
@@ -110,7 +126,7 @@ func (s *Session) Del(key interface{}) {
 }
 
 // Pop gets data from session then delete it
-func (s *Session) Pop(key interface{}) interface{} {
+func (s *Session) Pop(key string) interface{} {
 	if s.data == nil {
 		return nil
 	}
@@ -120,12 +136,48 @@ func (s *Session) Pop(key interface{}) interface{} {
 	return r
 }
 
-// Rotate rotates session id
+// PopString pops string from session
+func (s *Session) PopString(key string) string {
+	r, _ := s.Get(key).(string)
+	return r
+}
+
+// PopInt pops int from session
+func (s *Session) PopInt(key string) int {
+	r, _ := s.Get(key).(int)
+	return r
+}
+
+// PopInt64 pops int64 from session
+func (s *Session) PopInt64(key string) int64 {
+	r, _ := s.Get(key).(int64)
+	return r
+}
+
+// PopFloat32 pops float32 from session
+func (s *Session) PopFloat32(key string) float32 {
+	r, _ := s.Get(key).(float32)
+	return r
+}
+
+// PopFloat64 pops float64 from session
+func (s *Session) PopFloat64(key string) float64 {
+	r, _ := s.Get(key).(float64)
+	return r
+}
+
+// PopBool pops bool from session
+func (s *Session) PopBool(key string) bool {
+	r, _ := s.Get(key).(bool)
+	return r
+}
+
+// Regenerate regenerates session id
 // use when change user access level to prevent session fixation
 //
-// can not use rotate and destroy same time
-// Rotate can call only one time
-func (s *Session) Rotate() {
+// can not use regenerate and destroy same time
+// Regenerate can call only one time
+func (s *Session) Regenerate() {
 	if len(s.oldID) > 0 {
 		return
 	}
@@ -135,21 +187,23 @@ func (s *Session) Rotate() {
 	}
 
 	s.oldID = s.id
-	s.oldData = s.encode()
-	s.rawID = generateID()
-	if s.IDHashFunc != nil {
-		s.id = s.IDHashFunc(s.rawID)
-	} else {
-		s.id = s.rawID
-	}
+	s.oldData = s.data.Clone()
+	s.rawID = s.manager.config.GenerateID()
+	s.isNew = true
+	s.id = s.manager.hashID(s.rawID)
 	s.changed = true
 }
 
+// IsNew checks is new session
+func (s *Session) IsNew() bool {
+	return s.isNew
+}
+
 // Renew clear all data in current session
-// and rotate session id
+// and regenerate session id
 func (s *Session) Renew() {
-	s.data = make(map[interface{}]interface{})
-	s.Rotate()
+	s.data = make(Data)
+	s.Regenerate()
 }
 
 // Destroy destroys session from store
@@ -177,9 +231,17 @@ func (s *Session) setCookie(w http.ResponseWriter) {
 		return
 	}
 
-	// if session not modified, don't set cookie
-	if !s.Changed() {
+	if s.isNew && !s.Changed() {
 		return
+	}
+	if !s.Rolling && (!s.isNew || !s.Changed()) {
+		return
+	}
+
+	value := s.rawID
+	if len(s.manager.config.Keys) > 0 {
+		digest := sign(value, s.manager.config.Keys[0])
+		value += "." + digest
 	}
 
 	setCookie(w, &cookie{
@@ -188,7 +250,7 @@ func (s *Session) setCookie(w http.ResponseWriter) {
 			Domain:   s.Domain,
 			Path:     s.Path,
 			HttpOnly: s.HTTPOnly,
-			Value:    s.rawID,
+			Value:    value,
 			MaxAge:   int(s.MaxAge / time.Second),
 			Expires:  time.Now().Add(s.MaxAge),
 			Secure:   s.Secure,
@@ -202,7 +264,7 @@ func (s *Session) Flash() *flash.Flash {
 	if s.flash != nil {
 		return s.flash
 	}
-	if b, ok := s.Get(flashKey{}).([]byte); ok {
+	if b, ok := s.Get(flashKey).([]byte); ok {
 		s.flash, _ = flash.Decode(b)
 	}
 	if s.flash == nil {
@@ -214,7 +276,7 @@ func (s *Session) Flash() *flash.Flash {
 // Hijacked checks is session was hijacked,
 // can use only with Manager
 func (s *Session) Hijacked() bool {
-	if t, ok := s.Get(destroyedKey{}).(int64); ok {
+	if t, ok := s.Get(destroyedKey).(int64); ok {
 		if t < time.Now().UnixNano()-int64(HijackedTime) {
 			return true
 		}

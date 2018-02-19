@@ -10,7 +10,6 @@ import (
 	"github.com/acoshift/header"
 	"github.com/acoshift/hime"
 	"github.com/acoshift/middleware"
-	"golang.org/x/net/xsrftoken"
 
 	"github.com/acoshift/acourse/appctx"
 	"github.com/acoshift/acourse/entity"
@@ -28,37 +27,6 @@ func errorRecovery(h http.Handler) http.Handler {
 		}()
 		h.ServeHTTP(w, r)
 	})
-}
-
-func csrf(baseURL, xsrfSecret string) middleware.Middleware {
-	return func(h http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			var id string
-			if u := appctx.GetUser(r.Context()); u != nil {
-				id = u.ID
-			}
-			if r.Method == http.MethodPost {
-				origin := r.Header.Get(header.Origin)
-				if len(origin) > 0 {
-					if origin != baseURL {
-						http.Error(w, "Not allow cross-site post", http.StatusBadRequest)
-						return
-					}
-				}
-
-				x := r.FormValue("X")
-				if !xsrftoken.Valid(x, xsrfSecret, id, r.URL.Path) {
-					http.Error(w, "invalid xsrf token, go back, refresh and try again...", http.StatusBadRequest)
-					return
-				}
-				h.ServeHTTP(w, r)
-				return
-			}
-			token := xsrftoken.Generate(xsrfSecret, id, r.URL.Path)
-			ctx := appctx.NewXSRFTokenContext(r.Context(), token)
-			h.ServeHTTP(w, r.WithContext(ctx))
-		})
-	}
 }
 
 func mustSignedIn(h http.Handler) http.Handler {

@@ -6,8 +6,13 @@ import (
 
 // Config is the session manager config
 type Config struct {
-	Store  Store
-	Secret []byte // session id salt when put to store
+	Store Store
+
+	// Secret is the salt for hash session id before put to store
+	Secret []byte
+
+	// Keys is the keys to sign session id
+	Keys [][]byte
 
 	// Cookie config
 	Domain   string
@@ -17,13 +22,24 @@ type Config struct {
 	Secure   Secure
 	SameSite SameSite
 
-	// DeleteOldSession deletes the old session from store when rotate,
+	// DeleteOldSession deletes the old session from store when regenerate,
 	// better not to delete old session to avoid user loss session when unstable network
 	DeleteOldSession bool
 
-	// Disable features
-	DisableRenew  bool // disable auto renew session
-	DisableHashID bool // disable hash session id when save to store
+	// Resave forces session to save to store even if session was not modified
+	Resave bool
+
+	// Rolling, set cookie every responses
+	Rolling bool
+
+	// Proxy, also checks X-Forwarded-Proto when use prefer secure
+	Proxy bool
+
+	// DisablaHashID disables hash session id when save to store
+	DisableHashID bool
+
+	// GenerateID is the generate id function
+	GenerateID func() string
 }
 
 // Secure config

@@ -43,11 +43,18 @@ func (m *Manager) Middleware() middleware.Middleware {
 				ResponseWriter: w,
 				beforeWriteHeader: func() {
 					for _, s := range storage {
-						m.Save(w, s)
+						err := m.Save(w, s)
+						if err != nil {
+							panic("session: " + err.Error())
+						}
 					}
 				},
 			}
 			h.ServeHTTP(&nw, nr)
+
+			if !nw.wroteHeader {
+				nw.beforeWriteHeader()
+			}
 		})
 	}
 }

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/storage"
+	"github.com/acoshift/csrf"
 	"github.com/acoshift/go-firebase-admin"
 	"github.com/acoshift/header"
 	"github.com/acoshift/hime"
@@ -163,13 +164,20 @@ func New(config Config) hime.HandlerFactory {
 				HTTPOnly: true,
 				Secure:   session.PreferSecure,
 				SameSite: session.SameSiteLax,
+				Rolling:  true,
+				Proxy:    true,
 				Store: redisstore.New(redisstore.Config{
 					Prefix: config.RedisPrefix,
 					Pool:   config.RedisPool,
 				}),
 			}),
 			fetchUser(),
-			csrf(config.BaseURL, config.XSRFSecret),
+			csrf.New(csrf.Config{
+				Origins: []string{config.BaseURL},
+				ForbiddenHandler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					http.Error(w, "Cross-site origin detected!", http.StatusForbidden)
+				}),
+			}),
 		)(r))
 
 		return middleware.Chain(

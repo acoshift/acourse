@@ -178,6 +178,5 @@ func newPage(ctx context.Context) map[string]interface{} {
 		"URL":   "https://acourse.io",
 		"Me":    appctx.GetUser(ctx),
 		"Flash": session.Get(ctx, "sess").Flash().Values(),
-		"XSRF":  template.HTML(`<input type="hidden" name="X" value="` + appctx.GetXSRFToken(ctx) + `">`),
 	}
 }
