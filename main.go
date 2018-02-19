@@ -17,7 +17,6 @@ import (
 	"gopkg.in/gomail.v2"
 
 	"github.com/acoshift/acourse/app"
-	"github.com/acoshift/acourse/view"
 )
 
 func main() {
@@ -81,8 +80,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	view.BaseURL = config.String("base_url")
 
 	err = hime.New().
 		TemplateDir("template").

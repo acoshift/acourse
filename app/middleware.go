@@ -8,13 +8,13 @@ import (
 	"runtime/debug"
 
 	"github.com/acoshift/header"
+	"github.com/acoshift/hime"
 	"github.com/acoshift/middleware"
 	"golang.org/x/net/xsrftoken"
 
 	"github.com/acoshift/acourse/appctx"
 	"github.com/acoshift/acourse/entity"
 	"github.com/acoshift/acourse/repository"
-	"github.com/acoshift/acourse/view"
 )
 
 func errorRecovery(h http.Handler) http.Handler {
@@ -137,31 +137,25 @@ func onlyInstructor(h http.Handler) http.Handler {
 }
 
 func isCourseOwner(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
+	return hime.H(func(ctx hime.Context) hime.Result {
 		u := appctx.GetUser(ctx)
 		if u == nil {
-			http.Redirect(w, r, "/signin", http.StatusFound)
-			return
+			return ctx.Redirect("signin")
 		}
 
-		id := r.FormValue("id")
+		id := ctx.FormValue("id")
 
 		var ownerID string
 		err := db.QueryRowContext(ctx, `select user_id from courses where id = $1`, id).Scan(&ownerID)
 		if err == sql.ErrNoRows {
-			view.NotFound(w, r)
-			return
+			return notFound(ctx)
 		}
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+		must(err)
+
 		if ownerID != u.ID {
-			http.Redirect(w, r, "/", http.StatusFound)
-			return
+			return ctx.Redirect("/")
 		}
-		h.ServeHTTP(w, r)
+		return ctx.Handle(h)
 	})
 }
 
