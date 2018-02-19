@@ -5,7 +5,6 @@
       Reject: {{.Payment.ID}}
     </div>
     <form method="POST">
-      {{$.XSRF}}
       <input type="hidden" name="ID" value="{{.Payment.ID}}">
       <div class="input-field _flex-column">
         <label>Message</label>

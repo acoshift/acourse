@@ -21,6 +21,12 @@
   version = "v1.1.0"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/acoshift/csrf"
+  packages = ["."]
+  revision = "535e29cd193bb8756530e74e298206a8e7324a57"
+
+[[projects]]
   name = "github.com/acoshift/flash"
   packages = ["."]
   revision = "d8b6eafa9dff18a17ecebe034b6cba0af4fae5bc"
@@ -203,8 +209,7 @@
     "idna",
     "internal/timeseries",
     "lex/httplex",
-    "trace",
-    "xsrftoken"
+    "trace"
   ]
   revision = "2fb46b16b8dda405028c50f7c7f0f9dd1fa6bfb1"
 
@@ -340,6 +345,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "1cd48e528ccd8d2874925adb9b6bd5b5fcd3839962aec47d65a5e7a7017c78b1"
+  inputs-digest = "ea33010a534bd392a3974310c3b19596d6d45e29af83dfc2862d6142963f3de2"
   solver-name = "gps-cdcl"
   solver-version = 1

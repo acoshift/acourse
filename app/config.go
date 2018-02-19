@@ -15,7 +15,6 @@ import (
 type Config struct {
 	DB            *sql.DB
 	BaseURL       string
-	XSRFSecret    string
 	RedisPool     *redis.Pool
 	RedisPrefix   string
 	CachePool     *redis.Pool

@@ -37,7 +37,6 @@
           <button class="acourse-button -primary acourse-block _font-sub _full-width">แก้ไข</button>
         </a>
         <form method="POST">
-          {{$.XSRF}}
           <input type="hidden" name="action" value="delete">
           <input type="hidden" name="contentId" value="{{.ID}}">
           <button class="acourse-button -negative _full-width _font-sub">ลบ</button>
