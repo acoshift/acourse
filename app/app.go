@@ -2,16 +2,23 @@ package app
 
 import (
 	"database/sql"
+	"io/ioutil"
+	"math/rand"
 	"net/http"
 	"time"
 
 	"cloud.google.com/go/storage"
 	"github.com/acoshift/go-firebase-admin"
+	"github.com/acoshift/header"
+	"github.com/acoshift/hime"
+	"github.com/acoshift/httprouter"
 	"github.com/acoshift/middleware"
 	"github.com/acoshift/session"
 	redisstore "github.com/acoshift/session/store/redis"
+	"github.com/acoshift/webstatic"
 	"github.com/garyburd/redigo/redis"
 	"gopkg.in/gomail.v2"
+	yaml "gopkg.in/yaml.v2"
 )
 
 var (
@@ -28,10 +35,11 @@ var (
 	cachePool    *redis.Pool
 	cachePrefix  string
 	db           *sql.DB
+	staticConf   = make(map[string]string)
 )
 
 // New creates new app
-func New(config Config) http.Handler {
+func New(config Config) hime.HandlerFactory {
 	auth = config.Auth
 	loc = config.Location
 	slackURL = config.SlackURL
@@ -46,69 +54,145 @@ func New(config Config) http.Handler {
 	cachePrefix = config.CachePrefix
 	db = config.DB
 
-	// create middlewares
-	isCourseOwner := isCourseOwner(config.DB)
+	// load static config
+	// TODO: move to main
+	{
+		bs, _ := ioutil.ReadFile("static.yaml")
+		yaml.Unmarshal(bs, &staticConf)
+	}
 
-	// create mux
-	mux := http.NewServeMux()
+	return func(app hime.App) http.Handler {
+		loadTemplates(app)
 
-	editor := http.NewServeMux()
-	editor.Handle("/create", onlyInstructor(http.HandlerFunc(editorCreate)))
-	editor.Handle("/course", isCourseOwner(http.HandlerFunc(editorCourse)))
-	editor.Handle("/content", isCourseOwner(http.HandlerFunc(editorContent)))
-	editor.Handle("/content/create", isCourseOwner(http.HandlerFunc(editorContentCreate)))
-	editor.Handle("/content/edit", http.HandlerFunc(editorContentEdit))
+		app.Routes(hime.Routes{
+			"index":                  "/",
+			"signin":                 "/signin",
+			"signin.password":        "/signin/password",
+			"signin.check-email":     "/signin/check-email",
+			"signin.link":            "/signin/link",
+			"openid":                 "/openid",
+			"openid.callback":        "/openid/callback",
+			"signup":                 "/signup",
+			"signout":                "/signout",
+			"reset.password":         "/reset/password",
+			"profile":                "/profile",
+			"profile.edit":           "/profile/edit",
+			"course":                 "/course/",
+			"editor.create":          "/editor/create",
+			"editor.course":          "/editor/course",
+			"editor.content":         "/editor/content",
+			"editor.content.create":  "/editor/content/create",
+			"editor.content.edit":    "/editor/content/edit",
+			"admin.users":            "/admin/users",
+			"admin.courses":          "/admin/courses",
+			"admin.payments.pending": "/admin/payments/pending",
+			"admin.payments.history": "/admin/payments/history",
+			"admin.payments.reject":  "/admin/payments/reject",
+		})
 
-	admin := http.NewServeMux()
-	admin.Handle("/users", http.HandlerFunc(adminUsers))
-	admin.Handle("/courses", http.HandlerFunc(adminCourses))
-	admin.Handle("/payments/pending", http.HandlerFunc(adminPendingPayments))
-	admin.Handle("/payments/history", http.HandlerFunc(adminHistoryPayments))
-	admin.Handle("/payments/reject", http.HandlerFunc(adminRejectPayment))
+		mux := http.NewServeMux()
 
-	main := http.NewServeMux()
-	main.Handle("/", http.HandlerFunc(index))
-	main.Handle("/signin", mustNotSignedIn(http.HandlerFunc(signIn)))
-	main.Handle("/signin/password", mustNotSignedIn(http.HandlerFunc(signInPassword)))
-	main.Handle("/signin/check-email", mustNotSignedIn(http.HandlerFunc(checkEmail)))
-	main.Handle("/signin/link", mustNotSignedIn(http.HandlerFunc(signInLink)))
-	main.Handle("/openid", mustNotSignedIn(http.HandlerFunc(openID)))
-	main.Handle("/openid/callback", mustNotSignedIn(http.HandlerFunc(openIDCallback)))
-	main.Handle("/signup", mustNotSignedIn(http.HandlerFunc(signUp)))
-	main.Handle("/signout", http.HandlerFunc(signOut))
-	main.Handle("/reset/password", mustNotSignedIn(http.HandlerFunc(resetPassword)))
-	main.Handle("/profile", mustSignedIn(http.HandlerFunc(profile)))
-	main.Handle("/profile/edit", mustSignedIn(http.HandlerFunc(profileEdit)))
-	main.Handle("/course/", http.StripPrefix("/course/", courseHandler()))
-	main.Handle("/admin/", http.StripPrefix("/admin", onlyAdmin(admin)))
-	main.Handle("/editor/", http.StripPrefix("/editor", editor))
+		mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+		})
 
-	mux.Handle("/~/", http.StripPrefix("/~", cache(http.FileServer(&fileFS{http.Dir("static")}))))
-	mux.Handle("/favicon.ico", fileHandler("static/favicon.ico"))
+		mux.Handle("/~/", http.StripPrefix("/~", cache(webstatic.New("static"))))
+		mux.Handle("/favicon.ico", fileHandler("static/favicon.ico"))
 
-	mux.Handle("/", middleware.Chain(
-		panicLogger,
-		session.Middleware(session.Config{
-			Secret:   config.SessionSecret,
-			Path:     "/",
-			MaxAge:   30 * 24 * time.Hour,
-			HTTPOnly: true,
-			Secure:   session.PreferSecure,
-			SameSite: session.SameSiteLax,
-			Store: redisstore.New(redisstore.Config{
-				Prefix: config.RedisPrefix,
-				Pool:   config.RedisPool,
+		r := httprouter.New()
+		r.HandleMethodNotAllowed = false
+		r.HandleOPTIONS = false
+		r.NotFound = hime.H(notFound)
+
+		r.Get("/", hime.H(index))
+
+		// auth
+		r.Get(app.Route("signin"), mustNotSignedIn(hime.H(signIn)))
+		r.Post(app.Route("signin"), mustNotSignedIn(hime.H(postSignIn)))
+		r.Get(app.Route("signin.password"), mustNotSignedIn(hime.H(signInPassword)))
+		r.Post(app.Route("signin.password"), mustNotSignedIn(hime.H(postSignInPassword)))
+		r.Get(app.Route("signin.check-email"), mustNotSignedIn(hime.H(checkEmail)))
+		r.Get(app.Route("signin.link"), mustNotSignedIn(hime.H(signInLink)))
+		r.Get(app.Route("reset.password"), mustNotSignedIn(hime.H(resetPassword)))
+		r.Post(app.Route("reset.password"), mustNotSignedIn(hime.H(postResetPassword)))
+		r.Get(app.Route("openid"), mustNotSignedIn(hime.H(openID)))
+		r.Get(app.Route("openid.callback"), mustNotSignedIn(hime.H(openIDCallback)))
+		r.Get(app.Route("signup"), mustNotSignedIn(hime.H(signUp)))
+		r.Post(app.Route("signup"), mustNotSignedIn(hime.H(postSignUp)))
+		r.Get(app.Route("signout"), hime.H(signOut)) // TODO: remove get signout
+		r.Post(app.Route("signout"), hime.H(signOut))
+
+		// profile
+		r.Get(app.Route("profile"), mustSignedIn(hime.H(profile)))
+		r.Get(app.Route("profile.edit"), mustSignedIn(hime.H(profileEdit)))
+		r.Post(app.Route("profile.edit"), mustSignedIn(hime.H(postProfileEdit)))
+
+		// course
+		r.Get(app.Route("course", ":courseURL"), hime.H(courseView))
+		r.Get(app.Route("course", ":courseURL", "content"), hime.H(courseContent))
+		r.Get(app.Route("course", ":courseURL", "enroll"), hime.H(courseEnroll))
+		r.Post(app.Route("course", ":courseURL", "enroll"), hime.H(postCourseEnroll))
+		r.Get(app.Route("course", ":courseURL", "assignment"), hime.H(courseAssignment))
+
+		// editor
+		r.Get(app.Route("editor.create"), onlyInstructor(hime.H(editorCreate)))
+		r.Post(app.Route("editor.create"), onlyInstructor(hime.H(postEditorCreate)))
+		r.Get(app.Route("editor.course"), isCourseOwner(hime.H(editorCourse)))
+		r.Post(app.Route("editor.course"), isCourseOwner(hime.H(postEditorCourse)))
+		r.Get(app.Route("editor.content"), isCourseOwner(hime.H(editorContent)))
+		r.Post(app.Route("editor.content"), isCourseOwner(hime.H(postEditorContent)))
+		r.Get(app.Route("editor.content.create"), isCourseOwner(hime.H(editorContentCreate)))
+		r.Post(app.Route("editor.content.create"), isCourseOwner(hime.H(postEditorContentCreate)))
+		r.Get(app.Route("editor.content.edit"), hime.H(editorContentEdit))
+		r.Post(app.Route("editor.content.edit"), hime.H(postEditorContentEdit))
+
+		// admin
+		r.Get(app.Route("admin.users"), onlyAdmin(hime.H(adminUsers)))
+		r.Get(app.Route("admin.courses"), onlyAdmin(hime.H(adminCourses)))
+		r.Get(app.Route("admin.payments.pending"), onlyAdmin(hime.H(adminPendingPayments)))
+		r.Post(app.Route("admin.payments.pending"), onlyAdmin(hime.H(postAdminPendingPayment)))
+		r.Get(app.Route("admin.payments.history"), onlyAdmin(hime.H(adminHistoryPayments)))
+		r.Get(app.Route("admin.payments.reject"), onlyAdmin(hime.H(adminRejectPayment)))
+		r.Post(app.Route("admin.payments.reject"), onlyAdmin(hime.H(postAdminRejectPayment)))
+
+		mux.Handle("/", middleware.Chain(
+			session.Middleware(session.Config{
+				Secret:   config.SessionSecret,
+				Path:     "/",
+				MaxAge:   30 * 24 * time.Hour,
+				HTTPOnly: true,
+				Secure:   session.PreferSecure,
+				SameSite: session.SameSiteLax,
+				Store: redisstore.New(redisstore.Config{
+					Prefix: config.RedisPrefix,
+					Pool:   config.RedisPool,
+				}),
 			}),
-		}),
-		fetchUser(),
-		csrf(config.BaseURL, config.XSRFSecret),
-	)(main))
+			fetchUser(),
+			csrf(config.BaseURL, config.XSRFSecret),
+		)(r))
 
-	return middleware.Chain(
-		setHeaders,
-	)(mux)
+		return middleware.Chain(
+			errorRecovery,
+			setHeaders,
+		)(mux)
+	}
 }
 
-func back(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, r.RequestURI, http.StatusSeeOther)
+func must(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
+var notFoundImages = []string{
+	"https://storage.googleapis.com/acourse/static/9961f3c1-575f-4b98-af4f-447566ee1cb3.png",
+	"https://storage.googleapis.com/acourse/static/b14a40c9-d3a4-465d-9453-ce7fcfbc594c.png",
+}
+
+func notFound(ctx hime.Context) hime.Result {
+	page := newPage(ctx)
+	page["Image"] = notFoundImages[rand.Intn(len(notFoundImages))]
+	ctx.ResponseWriter().Header().Set(header.XContentTypeOptions, "nosniff")
+	return ctx.Status(http.StatusNotFound).View("error.not-found", page)
 }

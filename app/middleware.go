@@ -2,35 +2,28 @@ package app
 
 import (
 	"database/sql"
+	"log"
 	"net/http"
 	"net/url"
 	"runtime/debug"
 
 	"github.com/acoshift/header"
+	"github.com/acoshift/hime"
 	"github.com/acoshift/middleware"
 	"golang.org/x/net/xsrftoken"
 
 	"github.com/acoshift/acourse/appctx"
 	"github.com/acoshift/acourse/entity"
 	"github.com/acoshift/acourse/repository"
-	"github.com/acoshift/acourse/view"
 )
 
-func panicLogger(h http.Handler) http.Handler {
+func errorRecovery(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
-			if r := recover(); r != nil {
-				var p string
-				switch t := r.(type) {
-				case string:
-					p = t
-				case error:
-					p = t.Error()
-				default:
-					p = "unknown"
-				}
+			if err := recover(); err != nil {
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				log.Println(err)
 				debug.PrintStack()
-				http.Error(w, p, http.StatusInternalServerError)
 			}
 		}()
 		h.ServeHTTP(w, r)
@@ -143,35 +136,27 @@ func onlyInstructor(h http.Handler) http.Handler {
 	})
 }
 
-func isCourseOwner(db *sql.DB) middleware.Middleware {
-	return func(h http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			ctx := r.Context()
-			u := appctx.GetUser(ctx)
-			if u == nil {
-				http.Redirect(w, r, "/signin", http.StatusFound)
-				return
-			}
+func isCourseOwner(h http.Handler) http.Handler {
+	return hime.H(func(ctx hime.Context) hime.Result {
+		u := appctx.GetUser(ctx)
+		if u == nil {
+			return ctx.Redirect("signin")
+		}
 
-			id := r.FormValue("id")
+		id := ctx.FormValue("id")
 
-			var ownerID string
-			err := db.QueryRowContext(ctx, `select user_id from courses where id = $1`, id).Scan(&ownerID)
-			if err == sql.ErrNoRows {
-				view.NotFound(w, r)
-				return
-			}
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			if ownerID != u.ID {
-				http.Redirect(w, r, "/", http.StatusFound)
-				return
-			}
-			h.ServeHTTP(w, r)
-		})
-	}
+		var ownerID string
+		err := db.QueryRowContext(ctx, `select user_id from courses where id = $1`, id).Scan(&ownerID)
+		if err == sql.ErrNoRows {
+			return notFound(ctx)
+		}
+		must(err)
+
+		if ownerID != u.ID {
+			return ctx.Redirect("/")
+		}
+		return ctx.Handle(h)
+	})
 }
 
 func setHeaders(h http.Handler) http.Handler {

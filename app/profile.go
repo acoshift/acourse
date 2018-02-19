@@ -7,37 +7,31 @@ import (
 	"unicode/utf8"
 
 	"github.com/acoshift/header"
+	"github.com/acoshift/hime"
 	"github.com/acoshift/pgsql"
 	"github.com/asaskevich/govalidator"
 
 	"github.com/acoshift/acourse/appctx"
 	"github.com/acoshift/acourse/repository"
-	"github.com/acoshift/acourse/view"
 )
 
-func profile(w http.ResponseWriter, r *http.Request) {
-	user := appctx.GetUser(r.Context())
+func profile(ctx hime.Context) hime.Result {
+	user := appctx.GetUser(ctx)
 
 	ownCourses, err := repository.ListOwnCourses(db, user.ID)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	enrolledCourses, err := repository.ListEnrolledCourses(db, user.ID)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	must(err)
 
-	view.Profile(w, r, ownCourses, enrolledCourses)
+	enrolledCourses, err := repository.ListEnrolledCourses(db, user.ID)
+	must(err)
+
+	page := newPage(ctx)
+	page["Title"] = user.Username + " | " + page["Title"].(string)
+	page["OwnCourses"] = ownCourses
+	page["EnrolledCourses"] = enrolledCourses
+	return ctx.View("profile", page)
 }
 
-func profileEdit(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodPost {
-		postProfileEdit(w, r)
-		return
-	}
-	ctx := r.Context()
+func profileEdit(ctx hime.Context) hime.Result {
 	user := appctx.GetUser(ctx)
 	f := appctx.GetSession(ctx).Flash()
 	if !f.Has("Username") {
@@ -49,40 +43,39 @@ func profileEdit(w http.ResponseWriter, r *http.Request) {
 	if !f.Has("AboutMe") {
 		f.Set("AboutMe", user.AboutMe)
 	}
-	view.ProfileEdit(w, r)
+
+	page := newPage(ctx)
+	page["Title"] = user.Username + " | " + page["Title"].(string)
+	return ctx.View("profile.edit", page)
 }
 
-func postProfileEdit(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
+func postProfileEdit(ctx hime.Context) hime.Result {
 	user := appctx.GetUser(ctx)
 	f := appctx.GetSession(ctx).Flash()
 
 	var imageURL string
-	if image, info, err := r.FormFile("Image"); err != http.ErrMissingFile && info.Size > 0 {
+	if image, info, err := ctx.FormFile("Image"); err != http.ErrMissingFile && info.Size > 0 {
 		if err != nil {
 			f.Add("Errors", err.Error())
-			back(w, r)
-			return
+			return ctx.RedirectToGet()
 		}
 
 		if !strings.Contains(info.Header.Get(header.ContentType), "image") {
 			f.Add("Errors", "file is not an image")
-			back(w, r)
-			return
+			return ctx.RedirectToGet()
 		}
 
 		imageURL, err = uploadProfileImage(ctx, image)
 		if err != nil {
 			f.Add("Errors", err.Error())
-			back(w, r)
-			return
+			return ctx.RedirectToGet()
 		}
 	}
 
 	var (
-		username = r.FormValue("Username")
-		name     = r.FormValue("Name")
-		aboutMe  = r.FormValue("AboutMe")
+		username = ctx.FormValue("Username")
+		name     = ctx.FormValue("Name")
+		aboutMe  = ctx.FormValue("AboutMe")
 	)
 	f.Set("Username", username)
 	f.Set("Name", name)
@@ -101,8 +94,7 @@ func postProfileEdit(w http.ResponseWriter, r *http.Request) {
 		f.Add("Errors", "about me must have lower than 256 characters")
 	}
 	if f.Has("Errors") {
-		back(w, r)
-		return
+		return ctx.RedirectToGet()
 	}
 
 	err := pgsql.RunInTx(db, nil, func(tx *sql.Tx) error {
@@ -132,9 +124,8 @@ func postProfileEdit(w http.ResponseWriter, r *http.Request) {
 	})
 	if err != nil {
 		f.Add("Errors", err.Error())
-		back(w, r)
-		return
+		return ctx.RedirectToGet()
 	}
 
-	http.Redirect(w, r, "/profile", http.StatusSeeOther)
+	return ctx.RedirectTo("profile")
 }

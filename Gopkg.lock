@@ -39,6 +39,18 @@
   revision = "5c88c77f50897ba89140829b44b9d96c5050ff5a"
 
 [[projects]]
+  name = "github.com/acoshift/hime"
+  packages = ["."]
+  revision = "f1cf9edd4b1d35de350e0ed16019881ca7a36dc1"
+  version = "v0.0.14"
+
+[[projects]]
+  name = "github.com/acoshift/httprouter"
+  packages = ["."]
+  revision = "fecd5a0a4ef0f46879ac1b1f5286156b2fd8b63b"
+  version = "v2.1.0"
+
+[[projects]]
   name = "github.com/acoshift/middleware"
   packages = ["."]
   revision = "eb528086425529ef1d014404066c11b3bfa15a92"
@@ -58,6 +70,12 @@
   ]
   revision = "01bf3e4593772b5aaf64efa0d18956559ee41e27"
   version = "v0.4.1"
+
+[[projects]]
+  name = "github.com/acoshift/webstatic"
+  packages = ["."]
+  revision = "81f1897e65a6ba4534d8110692e5fca853027af7"
+  version = "v1.0.0"
 
 [[projects]]
   name = "github.com/asaskevich/govalidator"
@@ -322,6 +340,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "1645beaf32a7f28a3ab99ebc2cad2649ff1a7fe9e48454b89be639ba7ae5aa50"
+  inputs-digest = "1cd48e528ccd8d2874925adb9b6bd5b5fcd3839962aec47d65a5e7a7017c78b1"
   solver-name = "gps-cdcl"
   solver-version = 1

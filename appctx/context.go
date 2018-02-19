@@ -11,7 +11,6 @@ import (
 type (
 	userKey        struct{}
 	xsrfKey        struct{}
-	courseURLKey   struct{}
 	redisPoolKey   struct{}
 	redisPrefixKey struct{}
 	cachePoolKey   struct{}
@@ -40,17 +39,6 @@ func NewXSRFTokenContext(ctx context.Context, token string) context.Context {
 // GetXSRFToken gets xsrf token from context
 func GetXSRFToken(ctx context.Context) string {
 	x, _ := ctx.Value(xsrfKey{}).(string)
-	return x
-}
-
-// NewCourseURLContext creates new context with course url
-func NewCourseURLContext(ctx context.Context, v string) context.Context {
-	return context.WithValue(ctx, courseURLKey{}, v)
-}
-
-// GetCourseURL gets course url from context
-func GetCourseURL(ctx context.Context) string {
-	x, _ := ctx.Value(courseURLKey{}).(string)
 	return x
 }
 

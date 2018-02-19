@@ -4,78 +4,73 @@ import (
 	"database/sql"
 	"fmt"
 	"math"
-	"net/http"
 	"strconv"
 
+	"github.com/acoshift/hime"
 	"github.com/acoshift/pgsql"
 
 	"github.com/acoshift/acourse/entity"
 	"github.com/acoshift/acourse/repository"
-	"github.com/acoshift/acourse/view"
 )
 
-func adminUsers(w http.ResponseWriter, r *http.Request) {
-	page, _ := strconv.ParseInt(r.FormValue("page"), 10, 64)
-	if page <= 0 {
-		page = 1
+func adminUsers(ctx hime.Context) hime.Result {
+	p, _ := strconv.ParseInt(ctx.FormValue("page"), 10, 64)
+	if p <= 0 {
+		p = 1
 	}
 	limit := int64(30)
 
 	cnt, err := repository.CountUsers(db)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	must(err)
 
-	offset := (page - 1) * limit
+	offset := (p - 1) * limit
 	for offset > cnt {
-		page--
-		offset = (page - 1) * limit
+		p--
+		offset = (p - 1) * limit
 	}
 	totalPage := cnt / limit
 
 	users, err := repository.ListUsers(db, limit, offset)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	must(err)
 
-	view.AdminUsers(w, r, users, int(page), int(totalPage))
+	page := newPage(ctx)
+	page["Users"] = users
+	page["CurrentPage"] = int(p)
+	page["TotalPage"] = int(totalPage)
+	return ctx.View("admin.users", page)
 }
 
-func adminCourses(w http.ResponseWriter, r *http.Request) {
-	page, _ := strconv.ParseInt(r.FormValue("page"), 10, 64)
-	if page <= 0 {
-		page = 1
+func adminCourses(ctx hime.Context) hime.Result {
+	p, _ := strconv.ParseInt(ctx.FormValue("page"), 10, 64)
+	if p <= 0 {
+		p = 1
 	}
 	limit := int64(30)
 
 	cnt, err := repository.CountCourses(db)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	must(err)
 
-	offset := (page - 1) * limit
+	offset := (p - 1) * limit
 	for offset > cnt {
-		page--
-		offset = (page - 1) * limit
+		p--
+		offset = (p - 1) * limit
 	}
 	totalPage := int64(math.Ceil(float64(cnt) / float64(limit)))
 
 	courses, err := repository.ListCourses(db, limit, offset)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	must(err)
 
-	view.AdminCourses(w, r, courses, int(page), int(totalPage))
+	page := newPage(ctx)
+	page["Courses"] = courses
+	page["CurrentPage"] = int(p)
+	page["TotalPage"] = int(totalPage)
+	return ctx.View("admin.courses", page)
 }
 
-func adminPayments(w http.ResponseWriter, r *http.Request, history bool) {
-	page, _ := strconv.ParseInt(r.FormValue("page"), 10, 64)
-	if page <= 0 {
-		page = 1
+func adminPayments(ctx hime.Context, history bool) hime.Result {
+	p, _ := strconv.ParseInt(ctx.FormValue("page"), 10, 64)
+	if p <= 0 {
+		p = 1
 	}
 	limit := int64(30)
 
@@ -86,15 +81,12 @@ func adminPayments(w http.ResponseWriter, r *http.Request, history bool) {
 	} else {
 		cnt, err = repository.CountPendingPayments(db)
 	}
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	must(err)
 
-	offset := (page - 1) * limit
+	offset := (p - 1) * limit
 	for offset > cnt {
-		page--
-		offset = (page - 1) * limit
+		p--
+		offset = (p - 1) * limit
 	}
 	totalPage := cnt / limit
 
@@ -104,26 +96,19 @@ func adminPayments(w http.ResponseWriter, r *http.Request, history bool) {
 	} else {
 		payments, err = repository.ListPendingPayments(db, limit, offset)
 	}
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	must(err)
 
-	view.AdminPayments(w, r, payments, int(page), int(totalPage))
+	page := newPage(ctx)
+	page["Payments"] = payments
+	page["CurrentPage"] = int(p)
+	page["TotalPage"] = int(totalPage)
+	return ctx.View("admin.payments", page)
 }
 
-func adminRejectPayment(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodPost {
-		postAdminRejectPayment(w, r)
-		return
-	}
-
-	id := r.FormValue("id")
+func adminRejectPayment(ctx hime.Context) hime.Result {
+	id := ctx.FormValue("id")
 	x, err := repository.GetPayment(db, id)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	must(err)
 
 	name := x.User.Name
 	if len(name) == 0 {
@@ -162,12 +147,15 @@ func adminRejectPayment(w http.ResponseWriter, r *http.Request) {
 		x.Course.Link(),
 	)
 
-	view.AdminPaymentReject(w, r, x, message)
+	page := newPage(ctx)
+	page["Payment"] = x
+	page["message"] = message
+	return ctx.View("admin.payment.reject", page)
 }
 
-func postAdminRejectPayment(w http.ResponseWriter, r *http.Request) {
-	message := r.FormValue("Message")
-	id := r.FormValue("ID")
+func postAdminRejectPayment(ctx hime.Context) hime.Result {
+	message := ctx.FormValue("Message")
+	id := ctx.FormValue("ID")
 
 	var x *entity.Payment
 	err := pgsql.RunInTx(db, nil, func(tx *sql.Tx) error {
@@ -178,10 +166,7 @@ func postAdminRejectPayment(w http.ResponseWriter, r *http.Request) {
 		}
 		return repository.RejectPayment(tx, x)
 	})
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	must(err)
 
 	if x.User.Email.Valid {
 		go func() {
@@ -195,13 +180,13 @@ func postAdminRejectPayment(w http.ResponseWriter, r *http.Request) {
 		}()
 	}
 
-	http.Redirect(w, r, "/admin/payments/pending", http.StatusSeeOther)
+	return ctx.RedirectTo("admin.payments.pending")
 }
 
-func postAdminPendingPayment(w http.ResponseWriter, r *http.Request) {
-	action := r.FormValue("Action")
+func postAdminPendingPayment(ctx hime.Context) hime.Result {
+	action := ctx.FormValue("Action")
 
-	id := r.FormValue("ID")
+	id := ctx.FormValue("ID")
 	if action == "accept" {
 		var x *entity.Payment
 		err := pgsql.RunInTx(db, nil, func(tx *sql.Tx) error {
@@ -212,10 +197,7 @@ func postAdminPendingPayment(w http.ResponseWriter, r *http.Request) {
 			}
 			return repository.AcceptPayment(tx, x)
 		})
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+		must(err)
 		if x.User.Email.Valid {
 			go func() {
 				// re-fetch payment to get latest timestamp
@@ -273,17 +255,13 @@ https://acourse.io
 			}()
 		}
 	}
-	http.Redirect(w, r, "/admin/payments/pending", http.StatusSeeOther)
+	return ctx.RedirectTo("admin.payments.pending")
 }
 
-func adminPendingPayments(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodPost {
-		postAdminPendingPayment(w, r)
-		return
-	}
-	adminPayments(w, r, false)
+func adminPendingPayments(ctx hime.Context) hime.Result {
+	return adminPayments(ctx, false)
 }
 
-func adminHistoryPayments(w http.ResponseWriter, r *http.Request) {
-	adminPayments(w, r, true)
+func adminHistoryPayments(ctx hime.Context) hime.Result {
+	return adminPayments(ctx, true)
 }

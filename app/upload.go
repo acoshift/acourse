@@ -21,10 +21,7 @@ func upload(ctx context.Context, r io.Reader, filename string) error {
 	defer writer.Close()
 	writer.CacheControl = "public, max-age=31536000"
 	_, err := io.Copy(writer, r)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 func generateFilename() string {

@@ -11,13 +11,13 @@ import (
 	"unicode/utf8"
 
 	"github.com/acoshift/go-firebase-admin"
+	"github.com/acoshift/hime"
 	"github.com/acoshift/pgsql"
 	"github.com/asaskevich/govalidator"
 
 	"github.com/acoshift/acourse/appctx"
 	"github.com/acoshift/acourse/entity"
 	"github.com/acoshift/acourse/repository"
-	"github.com/acoshift/acourse/view"
 )
 
 func generateRandomString(n int) string {
@@ -34,37 +34,28 @@ func generateMagicLinkID() string {
 	return generateRandomString(64)
 }
 
-func signIn(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodPost {
-		postSignIn(w, r)
-		return
-	}
-	view.SignIn(w, r)
+func signIn(ctx hime.Context) hime.Result {
+	return ctx.View("signin", newPage(ctx))
 }
 
-func postSignIn(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
+func postSignIn(ctx hime.Context) hime.Result {
 	s := appctx.GetSession(ctx)
 	f := s.Flash()
 
-	email := r.FormValue("Email")
+	email := ctx.FormValue("Email")
 	if len(email) == 0 {
 		f.Add("Errors", "email required")
 	}
 	if f.Has("Errors") {
 		f.Set("Email", email)
-		back(w, r)
-		return
+		return ctx.RedirectToGet()
 	}
 
 	ok, err := repository.CanAcquireMagicLink(redisPool, redisPrefix, email)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	must(err)
 	if !ok {
 		f.Add("Errors", "อีเมลของคุณได้ขอ Magic Link จากเราไปแล้ว กรุณาตรวจสอบอีเมล")
-		back(w, r)
+		return ctx.RedirectToGet()
 	}
 
 	f.Set("CheckEmail", "1")
@@ -72,28 +63,20 @@ func postSignIn(w http.ResponseWriter, r *http.Request) {
 	user, err := repository.FindUserByEmail(db, email)
 	// don't lets user know if email is wrong
 	if err == entity.ErrNotFound {
-		http.Redirect(w, r, "/signin/check-email", http.StatusSeeOther)
-		return
+		return ctx.RedirectTo("signin.check-email")
 	}
 	if err != nil {
 		f.Add("Errors", err.Error())
-		back(w, r)
-		return
+		return ctx.RedirectToGet()
 	}
 
 	linkID := generateMagicLinkID()
 
 	err = repository.StoreMagicLink(redisPool, redisPrefix, linkID, user.ID)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	must(err)
 
 	linkQuery := make(url.Values)
 	linkQuery.Set("id", linkID)
-	if x := r.FormValue("r"); len(x) > 0 {
-		linkQuery.Set("r", parsePath(x))
-	}
 
 	message := fmt.Sprintf(`สวัสดีครับคุณ %s,
 
@@ -103,29 +86,25 @@ func postSignIn(w http.ResponseWriter, r *http.Request) {
 %s
 
 ทีมงาน acourse.io
-	`, user.Name, makeLink("/signin/link", linkQuery))
+	`, user.Name, "/signin/link?id="+linkID)
 
 	go sendEmail(user.Email.String, "Magic Link Request", markdown(message))
 
-	http.Redirect(w, r, "/signin/check-email", http.StatusSeeOther)
+	return ctx.RedirectTo("signin.check-email")
 }
 
-func checkEmail(w http.ResponseWriter, r *http.Request) {
-	f := appctx.GetSession(r.Context()).Flash()
+func checkEmail(ctx hime.Context) hime.Result {
+	f := appctx.GetSession(ctx).Flash()
 	if !f.Has("CheckEmail") {
-		http.Redirect(w, r, "/", http.StatusFound)
-		return
+		return ctx.Redirect("/")
 	}
-	view.CheckEmail(w, r)
+	return ctx.View("check-email", newPage(ctx))
 }
 
-func signInLink(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	linkID := r.FormValue("id")
+func signInLink(ctx hime.Context) hime.Result {
+	linkID := ctx.FormValue("id")
 	if len(linkID) == 0 {
-		http.Redirect(w, r, "/signin", http.StatusFound)
-		return
+		return ctx.RedirectTo("signin")
 	}
 
 	s := appctx.GetSession(ctx)
@@ -134,46 +113,38 @@ func signInLink(w http.ResponseWriter, r *http.Request) {
 	userID, err := repository.FindMagicLink(redisPool, redisPrefix, linkID)
 	if err != nil {
 		f.Add("Errors", "ไม่พบ Magic Link ของคุณ")
-		http.Redirect(w, r, "/signin", http.StatusFound)
-		return
+		return ctx.RedirectTo("signin")
 	}
 
 	setUserID(s, userID)
-	http.Redirect(w, r, "/", http.StatusFound)
+	return ctx.Redirect("/")
 }
 
-func signInPassword(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodPost {
-		postSignInPassword(w, r)
-		return
-	}
-	view.SignInPassword(w, r)
+func signInPassword(ctx hime.Context) hime.Result {
+	return ctx.View("signin.password", newPage(ctx))
 }
 
-func postSignInPassword(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
+func postSignInPassword(ctx hime.Context) hime.Result {
 	s := appctx.GetSession(ctx)
 	f := s.Flash()
 
-	email := r.FormValue("Email")
+	email := ctx.PostFormValue("Email")
 	if len(email) == 0 {
 		f.Add("Errors", "email required")
 	}
-	pass := r.FormValue("Password")
+	pass := ctx.PostFormValue("Password")
 	if len(pass) == 0 {
 		f.Add("Errors", "password required")
 	}
 	if f.Has("Errors") {
 		f.Set("Email", email)
-		back(w, r)
-		return
+		return ctx.RedirectToGet()
 	}
 
 	userID, err := auth.VerifyPassword(ctx, email, pass)
 	if err != nil {
 		f.Add("Errors", err.Error())
-		back(w, r)
-		return
+		return ctx.RedirectToGet()
 	}
 
 	s.Rotate()
@@ -183,21 +154,14 @@ func postSignInPassword(w http.ResponseWriter, r *http.Request) {
 	// this happend when database out of sync with firebase authentication
 	{
 		ok, err := repository.IsUserExists(db, userID)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+		must(err)
 		if !ok {
 			err = repository.CreateUser(db, &entity.User{ID: userID, Email: sql.NullString{String: email, Valid: len(email) > 0}})
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
+			must(err)
 		}
 	}
 
-	rURL := parsePath(r.FormValue("r"))
-	http.Redirect(w, r, rURL, http.StatusSeeOther)
+	return ctx.SafeRedirect(ctx.FormValue("r"))
 }
 
 var allowProvider = map[string]bool{
@@ -206,35 +170,27 @@ var allowProvider = map[string]bool{
 	"github.com":   true,
 }
 
-func openID(w http.ResponseWriter, r *http.Request) {
-	p := r.FormValue("p")
+func openID(ctx hime.Context) hime.Result {
+	p := ctx.FormValue("p")
 	if !allowProvider[p] {
-		http.Error(w, "provider not allowed", http.StatusBadRequest)
-		return
+		return ctx.Status(http.StatusBadRequest).String("provider not allowed")
 	}
 
-	ctx := r.Context()
 	sessID := generateSessionID()
 	redirectURL, err := auth.CreateAuthURI(ctx, p, baseURL+"/openid/callback", sessID)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	must(err)
+
 	s := appctx.GetSession(ctx)
 	setOpenIDSessionID(s, sessID)
-	http.Redirect(w, r, redirectURL, http.StatusSeeOther)
+	return ctx.Redirect(redirectURL)
 }
 
-func openIDCallback(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
+func openIDCallback(ctx hime.Context) hime.Result {
 	s := appctx.GetSession(ctx)
 	sessID := getOpenIDSessionID(s)
 	delOpenIDSessionID(s)
-	user, err := auth.VerifyAuthCallbackURI(ctx, baseURL+r.RequestURI, sessID)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	user, err := auth.VerifyAuthCallbackURI(ctx, baseURL+ctx.Request().RequestURI, sessID)
+	must(err)
 
 	err = pgsql.RunInTx(db, nil, func(tx *sql.Tx) error {
 		// check is user sign up
@@ -255,29 +211,21 @@ func openIDCallback(w http.ResponseWriter, r *http.Request) {
 		}
 		return nil
 	})
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	must(err)
 
 	s.Rotate()
 	setUserID(s, user.UserID)
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	return ctx.RedirectTo("index")
 }
 
-func signUp(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodPost {
-		postSignUp(w, r)
-		return
-	}
-	view.SignUp(w, r)
+func signUp(ctx hime.Context) hime.Result {
+	return ctx.View("signup", newPage(ctx))
 }
 
-func postSignUp(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
+func postSignUp(ctx hime.Context) hime.Result {
 	f := appctx.GetSession(ctx).Flash()
 
-	email := r.FormValue("Email")
+	email := ctx.FormValue("Email")
 	if len(email) == 0 {
 		f.Add("Errors", "email required")
 	}
@@ -285,9 +233,9 @@ func postSignUp(w http.ResponseWriter, r *http.Request) {
 	email, err := govalidator.NormalizeEmail(email)
 	if err != nil {
 		f.Add("Errors", err.Error())
-		return
+		return ctx.RedirectToGet()
 	}
-	pass := r.FormValue("Password")
+	pass := ctx.FormValue("Password")
 	if len(pass) == 0 {
 		f.Add("Errors", "password required")
 	}
@@ -296,8 +244,7 @@ func postSignUp(w http.ResponseWriter, r *http.Request) {
 	}
 	if f.Has("Errors") {
 		f.Set("Email", email)
-		back(w, r)
-		return
+		return ctx.RedirectToGet()
 	}
 
 	userID, err := auth.CreateUser(ctx, &firebase.User{
@@ -306,8 +253,7 @@ func postSignUp(w http.ResponseWriter, r *http.Request) {
 	})
 	if err != nil {
 		f.Add("Errors", err.Error())
-		back(w, r)
-		return
+		return ctx.RedirectToGet()
 	}
 
 	_, err = db.ExecContext(ctx, `
@@ -316,37 +262,33 @@ func postSignUp(w http.ResponseWriter, r *http.Request) {
 		values
 			($1, $2, '', $3)
 	`, userID, userID, email)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	must(err)
 
 	s := appctx.GetSession(ctx)
 	setUserID(s, userID)
 
-	rURL := parsePath(r.FormValue("r"))
-	http.Redirect(w, r, rURL, http.StatusSeeOther)
+	return ctx.SafeRedirect(ctx.FormValue("r"))
 }
 
-func signOut(w http.ResponseWriter, r *http.Request) {
-	appctx.GetSession(r.Context()).Destroy()
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+func signOut(ctx hime.Context) hime.Result {
+	appctx.GetSession(ctx).Destroy()
+	return ctx.Redirect("/")
 }
 
-func resetPassword(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodPost {
-		defer back(w, r)
-		ctx := r.Context()
-		f := appctx.GetSession(ctx).Flash()
-		f.Set("OK", "1")
-		email := r.FormValue("email")
-		user, err := auth.GetUserByEmail(ctx, email)
-		if err != nil {
-			// don't send any error back to user
-			return
-		}
-		auth.SendPasswordResetEmail(ctx, user.Email)
-		return
+func resetPassword(ctx hime.Context) hime.Result {
+	return ctx.View("reset.password", newPage(ctx))
+}
+
+func postResetPassword(ctx hime.Context) hime.Result {
+	f := appctx.GetSession(ctx).Flash()
+	f.Set("OK", "1")
+	email := ctx.FormValue("email")
+	user, err := auth.GetUserByEmail(ctx, email)
+	if err != nil {
+		// don't send any error back to user
+		return ctx.RedirectToGet()
 	}
-	view.ResetPassword(w, r)
+	auth.SendPasswordResetEmail(ctx, user.Email)
+
+	return ctx.RedirectToGet()
 }
