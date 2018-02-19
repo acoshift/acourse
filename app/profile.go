@@ -33,10 +33,6 @@ func profile(w http.ResponseWriter, r *http.Request) {
 }
 
 func profileEdit(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodPost {
-		postProfileEdit(w, r)
-		return
-	}
 	ctx := r.Context()
 	user := appctx.GetUser(ctx)
 	f := appctx.GetSession(ctx).Flash()

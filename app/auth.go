@@ -35,10 +35,6 @@ func generateMagicLinkID() string {
 }
 
 func signIn(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodPost {
-		postSignIn(w, r)
-		return
-	}
 	view.SignIn(w, r)
 }
 
@@ -266,10 +262,6 @@ func openIDCallback(w http.ResponseWriter, r *http.Request) {
 }
 
 func signUp(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodPost {
-		postSignUp(w, r)
-		return
-	}
 	view.SignUp(w, r)
 }
 
@@ -334,19 +326,19 @@ func signOut(w http.ResponseWriter, r *http.Request) {
 }
 
 func resetPassword(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodPost {
-		defer back(w, r)
-		ctx := r.Context()
-		f := appctx.GetSession(ctx).Flash()
-		f.Set("OK", "1")
-		email := r.FormValue("email")
-		user, err := auth.GetUserByEmail(ctx, email)
-		if err != nil {
-			// don't send any error back to user
-			return
-		}
-		auth.SendPasswordResetEmail(ctx, user.Email)
+	view.ResetPassword(w, r)
+}
+
+func postResetPassword(w http.ResponseWriter, r *http.Request) {
+	defer back(w, r)
+	ctx := r.Context()
+	f := appctx.GetSession(ctx).Flash()
+	f.Set("OK", "1")
+	email := r.FormValue("email")
+	user, err := auth.GetUserByEmail(ctx, email)
+	if err != nil {
+		// don't send any error back to user
 		return
 	}
-	view.ResetPassword(w, r)
+	auth.SendPasswordResetEmail(ctx, user.Email)
 }

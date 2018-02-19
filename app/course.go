@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/acoshift/header"
+	"github.com/acoshift/httprouter"
 	"github.com/acoshift/pgsql"
 	"github.com/google/uuid"
 	"github.com/lib/pq"
@@ -23,7 +24,7 @@ import (
 func courseView(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	user := appctx.GetUser(ctx)
-	link := appctx.GetCourseURL(ctx)
+	link := httprouter.GetParam(ctx, "courseURL")
 
 	// if id can parse to uuid get course from id
 	id := link
@@ -104,7 +105,7 @@ func courseView(w http.ResponseWriter, r *http.Request) {
 func courseContent(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	user := appctx.GetUser(ctx)
-	link := appctx.GetCourseURL(ctx)
+	link := httprouter.GetParam(ctx, "courseURL")
 
 	// if id can parse to uuid get course from id
 	id := link
@@ -409,14 +410,10 @@ func postEditorContent(w http.ResponseWriter, r *http.Request) {
 }
 
 func courseEnroll(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodPost {
-		postCourseEnroll(w, r)
-		return
-	}
 	ctx := r.Context()
 	user := appctx.GetUser(ctx)
 
-	link := appctx.GetCourseURL(ctx)
+	link := httprouter.GetParam(ctx, "courseURL")
 
 	id := link
 	_, err := uuid.Parse(link)
@@ -478,7 +475,7 @@ func postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 	user := appctx.GetUser(ctx)
 	f := appctx.GetSession(ctx).Flash()
 
-	link := appctx.GetCourseURL(ctx)
+	link := httprouter.GetParam(ctx, "courseURL")
 
 	id := link
 	_, err := uuid.Parse(link)
@@ -614,7 +611,7 @@ func postCourseEnroll(w http.ResponseWriter, r *http.Request) {
 func courseAssignment(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	user := appctx.GetUser(ctx)
-	link := appctx.GetCourseURL(ctx)
+	link := httprouter.GetParam(ctx, "courseURL")
 
 	// if id can parse to int64 get course from id
 	id := link
