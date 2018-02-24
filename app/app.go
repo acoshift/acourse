@@ -130,7 +130,7 @@ func New(config Config) hime.HandlerFactory {
 
 		// course
 		r.Get(app.Route("course", ":courseURL"), hime.H(courseView))
-		r.Get(app.Route("course", ":courseURL", "content"), hime.H(courseContent))
+		r.Get(app.Route("course", ":courseURL", "content"), mustSignedIn(hime.H(courseContent)))
 		r.Get(app.Route("course", ":courseURL", "enroll"), mustSignedIn(hime.H(courseEnroll)))
 		r.Post(app.Route("course", ":courseURL", "enroll"), mustSignedIn(hime.H(postCourseEnroll)))
 		r.Get(app.Route("course", ":courseURL", "assignment"), mustSignedIn(hime.H(courseAssignment)))
