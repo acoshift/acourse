@@ -131,9 +131,9 @@ func New(config Config) hime.HandlerFactory {
 		// course
 		r.Get(app.Route("course", ":courseURL"), hime.H(courseView))
 		r.Get(app.Route("course", ":courseURL", "content"), hime.H(courseContent))
-		r.Get(app.Route("course", ":courseURL", "enroll"), hime.H(courseEnroll))
-		r.Post(app.Route("course", ":courseURL", "enroll"), hime.H(postCourseEnroll))
-		r.Get(app.Route("course", ":courseURL", "assignment"), hime.H(courseAssignment))
+		r.Get(app.Route("course", ":courseURL", "enroll"), mustSignedIn(hime.H(courseEnroll)))
+		r.Post(app.Route("course", ":courseURL", "enroll"), mustSignedIn(hime.H(postCourseEnroll)))
+		r.Get(app.Route("course", ":courseURL", "assignment"), mustSignedIn(hime.H(courseAssignment)))
 
 		// editor
 		r.Get(app.Route("editor.create"), onlyInstructor(hime.H(editorCreate)))
