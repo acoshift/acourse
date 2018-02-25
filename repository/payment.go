@@ -63,11 +63,9 @@ const (
 // CreatePayment creates new payment
 func CreatePayment(q Queryer, x *entity.Payment) error {
 	_, err := q.Exec(`
-		insert into payments
-			(user_id, course_id, image, price, original_price, code, status)
-		values
-			($1, $2, $3, $4, $5, $6, $7)
-		returning id
+		INSERT INTO payments (user_id, course_id, image, price, original_price, code, status)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
+		RETURNING id;
 	`, x.UserID, x.CourseID, x.Image, x.Price, x.OriginalPrice, x.Code, entity.Pending)
 	if err != nil {
 		return err
