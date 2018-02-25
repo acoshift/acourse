@@ -2,7 +2,6 @@ package repository
 
 import (
 	"database/sql"
-	"fmt"
 
 	"github.com/lib/pq"
 
@@ -47,23 +46,6 @@ const (
 		limit $1 offset $2
 	`
 )
-
-// SaveUser saves user
-func SaveUser(q Queryer, x *entity.User) error {
-	if len(x.ID) == 0 {
-		return fmt.Errorf("invalid id")
-	}
-	_, err := q.Exec(`
-		upsert into users
-			(id, name, username, about_me, image, updated_at)
-		values
-			($1, $2, $3, $4, $5, now())
-	`, x.ID, x.Name, x.Username, x.AboutMe, x.Image)
-	if err != nil {
-		return err
-	}
-	return nil
-}
 
 func scanUser(scan scanFunc, x *entity.User) error {
 	err := scan(&x.ID, &x.Name, &x.Username, &x.Email, &x.AboutMe, &x.Image, &x.CreatedAt, &x.UpdatedAt, &x.Role.Admin, &x.Role.Instructor)
