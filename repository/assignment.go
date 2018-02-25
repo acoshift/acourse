@@ -7,11 +7,10 @@ import (
 // GetAssignments gets assignments
 func GetAssignments(q Queryer, courseID string) ([]*entity.Assignment, error) {
 	rows, err := q.Query(`
-		select
-			id, title, long_desc, open
-		from assignments
-		where course_id = $1
-		order by i asc
+		  SELECT id, title, long_desc, open
+		    FROM assignments
+		   WHERE course_id = $1
+		ORDER BY i ASC;
 	`, courseID)
 	if err != nil {
 		return nil, err
