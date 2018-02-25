@@ -156,7 +156,10 @@ func ListUsers(q Queryer, limit, offset int64) ([]*entity.User, error) {
 // CountUsers counts users
 func CountUsers(q Queryer) (int64, error) {
 	var cnt int64
-	err := q.QueryRow(`select count(*) from users`).Scan(&cnt)
+	err := q.QueryRow(`
+		SELECT count(*)
+		  FROM users;
+	`).Scan(&cnt)
 	if err != nil {
 		return 0, err
 	}
@@ -166,7 +169,11 @@ func CountUsers(q Queryer) (int64, error) {
 // IsUserExists checks is user exists
 func IsUserExists(q Queryer, id string) (bool, error) {
 	var cnt int64
-	err := q.QueryRow(`select count(*) from users where id = $1`, id).Scan(&cnt)
+	err := q.QueryRow(`
+		SELECT count(*)
+		  FROM users
+		 WHERE id = $1;
+	`, id).Scan(&cnt)
 	if err != nil {
 		return false, err
 	}
@@ -175,10 +182,10 @@ func IsUserExists(q Queryer, id string) (bool, error) {
 
 // CreateUser creates new users
 func CreateUser(q Queryer, x *entity.User) error {
-	_, err := q.Exec(
-		`insert into users (id, username, name, email) values ($1, $2, $3, $4)`,
-		x.ID, x.ID, "", x.Email,
-	)
+	_, err := q.Exec(`
+		INSERT INTO users (id, username, name, email)
+		VALUES ($1, $2, $3, $4);
+	`, x.ID, x.ID, "", x.Email)
 	if err != nil {
 		return err
 	}

@@ -7,10 +7,8 @@ import (
 // Enroll an user to a course
 func Enroll(q Queryer, userID string, courseID string) error {
 	_, err := q.Exec(`
-		insert into enrolls
-			(user_id, course_id)
-		values
-			($1, $2)
+		INSERT INTO enrolls (user_id, course_id)
+		VALUES ($1, $2);
 	`, userID, courseID)
 	if err != nil {
 		return err
@@ -21,7 +19,12 @@ func Enroll(q Queryer, userID string, courseID string) error {
 // IsEnrolled returns true if user enrolled a given course
 func IsEnrolled(q Queryer, userID string, courseID string) (bool, error) {
 	var p int
-	err := q.QueryRow(`select 1 from enrolls where user_id = $1 and course_id = $2`, userID, courseID).Scan(&p)
+	err := q.QueryRow(`
+		SELECT 1
+		  FROM enrolls
+		 WHERE user_id = $1
+		   AND course_id = $2;
+	`, userID, courseID).Scan(&p)
 	if err == sql.ErrNoRows {
 		return false, nil
 	}
