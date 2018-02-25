@@ -103,13 +103,16 @@ func GetCourses(q Queryer, courseIDs []string) ([]*entity.Course, error) {
 func GetCourse(q Queryer, courseID string) (*entity.Course, error) {
 	var x entity.Course
 	err := q.QueryRow(`
-		select
-			id, user_id, title, short_desc, long_desc, image, start, url, type, price, courses.discount, enroll_detail,
-			opt.public, opt.enroll, opt.attend, opt.assignment, opt.discount
-		from courses left join course_options as opt on courses.id = opt.course_id
-		where id = $1
+		SELECT id, user_id, title, short_desc, long_desc, image,
+		       start, url, type, price, courses.discount, enroll_detail,
+		       opt.public, opt.enroll, opt.attend, opt.assignment, opt.discount
+		  FROM courses
+		       LEFT JOIN course_options AS opt
+		       ON opt.course_id = courses.id
+		 WHERE id = $1;
 	`, courseID).Scan(
-		&x.ID, &x.UserID, &x.Title, &x.ShortDesc, &x.Desc, &x.Image, &x.Start, &x.URL, &x.Type, &x.Price, &x.Discount, &x.EnrollDetail,
+		&x.ID, &x.UserID, &x.Title, &x.ShortDesc, &x.Desc, &x.Image,
+		&x.Start, &x.URL, &x.Type, &x.Price, &x.Discount, &x.EnrollDetail,
 		&x.Option.Public, &x.Option.Enroll, &x.Option.Attend, &x.Option.Assignment, &x.Option.Discount,
 	)
 	if err == sql.ErrNoRows {
@@ -124,17 +127,10 @@ func GetCourse(q Queryer, courseID string) (*entity.Course, error) {
 // GetCourseContents gets course contents for given course id
 func GetCourseContents(q Queryer, courseID string) ([]*entity.CourseContent, error) {
 	rows, err := q.Query(`
-		select
-			id,
-			course_id,
-			title,
-			long_desc,
-			video_id,
-			video_type,
-			download_url
-		from course_contents
-		where course_id = $1
-		order by i asc
+		  SELECT id, course_id, title, long_desc, video_id, video_type, download_url
+		    FROM course_contents
+		   WHERE course_id = $1
+		ORDER BY i ASC;
 	`, courseID)
 	if err != nil {
 		return nil, err
@@ -143,7 +139,9 @@ func GetCourseContents(q Queryer, courseID string) ([]*entity.CourseContent, err
 	xs := make([]*entity.CourseContent, 0)
 	for rows.Next() {
 		var x entity.CourseContent
-		err = rows.Scan(&x.ID, &x.CourseID, &x.Title, &x.Desc, &x.VideoID, &x.VideoType, &x.DownloadURL)
+		err = rows.Scan(
+			&x.ID, &x.CourseID, &x.Title, &x.Desc, &x.VideoID, &x.VideoType, &x.DownloadURL,
+		)
 		if err != nil {
 			return nil, err
 		}
@@ -159,17 +157,12 @@ func GetCourseContents(q Queryer, courseID string) ([]*entity.CourseContent, err
 func GetCourseContent(q Queryer, courseContentID string) (*entity.CourseContent, error) {
 	var x entity.CourseContent
 	err := q.QueryRow(`
-		select
-			id,
-			course_id,
-			title,
-			long_desc,
-			video_id,
-			video_type,
-			download_url
-		from course_contents
-		where id = $1
-	`, courseContentID).Scan(&x.ID, &x.CourseID, &x.Title, &x.Desc, &x.VideoID, &x.VideoType, &x.DownloadURL)
+		SELECT id, course_id, title, long_desc, video_id, video_type, download_url
+		  FROM course_contents
+		 WHERE id = $1;
+	`, courseContentID).Scan(
+		&x.ID, &x.CourseID, &x.Title, &x.Desc, &x.VideoID, &x.VideoType, &x.DownloadURL,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -180,9 +173,9 @@ func GetCourseContent(q Queryer, courseContentID string) (*entity.CourseContent,
 func GetCourseIDFromURL(q Queryer, url string) (string, error) {
 	var id string
 	err := q.QueryRow(`
-		select id
-		from courses
-		where url = $1
+		SELECT id
+		  FROM courses
+		 WHERE url = $1;
 	`, url).Scan(&id)
 	if err == sql.ErrNoRows {
 		return "", entity.ErrNotFound
@@ -390,11 +383,10 @@ func ListEnrolledCourses(q Queryer, userID string) ([]*entity.Course, error) {
 }
 
 // CountCourses counts courses
-func CountCourses(q Queryer) (int64, error) {
-	var cnt int64
-	err := q.QueryRow(`select count(*) from courses`).Scan(&cnt)
-	if err != nil {
-		return 0, err
-	}
-	return cnt, nil
+func CountCourses(q Queryer) (cnt int64, err error) {
+	err = q.QueryRow(`
+		SELECT count(*)
+		  FROM courses;
+	`).Scan(&cnt)
+	return
 }
