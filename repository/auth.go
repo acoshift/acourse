@@ -3,8 +3,9 @@ package repository
 import (
 	"time"
 
-	"github.com/acoshift/acourse/entity"
 	"github.com/garyburd/redigo/redis"
+
+	"github.com/acoshift/acourse/entity"
 )
 
 // StoreMagicLink stores magic link to redis
