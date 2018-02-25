@@ -62,37 +62,6 @@ const (
 	`
 )
 
-// SaveCourse saves course
-func SaveCourse(q Queryer, x *entity.Course) error {
-	if len(x.URL.String) > 0 && x.URL.String != x.ID {
-		x.URL.Valid = true
-	} else {
-		x.URL.String = x.ID
-		x.URL.Valid = false
-	}
-
-	_, err := q.Exec(`
-		upsert into courses
-			(id, user_id, title, short_desc, long_desc, image, start, url, type, price, discount, enroll_detail, updated_at)
-		values
-			($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, now())
-	`, x.ID, x.UserID, x.Title, x.ShortDesc, x.Desc, x.Image, x.Start, x.URL, x.Type, x.Price, x.Discount, x.EnrollDetail)
-	if err != nil {
-		return err
-	}
-	_, err = q.Exec(`
-		upsert into course_options
-			(course_id, public, enroll, attend, assignment, discount)
-		values
-			($1, $2, $3, $4, $5, $6)
-	`, x.ID, x.Option.Public, x.Option.Enroll, x.Option.Attend, x.Option.Assignment, x.Option.Discount)
-	if err != nil {
-		return err
-	}
-	// TODO: save contents
-	return nil
-}
-
 func scanCourse(scan scanFunc, x *entity.Course) error {
 	err := scan(&x.ID,
 		&x.Title, &x.ShortDesc, &x.Desc, &x.Image, &x.Start, &x.URL, &x.Type, &x.Price, &x.Discount, &x.EnrollDetail,
