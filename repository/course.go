@@ -62,37 +62,6 @@ const (
 	`
 )
 
-// SaveCourse saves course
-func SaveCourse(q Queryer, x *entity.Course) error {
-	if len(x.URL.String) > 0 && x.URL.String != x.ID {
-		x.URL.Valid = true
-	} else {
-		x.URL.String = x.ID
-		x.URL.Valid = false
-	}
-
-	_, err := q.Exec(`
-		upsert into courses
-			(id, user_id, title, short_desc, long_desc, image, start, url, type, price, discount, enroll_detail, updated_at)
-		values
-			($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, now())
-	`, x.ID, x.UserID, x.Title, x.ShortDesc, x.Desc, x.Image, x.Start, x.URL, x.Type, x.Price, x.Discount, x.EnrollDetail)
-	if err != nil {
-		return err
-	}
-	_, err = q.Exec(`
-		upsert into course_options
-			(course_id, public, enroll, attend, assignment, discount)
-		values
-			($1, $2, $3, $4, $5, $6)
-	`, x.ID, x.Option.Public, x.Option.Enroll, x.Option.Attend, x.Option.Assignment, x.Option.Discount)
-	if err != nil {
-		return err
-	}
-	// TODO: save contents
-	return nil
-}
-
 func scanCourse(scan scanFunc, x *entity.Course) error {
 	err := scan(&x.ID,
 		&x.Title, &x.ShortDesc, &x.Desc, &x.Image, &x.Start, &x.URL, &x.Type, &x.Price, &x.Discount, &x.EnrollDetail,
@@ -134,13 +103,16 @@ func GetCourses(q Queryer, courseIDs []string) ([]*entity.Course, error) {
 func GetCourse(q Queryer, courseID string) (*entity.Course, error) {
 	var x entity.Course
 	err := q.QueryRow(`
-		select
-			id, user_id, title, short_desc, long_desc, image, start, url, type, price, courses.discount, enroll_detail,
-			opt.public, opt.enroll, opt.attend, opt.assignment, opt.discount
-		from courses left join course_options as opt on courses.id = opt.course_id
-		where id = $1
+		SELECT id, user_id, title, short_desc, long_desc, image,
+		       start, url, type, price, courses.discount, enroll_detail,
+		       opt.public, opt.enroll, opt.attend, opt.assignment, opt.discount
+		  FROM courses
+		       LEFT JOIN course_options AS opt
+		       ON opt.course_id = courses.id
+		 WHERE id = $1;
 	`, courseID).Scan(
-		&x.ID, &x.UserID, &x.Title, &x.ShortDesc, &x.Desc, &x.Image, &x.Start, &x.URL, &x.Type, &x.Price, &x.Discount, &x.EnrollDetail,
+		&x.ID, &x.UserID, &x.Title, &x.ShortDesc, &x.Desc, &x.Image,
+		&x.Start, &x.URL, &x.Type, &x.Price, &x.Discount, &x.EnrollDetail,
 		&x.Option.Public, &x.Option.Enroll, &x.Option.Attend, &x.Option.Assignment, &x.Option.Discount,
 	)
 	if err == sql.ErrNoRows {
@@ -155,17 +127,10 @@ func GetCourse(q Queryer, courseID string) (*entity.Course, error) {
 // GetCourseContents gets course contents for given course id
 func GetCourseContents(q Queryer, courseID string) ([]*entity.CourseContent, error) {
 	rows, err := q.Query(`
-		select
-			id,
-			course_id,
-			title,
-			long_desc,
-			video_id,
-			video_type,
-			download_url
-		from course_contents
-		where course_id = $1
-		order by i asc
+		  SELECT id, course_id, title, long_desc, video_id, video_type, download_url
+		    FROM course_contents
+		   WHERE course_id = $1
+		ORDER BY i ASC;
 	`, courseID)
 	if err != nil {
 		return nil, err
@@ -174,7 +139,9 @@ func GetCourseContents(q Queryer, courseID string) ([]*entity.CourseContent, err
 	xs := make([]*entity.CourseContent, 0)
 	for rows.Next() {
 		var x entity.CourseContent
-		err = rows.Scan(&x.ID, &x.CourseID, &x.Title, &x.Desc, &x.VideoID, &x.VideoType, &x.DownloadURL)
+		err = rows.Scan(
+			&x.ID, &x.CourseID, &x.Title, &x.Desc, &x.VideoID, &x.VideoType, &x.DownloadURL,
+		)
 		if err != nil {
 			return nil, err
 		}
@@ -190,17 +157,12 @@ func GetCourseContents(q Queryer, courseID string) ([]*entity.CourseContent, err
 func GetCourseContent(q Queryer, courseContentID string) (*entity.CourseContent, error) {
 	var x entity.CourseContent
 	err := q.QueryRow(`
-		select
-			id,
-			course_id,
-			title,
-			long_desc,
-			video_id,
-			video_type,
-			download_url
-		from course_contents
-		where id = $1
-	`, courseContentID).Scan(&x.ID, &x.CourseID, &x.Title, &x.Desc, &x.VideoID, &x.VideoType, &x.DownloadURL)
+		SELECT id, course_id, title, long_desc, video_id, video_type, download_url
+		  FROM course_contents
+		 WHERE id = $1;
+	`, courseContentID).Scan(
+		&x.ID, &x.CourseID, &x.Title, &x.Desc, &x.VideoID, &x.VideoType, &x.DownloadURL,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -211,9 +173,9 @@ func GetCourseContent(q Queryer, courseContentID string) (*entity.CourseContent,
 func GetCourseIDFromURL(q Queryer, url string) (string, error) {
 	var id string
 	err := q.QueryRow(`
-		select id
-		from courses
-		where url = $1
+		SELECT id
+		  FROM courses
+		 WHERE url = $1;
 	`, url).Scan(&id)
 	if err == sql.ErrNoRows {
 		return "", entity.ErrNotFound
@@ -228,33 +190,19 @@ func GetCourseIDFromURL(q Queryer, url string) (string, error) {
 func ListCourses(q Queryer, limit, offset int64) ([]*entity.Course, error) {
 	xs := make([]*entity.Course, 0)
 	rows, err := q.Query(`
-		select
-			courses.id,
-			courses.title,
-			courses.short_desc,
-			courses.long_desc,
-			courses.image,
-			courses.start,
-			courses.url,
-			courses.type,
-			courses.price,
-			courses.discount,
-			courses.enroll_detail,
-			courses.created_at,
-			courses.updated_at,
-			course_options.public,
-			course_options.enroll,
-			course_options.attend,
-			course_options.assignment,
-			course_options.discount,
-			users.id,
-			users.username,
-			users.image
-		from courses
-			left join course_options on courses.id = course_options.course_id
-			left join users on courses.user_id = users.id
-			order by courses.created_at desc
-			limit $1 offset $2
+		  SELECT courses.id, courses.title, courses.short_desc, courses.long_desc, courses.image,
+		         courses.start, courses.url, courses.type, courses.price, courses.discount,
+		         courses.enroll_detail, courses.created_at, courses.updated_at,
+		         opt.public, opt.enroll, opt.attend, opt.assignment, opt.discount,
+		         users.id, users.username, users.image
+		    FROM courses
+		         LEFT JOIN course_options AS opt
+		         ON opt.course_id = courses.id
+		         LEFT JOIN users
+		         ON users.id = courses.user_id
+		ORDER BY courses.created_at DESC
+		   LIMIT $1
+		  OFFSET $2;
 	`, limit, offset)
 	if err != nil {
 		return nil, err
@@ -263,9 +211,10 @@ func ListCourses(q Queryer, limit, offset int64) ([]*entity.Course, error) {
 	for rows.Next() {
 		var x entity.Course
 		x.Owner = &entity.User{}
-		err := rows.Scan(&x.ID,
-			&x.Title, &x.ShortDesc, &x.Desc, &x.Image, &x.Start, &x.URL, &x.Type, &x.Price, &x.Discount, &x.EnrollDetail,
-			&x.CreatedAt, &x.UpdatedAt,
+		err := rows.Scan(
+			&x.ID, &x.Title, &x.ShortDesc, &x.Desc, &x.Image,
+			&x.Start, &x.URL, &x.Type, &x.Price, &x.Discount,
+			&x.EnrollDetail, &x.CreatedAt, &x.UpdatedAt,
 			&x.Option.Public, &x.Option.Enroll, &x.Option.Attend, &x.Option.Assignment, &x.Option.Discount,
 			&x.Owner.ID, &x.Owner.Username, &x.Owner.Image,
 		)
@@ -325,7 +274,12 @@ func ListPublicCourses(q Queryer, cachePool *redis.Pool, cachePrefix string) ([]
 		rows.Close()
 	}
 
-	rows, err := q.Query(`select course_id, count(*) from enrolls where course_id = any($1) group by course_id`, pq.Array(ids))
+	rows, err := q.Query(`
+		  SELECT course_id, count(*)
+		    FROM enrolls
+		   WHERE course_id = any($1)
+		GROUP BY course_id;
+	`, pq.Array(ids))
 	if err != nil {
 		return nil, err
 	}
@@ -380,7 +334,12 @@ func ListOwnCourses(q Queryer, userID string) ([]*entity.Course, error) {
 	}
 	rows.Close()
 
-	rows, err = q.Query(`select course_id, count(*) from enrolls where course_id = any($1) group by course_id`, pq.Array(ids))
+	rows, err = q.Query(`
+		  SELECT course_id, count(*)
+		    FROM enrolls
+		   WHERE course_id = any($1)
+		GROUP BY course_id;
+	`, pq.Array(ids))
 	if err != nil {
 		return nil, err
 	}
@@ -421,11 +380,10 @@ func ListEnrolledCourses(q Queryer, userID string) ([]*entity.Course, error) {
 }
 
 // CountCourses counts courses
-func CountCourses(q Queryer) (int64, error) {
-	var cnt int64
-	err := q.QueryRow(`select count(*) from courses`).Scan(&cnt)
-	if err != nil {
-		return 0, err
-	}
-	return cnt, nil
+func CountCourses(q Queryer) (cnt int64, err error) {
+	err = q.QueryRow(`
+		SELECT count(*)
+		  FROM courses;
+	`).Scan(&cnt)
+	return
 }

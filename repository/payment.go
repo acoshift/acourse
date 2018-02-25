@@ -63,11 +63,9 @@ const (
 // CreatePayment creates new payment
 func CreatePayment(q Queryer, x *entity.Payment) error {
 	_, err := q.Exec(`
-		insert into payments
-			(user_id, course_id, image, price, original_price, code, status)
-		values
-			($1, $2, $3, $4, $5, $6, $7)
-		returning id
+		INSERT INTO payments (user_id, course_id, image, price, original_price, code, status)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
+		RETURNING id;
 	`, x.UserID, x.CourseID, x.Image, x.Price, x.OriginalPrice, x.Code, entity.Pending)
 	if err != nil {
 		return err
@@ -82,12 +80,12 @@ func AcceptPayment(q Queryer, x *entity.Payment) error {
 	}
 
 	_, err := q.Exec(`
-		update payments
-		set
-			status = $2,
-			updated_at = now(),
-			at = now()
-		where id = $1`, x.ID, entity.Accepted)
+		UPDATE payments
+		SET status = $2,
+		    updated_at = now(),
+		    at = now()
+		WHERE id = $1;
+	`, x.ID, entity.Accepted)
 	if err != nil {
 		return err
 	}
@@ -106,12 +104,11 @@ func RejectPayment(q Queryer, x *entity.Payment) error {
 		return fmt.Errorf("payment must be save before accept")
 	}
 	_, err := q.Exec(`
-		update payments
-		set
-			status = $2,
-			updated_at = now(),
-			at = now()
-		where id = $1
+		UPDATE payments
+		SET status = $2,
+		    updated_at = now(),
+		    at = now()
+		WHERE id = $1;
 	`, x.ID, entity.Rejected)
 	if err != nil {
 		return err
@@ -169,10 +166,12 @@ func GetPayment(q Queryer, paymentID string) (*entity.Payment, error) {
 func HasPendingPayment(q Queryer, userID string, courseID string) (bool, error) {
 	var p int
 	err := q.QueryRow(`
-		select 1 from payments
-		where user_id = $1 and course_id = $2 and status = $3`,
-		userID, courseID, entity.Pending,
-	).Scan(&p)
+		SELECT 1
+		  FROM payments
+		 WHERE user_id = $1
+		   AND course_id = $2
+		   AND status = $3;
+	`, userID, courseID, entity.Pending).Scan(&p)
 	if err == sql.ErrNoRows {
 		return false, nil
 	}
