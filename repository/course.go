@@ -190,33 +190,19 @@ func GetCourseIDFromURL(q Queryer, url string) (string, error) {
 func ListCourses(q Queryer, limit, offset int64) ([]*entity.Course, error) {
 	xs := make([]*entity.Course, 0)
 	rows, err := q.Query(`
-		select
-			courses.id,
-			courses.title,
-			courses.short_desc,
-			courses.long_desc,
-			courses.image,
-			courses.start,
-			courses.url,
-			courses.type,
-			courses.price,
-			courses.discount,
-			courses.enroll_detail,
-			courses.created_at,
-			courses.updated_at,
-			course_options.public,
-			course_options.enroll,
-			course_options.attend,
-			course_options.assignment,
-			course_options.discount,
-			users.id,
-			users.username,
-			users.image
-		from courses
-			left join course_options on courses.id = course_options.course_id
-			left join users on courses.user_id = users.id
-			order by courses.created_at desc
-			limit $1 offset $2
+		  SELECT courses.id, courses.title, courses.short_desc, courses.long_desc, courses.image,
+		         courses.start, courses.url, courses.type, courses.price, courses.discount,
+		         courses.enroll_detail, courses.created_at, courses.updated_at,
+		         opt.public, opt.enroll, opt.attend, opt.assignment, opt.discount,
+		         users.id, users.username, users.image
+		    FROM courses
+		         LEFT JOIN course_options AS opt
+		         ON opt.course_id = courses.id
+		         LEFT JOIN users
+		         ON users.id = courses.user_id
+		ORDER BY courses.created_at DESC
+		   LIMIT $1
+		  OFFSET $2;
 	`, limit, offset)
 	if err != nil {
 		return nil, err
@@ -225,9 +211,10 @@ func ListCourses(q Queryer, limit, offset int64) ([]*entity.Course, error) {
 	for rows.Next() {
 		var x entity.Course
 		x.Owner = &entity.User{}
-		err := rows.Scan(&x.ID,
-			&x.Title, &x.ShortDesc, &x.Desc, &x.Image, &x.Start, &x.URL, &x.Type, &x.Price, &x.Discount, &x.EnrollDetail,
-			&x.CreatedAt, &x.UpdatedAt,
+		err := rows.Scan(
+			&x.ID, &x.Title, &x.ShortDesc, &x.Desc, &x.Image,
+			&x.Start, &x.URL, &x.Type, &x.Price, &x.Discount,
+			&x.EnrollDetail, &x.CreatedAt, &x.UpdatedAt,
 			&x.Option.Public, &x.Option.Enroll, &x.Option.Attend, &x.Option.Assignment, &x.Option.Discount,
 			&x.Owner.ID, &x.Owner.Username, &x.Owner.Image,
 		)
@@ -287,7 +274,12 @@ func ListPublicCourses(q Queryer, cachePool *redis.Pool, cachePrefix string) ([]
 		rows.Close()
 	}
 
-	rows, err := q.Query(`select course_id, count(*) from enrolls where course_id = any($1) group by course_id`, pq.Array(ids))
+	rows, err := q.Query(`
+		  SELECT course_id, count(*)
+		    FROM enrolls
+		   WHERE course_id = any($1)
+		GROUP BY course_id;
+	`, pq.Array(ids))
 	if err != nil {
 		return nil, err
 	}
@@ -342,7 +334,12 @@ func ListOwnCourses(q Queryer, userID string) ([]*entity.Course, error) {
 	}
 	rows.Close()
 
-	rows, err = q.Query(`select course_id, count(*) from enrolls where course_id = any($1) group by course_id`, pq.Array(ids))
+	rows, err = q.Query(`
+		  SELECT course_id, count(*)
+		    FROM enrolls
+		   WHERE course_id = any($1)
+		GROUP BY course_id;
+	`, pq.Array(ids))
 	if err != nil {
 		return nil, err
 	}
