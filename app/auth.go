@@ -86,7 +86,7 @@ func postSignIn(ctx hime.Context) hime.Result {
 %s
 
 ทีมงาน acourse.io
-	`, user.Name, "/signin/link?id="+linkID)
+	`, user.Name, baseURL+"/signin/link?id="+linkID)
 
 	go sendEmail(user.Email.String, "Magic Link Request", markdown(message))
 
