@@ -8,11 +8,11 @@
           รายการคอนเทนท์<br>
           <div class="_font-size-big">
             <span class="_font-bold _color-dark">คอร์ส: </span>
-            <a href="/course/{{.Course.Link}}" class="acourse-link">{{.Course.Title}}</a>
+            <a href="{{route "course" .Course.Link}}" class="acourse-link">{{.Course.Title}}</a>
           </div>
         </div>
         <div class="col-xs-12 col-md-4 _full-width _align-right">
-          <a href="/editor/content/create?id={{.Course.ID}}">
+          <a href="{{route "editor.content.create" (param "id" .Course.ID)}}">
             <button class="acourse-button -positive _full-width _font-sub _color-sub">
               <i class="fa fa-plus"></i>&nbsp;&nbsp; เพิ่มคอนเทนท์
             </button>
@@ -33,7 +33,7 @@
         <div><span class="_font-bold">วิดีโอ ID:</span> {{.VideoID}}</div>
       </div>
       <div class="acourse-segment col-xs-12 col-md-3 _bg-color-base-2">
-        <a href="/editor/content/edit?id={{.ID}}">
+        <a href="{{route "editor.content.edit" (param "id" .ID)}}">
           <button class="acourse-button -primary acourse-block _font-sub _full-width">แก้ไข</button>
         </a>
         <form method="POST">

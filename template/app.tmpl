@@ -2,7 +2,7 @@
   <div id="navbar" class="navbar-color">
     <div class="navbar-container grid-container _flex-row _main-space-between _cross-stretch">
 
-      <a href="/" class="_flex-row _cross-center">
+      <a href="{{route "index"}}" class="_flex-row _cross-center">
         <img class="logo" src="https://storage.googleapis.com/acourse/static/16e99da4-5af9-47e9-880c-babd8d6ba8cc.svg" height="45">
       </a>
       <div class="_flex-row _cross-center _main-end">
@@ -18,22 +18,22 @@
         </div>
         <div class="dropdown-content-w">
           <div class="dropdown-content">
-            <a class="_font-main _font-bold _font-size-big {{if eq templateName "profile"}} active{{end}}" href="/profile">โปรไฟล์</a>
+            <a class="_font-main _font-bold _font-size-big {{if eq templateName "profile"}} active{{end}}" href="{{route "profile"}}">โปรไฟล์</a>
             {{if .Me.Role.Admin.Bool}}
-            <a class="_font-main _font-bold _font-size-big {{if eq templateName "admin/users"}} active{{end}}" href="/admin/users">รายชื่อผู้ใช้</a>
-            <a class="_font-main _font-bold _font-size-big {{if eq templateName "admin/courses"}} active{{end}}" href="/admin/courses">รายชื่อคอร์ส</a>
-            <a class="_font-main _font-bold _font-size-big" href="/admin/payments/pending">รอดำเนินการ</a>
-            <a class="_font-main _font-bold _font-size-big" href="/admin/payments/history">ประวัติการชำระเงิน</a>
+            <a class="_font-main _font-bold _font-size-big {{if eq templateName "admin/users"}} active{{end}}" href="{{route "admin.users"}}">รายชื่อผู้ใช้</a>
+            <a class="_font-main _font-bold _font-size-big {{if eq templateName "admin/courses"}} active{{end}}" href="{{route "admin.courses"}}">รายชื่อคอร์ส</a>
+            <a class="_font-main _font-bold _font-size-big" href="{{route "admin.payments.pending"}}">รอดำเนินการ</a>
+            <a class="_font-main _font-bold _font-size-big" href="{{route "admin.payments.history"}}">ประวัติการชำระเงิน</a>
             {{end}}
-            <a class="_font-main _font-bold _font-size-big" href="/signout">ออกจากระบบ</a>
+            <a class="_font-main _font-bold _font-size-big" href="{{route "signout"}}">ออกจากระบบ</a>
           </div>
         </div>
       </div>
       {{else}}
-      <a class="link _flex-row _cross-center _font-sub" href="/signin">
+      <a class="link _flex-row _cross-center _font-sub" href="{{route "signin"}}">
         เข้าสู่ระบบ
       </a>
-      <a href="/signup">
+      <a href="{{route "signup"}}">
         <div class="acourse-button -primary _font-sub acourse-side-space">สมัครใช้งาน</div>
       </a>
       {{end}}

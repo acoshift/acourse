@@ -8,7 +8,7 @@
           การบ้าน<br>
           <div class="_font-size-big">
             <span class="_font-bold _color-dark">คอร์ส: </span>
-            <a href="/course/{{.Course.Link}}" class="acourse-link">{{.Course.Title}}</a>
+            <a href="{{route "course" .Course.Link}}" class="acourse-link">{{.Course.Title}}</a>
           </div>
         </div>
       </div>
@@ -26,7 +26,7 @@
         </div>
         <!--<div class="acourse-segment col-xs-12 col-md-3 _bg-color-base-2">
           {{if .Open}}
-            <a href="/">
+            <a href="{{route "index"}}">
               <button class="acourse-button -primary acourse-block _font-sub _full-width">Submit</button>
             </a>
           {{end}}

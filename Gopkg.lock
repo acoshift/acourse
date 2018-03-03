@@ -47,8 +47,8 @@
 [[projects]]
   name = "github.com/acoshift/hime"
   packages = ["."]
-  revision = "f1cf9edd4b1d35de350e0ed16019881ca7a36dc1"
-  version = "v0.0.14"
+  revision = "cc59ad0e39d57470d4181ebc563989cc83f18fc1"
+  version = "v0.0.17"
 
 [[projects]]
   name = "github.com/acoshift/httprouter"
@@ -346,6 +346,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "7d4d6be7a0d4458e0902d3d98d081471d6b024d10365f5de831d775cd182e09b"
+  inputs-digest = "ea5a34a89de205648805d932b34c7a861441cb19b9d164efde8767009e460fbd"
   solver-name = "gps-cdcl"
   solver-version = 1

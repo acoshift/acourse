@@ -6,11 +6,8 @@ import (
 	"fmt"
 	"html/template"
 	"io"
-	"log"
 	"net"
 	"net/http"
-	"net/url"
-	"path"
 	"syscall"
 
 	"github.com/acoshift/header"
@@ -53,24 +50,9 @@ func (ctx *appContext) Redirect(url string, params ...interface{}) Result {
 	})
 }
 
-func safeRedirectPath(p string) string {
-	l, err := url.ParseRequestURI(p)
-	if err != nil {
-		return "/"
-	}
-	r := l.EscapedPath()
-	if len(r) == 0 {
-		r = "/"
-	}
-	if l.ForceQuery || l.RawQuery != "" {
-		r += "?" + l.RawQuery
-	}
-	return path.Clean(r)
-}
-
 func (ctx *appContext) SafeRedirect(url string, params ...interface{}) Result {
 	p := buildPath(url, params...)
-	return ctx.Redirect(safeRedirectPath(p))
+	return ctx.Redirect(SafeRedirectPath(p))
 }
 
 func (ctx *appContext) RedirectTo(name string, params ...interface{}) Result {
@@ -110,7 +92,7 @@ func (ctx *appContext) View(name string, data interface{}) Result {
 	return ResultFunc(func(w http.ResponseWriter, r *http.Request) {
 		t, ok := ctx.app.template[name]
 		if !ok {
-			log.Panicf("hime: template %s not found", name)
+			panic(newErrTemplateNotFound(name))
 		}
 
 		ctx.invokeBeforeRender(func() {

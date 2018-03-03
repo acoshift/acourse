@@ -77,14 +77,14 @@
 
                   {{if .Enrolled}}
                   <div class="acourse-block-big">
-                    <a href="/course/{{.Course.Link}}/content">
+                    <a href="{{route "course" .Course.Link "content"}}">
                       <button class="acourse-button -positive _font-sub _full-width acourse-block">เริ่มเรียน</button>
                     </a>
-                    <!--<a href="/">
+                    <!--<a href="{{route "index"}}">
                       <button class="acourse-button -primary _font-sub _full-width acourse-block">Attend</button>
                     </a>-->
                     {{if .Course.Option.Assignment}}
-                      <a href="/course/{{.Course.Link}}/assignment">
+                      <a href="{{route "course" .Course.Link "assignment"}}">
                         <button class="acourse-button -primary _font-sub _full-width acourse-block">การบ้าน</button>
                       </a>
                     {{end}}
@@ -99,7 +99,7 @@
                     {{if .Course.Option.Enroll}}
                       {{if and (not .Owned) (not .Enrolled)}}
                       <div class="acourse-block-big">
-                        <a href="/course/{{.Course.Link}}/enroll">
+                        <a href="{{route "course" .Course.Link "enroll"}}">
                           <button class="acourse-button -positive _font-sub _full-width acourse-block">สมัครเรียน</button>
                         </a>
                       </div>
@@ -109,13 +109,13 @@
 
                   {{if .Owned}}
                   <div class="acourse-block-big">
-                    <a href="/course/{{.Course.Link}}/content">
+                    <a href="{{route "course" .Course.Link "content"}}">
                       <button class="acourse-button -positive _font-sub _full-width acourse-block">เริ่มเรียน</button>
                     </a>
-                    <a href="/editor/course?id={{.Course.ID}}">
+                    <a href="{{route "editor.course" (param "id" .Course.ID)}}">
                       <button class="acourse-button -primary _font-sub _full-width acourse-block">แก้ไขคอร์ส</button>
                     </a>
-                    <a href="/editor/content?id={{.Course.ID}}">
+                    <a href="{{route "editor.content" (param "id" .Course.ID)}}">
                       <button class="acourse-button -primary _font-sub _full-width acourse-block">แก้ไขคอนเทนท์</button>
                     </a>
                   </div>

@@ -8,7 +8,7 @@
         <div class="user-id _font-size-small _align-center">
           ID: {{.Me.ID}}
         </div>
-        <a href="/profile/edit">
+        <a href="{{route "profile.edit"}}">
           <div class="acourse-button-secondary">แก้ไขโปรไฟล์</div>
         </a>
       </div>
@@ -17,7 +17,7 @@
         {{if .Me.Role.Instructor.Bool}}
           <div class="acourse-block-big col-xs-12 _flex-row _main-space-between _cross-center _clearflex">
             <div class="acourse-header _no-margin _color-main">คอร์สที่คุณสอน</div>
-            <a href="/editor/create">
+            <a href="{{route "editor.create"}}">
               <div class="acourse-button -primary _font-sub">สร้างคอร์สใหม่</div>
             </a>
           </div>

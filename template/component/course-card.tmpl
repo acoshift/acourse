@@ -1,5 +1,5 @@
 {{define "course-card"}}
-  <a href="/course/{{.Link}}" class="course-card acourse-card -hover-rise _flex-column _color-dark">
+  <a href="{{route "course" .Link}}" class="course-card acourse-card -hover-rise _flex-column _color-dark">
     <img class="course-cover placeholder" {{if .Image}}src="{{.Image}}"{{end}} width="100%">
     <div class="course-detail acourse-segment _flex-column _flex-span _main-start">
 
