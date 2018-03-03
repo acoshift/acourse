@@ -18,12 +18,12 @@
         </div>
         <div class="dropdown-content-w">
           <div class="dropdown-content">
-            <a class="_font-main _font-bold _font-size-big {{if eq templateName "profile"}} active{{end}}" href="/profile">โปรไฟล์</a>
+            <a class="_font-main _font-bold _font-size-big {{if eq templateName "profile"}} active{{end}}" href="{{route "profile"}}">โปรไฟล์</a>
             {{if .Me.Role.Admin.Bool}}
-            <a class="_font-main _font-bold _font-size-big {{if eq templateName "admin/users"}} active{{end}}" href="/admin/users">รายชื่อผู้ใช้</a>
-            <a class="_font-main _font-bold _font-size-big {{if eq templateName "admin/courses"}} active{{end}}" href="/admin/courses">รายชื่อคอร์ส</a>
-            <a class="_font-main _font-bold _font-size-big" href="/admin/payments/pending">รอดำเนินการ</a>
-            <a class="_font-main _font-bold _font-size-big" href="/admin/payments/history">ประวัติการชำระเงิน</a>
+            <a class="_font-main _font-bold _font-size-big {{if eq templateName "admin/users"}} active{{end}}" href="{{route "admin.users"}}">รายชื่อผู้ใช้</a>
+            <a class="_font-main _font-bold _font-size-big {{if eq templateName "admin/courses"}} active{{end}}" href="{{route "admin.courses"}}">รายชื่อคอร์ส</a>
+            <a class="_font-main _font-bold _font-size-big" href="{{route "admin.payments.pending"}}">รอดำเนินการ</a>
+            <a class="_font-main _font-bold _font-size-big" href="{{route "admin.payments.history"}}">ประวัติการชำระเงิน</a>
             {{end}}
             <a class="_font-main _font-bold _font-size-big" href="{{route "signout"}}">ออกจากระบบ</a>
           </div>
