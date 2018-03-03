@@ -42,9 +42,14 @@ func postSignIn(ctx hime.Context) hime.Result {
 	s := appctx.GetSession(ctx)
 	f := s.Flash()
 
-	email := ctx.FormValue("Email")
+	email := ctx.FormValueTrimSpace("Email")
 	if len(email) == 0 {
 		f.Add("Errors", "email required")
+		return ctx.RedirectToGet()
+	}
+	email, err := govalidator.NormalizeEmail(email)
+	if err != nil {
+		f.Add("Errors", "invalid email")
 	}
 	if f.Has("Errors") {
 		f.Set("Email", email)
