@@ -165,9 +165,8 @@ func postSignInPassword(ctx hime.Context) hime.Result {
 }
 
 var allowProvider = map[string]bool{
-	"google.com":   true,
-	"facebook.com": true,
-	"github.com":   true,
+	"google.com": true,
+	"github.com": true,
 }
 
 func openID(ctx hime.Context) hime.Result {

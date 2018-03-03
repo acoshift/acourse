@@ -73,7 +73,6 @@ func New(config Config) hime.HandlerFactory {
 			"signin.link":            "/signin/link",
 			"openid":                 "/openid",
 			"openid.google":          "/openid?p=google.com",
-			"openid.facebook":        "/openid?p=facebook.com",
 			"openid.github":          "/openid?p=github.com",
 			"openid.callback":        "/openid/callback",
 			"signup":                 "/signup",
