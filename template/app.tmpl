@@ -25,15 +25,15 @@
             <a class="_font-main _font-bold _font-size-big" href="/admin/payments/pending">รอดำเนินการ</a>
             <a class="_font-main _font-bold _font-size-big" href="/admin/payments/history">ประวัติการชำระเงิน</a>
             {{end}}
-            <a class="_font-main _font-bold _font-size-big" href="/signout">ออกจากระบบ</a>
+            <a class="_font-main _font-bold _font-size-big" href="{{route "signout"}}">ออกจากระบบ</a>
           </div>
         </div>
       </div>
       {{else}}
-      <a class="link _flex-row _cross-center _font-sub" href="/signin">
+      <a class="link _flex-row _cross-center _font-sub" href="{{route "signin"}}">
         เข้าสู่ระบบ
       </a>
-      <a href="/signup">
+      <a href="{{route "signup"}}">
         <div class="acourse-button -primary _font-sub acourse-side-space">สมัครใช้งาน</div>
       </a>
       {{end}}

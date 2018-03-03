@@ -33,12 +33,12 @@
             {{end}}
             <p class="_align-center acourse-block">หรือเข้าสู่ระบบด้วย</p>
             <div class="_flex-row _main-center acourse-block">
-              <a class="_color-main" href="/signin/password">รหัสผ่าน / OpenID</a>
+              <a class="_color-main" href="{{route "signin.password"}}">รหัสผ่าน / OpenID</a>
             </div>
             <div class="_flex-row _main-center acourse-block-big">
-              <a class="_color-main" href="/signup">&nbsp;สมัครใช้งาน</a>
+              <a class="_color-main" href="{{route "signup"}}">&nbsp;สมัครใช้งาน</a>
               <span class="acourse-side-space-bigger _opa20">|</span>
-              <a href="/reset/password" class="_color-main">ลืมรหัสผ่าน</a>
+              <a href="{{route "reset.password"}}" class="_color-main">ลืมรหัสผ่าน</a>
             </div>
             <div class="_flex-row _main-center acourse-block">
               <a class="_color-main" href="{{route "index"}}">กลับไปหน้าแรก</a>

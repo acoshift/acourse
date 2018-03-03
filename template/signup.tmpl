@@ -37,14 +37,14 @@
             {{end}}
             <p class="_align-center acourse-block">หรือสมัครสมาชิกด้วย</p>
             <div class="_flex-row _main-center acourse-block">
-              <a class="link" href="/openid?p=google.com"><i class="fa fa-google"></i>Google</a>
-              <a class="link" href="/openid?p=facebook.com"><i class="fa fa-facebook"></i>Facebook</a>
-              <a class="link" href="/openid?p=github.com"><i class="fa fa-github"></i>Github</a>
+              <a class="link" href="{{route "openid" (param "p" "google.com")}}"><i class="fa fa-google"></i>Google</a>
+              <a class="link" href="{{route "openid" (param "p" "facebook.com")}}"><i class="fa fa-facebook"></i>Facebook</a>
+              <a class="link" href="{{route "openid" (param "p" "github.com")}}"><i class="fa fa-github"></i>Github</a>
             </div>
             <div class="_flex-row _main-center acourse-block-big">
-              <a class="_color-main" href="/signin">&nbsp;เข้าสู่ระบบ</a>
+              <a class="_color-main" href="{{route "signin"}}">&nbsp;เข้าสู่ระบบ</a>
               <span class="acourse-side-space-bigger _opa20">|</span>
-              <a href="/reset/password" class="_color-main">ลืมรหัสผ่าน</a>
+              <a href="{{route "reset.password"}}" class="_color-main">ลืมรหัสผ่าน</a>
             </div>
             <div class="_flex-row _main-center acourse-block">
               <a class="_color-main" href="{{route "index"}}">กลับไปหน้าแรก</a>
