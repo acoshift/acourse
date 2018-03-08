@@ -57,8 +57,8 @@ func main() {
 
 	// init redis pool
 	redisPool := &redis.Pool{
-		MaxIdle:     5,
-		IdleTimeout: 5 * time.Minute,
+		MaxIdle:     2,
+		IdleTimeout: 60 * time.Minute,
 		Dial: func() (redis.Conn, error) {
 			return redis.Dial("tcp", config.String("redis_addr"), redis.DialPassword(config.String("redis_pass")))
 		},
