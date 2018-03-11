@@ -54,7 +54,7 @@ func postProfileEdit(ctx hime.Context) hime.Result {
 	f := appctx.GetSession(ctx).Flash()
 
 	var imageURL string
-	if image, info, err := ctx.FormFile("Image"); err != http.ErrMissingFile && info.Size > 0 {
+	if image, info, err := ctx.FormFileNotEmpty("Image"); err != http.ErrMissingFile {
 		if err != nil {
 			f.Add("Errors", err.Error())
 			return ctx.RedirectToGet()

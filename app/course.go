@@ -179,7 +179,7 @@ func postEditorCreate(ctx hime.Context) hime.Result {
 		}
 	}
 
-	if image, info, err := ctx.FormFile("Image"); err != http.ErrMissingFile && info.Size > 0 {
+	if image, info, err := ctx.FormFileNotEmpty("Image"); err != http.ErrMissingFile {
 		if err != nil {
 			f.Add("Errors", err.Error())
 			return ctx.RedirectToGet()
@@ -263,7 +263,7 @@ func postEditorCourse(ctx hime.Context) hime.Result {
 		}
 	}
 
-	if image, info, err := ctx.FormFile("Image"); err != http.ErrMissingFile && info.Size > 0 {
+	if image, info, err := ctx.FormFileNotEmpty("Image"); err != http.ErrMissingFile {
 		if err != nil {
 			f.Add("Errors", err.Error())
 			return ctx.RedirectToGet()
@@ -457,8 +457,8 @@ func postCourseEnroll(ctx hime.Context) hime.Result {
 
 	var imageURL string
 	if originalPrice != 0 {
-		image, info, err := ctx.FormFile("Image")
-		if err == http.ErrMissingFile || info.Size == 0 {
+		image, info, err := ctx.FormFileNotEmpty("Image")
+		if err == http.ErrMissingFile {
 			f.Add("Errors", "image required")
 			return ctx.RedirectToGet()
 		}
