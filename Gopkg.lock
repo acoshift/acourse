@@ -54,7 +54,7 @@
   branch = "master"
   name = "github.com/acoshift/methodmux"
   packages = ["."]
-  revision = "0f9b42ccf4c49dba097b537a3a243475739ca5c2"
+  revision = "edcc876fd209af41e18b6c8bbec63e4d585e525d"
 
 [[projects]]
   name = "github.com/acoshift/middleware"

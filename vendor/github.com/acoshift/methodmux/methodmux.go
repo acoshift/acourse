@@ -24,6 +24,7 @@ func (m Mux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// fallback
 	if h := m[""]; h != nil {
 		h.ServeHTTP(w, r)
+		return
 	}
 
 	// handler not found, returns method not allowed
