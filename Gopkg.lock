@@ -51,10 +51,10 @@
   version = "v0.0.18"
 
 [[projects]]
-  branch = "master"
   name = "github.com/acoshift/methodmux"
   packages = ["."]
-  revision = "edcc876fd209af41e18b6c8bbec63e4d585e525d"
+  revision = "d62722cdcf78f165e6573af71cb582f88da1545a"
+  version = "v1.1.1"
 
 [[projects]]
   name = "github.com/acoshift/middleware"
@@ -352,6 +352,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "c949245ddfdac661c0c65864fa1aaa4a59dc887ce3944911a9ddc3a8d5007903"
+  inputs-digest = "6f7d4b8b5e87d67a0822cef5a431050fa861ca6e4b4c8352cb80cc4518eb1e37"
   solver-name = "gps-cdcl"
   solver-version = 1

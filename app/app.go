@@ -103,6 +103,8 @@ func New(config Config) hime.HandlerFactory {
 		mux.Handle("/~/", http.StripPrefix("/~", cache(webstatic.New("static"))))
 		mux.Handle("/favicon.ico", fileHandler("static/favicon.ico"))
 
+		methodmux.FallbackHandler = hime.H(notFound)
+
 		r := http.NewServeMux()
 
 		r.Handle(app.Route("index"), methodmux.Get(hime.H(index)))

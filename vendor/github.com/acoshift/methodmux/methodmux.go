@@ -1,11 +1,25 @@
 package methodmux
 
-import "net/http"
+import (
+	"context"
+	"net/http"
+)
 
 // Mux is the method mux
 type Mux map[string]http.Handler
 
 var _ http.Handler = Mux{}
+
+// FallbackHandler is the default fallback handler if no method matched
+var FallbackHandler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	m := GetMux(r.Context())
+	for method := range m {
+		if method != "" {
+			w.Header().Add("Allow", method)
+		}
+	}
+	http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+})
 
 func (m Mux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if h := m[r.Method]; h != nil {
@@ -21,14 +35,16 @@ func (m Mux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	r = r.WithContext(context.WithValue(r.Context(), muxKey{}, m))
+
 	// fallback
 	if h := m[""]; h != nil {
 		h.ServeHTTP(w, r)
 		return
 	}
 
-	// handler not found, returns method not allowed
-	http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+	// handler not found, fallback to package's not found handler
+	FallbackHandler.ServeHTTP(w, r)
 }
 
 // Get is a short-hand for Mux{http.MethodGet: h}
