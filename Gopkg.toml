@@ -27,12 +27,12 @@
   version = "0.6.0"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/acoshift/methodmux"
+  version = "1.0.0"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/acoshift/prefixhandler"
+  version = "1.0.0"
 
 [[constraint]]
   name = "github.com/asaskevich/govalidator"
