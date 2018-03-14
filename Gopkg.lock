@@ -51,10 +51,10 @@
   version = "v0.0.18"
 
 [[projects]]
-  name = "github.com/acoshift/httprouter"
+  name = "github.com/acoshift/methodmux"
   packages = ["."]
-  revision = "fecd5a0a4ef0f46879ac1b1f5286156b2fd8b63b"
-  version = "v2.1.0"
+  revision = "d62722cdcf78f165e6573af71cb582f88da1545a"
+  version = "v1.1.1"
 
 [[projects]]
   name = "github.com/acoshift/middleware"
@@ -67,6 +67,12 @@
   packages = ["."]
   revision = "58848b9ae8aee9b2f77320ca2288b17f39ad9324"
   version = "v0.2.0"
+
+[[projects]]
+  name = "github.com/acoshift/prefixhandler"
+  packages = ["."]
+  revision = "2db4e331fb42ad1e4e07eb522b6e8706d2a9796f"
+  version = "v1.0.0"
 
 [[projects]]
   name = "github.com/acoshift/session"
@@ -346,6 +352,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "fb49497cb7ffccfac57c885b40ce60676c1716047b8bf95f129e617dbd3c87d1"
+  inputs-digest = "6f7d4b8b5e87d67a0822cef5a431050fa861ca6e4b4c8352cb80cc4518eb1e37"
   solver-name = "gps-cdcl"
   solver-version = 1

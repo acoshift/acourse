@@ -27,6 +27,14 @@
   version = "0.6.0"
 
 [[constraint]]
+  name = "github.com/acoshift/methodmux"
+  version = "1.1.1"
+
+[[constraint]]
+  name = "github.com/acoshift/prefixhandler"
+  version = "1.0.0"
+
+[[constraint]]
   name = "github.com/asaskevich/govalidator"
   version = "6.0.0"
 

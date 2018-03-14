@@ -12,8 +12,8 @@ import (
 
 	"github.com/acoshift/header"
 	"github.com/acoshift/hime"
-	"github.com/acoshift/httprouter"
 	"github.com/acoshift/pgsql"
+	"github.com/acoshift/prefixhandler"
 	"github.com/google/uuid"
 	"github.com/lib/pq"
 
@@ -22,9 +22,15 @@ import (
 	"github.com/acoshift/acourse/repository"
 )
 
+type courseURLKey struct{}
+
 func courseView(ctx hime.Context) hime.Result {
+	if ctx.Request().URL.Path != "/" {
+		return notFound(ctx)
+	}
+
 	user := appctx.GetUser(ctx)
-	link := httprouter.GetParam(ctx, "courseURL")
+	link := prefixhandler.Get(ctx, courseURLKey{})
 
 	// if id can parse to uuid get course from id
 	id := link
@@ -92,7 +98,7 @@ func courseView(ctx hime.Context) hime.Result {
 
 func courseContent(ctx hime.Context) hime.Result {
 	user := appctx.GetUser(ctx)
-	link := httprouter.GetParam(ctx, "courseURL")
+	link := prefixhandler.Get(ctx, courseURLKey{})
 
 	// if id can parse to uuid get course from id
 	id := link
@@ -356,7 +362,7 @@ func postEditorContent(ctx hime.Context) hime.Result {
 func courseEnroll(ctx hime.Context) hime.Result {
 	user := appctx.GetUser(ctx)
 
-	link := httprouter.GetParam(ctx, "courseURL")
+	link := prefixhandler.Get(ctx, courseURLKey{})
 
 	id := link
 	_, err := uuid.Parse(link)
@@ -406,7 +412,7 @@ func postCourseEnroll(ctx hime.Context) hime.Result {
 	user := appctx.GetUser(ctx)
 	f := appctx.GetSession(ctx).Flash()
 
-	link := httprouter.GetParam(ctx, "courseURL")
+	link := prefixhandler.Get(ctx, courseURLKey{})
 
 	id := link
 	_, err := uuid.Parse(link)
@@ -516,7 +522,7 @@ func postCourseEnroll(ctx hime.Context) hime.Result {
 
 func courseAssignment(ctx hime.Context) hime.Result {
 	user := appctx.GetUser(ctx)
-	link := httprouter.GetParam(ctx, "courseURL")
+	link := prefixhandler.Get(ctx, courseURLKey{})
 
 	// if id can parse to int64 get course from id
 	id := link

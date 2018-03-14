@@ -7,6 +7,10 @@ import (
 )
 
 func index(ctx hime.Context) hime.Result {
+	if ctx.Request().URL.Path != "/" {
+		return notFound(ctx)
+	}
+
 	courses, err := repository.ListPublicCourses(db, cachePool, cachePrefix)
 	must(err)
 

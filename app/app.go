@@ -12,14 +12,15 @@ import (
 	"github.com/acoshift/go-firebase-admin"
 	"github.com/acoshift/header"
 	"github.com/acoshift/hime"
-	"github.com/acoshift/httprouter"
+	"github.com/acoshift/methodmux"
 	"github.com/acoshift/middleware"
+	"github.com/acoshift/prefixhandler"
 	"github.com/acoshift/session"
 	redisstore "github.com/acoshift/session/store/redis"
 	"github.com/acoshift/webstatic"
 	"github.com/garyburd/redigo/redis"
 	"gopkg.in/gomail.v2"
-	yaml "gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v2"
 )
 
 var (
@@ -102,61 +103,114 @@ func New(config Config) hime.HandlerFactory {
 		mux.Handle("/~/", http.StripPrefix("/~", cache(webstatic.New("static"))))
 		mux.Handle("/favicon.ico", fileHandler("static/favicon.ico"))
 
-		r := httprouter.New()
-		r.HandleMethodNotAllowed = false
-		r.HandleOPTIONS = false
-		r.NotFound = hime.H(notFound)
+		methodmux.FallbackHandler = hime.H(notFound)
 
-		r.Get("/", hime.H(index))
+		r := http.NewServeMux()
+
+		r.Handle(app.Route("index"), methodmux.Get(hime.H(index)))
 
 		// auth
-		r.Get(app.Route("signin"), mustNotSignedIn(hime.H(signIn)))
-		r.Post(app.Route("signin"), mustNotSignedIn(hime.H(postSignIn)))
-		r.Get(app.Route("signin.password"), mustNotSignedIn(hime.H(signInPassword)))
-		r.Post(app.Route("signin.password"), mustNotSignedIn(hime.H(postSignInPassword)))
-		r.Get(app.Route("signin.check-email"), mustNotSignedIn(hime.H(checkEmail)))
-		r.Get(app.Route("signin.link"), mustNotSignedIn(hime.H(signInLink)))
-		r.Get(app.Route("reset.password"), mustNotSignedIn(hime.H(resetPassword)))
-		r.Post(app.Route("reset.password"), mustNotSignedIn(hime.H(postResetPassword)))
-		r.Get(app.Route("openid"), mustNotSignedIn(hime.H(openID)))
-		r.Get(app.Route("openid.callback"), mustNotSignedIn(hime.H(openIDCallback)))
-		r.Get(app.Route("signup"), mustNotSignedIn(hime.H(signUp)))
-		r.Post(app.Route("signup"), mustNotSignedIn(hime.H(postSignUp)))
-		r.Get(app.Route("signout"), hime.H(signOut)) // TODO: remove get signout
-		r.Post(app.Route("signout"), hime.H(signOut))
+		r.Handle(app.Route("signin"), mustNotSignedIn(methodmux.GetPost(
+			hime.H(signIn),
+			hime.H(postSignIn),
+		)))
+		r.Handle(app.Route("signin.password"), mustNotSignedIn(methodmux.GetPost(
+			hime.H(signInPassword),
+			hime.H(postSignInPassword),
+		)))
+		r.Handle(app.Route("signin.check-email"), mustNotSignedIn(methodmux.Get(
+			hime.H(checkEmail),
+		)))
+		r.Handle(app.Route("signin.link"), mustNotSignedIn(methodmux.Get(
+			hime.H(signInLink),
+		)))
+		r.Handle(app.Route("reset.password"), mustNotSignedIn(methodmux.GetPost(
+			hime.H(resetPassword),
+			hime.H(postResetPassword),
+		)))
+
+		r.Handle(app.Route("openid"), mustNotSignedIn(methodmux.Get(
+			hime.H(openID),
+		)))
+		r.Handle(app.Route("openid.callback"), mustNotSignedIn(methodmux.Get(
+			hime.H(openIDCallback),
+		)))
+		r.Handle(app.Route("signup"), mustNotSignedIn(methodmux.GetPost(
+			hime.H(signUp),
+			hime.H(postSignUp),
+		)))
+		r.Handle(app.Route("signout"), methodmux.GetPost(
+			hime.H(signOut),
+			hime.H(signOut),
+		)) // TODO: remove get signout
 
 		// profile
-		r.Get(app.Route("profile"), mustSignedIn(hime.H(profile)))
-		r.Get(app.Route("profile.edit"), mustSignedIn(hime.H(profileEdit)))
-		r.Post(app.Route("profile.edit"), mustSignedIn(hime.H(postProfileEdit)))
+		r.Handle(app.Route("profile"), mustSignedIn(methodmux.Get(
+			hime.H(profile),
+		)))
+		r.Handle(app.Route("profile.edit"), mustSignedIn(methodmux.GetPost(
+			hime.H(profileEdit),
+			hime.H(postProfileEdit),
+		)))
 
 		// course
-		r.Get(app.Route("course", ":courseURL"), hime.H(courseView))
-		r.Get(app.Route("course", ":courseURL", "content"), mustSignedIn(hime.H(courseContent)))
-		r.Get(app.Route("course", ":courseURL", "enroll"), mustSignedIn(hime.H(courseEnroll)))
-		r.Post(app.Route("course", ":courseURL", "enroll"), mustSignedIn(hime.H(postCourseEnroll)))
-		r.Get(app.Route("course", ":courseURL", "assignment"), mustSignedIn(hime.H(courseAssignment)))
+		courseMux := http.NewServeMux()
+		courseMux.Handle("/", methodmux.Get(
+			hime.H(courseView),
+		))
+		courseMux.Handle("/content", mustSignedIn(methodmux.Get(
+			hime.H(courseContent),
+		)))
+		courseMux.Handle("/enroll", mustSignedIn(methodmux.GetPost(
+			hime.H(courseEnroll),
+			hime.H(postCourseEnroll),
+		)))
+		courseMux.Handle("/assignment", mustSignedIn(methodmux.Get(
+			hime.H(courseAssignment),
+		)))
+
+		r.Handle(app.Route("course"), prefixhandler.New(app.Route("course"), courseURLKey{}, courseMux))
 
 		// editor
-		r.Get(app.Route("editor.create"), onlyInstructor(hime.H(editorCreate)))
-		r.Post(app.Route("editor.create"), onlyInstructor(hime.H(postEditorCreate)))
-		r.Get(app.Route("editor.course"), isCourseOwner(hime.H(editorCourse)))
-		r.Post(app.Route("editor.course"), isCourseOwner(hime.H(postEditorCourse)))
-		r.Get(app.Route("editor.content"), isCourseOwner(hime.H(editorContent)))
-		r.Post(app.Route("editor.content"), isCourseOwner(hime.H(postEditorContent)))
-		r.Get(app.Route("editor.content.create"), isCourseOwner(hime.H(editorContentCreate)))
-		r.Post(app.Route("editor.content.create"), isCourseOwner(hime.H(postEditorContentCreate)))
-		r.Get(app.Route("editor.content.edit"), hime.H(editorContentEdit))
-		r.Post(app.Route("editor.content.edit"), hime.H(postEditorContentEdit))
+		r.Handle(app.Route("editor.create"), onlyInstructor(methodmux.GetPost(
+			hime.H(editorCreate),
+			hime.H(postEditorCreate),
+		)))
+		r.Handle(app.Route("editor.course"), isCourseOwner(methodmux.GetPost(
+			hime.H(editorCourse),
+			hime.H(postEditorCourse),
+		)))
+		r.Handle(app.Route("editor.content"), isCourseOwner(methodmux.GetPost(
+			hime.H(editorContent),
+			hime.H(postEditorContent),
+		)))
+		r.Handle(app.Route("editor.content.create"), isCourseOwner(methodmux.GetPost(
+			hime.H(editorContentCreate),
+			hime.H(postEditorContentCreate),
+		)))
+		r.Handle(app.Route("editor.content.edit"), methodmux.GetPost(
+			hime.H(editorContentEdit),
+			hime.H(postEditorContentEdit),
+		))
 
 		// admin
-		r.Get(app.Route("admin.users"), onlyAdmin(hime.H(adminUsers)))
-		r.Get(app.Route("admin.courses"), onlyAdmin(hime.H(adminCourses)))
-		r.Get(app.Route("admin.payments.pending"), onlyAdmin(hime.H(adminPendingPayments)))
-		r.Post(app.Route("admin.payments.pending"), onlyAdmin(hime.H(postAdminPendingPayment)))
-		r.Get(app.Route("admin.payments.history"), onlyAdmin(hime.H(adminHistoryPayments)))
-		r.Get(app.Route("admin.payments.reject"), onlyAdmin(hime.H(adminRejectPayment)))
-		r.Post(app.Route("admin.payments.reject"), onlyAdmin(hime.H(postAdminRejectPayment)))
+		r.Handle(app.Route("admin.users"), onlyAdmin(methodmux.Get(
+			hime.H(adminUsers),
+		)))
+		r.Handle(app.Route("admin.courses"), onlyAdmin(methodmux.Get(
+			hime.H(adminCourses),
+		)))
+		r.Handle(app.Route("admin.payments.pending"), onlyAdmin(methodmux.GetPost(
+			hime.H(adminPendingPayments),
+			hime.H(postAdminPendingPayment),
+		)))
+		r.Handle(app.Route("admin.payments.history"), onlyAdmin(methodmux.Get(
+			hime.H(adminHistoryPayments),
+		)))
+		r.Handle(app.Route("admin.payments.reject"), onlyAdmin(methodmux.GetPost(
+			hime.H(adminRejectPayment),
+			hime.H(postAdminRejectPayment),
+		)))
 
 		mux.Handle("/", middleware.Chain(
 			session.Middleware(session.Config{
