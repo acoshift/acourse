@@ -107,48 +107,50 @@ func New(config Config) hime.HandlerFactory {
 
 		r := http.NewServeMux()
 
-		r.Handle(app.Route("index"), methodmux.Get(hime.H(index)))
+		r.Handle("/", methodmux.Get(
+			hime.H(index),
+		))
 
 		// auth
-		r.Handle(app.Route("signin"), mustNotSignedIn(methodmux.GetPost(
+		r.Handle("/signin", mustNotSignedIn(methodmux.GetPost(
 			hime.H(signIn),
 			hime.H(postSignIn),
 		)))
-		r.Handle(app.Route("signin.password"), mustNotSignedIn(methodmux.GetPost(
+		r.Handle("/signin/password", mustNotSignedIn(methodmux.GetPost(
 			hime.H(signInPassword),
 			hime.H(postSignInPassword),
 		)))
-		r.Handle(app.Route("signin.check-email"), mustNotSignedIn(methodmux.Get(
+		r.Handle("/signin/check-email", mustNotSignedIn(methodmux.Get(
 			hime.H(checkEmail),
 		)))
-		r.Handle(app.Route("signin.link"), mustNotSignedIn(methodmux.Get(
+		r.Handle("/signin/link", mustNotSignedIn(methodmux.Get(
 			hime.H(signInLink),
 		)))
-		r.Handle(app.Route("reset.password"), mustNotSignedIn(methodmux.GetPost(
+		r.Handle("/reset/password", mustNotSignedIn(methodmux.GetPost(
 			hime.H(resetPassword),
 			hime.H(postResetPassword),
 		)))
 
-		r.Handle(app.Route("openid"), mustNotSignedIn(methodmux.Get(
+		r.Handle("/openid", mustNotSignedIn(methodmux.Get(
 			hime.H(openID),
 		)))
-		r.Handle(app.Route("openid.callback"), mustNotSignedIn(methodmux.Get(
+		r.Handle("/openid/callback", mustNotSignedIn(methodmux.Get(
 			hime.H(openIDCallback),
 		)))
-		r.Handle(app.Route("signup"), mustNotSignedIn(methodmux.GetPost(
+		r.Handle("/signup", mustNotSignedIn(methodmux.GetPost(
 			hime.H(signUp),
 			hime.H(postSignUp),
 		)))
-		r.Handle(app.Route("signout"), methodmux.GetPost(
+		r.Handle("/signout", methodmux.GetPost(
 			hime.H(signOut),
 			hime.H(signOut),
 		)) // TODO: remove get signout
 
 		// profile
-		r.Handle(app.Route("profile"), mustSignedIn(methodmux.Get(
+		r.Handle("/profile", mustSignedIn(methodmux.Get(
 			hime.H(profile),
 		)))
-		r.Handle(app.Route("profile.edit"), mustSignedIn(methodmux.GetPost(
+		r.Handle("/profile/edit", mustSignedIn(methodmux.GetPost(
 			hime.H(profileEdit),
 			hime.H(postProfileEdit),
 		)))
@@ -169,45 +171,45 @@ func New(config Config) hime.HandlerFactory {
 			hime.H(courseAssignment),
 		)))
 
-		r.Handle(app.Route("course"), prefixhandler.New(app.Route("course"), courseURLKey{}, courseMux))
+		r.Handle("/course/", prefixhandler.New("/course", courseURLKey{}, courseMux))
 
 		// editor
-		r.Handle(app.Route("editor.create"), onlyInstructor(methodmux.GetPost(
+		r.Handle("/editor/create", onlyInstructor(methodmux.GetPost(
 			hime.H(editorCreate),
 			hime.H(postEditorCreate),
 		)))
-		r.Handle(app.Route("editor.course"), isCourseOwner(methodmux.GetPost(
+		r.Handle("/editor/course", isCourseOwner(methodmux.GetPost(
 			hime.H(editorCourse),
 			hime.H(postEditorCourse),
 		)))
-		r.Handle(app.Route("editor.content"), isCourseOwner(methodmux.GetPost(
+		r.Handle("/editor/content", isCourseOwner(methodmux.GetPost(
 			hime.H(editorContent),
 			hime.H(postEditorContent),
 		)))
-		r.Handle(app.Route("editor.content.create"), isCourseOwner(methodmux.GetPost(
+		r.Handle("/editor/content/create", isCourseOwner(methodmux.GetPost(
 			hime.H(editorContentCreate),
 			hime.H(postEditorContentCreate),
 		)))
-		r.Handle(app.Route("editor.content.edit"), methodmux.GetPost(
+		r.Handle("/editor/content/edit", methodmux.GetPost(
 			hime.H(editorContentEdit),
 			hime.H(postEditorContentEdit),
 		))
 
 		// admin
-		r.Handle(app.Route("admin.users"), onlyAdmin(methodmux.Get(
+		r.Handle("/admin/users", onlyAdmin(methodmux.Get(
 			hime.H(adminUsers),
 		)))
-		r.Handle(app.Route("admin.courses"), onlyAdmin(methodmux.Get(
+		r.Handle("/admin/courses", onlyAdmin(methodmux.Get(
 			hime.H(adminCourses),
 		)))
-		r.Handle(app.Route("admin.payments.pending"), onlyAdmin(methodmux.GetPost(
+		r.Handle("/admin/payments/pending", onlyAdmin(methodmux.GetPost(
 			hime.H(adminPendingPayments),
 			hime.H(postAdminPendingPayment),
 		)))
-		r.Handle(app.Route("admin.payments.history"), onlyAdmin(methodmux.Get(
+		r.Handle("/admin/payments/history", onlyAdmin(methodmux.Get(
 			hime.H(adminHistoryPayments),
 		)))
-		r.Handle(app.Route("admin.payments.reject"), onlyAdmin(methodmux.GetPost(
+		r.Handle("/admin/payments/reject", onlyAdmin(methodmux.GetPost(
 			hime.H(adminRejectPayment),
 			hime.H(postAdminRejectPayment),
 		)))
@@ -216,7 +218,7 @@ func New(config Config) hime.HandlerFactory {
 			session.Middleware(session.Config{
 				Secret:   config.SessionSecret,
 				Path:     "/",
-				MaxAge:   30 * 24 * time.Hour,
+				MaxAge:   7 * 24 * time.Hour,
 				HTTPOnly: true,
 				Secure:   session.PreferSecure,
 				SameSite: session.SameSiteLax,
