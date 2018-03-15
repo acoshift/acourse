@@ -71,10 +71,6 @@ func main() {
 		},
 	}
 
-	// init cache pool
-	// TODO: use in-memory redis for caching
-	cachePool := redisPool
-
 	// init databases
 	db, err := sql.Open("postgres", config.String("sql_url"))
 	if err != nil {
@@ -90,8 +86,6 @@ func main() {
 			BaseURL:       config.String("base_url"),
 			RedisPool:     redisPool,
 			RedisPrefix:   config.String("redis_prefix"),
-			CachePool:     cachePool,
-			CachePrefix:   config.String("redis_prefix"),
 			SessionSecret: config.Bytes("session_secret"),
 			Auth:          firAuth,
 			Location:      loc,

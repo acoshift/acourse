@@ -11,7 +11,7 @@ func index(ctx hime.Context) hime.Result {
 		return notFound(ctx)
 	}
 
-	courses, err := repository.ListPublicCourses(db, cachePool, cachePrefix)
+	courses, err := repository.ListPublicCourses(db, redisPool, redisPrefix)
 	must(err)
 
 	page := newPage(ctx)

@@ -34,8 +34,6 @@ var (
 	bucketName   string
 	redisPool    *redis.Pool
 	redisPrefix  string
-	cachePool    *redis.Pool
-	cachePrefix  string
 	db           *sql.DB
 	staticConf   = make(map[string]string)
 )
@@ -52,8 +50,6 @@ func New(config Config) hime.HandlerFactory {
 	bucketName = config.BucketName
 	redisPool = config.RedisPool
 	redisPrefix = config.RedisPrefix
-	cachePool = config.CachePool
-	cachePrefix = config.CachePrefix
 	db = config.DB
 
 	// load static config
