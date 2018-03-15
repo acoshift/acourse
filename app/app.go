@@ -156,63 +156,76 @@ func New(config Config) hime.HandlerFactory {
 		)))
 
 		// course
-		courseMux := http.NewServeMux()
-		courseMux.Handle("/", methodmux.Get(
-			hime.H(courseView),
-		))
-		courseMux.Handle("/content", mustSignedIn(methodmux.Get(
-			hime.H(courseContent),
-		)))
-		courseMux.Handle("/enroll", mustSignedIn(methodmux.GetPost(
-			hime.H(courseEnroll),
-			hime.H(postCourseEnroll),
-		)))
-		courseMux.Handle("/assignment", mustSignedIn(methodmux.Get(
-			hime.H(courseAssignment),
-		)))
+		{
+			m := http.NewServeMux()
+			m.Handle("/", methodmux.Get(
+				hime.H(courseView),
+			))
+			m.Handle("/content", mustSignedIn(methodmux.Get(
+				hime.H(courseContent),
+			)))
+			m.Handle("/enroll", mustSignedIn(methodmux.GetPost(
+				hime.H(courseEnroll),
+				hime.H(postCourseEnroll),
+			)))
+			m.Handle("/assignment", mustSignedIn(methodmux.Get(
+				hime.H(courseAssignment),
+			)))
 
-		r.Handle("/course/", prefixhandler.New("/course", courseURLKey{}, courseMux))
+			r.Handle("/course/", prefixhandler.New("/course", courseURLKey{}, m))
+		}
 
 		// editor
-		r.Handle("/editor/create", onlyInstructor(methodmux.GetPost(
-			hime.H(editorCreate),
-			hime.H(postEditorCreate),
-		)))
-		r.Handle("/editor/course", isCourseOwner(methodmux.GetPost(
-			hime.H(editorCourse),
-			hime.H(postEditorCourse),
-		)))
-		r.Handle("/editor/content", isCourseOwner(methodmux.GetPost(
-			hime.H(editorContent),
-			hime.H(postEditorContent),
-		)))
-		r.Handle("/editor/content/create", isCourseOwner(methodmux.GetPost(
-			hime.H(editorContentCreate),
-			hime.H(postEditorContentCreate),
-		)))
-		r.Handle("/editor/content/edit", methodmux.GetPost(
-			hime.H(editorContentEdit),
-			hime.H(postEditorContentEdit),
-		))
+		{
+			m := http.NewServeMux()
+			m.Handle("/create", onlyInstructor(methodmux.GetPost(
+				hime.H(editorCreate),
+				hime.H(postEditorCreate),
+			)))
+			m.Handle("/course", isCourseOwner(methodmux.GetPost(
+				hime.H(editorCourse),
+				hime.H(postEditorCourse),
+			)))
+			m.Handle("/content", isCourseOwner(methodmux.GetPost(
+				hime.H(editorContent),
+				hime.H(postEditorContent),
+			)))
+			m.Handle("/content/create", isCourseOwner(methodmux.GetPost(
+				hime.H(editorContentCreate),
+				hime.H(postEditorContentCreate),
+			)))
+			// TODO: add middleware ?
+			m.Handle("/content/edit", methodmux.GetPost(
+				hime.H(editorContentEdit),
+				hime.H(postEditorContentEdit),
+			))
+
+			r.Handle("/editor/", http.StripPrefix("/editor", m))
+		}
 
 		// admin
-		r.Handle("/admin/users", onlyAdmin(methodmux.Get(
-			hime.H(adminUsers),
-		)))
-		r.Handle("/admin/courses", onlyAdmin(methodmux.Get(
-			hime.H(adminCourses),
-		)))
-		r.Handle("/admin/payments/pending", onlyAdmin(methodmux.GetPost(
-			hime.H(adminPendingPayments),
-			hime.H(postAdminPendingPayment),
-		)))
-		r.Handle("/admin/payments/history", onlyAdmin(methodmux.Get(
-			hime.H(adminHistoryPayments),
-		)))
-		r.Handle("/admin/payments/reject", onlyAdmin(methodmux.GetPost(
-			hime.H(adminRejectPayment),
-			hime.H(postAdminRejectPayment),
-		)))
+		{
+			m := http.NewServeMux()
+			m.Handle("/users", methodmux.Get(
+				hime.H(adminUsers),
+			))
+			m.Handle("/courses", methodmux.Get(
+				hime.H(adminCourses),
+			))
+			m.Handle("/payments/pending", methodmux.GetPost(
+				hime.H(adminPendingPayments),
+				hime.H(postAdminPendingPayment),
+			))
+			m.Handle("/payments/history", methodmux.Get(
+				hime.H(adminHistoryPayments),
+			))
+			m.Handle("/payments/reject", methodmux.GetPost(
+				hime.H(adminRejectPayment),
+				hime.H(postAdminRejectPayment),
+			))
+
+			r.Handle("/admin/", onlyAdmin(http.StripPrefix("/admin", m)))
+		}
 
 		mux.Handle("/", middleware.Chain(
 			session.Middleware(session.Config{
