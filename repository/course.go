@@ -231,12 +231,12 @@ func ListCourses(q Queryer, limit, offset int64) ([]*entity.Course, error) {
 
 // ListPublicCourses lists public course sort by created at desc
 // TODO: add pagination
-func ListPublicCourses(q Queryer, cachePool *redis.Pool, cachePrefix string) ([]*entity.Course, error) {
+func ListPublicCourses(q Queryer, redisPool *redis.Pool, cachePrefix string) ([]*entity.Course, error) {
 	// TODO: move cache logic out from repo
 
 	// look from cache
 	{
-		c := cachePool.Get()
+		c := redisPool.Get()
 		bs, err := redis.Bytes(c.Do("GET", cachePrefix+"cache:list_public_course"))
 		c.Close()
 		if err == nil {
@@ -299,7 +299,7 @@ func ListPublicCourses(q Queryer, cachePool *redis.Pool, cachePrefix string) ([]
 		buf := bytes.Buffer{}
 		err := gob.NewEncoder(&buf).Encode(xs)
 		if err == nil {
-			c := cachePool.Get()
+			c := redisPool.Get()
 			c.Do("SETEX", cachePrefix+"cache:list_public_course", 5, buf.Bytes())
 			c.Close()
 		}

@@ -16,8 +16,6 @@ type Config struct {
 	BaseURL       string
 	RedisPool     *redis.Pool
 	RedisPrefix   string
-	CachePool     *redis.Pool
-	CachePrefix   string
 	SessionSecret []byte
 	Auth          *firebase.Auth
 	Location      *time.Location
