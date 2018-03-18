@@ -150,7 +150,7 @@ func adminRejectPayment(ctx hime.Context) hime.Result {
 	page := newPage(ctx)
 	page["Payment"] = x
 	page["message"] = message
-	return ctx.View("admin.payment.reject", page)
+	return ctx.View("admin.payments.reject", page)
 }
 
 func postAdminRejectPayment(ctx hime.Context) hime.Result {
