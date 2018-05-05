@@ -76,6 +76,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer db.Close()
+	db.SetMaxOpenConns(4)
 
 	err = hime.New().
 		TemplateDir("template").
