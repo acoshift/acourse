@@ -2,9 +2,13 @@ package session
 
 import (
 	"context"
+	"errors"
 	"net/http"
+)
 
-	"github.com/acoshift/middleware"
+// Errors
+var (
+	ErrNotPassMiddleware = errors.New("session: request not pass middleware")
 )
 
 type (
@@ -16,14 +20,14 @@ type (
 // Middleware is the Manager middleware wrapper
 //
 // New(config).Middleware()
-func Middleware(config Config) middleware.Middleware {
+func Middleware(config Config) func(http.Handler) http.Handler {
 	return New(config).Middleware()
 }
 
 // Middleware injects session manager into request's context.
 //
 // All data changed before write response writer's header will be save.
-func (m *Manager) Middleware() middleware.Middleware {
+func (m *Manager) Middleware() func(http.Handler) http.Handler {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
@@ -60,24 +64,26 @@ func (m *Manager) Middleware() middleware.Middleware {
 }
 
 // Get gets session from context
-func Get(ctx context.Context, name string) *Session {
+func Get(ctx context.Context, name string) (*Session, error) {
 	m, _ := ctx.Value(managerKey{}).(*Manager)
 	if m == nil {
-		// request not pass middleware
-		return nil
+		return nil, ErrNotPassMiddleware
 	}
 
 	// try get session from storage first
 	// to preserve session data from difference handler
 	storage := ctx.Value(storageKey{}).(map[string]*Session)
 	if s, ok := storage[name]; ok {
-		return s
+		return s, nil
 	}
 
 	// get session from manager
-	s := m.Get(ctx.Value(requestKey{}).(*http.Request), name)
+	s, err := m.Get(ctx.Value(requestKey{}).(*http.Request), name)
+	if err != nil {
+		return nil, err
+	}
 
 	// save session to storage for later get
 	storage[name] = s
-	return s
+	return s, nil
 }

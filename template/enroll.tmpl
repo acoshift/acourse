@@ -43,9 +43,9 @@
           {{end}}
           <button class="acourse-button -positive _font-sub _full-width" type="submit">สมัครเรียน</button>
         </form>
-        {{if .Flash.Errors}}
+        {{if .Flash.Has "Errors"}}
           <ul>
-            {{range .Flash.Errors}}
+            {{range .Flash.Get "Errors"}}
             <li>{{.}}</li>
             {{end}}
           </ul>
@@ -54,10 +54,10 @@
     </div>
   </div>
 </div>
+{{end}}
+
+{{define "script"}}
 <script>
-  bindFileInputImage (
-    document.querySelector('#image-input'),
-    document.querySelector('#slip')
-  )
+  bindFileInputImage(document.querySelector('#image-input'), document.querySelector('#slip'))
 </script>
 {{end}}

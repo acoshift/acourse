@@ -36,7 +36,7 @@ func New(config Config) *Manager {
 		}
 	}
 
-	if config.DisableHashID {
+	if m.config.DisableHashID {
 		m.hashID = func(id string) string {
 			return id
 		}
@@ -49,11 +49,15 @@ func New(config Config) *Manager {
 		}
 	}
 
+	if m.config.IdleTimeout <= 0 {
+		m.config.IdleTimeout = m.config.MaxAge
+	}
+
 	return &m
 }
 
 // Get retrieves session from request
-func (m *Manager) Get(r *http.Request, name string) *Session {
+func (m *Manager) Get(r *http.Request, name string) (*Session, error) {
 	s := Session{
 		manager:  m,
 		Name:     name,
@@ -90,7 +94,10 @@ func (m *Manager) Get(r *http.Request, name string) *Session {
 		if err == nil {
 			s.rawID = rawID
 			s.id = hashedID
+		} else if err != ErrNotFound {
+			return nil, err
 		}
+
 		// DO NOT set session id to cookie value if not found in store
 		// to prevent session fixation attack
 	}
@@ -102,7 +109,7 @@ invalidSignature:
 		s.isNew = true
 	}
 
-	return &s
+	return &s, nil
 }
 
 // Save saves session to store and set cookie to response

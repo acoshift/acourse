@@ -22,10 +22,10 @@
                 เข้าสู่ระบบ
               </button>
             </div>
-            {{if .Flash.Errors}}
+            {{if .Flash.Has "Errors"}}
               <div class="acourse-message -error">
                 <ul>
-                  {{range .Flash.Errors}}
+                  {{range .Flash.Get "Errors"}}
                     <li>{{.}}</li>
                   {{end}}
                 </ul>

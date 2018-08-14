@@ -6,13 +6,15 @@ import (
 	"github.com/acoshift/acourse/repository"
 )
 
-func index(ctx hime.Context) hime.Result {
+func index(ctx *hime.Context) error {
 	if ctx.Request().URL.Path != "/" {
 		return notFound(ctx)
 	}
 
-	courses, err := repository.ListPublicCourses(db, redisPool, redisPrefix)
-	must(err)
+	courses, err := repository.ListPublicCourses(db, redisClient, redisPrefix)
+	if err != nil {
+		return err
+	}
 
 	page := newPage(ctx)
 	page["Courses"] = courses

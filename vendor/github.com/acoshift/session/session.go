@@ -130,45 +130,48 @@ func (s *Session) Pop(key string) interface{} {
 	if s.data == nil {
 		return nil
 	}
-	r := s.data[key]
-	s.changed = true
-	delete(s.data, key)
+
+	r, ok := s.data[key]
+	if ok {
+		s.changed = true
+		delete(s.data, key)
+	}
 	return r
 }
 
 // PopString pops string from session
 func (s *Session) PopString(key string) string {
-	r, _ := s.Get(key).(string)
+	r, _ := s.Pop(key).(string)
 	return r
 }
 
 // PopInt pops int from session
 func (s *Session) PopInt(key string) int {
-	r, _ := s.Get(key).(int)
+	r, _ := s.Pop(key).(int)
 	return r
 }
 
 // PopInt64 pops int64 from session
 func (s *Session) PopInt64(key string) int64 {
-	r, _ := s.Get(key).(int64)
+	r, _ := s.Pop(key).(int64)
 	return r
 }
 
 // PopFloat32 pops float32 from session
 func (s *Session) PopFloat32(key string) float32 {
-	r, _ := s.Get(key).(float32)
+	r, _ := s.Pop(key).(float32)
 	return r
 }
 
 // PopFloat64 pops float64 from session
 func (s *Session) PopFloat64(key string) float64 {
-	r, _ := s.Get(key).(float64)
+	r, _ := s.Pop(key).(float64)
 	return r
 }
 
 // PopBool pops bool from session
 func (s *Session) PopBool(key string) bool {
-	r, _ := s.Get(key).(bool)
+	r, _ := s.Pop(key).(bool)
 	return r
 }
 
@@ -244,19 +247,23 @@ func (s *Session) setCookie(w http.ResponseWriter) {
 		value += "." + digest
 	}
 
-	setCookie(w, &cookie{
+	cs := cookie{
 		Cookie: http.Cookie{
 			Name:     s.Name,
 			Domain:   s.Domain,
 			Path:     s.Path,
 			HttpOnly: s.HTTPOnly,
 			Value:    value,
-			MaxAge:   int(s.MaxAge / time.Second),
-			Expires:  time.Now().Add(s.MaxAge),
 			Secure:   s.Secure,
 		},
 		SameSite: s.SameSite,
-	})
+	}
+	if s.MaxAge > 0 {
+		cs.MaxAge = int(s.MaxAge / time.Second)
+		cs.Expires = time.Now().Add(s.MaxAge)
+	}
+
+	setCookie(w, cs)
 }
 
 // Flash returns flash from session

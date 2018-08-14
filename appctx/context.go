@@ -28,5 +28,9 @@ func GetUser(ctx context.Context) *entity.User {
 
 // GetSession gets session from context
 func GetSession(ctx context.Context) *session.Session {
-	return session.Get(ctx, sessName)
+	s, err := session.Get(ctx, sessName)
+	if err != nil {
+		panic(err)
+	}
+	return s
 }

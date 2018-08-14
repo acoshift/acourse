@@ -15,14 +15,18 @@ import (
 	"github.com/acoshift/acourse/repository"
 )
 
-func profile(ctx hime.Context) hime.Result {
+func profile(ctx *hime.Context) error {
 	user := appctx.GetUser(ctx)
 
 	ownCourses, err := repository.ListOwnCourses(db, user.ID)
-	must(err)
+	if err != nil {
+		return err
+	}
 
 	enrolledCourses, err := repository.ListEnrolledCourses(db, user.ID)
-	must(err)
+	if err != nil {
+		return err
+	}
 
 	page := newPage(ctx)
 	page["Title"] = user.Username + " | " + page["Title"].(string)
@@ -31,7 +35,7 @@ func profile(ctx hime.Context) hime.Result {
 	return ctx.View("profile", page)
 }
 
-func profileEdit(ctx hime.Context) hime.Result {
+func profileEdit(ctx *hime.Context) error {
 	user := appctx.GetUser(ctx)
 	f := appctx.GetSession(ctx).Flash()
 	if !f.Has("Username") {
@@ -49,7 +53,7 @@ func profileEdit(ctx hime.Context) hime.Result {
 	return ctx.View("profile.edit", page)
 }
 
-func postProfileEdit(ctx hime.Context) hime.Result {
+func postProfileEdit(ctx *hime.Context) error {
 	user := appctx.GetUser(ctx)
 	f := appctx.GetSession(ctx).Flash()
 

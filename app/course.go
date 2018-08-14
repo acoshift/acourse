@@ -24,7 +24,7 @@ import (
 
 type courseURLKey struct{}
 
-func courseView(ctx hime.Context) hime.Result {
+func courseView(ctx *hime.Context) error {
 	if ctx.Request().URL.Path != "/" {
 		return notFound(ctx)
 	}
@@ -41,13 +41,17 @@ func courseView(ctx hime.Context) hime.Result {
 		if err == entity.ErrNotFound {
 			return notFound(ctx)
 		}
-		must(err)
+		if err != nil {
+			return err
+		}
 	}
 	x, err := repository.GetCourse(db, id)
 	if err == entity.ErrNotFound {
 		return notFound(ctx)
 	}
-	must(err)
+	if err != nil {
+		return err
+	}
 
 	// if course has url, redirect to course url
 	if x.URL.Valid && x.URL.String != link {
@@ -58,11 +62,15 @@ func courseView(ctx hime.Context) hime.Result {
 	pendingEnroll := false
 	if user != nil {
 		enrolled, err = repository.IsEnrolled(db, user.ID, x.ID)
-		must(err)
+		if err != nil {
+			return err
+		}
 
 		if !enrolled {
 			pendingEnroll, err = repository.HasPendingPayment(db, user.ID, x.ID)
-			must(err)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
@@ -74,14 +82,18 @@ func courseView(ctx hime.Context) hime.Result {
 	// if user enrolled or user is owner fetch course contents
 	if enrolled || owned {
 		x.Contents, err = repository.GetCourseContents(db, x.ID)
-		must(err)
+		if err != nil {
+			return err
+		}
 	}
 
 	if owned {
 		x.Owner = user
 	} else {
 		x.Owner, err = repository.GetUser(db, x.UserID)
-		must(err)
+		if err != nil {
+			return err
+		}
 	}
 
 	page := newPage(ctx)
@@ -96,7 +108,7 @@ func courseView(ctx hime.Context) hime.Result {
 	return ctx.View("course", page)
 }
 
-func courseContent(ctx hime.Context) hime.Result {
+func courseContent(ctx *hime.Context) error {
 	user := appctx.GetUser(ctx)
 	link := prefixhandler.Get(ctx, courseURLKey{})
 
@@ -109,13 +121,17 @@ func courseContent(ctx hime.Context) hime.Result {
 		if err == entity.ErrNotFound {
 			return notFound(ctx)
 		}
-		must(err)
+		if err != nil {
+			return err
+		}
 	}
 	x, err := repository.GetCourse(db, id)
 	if err == entity.ErrNotFound {
 		return notFound(ctx)
 	}
-	must(err)
+	if err != nil {
+		return err
+	}
 
 	// if course has url, redirect to course url
 	if x.URL.Valid && x.URL.String != link {
@@ -123,17 +139,23 @@ func courseContent(ctx hime.Context) hime.Result {
 	}
 
 	enrolled, err := repository.IsEnrolled(db, user.ID, x.ID)
-	must(err)
+	if err != nil {
+		return err
+	}
 
 	if !enrolled && user.ID != x.UserID {
 		return ctx.Status(http.StatusForbidden).StatusText()
 	}
 
 	x.Contents, err = repository.GetCourseContents(db, x.ID)
-	must(err)
+	if err != nil {
+		return err
+	}
 
 	x.Owner, err = repository.GetUser(db, x.UserID)
-	must(err)
+	if err != nil {
+		return err
+	}
 
 	var content *entity.CourseContent
 	p, _ := strconv.Atoi(ctx.FormValue("p"))
@@ -156,11 +178,11 @@ func courseContent(ctx hime.Context) hime.Result {
 	return ctx.View("course.content", page)
 }
 
-func editorCreate(ctx hime.Context) hime.Result {
+func editorCreate(ctx *hime.Context) error {
 	return ctx.View("editor.create", newPage(ctx))
 }
 
-func postEditorCreate(ctx hime.Context) hime.Result {
+func postEditorCreate(ctx *hime.Context) error {
 	f := appctx.GetSession(ctx).Flash()
 	user := appctx.GetUser(ctx)
 
@@ -223,7 +245,9 @@ func postEditorCreate(ctx hime.Context) hime.Result {
 		`, id)
 		return err
 	})
-	must(err)
+	if err != nil {
+		return err
+	}
 
 	var link sql.NullString
 	db.QueryRow(`select url from courses where id = $1`, id).Scan(&link)
@@ -233,17 +257,19 @@ func postEditorCreate(ctx hime.Context) hime.Result {
 	return ctx.RedirectTo("course", link.String)
 }
 
-func editorCourse(ctx hime.Context) hime.Result {
+func editorCourse(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 	course, err := repository.GetCourse(db, id)
-	must(err)
+	if err != nil {
+		return err
+	}
 
 	page := newPage(ctx)
 	page["Course"] = course
 	return ctx.View("editor.course", page)
 }
 
-func postEditorCourse(ctx hime.Context) hime.Result {
+func postEditorCourse(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 
 	f := appctx.GetSession(ctx).Flash()
@@ -322,7 +348,9 @@ func postEditorCourse(ctx hime.Context) hime.Result {
 		// must(err)
 		return nil
 	})
-	must(err)
+	if err != nil {
+		return err
+	}
 
 	var link sql.NullString
 	db.QueryRow(`select url from courses where id = $1`, id).Scan(&link)
@@ -332,34 +360,40 @@ func postEditorCourse(ctx hime.Context) hime.Result {
 	return ctx.RedirectTo("course", link.String)
 }
 
-func editorContent(ctx hime.Context) hime.Result {
+func editorContent(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 
 	course, err := repository.GetCourse(db, id)
 	if err == entity.ErrNotFound {
 		return notFound(ctx)
 	}
-	must(err)
+	if err != nil {
+		return err
+	}
 	course.Contents, err = repository.GetCourseContents(db, id)
-	must(err)
+	if err != nil {
+		return err
+	}
 
 	page := newPage(ctx)
 	page["Course"] = course
 	return ctx.View("editor.content", page)
 }
 
-func postEditorContent(ctx hime.Context) hime.Result {
+func postEditorContent(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 
 	if ctx.FormValue("action") == "delete" {
 		contentID := ctx.FormValue("contentId")
 		_, err := db.Exec(`delete from course_contents where id = $1 and course_id = $2`, contentID, id)
-		must(err)
+		if err != nil {
+			return err
+		}
 	}
 	return ctx.RedirectToGet()
 }
 
-func courseEnroll(ctx hime.Context) hime.Result {
+func courseEnroll(ctx *hime.Context) error {
 	user := appctx.GetUser(ctx)
 
 	link := prefixhandler.Get(ctx, courseURLKey{})
@@ -371,14 +405,18 @@ func courseEnroll(ctx hime.Context) hime.Result {
 		if err == entity.ErrNotFound {
 			return notFound(ctx)
 		}
-		must(err)
+		if err != nil {
+			return err
+		}
 	}
 
 	x, err := repository.GetCourse(db, id)
 	if err == entity.ErrNotFound {
 		return notFound(ctx)
 	}
-	must(err)
+	if err != nil {
+		return err
+	}
 
 	// if user is course owner redirect back to course page
 	if user.ID == x.UserID {
@@ -387,14 +425,18 @@ func courseEnroll(ctx hime.Context) hime.Result {
 
 	// redirect enrolled user back to course page
 	enrolled, err := repository.IsEnrolled(db, user.ID, id)
-	must(err)
+	if err != nil {
+		return err
+	}
 	if enrolled {
 		return ctx.RedirectTo("course", link)
 	}
 
 	// check is user has pending enroll
 	pendingPayment, err := repository.HasPendingPayment(db, user.ID, id)
-	must(err)
+	if err != nil {
+		return err
+	}
 	if pendingPayment {
 		return ctx.RedirectTo("course", link)
 	}
@@ -408,7 +450,7 @@ func courseEnroll(ctx hime.Context) hime.Result {
 	return ctx.View("course.enroll", page)
 }
 
-func postCourseEnroll(ctx hime.Context) hime.Result {
+func postCourseEnroll(ctx *hime.Context) error {
 	user := appctx.GetUser(ctx)
 	f := appctx.GetSession(ctx).Flash()
 
@@ -421,14 +463,18 @@ func postCourseEnroll(ctx hime.Context) hime.Result {
 		if err == entity.ErrNotFound {
 			return notFound(ctx)
 		}
-		must(err)
+		if err != nil {
+			return err
+		}
 	}
 
 	x, err := repository.GetCourse(db, id)
 	if err == entity.ErrNotFound {
 		return notFound(ctx)
 	}
-	must(err)
+	if err != nil {
+		return err
+	}
 
 	// if user is course owner redirect back to course page
 	if user.ID == x.UserID {
@@ -437,14 +483,18 @@ func postCourseEnroll(ctx hime.Context) hime.Result {
 
 	// redirect enrolled user back to course page
 	enrolled, err := repository.IsEnrolled(db, user.ID, id)
-	must(err)
+	if err != nil {
+		return err
+	}
 	if enrolled {
 		return ctx.RedirectTo("course", link)
 	}
 
 	// check is user has pending enroll
 	pendingPayment, err := repository.HasPendingPayment(db, user.ID, id)
-	must(err)
+	if err != nil {
+		return err
+	}
 	if pendingPayment {
 		return ctx.RedirectTo("course", link)
 	}
@@ -507,7 +557,9 @@ func postCourseEnroll(ctx hime.Context) hime.Result {
 		}
 		return nil
 	})
-	must(err)
+	if err != nil {
+		return err
+	}
 
 	if newPayment {
 		go func() {
@@ -520,7 +572,7 @@ func postCourseEnroll(ctx hime.Context) hime.Result {
 	return ctx.RedirectTo("course", link)
 }
 
-func courseAssignment(ctx hime.Context) hime.Result {
+func courseAssignment(ctx *hime.Context) error {
 	user := appctx.GetUser(ctx)
 	link := prefixhandler.Get(ctx, courseURLKey{})
 
@@ -533,13 +585,17 @@ func courseAssignment(ctx hime.Context) hime.Result {
 		if err == entity.ErrNotFound {
 			return notFound(ctx)
 		}
-		must(err)
+		if err != nil {
+			return err
+		}
 	}
 	x, err := repository.GetCourse(db, id)
 	if err == entity.ErrNotFound {
 		return notFound(ctx)
 	}
-	must(err)
+	if err != nil {
+		return err
+	}
 
 	// if course has url, redirect to course url
 	if x.URL.Valid && x.URL.String != link {
@@ -547,14 +603,18 @@ func courseAssignment(ctx hime.Context) hime.Result {
 	}
 
 	enrolled, err := repository.IsEnrolled(db, user.ID, x.ID)
-	must(err)
+	if err != nil {
+		return err
+	}
 
 	if !enrolled && user.ID != x.UserID {
 		return ctx.Status(http.StatusForbidden).StatusText()
 	}
 
 	assignments, err := repository.GetAssignments(db, x.ID)
-	must(err)
+	if err != nil {
+		return err
+	}
 
 	page := newPage(ctx)
 	page["Title"] = x.Title + " | " + page["Title"].(string)
@@ -566,18 +626,20 @@ func courseAssignment(ctx hime.Context) hime.Result {
 	return ctx.View("assignment", page)
 }
 
-func editorContentCreate(ctx hime.Context) hime.Result {
+func editorContentCreate(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 
 	course, err := repository.GetCourse(db, id)
-	must(err)
+	if err != nil {
+		return err
+	}
 
 	page := newPage(ctx)
 	page["Course"] = course
 	return ctx.View("editor.content.create", page)
 }
 
-func postEditorContentCreate(ctx hime.Context) hime.Result {
+func postEditorContentCreate(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 
 	var (
@@ -606,12 +668,14 @@ func postEditorContentCreate(ctx hime.Context) hime.Result {
 		}
 		return nil
 	})
-	must(err)
+	if err != nil {
+		return err
+	}
 
 	return ctx.RedirectTo("editor.content", ctx.Param("id", ctx.FormValue("id")))
 }
 
-func editorContentEdit(ctx hime.Context) hime.Result {
+func editorContentEdit(ctx *hime.Context) error {
 	// course content id
 	id := ctx.FormValue("id")
 
@@ -619,10 +683,14 @@ func editorContentEdit(ctx hime.Context) hime.Result {
 	if err == sql.ErrNoRows {
 		return notFound(ctx)
 	}
-	must(err)
+	if err != nil {
+		return err
+	}
 
 	course, err := repository.GetCourse(db, content.CourseID)
-	must(err)
+	if err != nil {
+		return err
+	}
 
 	user := appctx.GetUser(ctx)
 	// user is not course owner
@@ -636,7 +704,7 @@ func editorContentEdit(ctx hime.Context) hime.Result {
 	return ctx.View("editor.content.edit", page)
 }
 
-func postEditorContentEdit(ctx hime.Context) hime.Result {
+func postEditorContentEdit(ctx *hime.Context) error {
 	// course content id
 	id := ctx.FormValue("id")
 
@@ -644,10 +712,14 @@ func postEditorContentEdit(ctx hime.Context) hime.Result {
 	if err == sql.ErrNoRows {
 		return notFound(ctx)
 	}
-	must(err)
+	if err != nil {
+		return err
+	}
 
 	course, err := repository.GetCourse(db, content.CourseID)
-	must(err)
+	if err != nil {
+		return err
+	}
 
 	user := appctx.GetUser(ctx)
 	// user is not course owner
@@ -670,7 +742,9 @@ func postEditorContentEdit(ctx hime.Context) hime.Result {
 			updated_at = now()
 		where id = $1 and course_id = $2
 	`, id, course.ID, title, desc, videoID)
-	must(err)
+	if err != nil {
+		return err
+	}
 
 	return ctx.RedirectTo("editor.content", ctx.Param("id", course.ID))
 }

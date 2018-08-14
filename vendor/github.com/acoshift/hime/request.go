@@ -8,114 +8,179 @@ import (
 	"strings"
 )
 
-func trimComma(s string) string {
+const (
+	// defaultMaxMemory is http.defaultMaxMemory
+	defaultMaxMemory = 32 << 20 // 32 MB
+)
+
+func removeComma(s string) string {
 	return strings.Replace(s, ",", "", -1)
 }
 
-func (ctx *appContext) ParseForm() error {
+// ParseForm calls r.ParseForm
+func (ctx *Context) ParseForm() error {
 	return ctx.r.ParseForm()
 }
 
-func (ctx *appContext) ParseMultipartForm(maxMemory int64) error {
+// ParseMultipartForm calls r.ParseMultipartForm
+func (ctx *Context) ParseMultipartForm(maxMemory int64) error {
 	return ctx.r.ParseMultipartForm(maxMemory)
 }
 
-func (ctx *appContext) Form() url.Values {
+// Form calls r.Form
+func (ctx *Context) Form() url.Values {
 	return ctx.r.Form
 }
 
-func (ctx *appContext) PostForm() url.Values {
+// PostForm calls r.PostForm
+func (ctx *Context) PostForm() url.Values {
 	return ctx.r.PostForm
 }
 
-func (ctx *appContext) FormValue(key string) string {
+// FormValue calls r.FormValue
+func (ctx *Context) FormValue(key string) string {
 	return ctx.r.FormValue(key)
 }
 
-func (ctx *appContext) FormValueTrimSpace(key string) string {
+// FormValueTrimSpace trims space from form value
+func (ctx *Context) FormValueTrimSpace(key string) string {
 	return strings.TrimSpace(ctx.FormValue(key))
 }
 
-func (ctx *appContext) FormValueTrimSpaceComma(key string) string {
-	return trimComma(strings.TrimSpace(ctx.FormValue(key)))
+// FormValueTrimSpaceComma trims space and remove comma from form value
+func (ctx *Context) FormValueTrimSpaceComma(key string) string {
+	return removeComma(strings.TrimSpace(ctx.FormValue(key)))
 }
 
-func (ctx *appContext) FormValueInt(key string) int {
+// FormValueInt converts form value to int
+func (ctx *Context) FormValueInt(key string) int {
 	x, _ := strconv.Atoi(ctx.FormValueTrimSpaceComma(key))
 	return x
 }
 
-func (ctx *appContext) FormValueInt64(key string) int64 {
+// FormValueInt64 converts form value to int64
+func (ctx *Context) FormValueInt64(key string) int64 {
 	x, _ := strconv.ParseInt(ctx.FormValueTrimSpaceComma(key), 10, 64)
 	return x
 }
 
-func (ctx *appContext) FormValueFloat32(key string) float32 {
+// FormValueFloat32 converts form value to float32
+func (ctx *Context) FormValueFloat32(key string) float32 {
 	x, _ := strconv.ParseFloat(ctx.FormValueTrimSpaceComma(key), 32)
 	return float32(x)
 }
 
-func (ctx *appContext) FormValueFloat64(key string) float64 {
+// FormValueFloat64 converts form value to float64
+func (ctx *Context) FormValueFloat64(key string) float64 {
 	x, _ := strconv.ParseFloat(ctx.FormValueTrimSpaceComma(key), 64)
 	return float64(x)
 }
 
-func (ctx *appContext) PostFormValue(key string) string {
+// PostFormValue calls r.PostFormValue
+func (ctx *Context) PostFormValue(key string) string {
 	return ctx.r.PostFormValue(key)
 }
 
-func (ctx *appContext) PostFormValueTrimSpace(key string) string {
+// PostFormValueTrimSpace trims space from post form value
+func (ctx *Context) PostFormValueTrimSpace(key string) string {
 	return strings.TrimSpace(ctx.PostFormValue(key))
 }
 
-func (ctx *appContext) PostFormValueTrimSpaceComma(key string) string {
-	return trimComma(strings.TrimSpace(ctx.PostFormValue(key)))
+// PostFormValueTrimSpaceComma trims space and remove comma from post form value
+func (ctx *Context) PostFormValueTrimSpaceComma(key string) string {
+	return removeComma(strings.TrimSpace(ctx.PostFormValue(key)))
 }
 
-func (ctx *appContext) PostFormValueInt(key string) int {
+// PostFormValueInt converts post form value to int
+func (ctx *Context) PostFormValueInt(key string) int {
 	x, _ := strconv.Atoi(ctx.PostFormValueTrimSpaceComma(key))
 	return x
 }
 
-func (ctx *appContext) PostFormValueInt64(key string) int64 {
+// PostFormValueInt64 converts post form value to int64
+func (ctx *Context) PostFormValueInt64(key string) int64 {
 	x, _ := strconv.ParseInt(ctx.PostFormValueTrimSpaceComma(key), 10, 64)
 	return x
 }
 
-func (ctx *appContext) PostFormValueFloat32(key string) float32 {
+// PostFormValueFloat32 converts post form value to flost32
+func (ctx *Context) PostFormValueFloat32(key string) float32 {
 	x, _ := strconv.ParseFloat(ctx.PostFormValueTrimSpaceComma(key), 32)
 	return float32(x)
 }
 
-func (ctx *appContext) PostFormValueFloat64(key string) float64 {
+// PostFormValueFloat64 converts post form value to flost64
+func (ctx *Context) PostFormValueFloat64(key string) float64 {
 	x, _ := strconv.ParseFloat(ctx.PostFormValueTrimSpaceComma(key), 64)
 	return float64(x)
 }
 
-func (ctx *appContext) FormFile(key string) (multipart.File, *multipart.FileHeader, error) {
+// FormFile returns r.FormFile
+func (ctx *Context) FormFile(key string) (multipart.File, *multipart.FileHeader, error) {
 	return ctx.r.FormFile(key)
 }
 
-func (ctx *appContext) FormFileNotEmpty(key string) (multipart.File, *multipart.FileHeader, error) {
+// FormFileNotEmpty returns file from r.FormFile
+// only when file size is not empty,
+// or return http.ErrMissingFile if file is empty
+func (ctx *Context) FormFileNotEmpty(key string) (multipart.File, *multipart.FileHeader, error) {
 	file, header, err := ctx.r.FormFile(key)
+	if err != nil {
+		return nil, nil, err
+	}
 	if header.Size == 0 {
+		file.Close()
 		return nil, nil, http.ErrMissingFile
 	}
 	return file, header, err
 }
 
-func (ctx *appContext) MultipartForm() *multipart.Form {
+// FormFileHeader returns file header for given key without open file
+func (ctx *Context) FormFileHeader(key string) (*multipart.FileHeader, error) {
+	// edit from http.Request.FormFile
+	if ctx.r.MultipartForm == nil {
+		err := ctx.r.ParseMultipartForm(defaultMaxMemory)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if ctx.r.MultipartForm != nil && ctx.r.MultipartForm.File != nil {
+		if fhs := ctx.r.MultipartForm.File[key]; len(fhs) > 0 {
+			return fhs[0], nil
+		}
+	}
+	return nil, http.ErrMissingFile
+}
+
+// FormFileHeaderNotEmpty returns file header if not empty,
+// or http.ErrMissingFile if file is empty
+func (ctx *Context) FormFileHeaderNotEmpty(key string) (*multipart.FileHeader, error) {
+	fh, err := ctx.FormFileHeader(key)
+	if err != nil {
+		return nil, err
+	}
+	if fh.Size == 0 {
+		return nil, http.ErrMissingFile
+	}
+	return fh, nil
+}
+
+// MultipartForm returns r.MultipartForm
+func (ctx *Context) MultipartForm() *multipart.Form {
 	return ctx.r.MultipartForm
 }
 
-func (ctx *appContext) MultipartReader() (*multipart.Reader, error) {
+// MultipartReader returns r.MultipartReader
+func (ctx *Context) MultipartReader() (*multipart.Reader, error) {
 	return ctx.r.MultipartReader()
 }
 
-func (ctx *appContext) Method() string {
+// Method return r.Method
+func (ctx *Context) Method() string {
 	return ctx.r.Method
 }
 
-func (ctx *appContext) Query() url.Values {
+// Query returns r.URL.Query
+func (ctx *Context) Query() url.Values {
 	return ctx.r.URL.Query()
 }

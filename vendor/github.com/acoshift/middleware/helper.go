@@ -2,19 +2,14 @@ package middleware
 
 import (
 	"net/http"
-
-	"github.com/acoshift/header"
-)
-
-const (
-	prefixWWW = "www."
+	"net/textproto"
 )
 
 func isTLS(r *http.Request) bool {
 	if r.TLS != nil {
 		return true
 	}
-	if r.Header.Get(header.XForwardedProto) == "https" {
+	if r.Header.Get("X-Forwarded-Proto") == "https" {
 		return true
 	}
 	return false
@@ -25,4 +20,14 @@ func scheme(r *http.Request) string {
 		return "https"
 	}
 	return "http"
+}
+
+func addHeaderIfNotExists(h http.Header, key, value string) {
+	key = textproto.CanonicalMIMEHeaderKey(key)
+	for _, v := range h[key] {
+		if v == value {
+			return
+		}
+	}
+	h.Add(key, value)
 }

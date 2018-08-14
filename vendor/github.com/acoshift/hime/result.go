@@ -4,23 +4,20 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"html/template"
 	"io"
 	"net"
 	"net/http"
 	"syscall"
-
-	"github.com/acoshift/header"
 )
 
-func (ctx *appContext) statusCode() int {
+func (ctx *Context) statusCode() int {
 	if ctx.code == 0 {
 		return http.StatusOK
 	}
 	return ctx.code
 }
 
-func (ctx *appContext) statusCodeRedirect() int {
+func (ctx *Context) statusCodeRedirect() int {
 	if ctx.code == 0 {
 		if ctx.r.Method == http.MethodPost {
 			return http.StatusSeeOther
@@ -30,169 +27,178 @@ func (ctx *appContext) statusCodeRedirect() int {
 	return ctx.code
 }
 
-func (ctx *appContext) statusCodeError() int {
+func (ctx *Context) statusCodeError() int {
 	if ctx.code == 0 {
 		return http.StatusInternalServerError
 	}
 	return ctx.code
 }
 
-func (ctx *appContext) writeHeader() {
+func (ctx *Context) writeHeader() {
 	if code := ctx.statusCode(); code > 0 {
 		ctx.w.WriteHeader(code)
 	}
 }
 
-func (ctx *appContext) Redirect(url string, params ...interface{}) Result {
-	p := buildPath(url, params...)
-	return ResultFunc(func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(ctx.w, ctx.r, p, ctx.statusCodeRedirect())
-	})
+// Handle calls h.ServeHTTP
+func (ctx *Context) Handle(h http.Handler) error {
+	h.ServeHTTP(ctx.w, ctx.r)
+	return nil
 }
 
-func (ctx *appContext) SafeRedirect(url string, params ...interface{}) Result {
+// Redirect redircets to given url
+func (ctx *Context) Redirect(url string, params ...interface{}) error {
+	p := buildPath(url, params...)
+	http.Redirect(ctx.w, ctx.r, p, ctx.statusCodeRedirect())
+	return nil
+}
+
+// SafeRedirect extracts only path from url then redirect
+func (ctx *Context) SafeRedirect(url string, params ...interface{}) error {
 	p := buildPath(url, params...)
 	return ctx.Redirect(SafeRedirectPath(p))
 }
 
-func (ctx *appContext) RedirectTo(name string, params ...interface{}) Result {
+// RedirectTo redirects to route name
+func (ctx *Context) RedirectTo(name string, params ...interface{}) error {
 	p := buildPath(ctx.app.Route(name), params...)
 	return ctx.Redirect(p)
 }
 
-func (ctx *appContext) RedirectToGet() Result {
+// RedirectToGet redirects to same url with status SeeOther
+func (ctx *Context) RedirectToGet() error {
 	return ctx.Status(http.StatusSeeOther).Redirect(ctx.Request().RequestURI)
 }
 
-func (ctx *appContext) Error(error string) Result {
-	return ResultFunc(func(w http.ResponseWriter, r *http.Request) {
-		http.Error(ctx.w, error, ctx.statusCodeError())
-	})
-}
-
-func (ctx *appContext) Nothing() Result {
-	return ResultFunc(func(w http.ResponseWriter, r *http.Request) {
-		// do nothing
-	})
-}
-
-func (ctx *appContext) NotFound() Result {
-	return ResultFunc(func(w http.ResponseWriter, r *http.Request) {
-		http.NotFound(w, r)
-	})
-}
-
-func (ctx *appContext) NoContent() Result {
-	return ResultFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusNoContent)
-	})
-}
-
-func (ctx *appContext) View(name string, data interface{}) Result {
-	return ResultFunc(func(w http.ResponseWriter, r *http.Request) {
-		t, ok := ctx.app.template[name]
-		if !ok {
-			panic(newErrTemplateNotFound(name))
-		}
-
-		ctx.invokeBeforeRender(func() {
-			ctx.renderView(t, ctx.statusCode(), data)
-		})
-	})
-}
-
-func (ctx *appContext) invokeBeforeRender(after func()) {
-	if ctx.app.beforeRender != nil {
-		ctx.app.beforeRender(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			after()
-		})).ServeHTTP(ctx.w, ctx.r)
-		return
+// RedirectBack redirects to referer or fallback if referer not exists
+func (ctx *Context) RedirectBack(fallback string) error {
+	u := ctx.r.Referer()
+	if u == "" {
+		u = fallback
 	}
-	after()
+	if u == "" {
+		u = ctx.Request().RequestURI
+	}
+	return ctx.Redirect(u)
 }
 
-func (ctx *appContext) setContentType(value string) {
-	if len(ctx.w.Header().Get(header.ContentType)) == 0 {
-		ctx.w.Header().Set(header.ContentType, value)
-	}
+// RedirectBackToGet redirects to referer with status SeeOther or fallback
+// with same url
+func (ctx *Context) RedirectBackToGet() error {
+	return ctx.Status(http.StatusSeeOther).RedirectBack("")
 }
 
-func panicRenderError(err error) {
-	if err == nil {
-		return
+// SafeRedirectBack safe redirects to referer
+func (ctx *Context) SafeRedirectBack(fallback string) error {
+	u := ctx.r.Referer()
+	if u == "" {
+		u = fallback
 	}
-	if _, ok := err.(*net.OpError); ok {
-		return
+	if u == "" {
+		u = ctx.Request().RequestURI
 	}
-	if err == syscall.EPIPE {
-		return
-	}
-	panic(err)
+	return ctx.SafeRedirect(u)
 }
 
-func (ctx *appContext) renderView(t *template.Template, code int, data interface{}) {
-	ctx.setContentType("text/html; charset=utf-8")
-	ctx.w.WriteHeader(code)
+// Error calls http.Error
+func (ctx *Context) Error(error string) error {
+	http.Error(ctx.w, error, ctx.statusCodeError())
+	return nil
+}
 
-	if ctx.app.minifier == nil {
-		err := t.Execute(ctx.w, data)
-		panicRenderError(err)
-		return
+// NotFound calls http.NotFound
+func (ctx *Context) NotFound() error {
+	http.NotFound(ctx.w, ctx.r)
+	return nil
+}
+
+// NoContent writes http.StatusNoContent into response writer
+func (ctx *Context) NoContent() error {
+	ctx.w.WriteHeader(http.StatusNoContent)
+	return nil
+}
+
+// View renders view
+func (ctx *Context) View(name string, data interface{}) error {
+	t, ok := ctx.app.template[name]
+	if !ok {
+		panic(newErrTemplateNotFound(name))
 	}
 
 	buf := bytes.Buffer{}
 	err := t.Execute(&buf, data)
-	panicRenderError(err)
-	err = ctx.app.minifier.Minify("text/html", ctx.w, &buf)
-	panicRenderError(err)
+	if err != nil {
+		return err
+	}
+
+	ctx.setContentType("text/html; charset=utf-8")
+	ctx.w.WriteHeader(ctx.statusCode())
+	_, err = io.Copy(ctx.w, &buf)
+	return filterRenderError(err)
 }
 
-func (ctx *appContext) JSON(data interface{}) Result {
-	return ResultFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx.invokeBeforeRender(func() {
-			ctx.setContentType("application/json; charset=utf-8")
-			ctx.writeHeader()
-			json.NewEncoder(w).Encode(data)
-		})
-	})
+func (ctx *Context) setContentType(value string) {
+	if len(ctx.w.Header().Get("Content-Type")) == 0 {
+		ctx.w.Header().Set("Content-Type", value)
+	}
 }
 
-func (ctx *appContext) String(format string, a ...interface{}) Result {
-	return ResultFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx.invokeBeforeRender(func() {
-			ctx.setContentType("text/plain; charset=utf-8")
-			ctx.writeHeader()
-			fmt.Fprintf(w, format, a...)
-		})
-	})
+func filterRenderError(err error) error {
+	if err == nil {
+		return nil
+	}
+	if _, ok := err.(*net.OpError); ok {
+		return nil
+	}
+	if err == syscall.EPIPE {
+		return nil
+	}
+	return err
 }
 
-func (ctx *appContext) StatusText() Result {
+// JSON encodes given data into json then writes to response writer
+func (ctx *Context) JSON(data interface{}) error {
+	ctx.setContentType("application/json; charset=utf-8")
+	ctx.writeHeader()
+	return json.NewEncoder(ctx.w).Encode(data)
+}
+
+// HTML writes html to response writer
+func (ctx *Context) HTML(data []byte) error {
+	ctx.setContentType("text/html; charset=utf-8")
+	ctx.writeHeader()
+	_, err := io.Copy(ctx.w, bytes.NewReader(data))
+	return filterRenderError(err)
+}
+
+// String writes string into response writer
+func (ctx *Context) String(format string, a ...interface{}) error {
+	ctx.setContentType("text/plain; charset=utf-8")
+	ctx.writeHeader()
+	_, err := fmt.Fprintf(ctx.w, format, a...)
+	return filterRenderError(err)
+}
+
+// StatusText writes status text from seted status code tnto response writer
+func (ctx *Context) StatusText() error {
 	return ctx.String(http.StatusText(ctx.statusCode()))
 }
 
-func (ctx *appContext) CopyFrom(src io.Reader) Result {
-	return ResultFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx.invokeBeforeRender(func() {
-			ctx.setContentType("application/octet-stream")
-			ctx.writeHeader()
-			io.Copy(w, src)
-		})
-	})
+// CopyFrom copies src reader into response writer
+func (ctx *Context) CopyFrom(src io.Reader) error {
+	ctx.setContentType("application/octet-stream")
+	ctx.writeHeader()
+	_, err := io.Copy(ctx.w, src)
+	return filterRenderError(err)
 }
 
-func (ctx *appContext) Bytes(b []byte) Result {
+// Bytes writes bytes into response writer
+func (ctx *Context) Bytes(b []byte) error {
 	return ctx.CopyFrom(bytes.NewReader(b))
 }
 
-func (ctx *appContext) File(name string) Result {
-	return ResultFunc(func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, name)
-	})
-}
-
-func (ctx *appContext) Handle(h http.Handler) Result {
-	return ResultFunc(func(w http.ResponseWriter, r *http.Request) {
-		h.ServeHTTP(ctx.w, ctx.r)
-	})
+// File serves file using http.ServeFile
+func (ctx *Context) File(name string) error {
+	http.ServeFile(ctx.w, ctx.r, name)
+	return nil
 }

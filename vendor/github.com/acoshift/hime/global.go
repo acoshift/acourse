@@ -1,16 +1,39 @@
 package hime
 
-func (app *app) Globals(globals Globals) App {
+// Globals is the global const map
+type Globals map[interface{}]interface{}
+
+func cloneGlobals(xs Globals) Globals {
+	if xs == nil {
+		return nil
+	}
+	rs := make(Globals)
+	for k, v := range xs {
+		rs[k] = v
+	}
+	return rs
+}
+
+// Globals registers global constants
+func (app *App) Globals(globals Globals) *App {
+	if app.globals == nil {
+		app.globals = make(Globals)
+	}
 	for key, value := range globals {
 		app.globals[key] = value
 	}
 	return app
 }
 
-func (app *app) Global(key interface{}) interface{} {
+// Global gets value from global storage
+func (app *App) Global(key interface{}) interface{} {
+	if app.globals == nil {
+		return nil
+	}
 	return app.globals[key]
 }
 
-func (ctx *appContext) Global(key interface{}) interface{} {
+// Global returns global value
+func (ctx *Context) Global(key interface{}) interface{} {
 	return ctx.app.Global(key)
 }

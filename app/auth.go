@@ -34,11 +34,11 @@ func generateMagicLinkID() string {
 	return generateRandomString(64)
 }
 
-func signIn(ctx hime.Context) hime.Result {
+func signIn(ctx *hime.Context) error {
 	return ctx.View("signin", newPage(ctx))
 }
 
-func postSignIn(ctx hime.Context) hime.Result {
+func postSignIn(ctx *hime.Context) error {
 	s := appctx.GetSession(ctx)
 	f := s.Flash()
 
@@ -56,8 +56,10 @@ func postSignIn(ctx hime.Context) hime.Result {
 		return ctx.RedirectToGet()
 	}
 
-	ok, err := repository.CanAcquireMagicLink(redisPool, redisPrefix, email)
-	must(err)
+	ok, err := repository.CanAcquireMagicLink(redisClient, redisPrefix, email)
+	if err != nil {
+		return err
+	}
 	if !ok {
 		f.Add("Errors", "อีเมลของคุณได้ขอ Magic Link จากเราไปแล้ว กรุณาตรวจสอบอีเมล")
 		return ctx.RedirectToGet()
@@ -77,8 +79,10 @@ func postSignIn(ctx hime.Context) hime.Result {
 
 	linkID := generateMagicLinkID()
 
-	err = repository.StoreMagicLink(redisPool, redisPrefix, linkID, user.ID)
-	must(err)
+	err = repository.StoreMagicLink(redisClient, redisPrefix, linkID, user.ID)
+	if err != nil {
+		return err
+	}
 
 	linkQuery := make(url.Values)
 	linkQuery.Set("id", linkID)
@@ -98,7 +102,7 @@ func postSignIn(ctx hime.Context) hime.Result {
 	return ctx.RedirectTo("signin.check-email")
 }
 
-func checkEmail(ctx hime.Context) hime.Result {
+func checkEmail(ctx *hime.Context) error {
 	f := appctx.GetSession(ctx).Flash()
 	if !f.Has("CheckEmail") {
 		return ctx.Redirect("/")
@@ -106,7 +110,7 @@ func checkEmail(ctx hime.Context) hime.Result {
 	return ctx.View("check-email", newPage(ctx))
 }
 
-func signInLink(ctx hime.Context) hime.Result {
+func signInLink(ctx *hime.Context) error {
 	linkID := ctx.FormValue("id")
 	if len(linkID) == 0 {
 		return ctx.RedirectTo("signin")
@@ -115,7 +119,7 @@ func signInLink(ctx hime.Context) hime.Result {
 	s := appctx.GetSession(ctx)
 	f := s.Flash()
 
-	userID, err := repository.FindMagicLink(redisPool, redisPrefix, linkID)
+	userID, err := repository.FindMagicLink(redisClient, redisPrefix, linkID)
 	if err != nil {
 		f.Add("Errors", "ไม่พบ Magic Link ของคุณ")
 		return ctx.RedirectTo("signin")
@@ -125,11 +129,11 @@ func signInLink(ctx hime.Context) hime.Result {
 	return ctx.Redirect("/")
 }
 
-func signInPassword(ctx hime.Context) hime.Result {
+func signInPassword(ctx *hime.Context) error {
 	return ctx.View("signin.password", newPage(ctx))
 }
 
-func postSignInPassword(ctx hime.Context) hime.Result {
+func postSignInPassword(ctx *hime.Context) error {
 	s := appctx.GetSession(ctx)
 	f := s.Flash()
 
@@ -159,10 +163,14 @@ func postSignInPassword(ctx hime.Context) hime.Result {
 	// this happend when database out of sync with firebase authentication
 	{
 		ok, err := repository.IsUserExists(db, userID)
-		must(err)
+		if err != nil {
+			return err
+		}
 		if !ok {
 			err = repository.CreateUser(db, &entity.User{ID: userID, Email: sql.NullString{String: email, Valid: len(email) > 0}})
-			must(err)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
@@ -174,7 +182,7 @@ var allowProvider = map[string]bool{
 	"github.com": true,
 }
 
-func openID(ctx hime.Context) hime.Result {
+func openID(ctx *hime.Context) error {
 	p := ctx.FormValue("p")
 	if !allowProvider[p] {
 		return ctx.Status(http.StatusBadRequest).String("provider not allowed")
@@ -182,19 +190,23 @@ func openID(ctx hime.Context) hime.Result {
 
 	sessID := generateSessionID()
 	redirectURL, err := auth.CreateAuthURI(ctx, p, baseURL+"/openid/callback", sessID)
-	must(err)
+	if err != nil {
+		return err
+	}
 
 	s := appctx.GetSession(ctx)
 	setOpenIDSessionID(s, sessID)
 	return ctx.Redirect(redirectURL)
 }
 
-func openIDCallback(ctx hime.Context) hime.Result {
+func openIDCallback(ctx *hime.Context) error {
 	s := appctx.GetSession(ctx)
 	sessID := getOpenIDSessionID(s)
 	delOpenIDSessionID(s)
 	user, err := auth.VerifyAuthCallbackURI(ctx, baseURL+ctx.Request().RequestURI, sessID)
-	must(err)
+	if err != nil {
+		return err
+	}
 
 	err = pgsql.RunInTx(db, nil, func(tx *sql.Tx) error {
 		// check is user sign up
@@ -215,18 +227,20 @@ func openIDCallback(ctx hime.Context) hime.Result {
 		}
 		return nil
 	})
-	must(err)
+	if err != nil {
+		return err
+	}
 
 	s.Regenerate()
 	setUserID(s, user.UserID)
 	return ctx.RedirectTo("index")
 }
 
-func signUp(ctx hime.Context) hime.Result {
+func signUp(ctx *hime.Context) error {
 	return ctx.View("signup", newPage(ctx))
 }
 
-func postSignUp(ctx hime.Context) hime.Result {
+func postSignUp(ctx *hime.Context) error {
 	f := appctx.GetSession(ctx).Flash()
 
 	email := ctx.FormValue("Email")
@@ -266,7 +280,9 @@ func postSignUp(ctx hime.Context) hime.Result {
 		values
 			($1, $2, '', $3)
 	`, userID, userID, email)
-	must(err)
+	if err != nil {
+		return err
+	}
 
 	s := appctx.GetSession(ctx)
 	setUserID(s, userID)
@@ -274,16 +290,16 @@ func postSignUp(ctx hime.Context) hime.Result {
 	return ctx.SafeRedirect(ctx.FormValue("r"))
 }
 
-func signOut(ctx hime.Context) hime.Result {
+func signOut(ctx *hime.Context) error {
 	appctx.GetSession(ctx).Destroy()
 	return ctx.Redirect("/")
 }
 
-func resetPassword(ctx hime.Context) hime.Result {
+func resetPassword(ctx *hime.Context) error {
 	return ctx.View("reset.password", newPage(ctx))
 }
 
-func postResetPassword(ctx hime.Context) hime.Result {
+func postResetPassword(ctx *hime.Context) error {
 	f := appctx.GetSession(ctx).Flash()
 	f.Set("OK", "1")
 	email := ctx.FormValue("email")

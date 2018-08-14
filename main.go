@@ -10,7 +10,7 @@ import (
 	"github.com/acoshift/configfile"
 	"github.com/acoshift/go-firebase-admin"
 	"github.com/acoshift/hime"
-	"github.com/garyburd/redigo/redis"
+	"github.com/go-redis/redis"
 	_ "github.com/lib/pq"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
@@ -56,20 +56,13 @@ func main() {
 	emailDialer := gomail.NewPlainDialer(config.String("email_server"), config.Int("email_port"), config.String("email_user"), config.String("email_password"))
 
 	// init redis pool
-	redisPool := &redis.Pool{
-		MaxIdle:     2,
+	redisClient := redis.NewClient(&redis.Options{
+		MaxRetries:  3,
+		PoolSize:    5,
 		IdleTimeout: 60 * time.Minute,
-		Dial: func() (redis.Conn, error) {
-			return redis.Dial("tcp", config.String("redis_addr"), redis.DialPassword(config.String("redis_pass")))
-		},
-		TestOnBorrow: func(c redis.Conn, t time.Time) error {
-			if time.Since(t) > time.Minute {
-				return nil
-			}
-			_, err := c.Do("PING")
-			return err
-		},
-	}
+		Addr:        config.String("redis_addr"),
+		Password:    config.String("redis_pass"),
+	})
 
 	// init databases
 	db, err := sql.Open("postgres", config.String("sql_url"))
@@ -79,26 +72,30 @@ func main() {
 	defer db.Close()
 	db.SetMaxOpenConns(4)
 
-	err = hime.New().
-		TemplateDir("template").
-		TemplateRoot("root").
-		Minify().
-		Handler(app.New(app.Config{
-			DB:            db,
-			BaseURL:       config.String("base_url"),
-			RedisPool:     redisPool,
-			RedisPrefix:   config.String("redis_prefix"),
-			SessionSecret: config.Bytes("session_secret"),
-			Auth:          firAuth,
-			Location:      loc,
-			SlackURL:      config.String("slack_url"),
-			EmailFrom:     config.String("email_from"),
-			EmailDialer:   emailDialer,
-			BucketHandle:  bucketHandle,
-			BucketName:    config.String("bucket"),
-		})).
+	himeApp := hime.New()
+
+	h := app.New(himeApp, app.Config{
+		DB:            db,
+		BaseURL:       config.String("base_url"),
+		RedisClient:   redisClient,
+		RedisPrefix:   config.String("redis_prefix"),
+		SessionSecret: config.Bytes("session_secret"),
+		Auth:          firAuth,
+		Location:      loc,
+		SlackURL:      config.String("slack_url"),
+		EmailFrom:     config.String("email_from"),
+		EmailDialer:   emailDialer,
+		BucketHandle:  bucketHandle,
+		BucketName:    config.String("bucket"),
+	})
+
+	err = himeApp.
+		Handler(h).
+		Address(":8080").
 		GracefulShutdown().
-		ListenAndServe(":8080")
+		Wait(5 * time.Second).
+		Timeout(10 * time.Second).
+		ListenAndServe()
 	if err != nil {
 		log.Fatal(err)
 	}

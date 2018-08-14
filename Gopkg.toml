@@ -1,42 +1,42 @@
 [[constraint]]
   name = "cloud.google.com/go"
-  version = "0.10.0"
+  branch = "master"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/acoshift/configfile"
+  branch = "master"
 
 [[constraint]]
   name = "github.com/acoshift/go-firebase-admin"
   version = "0.0.3"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/acoshift/header"
+  branch = "master"
 
 [[constraint]]
   name = "github.com/acoshift/middleware"
-  version = "0.2.0"
+  branch = "master"
 
 [[constraint]]
   name = "github.com/acoshift/hime"
-  version = "0.0.18"
+  branch = "master"
 
 [[constraint]]
   name = "github.com/acoshift/session"
-  version = "0.6.0"
+  branch = "master"
 
 [[constraint]]
   name = "github.com/acoshift/methodmux"
-  version = "1.1.1"
+  branch = "master"
 
 [[constraint]]
   name = "github.com/acoshift/prefixhandler"
-  version = "1.0.0"
+  branch = "master"
 
 [[constraint]]
   name = "github.com/asaskevich/govalidator"
-  version = "6.0.0"
+  branch = "master"
 
 [[constraint]]
   name = "github.com/disintegration/imaging"
@@ -47,8 +47,8 @@
   name = "github.com/dustin/go-humanize"
 
 [[constraint]]
-  name = "github.com/garyburd/redigo"
-  version = "1.1.0"
+  name = "github.com/go-redis/redis"
+  version = "6.13.2"
 
 [[constraint]]
   name = "github.com/google/uuid"

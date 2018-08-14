@@ -6,7 +6,7 @@ import (
 
 	"cloud.google.com/go/storage"
 	"github.com/acoshift/go-firebase-admin"
-	"github.com/garyburd/redigo/redis"
+	"github.com/go-redis/redis"
 	"gopkg.in/gomail.v2"
 )
 
@@ -14,7 +14,7 @@ import (
 type Config struct {
 	DB            *sql.DB
 	BaseURL       string
-	RedisPool     *redis.Pool
+	RedisClient   *redis.Client
 	RedisPrefix   string
 	SessionSecret []byte
 	Auth          *firebase.Auth

@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"cloud.google.com/go/storage"
-	"github.com/acoshift/csrf"
 	"github.com/acoshift/go-firebase-admin"
 	"github.com/acoshift/header"
 	"github.com/acoshift/hime"
@@ -16,9 +15,9 @@ import (
 	"github.com/acoshift/middleware"
 	"github.com/acoshift/prefixhandler"
 	"github.com/acoshift/session"
-	redisstore "github.com/acoshift/session/store/redis"
+	redisstore "github.com/acoshift/session/store/goredis"
 	"github.com/acoshift/webstatic"
-	"github.com/garyburd/redigo/redis"
+	"github.com/go-redis/redis"
 	"gopkg.in/gomail.v2"
 	"gopkg.in/yaml.v2"
 )
@@ -32,14 +31,14 @@ var (
 	baseURL      string
 	bucketHandle *storage.BucketHandle
 	bucketName   string
-	redisPool    *redis.Pool
+	redisClient  *redis.Client
 	redisPrefix  string
 	db           *sql.DB
 	staticConf   = make(map[string]string)
 )
 
 // New creates new app
-func New(config Config) hime.HandlerFactory {
+func New(app *hime.App, config Config) http.Handler {
 	auth = config.Auth
 	loc = config.Location
 	slackURL = config.SlackURL
@@ -48,7 +47,7 @@ func New(config Config) hime.HandlerFactory {
 	baseURL = config.BaseURL
 	bucketHandle = config.BucketHandle
 	bucketName = config.BucketName
-	redisPool = config.RedisPool
+	redisClient = config.RedisClient
 	redisPrefix = config.RedisPrefix
 	db = config.DB
 
@@ -59,205 +58,198 @@ func New(config Config) hime.HandlerFactory {
 		yaml.Unmarshal(bs, &staticConf)
 	}
 
-	return func(app hime.App) http.Handler {
-		loadTemplates(app)
+	loadTemplates(app)
 
-		app.Routes(hime.Routes{
-			"index":                  "/",
-			"signin":                 "/signin",
-			"signin.password":        "/signin/password",
-			"signin.check-email":     "/signin/check-email",
-			"signin.link":            "/signin/link",
-			"openid":                 "/openid",
-			"openid.google":          "/openid?p=google.com",
-			"openid.github":          "/openid?p=github.com",
-			"openid.callback":        "/openid/callback",
-			"signup":                 "/signup",
-			"signout":                "/signout",
-			"reset.password":         "/reset/password",
-			"profile":                "/profile",
-			"profile.edit":           "/profile/edit",
-			"course":                 "/course/",
-			"editor.create":          "/editor/create",
-			"editor.course":          "/editor/course",
-			"editor.content":         "/editor/content",
-			"editor.content.create":  "/editor/content/create",
-			"editor.content.edit":    "/editor/content/edit",
-			"admin.users":            "/admin/users",
-			"admin.courses":          "/admin/courses",
-			"admin.payments.pending": "/admin/payments/pending",
-			"admin.payments.history": "/admin/payments/history",
-			"admin.payments.reject":  "/admin/payments/reject",
-		})
+	app.Routes(hime.Routes{
+		"index":                  "/",
+		"signin":                 "/signin",
+		"signin.password":        "/signin/password",
+		"signin.check-email":     "/signin/check-email",
+		"signin.link":            "/signin/link",
+		"openid":                 "/openid",
+		"openid.google":          "/openid?p=google.com",
+		"openid.github":          "/openid?p=github.com",
+		"openid.callback":        "/openid/callback",
+		"signup":                 "/signup",
+		"signout":                "/signout",
+		"reset.password":         "/reset/password",
+		"profile":                "/profile",
+		"profile.edit":           "/profile/edit",
+		"course":                 "/course/",
+		"editor.create":          "/editor/create",
+		"editor.course":          "/editor/course",
+		"editor.content":         "/editor/content",
+		"editor.content.create":  "/editor/content/create",
+		"editor.content.edit":    "/editor/content/edit",
+		"admin.users":            "/admin/users",
+		"admin.courses":          "/admin/courses",
+		"admin.payments.pending": "/admin/payments/pending",
+		"admin.payments.history": "/admin/payments/history",
+		"admin.payments.reject":  "/admin/payments/reject",
+	})
 
-		mux := http.NewServeMux()
+	mux := http.NewServeMux()
 
-		mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusOK)
-		})
+	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
 
-		mux.Handle("/~/", http.StripPrefix("/~", cache(webstatic.New("static"))))
-		mux.Handle("/favicon.ico", fileHandler("static/favicon.ico"))
+	mux.Handle("/~/", http.StripPrefix("/~", cache(webstatic.New("static"))))
+	mux.Handle("/favicon.ico", fileHandler("static/favicon.ico"))
 
-		methodmux.FallbackHandler = hime.H(notFound)
+	methodmux.FallbackHandler = hime.Handler(notFound)
 
-		r := http.NewServeMux()
+	r := http.NewServeMux()
 
-		r.Handle("/", methodmux.Get(
-			hime.H(index),
+	r.Handle("/", methodmux.Get(
+		hime.Handler(index),
+	))
+
+	// auth
+	r.Handle("/signin", mustNotSignedIn(methodmux.GetPost(
+		hime.Handler(signIn),
+		hime.Handler(postSignIn),
+	)))
+	r.Handle("/signin/password", mustNotSignedIn(methodmux.GetPost(
+		hime.Handler(signInPassword),
+		hime.Handler(postSignInPassword),
+	)))
+	r.Handle("/signin/check-email", mustNotSignedIn(methodmux.Get(
+		hime.Handler(checkEmail),
+	)))
+	r.Handle("/signin/link", mustNotSignedIn(methodmux.Get(
+		hime.Handler(signInLink),
+	)))
+	r.Handle("/reset/password", mustNotSignedIn(methodmux.GetPost(
+		hime.Handler(resetPassword),
+		hime.Handler(postResetPassword),
+	)))
+
+	r.Handle("/openid", mustNotSignedIn(methodmux.Get(
+		hime.Handler(openID),
+	)))
+	r.Handle("/openid/callback", mustNotSignedIn(methodmux.Get(
+		hime.Handler(openIDCallback),
+	)))
+	r.Handle("/signup", mustNotSignedIn(methodmux.GetPost(
+		hime.Handler(signUp),
+		hime.Handler(postSignUp),
+	)))
+	r.Handle("/signout", methodmux.GetPost(
+		hime.Handler(signOut),
+		hime.Handler(signOut),
+	)) // TODO: remove get signout
+
+	// profile
+	r.Handle("/profile", mustSignedIn(methodmux.Get(
+		hime.Handler(profile),
+	)))
+	r.Handle("/profile/edit", mustSignedIn(methodmux.GetPost(
+		hime.Handler(profileEdit),
+		hime.Handler(postProfileEdit),
+	)))
+
+	// course
+	{
+		m := http.NewServeMux()
+		m.Handle("/", methodmux.Get(
+			hime.Handler(courseView),
+		))
+		m.Handle("/content", mustSignedIn(methodmux.Get(
+			hime.Handler(courseContent),
+		)))
+		m.Handle("/enroll", mustSignedIn(methodmux.GetPost(
+			hime.Handler(courseEnroll),
+			hime.Handler(postCourseEnroll),
+		)))
+		m.Handle("/assignment", mustSignedIn(methodmux.Get(
+			hime.Handler(courseAssignment),
+		)))
+
+		r.Handle("/course/", prefixhandler.New("/course", courseURLKey{}, m))
+	}
+
+	// editor
+	{
+		m := http.NewServeMux()
+		m.Handle("/create", onlyInstructor(methodmux.GetPost(
+			hime.Handler(editorCreate),
+			hime.Handler(postEditorCreate),
+		)))
+		m.Handle("/course", isCourseOwner(methodmux.GetPost(
+			hime.Handler(editorCourse),
+			hime.Handler(postEditorCourse),
+		)))
+		m.Handle("/content", isCourseOwner(methodmux.GetPost(
+			hime.Handler(editorContent),
+			hime.Handler(postEditorContent),
+		)))
+		m.Handle("/content/create", isCourseOwner(methodmux.GetPost(
+			hime.Handler(editorContentCreate),
+			hime.Handler(postEditorContentCreate),
+		)))
+		// TODO: add middleware ?
+		m.Handle("/content/edit", methodmux.GetPost(
+			hime.Handler(editorContentEdit),
+			hime.Handler(postEditorContentEdit),
 		))
 
-		// auth
-		r.Handle("/signin", mustNotSignedIn(methodmux.GetPost(
-			hime.H(signIn),
-			hime.H(postSignIn),
-		)))
-		r.Handle("/signin/password", mustNotSignedIn(methodmux.GetPost(
-			hime.H(signInPassword),
-			hime.H(postSignInPassword),
-		)))
-		r.Handle("/signin/check-email", mustNotSignedIn(methodmux.Get(
-			hime.H(checkEmail),
-		)))
-		r.Handle("/signin/link", mustNotSignedIn(methodmux.Get(
-			hime.H(signInLink),
-		)))
-		r.Handle("/reset/password", mustNotSignedIn(methodmux.GetPost(
-			hime.H(resetPassword),
-			hime.H(postResetPassword),
-		)))
-
-		r.Handle("/openid", mustNotSignedIn(methodmux.Get(
-			hime.H(openID),
-		)))
-		r.Handle("/openid/callback", mustNotSignedIn(methodmux.Get(
-			hime.H(openIDCallback),
-		)))
-		r.Handle("/signup", mustNotSignedIn(methodmux.GetPost(
-			hime.H(signUp),
-			hime.H(postSignUp),
-		)))
-		r.Handle("/signout", methodmux.GetPost(
-			hime.H(signOut),
-			hime.H(signOut),
-		)) // TODO: remove get signout
-
-		// profile
-		r.Handle("/profile", mustSignedIn(methodmux.Get(
-			hime.H(profile),
-		)))
-		r.Handle("/profile/edit", mustSignedIn(methodmux.GetPost(
-			hime.H(profileEdit),
-			hime.H(postProfileEdit),
-		)))
-
-		// course
-		{
-			m := http.NewServeMux()
-			m.Handle("/", methodmux.Get(
-				hime.H(courseView),
-			))
-			m.Handle("/content", mustSignedIn(methodmux.Get(
-				hime.H(courseContent),
-			)))
-			m.Handle("/enroll", mustSignedIn(methodmux.GetPost(
-				hime.H(courseEnroll),
-				hime.H(postCourseEnroll),
-			)))
-			m.Handle("/assignment", mustSignedIn(methodmux.Get(
-				hime.H(courseAssignment),
-			)))
-
-			r.Handle("/course/", prefixhandler.New("/course", courseURLKey{}, m))
-		}
-
-		// editor
-		{
-			m := http.NewServeMux()
-			m.Handle("/create", onlyInstructor(methodmux.GetPost(
-				hime.H(editorCreate),
-				hime.H(postEditorCreate),
-			)))
-			m.Handle("/course", isCourseOwner(methodmux.GetPost(
-				hime.H(editorCourse),
-				hime.H(postEditorCourse),
-			)))
-			m.Handle("/content", isCourseOwner(methodmux.GetPost(
-				hime.H(editorContent),
-				hime.H(postEditorContent),
-			)))
-			m.Handle("/content/create", isCourseOwner(methodmux.GetPost(
-				hime.H(editorContentCreate),
-				hime.H(postEditorContentCreate),
-			)))
-			// TODO: add middleware ?
-			m.Handle("/content/edit", methodmux.GetPost(
-				hime.H(editorContentEdit),
-				hime.H(postEditorContentEdit),
-			))
-
-			r.Handle("/editor/", http.StripPrefix("/editor", m))
-		}
-
-		// admin
-		{
-			m := http.NewServeMux()
-			m.Handle("/users", methodmux.Get(
-				hime.H(adminUsers),
-			))
-			m.Handle("/courses", methodmux.Get(
-				hime.H(adminCourses),
-			))
-			m.Handle("/payments/pending", methodmux.GetPost(
-				hime.H(adminPendingPayments),
-				hime.H(postAdminPendingPayment),
-			))
-			m.Handle("/payments/history", methodmux.Get(
-				hime.H(adminHistoryPayments),
-			))
-			m.Handle("/payments/reject", methodmux.GetPost(
-				hime.H(adminRejectPayment),
-				hime.H(postAdminRejectPayment),
-			))
-
-			r.Handle("/admin/", onlyAdmin(http.StripPrefix("/admin", m)))
-		}
-
-		mux.Handle("/", middleware.Chain(
-			session.Middleware(session.Config{
-				Secret:   config.SessionSecret,
-				Path:     "/",
-				MaxAge:   7 * 24 * time.Hour,
-				HTTPOnly: true,
-				Secure:   session.PreferSecure,
-				SameSite: session.SameSiteLax,
-				Rolling:  true,
-				Proxy:    true,
-				Store: redisstore.New(redisstore.Config{
-					Prefix: config.RedisPrefix,
-					Pool:   config.RedisPool,
-				}),
-			}),
-			fetchUser(),
-			csrf.New(csrf.Config{
-				Origins: []string{config.BaseURL},
-				ForbiddenHandler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					http.Error(w, "Cross-site origin detected!", http.StatusForbidden)
-				}),
-			}),
-		)(r))
-
-		return middleware.Chain(
-			errorRecovery,
-			setHeaders,
-		)(mux)
+		r.Handle("/editor/", http.StripPrefix("/editor", m))
 	}
-}
 
-func must(err error) {
-	if err != nil {
-		panic(err)
+	// admin
+	{
+		m := http.NewServeMux()
+		m.Handle("/users", methodmux.Get(
+			hime.Handler(adminUsers),
+		))
+		m.Handle("/courses", methodmux.Get(
+			hime.Handler(adminCourses),
+		))
+		m.Handle("/payments/pending", methodmux.GetPost(
+			hime.Handler(adminPendingPayments),
+			hime.Handler(postAdminPendingPayment),
+		))
+		m.Handle("/payments/history", methodmux.Get(
+			hime.Handler(adminHistoryPayments),
+		))
+		m.Handle("/payments/reject", methodmux.GetPost(
+			hime.Handler(adminRejectPayment),
+			hime.Handler(postAdminRejectPayment),
+		))
+
+		r.Handle("/admin/", onlyAdmin(http.StripPrefix("/admin", m)))
 	}
+
+	mux.Handle("/", middleware.Chain(
+		session.Middleware(session.Config{
+			Secret:   config.SessionSecret,
+			Path:     "/",
+			MaxAge:   7 * 24 * time.Hour,
+			HTTPOnly: true,
+			Secure:   session.PreferSecure,
+			SameSite: session.SameSiteLax,
+			Rolling:  true,
+			Proxy:    true,
+			Store: redisstore.New(redisstore.Config{
+				Prefix: config.RedisPrefix,
+				Client: config.RedisClient,
+			}),
+		}),
+		fetchUser(),
+		middleware.CSRF(middleware.CSRFConfig{
+			Origins:     []string{config.BaseURL},
+			IgnoreProto: true,
+			ForbiddenHandler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				http.Error(w, "Cross-site origin detected!", http.StatusForbidden)
+			}),
+		}),
+	)(r))
+
+	return middleware.Chain(
+		errorRecovery,
+		setHeaders,
+	)(mux)
 }
 
 var notFoundImages = []string{
@@ -265,7 +257,7 @@ var notFoundImages = []string{
 	"https://storage.googleapis.com/acourse/static/b14a40c9-d3a4-465d-9453-ce7fcfbc594c.png",
 }
 
-func notFound(ctx hime.Context) hime.Result {
+func notFound(ctx *hime.Context) error {
 	page := newPage(ctx)
 	page["Image"] = notFoundImages[rand.Intn(len(notFoundImages))]
 	ctx.ResponseWriter().Header().Set(header.XContentTypeOptions, "nosniff")

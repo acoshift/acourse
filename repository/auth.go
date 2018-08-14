@@ -3,17 +3,14 @@ package repository
 import (
 	"time"
 
-	"github.com/garyburd/redigo/redis"
+	"github.com/go-redis/redis"
 
 	"github.com/acoshift/acourse/entity"
 )
 
 // StoreMagicLink stores magic link to redis
-func StoreMagicLink(pool *redis.Pool, prefix string, linkID string, userID string) error {
-	db := pool.Get()
-	defer db.Close()
-
-	_, err := db.Do("SETEX", prefix+"magic:"+linkID, int64(time.Hour/time.Second), userID)
+func StoreMagicLink(db *redis.Client, prefix string, linkID string, userID string) error {
+	err := db.Set(prefix+"magic:"+linkID, userID, time.Hour/time.Second).Err()
 	if err != nil {
 		return err
 	}
@@ -21,36 +18,30 @@ func StoreMagicLink(pool *redis.Pool, prefix string, linkID string, userID strin
 }
 
 // FindMagicLink finds magic link from redis
-func FindMagicLink(pool *redis.Pool, prefix string, linkID string) (string, error) {
-	db := pool.Get()
-	defer db.Close()
-
+func FindMagicLink(db *redis.Client, prefix string, linkID string) (string, error) {
 	key := prefix + "magic:" + linkID
-	userID, err := redis.String(db.Do("GET", key))
-	if err == redis.ErrNil {
+	userID, err := db.Get(key).Result()
+	if err == redis.Nil {
 		return "", entity.ErrNotFound
 	}
 	if err != nil {
 		return "", err
 	}
-	db.Do("DEL", key)
+	db.Del(key)
 	return userID, nil
 }
 
 // CanAcquireMagicLink checks rate limit to acquire magic link
-func CanAcquireMagicLink(pool *redis.Pool, prefix string, email string) (bool, error) {
-	db := pool.Get()
-	defer db.Close()
-
+func CanAcquireMagicLink(db *redis.Client, prefix string, email string) (bool, error) {
 	key := prefix + "magic-rate:" + email
-	current, err := redis.Int(db.Do("INCR", key))
+	current, err := db.Incr(key).Result()
 	if err != nil {
 		return false, err
 	}
 	if current > 1 {
 		return false, nil
 	}
-	_, err = db.Do("EXPIRE", key, int64(5*time.Minute/time.Second))
+	err = db.Expire(key, 5*time.Minute/time.Second).Err()
 	if err != nil {
 		return false, err
 	}

@@ -3,12 +3,9 @@ package app
 import (
 	"context"
 	"html/template"
-	"net/http"
 	"time"
 
-	"github.com/acoshift/header"
 	"github.com/acoshift/hime"
-	"github.com/acoshift/session"
 	"github.com/dustin/go-humanize"
 	"github.com/microcosm-cc/bluemonday"
 	"github.com/russross/blackfriday"
@@ -17,16 +14,13 @@ import (
 	"github.com/acoshift/acourse/entity"
 )
 
-func loadTemplates(app hime.App) {
+func loadTemplates(app *hime.App) {
 	app.
-		BeforeRender(func(h http.Handler) http.Handler {
-			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				appctx.GetSession(r.Context()).Flash().Clear()
-				w.Header().Set(header.CacheControl, "no-cache, no-store, must-revalidate")
-				h.ServeHTTP(w, r)
-			})
-		}).
-		TemplateFuncs(template.FuncMap{
+		Template().
+		Dir("template").
+		Root("root").
+		Minify().
+		Funcs(template.FuncMap{
 			"currency": func(v float64) string {
 				return humanize.FormatFloat("#,###.##", v)
 			},
@@ -142,32 +136,32 @@ func loadTemplates(app hime.App) {
 			},
 		}).
 		Component("layout.tmpl", "component/global.script.tmpl").
-		Template("index", "index.tmpl", "app.tmpl", "component/course-card.tmpl").
-		Template("error.not-found", "not-found.tmpl", "app.tmpl").
-		Template("signin", "signin.tmpl", "auth.tmpl").
-		Template("signin.password", "signin-password.tmpl", "auth.tmpl").
-		Template("signup", "signup.tmpl", "auth.tmpl").
-		Template("reset.password", "reset-password.tmpl", "auth.tmpl").
-		Template("check-email", "check-email.tmpl", "auth.tmpl").
-		Template("profile", "profile.tmpl", "app.tmpl",
+		Parse("index", "index.tmpl", "app.tmpl", "component/course-card.tmpl").
+		Parse("error.not-found", "not-found.tmpl", "app.tmpl").
+		Parse("signin", "signin.tmpl", "auth.tmpl").
+		Parse("signin.password", "signin-password.tmpl", "auth.tmpl").
+		Parse("signup", "signup.tmpl", "auth.tmpl").
+		Parse("reset.password", "reset-password.tmpl", "auth.tmpl").
+		Parse("check-email", "check-email.tmpl", "auth.tmpl").
+		Parse("profile", "profile.tmpl", "app.tmpl",
 			"component/user-profile.tmpl",
 			"component/own-course-card.tmpl",
 			"component/enrolled-course-card.tmpl",
 		).
-		Template("profile.edit", "profile-edit.tmpl", "app.tmpl").
-		Template("course", "course.tmpl", "app.tmpl").
-		Template("course.content", "course-content.tmpl", "app.tmpl").
-		Template("course.enroll", "enroll.tmpl", "app.tmpl").
-		Template("assignment", "assignment.tmpl", "app.tmpl").
-		Template("editor.create", "editor/create.tmpl", "app.tmpl").
-		Template("editor.course", "editor/course.tmpl", "app.tmpl").
-		Template("editor.content", "editor/content.tmpl", "app.tmpl").
-		Template("editor.content.create", "editor/content-create.tmpl", "app.tmpl").
-		Template("editor.content.edit", "editor/content-edit.tmpl", "app.tmpl").
-		Template("admin.users", "admin/users.tmpl", "app.tmpl").
-		Template("admin.courses", "admin/courses.tmpl", "app.tmpl").
-		Template("admin.payments", "admin/payments.tmpl", "app.tmpl").
-		Template("admin.payments.reject", "admin/payment-reject.tmpl", "app.tmpl")
+		Parse("profile.edit", "profile-edit.tmpl", "app.tmpl").
+		Parse("course", "course.tmpl", "app.tmpl").
+		Parse("course.content", "course-content.tmpl", "app.tmpl").
+		Parse("course.enroll", "enroll.tmpl", "app.tmpl").
+		Parse("assignment", "assignment.tmpl", "app.tmpl").
+		Parse("editor.create", "editor/create.tmpl", "app.tmpl").
+		Parse("editor.course", "editor/course.tmpl", "app.tmpl").
+		Parse("editor.content", "editor/content.tmpl", "app.tmpl").
+		Parse("editor.content.create", "editor/content-create.tmpl", "app.tmpl").
+		Parse("editor.content.edit", "editor/content-edit.tmpl", "app.tmpl").
+		Parse("admin.users", "admin/users.tmpl", "app.tmpl").
+		Parse("admin.courses", "admin/courses.tmpl", "app.tmpl").
+		Parse("admin.payments", "admin/payments.tmpl", "app.tmpl").
+		Parse("admin.payments.reject", "admin/payment-reject.tmpl", "app.tmpl")
 }
 
 func newPage(ctx context.Context) map[string]interface{} {
@@ -177,6 +171,6 @@ func newPage(ctx context.Context) map[string]interface{} {
 		"Image": "https://storage.googleapis.com/acourse/static/62b9eb0e-3668-4f9f-86b7-a11349938f7a.jpg",
 		"URL":   "https://acourse.io",
 		"Me":    appctx.GetUser(ctx),
-		"Flash": session.Get(ctx, "sess").Flash().Values(),
+		"Flash": appctx.GetSession(ctx).Flash(),
 	}
 }

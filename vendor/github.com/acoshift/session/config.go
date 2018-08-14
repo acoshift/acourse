@@ -22,6 +22,10 @@ type Config struct {
 	Secure   Secure
 	SameSite SameSite
 
+	// IdleTimeout is the ttl for storage
+	// if IdleTimeout is zero, it will use MaxAge
+	IdleTimeout time.Duration
+
 	// DeleteOldSession deletes the old session from store when regenerate,
 	// better not to delete old session to avoid user loss session when unstable network
 	DeleteOldSession bool

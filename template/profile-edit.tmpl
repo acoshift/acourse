@@ -38,10 +38,10 @@
           </button>
         </div>
 
-        {{if .Flash.Errors}}
+        {{if .Flash.Has "Errors"}}
           <div class="acourse-message -error">
             <ul>
-              {{range .Flash.Errors}}
+              {{range .Flash.Get "Errors"}}
                 <li>{{.}}</li>
               {{end}}
             </ul>
@@ -55,6 +55,9 @@
     </div>
   </div>
 </div>
+{{end}}
+
+{{define "script"}}
 <script>
   bindFileInputImage(document.querySelector('#image-input'), document.querySelector('#avatar'))
 </script>

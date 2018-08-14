@@ -13,7 +13,7 @@ import (
 	"github.com/acoshift/acourse/repository"
 )
 
-func adminUsers(ctx hime.Context) hime.Result {
+func adminUsers(ctx *hime.Context) error {
 	p, _ := strconv.ParseInt(ctx.FormValue("page"), 10, 64)
 	if p <= 0 {
 		p = 1
@@ -21,7 +21,9 @@ func adminUsers(ctx hime.Context) hime.Result {
 	limit := int64(30)
 
 	cnt, err := repository.CountUsers(db)
-	must(err)
+	if err != nil {
+		return err
+	}
 
 	offset := (p - 1) * limit
 	for offset > cnt {
@@ -31,7 +33,9 @@ func adminUsers(ctx hime.Context) hime.Result {
 	totalPage := cnt / limit
 
 	users, err := repository.ListUsers(db, limit, offset)
-	must(err)
+	if err != nil {
+		return err
+	}
 
 	page := newPage(ctx)
 	page["Users"] = users
@@ -40,7 +44,7 @@ func adminUsers(ctx hime.Context) hime.Result {
 	return ctx.View("admin.users", page)
 }
 
-func adminCourses(ctx hime.Context) hime.Result {
+func adminCourses(ctx *hime.Context) error {
 	p, _ := strconv.ParseInt(ctx.FormValue("page"), 10, 64)
 	if p <= 0 {
 		p = 1
@@ -48,7 +52,9 @@ func adminCourses(ctx hime.Context) hime.Result {
 	limit := int64(30)
 
 	cnt, err := repository.CountCourses(db)
-	must(err)
+	if err != nil {
+		return err
+	}
 
 	offset := (p - 1) * limit
 	for offset > cnt {
@@ -58,7 +64,9 @@ func adminCourses(ctx hime.Context) hime.Result {
 	totalPage := int64(math.Ceil(float64(cnt) / float64(limit)))
 
 	courses, err := repository.ListCourses(db, limit, offset)
-	must(err)
+	if err != nil {
+		return err
+	}
 
 	page := newPage(ctx)
 	page["Courses"] = courses
@@ -67,7 +75,7 @@ func adminCourses(ctx hime.Context) hime.Result {
 	return ctx.View("admin.courses", page)
 }
 
-func adminPayments(ctx hime.Context, history bool) hime.Result {
+func adminPayments(ctx *hime.Context, history bool) error {
 	p, _ := strconv.ParseInt(ctx.FormValue("page"), 10, 64)
 	if p <= 0 {
 		p = 1
@@ -81,7 +89,9 @@ func adminPayments(ctx hime.Context, history bool) hime.Result {
 	} else {
 		cnt, err = repository.CountPendingPayments(db)
 	}
-	must(err)
+	if err != nil {
+		return err
+	}
 
 	offset := (p - 1) * limit
 	for offset > cnt {
@@ -96,7 +106,9 @@ func adminPayments(ctx hime.Context, history bool) hime.Result {
 	} else {
 		payments, err = repository.ListPendingPayments(db, limit, offset)
 	}
-	must(err)
+	if err != nil {
+		return err
+	}
 
 	page := newPage(ctx)
 	page["Payments"] = payments
@@ -105,10 +117,12 @@ func adminPayments(ctx hime.Context, history bool) hime.Result {
 	return ctx.View("admin.payments", page)
 }
 
-func adminRejectPayment(ctx hime.Context) hime.Result {
+func adminRejectPayment(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 	x, err := repository.GetPayment(db, id)
-	must(err)
+	if err != nil {
+		return err
+	}
 
 	name := x.User.Name
 	if len(name) == 0 {
@@ -153,7 +167,7 @@ func adminRejectPayment(ctx hime.Context) hime.Result {
 	return ctx.View("admin.payments.reject", page)
 }
 
-func postAdminRejectPayment(ctx hime.Context) hime.Result {
+func postAdminRejectPayment(ctx *hime.Context) error {
 	message := ctx.FormValue("Message")
 	id := ctx.FormValue("ID")
 
@@ -166,7 +180,9 @@ func postAdminRejectPayment(ctx hime.Context) hime.Result {
 		}
 		return repository.RejectPayment(tx, x)
 	})
-	must(err)
+	if err != nil {
+		return err
+	}
 
 	if x.User.Email.Valid {
 		go func() {
@@ -183,7 +199,7 @@ func postAdminRejectPayment(ctx hime.Context) hime.Result {
 	return ctx.RedirectTo("admin.payments.pending")
 }
 
-func postAdminPendingPayment(ctx hime.Context) hime.Result {
+func postAdminPendingPayment(ctx *hime.Context) error {
 	action := ctx.FormValue("Action")
 
 	id := ctx.FormValue("ID")
@@ -197,7 +213,9 @@ func postAdminPendingPayment(ctx hime.Context) hime.Result {
 			}
 			return repository.AcceptPayment(tx, x)
 		})
-		must(err)
+		if err != nil {
+			return err
+		}
 		if x.User.Email.Valid {
 			go func() {
 				// re-fetch payment to get latest timestamp
@@ -258,10 +276,10 @@ https://acourse.io
 	return ctx.RedirectTo("admin.payments.pending")
 }
 
-func adminPendingPayments(ctx hime.Context) hime.Result {
+func adminPendingPayments(ctx *hime.Context) error {
 	return adminPayments(ctx, false)
 }
 
-func adminHistoryPayments(ctx hime.Context) hime.Result {
+func adminHistoryPayments(ctx *hime.Context) error {
 	return adminPayments(ctx, true)
 }

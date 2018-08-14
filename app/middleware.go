@@ -105,7 +105,7 @@ func onlyInstructor(h http.Handler) http.Handler {
 }
 
 func isCourseOwner(h http.Handler) http.Handler {
-	return hime.H(func(ctx hime.Context) hime.Result {
+	return hime.Handler(func(ctx *hime.Context) error {
 		u := appctx.GetUser(ctx)
 		if u == nil {
 			return ctx.Redirect("signin")
@@ -118,7 +118,9 @@ func isCourseOwner(h http.Handler) http.Handler {
 		if err == sql.ErrNoRows {
 			return notFound(ctx)
 		}
-		must(err)
+		if err != nil {
+			return err
+		}
 
 		if ownerID != u.ID {
 			return ctx.Redirect("/")
@@ -133,6 +135,7 @@ func setHeaders(h http.Handler) http.Handler {
 		w.Header().Set(header.XXSSProtection, "1; mode=block")
 		w.Header().Set(header.XFrameOptions, "deny")
 		w.Header().Set(header.ContentSecurityPolicy, "img-src https: data:; font-src https: data:; media-src https:;")
+		w.Header().Set(header.CacheControl, "no-cache, no-store, must-revalidate")
 		h.ServeHTTP(w, r)
 	})
 }
