@@ -1,5 +1,5 @@
 {{define "global.script"}}
-<script>
+<script data-turbolinks-eval="false">
 	document.addEventListener('DOMContentLoaded', () => {
 		const navbar = document.querySelector('#navbar')
 		const delta = 5
@@ -37,6 +37,7 @@
 	})
 
 	function bindFileInputImage (input, img) {
+		console.log('image')
 		if (!input || !img) return
 		input.onchange = () => {
 			const fp = input.files && input.files[0]
