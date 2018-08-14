@@ -73,8 +73,13 @@ func main() {
 	db.SetMaxOpenConns(4)
 
 	himeApp := hime.New()
+	himeApp.ParseConfigFile("settings/routes.yaml")
 
-	h := app.New(himeApp, app.Config{
+	himeApp.Template().
+		Funcs(app.TemplateFunc()).
+		ParseConfigFile("settings/template.yaml")
+
+	h := app.New(app.Config{
 		DB:            db,
 		BaseURL:       config.String("base_url"),
 		RedisClient:   redisClient,

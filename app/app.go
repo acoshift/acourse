@@ -38,7 +38,7 @@ var (
 )
 
 // New creates new app
-func New(app *hime.App, config Config) http.Handler {
+func New(config Config) http.Handler {
 	auth = config.Auth
 	loc = config.Location
 	slackURL = config.SlackURL
@@ -57,36 +57,6 @@ func New(app *hime.App, config Config) http.Handler {
 		bs, _ := ioutil.ReadFile("static.yaml")
 		yaml.Unmarshal(bs, &staticConf)
 	}
-
-	loadTemplates(app)
-
-	app.Routes(hime.Routes{
-		"index":                  "/",
-		"signin":                 "/signin",
-		"signin.password":        "/signin/password",
-		"signin.check-email":     "/signin/check-email",
-		"signin.link":            "/signin/link",
-		"openid":                 "/openid",
-		"openid.google":          "/openid?p=google.com",
-		"openid.github":          "/openid?p=github.com",
-		"openid.callback":        "/openid/callback",
-		"signup":                 "/signup",
-		"signout":                "/signout",
-		"reset.password":         "/reset/password",
-		"profile":                "/profile",
-		"profile.edit":           "/profile/edit",
-		"course":                 "/course/",
-		"editor.create":          "/editor/create",
-		"editor.course":          "/editor/course",
-		"editor.content":         "/editor/content",
-		"editor.content.create":  "/editor/content/create",
-		"editor.content.edit":    "/editor/content/edit",
-		"admin.users":            "/admin/users",
-		"admin.courses":          "/admin/courses",
-		"admin.payments.pending": "/admin/payments/pending",
-		"admin.payments.history": "/admin/payments/history",
-		"admin.payments.reject":  "/admin/payments/reject",
-	})
 
 	mux := http.NewServeMux()
 

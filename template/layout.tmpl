@@ -20,19 +20,24 @@
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
 
-    <link rel="stylesheet" href="{{static "style.css"}}">
     <link rel="preload" as="image" href="https://storage.googleapis.com/acourse/static/d509b7d8-88ad-478c-aa40-2984878c87cd.svg">
+    <link rel="preload" as="style" href="{{static "style.css"}}">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600">
+    <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <link rel="stylesheet" href="{{static "style.css"}}" data-turbolinks-track="reload">
 
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   </head>
   <body>
-    <script src="{{static "script.js"}}"></script>
     {{template "body" $}}
 
     {{template "global.script"}}
     {{block "script" .}}{{end}}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/turbolinks/5.1.1/turbolinks.js"></script>
   </body>
 </html>
 {{end}}
