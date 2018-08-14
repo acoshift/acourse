@@ -141,7 +141,7 @@ func loadTemplates(app hime.App) {
 				return v - 1
 			},
 		}).
-		Component("layout.tmpl").
+		Component("layout.tmpl", "component/global.script.tmpl").
 		Template("index", "index.tmpl", "app.tmpl", "component/course-card.tmpl").
 		Template("error.not-found", "not-found.tmpl", "app.tmpl").
 		Template("signin", "signin.tmpl", "auth.tmpl").

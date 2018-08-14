@@ -1,10 +1,10 @@
 steps:
-- name: 'gcr.io/cloud-builders/npm'
+- name: 'gcr.io/cloud-builders/yarn'
   args: ['install']
-- name: 'gcr.io/cloud-builders/npm'
+- name: 'gcr.io/cloud-builders/yarn'
   args: ['run', 'build']
 - name: 'gcr.io/cloud-builders/go'
-  args: ['build', '-o', 'acourse', '-a', '-ldflags', '-w -s', 'main.go']
+  args: ['build', '-o', 'acourse', '-ldflags', '-w -s', 'main.go']
   env:
   - 'PROJECT_ROOT=github.com/acoshift/acourse'
   - 'GOOS=linux'

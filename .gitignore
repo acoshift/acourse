@@ -10,4 +10,4 @@ private/
 acourse
 static.yaml
 *.swp
-gin-bin
+.goreload

@@ -3,7 +3,7 @@ default:
 	# `make style` builds style
 
 dev:
-	gin -p 8000 -a 8080 -x vendor --all -i
+	goreload --all -x vendor
 
 .PHONY: style
 style:
