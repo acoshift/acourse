@@ -10,7 +10,7 @@ import (
 
 // StoreMagicLink stores magic link to redis
 func StoreMagicLink(db *redis.Client, prefix string, linkID string, userID string) error {
-	err := db.Set(prefix+"magic:"+linkID, userID, time.Hour/time.Second).Err()
+	err := db.Set(prefix+"magic:"+linkID, userID, time.Hour).Err()
 	if err != nil {
 		return err
 	}
@@ -41,7 +41,7 @@ func CanAcquireMagicLink(db *redis.Client, prefix string, email string) (bool, e
 	if current > 1 {
 		return false, nil
 	}
-	err = db.Expire(key, 5*time.Minute/time.Second).Err()
+	err = db.Expire(key, 5*time.Minute).Err()
 	if err != nil {
 		return false, err
 	}
