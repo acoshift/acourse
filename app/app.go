@@ -50,10 +50,6 @@ func New(config Config) http.Handler {
 
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-	})
-
 	mux.Handle("/-/", http.StripPrefix("/-", webstatic.New(webstatic.Config{
 		Dir:          "assets",
 		CacheControl: "public, max-age=31536000",
@@ -200,19 +196,9 @@ func New(config Config) http.Handler {
 			}),
 		}),
 		fetchUser(),
-		middleware.CSRF(middleware.CSRFConfig{
-			Origins:     []string{config.BaseURL},
-			IgnoreProto: true,
-			ForbiddenHandler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				http.Error(w, "Cross-site origin detected!", http.StatusForbidden)
-			}),
-		}),
 	)(r))
 
-	return middleware.Chain(
-		errorRecovery,
-		setHeaders,
-	)(mux)
+	return mux
 }
 
 var notFoundImages = []string{

@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"log"
+	"net/http"
 	"time"
 
 	"cloud.google.com/go/profiler"
@@ -11,12 +12,15 @@ import (
 	"github.com/acoshift/configfile"
 	"github.com/acoshift/go-firebase-admin"
 	"github.com/acoshift/hime"
+	"github.com/acoshift/middleware"
+	"github.com/acoshift/probehandler"
 	"github.com/go-redis/redis"
 	_ "github.com/lib/pq"
 	"google.golang.org/api/option"
 	"gopkg.in/gomail.v2"
 
 	"github.com/acoshift/acourse/app"
+	"github.com/acoshift/acourse/internal"
 )
 
 func main() {
@@ -78,13 +82,30 @@ func main() {
 		return "/-/" + static.StringDefault(s, s)
 	})
 
+	baseURL := config.String("base_url")
+
 	himeApp.Template().
 		Funcs(app.TemplateFunc()).
 		ParseConfigFile("settings/template.yaml")
 
-	h := app.New(app.Config{
+	mux := http.NewServeMux()
+
+	// health check
+	probe := probehandler.New()
+	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Query().Get("ready") == "1" {
+			// readiness probe
+			probe.ServeHTTP(w, r)
+			return
+		}
+
+		// liveness probe
+		w.WriteHeader(http.StatusOK)
+	})
+
+	mux.Handle("/", app.New(app.Config{
 		DB:            db,
-		BaseURL:       config.String("base_url"),
+		BaseURL:       baseURL,
 		RedisClient:   redisClient,
 		RedisPrefix:   config.String("redis_prefix"),
 		SessionSecret: config.Bytes("session_secret"),
@@ -95,10 +116,24 @@ func main() {
 		EmailDialer:   emailDialer,
 		BucketHandle:  bucketHandle,
 		BucketName:    config.String("bucket"),
-	})
+	}))
+
+	h := middleware.Chain(
+		internal.ErrorRecovery,
+		internal.SetHeaders,
+		middleware.CSRF(middleware.CSRFConfig{
+			Origins:     []string{baseURL},
+			IgnoreProto: true,
+			ForbiddenHandler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				http.Error(w, "Cross-site origin detected!", http.StatusForbidden)
+			}),
+		}),
+	)(mux)
 
 	err = himeApp.
 		Handler(h).
+		GracefulShutdown().
+		Notify(probe.Fail).
 		ListenAndServe()
 	if err != nil {
 		log.Fatal(err)
