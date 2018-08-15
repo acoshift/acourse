@@ -41,7 +41,7 @@
         {{if .Flash.Has "Errors"}}
           <div class="acourse-message -error">
             <ul>
-              {{range .Flash.Get "Errors"}}
+              {{range .Flash.Values "Errors"}}
                 <li>{{.}}</li>
               {{end}}
             </ul>

@@ -45,7 +45,7 @@
         </form>
         {{if .Flash.Has "Errors"}}
           <ul>
-            {{range .Flash.Get "Errors"}}
+            {{range .Flash.Values "Errors"}}
             <li>{{.}}</li>
             {{end}}
           </ul>
