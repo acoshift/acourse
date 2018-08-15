@@ -496,7 +496,7 @@ func postCourseEnroll(ctx *hime.Context) error {
 
 	var imageURL string
 	if originalPrice != 0 {
-		image, info, err := ctx.FormFileNotEmpty("Image")
+		image, info, err := ctx.FormFileNotEmpty("image")
 		if err == http.ErrMissingFile {
 			f.Add("Errors", "image required")
 			return ctx.RedirectToGet()
