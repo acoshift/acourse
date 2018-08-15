@@ -2,9 +2,9 @@ dir: template
 root: root
 minify: true
 components:
-  - layout.tmpl
-  - component/global.script.tmpl
-  - component/pagination.tmpl
+- main.tmpl
+- component/global.script.tmpl
+- component/pagination.tmpl
 list:
   index:
   - index.tmpl
