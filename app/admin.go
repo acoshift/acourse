@@ -3,10 +3,10 @@ package app
 import (
 	"context"
 	"fmt"
-	"math"
 	"strconv"
 
 	"github.com/acoshift/hime"
+	"github.com/acoshift/paginate"
 
 	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/entity"
@@ -14,25 +14,15 @@ import (
 )
 
 func adminUsers(ctx *hime.Context) error {
-	p, _ := strconv.ParseInt(ctx.FormValue("page"), 10, 64)
-	if p <= 0 {
-		p = 1
-	}
-	limit := int64(30)
-
 	cnt, err := repository.CountUsers(ctx)
 	if err != nil {
 		return err
 	}
 
-	offset := (p - 1) * limit
-	for offset > cnt {
-		p--
-		offset = (p - 1) * limit
-	}
-	totalPage := cnt / limit
+	pg, _ := strconv.ParseInt(ctx.FormValue("page"), 10, 64)
+	pn := paginate.New(int64(pg), 30, cnt)
 
-	users, err := repository.ListUsers(ctx, limit, offset)
+	users, err := repository.ListUsers(ctx, pn.Limit(), pn.Offset())
 	if err != nil {
 		return err
 	}
@@ -40,31 +30,20 @@ func adminUsers(ctx *hime.Context) error {
 	page := newPage(ctx)
 	page["Navbar"] = "admin.users"
 	page["Users"] = users
-	page["CurrentPage"] = int(p)
-	page["TotalPage"] = int(totalPage)
+	page["Paginate"] = pn
 	return ctx.View("admin.users", page)
 }
 
 func adminCourses(ctx *hime.Context) error {
-	p, _ := strconv.ParseInt(ctx.FormValue("page"), 10, 64)
-	if p <= 0 {
-		p = 1
-	}
-	limit := int64(30)
-
 	cnt, err := repository.CountCourses(ctx)
 	if err != nil {
 		return err
 	}
 
-	offset := (p - 1) * limit
-	for offset > cnt {
-		p--
-		offset = (p - 1) * limit
-	}
-	totalPage := int64(math.Ceil(float64(cnt) / float64(limit)))
+	pg, _ := strconv.ParseInt(ctx.FormValue("page"), 10, 64)
+	pn := paginate.New(int64(pg), 30, cnt)
 
-	courses, err := repository.ListCourses(ctx, limit, offset)
+	courses, err := repository.ListCourses(ctx, pn.Limit(), pn.Offset())
 	if err != nil {
 		return err
 	}
@@ -72,8 +51,7 @@ func adminCourses(ctx *hime.Context) error {
 	page := newPage(ctx)
 	page["Navbar"] = "admin.courses"
 	page["Courses"] = courses
-	page["CurrentPage"] = int(p)
-	page["TotalPage"] = int(totalPage)
+	page["Paginate"] = pn
 	return ctx.View("admin.courses", page)
 }
 
@@ -245,25 +223,15 @@ https://acourse.io
 }
 
 func adminPendingPayments(ctx *hime.Context) error {
-	p, _ := strconv.ParseInt(ctx.FormValue("page"), 10, 64)
-	if p <= 0 {
-		p = 1
-	}
-	limit := int64(30)
-
 	cnt, err := repository.CountPaymentsByStatuses(ctx, []int{entity.Pending})
 	if err != nil {
 		return err
 	}
 
-	offset := (p - 1) * limit
-	for offset > cnt {
-		p--
-		offset = (p - 1) * limit
-	}
-	totalPage := cnt / limit
+	pg, _ := strconv.ParseInt(ctx.FormValue("page"), 10, 64)
+	pn := paginate.New(int64(pg), 30, cnt)
 
-	payments, err := repository.ListPaymentsByStatus(ctx, []int{entity.Pending}, limit, offset)
+	payments, err := repository.ListPaymentsByStatus(ctx, []int{entity.Pending}, pn.Limit(), pn.Offset())
 	if err != nil {
 		return err
 	}
@@ -271,31 +239,20 @@ func adminPendingPayments(ctx *hime.Context) error {
 	page := newPage(ctx)
 	page["Navbar"] = "admin.payment.pending"
 	page["Payments"] = payments
-	page["CurrentPage"] = int(p)
-	page["TotalPage"] = int(totalPage)
+	page["Paginate"] = pn
 	return ctx.View("admin.payments", page)
 }
 
 func adminHistoryPayments(ctx *hime.Context) error {
-	p, _ := strconv.ParseInt(ctx.FormValue("page"), 10, 64)
-	if p <= 0 {
-		p = 1
-	}
-	limit := int64(30)
-
 	cnt, err := repository.CountPaymentsByStatuses(ctx, []int{entity.Accepted, entity.Rejected})
 	if err != nil {
 		return err
 	}
 
-	offset := (p - 1) * limit
-	for offset > cnt {
-		p--
-		offset = (p - 1) * limit
-	}
-	totalPage := cnt / limit
+	pg, _ := strconv.ParseInt(ctx.FormValue("page"), 10, 64)
+	pn := paginate.New(int64(pg), 30, cnt)
 
-	payments, err := repository.ListPaymentsByStatus(ctx, []int{entity.Accepted, entity.Rejected, entity.Refunded}, limit, offset)
+	payments, err := repository.ListPaymentsByStatus(ctx, []int{entity.Accepted, entity.Rejected, entity.Refunded}, pn.Limit(), pn.Offset())
 
 	if err != nil {
 		return err
@@ -304,7 +261,6 @@ func adminHistoryPayments(ctx *hime.Context) error {
 	page := newPage(ctx)
 	page["Navbar"] = "admin.payment.history"
 	page["Payments"] = payments
-	page["CurrentPage"] = int(p)
-	page["TotalPage"] = int(totalPage)
+	page["Paginate"] = pn
 	return ctx.View("admin.payments", page)
 }

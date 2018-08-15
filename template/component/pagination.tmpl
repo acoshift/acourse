@@ -1,0 +1,23 @@
+{{define "pagination"}}
+<div class="acourse-block-big _flex-row _main-end _cross-start">
+	<a class="_flex-row acourse-button-outline -info acourse-side-space" href="?page={{.Prev}}">
+		<span class="show-sm-upper"><i class="show-sm-upper fa fa-angle-left _font-size-normal"></i> &nbsp;&nbsp; </span>Prev
+	</a>
+
+	{{range .Pages 3 0}}
+	{{if eq . 0}}
+	<div class="show-sm-upper acourse-button-base -info acourse-side-space">...</div>
+	{{else if eq $.Page .}}
+	<div class="show-sm-upper acourse-button -info acourse-side-space">{{.}}</div>
+	{{else}}
+	<a class="show-sm-upper acourse-button-outline -info acourse-side-space" href="?page={{.}}">{{.}}</a>
+	{{end}}
+	{{end}}
+	<div class="hide-sm-upper _flex-row _flex-span _self-stretch">
+		<input class="acourse-input -rise _full-width" value="{{.Page}}" readonly>
+	</div>
+	<a class="_flex-row acourse-button-outline -info acourse-side-space" href="?page={{.Next}}">
+		Next <span class="show-sm-upper">&nbsp;&nbsp; <i class="fa fa-angle-right _font-size-normal"></i></span>
+	</a>
+</div>
+{{end}}

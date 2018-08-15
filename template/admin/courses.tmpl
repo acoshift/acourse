@@ -6,27 +6,7 @@
       Course List
     </div>
 
-    <!-- Pagination -->
-    <div class="acourse-block-big _flex-row _main-end _cross-start">
-      <a class="_flex-row acourse-button-outline -info acourse-side-space" href="?page={{decr .CurrentPage}}">
-        <span class="show-sm-upper"><i class="show-sm-upper fa fa-angle-left _font-size-normal"></i> &nbsp;&nbsp; </span>Prev
-      </a>
-      {{range paginate .CurrentPage .TotalPage}}
-        {{if eq . $.CurrentPage}}
-          <div class="show-sm-upper acourse-button -info acourse-side-space">{{.}}</div>
-        {{else if eq . -1}}
-          <div class="show-sm-upper acourse-button-base -info acourse-side-space">...</div>
-        {{else}}
-          <a class="show-sm-upper acourse-button-outline -info acourse-side-space" href="?page={{.}}">{{.}}</a>
-        {{end}}
-      {{end}}
-      <div class="hide-sm-upper _flex-row _flex-span _self-stretch">
-        <input class="acourse-input -rise _full-width" type="number" placeholder="Page Number">
-      </div>
-      <a class="_flex-row acourse-button-outline -info acourse-side-space" href="?page={{incr .CurrentPage}}">
-        Next <span class="show-sm-upper">&nbsp;&nbsp; <i class="fa fa-angle-right _font-size-normal"></i></span>
-      </a>
-    </div>
+    {{template "pagination" .Paginate}}
 
     <!-- Table -->
     <div class="flex-row">
@@ -87,27 +67,7 @@
       </table>
     </div>
 
-    <!-- Pagination -->
-    <div class="acourse-block-big _flex-row _main-end _cross-start">
-      <a class="_flex-row acourse-button-outline -info acourse-side-space" href="?page={{decr .CurrentPage}}">
-        <span class="show-sm-upper"><i class="show-sm-upper fa fa-angle-left _font-size-normal"></i> &nbsp;&nbsp; </span>Prev
-      </a>
-      {{range paginate .CurrentPage .TotalPage}}
-        {{if eq . $.CurrentPage}}
-          <div class="show-sm-upper acourse-button -info acourse-side-space">{{.}}</div>
-        {{else if eq . -1}}
-          <div class="show-sm-upper acourse-button-base -info acourse-side-space">...</div>
-        {{else}}
-          <a class="show-sm-upper acourse-button-outline -info acourse-side-space" href="?page={{.}}">{{.}}</a>
-        {{end}}
-      {{end}}
-      <div class="hide-sm-upper _flex-row _flex-span _self-stretch">
-        <input class="acourse-input -rise _full-width" type="number" placeholder="Page Number">
-      </div>
-      <a class="_flex-row acourse-button-outline -info acourse-side-space" href="?page={{incr .CurrentPage}}">
-        Next <span class="show-sm-upper">&nbsp;&nbsp; <i class="fa fa-angle-right _font-size-normal"></i></span>
-      </a>
-    </div>
+    {{template "pagination" .Paginate}}
 
   </div>
 </div>

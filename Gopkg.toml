@@ -31,6 +31,10 @@
   branch = "master"
 
 [[constraint]]
+  name = "github.com/acoshift/paginate"
+  branch = "master"
+
+[[constraint]]
   name = "github.com/acoshift/methodmux"
   branch = "master"
 

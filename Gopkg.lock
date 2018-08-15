@@ -86,6 +86,14 @@
   revision = "278dcbceb879ff24c6f815f0c1cc5281f5ea9c9f"
 
 [[projects]]
+  branch = "master"
+  digest = "1:b8c4ce2a51cab06b566c03fe3aa2de5bb5d4fd69cbf302e57eef26361039c201"
+  name = "github.com/acoshift/paginate"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "e4fad7952f30e60c5c1dabef9c3f371a247b000a"
+
+[[projects]]
   digest = "1:7f2668169cab2b7cb40f9645b834a68b6b106cc46ea97746378323e01651c1fc"
   name = "github.com/acoshift/pgsql"
   packages = ["."]
@@ -507,6 +515,7 @@
     "github.com/acoshift/hime",
     "github.com/acoshift/methodmux",
     "github.com/acoshift/middleware",
+    "github.com/acoshift/paginate",
     "github.com/acoshift/pgsql",
     "github.com/acoshift/prefixhandler",
     "github.com/acoshift/probehandler",
