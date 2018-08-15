@@ -102,7 +102,7 @@ func main() {
 	baseURL := config.String("base_url")
 
 	himeApp.Template().
-		Funcs(app.TemplateFunc()).
+		Funcs(internal.TemplateFunc(loc)).
 		ParseConfigFile("settings/template.yaml")
 
 	mux := http.NewServeMux()
