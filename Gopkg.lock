@@ -3,7 +3,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:781fb6770ce23b79bdbbabdc23d7d5ada6515bd6d7b80e7b3a907f8b4e435dfe"
+  digest = "1:facc9e6ae2141fb521615e95264c6bb87a705a40832a22edca974831a936617a"
   name = "cloud.google.com/go"
   packages = [
     "compute/metadata",
@@ -103,7 +103,15 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:ccda28f856031403d71f99c9f72081a4ec4756dd49accd6e6539fe9b29a48f93"
+  digest = "1:4af8d6691cebdfecc02dff191c6258f1ef3d51d8fbe07b6aa49be2fcf2e4e012"
+  name = "github.com/acoshift/probehandler"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "3b189a71087b4558758b13d652777326fd1c2c63"
+
+[[projects]]
+  branch = "master"
+  digest = "1:76b88fecb4e1d1d7ff7cd357eb281470e12acc3994b9df93bc9fd3254df718fa"
   name = "github.com/acoshift/session"
   packages = [
     ".",
@@ -153,7 +161,7 @@
   revision = "9f541cc9db5d55bce703bd99987c9d5cb8eea45e"
 
 [[projects]]
-  digest = "1:70af43f7acd15e2814ed449c0e8795dd5d6a951277f4f26c1a0480c99b15144c"
+  digest = "1:c319443cbcf72dadec97418a0b75e169e6930d737ab3e36b064da2d7c72caa90"
   name = "github.com/go-redis/redis"
   packages = [
     ".",
@@ -170,7 +178,7 @@
   version = "v6.13.2"
 
 [[projects]]
-  digest = "1:b8a6f63b6844ca793a908877e066ab65f816aa82c2e4a5896278375b3d50e8a9"
+  digest = "1:698b57d2e177534bca3e8ee5eee05968dd14dc4fe1d015e3fb6237ff10e8826a"
   name = "github.com/golang/protobuf"
   packages = [
     "proto",
@@ -194,7 +202,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:91b490799c74ef3580536c9356f753d9978cbe50c09757ebea3f819a79c9ec61"
+  digest = "1:089d56c0adb79140365b5c86815ce97233986da6f3a525c6b706773e4b83876f"
   name = "github.com/google/pprof"
   packages = ["profile"]
   pruneopts = "NUT"
@@ -218,7 +226,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:2c52c3bfa3e106abd7df09126db04bd385aa0f3c250508d8568896253e80cb10"
+  digest = "1:6415011db6d5f89961c38446f3552c74749462bef94904534c55e3dda1affeb9"
   name = "github.com/lib/pq"
   packages = [
     ".",
@@ -244,7 +252,7 @@
   version = "v1.5.1"
 
 [[projects]]
-  digest = "1:960d2997ec31a1aef52ee7e639a037a6fa7cabcc6857ba326ed4265ffc456124"
+  digest = "1:56d79caf8a7a6f8bdae8d1697403d14d408afd795b37fe9df35991dc8c2dcfcd"
   name = "github.com/tdewolff/minify"
   packages = [
     ".",
@@ -257,7 +265,7 @@
   version = "v2.3.5"
 
 [[projects]]
-  digest = "1:d3272f10db463acfe1d752a137d7d40ae4506737ee371889d68860f044f8e2d9"
+  digest = "1:b715e5f1c083ea33f015e4428c4fc58f2b8f9dfdd06eb0d10b8627931b8e410f"
   name = "github.com/tdewolff/parse"
   packages = [
     ".",
@@ -272,7 +280,7 @@
   version = "v2.3.3"
 
 [[projects]]
-  digest = "1:805112bc49126b3ee2b3a27c996c774e5811ebe183f5b5ce00d65da0dd7a44fa"
+  digest = "1:d5873df99f8cd0510440f202f92578caee8404fd835eb17d7cd3534cd1b6c982"
   name = "go.opencensus.io"
   packages = [
     ".",
@@ -295,7 +303,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:d7ca20afe3232af92ca012f69bdb647bfb4e420e47140da3a8bfdc913fbddfce"
+  digest = "1:d3d337e91c35f337d548873978c858ecb723168a6303a41a3ba625c79094f899"
   name = "golang.org/x/image"
   packages = [
     "bmp",
@@ -307,7 +315,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:43944eb236abe5aca1afc52f19ce4db26cbbd87b5ac88f6f9fbf60c6589ff738"
+  digest = "1:c4c84f7817d8a74918a3274fe9d1f3628e8eeeb7432ab4934f60bae1426db0f0"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -326,7 +334,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:4182888816989aa2ac1cd1f160bc9c8f32a831d7317d33731616eb27496e6e98"
+  digest = "1:20be1c62ac412f0f743bb5afdf2b3e343cb2f5b6dbcfb5ea09dac0d3d476dc2f"
   name = "golang.org/x/oauth2"
   packages = [
     ".",
@@ -344,10 +352,10 @@
   name = "golang.org/x/sys"
   packages = ["unix"]
   pruneopts = "NUT"
-  revision = "4e1fef5609515ec7a2cee7b5de30ba6d9b438cbf"
+  revision = "14742f9018cd6651ec7364dc6ee08af0baaa1031"
 
 [[projects]]
-  digest = "1:a0f29009397dc27c9dc8440f0945d49e5cbb9b72d0b0fc745474d9bfdea2d9f8"
+  digest = "1:e7071ed636b5422cc51c0e3a6cebc229d6c9fffc528814b519a980641422d619"
   name = "golang.org/x/text"
   packages = [
     "collate",
@@ -371,7 +379,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:2d7346ddfdef34df33690a9a1fff737e964c4a1f60495b3f08a87d0de9c3d21e"
+  digest = "1:575199a464025c6080c14d2f688a7e182bf80ec1f339bdbfa3112e7c4e24a152"
   name = "google.golang.org/api"
   packages = [
     "gensupport",
@@ -391,7 +399,7 @@
   revision = "0e8d13b5c025da6a7cf249bb854e5869921dd459"
 
 [[projects]]
-  digest = "1:9966556287d8da076caf7e34d345c80e925c947ce1fa3dea6a50999ad02b87ea"
+  digest = "1:8a3a8e562c362acf2762a091627554f12d49c242dfe905cf7231c66cb5c66b6e"
   name = "google.golang.org/appengine"
   packages = [
     ".",
@@ -413,7 +421,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:404312fbc823ed898b19a5ede2b70f10be20cc4743f79bc8ad8e8fbec9c2e916"
+  digest = "1:1fcd1882a7ce01594b9c45778744b6537eea554f4915c502586c6b32bcfe52a0"
   name = "google.golang.org/genproto"
   packages = [
     "googleapis/api/annotations",
@@ -428,7 +436,7 @@
   revision = "383e8b2c3b9e36c4076b235b32537292176bae20"
 
 [[projects]]
-  digest = "1:b6ce4dec4c9daddb797dbfae2e12e4ce822a953802021fe965ac767658226c4d"
+  digest = "1:a6b0b7f7e3b3d0d3bd090b120948c4519b6407828078935868d3207b12958a00"
   name = "google.golang.org/grpc"
   packages = [
     ".",
@@ -480,12 +488,12 @@
   version = "2.0.0"
 
 [[projects]]
-  branch = "v2"
   digest = "1:7c95b35057a0ff2e19f707173cc1a947fa43a6eb5c4d300d196ece0334046082"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
   pruneopts = "NUT"
   revision = "5420a8b6744d3b0345ab293f6fcba19c978f1183"
+  version = "v2.2.1"
 
 [solve-meta]
   analyzer-name = "dep"
@@ -501,6 +509,7 @@
     "github.com/acoshift/middleware",
     "github.com/acoshift/pgsql",
     "github.com/acoshift/prefixhandler",
+    "github.com/acoshift/probehandler",
     "github.com/acoshift/session",
     "github.com/acoshift/session/store/goredis",
     "github.com/acoshift/webstatic",
@@ -514,7 +523,6 @@
     "github.com/russross/blackfriday",
     "google.golang.org/api/option",
     "gopkg.in/gomail.v2",
-    "gopkg.in/yaml.v2",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -23,6 +23,10 @@
   branch = "master"
 
 [[constraint]]
+  name = "github.com/acoshift/probehandler"
+  branch = "master"
+
+[[constraint]]
   name = "github.com/acoshift/session"
   branch = "master"
 
@@ -40,7 +44,7 @@
 
 [[constraint]]
   name = "github.com/disintegration/imaging"
-  version = "1.2.0"
+  version = "1.4.2"
 
 [[constraint]]
   branch = "master"
@@ -64,7 +68,7 @@
 
 [[constraint]]
   name = "github.com/russross/blackfriday"
-  version = "1.4.0"
+  version = "1.5.1"
 
 [[constraint]]
   branch = "master"
@@ -73,10 +77,6 @@
 [[constraint]]
   name = "gopkg.in/gomail.v2"
   version = "2.0.0"
-
-[[constraint]]
-  branch = "v2"
-  name = "gopkg.in/yaml.v2"
 
 [prune]
   non-go = true
