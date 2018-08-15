@@ -9,7 +9,7 @@ import (
 	"github.com/microcosm-cc/bluemonday"
 	"github.com/russross/blackfriday"
 
-	"github.com/acoshift/acourse/appctx"
+	"github.com/acoshift/acourse/context/appctx"
 	"github.com/acoshift/acourse/entity"
 )
 

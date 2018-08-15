@@ -10,7 +10,7 @@ import (
 	"github.com/acoshift/hime"
 	"github.com/asaskevich/govalidator"
 
-	"github.com/acoshift/acourse/appctx"
+	"github.com/acoshift/acourse/context/appctx"
 	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/repository"
 )
