@@ -14,6 +14,7 @@ import (
 	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/entity"
 	"github.com/acoshift/acourse/repository"
+	"github.com/acoshift/acourse/view"
 )
 
 func profile(ctx *hime.Context) error {
@@ -29,7 +30,7 @@ func profile(ctx *hime.Context) error {
 		return err
 	}
 
-	p := page(ctx)
+	p := view.Page(ctx)
 	p["Navbar"] = "profile"
 	p["Title"] = user.Username
 	p["OwnCourses"] = ownCourses
@@ -50,7 +51,7 @@ func profileEdit(ctx *hime.Context) error {
 		f.Set("AboutMe", user.AboutMe)
 	}
 
-	p := page(ctx)
+	p := view.Page(ctx)
 	p["Title"] = user.Username
 	return ctx.View("profile.edit", p)
 }

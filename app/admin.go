@@ -11,6 +11,7 @@ import (
 	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/entity"
 	"github.com/acoshift/acourse/repository"
+	"github.com/acoshift/acourse/view"
 )
 
 func adminUsers(ctx *hime.Context) error {
@@ -27,7 +28,7 @@ func adminUsers(ctx *hime.Context) error {
 		return err
 	}
 
-	p := page(ctx)
+	p := view.Page(ctx)
 	p["Navbar"] = "admin.users"
 	p["Users"] = users
 	p["Paginate"] = pn
@@ -48,7 +49,7 @@ func adminCourses(ctx *hime.Context) error {
 		return err
 	}
 
-	p := page(ctx)
+	p := view.Page(ctx)
 	p["Navbar"] = "admin.courses"
 	p["Courses"] = courses
 	p["Paginate"] = pn
@@ -100,7 +101,7 @@ func adminRejectPayment(ctx *hime.Context) error {
 		x.Course.Link(),
 	)
 
-	p := page(ctx)
+	p := view.Page(ctx)
 	p["Payment"] = x
 	p["Message"] = message
 	return ctx.View("admin.payments.reject", p)
@@ -237,7 +238,7 @@ func adminPendingPayments(ctx *hime.Context) error {
 		return err
 	}
 
-	p := page(ctx)
+	p := view.Page(ctx)
 	p["Navbar"] = "admin.payment.pending"
 	p["Payments"] = payments
 	p["Paginate"] = pn
@@ -258,7 +259,7 @@ func adminHistoryPayments(ctx *hime.Context) error {
 		return err
 	}
 
-	p := page(ctx)
+	p := view.Page(ctx)
 	p["Navbar"] = "admin.payment.history"
 	p["Payments"] = payments
 	p["Paginate"] = pn

@@ -4,6 +4,7 @@ import (
 	"github.com/acoshift/hime"
 
 	"github.com/acoshift/acourse/repository"
+	"github.com/acoshift/acourse/view"
 )
 
 func index(ctx *hime.Context) error {
@@ -16,7 +17,7 @@ func index(ctx *hime.Context) error {
 		return err
 	}
 
-	p := page(ctx)
+	p := view.Page(ctx)
 	p["Courses"] = courses
 	return ctx.View("index", p)
 }

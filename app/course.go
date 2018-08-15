@@ -19,6 +19,7 @@ import (
 	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/entity"
 	"github.com/acoshift/acourse/repository"
+	"github.com/acoshift/acourse/view"
 )
 
 type courseURLKey struct{}
@@ -95,7 +96,7 @@ func courseView(ctx *hime.Context) error {
 		}
 	}
 
-	p := page(ctx)
+	p := view.Page(ctx)
 	p["Title"] = x.Title
 	p["Desc"] = x.ShortDesc
 	p["Image"] = x.Image
@@ -168,7 +169,7 @@ func courseContent(ctx *hime.Context) error {
 		content = x.Contents[pg]
 	}
 
-	p := page(ctx)
+	p := view.Page(ctx)
 	p["Title"] = x.Title
 	p["Desc"] = x.ShortDesc
 	p["Image"] = x.Image
@@ -178,7 +179,7 @@ func courseContent(ctx *hime.Context) error {
 }
 
 func editorCreate(ctx *hime.Context) error {
-	return ctx.View("editor.create", page(ctx))
+	return ctx.View("editor.create", view.Page(ctx))
 }
 
 func postEditorCreate(ctx *hime.Context) error {
@@ -260,7 +261,7 @@ func editorCourse(ctx *hime.Context) error {
 		return err
 	}
 
-	p := page(ctx)
+	p := view.Page(ctx)
 	p["Course"] = course
 	return ctx.View("editor.course", p)
 }
@@ -356,7 +357,7 @@ func editorContent(ctx *hime.Context) error {
 		return err
 	}
 
-	p := page(ctx)
+	p := view.Page(ctx)
 	p["Course"] = course
 	return ctx.View("editor.content", p)
 }
@@ -423,7 +424,7 @@ func courseEnroll(ctx *hime.Context) error {
 		return ctx.RedirectTo("course", link)
 	}
 
-	p := page(ctx)
+	p := view.Page(ctx)
 	p["Title"] = x.Title
 	p["Desc"] = x.ShortDesc
 	p["Image"] = x.Image
@@ -594,7 +595,7 @@ func courseAssignment(ctx *hime.Context) error {
 		return err
 	}
 
-	p := page(ctx)
+	p := view.Page(ctx)
 	p["Title"] = x.Title
 	p["Desc"] = x.ShortDesc
 	p["Image"] = x.Image
@@ -612,7 +613,7 @@ func editorContentCreate(ctx *hime.Context) error {
 		return err
 	}
 
-	p := page(ctx)
+	p := view.Page(ctx)
 	p["Course"] = course
 	return ctx.View("editor.content.create", p)
 }
@@ -663,7 +664,7 @@ func editorContentEdit(ctx *hime.Context) error {
 		return ctx.Status(http.StatusForbidden).StatusText()
 	}
 
-	p := page(ctx)
+	p := view.Page(ctx)
 	p["Course"] = course
 	p["Content"] = content
 	return ctx.View("editor.content.edit", p)

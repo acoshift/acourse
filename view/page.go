@@ -1,4 +1,4 @@
-package app
+package view
 
 import (
 	"context"
@@ -6,7 +6,8 @@ import (
 	"github.com/acoshift/acourse/context/appctx"
 )
 
-func page(ctx context.Context) map[string]interface{} {
+// Page creates new page data
+func Page(ctx context.Context) map[string]interface{} {
 	return map[string]interface{}{
 		"Title":  "",
 		"Desc":   "แหล่งเรียนรู้ออนไลน์ ที่ทุกคนเข้าถึงได้",

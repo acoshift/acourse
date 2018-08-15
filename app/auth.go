@@ -18,6 +18,7 @@ import (
 	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/entity"
 	"github.com/acoshift/acourse/repository"
+	"github.com/acoshift/acourse/view"
 )
 
 func generateRandomString(n int) string {
@@ -35,7 +36,7 @@ func generateMagicLinkID() string {
 }
 
 func signIn(ctx *hime.Context) error {
-	return ctx.View("signin", page(ctx))
+	return ctx.View("signin", view.Page(ctx))
 }
 
 func postSignIn(ctx *hime.Context) error {
@@ -105,7 +106,7 @@ func checkEmail(ctx *hime.Context) error {
 	if !f.Has("CheckEmail") {
 		return ctx.Redirect("/")
 	}
-	return ctx.View("check-email", page(ctx))
+	return ctx.View("check-email", view.Page(ctx))
 }
 
 func signInLink(ctx *hime.Context) error {
@@ -128,7 +129,7 @@ func signInLink(ctx *hime.Context) error {
 }
 
 func signInPassword(ctx *hime.Context) error {
-	return ctx.View("signin.password", page(ctx))
+	return ctx.View("signin.password", view.Page(ctx))
 }
 
 func postSignInPassword(ctx *hime.Context) error {
@@ -246,7 +247,7 @@ func openIDCallback(ctx *hime.Context) error {
 }
 
 func signUp(ctx *hime.Context) error {
-	return ctx.View("signup", page(ctx))
+	return ctx.View("signup", view.Page(ctx))
 }
 
 func postSignUp(ctx *hime.Context) error {
@@ -304,7 +305,7 @@ func signOut(ctx *hime.Context) error {
 }
 
 func resetPassword(ctx *hime.Context) error {
-	return ctx.View("reset.password", page(ctx))
+	return ctx.View("reset.password", view.Page(ctx))
 }
 
 func postResetPassword(ctx *hime.Context) error {

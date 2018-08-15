@@ -16,6 +16,7 @@ import (
 	"github.com/acoshift/acourse/email"
 	"github.com/acoshift/acourse/image"
 	"github.com/acoshift/acourse/notify"
+	"github.com/acoshift/acourse/view"
 )
 
 var (
@@ -174,7 +175,7 @@ var notFoundImages = []string{
 }
 
 func notFound(ctx *hime.Context) error {
-	p := page(ctx)
+	p := view.Page(ctx)
 	p["Image"] = notFoundImages[rand.Intn(len(notFoundImages))]
 	ctx.ResponseWriter().Header().Set(header.XContentTypeOptions, "nosniff")
 	return ctx.Status(http.StatusNotFound).View("error.not-found", p)
