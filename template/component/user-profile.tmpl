@@ -2,8 +2,8 @@
 <div id="profile-card" class="_flex-column _cross-center">
   <img class="acourse-block-big acourse-circle -large _img-cover" src="{{.Image}}" onerror="this.src = 'https://storage.googleapis.com/acourse/static/d509b7d8-88ad-478c-aa40-2984878c87cd.svg'">
   <h3 class="_no-margin _color-sub">{{.Name}}</h3>
-  {{if .Email.String}}
-    <p class="_font-size-small">{{.Email.String}}</p>
+  {{if .Email}}
+    <p class="_font-size-small">{{.Email}}</p>
   {{end}}
   <p class="profile-card-detail">{{.AboutMe}}</p>
 </div>

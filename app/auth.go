@@ -3,7 +3,6 @@ package app
 import (
 	"context"
 	"crypto/rand"
-	"database/sql"
 	"encoding/base64"
 	"fmt"
 	"io"
@@ -137,7 +136,7 @@ func postSignInPassword(ctx *hime.Context) error {
 	f := s.Flash()
 
 	email := ctx.PostFormValue("Email")
-	if len(email) == 0 {
+	if email == "" {
 		f.Add("Errors", "email required")
 	}
 	pass := ctx.PostFormValue("Password")
@@ -165,12 +164,14 @@ func postSignInPassword(ctx *hime.Context) error {
 		if err != nil {
 			return err
 		}
+
+		email, _ = govalidator.NormalizeEmail(email)
 		if !ok {
-			err = repository.RegisterUser(ctx, &entity.User{
+			err = repository.RegisterUser(ctx, &entity.RegisterUser{
 				ID:       userID,
 				Username: userID,
 				Name:     userID,
-				Email:    sql.NullString{String: email, Valid: len(email) > 0},
+				Email:    email,
 			})
 			if err != nil {
 				return err
@@ -221,11 +222,11 @@ func openIDCallback(ctx *hime.Context) error {
 		if !exists {
 			// user not found, insert new user
 			imageURL := uploadProfileFromURLAsync(user.PhotoURL)
-			err = repository.RegisterUser(ctx, &entity.User{
+			err = repository.RegisterUser(ctx, &entity.RegisterUser{
 				ID:       user.UserID,
 				Name:     user.DisplayName,
 				Username: user.UserID,
-				Email:    sql.NullString{String: user.Email, Valid: len(user.Email) > 0},
+				Email:    user.Email,
 				Image:    imageURL,
 			})
 			if err != nil {
@@ -282,10 +283,10 @@ func postSignUp(ctx *hime.Context) error {
 		return ctx.RedirectToGet()
 	}
 
-	err = repository.RegisterUser(ctx, &entity.User{
+	err = repository.RegisterUser(ctx, &entity.RegisterUser{
 		ID:       userID,
 		Username: userID,
-		Email:    sql.NullString{String: email, Valid: email != ""},
+		Email:    email,
 	})
 	if err != nil {
 		return err

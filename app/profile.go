@@ -30,6 +30,7 @@ func profile(ctx *hime.Context) error {
 	}
 
 	page := newPage(ctx)
+	page["Navbar"] = "profile"
 	page["Title"] = user.Username + " | " + page["Title"].(string)
 	page["OwnCourses"] = ownCourses
 	page["EnrolledCourses"] = enrolledCourses

@@ -14,7 +14,7 @@
       </div>
 
       <div class="user-dashboard col-xs-12 col-md-9 _flex-column">
-        {{if .Me.Role.Instructor.Bool}}
+        {{if .Me.Role.Instructor}}
           <div class="acourse-block-big col-xs-12 _flex-row _main-space-between _cross-center _clearflex">
             <div class="acourse-header _no-margin _color-main">คอร์สที่คุณสอน</div>
             <a href="{{route "editor.create"}}">

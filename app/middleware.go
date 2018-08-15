@@ -64,7 +64,7 @@ func onlyAdmin(h http.Handler) http.Handler {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
-		if !u.Role.Admin.Bool {
+		if !u.Role.Admin {
 			http.Error(w, "Forbidden", http.StatusForbidden)
 			return
 		}
@@ -79,7 +79,7 @@ func onlyInstructor(h http.Handler) http.Handler {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
-		if !u.Role.Instructor.Bool {
+		if !u.Role.Instructor {
 			http.Error(w, "Forbidden", http.StatusForbidden)
 			return
 		}

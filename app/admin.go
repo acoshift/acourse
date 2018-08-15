@@ -38,6 +38,7 @@ func adminUsers(ctx *hime.Context) error {
 	}
 
 	page := newPage(ctx)
+	page["Navbar"] = "admin.users"
 	page["Users"] = users
 	page["CurrentPage"] = int(p)
 	page["TotalPage"] = int(totalPage)
@@ -69,52 +70,11 @@ func adminCourses(ctx *hime.Context) error {
 	}
 
 	page := newPage(ctx)
+	page["Navbar"] = "admin.courses"
 	page["Courses"] = courses
 	page["CurrentPage"] = int(p)
 	page["TotalPage"] = int(totalPage)
 	return ctx.View("admin.courses", page)
-}
-
-func adminPayments(ctx *hime.Context, history bool) error {
-	p, _ := strconv.ParseInt(ctx.FormValue("page"), 10, 64)
-	if p <= 0 {
-		p = 1
-	}
-	limit := int64(30)
-
-	var err error
-	var cnt int64
-	if history {
-		cnt, err = repository.CountPaymentsByStatuses(ctx, []int{entity.Accepted, entity.Rejected})
-	} else {
-		cnt, err = repository.CountPaymentsByStatuses(ctx, []int{entity.Pending})
-	}
-	if err != nil {
-		return err
-	}
-
-	offset := (p - 1) * limit
-	for offset > cnt {
-		p--
-		offset = (p - 1) * limit
-	}
-	totalPage := cnt / limit
-
-	var payments []*entity.Payment
-	if history {
-		payments, err = repository.ListPaymentsByStatus(ctx, []int{entity.Accepted, entity.Rejected, entity.Refunded}, limit, offset)
-	} else {
-		payments, err = repository.ListPaymentsByStatus(ctx, []int{entity.Pending}, limit, offset)
-	}
-	if err != nil {
-		return err
-	}
-
-	page := newPage(ctx)
-	page["Payments"] = payments
-	page["CurrentPage"] = int(p)
-	page["TotalPage"] = int(totalPage)
-	return ctx.View("admin.payments", page)
 }
 
 func adminRejectPayment(ctx *hime.Context) error {
@@ -186,7 +146,7 @@ func postAdminRejectPayment(ctx *hime.Context) error {
 		return err
 	}
 
-	if x.User.Email.Valid {
+	if x.User.Email != "" {
 		go func() {
 			x, err := repository.GetPayment(ctx, id)
 			if err != nil {
@@ -194,7 +154,7 @@ func postAdminRejectPayment(ctx *hime.Context) error {
 			}
 			body := markdown(message)
 			title := fmt.Sprintf("คำขอเพื่อเรียนหลักสูตร %s ได้รับการปฏิเสธ", x.Course.Title)
-			emailSender.Send(x.User.Email.String, title, body)
+			emailSender.Send(x.User.Email, title, body)
 		}()
 	}
 
@@ -224,7 +184,7 @@ func postAdminPendingPayment(ctx *hime.Context) error {
 		if err != nil {
 			return err
 		}
-		if x.User.Email.Valid {
+		if x.User.Email != "" {
 			go func() {
 				// re-fetch payment to get latest timestamp
 				x, err := repository.GetPayment(ctx, id)
@@ -273,11 +233,11 @@ https://acourse.io
 					x.CreatedAt.In(loc).Format("02/01/2006 15:04:05"),
 					x.At.Time.In(loc).Format("02/01/2006 15:04:05"),
 					name,
-					x.User.Email.String,
+					x.User.Email,
 				))
 
 				title := fmt.Sprintf("ยืนยันการชำระเงิน หลักสูตร %s", x.Course.Title)
-				emailSender.Send(x.User.Email.String, title, body)
+				emailSender.Send(x.User.Email, title, body)
 			}()
 		}
 	}
@@ -285,9 +245,66 @@ https://acourse.io
 }
 
 func adminPendingPayments(ctx *hime.Context) error {
-	return adminPayments(ctx, false)
+	p, _ := strconv.ParseInt(ctx.FormValue("page"), 10, 64)
+	if p <= 0 {
+		p = 1
+	}
+	limit := int64(30)
+
+	cnt, err := repository.CountPaymentsByStatuses(ctx, []int{entity.Pending})
+	if err != nil {
+		return err
+	}
+
+	offset := (p - 1) * limit
+	for offset > cnt {
+		p--
+		offset = (p - 1) * limit
+	}
+	totalPage := cnt / limit
+
+	payments, err := repository.ListPaymentsByStatus(ctx, []int{entity.Pending}, limit, offset)
+	if err != nil {
+		return err
+	}
+
+	page := newPage(ctx)
+	page["Navbar"] = "admin.payment.pending"
+	page["Payments"] = payments
+	page["CurrentPage"] = int(p)
+	page["TotalPage"] = int(totalPage)
+	return ctx.View("admin.payments", page)
 }
 
 func adminHistoryPayments(ctx *hime.Context) error {
-	return adminPayments(ctx, true)
+	p, _ := strconv.ParseInt(ctx.FormValue("page"), 10, 64)
+	if p <= 0 {
+		p = 1
+	}
+	limit := int64(30)
+
+	cnt, err := repository.CountPaymentsByStatuses(ctx, []int{entity.Accepted, entity.Rejected})
+	if err != nil {
+		return err
+	}
+
+	offset := (p - 1) * limit
+	for offset > cnt {
+		p--
+		offset = (p - 1) * limit
+	}
+	totalPage := cnt / limit
+
+	payments, err := repository.ListPaymentsByStatus(ctx, []int{entity.Accepted, entity.Rejected, entity.Refunded}, limit, offset)
+
+	if err != nil {
+		return err
+	}
+
+	page := newPage(ctx)
+	page["Navbar"] = "admin.payment.history"
+	page["Payments"] = payments
+	page["CurrentPage"] = int(p)
+	page["TotalPage"] = int(totalPage)
+	return ctx.View("admin.payments", page)
 }

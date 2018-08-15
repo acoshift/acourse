@@ -23,15 +23,13 @@ func GetUser(ctx context.Context, userID string) (*entity.User, error) {
 			users.email,
 			users.about_me,
 			users.image,
-			users.created_at,
-			users.updated_at,
-			roles.admin,
-			roles.instructor
+			coalesce(roles.admin, false),
+			coalesce(roles.instructor, false)
 		from users
 			left join roles on users.id = roles.user_id
 		where users.id = $1
 	`, userID).Scan(
-		&x.ID, &x.Name, &x.Username, &x.Email, &x.AboutMe, &x.Image, &x.CreatedAt, &x.UpdatedAt,
+		&x.ID, &x.Name, &x.Username, pgsql.NullString(&x.Email), &x.AboutMe, &x.Image,
 		&x.Role.Admin, &x.Role.Instructor,
 	)
 	if err == sql.ErrNoRows {
@@ -123,7 +121,7 @@ func IsUserExists(ctx context.Context, id string) (exists bool, err error) {
 }
 
 // RegisterUser registers new users
-func RegisterUser(ctx context.Context, x *entity.User) error {
+func RegisterUser(ctx context.Context, x *entity.RegisterUser) error {
 	q := sqlctx.GetQueryer(ctx)
 
 	_, err := q.Exec(`
@@ -131,7 +129,7 @@ func RegisterUser(ctx context.Context, x *entity.User) error {
 			(id, username, name, email, image)
 		values
 			($1, $2, $3, $4, $5)
-	`, x.ID, x.Username, x.Name, x.Email, x.Image)
+	`, x.ID, x.Username, x.Name, pgsql.NullString(&x.Email), x.Image)
 	return err
 }
 

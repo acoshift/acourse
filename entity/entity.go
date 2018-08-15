@@ -7,23 +7,21 @@ import (
 	"github.com/lib/pq"
 )
 
-// User model
+// User type
 type User struct {
-	ID        string
-	Role      UserRole
-	Username  string
-	Name      string
-	Email     sql.NullString
-	AboutMe   string
-	Image     string
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID       string
+	Role     UserRole
+	Username string
+	Name     string
+	Email    string
+	AboutMe  string
+	Image    string
 }
 
 // UserRole type
 type UserRole struct {
-	Admin      sql.NullBool
-	Instructor sql.NullBool
+	Admin      bool
+	Instructor bool
 }
 
 // EmailSignInUser type
