@@ -30,9 +30,9 @@ Max width before this PARTICULAR table gets nasty
 This query will take effect for any screen smaller than 760px
 and also iPads specifically.
 */
-@media only screen and (max-width: $md)  {
+@media only screen and (max-width: $md)	{
 	table { 
-    width: 100%; 
+		width: 100%; 
 	}
 	/* Force table to not be like tables anymore */
 	table, thead, tbody, th, td, tr { 
@@ -45,22 +45,22 @@ and also iPads specifically.
 		left: -9999px;
 	}
 	tr { 
-    border: 1px solid #d4d4d4;
-    margin-bottom: 8px;
-  }
+		border: 1px solid #d4d4d4;
+		margin-bottom: 8px;
+	}
 	td { 
-		/* Behave  like a "row" */
+		/* Behave	like a "row" */
 		border: none;
 		border-bottom: 1px solid #e3e6e8; 
 		position: relative;
 		padding-left: 50%;
-    word-break: break-all;
-    &:last-child {
-      border-bottom: 0px;
-    }
-    span {
-      word-break: break-all;
-    }
+		word-break: break-all;
+		&:last-child {
+			border-bottom: 0px;
+		}
+		span {
+			word-break: break-all;
+		}
 	}
 
 	td:before { 

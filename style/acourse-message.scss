@@ -1,11 +1,11 @@
 @import 'config';
 .acourse-message {
-  padding: 4px;
-  border-radius: 3px;
-  margin-bottom: 16px;
-  &.-error {
-    background-color: #fff5f7;
-    border: 1px solid #ffced8;
-    color: #cd0930;
-  }
+	padding: 4px;
+	border-radius: 3px;
+	margin-bottom: 16px;
+	&.-error {
+		background-color: #fff5f7;
+		border: 1px solid #ffced8;
+		color: #cd0930;
+	}
 }

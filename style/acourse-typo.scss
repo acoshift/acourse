@@ -1,15 +1,15 @@
 .acourse-header {
-  font-size: 32px;
-  margin-bottom: 16px;
-  -webkit-font-smoothing: antialiased;
-  font-weight: 400;
+	font-size: 32px;
+	margin-bottom: 16px;
+	-webkit-font-smoothing: antialiased;
+	font-weight: 400;
 }
 .acourse-word-breakeable {
-  word-break: break-all;
+	word-break: break-all;
 }
 .acourse-link {
-  cursor: pointer;
-  &:hover {
-    text-decoration: underline;
-  }
+	cursor: pointer;
+	&:hover {
+		text-decoration: underline;
+	}
 }

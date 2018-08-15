@@ -11,18 +11,18 @@ input[type='url'].acourse-input,
 input:not([type]).acourse-input,
 textarea.acourse-input,
 select.acourse-input {
-  -webkit-appearance: none;
-     -moz-appearance: none;
-          appearance: none;
-  border: 1px solid #d1d1d1;
-  border-radius: 3px;
-  box-shadow: none;
-  box-sizing: inherit;
-  padding: 8px 16px;
-  background-color: white;
-  &.-rise {
-    box-shadow: 8px 10px 20px 0 rgba(46,61,73,0.15);
-  }
+	-webkit-appearance: none;
+		 -moz-appearance: none;
+					appearance: none;
+	border: 1px solid #d1d1d1;
+	border-radius: 3px;
+	box-shadow: none;
+	box-sizing: inherit;
+	padding: 8px 16px;
+	background-color: white;
+	&.-rise {
+		box-shadow: 8px 10px 20px 0 rgba(46,61,73,0.15);
+	}
 }
 input[type='email'].acourse-input:focus,
 input[type='number'].acourse-input:focus,
@@ -35,8 +35,8 @@ input[type='url'].acourse-input:focus,
 input:not([type]).acourse-input:focus,
 textarea.acourse-input:focus,
 select.acourse-input:focus {
-  border-color: $color-sub;
-  outline: 0;
+	border-color: $color-sub;
+	outline: 0;
 }
 
 input[type='email'].acourse-input.error,
@@ -50,15 +50,15 @@ input[type='url'].acourse-input.error,
 input:not([type]).acourse-input.error,
 textarea.acourse-input.error,
 select.acourse-input.error {
-  border-color: $color-negative;
-  outline: 0;
+	border-color: $color-negative;
+	outline: 0;
 }
 
 .input-field {
-  margin-bottom: 16px;
-  &:not(.inline) {
-    label {
-      margin-bottom: 6px;
-    }
-  }
+	margin-bottom: 16px;
+	&:not(.inline) {
+		label {
+			margin-bottom: 6px;
+		}
+	}
 }
