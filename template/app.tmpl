@@ -25,7 +25,10 @@
             <a class="_font-main _font-bold _font-size-big" href="{{route "admin.payments.pending"}}">รอดำเนินการ</a>
             <a class="_font-main _font-bold _font-size-big" href="{{route "admin.payments.history"}}">ประวัติการชำระเงิน</a>
             {{end}}
-            <a class="_font-main _font-bold _font-size-big" href="{{route "signout"}}">ออกจากระบบ</a>
+
+            <form method="POST" action="{{route "signout"}}">
+              <button class="_font-main _font-bold _font-size-big">ออกจากระบบ</button>
+            </form>
           </div>
         </div>
       </div>

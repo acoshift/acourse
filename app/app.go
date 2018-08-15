@@ -75,10 +75,9 @@ func New(config Config) http.Handler {
 		hime.Handler(signUp),
 		hime.Handler(postSignUp),
 	)))
-	mux.Handle("/signout", methodmux.GetPost(
+	mux.Handle("/signout", methodmux.Post(
 		hime.Handler(signOut),
-		hime.Handler(signOut),
-	)) // TODO: remove get signout
+	))
 
 	// profile
 	mux.Handle("/profile", mustSignedIn(methodmux.Get(
