@@ -14,6 +14,7 @@ import (
 	"github.com/acoshift/hime"
 	"github.com/acoshift/middleware"
 	"github.com/acoshift/probehandler"
+	"github.com/acoshift/webstatic"
 	"github.com/go-redis/redis"
 	_ "github.com/lib/pq"
 	"google.golang.org/api/option"
@@ -102,6 +103,13 @@ func main() {
 		// liveness probe
 		w.WriteHeader(http.StatusOK)
 	})
+
+	mux.Handle("/-/", http.StripPrefix("/-", webstatic.New(webstatic.Config{
+		Dir:          "assets",
+		CacheControl: "public, max-age=31536000",
+	})))
+
+	mux.Handle("/favicon.ico", internal.FileHandler("assets/favicon.ico"))
 
 	mux.Handle("/", app.New(app.Config{
 		DB:            db,

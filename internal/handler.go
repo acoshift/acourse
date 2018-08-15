@@ -1,10 +1,9 @@
-package app
+package internal
 
-import (
-	"net/http"
-)
+import "net/http"
 
-func fileHandler(name string) http.Handler {
+// FileHandler serves a file
+func FileHandler(name string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, name)
 	})

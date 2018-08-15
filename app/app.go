@@ -15,7 +15,6 @@ import (
 	"github.com/acoshift/prefixhandler"
 	"github.com/acoshift/session"
 	redisstore "github.com/acoshift/session/store/goredis"
-	"github.com/acoshift/webstatic"
 	"github.com/go-redis/redis"
 	"gopkg.in/gomail.v2"
 )
@@ -50,60 +49,52 @@ func New(config Config) http.Handler {
 
 	mux := http.NewServeMux()
 
-	mux.Handle("/-/", http.StripPrefix("/-", webstatic.New(webstatic.Config{
-		Dir:          "assets",
-		CacheControl: "public, max-age=31536000",
-	})))
-	mux.Handle("/favicon.ico", fileHandler("assets/favicon.ico"))
-
 	methodmux.FallbackHandler = hime.Handler(notFound)
 
-	r := http.NewServeMux()
-
-	r.Handle("/", methodmux.Get(
+	mux.Handle("/", methodmux.Get(
 		hime.Handler(index),
 	))
 
 	// auth
-	r.Handle("/signin", mustNotSignedIn(methodmux.GetPost(
+	mux.Handle("/signin", mustNotSignedIn(methodmux.GetPost(
 		hime.Handler(signIn),
 		hime.Handler(postSignIn),
 	)))
-	r.Handle("/signin/password", mustNotSignedIn(methodmux.GetPost(
+	mux.Handle("/signin/password", mustNotSignedIn(methodmux.GetPost(
 		hime.Handler(signInPassword),
 		hime.Handler(postSignInPassword),
 	)))
-	r.Handle("/signin/check-email", mustNotSignedIn(methodmux.Get(
+	mux.Handle("/signin/check-email", mustNotSignedIn(methodmux.Get(
 		hime.Handler(checkEmail),
 	)))
-	r.Handle("/signin/link", mustNotSignedIn(methodmux.Get(
+	mux.Handle("/signin/link", mustNotSignedIn(methodmux.Get(
 		hime.Handler(signInLink),
 	)))
-	r.Handle("/reset/password", mustNotSignedIn(methodmux.GetPost(
+	mux.Handle("/reset/password", mustNotSignedIn(methodmux.GetPost(
 		hime.Handler(resetPassword),
 		hime.Handler(postResetPassword),
 	)))
 
-	r.Handle("/openid", mustNotSignedIn(methodmux.Get(
+	mux.Handle("/openid", mustNotSignedIn(methodmux.Get(
 		hime.Handler(openID),
 	)))
-	r.Handle("/openid/callback", mustNotSignedIn(methodmux.Get(
+	mux.Handle("/openid/callback", mustNotSignedIn(methodmux.Get(
 		hime.Handler(openIDCallback),
 	)))
-	r.Handle("/signup", mustNotSignedIn(methodmux.GetPost(
+	mux.Handle("/signup", mustNotSignedIn(methodmux.GetPost(
 		hime.Handler(signUp),
 		hime.Handler(postSignUp),
 	)))
-	r.Handle("/signout", methodmux.GetPost(
+	mux.Handle("/signout", methodmux.GetPost(
 		hime.Handler(signOut),
 		hime.Handler(signOut),
 	)) // TODO: remove get signout
 
 	// profile
-	r.Handle("/profile", mustSignedIn(methodmux.Get(
+	mux.Handle("/profile", mustSignedIn(methodmux.Get(
 		hime.Handler(profile),
 	)))
-	r.Handle("/profile/edit", mustSignedIn(methodmux.GetPost(
+	mux.Handle("/profile/edit", mustSignedIn(methodmux.GetPost(
 		hime.Handler(profileEdit),
 		hime.Handler(postProfileEdit),
 	)))
@@ -125,7 +116,7 @@ func New(config Config) http.Handler {
 			hime.Handler(courseAssignment),
 		)))
 
-		r.Handle("/course/", prefixhandler.New("/course", courseURLKey{}, m))
+		mux.Handle("/course/", prefixhandler.New("/course", courseURLKey{}, m))
 	}
 
 	// editor
@@ -153,7 +144,7 @@ func New(config Config) http.Handler {
 			hime.Handler(postEditorContentEdit),
 		))
 
-		r.Handle("/editor/", http.StripPrefix("/editor", m))
+		mux.Handle("/editor/", http.StripPrefix("/editor", m))
 	}
 
 	// admin
@@ -177,10 +168,10 @@ func New(config Config) http.Handler {
 			hime.Handler(postAdminRejectPayment),
 		))
 
-		r.Handle("/admin/", onlyAdmin(http.StripPrefix("/admin", m)))
+		mux.Handle("/admin/", onlyAdmin(http.StripPrefix("/admin", m)))
 	}
 
-	mux.Handle("/", middleware.Chain(
+	return middleware.Chain(
 		session.Middleware(session.Config{
 			Secret:   config.SessionSecret,
 			Path:     "/",
@@ -196,9 +187,7 @@ func New(config Config) http.Handler {
 			}),
 		}),
 		fetchUser(),
-	)(r))
-
-	return mux
+	)(mux)
 }
 
 var notFoundImages = []string{
