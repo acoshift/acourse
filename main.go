@@ -9,6 +9,7 @@ import (
 
 	"github.com/acoshift/acourse/context/redisctx"
 	"github.com/acoshift/acourse/context/sqlctx"
+	"github.com/acoshift/acourse/email"
 
 	"cloud.google.com/go/profiler"
 	"cloud.google.com/go/storage"
@@ -23,7 +24,6 @@ import (
 	"github.com/go-redis/redis"
 	_ "github.com/lib/pq"
 	"google.golang.org/api/option"
-	"gopkg.in/gomail.v2"
 
 	"github.com/acoshift/acourse/app"
 	"github.com/acoshift/acourse/internal"
@@ -59,8 +59,14 @@ func main() {
 	}
 	bucketHandle := storageClient.Bucket(config.String("bucket"))
 
-	// init email client
-	emailDialer := gomail.NewPlainDialer(config.String("email_server"), config.Int("email_port"), config.String("email_user"), config.String("email_password"))
+	// init email sender
+	emailSender := email.NewSMTPSender(email.SMTPConfig{
+		Server:   config.String("email_server"),
+		Port:     config.Int("email_port"),
+		User:     config.String("email_user"),
+		Password: config.String("email_password"),
+		From:     config.String("email_from"),
+	})
 
 	// init redis pool
 	redisClient := redis.NewClient(&redis.Options{
@@ -138,8 +144,7 @@ func main() {
 		Auth:         firAuth,
 		Location:     loc,
 		SlackURL:     config.String("slack_url"),
-		EmailFrom:    config.String("email_from"),
-		EmailDialer:  emailDialer,
+		EmailSender:  emailSender,
 		BucketHandle: bucketHandle,
 		BucketName:   config.String("bucket"),
 	})))

@@ -12,15 +12,15 @@ import (
 	"github.com/acoshift/methodmux"
 	"github.com/acoshift/middleware"
 	"github.com/acoshift/prefixhandler"
-	"gopkg.in/gomail.v2"
+
+	"github.com/acoshift/acourse/email"
 )
 
 var (
 	auth         *firebase.Auth
 	loc          *time.Location
 	slackURL     string
-	emailFrom    string
-	emailDialer  *gomail.Dialer
+	emailSender  email.Sender
 	baseURL      string
 	bucketHandle *storage.BucketHandle
 	bucketName   string
@@ -31,8 +31,7 @@ func New(config Config) http.Handler {
 	auth = config.Auth
 	loc = config.Location
 	slackURL = config.SlackURL
-	emailFrom = config.EmailFrom
-	emailDialer = config.EmailDialer
+	emailSender = config.EmailSender
 	baseURL = config.BaseURL
 	bucketHandle = config.BucketHandle
 	bucketName = config.BucketName

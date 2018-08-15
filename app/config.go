@@ -6,7 +6,8 @@ import (
 	"cloud.google.com/go/storage"
 	"github.com/acoshift/go-firebase-admin"
 	"github.com/go-redis/redis"
-	"gopkg.in/gomail.v2"
+
+	"github.com/acoshift/acourse/email"
 )
 
 // Config use to init app package
@@ -17,8 +18,7 @@ type Config struct {
 	Auth         *firebase.Auth
 	Location     *time.Location
 	SlackURL     string
-	EmailFrom    string
-	EmailDialer  *gomail.Dialer
+	EmailSender  email.Sender
 	BucketHandle *storage.BucketHandle
 	BucketName   string
 }

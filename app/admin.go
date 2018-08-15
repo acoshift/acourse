@@ -194,7 +194,7 @@ func postAdminRejectPayment(ctx *hime.Context) error {
 			}
 			body := markdown(message)
 			title := fmt.Sprintf("คำขอเพื่อเรียนหลักสูตร %s ได้รับการปฏิเสธ", x.Course.Title)
-			sendEmail(x.User.Email.String, title, body)
+			emailSender.Send(x.User.Email.String, title, body)
 		}()
 	}
 
@@ -277,7 +277,7 @@ https://acourse.io
 				))
 
 				title := fmt.Sprintf("ยืนยันการชำระเงิน หลักสูตร %s", x.Course.Title)
-				sendEmail(x.User.Email.String, title, body)
+				emailSender.Send(x.User.Email.String, title, body)
 			}()
 		}
 	}

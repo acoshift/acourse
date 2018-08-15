@@ -98,7 +98,7 @@ func postSignIn(ctx *hime.Context) error {
 ทีมงาน acourse.io
 	`, user.Name, baseURL+"/signin/link?id="+linkID)
 
-	go sendEmail(user.Email.String, "Magic Link Request", markdown(message))
+	go emailSender.Send(user.Email.String, "Magic Link Request", markdown(message))
 
 	return ctx.RedirectTo("signin.check-email")
 }
