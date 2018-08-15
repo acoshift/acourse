@@ -512,7 +512,6 @@
     "github.com/lib/pq",
     "github.com/microcosm-cc/bluemonday",
     "github.com/russross/blackfriday",
-    "golang.org/x/oauth2/google",
     "google.golang.org/api/option",
     "gopkg.in/gomail.v2",
     "gopkg.in/yaml.v2",
