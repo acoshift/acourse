@@ -14,6 +14,8 @@ import (
 	"github.com/acoshift/hime"
 	"github.com/acoshift/middleware"
 	"github.com/acoshift/probehandler"
+	"github.com/acoshift/session"
+	redisstore "github.com/acoshift/session/store/goredis"
 	"github.com/acoshift/webstatic"
 	"github.com/go-redis/redis"
 	_ "github.com/lib/pq"
@@ -111,20 +113,34 @@ func main() {
 
 	mux.Handle("/favicon.ico", internal.FileHandler("assets/favicon.ico"))
 
-	mux.Handle("/", app.New(app.Config{
-		DB:            db,
-		BaseURL:       baseURL,
-		RedisClient:   redisClient,
-		RedisPrefix:   config.String("redis_prefix"),
-		SessionSecret: config.Bytes("session_secret"),
-		Auth:          firAuth,
-		Location:      loc,
-		SlackURL:      config.String("slack_url"),
-		EmailFrom:     config.String("email_from"),
-		EmailDialer:   emailDialer,
-		BucketHandle:  bucketHandle,
-		BucketName:    config.String("bucket"),
-	}))
+	mux.Handle("/", middleware.Chain(
+		session.Middleware(session.Config{
+			Secret:   config.Bytes("session_secret"),
+			Path:     "/",
+			MaxAge:   7 * 24 * time.Hour,
+			HTTPOnly: true,
+			Secure:   session.PreferSecure,
+			SameSite: session.SameSiteLax,
+			Rolling:  true,
+			Proxy:    true,
+			Store: redisstore.New(redisstore.Config{
+				Prefix: config.String("redis_prefix"),
+				Client: redisClient,
+			}),
+		}),
+	)(app.New(app.Config{
+		DB:           db,
+		BaseURL:      baseURL,
+		RedisPrefix:  config.String("redis_prefix"),
+		RedisClient:  redisClient,
+		Auth:         firAuth,
+		Location:     loc,
+		SlackURL:     config.String("slack_url"),
+		EmailFrom:    config.String("email_from"),
+		EmailDialer:  emailDialer,
+		BucketHandle: bucketHandle,
+		BucketName:   config.String("bucket"),
+	})))
 
 	h := middleware.Chain(
 		internal.ErrorRecovery,

@@ -13,8 +13,6 @@ import (
 	"github.com/acoshift/methodmux"
 	"github.com/acoshift/middleware"
 	"github.com/acoshift/prefixhandler"
-	"github.com/acoshift/session"
-	redisstore "github.com/acoshift/session/store/goredis"
 	"github.com/go-redis/redis"
 	"gopkg.in/gomail.v2"
 )
@@ -172,20 +170,6 @@ func New(config Config) http.Handler {
 	}
 
 	return middleware.Chain(
-		session.Middleware(session.Config{
-			Secret:   config.SessionSecret,
-			Path:     "/",
-			MaxAge:   7 * 24 * time.Hour,
-			HTTPOnly: true,
-			Secure:   session.PreferSecure,
-			SameSite: session.SameSiteLax,
-			Rolling:  true,
-			Proxy:    true,
-			Store: redisstore.New(redisstore.Config{
-				Prefix: config.RedisPrefix,
-				Client: config.RedisClient,
-			}),
-		}),
 		fetchUser(),
 	)(mux)
 }
