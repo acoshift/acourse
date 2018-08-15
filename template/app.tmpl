@@ -1,88 +1,88 @@
 {{define "body"}}
-  <div id="navbar" class="navbar-color">
-    <div class="navbar-container grid-container _flex-row _main-space-between _cross-stretch">
+	<div id="navbar" class="navbar-color">
+		<div class="navbar-container grid-container _flex-row _main-space-between _cross-stretch">
 
-      <a href="{{route "index"}}" class="_flex-row _cross-center">
-        <img class="logo" src="https://storage.googleapis.com/acourse/static/16e99da4-5af9-47e9-880c-babd8d6ba8cc.svg" height="45">
-      </a>
-      <div class="_flex-row _cross-center _main-end">
-      {{if .Me}}
-      <div class="dropdown _full-height">
-        <div class="dropbtn _full-height _flex-row _cross-center ">
-          <img
-            class="acourse-block-big acourse-circle _img-cover _no-margin"
-            src="{{.Me.Image}}"
-            onerror="this.src = '{{fallbackImage}}'">
-          <div class="username">&nbsp;&nbsp;{{.Me.Username}}</div>
-          &nbsp;&nbsp;<i class="fa fa-caret-down"></i>
-        </div>
-        <div class="dropdown-content-w">
-          <div class="dropdown-content">
-            <a class="_font-main _font-bold _font-size-big {{if eq .Navbar "profile"}} active{{end}}" href="{{route "profile"}}">โปรไฟล์</a>
-            {{if .Me.Role.Admin}}
-            <a class="_font-main _font-bold _font-size-big {{if eq .Navbar "admin.users"}} active{{end}}" href="{{route "admin.users"}}">รายชื่อผู้ใช้</a>
-            <a class="_font-main _font-bold _font-size-big {{if eq .Navbar "admin.courses"}} active{{end}}" href="{{route "admin.courses"}}">รายชื่อคอร์ส</a>
-            <a class="_font-main _font-bold _font-size-big {{if eq .Navbar "admin.payment.pending"}} active{{end}}" href="{{route "admin.payments.pending"}}">รอดำเนินการ</a>
-            <a class="_font-main _font-bold _font-size-big {{if eq .Navbar "admin.payment.history"}} active{{end}}" href="{{route "admin.payments.history"}}">ประวัติการชำระเงิน</a>
-            {{end}}
+			<a href="{{route "index"}}" class="_flex-row _cross-center">
+				<img class="logo" src="https://storage.googleapis.com/acourse/static/16e99da4-5af9-47e9-880c-babd8d6ba8cc.svg" height="45">
+			</a>
+			<div class="_flex-row _cross-center _main-end">
+			{{if .Me}}
+			<div class="dropdown _full-height">
+				<div class="dropbtn _full-height _flex-row _cross-center ">
+					<img
+						class="acourse-block-big acourse-circle _img-cover _no-margin"
+						src="{{.Me.Image}}"
+						onerror="this.src = '{{fallbackImage}}'">
+					<div class="username">&nbsp;&nbsp;{{.Me.Username}}</div>
+					&nbsp;&nbsp;<i class="fa fa-caret-down"></i>
+				</div>
+				<div class="dropdown-content-w">
+					<div class="dropdown-content">
+						<a class="_font-main _font-bold _font-size-big {{if eq .Navbar "profile"}} active{{end}}" href="{{route "profile"}}">โปรไฟล์</a>
+						{{if .Me.Role.Admin}}
+						<a class="_font-main _font-bold _font-size-big {{if eq .Navbar "admin.users"}} active{{end}}" href="{{route "admin.users"}}">รายชื่อผู้ใช้</a>
+						<a class="_font-main _font-bold _font-size-big {{if eq .Navbar "admin.courses"}} active{{end}}" href="{{route "admin.courses"}}">รายชื่อคอร์ส</a>
+						<a class="_font-main _font-bold _font-size-big {{if eq .Navbar "admin.payment.pending"}} active{{end}}" href="{{route "admin.payments.pending"}}">รอดำเนินการ</a>
+						<a class="_font-main _font-bold _font-size-big {{if eq .Navbar "admin.payment.history"}} active{{end}}" href="{{route "admin.payments.history"}}">ประวัติการชำระเงิน</a>
+						{{end}}
 
-            <form method="POST" action="{{route "signout"}}">
-              <button class="_font-main _font-bold _font-size-big">ออกจากระบบ</button>
-            </form>
-          </div>
-        </div>
-      </div>
-      {{else}}
-      <a class="link _flex-row _cross-center _font-sub" href="{{route "signin"}}">
-        เข้าสู่ระบบ
-      </a>
-      <a href="{{route "signup"}}">
-        <div class="acourse-button -primary _font-sub acourse-side-space">สมัครใช้งาน</div>
-      </a>
-      {{end}}
-      </div>
-    </div>
-  </div>
+						<form method="POST" action="{{route "signout"}}">
+							<button class="_font-main _font-bold _font-size-big">ออกจากระบบ</button>
+						</form>
+					</div>
+				</div>
+			</div>
+			{{else}}
+			<a class="link _flex-row _cross-center _font-sub" href="{{route "signin"}}">
+				เข้าสู่ระบบ
+			</a>
+			<a href="{{route "signup"}}">
+				<div class="acourse-button -primary _font-sub acourse-side-space">สมัครใช้งาน</div>
+			</a>
+			{{end}}
+			</div>
+		</div>
+	</div>
 
-  <div class="app-container _bg-color-base">
-    {{template "app-body" $}}
-  </div>
+	<div class="app-container _bg-color-base">
+		{{template "app-body" $}}
+	</div>
 
-  <footer class="row">
-    <div class="_full-width acourse-block-big row">
-      <div class="col-xs-12 col-sm-6 _flex-column _cross-start acourse-block-big">
-        <h2 class="acourse-block _font-regular">Contact Us</h2>
-        <a href="mailto:contact@acourse.io" target="_blank" rel="noopener">
-          <div class="_font-size-big _color-sub acourse-block">
-            <i class="fa fa-envelope"></i> &nbsp; contact@acourse.io
-          </div>
-        </a>
-      </div>
+	<footer class="row">
+		<div class="_full-width acourse-block-big row">
+			<div class="col-xs-12 col-sm-6 _flex-column _cross-start acourse-block-big">
+				<h2 class="acourse-block _font-regular">Contact Us</h2>
+				<a href="mailto:contact@acourse.io" target="_blank" rel="noopener">
+					<div class="_font-size-big _color-sub acourse-block">
+						<i class="fa fa-envelope"></i> &nbsp; contact@acourse.io
+					</div>
+				</a>
+			</div>
 
-      <div class="col-xs-12 col-sm-6 _flex-column _cross-start">
-        <h2 class="acourse-block _font-regular">Follow Us</h2>
-        <a href="https://github.com/acoshift/acourse" class="_font-size-bigger" target="_blank" rel="noopener">
-          <div class="_font-size-big _color-sub acourse-block" >
-            <i class="fa fa-github _font-size-bigger _color-sub"></i> &nbsp; Github
-          </div>
-        </a>
-        <a href="https://www.facebook.com/acourse.io" class="_font-size-bigger" target="_blank" rel="noopener">
-          <div class="_font-size-big _color-sub acourse-block" >
-            <i class="fa fa-facebook _color-sub"></i> &nbsp; Facebook
-          </div>
-        </a>
-      </div>
-    </div>
+			<div class="col-xs-12 col-sm-6 _flex-column _cross-start">
+				<h2 class="acourse-block _font-regular">Follow Us</h2>
+				<a href="https://github.com/acoshift/acourse" class="_font-size-bigger" target="_blank" rel="noopener">
+					<div class="_font-size-big _color-sub acourse-block" >
+						<i class="fa fa-github _font-size-bigger _color-sub"></i> &nbsp; Github
+					</div>
+				</a>
+				<a href="https://www.facebook.com/acourse.io" class="_font-size-bigger" target="_blank" rel="noopener">
+					<div class="_font-size-big _color-sub acourse-block" >
+						<i class="fa fa-facebook _color-sub"></i> &nbsp; Facebook
+					</div>
+				</a>
+			</div>
+		</div>
 
-    <div class="bottomline _full-width row">
-      <div class="col-xs-12 col-sm-6 acourse-block">
-        Acourse.io © 2016 - 2018 &nbsp;&nbsp;
-      </div>
-      <div class="col-xs-12 col-sm-6">
-        Made with &nbsp;<i class="fa fa-heart _color-negative pulse"></i>&nbsp;&nbsp;by
-        <a class="_color-sub" href="https://www.moonrhythm.io" target="_blank" rel="noopener">Moon Rhythm</a>
-      </div>
-    </div>
+		<div class="bottomline _full-width row">
+			<div class="col-xs-12 col-sm-6 acourse-block">
+				Acourse.io © 2016 - 2018 &nbsp;&nbsp;
+			</div>
+			<div class="col-xs-12 col-sm-6">
+				Made with &nbsp;<i class="fa fa-heart _color-negative pulse"></i>&nbsp;&nbsp;by
+				<a class="_color-sub" href="https://www.moonrhythm.io" target="_blank" rel="noopener">Moon Rhythm</a>
+			</div>
+		</div>
 
-  </footer>
+	</footer>
 {{end}}

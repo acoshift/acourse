@@ -1,43 +1,43 @@
 {{define "app-body"}}
 <div id="content-create">
-  <div class="grid-container">
-    <div class="col-xs-12 col-lg-8 col-lg-offset-2">
-      <div class="acourse-header _color-sub">
-        สร้างคอนเทนท์<br>
-        <div class="_font-size-big">
-          <span class="_font-bold _color-dark">คอร์ส: </span>
-          <a href="{{route "course" .Course.Link}}" class="acourse-link">{{.Course.Title}}</a>
-        </div>
-      </div>
-      <div class="acourse-card acourse-segment acourse-block-bigger">
+	<div class="grid-container">
+		<div class="col-xs-12 col-lg-8 col-lg-offset-2">
+			<div class="acourse-header _color-sub">
+				สร้างคอนเทนท์<br>
+				<div class="_font-size-big">
+					<span class="_font-bold _color-dark">คอร์ส: </span>
+					<a href="{{route "course" .Course.Link}}" class="acourse-link">{{.Course.Title}}</a>
+				</div>
+			</div>
+			<div class="acourse-card acourse-segment acourse-block-bigger">
 
-        <form method="POST">
-          <div class="input-field _flex-column">
-            <label>หัวข้อคอนเทนท์</label>
-            <input class="acourse-input" name="title" placeholder="หัวข้อคอนเทนท์" required>
-          </div>
+				<form method="POST">
+					<div class="input-field _flex-column">
+						<label>หัวข้อคอนเทนท์</label>
+						<input class="acourse-input" name="title" placeholder="หัวข้อคอนเทนท์" required>
+					</div>
 
-          <div class="input-field _flex-column">
-            <label>รายละเอียด</label>
-            <textarea class="acourse-input" id="decs-text" rows="10" name="desc" placeholder="รายละเอียด"></textarea>
-            <div class="_flex-row _opa50">
-              <img src="https://storage.googleapis.com/acourse/static/f0e314d7-41a2-45b5-8c60-3b751ee1a275.svg"><div class="_font-size-small">&nbsp;Styling with Markdown is supported</div>
-            </div>
-          </div>
+					<div class="input-field _flex-column">
+						<label>รายละเอียด</label>
+						<textarea class="acourse-input" id="decs-text" rows="10" name="desc" placeholder="รายละเอียด"></textarea>
+						<div class="_flex-row _opa50">
+							<img src="https://storage.googleapis.com/acourse/static/f0e314d7-41a2-45b5-8c60-3b751ee1a275.svg"><div class="_font-size-small">&nbsp;Styling with Markdown is supported</div>
+						</div>
+					</div>
 
-          <div class="input-field _flex-column">
-            <label>วิดีโอ ID</label>
-            <input class="acourse-input" name="videoId" placeholder="วิดีโอ ID">
-          </div>
+					<div class="input-field _flex-column">
+						<label>วิดีโอ ID</label>
+						<input class="acourse-input" name="videoId" placeholder="วิดีโอ ID">
+					</div>
 
-          <button class="acourse-button -primary _font-sub _full-width">
-            สร้างคอนเทนท์
-          </button>
+					<button class="acourse-button -primary _font-sub _full-width">
+						สร้างคอนเทนท์
+					</button>
 
-        </form>
+				</form>
 
-      </div>
-    </div>
-  </div>
+			</div>
+		</div>
+	</div>
 </div>
 {{end}}

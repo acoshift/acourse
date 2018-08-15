@@ -1,47 +1,47 @@
 {{define "root"}}
 <!doctype html>
 <html lang="th">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{if .Title}}{{.Title}} | {{end}}Acourse</title>
-    <link rel="icon" type="image/png" href="/-/favicon.png">
-    <meta name="theme-color" content="#336b87">
-    <link rel="apple-touch-icon" href="/-/apple-touch-icon.png">
-    <meta name="msapplication-navbutton-color" content="#336b87">
-    <meta name="description" content="{{.Desc}}">
-    <meta property="fb:app_id" content="1369680239711962">
-    <meta property="og:url" content="{{.URL}}">
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="{{.Title}}">
-    <meta property="og:description" content="{{.Desc}}">
-    <meta property="og:site_name" content="Acourse">
-    <meta property="og:image" content="{{.Image}}">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>{{if .Title}}{{.Title}} | {{end}}Acourse</title>
+		<link rel="icon" type="image/png" href="/-/favicon.png">
+		<meta name="theme-color" content="#336b87">
+		<link rel="apple-touch-icon" href="/-/apple-touch-icon.png">
+		<meta name="msapplication-navbutton-color" content="#336b87">
+		<meta name="description" content="{{.Desc}}">
+		<meta property="fb:app_id" content="1369680239711962">
+		<meta property="og:url" content="{{.URL}}">
+		<meta property="og:type" content="website">
+		<meta property="og:title" content="{{.Title}}">
+		<meta property="og:description" content="{{.Desc}}">
+		<meta property="og:site_name" content="Acourse">
+		<meta property="og:image" content="{{.Image}}">
+		<meta property="og:image:width" content="1200">
+		<meta property="og:image:height" content="630">
 
-    <link rel="dns-prefetch" href="https://storage.googleapis.com" data-turbolinks-permanent>
-    <link rel="dns-prefetch" href="https://fonts.googleapis.com" data-turbolinks-permanent>
-    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com" data-turbolinks-permanent>
+		<link rel="dns-prefetch" href="https://storage.googleapis.com" data-turbolinks-permanent>
+		<link rel="dns-prefetch" href="https://fonts.googleapis.com" data-turbolinks-permanent>
+		<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com" data-turbolinks-permanent>
 
-    <link rel="preload" as="image" href="{{fallbackImage}}" data-turbolinks-permanent>
-    <link rel="preload" as="style" href="{{static "style.css"}}" data-turbolinks-permanent>
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500" data-turbolinks-permanent>
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600" data-turbolinks-permanent>
-    <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" data-turbolinks-permanent>
+		<link rel="preload" as="image" href="{{fallbackImage}}" data-turbolinks-permanent>
+		<link rel="preload" as="style" href="{{static "style.css"}}" data-turbolinks-permanent>
+		<link rel="preload" as="style" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500" data-turbolinks-permanent>
+		<link rel="preload" as="style" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600" data-turbolinks-permanent>
+		<link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" data-turbolinks-permanent>
 
-    <link rel="stylesheet" href="{{static "style.css"}}" data-turbolinks-track="reload">
+		<link rel="stylesheet" href="{{static "style.css"}}" data-turbolinks-track="reload">
 
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/turbolinks/5.1.1/turbolinks.js" defer></script>
-  </head>
-  <body>
-    {{template "body" $}}
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500">
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/turbolinks/5.1.1/turbolinks.js" defer></script>
+	</head>
+	<body>
+		{{template "body" $}}
 
-    {{template "global.script"}}
-    {{block "script" .}}{{end}}
-  </body>
+		{{template "global.script"}}
+		{{block "script" .}}{{end}}
+	</body>
 </html>
 {{end}}

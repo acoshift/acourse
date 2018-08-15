@@ -1,38 +1,38 @@
 {{define "app-body"}}
 <div id="assignment-list">
-  <div class="grid-container _flex-column">
+	<div class="grid-container _flex-column">
 
-    <div class="acourse-block-big row">
-      <div class="col-xs-12 col-md-8 col-md-offset-2 _no-padding row">
-        <div class="acourse-header _color-sub col-xs-12 col-md-8">
-          การบ้าน<br>
-          <div class="_font-size-big">
-            <span class="_font-bold _color-dark">คอร์ส: </span>
-            <a href="{{route "course" .Course.Link}}" class="acourse-link">{{.Course.Title}}</a>
-          </div>
-        </div>
-      </div>
-    </div>
+		<div class="acourse-block-big row">
+			<div class="col-xs-12 col-md-8 col-md-offset-2 _no-padding row">
+				<div class="acourse-header _color-sub col-xs-12 col-md-8">
+					การบ้าน<br>
+					<div class="_font-size-big">
+						<span class="_font-bold _color-dark">คอร์ส: </span>
+						<a href="{{route "course" .Course.Link}}" class="acourse-link">{{.Course.Title}}</a>
+					</div>
+				</div>
+			</div>
+		</div>
 
-    {{range .Assignments}}
-      <div class="acourse-card acourse-block-big _flex-row row col-xs-12 col-md-8 col-md-offset-2 _no-padding _clearflex">
-        <div class="acourse-segment col-xs-12 col-md-9">
-          <h3 class="color-sub">{{.Title}}</h3>
-          <div class="_flex-column">
-            <p class="_pre-wrap acourse-word-breakeable _color-dark">
-              {{.Desc}}
-            </p>
-          </div>
-        </div>
-        <!--<div class="acourse-segment col-xs-12 col-md-3 _bg-color-base-2">
-          {{if .Open}}
-            <a href="{{route "index"}}">
-              <button class="acourse-button -primary acourse-block _font-sub _full-width">Submit</button>
-            </a>
-          {{end}}
-        </div>-->
-      </div>
-    {{end}}
-  </div>
+		{{range .Assignments}}
+			<div class="acourse-card acourse-block-big _flex-row row col-xs-12 col-md-8 col-md-offset-2 _no-padding _clearflex">
+				<div class="acourse-segment col-xs-12 col-md-9">
+					<h3 class="color-sub">{{.Title}}</h3>
+					<div class="_flex-column">
+						<p class="_pre-wrap acourse-word-breakeable _color-dark">
+							{{.Desc}}
+						</p>
+					</div>
+				</div>
+				<!--<div class="acourse-segment col-xs-12 col-md-3 _bg-color-base-2">
+					{{if .Open}}
+						<a href="{{route "index"}}">
+							<button class="acourse-button -primary acourse-block _font-sub _full-width">Submit</button>
+						</a>
+					{{end}}
+				</div>-->
+			</div>
+		{{end}}
+	</div>
 </div>
 {{end}}

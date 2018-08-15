@@ -1,54 +1,54 @@
 {{define "auth-body"}}
 <div id="sign-in" class="page-pattern">
-  <div class="grid-container _flex-column _main-center _cross-center">
+	<div class="grid-container _flex-column _main-center _cross-center">
 
-    <div class="acourse-block-big">
-      <a href="{{route "index"}}"><img class="logo" src="https://storage.googleapis.com/acourse/static/f3fb373b-929b-4966-a9f1-0eb39c97401f.svg"></a>
-    </div>
+		<div class="acourse-block-big">
+			<a href="{{route "index"}}"><img class="logo" src="https://storage.googleapis.com/acourse/static/f3fb373b-929b-4966-a9f1-0eb39c97401f.svg"></a>
+		</div>
 
-    <div class="_flex-row _self-stretch">
-      <div class="acourse-card acourse-segment col-xs-12 col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3">
-        <form method="POST">
-          <div class="_flex-column">
-            <div class="acourse-header _font-sub _color-sub _align-center">
-              เข้าสู่ระบบ
-            </div>
-            <div class="input-field _flex-column">
-              <label>อีเมล์</label>
-              <input class="acourse-input" name="email" value="{{.Flash.Get "User"}}" placeholder="อีเมล์ของคุณ">
-            </div>
-            <div class="_flex-row _main-center">
-              <button class="acourse-button -primary _font-sub acourse-block-big _full-width">
-                เข้าสู่ระบบ
-              </button>
-            </div>
+		<div class="_flex-row _self-stretch">
+			<div class="acourse-card acourse-segment col-xs-12 col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3">
+				<form method="POST">
+					<div class="_flex-column">
+						<div class="acourse-header _font-sub _color-sub _align-center">
+							เข้าสู่ระบบ
+						</div>
+						<div class="input-field _flex-column">
+							<label>อีเมล์</label>
+							<input class="acourse-input" name="email" value="{{.Flash.Get "User"}}" placeholder="อีเมล์ของคุณ">
+						</div>
+						<div class="_flex-row _main-center">
+							<button class="acourse-button -primary _font-sub acourse-block-big _full-width">
+								เข้าสู่ระบบ
+							</button>
+						</div>
 
-            {{if .Flash.Has "Errors"}}
-              <div class="acourse-message -error">
-                <ul>
-                  {{range .Flash.Values "Errors"}}
-                    <li>{{.}}</li>
-                  {{end}}
-                </ul>
-              </div>
-            {{end}}
+						{{if .Flash.Has "Errors"}}
+							<div class="acourse-message -error">
+								<ul>
+									{{range .Flash.Values "Errors"}}
+										<li>{{.}}</li>
+									{{end}}
+								</ul>
+							</div>
+						{{end}}
 
-            <p class="_align-center acourse-block">หรือเข้าสู่ระบบด้วย</p>
-            <div class="_flex-row _main-center acourse-block">
-              <a class="_color-main" href="{{route "signin.password"}}">รหัสผ่าน / OpenID</a>
-            </div>
-            <div class="_flex-row _main-center acourse-block-big">
-              <a class="_color-main" href="{{route "signup"}}">&nbsp;สมัครใช้งาน</a>
-              <span class="acourse-side-space-bigger _opa20">|</span>
-              <a href="{{route "reset.password"}}" class="_color-main">ลืมรหัสผ่าน</a>
-            </div>
-            <div class="_flex-row _main-center acourse-block">
-              <a class="_color-main" href="{{route "index"}}">กลับไปหน้าแรก</a>
-            </div>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
+						<p class="_align-center acourse-block">หรือเข้าสู่ระบบด้วย</p>
+						<div class="_flex-row _main-center acourse-block">
+							<a class="_color-main" href="{{route "signin.password"}}">รหัสผ่าน / OpenID</a>
+						</div>
+						<div class="_flex-row _main-center acourse-block-big">
+							<a class="_color-main" href="{{route "signup"}}">&nbsp;สมัครใช้งาน</a>
+							<span class="acourse-side-space-bigger _opa20">|</span>
+							<a href="{{route "reset.password"}}" class="_color-main">ลืมรหัสผ่าน</a>
+						</div>
+						<div class="_flex-row _main-center acourse-block">
+							<a class="_color-main" href="{{route "index"}}">กลับไปหน้าแรก</a>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
 </div>
 {{end}}

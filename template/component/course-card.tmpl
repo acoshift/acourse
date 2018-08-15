@@ -1,37 +1,37 @@
 {{define "course-card"}}
-  <a href="{{route "course" .Link}}" class="course-card acourse-card -hover-rise _flex-column _color-dark">
-    <img class="course-cover placeholder" {{if .Image}}src="{{.Image}}"{{end}} width="100%">
-    <div class="course-detail acourse-segment _flex-column _flex-span _main-start">
+	<a href="{{route "course" .Link}}" class="course-card acourse-card -hover-rise _flex-column _color-dark">
+		<img class="course-cover placeholder" {{if .Image}}src="{{.Image}}"{{end}} width="100%">
+		<div class="course-detail acourse-segment _flex-column _flex-span _main-start">
 
-      <h4>{{.Title}}</h4>
+			<h4>{{.Title}}</h4>
 
-      <div class="acourse-block">
-        <div class="acourse-label {{.Type | courseType}} _font-bold">{{.Type | courseType}}</div>
-        {{if and (eq .Type live) .Start.Valid}}
-          <div class="live-date _font-size-small">เริ่มเรียน {{.Start.Time | date}}</div>
-        {{end}}
-      </div>
+			<div class="acourse-block">
+				<div class="acourse-label {{.Type | courseType}} _font-bold">{{.Type | courseType}}</div>
+				{{if and (eq .Type live) .Start.Valid}}
+					<div class="live-date _font-size-small">เริ่มเรียน {{.Start.Time | date}}</div>
+				{{end}}
+			</div>
 
-      <div class="acourse-block-big _flex-span _font-sub _font-size-normal">
-        {{.ShortDesc}}
-      </div>
-      <div class="_flex-row _main-space-between">
-        <div class="course-student _color-dark">
-          <i class="fa fa-user"></i>&nbsp; {{.EnrollCount}}
-        </div>
-        <div class="course-price _flex-row _cross-end">
-          {{if le .Price 0.0}}
-            <p class="_font-bold _no-margin">ฟรี</p>
-          {{else}}
-            <p class="_no-margin {{if .Option.Discount}}discount _color-positive{{else}}_font-bold{{end}}">
-              ฿ {{.Price | currency}}
-              {{if .Option.Discount}}
-                <p class="_font-bold _no-margin">&nbsp;฿ {{.Discount | currency}}</p>
-              {{end}}
-            </p>
-          {{end}}
-        </div>
-      </div>
-    </div>
-  </a>
+			<div class="acourse-block-big _flex-span _font-sub _font-size-normal">
+				{{.ShortDesc}}
+			</div>
+			<div class="_flex-row _main-space-between">
+				<div class="course-student _color-dark">
+					<i class="fa fa-user"></i>&nbsp; {{.EnrollCount}}
+				</div>
+				<div class="course-price _flex-row _cross-end">
+					{{if le .Price 0.0}}
+						<p class="_font-bold _no-margin">ฟรี</p>
+					{{else}}
+						<p class="_no-margin {{if .Option.Discount}}discount _color-positive{{else}}_font-bold{{end}}">
+							฿ {{.Price | currency}}
+							{{if .Option.Discount}}
+								<p class="_font-bold _no-margin">&nbsp;฿ {{.Discount | currency}}</p>
+							{{end}}
+						</p>
+					{{end}}
+				</div>
+			</div>
+		</div>
+	</a>
 {{end}}
