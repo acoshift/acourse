@@ -20,7 +20,7 @@ func adminUsers(ctx *hime.Context) error {
 	}
 
 	pg, _ := strconv.ParseInt(ctx.FormValue("page"), 10, 64)
-	pn := paginate.New(int64(pg), 30, cnt)
+	pn := paginate.New(pg, 30, cnt)
 
 	users, err := repository.ListUsers(ctx, pn.Limit(), pn.Offset())
 	if err != nil {
@@ -41,7 +41,7 @@ func adminCourses(ctx *hime.Context) error {
 	}
 
 	pg, _ := strconv.ParseInt(ctx.FormValue("page"), 10, 64)
-	pn := paginate.New(int64(pg), 30, cnt)
+	pn := paginate.New(pg, 30, cnt)
 
 	courses, err := repository.ListCourses(ctx, pn.Limit(), pn.Offset())
 	if err != nil {
@@ -57,6 +57,7 @@ func adminCourses(ctx *hime.Context) error {
 
 func adminRejectPayment(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
+
 	x, err := repository.GetPayment(ctx, id)
 	if err != nil {
 		return err
@@ -101,13 +102,13 @@ func adminRejectPayment(ctx *hime.Context) error {
 
 	p := page(ctx)
 	p["Payment"] = x
-	p["message"] = message
+	p["Message"] = message
 	return ctx.View("admin.payments.reject", p)
 }
 
 func postAdminRejectPayment(ctx *hime.Context) error {
-	message := ctx.FormValue("Message")
-	id := ctx.FormValue("ID")
+	message := ctx.FormValue("message")
+	id := ctx.FormValue("id")
 
 	var x *entity.Payment
 	err := sqlctx.RunInTx(ctx, func(ctx context.Context) error {
@@ -140,9 +141,9 @@ func postAdminRejectPayment(ctx *hime.Context) error {
 }
 
 func postAdminPendingPayment(ctx *hime.Context) error {
-	action := ctx.FormValue("Action")
+	action := ctx.FormValue("action")
 
-	id := ctx.FormValue("ID")
+	id := ctx.FormValue("id")
 	if action == "accept" {
 		var x *entity.Payment
 		err := sqlctx.RunInTx(ctx, func(ctx context.Context) error {
@@ -229,7 +230,7 @@ func adminPendingPayments(ctx *hime.Context) error {
 	}
 
 	pg, _ := strconv.ParseInt(ctx.FormValue("page"), 10, 64)
-	pn := paginate.New(int64(pg), 30, cnt)
+	pn := paginate.New(pg, 30, cnt)
 
 	payments, err := repository.ListPaymentsByStatus(ctx, []int{entity.Pending}, pn.Limit(), pn.Offset())
 	if err != nil {
@@ -250,7 +251,7 @@ func adminHistoryPayments(ctx *hime.Context) error {
 	}
 
 	pg, _ := strconv.ParseInt(ctx.FormValue("page"), 10, 64)
-	pn := paginate.New(int64(pg), 30, cnt)
+	pn := paginate.New(pg, 30, cnt)
 
 	payments, err := repository.ListPaymentsByStatus(ctx, []int{entity.Accepted, entity.Rejected, entity.Refunded}, pn.Limit(), pn.Offset())
 	if err != nil {

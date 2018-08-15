@@ -15,13 +15,14 @@
             </div>
             <div class="input-field _flex-column">
               <label>อีเมล์</label>
-              <input class="acourse-input" name="Email" value="{{.Flash.Get "User"}}" placeholder="อีเมล์ของคุณ">
+              <input class="acourse-input" name="email" value="{{.Flash.Get "User"}}" placeholder="อีเมล์ของคุณ">
             </div>
             <div class="_flex-row _main-center">
-              <button class="acourse-button -primary _font-sub acourse-block-big _full-width" type="submit">
+              <button class="acourse-button -primary _font-sub acourse-block-big _full-width">
                 เข้าสู่ระบบ
               </button>
             </div>
+
             {{if .Flash.Has "Errors"}}
               <div class="acourse-message -error">
                 <ul>
@@ -31,6 +32,7 @@
                 </ul>
               </div>
             {{end}}
+
             <p class="_align-center acourse-block">หรือเข้าสู่ระบบด้วย</p>
             <div class="_flex-row _main-center acourse-block">
               <a class="_color-main" href="{{route "signin.password"}}">รหัสผ่าน / OpenID</a>

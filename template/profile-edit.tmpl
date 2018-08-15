@@ -16,24 +16,24 @@
           <label>รูปของคุณ</label>
           <div class="_flex-row">
             <label class="acourse-button -info _font-sub" for="image-input">อัพโหลดรูปของคุณ</label>
-            <input id="image-input" class="_hide" name="Image" type="file" accept="image/*">
+            <input id="image-input" class="_hide" name="image" type="file" accept="image/*">
           </div>
         </div>
         <div class="input-field _flex-column">
           <label>ชื่อผู้ใช้</label>
-          <input class="acourse-input" name="Username" value="{{.Flash.Get "Username"}}">
+          <input class="acourse-input" name="username" value="{{.Flash.Get "Username"}}">
         </div>
         <div class="input-field _flex-column">
           <label>ชื่อของคุณ</label>
-          <input class="acourse-input" name="Name" value="{{.Flash.Get "Name"}}" placeholder="ชื่อของคุณ">
+          <input class="acourse-input" name="name" value="{{.Flash.Get "Name"}}" placeholder="ชื่อของคุณ">
         </div>
         <div class="input-field _flex-column">
           <label>เกี่ยวกับคุณ</label>
-          <input class="acourse-input" name="AboutMe" value="{{.Flash.Get "AboutMe"}}" placeholder="เขียนเกี่ยวกับคุณสั้นๆ">
+          <input class="acourse-input" name="aboutMe" value="{{.Flash.Get "AboutMe"}}" placeholder="เขียนเกี่ยวกับคุณสั้นๆ">
         </div>
 
         <div class="acourse-block-big _flex-row _main-center">
-          <button class="acourse-button -primary _font-sub _full-width" type="submit">
+          <button class="acourse-button -primary _font-sub _full-width">
             บันทึกโปรไฟล์
           </button>
         </div>

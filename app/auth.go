@@ -42,7 +42,7 @@ func postSignIn(ctx *hime.Context) error {
 	s := appctx.GetSession(ctx)
 	f := s.Flash()
 
-	email := ctx.FormValueTrimSpace("Email")
+	email := ctx.FormValueTrimSpace("email")
 	if email == "" {
 		f.Add("Errors", "email required")
 		return ctx.RedirectToGet()
@@ -135,11 +135,11 @@ func postSignInPassword(ctx *hime.Context) error {
 	s := appctx.GetSession(ctx)
 	f := s.Flash()
 
-	email := ctx.PostFormValue("Email")
+	email := ctx.PostFormValue("email")
 	if email == "" {
 		f.Add("Errors", "email required")
 	}
-	pass := ctx.PostFormValue("Password")
+	pass := ctx.PostFormValue("password")
 	if len(pass) == 0 {
 		f.Add("Errors", "password required")
 	}
@@ -252,7 +252,7 @@ func signUp(ctx *hime.Context) error {
 func postSignUp(ctx *hime.Context) error {
 	f := appctx.GetSession(ctx).Flash()
 
-	email := ctx.FormValue("Email")
+	email := ctx.FormValue("email")
 	if len(email) == 0 {
 		f.Add("Errors", "email required")
 	}
@@ -262,7 +262,7 @@ func postSignUp(ctx *hime.Context) error {
 		f.Add("Errors", err.Error())
 		return ctx.RedirectToGet()
 	}
-	pass := ctx.FormValue("Password")
+	pass := ctx.FormValue("password")
 	if len(pass) == 0 {
 		f.Add("Errors", "password required")
 	}

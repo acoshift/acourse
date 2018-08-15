@@ -28,7 +28,7 @@
                 <label>สลิปโอนเงิน</label>
                 <div class="_flex-row">
                   <label class="acourse-button -info _font-sub  _full-width" for="image-input">อัพโหลดสลิปโอนเงิน</label>
-                  <input id="image-input" class="_hide" type="file" name="Image" accept="image/*">
+                  <input id="image-input" class="_hide" type="file" name="image" accept="image/*">
                 </div>
               </div>
               <div class="acourse-block col-xs-6">
@@ -38,10 +38,10 @@
 
             <div class="input-field _flex-column">
               <label>จำนวนเงินที่โอน</label>
-              <input class="acourse-input" type="number" step="0.01" name="Price">
+              <input class="acourse-input" type="number" step="0.01" name="price">
             </div>
           {{end}}
-          <button class="acourse-button -positive _font-sub _full-width" type="submit">สมัครเรียน</button>
+          <button class="acourse-button -positive _font-sub _full-width">สมัครเรียน</button>
         </form>
         {{if .Flash.Has "Errors"}}
           <ul>

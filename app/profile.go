@@ -60,7 +60,7 @@ func postProfileEdit(ctx *hime.Context) error {
 	f := appctx.GetSession(ctx).Flash()
 
 	var imageURL string
-	if image, info, err := ctx.FormFileNotEmpty("Image"); err != http.ErrMissingFile {
+	if image, info, err := ctx.FormFileNotEmpty("image"); err != http.ErrMissingFile {
 		if err != nil {
 			f.Add("Errors", err.Error())
 			return ctx.RedirectToGet()
@@ -79,9 +79,9 @@ func postProfileEdit(ctx *hime.Context) error {
 	}
 
 	var (
-		username = ctx.FormValue("Username")
-		name     = ctx.FormValue("Name")
-		aboutMe  = ctx.FormValue("AboutMe")
+		username = ctx.FormValue("username")
+		name     = ctx.FormValue("name")
+		aboutMe  = ctx.FormValue("aboutMe")
 	)
 	f.Set("Username", username)
 	f.Set("Name", name)

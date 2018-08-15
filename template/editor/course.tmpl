@@ -17,29 +17,29 @@
             <label>ภาพหน้าปก</label>
             <div class="_flex-row">
               <label class="acourse-button -info _font-sub" for="image-input">อัพโหลดภาพหน้าปก</label>
-              <input id="image-input" class="_hide" name="Image" type="file" accept="image/*">
+              <input id="image-input" class="_hide" name="image" type="file" accept="image/*">
             </div>
           </div>
 
           <div class="input-field _flex-column">
             <label>ชื่อคอร์ส</label>
-            <input class="acourse-input" name="Title" value="{{.Course.Title}}" type="text" placeholder="ชื่อคอร์ส" required>
+            <input class="acourse-input" name="title" value="{{.Course.Title}}" placeholder="ชื่อคอร์ส" required>
           </div>
 
           <div class="input-field _flex-column">
             <label>คำอธิบายสั้นๆ</label>
-            <input class="acourse-input" name="ShortDesc" value="{{.Course.ShortDesc}}" type="text" placeholder="คำอธิบายสั้นๆ">
+            <input class="acourse-input" name="shortDesc" value="{{.Course.ShortDesc}}" placeholder="คำอธิบายสั้นๆ">
           </div>
 
           <div class="input-field _flex-column">
             <label>วันที่เริ่มเรียน</label>
-            <input class="acourse-input" name="Start" value="{{.Course.Start.Time | dateInput}}" type="date">
+            <input class="acourse-input" name="start" value="{{.Course.Start.Time | dateInput}}" type="date">
           </div>
 
           <!--<div class="input-field _flex-column">
             <label>Assignment</label>
             <div class="acourse-switch">
-              <input type="checkbox" name="Assignment" checked="">
+              <input type="checkbox" name="assignment" checked="">
               <label>
                 <div></div>
               </label>
@@ -48,13 +48,13 @@
 
           <div class="input-field _flex-column">
             <label>รายละเอียดคอร์ส</label>
-            <textarea class="acourse-input" id="desc-text" rows="12" name="Desc" placeholder="รายละเอียดคอร์ส">{{.Course.Desc}}</textarea>
+            <textarea class="acourse-input" id="desc-text" rows="12" name="desc" placeholder="รายละเอียดคอร์ส">{{.Course.Desc}}</textarea>
             <div class="_flex-row _opa50">
               <img src="https://storage.googleapis.com/acourse/static/f0e314d7-41a2-45b5-8c60-3b751ee1a275.svg"><div class="_font-size-small">&nbsp;รองรับการใช้ Markdown</div>
             </div>
           </div>
 
-          <button class="acourse-button -primary _font-sub _full-width" type="submit">
+          <button class="acourse-button -primary _font-sub _full-width">
             บันทึกการเปลี่ยนแปลง
           </button>
 

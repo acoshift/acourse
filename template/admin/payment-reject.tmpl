@@ -5,15 +5,15 @@
       Reject: {{.Payment.ID}}
     </div>
     <form method="POST">
-      <input type="hidden" name="ID" value="{{.Payment.ID}}">
+      <input type="hidden" name="id" value="{{.Payment.ID}}">
       <div class="input-field _flex-column">
         <label>Message</label>
-        <textarea rows="30" class="acourse-input" name="Message">{{.Message}}</textarea>
+        <textarea rows="30" class="acourse-input" name="message">{{.Message}}</textarea>
         <div class="_flex-row _opa50">
           <img src="https://storage.googleapis.com/acourse/static/f0e314d7-41a2-45b5-8c60-3b751ee1a275.svg"><div class="_font-size-small">&nbsp;Styling with Markdown is supported</div>
         </div>
       </div>
-      <button class="acourse-button -negative _font-main _full-width" type="submit">Reject and Send</button>
+      <button class="acourse-button -negative _font-main _full-width">Reject and Send</button>
     </form>
   </div>
 </div>

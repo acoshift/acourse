@@ -186,19 +186,19 @@ func postEditorCreate(ctx *hime.Context) error {
 	user := appctx.GetUser(ctx)
 
 	var (
-		title     = ctx.FormValue("Title")
-		shortDesc = ctx.FormValue("ShortDesc")
-		desc      = ctx.FormValue("Desc")
+		title     = ctx.FormValue("title")
+		shortDesc = ctx.FormValue("shortDesc")
+		desc      = ctx.FormValue("desc")
 		imageURL  string
 		start     pq.NullTime
-		// assignment, _ = strconv.ParseBool(ctx.FormValue("Assignment"))
+		// assignment, _ = strconv.ParseBool(ctx.FormValue("assignment"))
 	)
 	if len(title) == 0 {
 		f.Add("Errors", "title required")
 		return ctx.RedirectToGet()
 	}
 
-	if v := ctx.FormValue("Start"); len(v) > 0 {
+	if v := ctx.FormValue("start"); len(v) > 0 {
 		t, _ := time.Parse("2006-01-02", v)
 		if !t.IsZero() {
 			start.Time = t
@@ -206,7 +206,7 @@ func postEditorCreate(ctx *hime.Context) error {
 		}
 	}
 
-	if image, info, err := ctx.FormFileNotEmpty("Image"); err != http.ErrMissingFile {
+	if image, info, err := ctx.FormFileNotEmpty("image"); err != http.ErrMissingFile {
 		if err != nil {
 			f.Add("Errors", err.Error())
 			return ctx.RedirectToGet()
@@ -271,19 +271,19 @@ func postEditorCourse(ctx *hime.Context) error {
 	f := appctx.GetSession(ctx).Flash()
 
 	var (
-		title     = ctx.FormValue("Title")
-		shortDesc = ctx.FormValue("ShortDesc")
-		desc      = ctx.FormValue("Desc")
+		title     = ctx.FormValue("title")
+		shortDesc = ctx.FormValue("shortDesc")
+		desc      = ctx.FormValue("desc")
 		imageURL  string
 		start     pq.NullTime
-		// assignment, _ = strconv.ParseBool(ctx.FormValue("Assignment"))
+		// assignment, _ = strconv.ParseBool(ctx.FormValue("assignment"))
 	)
 	if len(title) == 0 {
 		f.Add("Errors", "title required")
 		return ctx.RedirectToGet()
 	}
 
-	if v := ctx.FormValue("Start"); len(v) > 0 {
+	if v := ctx.FormValue("start"); len(v) > 0 {
 		t, _ := time.Parse("2006-01-02", v)
 		if !t.IsZero() {
 			start.Time = t
@@ -291,7 +291,7 @@ func postEditorCourse(ctx *hime.Context) error {
 		}
 	}
 
-	if image, info, err := ctx.FormFileNotEmpty("Image"); err != http.ErrMissingFile {
+	if image, info, err := ctx.FormFileNotEmpty("image"); err != http.ErrMissingFile {
 		if err != nil {
 			f.Add("Errors", err.Error())
 			return ctx.RedirectToGet()
@@ -486,7 +486,7 @@ func postCourseEnroll(ctx *hime.Context) error {
 		originalPrice = x.Discount
 	}
 
-	price, _ := strconv.ParseFloat(ctx.FormValue("Price"), 64)
+	price, _ := strconv.ParseFloat(ctx.FormValue("price"), 64)
 
 	if price < 0 {
 		f.Add("Errors", "price can not be negative")
@@ -621,9 +621,9 @@ func postEditorContentCreate(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 
 	var (
-		title   = ctx.FormValue("Title")
-		desc    = ctx.FormValue("Desc")
-		videoID = ctx.FormValue("VideoID")
+		title   = ctx.FormValue("title")
+		desc    = ctx.FormValue("desc")
+		videoID = ctx.FormValue("videoId")
 	)
 
 	_, err := repository.RegisterCourseContent(ctx, &entity.RegisterCourseContent{
@@ -693,9 +693,9 @@ func postEditorContentEdit(ctx *hime.Context) error {
 	}
 
 	var (
-		title   = ctx.FormValue("Title")
-		desc    = ctx.FormValue("Desc")
-		videoID = ctx.FormValue("VideoID")
+		title   = ctx.FormValue("title")
+		desc    = ctx.FormValue("desc")
+		videoID = ctx.FormValue("videoId")
 	)
 
 	err = repository.UpdateCourseContent(ctx, course.ID, id, title, desc, videoID)
