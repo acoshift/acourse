@@ -54,7 +54,7 @@ func New(config Config) http.Handler {
 		w.WriteHeader(http.StatusOK)
 	})
 
-	mux.Handle("/~/", http.StripPrefix("/~", webstatic.New(webstatic.Config{
+	mux.Handle("/-/", http.StripPrefix("/-", webstatic.New(webstatic.Config{
 		Dir:          "assets",
 		CacheControl: "public, max-age=31536000",
 	})))

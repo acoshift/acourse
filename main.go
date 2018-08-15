@@ -74,7 +74,7 @@ func main() {
 
 	static := configfile.NewYAMLReader("static.yaml")
 	himeApp.TemplateFunc("static", func(s string) string {
-		return "/~/" + static.StringDefault(s, s)
+		return "/-/" + static.StringDefault(s, s)
 	})
 
 	himeApp.Template().
