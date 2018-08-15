@@ -1,12 +1,12 @@
-package app
+package view
 
 import (
 	"github.com/microcosm-cc/bluemonday"
 	"github.com/russross/blackfriday"
 )
 
-// markdown converts markdown to html for "email"
-func markdown(s string) string {
+// Markdown converts markdown to html for "email"
+func Markdown(s string) string {
 	renderer := blackfriday.HtmlRenderer(
 		0|
 			blackfriday.HTML_USE_XHTML|

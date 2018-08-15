@@ -1,8 +1,6 @@
 package app
 
 import (
-	"time"
-
 	"cloud.google.com/go/storage"
 	"github.com/acoshift/go-firebase-admin"
 	"github.com/go-redis/redis"
@@ -18,7 +16,6 @@ type Config struct {
 	RedisClient        *redis.Client
 	RedisPrefix        string
 	Auth               *firebase.Auth
-	Location           *time.Location
 	EmailSender        email.Sender
 	AdminNotifier      notify.AdminNotifier
 	BucketHandle       *storage.BucketHandle

@@ -3,14 +3,12 @@ package app
 import (
 	"math/rand"
 	"net/http"
-	"time"
 
 	"cloud.google.com/go/storage"
 	"github.com/acoshift/go-firebase-admin"
 	"github.com/acoshift/header"
 	"github.com/acoshift/hime"
 	"github.com/acoshift/methodmux"
-	"github.com/acoshift/middleware"
 	"github.com/acoshift/prefixhandler"
 
 	"github.com/acoshift/acourse/email"
@@ -21,7 +19,6 @@ import (
 
 var (
 	auth               *firebase.Auth
-	loc                *time.Location
 	emailSender        email.Sender
 	adminNotifier      notify.AdminNotifier
 	baseURL            string
@@ -33,7 +30,6 @@ var (
 // New creates new app
 func New(config Config) http.Handler {
 	auth = config.Auth
-	loc = config.Location
 	emailSender = config.EmailSender
 	adminNotifier = config.AdminNotifier
 	baseURL = config.BaseURL
@@ -140,33 +136,7 @@ func New(config Config) http.Handler {
 		mux.Handle("/editor/", http.StripPrefix("/editor", m))
 	}
 
-	// admin
-	{
-		m := http.NewServeMux()
-		m.Handle("/users", methodmux.Get(
-			hime.Handler(adminUsers),
-		))
-		m.Handle("/courses", methodmux.Get(
-			hime.Handler(adminCourses),
-		))
-		m.Handle("/payments/pending", methodmux.GetPost(
-			hime.Handler(adminPendingPayments),
-			hime.Handler(postAdminPendingPayment),
-		))
-		m.Handle("/payments/history", methodmux.Get(
-			hime.Handler(adminHistoryPayments),
-		))
-		m.Handle("/payments/reject", methodmux.GetPost(
-			hime.Handler(adminRejectPayment),
-			hime.Handler(postAdminRejectPayment),
-		))
-
-		mux.Handle("/admin/", onlyAdmin(http.StripPrefix("/admin", m)))
-	}
-
-	return middleware.Chain(
-		fetchUser(),
-	)(mux)
+	return mux
 }
 
 var notFoundImages = []string{

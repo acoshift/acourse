@@ -14,6 +14,7 @@ import (
 	"github.com/acoshift/hime"
 	"github.com/asaskevich/govalidator"
 
+	"github.com/acoshift/acourse/appsess"
 	"github.com/acoshift/acourse/context/appctx"
 	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/entity"
@@ -96,7 +97,7 @@ func postSignIn(ctx *hime.Context) error {
 ทีมงาน acourse.io
 	`, user.Name, baseURL+"/signin/link?id="+linkID)
 
-	go emailSender.Send(user.Email, "Magic Link Request", markdown(message))
+	go emailSender.Send(user.Email, "Magic Link Request", view.Markdown(message))
 
 	return ctx.RedirectTo("signin.check-email")
 }
@@ -124,7 +125,7 @@ func signInLink(ctx *hime.Context) error {
 		return ctx.RedirectTo("signin")
 	}
 
-	setUserID(s, userID)
+	appsess.SetUserID(s, userID)
 	return ctx.Redirect("/")
 }
 
@@ -156,7 +157,7 @@ func postSignInPassword(ctx *hime.Context) error {
 	}
 
 	s.Regenerate()
-	setUserID(s, userID)
+	appsess.SetUserID(s, userID)
 
 	// if user not found in our database, insert new user
 	// this happend when database out of sync with firebase authentication
@@ -201,14 +202,14 @@ func openID(ctx *hime.Context) error {
 	}
 
 	s := appctx.GetSession(ctx)
-	setOpenIDSessionID(s, sessID)
+	appsess.SetOpenIDSessionID(s, sessID)
 	return ctx.Redirect(redirectURL)
 }
 
 func openIDCallback(ctx *hime.Context) error {
 	s := appctx.GetSession(ctx)
-	sessID := getOpenIDSessionID(s)
-	delOpenIDSessionID(s)
+	sessID := appsess.GetOpenIDSessionID(s)
+	appsess.DelOpenIDSessionID(s)
 	user, err := auth.VerifyAuthCallbackURI(ctx, baseURL+ctx.Request().RequestURI, sessID)
 	if err != nil {
 		return err
@@ -242,7 +243,7 @@ func openIDCallback(ctx *hime.Context) error {
 	}
 
 	s.Regenerate()
-	setUserID(s, user.UserID)
+	appsess.SetUserID(s, user.UserID)
 	return ctx.RedirectTo("index")
 }
 
@@ -294,7 +295,7 @@ func postSignUp(ctx *hime.Context) error {
 	}
 
 	s := appctx.GetSession(ctx)
-	setUserID(s, userID)
+	appsess.SetUserID(s, userID)
 
 	return ctx.SafeRedirect(ctx.FormValue("r"))
 }

@@ -6,6 +6,8 @@ import (
 	"runtime/debug"
 
 	"github.com/acoshift/header"
+
+	"github.com/acoshift/acourse/context/appctx"
 )
 
 // ErrorRecovery recoveries error
@@ -30,6 +32,22 @@ func SetHeaders(h http.Handler) http.Handler {
 		w.Header().Set(header.XFrameOptions, "deny")
 		w.Header().Set(header.ContentSecurityPolicy, "img-src https: data:; font-src https: data:; media-src https:;")
 		w.Header().Set(header.CacheControl, "no-cache, no-store, must-revalidate")
+		h.ServeHTTP(w, r)
+	})
+}
+
+// OnlyAdmin allows only admin
+func OnlyAdmin(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		u := appctx.GetUser(r.Context())
+		if u == nil {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+		if !u.Role.Admin {
+			http.Error(w, "Forbidden", http.StatusForbidden)
+			return
+		}
 		h.ServeHTTP(w, r)
 	})
 }

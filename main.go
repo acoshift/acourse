@@ -23,7 +23,9 @@ import (
 	_ "github.com/lib/pq"
 	"google.golang.org/api/option"
 
+	"github.com/acoshift/acourse/admin"
 	"github.com/acoshift/acourse/app"
+	"github.com/acoshift/acourse/context/appctx"
 	"github.com/acoshift/acourse/context/redisctx"
 	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/email"
@@ -127,6 +129,25 @@ func main() {
 
 	mux.Handle("/favicon.ico", internal.FileHandler("assets/favicon.ico"))
 
+	m := http.NewServeMux()
+
+	m.Handle("/", app.New(app.Config{
+		BaseURL:            baseURL,
+		Auth:               firAuth,
+		AdminNotifier:      adminNotifier,
+		EmailSender:        emailSender,
+		BucketHandle:       bucketHandle,
+		BucketName:         config.String("bucket"),
+		ImageResizeEncoder: image.NewJPEGResizeEncoder(),
+	}))
+
+	m.Handle("/admin/", http.StripPrefix("/admin", middleware.Chain(
+		internal.OnlyAdmin,
+	)(admin.New(admin.Config{
+		Location:    loc,
+		EmailSender: emailSender,
+	}))))
+
 	mux.Handle("/", middleware.Chain(
 		sqlctx.Middleware(db),
 		redisctx.Middleware(redisClient, config.String("redis_prefix")),
@@ -144,16 +165,8 @@ func main() {
 				Client: redisClient,
 			}),
 		}),
-	)(app.New(app.Config{
-		BaseURL:            baseURL,
-		Auth:               firAuth,
-		Location:           loc,
-		AdminNotifier:      adminNotifier,
-		EmailSender:        emailSender,
-		BucketHandle:       bucketHandle,
-		BucketName:         config.String("bucket"),
-		ImageResizeEncoder: image.NewJPEGResizeEncoder(),
-	})))
+		appctx.Middleware,
+	)(m))
 
 	h := middleware.Chain(
 		internal.ErrorRecovery,
