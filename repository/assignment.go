@@ -12,15 +12,16 @@ func GetAssignments(ctx context.Context, courseID string) ([]*entity.Assignment,
 	q := sqlctx.GetQueryer(ctx)
 
 	rows, err := q.Query(`
-		  SELECT id, title, long_desc, open
-		    FROM assignments
-		   WHERE course_id = $1
-		ORDER BY i ASC;
+		select id, title, long_desc, open
+		from assignments
+		where course_id = $1
+		order by i asc
 	`, courseID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
+
 	xs := make([]*entity.Assignment, 0)
 	for rows.Next() {
 		var x entity.Assignment

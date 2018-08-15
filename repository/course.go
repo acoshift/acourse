@@ -7,12 +7,10 @@ import (
 	"encoding/gob"
 	"time"
 
-	"github.com/acoshift/acourse/context/redisctx"
-
 	"github.com/acoshift/pgsql"
-
 	"github.com/lib/pq"
 
+	"github.com/acoshift/acourse/context/redisctx"
 	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/entity"
 )
@@ -114,13 +112,13 @@ func GetCourse(ctx context.Context, courseID string) (*entity.Course, error) {
 
 	var x entity.Course
 	err := q.QueryRow(`
-		SELECT id, user_id, title, short_desc, long_desc, image,
-		       start, url, type, price, courses.discount, enroll_detail,
-		       opt.public, opt.enroll, opt.attend, opt.assignment, opt.discount
-		  FROM courses
-		       LEFT JOIN course_options AS opt
-		       ON opt.course_id = courses.id
-		 WHERE id = $1;
+		select
+			id, user_id, title, short_desc, long_desc, image,
+			start, url, type, price, courses.discount, enroll_detail,
+			opt.public, opt.enroll, opt.attend, opt.assignment, opt.discount
+		from courses
+			left join course_options as opt on opt.course_id = courses.id
+		where id = $1
 	`, courseID).Scan(
 		&x.ID, &x.UserID, &x.Title, &x.ShortDesc, &x.Desc, &x.Image,
 		&x.Start, &x.URL, &x.Type, &x.Price, &x.Discount, &x.EnrollDetail,
@@ -140,17 +138,18 @@ func GetCourseContents(ctx context.Context, courseID string) ([]*entity.CourseCo
 	q := sqlctx.GetQueryer(ctx)
 
 	rows, err := q.Query(`
-		  SELECT id, course_id, title, long_desc, video_id, video_type, download_url
-		    FROM course_contents
-		   WHERE course_id = $1
-		ORDER BY i ASC;
+		select
+			id, course_id, title, long_desc, video_id, video_type, download_url
+		from course_contents
+		where course_id = $1
+		order by i
 	`, courseID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	xs := make([]*entity.CourseContent, 0)
+	var xs []*entity.CourseContent
 	for rows.Next() {
 		var x entity.CourseContent
 		err = rows.Scan(
@@ -173,9 +172,10 @@ func GetCourseContent(ctx context.Context, courseContentID string) (*entity.Cour
 
 	var x entity.CourseContent
 	err := q.QueryRow(`
-		SELECT id, course_id, title, long_desc, video_id, video_type, download_url
-		  FROM course_contents
-		 WHERE id = $1;
+		select
+			id, course_id, title, long_desc, video_id, video_type, download_url
+		from course_contents
+		where id = $1
 	`, courseContentID).Scan(
 		&x.ID, &x.CourseID, &x.Title, &x.Desc, &x.VideoID, &x.VideoType, &x.DownloadURL,
 	)
@@ -191,9 +191,9 @@ func GetCourseIDFromURL(ctx context.Context, url string) (string, error) {
 
 	var id string
 	err := q.QueryRow(`
-		SELECT id
-		  FROM courses
-		 WHERE url = $1;
+		select id
+		from courses
+		where url = $1
 	`, url).Scan(&id)
 	if err == sql.ErrNoRows {
 		return "", entity.ErrNotFound

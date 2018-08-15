@@ -85,9 +85,9 @@ func adminPayments(ctx *hime.Context, history bool) error {
 	var err error
 	var cnt int64
 	if history {
-		cnt, err = repository.CountHistoryPayments(ctx)
+		cnt, err = repository.CountPaymentsByStatuses(ctx, []int{entity.Accepted, entity.Rejected})
 	} else {
-		cnt, err = repository.CountPendingPayments(ctx)
+		cnt, err = repository.CountPaymentsByStatuses(ctx, []int{entity.Pending})
 	}
 	if err != nil {
 		return err
@@ -102,9 +102,9 @@ func adminPayments(ctx *hime.Context, history bool) error {
 
 	var payments []*entity.Payment
 	if history {
-		payments, err = repository.ListHistoryPayments(ctx, limit, offset)
+		payments, err = repository.ListPaymentsByStatus(ctx, []int{entity.Accepted, entity.Rejected, entity.Refunded}, limit, offset)
 	} else {
-		payments, err = repository.ListPendingPayments(ctx, limit, offset)
+		payments, err = repository.ListPaymentsByStatus(ctx, []int{entity.Pending}, limit, offset)
 	}
 	if err != nil {
 		return err

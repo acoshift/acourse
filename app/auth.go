@@ -168,7 +168,7 @@ func postSignInPassword(ctx *hime.Context) error {
 			return err
 		}
 		if !ok {
-			err = repository.CreateUser(ctx, &entity.User{
+			err = repository.RegisterUser(ctx, &entity.User{
 				ID:       userID,
 				Username: userID,
 				Name:     userID,
@@ -223,7 +223,7 @@ func openIDCallback(ctx *hime.Context) error {
 		if !exists {
 			// user not found, insert new user
 			imageURL := uploadProfileFromURLAsync(user.PhotoURL)
-			err = repository.CreateUser(ctx, &entity.User{
+			err = repository.RegisterUser(ctx, &entity.User{
 				ID:       user.UserID,
 				Name:     user.DisplayName,
 				Username: user.UserID,
@@ -284,7 +284,7 @@ func postSignUp(ctx *hime.Context) error {
 		return ctx.RedirectToGet()
 	}
 
-	err = repository.CreateUser(ctx, &entity.User{
+	err = repository.RegisterUser(ctx, &entity.User{
 		ID:       userID,
 		Username: userID,
 		Email:    sql.NullString{String: email, Valid: email != ""},

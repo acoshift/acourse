@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 
 	"github.com/lib/pq"
@@ -54,12 +53,6 @@ const (
 		order by payments.created_at desc
 		limit $2 offset $3
 	`
-
-	queryCountPaymentsWithStatus = `
-		select count(*)
-		from payments
-		where status = any($1)
-	`
 )
 
 // CreatePayment creates new payment
@@ -67,9 +60,11 @@ func CreatePayment(ctx context.Context, x *entity.Payment) error {
 	q := sqlctx.GetQueryer(ctx)
 
 	_, err := q.Exec(`
-		INSERT INTO payments (user_id, course_id, image, price, original_price, code, status)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-		RETURNING id;
+		insert into payments
+			(user_id, course_id, image, price, original_price, code, status)
+		values
+			($1, $2, $3, $4, $5, $6, $7)
+		returning id
 	`, x.UserID, x.CourseID, x.Image, x.Price, x.OriginalPrice, x.Code, entity.Pending)
 	if err != nil {
 		return err
@@ -86,11 +81,12 @@ func AcceptPayment(ctx context.Context, x *entity.Payment) error {
 	}
 
 	_, err := q.Exec(`
-		UPDATE payments
-		SET status = $2,
-		    updated_at = now(),
-		    at = now()
-		WHERE id = $1;
+		update payments
+		set
+			status = $2,
+			updated_at = now(),
+			at = now()
+		where id = $1
 	`, x.ID, entity.Accepted)
 	if err != nil {
 		return err
@@ -113,11 +109,12 @@ func RejectPayment(ctx context.Context, x *entity.Payment) error {
 	q := sqlctx.GetQueryer(ctx)
 
 	_, err := q.Exec(`
-		UPDATE payments
-		SET status = $2,
-		    updated_at = now(),
-		    at = now()
-		WHERE id = $1;
+		update payments
+		set
+			status = $2,
+			updated_at = now(),
+			at = now()
+		where id = $1;
 	`, x.ID, entity.Rejected)
 	if err != nil {
 		return err
@@ -143,12 +140,13 @@ func scanPayment(scan scanFunc, x *entity.Payment) error {
 func GetPayments(ctx context.Context, paymentIDs []string) ([]*entity.Payment, error) {
 	q := sqlctx.GetQueryer(ctx)
 
-	xs := make([]*entity.Payment, 0, len(paymentIDs))
 	rows, err := q.Query(queryGetPayments, pq.Array(paymentIDs))
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
+
+	xs := make([]*entity.Payment, 0, len(paymentIDs))
 	for rows.Next() {
 		var x entity.Payment
 		err = scanPayment(rows.Scan, &x)
@@ -176,36 +174,30 @@ func GetPayment(ctx context.Context, paymentID string) (*entity.Payment, error) 
 }
 
 // HasPendingPayment returns ture if given user has pending payment for given course
-func HasPendingPayment(ctx context.Context, userID string, courseID string) (bool, error) {
+func HasPendingPayment(ctx context.Context, userID string, courseID string) (exists bool, err error) {
 	q := sqlctx.GetQueryer(ctx)
 
-	var p int
-	err := q.QueryRow(`
-		SELECT 1
-		  FROM payments
-		 WHERE user_id = $1
-		   AND course_id = $2
-		   AND status = $3;
-	`, userID, courseID, entity.Pending).Scan(&p)
-	if err == sql.ErrNoRows {
-		return false, nil
-	}
-	if err != nil {
-		return false, err
-	}
-	return true, nil
+	err = q.QueryRow(`
+		select exists (
+			select 1
+			from payments
+			where user_id = $1 and course_id = $2 and status = $3
+		)
+	`, userID, courseID, entity.Pending).Scan(&exists)
+	return
 }
 
-// ListHistoryPayments lists history payments
-func ListHistoryPayments(ctx context.Context, limit, offset int64) ([]*entity.Payment, error) {
+// ListPaymentsByStatus lists history payments by statuses
+func ListPaymentsByStatus(ctx context.Context, statuses []int, limit, offset int64) ([]*entity.Payment, error) {
 	q := sqlctx.GetQueryer(ctx)
 
-	xs := make([]*entity.Payment, 0)
-	rows, err := q.Query(queryListPaymentsWithStatus, pq.Array([]int{entity.Accepted, entity.Rejected, entity.Refunded}), limit, offset)
+	rows, err := q.Query(queryListPaymentsWithStatus, pq.Array(statuses), limit, offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
+
+	var xs []*entity.Payment
 	for rows.Next() {
 		var x entity.Payment
 		err = scanPayment(rows.Scan, &x)
@@ -220,50 +212,14 @@ func ListHistoryPayments(ctx context.Context, limit, offset int64) ([]*entity.Pa
 	return xs, nil
 }
 
-// ListPendingPayments lists pending payments
-func ListPendingPayments(ctx context.Context, limit, offset int64) ([]*entity.Payment, error) {
+// CountPaymentsByStatuses returns payments count by statuses
+func CountPaymentsByStatuses(ctx context.Context, statuses []int) (cnt int64, err error) {
 	q := sqlctx.GetQueryer(ctx)
 
-	xs := make([]*entity.Payment, 0)
-	rows, err := q.Query(queryListPaymentsWithStatus, pq.Array([]int{entity.Pending}), limit, offset)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var x entity.Payment
-		err = scanPayment(rows.Scan, &x)
-		if err != nil {
-			return nil, err
-		}
-		xs = append(xs, &x)
-	}
-	if err = rows.Err(); err != nil {
-		return nil, err
-	}
-	return xs, nil
-}
-
-// CountHistoryPayments returns history payments count
-func CountHistoryPayments(ctx context.Context) (int64, error) {
-	q := sqlctx.GetQueryer(ctx)
-
-	var cnt int64
-	err := q.QueryRow(queryCountPaymentsWithStatus, pq.Array([]int{entity.Accepted, entity.Rejected})).Scan(&cnt)
-	if err != nil {
-		return 0, err
-	}
-	return cnt, nil
-}
-
-// CountPendingPayments returns pending payments count
-func CountPendingPayments(ctx context.Context) (int64, error) {
-	q := sqlctx.GetQueryer(ctx)
-
-	var cnt int64
-	err := q.QueryRow(queryCountPaymentsWithStatus, pq.Array([]int{entity.Pending})).Scan(&cnt)
-	if err != nil {
-		return 0, err
-	}
-	return cnt, nil
+	err = q.QueryRow(`
+		select count(*)
+		from payments
+		where status = any($1)
+	`, pq.Array(statuses)).Scan(&cnt)
+	return
 }

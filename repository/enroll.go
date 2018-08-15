@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"database/sql"
 
 	"github.com/acoshift/acourse/context/sqlctx"
 )
@@ -12,31 +11,24 @@ func Enroll(ctx context.Context, userID string, courseID string) error {
 	q := sqlctx.GetQueryer(ctx)
 
 	_, err := q.Exec(`
-		INSERT INTO enrolls (user_id, course_id)
-		VALUES ($1, $2);
+		insert into enrolls
+			(user_id, course_id)
+		values
+			($1, $2)
 	`, userID, courseID)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 // IsEnrolled returns true if user enrolled a given course
-func IsEnrolled(ctx context.Context, userID string, courseID string) (bool, error) {
+func IsEnrolled(ctx context.Context, userID string, courseID string) (enrolled bool, err error) {
 	q := sqlctx.GetQueryer(ctx)
 
-	var p int
-	err := q.QueryRow(`
-		SELECT 1
-		  FROM enrolls
-		 WHERE user_id = $1
-		   AND course_id = $2;
-	`, userID, courseID).Scan(&p)
-	if err == sql.ErrNoRows {
-		return false, nil
-	}
-	if err != nil {
-		return false, err
-	}
-	return true, nil
+	err = q.QueryRow(`
+		select exists (
+			select 1
+			from enrolls
+			where user_id = $1 and course_id = $2
+		)
+	`, userID, courseID).Scan(&enrolled)
+	return
 }

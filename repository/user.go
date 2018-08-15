@@ -4,8 +4,6 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/lib/pq"
-
 	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/entity"
 )
@@ -57,30 +55,6 @@ func scanUser(scan scanFunc, x *entity.User) error {
 	return nil
 }
 
-// GetUsers gets users
-func GetUsers(ctx context.Context, userIDs []string) ([]*entity.User, error) {
-	q := sqlctx.GetQueryer(ctx)
-
-	xs := make([]*entity.User, 0, len(userIDs))
-	rows, err := q.Query(queryGetUsers, pq.Array(userIDs))
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var x entity.User
-		err = scanUser(rows.Scan, &x)
-		if err != nil {
-			return nil, err
-		}
-		xs = append(xs, &x)
-	}
-	if err = rows.Err(); err != nil {
-		return nil, err
-	}
-	return xs, nil
-}
-
 // GetUser gets user from id
 func GetUser(ctx context.Context, userID string) (*entity.User, error) {
 	q := sqlctx.GetQueryer(ctx)
@@ -127,12 +101,13 @@ func FindUserByEmail(ctx context.Context, email string) (*entity.User, error) {
 func ListUsers(ctx context.Context, limit, offset int64) ([]*entity.User, error) {
 	q := sqlctx.GetQueryer(ctx)
 
-	xs := make([]*entity.User, 0)
 	rows, err := q.Query(queryListUsers, limit, offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
+
+	var xs []*entity.User
 	for rows.Next() {
 		var x entity.User
 		err = scanUser(rows.Scan, &x)
@@ -148,18 +123,11 @@ func ListUsers(ctx context.Context, limit, offset int64) ([]*entity.User, error)
 }
 
 // CountUsers counts users
-func CountUsers(ctx context.Context) (int64, error) {
+func CountUsers(ctx context.Context) (cnt int64, err error) {
 	q := sqlctx.GetQueryer(ctx)
 
-	var cnt int64
-	err := q.QueryRow(`
-		SELECT count(*)
-		  FROM users;
-	`).Scan(&cnt)
-	if err != nil {
-		return 0, err
-	}
-	return cnt, nil
+	err = q.QueryRow(`select count(*) from users`).Scan(&cnt)
+	return
 }
 
 // IsUserExists checks is user exists
@@ -176,13 +144,15 @@ func IsUserExists(ctx context.Context, id string) (exists bool, err error) {
 	return
 }
 
-// CreateUser creates new users
-func CreateUser(ctx context.Context, x *entity.User) error {
+// RegisterUser registers new users
+func RegisterUser(ctx context.Context, x *entity.User) error {
 	q := sqlctx.GetQueryer(ctx)
 
 	_, err := q.Exec(`
-		insert into users (id, username, name, email, image)
-		values ($1, $2, $3, $4, $5)
+		insert into users
+			(id, username, name, email, image)
+		values
+			($1, $2, $3, $4, $5)
 	`, x.ID, x.Username, x.Name, x.Email, x.Image)
 	return err
 }
