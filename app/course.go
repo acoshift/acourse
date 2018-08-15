@@ -96,7 +96,7 @@ func courseView(ctx *hime.Context) error {
 	}
 
 	p := page(ctx)
-	p["Title"] = x.Title + " | " + p["Title"].(string)
+	p["Title"] = x.Title
 	p["Desc"] = x.ShortDesc
 	p["Image"] = x.Image
 	p["URL"] = baseURL + "/course/" + url.PathEscape(x.Link())
@@ -169,7 +169,7 @@ func courseContent(ctx *hime.Context) error {
 	}
 
 	p := page(ctx)
-	p["Title"] = x.Title + " | " + p["Title"].(string)
+	p["Title"] = x.Title
 	p["Desc"] = x.ShortDesc
 	p["Image"] = x.Image
 	p["Course"] = x
@@ -424,7 +424,7 @@ func courseEnroll(ctx *hime.Context) error {
 	}
 
 	p := page(ctx)
-	p["Title"] = x.Title + " | " + p["Title"].(string)
+	p["Title"] = x.Title
 	p["Desc"] = x.ShortDesc
 	p["Image"] = x.Image
 	p["URL"] = baseURL + "/course/" + url.PathEscape(x.Link())
@@ -599,7 +599,7 @@ func courseAssignment(ctx *hime.Context) error {
 	}
 
 	p := page(ctx)
-	p["Title"] = x.Title + " | " + p["Title"].(string)
+	p["Title"] = x.Title
 	p["Desc"] = x.ShortDesc
 	p["Image"] = x.Image
 	p["URL"] = baseURL + "/course/" + url.PathEscape(x.Link())

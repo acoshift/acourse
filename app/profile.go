@@ -31,7 +31,7 @@ func profile(ctx *hime.Context) error {
 
 	p := page(ctx)
 	p["Navbar"] = "profile"
-	p["Title"] = user.Username + " | " + p["Title"].(string)
+	p["Title"] = user.Username
 	p["OwnCourses"] = ownCourses
 	p["EnrolledCourses"] = enrolledCourses
 	return ctx.View("profile", p)
@@ -51,7 +51,7 @@ func profileEdit(ctx *hime.Context) error {
 	}
 
 	p := page(ctx)
-	p["Title"] = user.Username + " | " + p["Title"].(string)
+	p["Title"] = user.Username
 	return ctx.View("profile.edit", p)
 }
 
