@@ -38,16 +38,7 @@
 					</button>
 				</div>
 
-				{{if .Flash.Has "Errors"}}
-					<div class="acourse-message -error">
-						<ul>
-							{{range .Flash.Values "Errors"}}
-								<li>{{.}}</li>
-							{{end}}
-						</ul>
-					</div>
-				{{end}}
-
+				{{template "error-message" .Flash}}
 			</form>
 			<div class="_flex-row _main-center">
 				<a class="_color-sub" href="{{route "profile"}}">ดูโปรไฟล์</a>

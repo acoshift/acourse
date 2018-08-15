@@ -5,6 +5,7 @@ components:
 - main.tmpl
 - component/global.script.tmpl
 - component/pagination.tmpl
+- component/error-message.tmpl
 list:
   index:
   - index.tmpl

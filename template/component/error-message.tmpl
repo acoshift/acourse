@@ -1,0 +1,11 @@
+{{define "error-message"}}
+{{if .Has "Errors"}}
+<div class="acourse-message -error">
+	<ul>
+		{{range .Values "Errors"}}
+		<li>{{.}}</li>
+		{{end}}
+	</ul>
+</div>
+{{end}}
+{{end}}

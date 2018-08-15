@@ -41,15 +41,13 @@
 							<input class="acourse-input" type="number" step="0.01" name="price">
 						</div>
 					{{end}}
-					<button class="acourse-button -positive _font-sub _full-width">สมัครเรียน</button>
+
+					<div class="acourse-block-big _flex-row _main-center">
+						<button class="acourse-button -positive _font-sub _full-width">สมัครเรียน</button>
+					</div>
+
+					{{template "error-message" .Flash}}
 				</form>
-				{{if .Flash.Has "Errors"}}
-					<ul>
-						{{range .Flash.Values "Errors"}}
-						<li>{{.}}</li>
-						{{end}}
-					</ul>
-				{{end}}
 			</div>
 		</div>
 	</div>
