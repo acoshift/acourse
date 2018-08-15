@@ -1,6 +1,6 @@
 {{define "global.script"}}
 <script>
-	document.addEventListener('DOMContentLoaded', () => {
+	document.addEventListener('turbolinks:load', () => {
 		const navbar = document.querySelector('#navbar')
 		const delta = 5
 		const navbarHeight = navbar.offsetHeight || navbar.clientHeight
