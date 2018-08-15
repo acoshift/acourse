@@ -38,7 +38,6 @@
           <th>Name</th>
           <th>Email</th>
           <th>Created At</th>
-          <th>Updated At</th>
         </thead>
         <tbody>
           {{range .Users}}
@@ -52,9 +51,8 @@
               </td>
               <td class="acourse-word-breakeable" data-column="Username" style="min-width: 120px">{{.Username}}</td>
               <td class="acourse-word-breakeable" data-column="Name" style="min-width: 120px">{{.Name}}</td>
-              <td class="acourse-word-breakeable" data-column="Email" style="min-width: 200px">{{.Email.String}}</td>
+              <td class="acourse-word-breakeable" data-column="Email" style="min-width: 200px">{{.Email}}</td>
               <td data-column="Created At">{{.CreatedAt | dateTime}}</td>
-              <td data-column="Updated At">{{.UpdatedAt | dateTime}}</td>
             </tr>
           {{end}}
         </tbody>

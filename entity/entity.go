@@ -7,8 +7,6 @@ import (
 	"github.com/lib/pq"
 )
 
-// TODO: change to entities
-
 // User model
 type User struct {
 	ID        string
@@ -26,6 +24,23 @@ type User struct {
 type UserRole struct {
 	Admin      sql.NullBool
 	Instructor sql.NullBool
+}
+
+// EmailSignInUser type
+type EmailSignInUser struct {
+	ID    string
+	Name  string
+	Email string
+}
+
+// UserItem type
+type UserItem struct {
+	ID        string
+	Username  string
+	Name      string
+	Email     string
+	Image     string
+	CreatedAt time.Time
 }
 
 // Course model

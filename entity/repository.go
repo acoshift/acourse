@@ -2,6 +2,14 @@ package entity
 
 import "github.com/lib/pq"
 
+// UpdateUser type
+type UpdateUser struct {
+	ID       string
+	Username string
+	Name     string
+	AboutMe  string
+}
+
 // RegisterCourse type
 type RegisterCourse struct {
 	UserID    string

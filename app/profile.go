@@ -12,6 +12,7 @@ import (
 
 	"github.com/acoshift/acourse/context/appctx"
 	"github.com/acoshift/acourse/context/sqlctx"
+	"github.com/acoshift/acourse/entity"
 	"github.com/acoshift/acourse/repository"
 )
 
@@ -109,7 +110,12 @@ func postProfileEdit(ctx *hime.Context) error {
 			}
 		}
 
-		return repository.UpdateUser(ctx, user.ID, username, name, aboutMe)
+		return repository.UpdateUser(ctx, &entity.UpdateUser{
+			ID:       user.ID,
+			Username: username,
+			Name:     name,
+			AboutMe:  aboutMe,
+		})
 	})
 	if err != nil {
 		f.Add("Errors", err.Error())

@@ -44,16 +44,15 @@ func postSignIn(ctx *hime.Context) error {
 	f := s.Flash()
 
 	email := ctx.FormValueTrimSpace("Email")
-	if len(email) == 0 {
+	if email == "" {
 		f.Add("Errors", "email required")
 		return ctx.RedirectToGet()
 	}
+
 	email, err := govalidator.NormalizeEmail(email)
 	if err != nil {
-		f.Add("Errors", "invalid email")
-	}
-	if f.Has("Errors") {
 		f.Set("Email", email)
+		f.Add("Errors", "invalid email")
 		return ctx.RedirectToGet()
 	}
 
@@ -68,8 +67,7 @@ func postSignIn(ctx *hime.Context) error {
 
 	f.Set("CheckEmail", "1")
 
-	user, err := repository.FindUserByEmail(ctx, email)
-	// don't lets user know if email is wrong
+	user, err := repository.GetEmailSignInUserByEmail(ctx, email)
 	if err == entity.ErrNotFound {
 		return ctx.RedirectTo("signin.check-email")
 	}
@@ -98,7 +96,7 @@ func postSignIn(ctx *hime.Context) error {
 ทีมงาน acourse.io
 	`, user.Name, baseURL+"/signin/link?id="+linkID)
 
-	go emailSender.Send(user.Email.String, "Magic Link Request", markdown(message))
+	go emailSender.Send(user.Email, "Magic Link Request", markdown(message))
 
 	return ctx.RedirectTo("signin.check-email")
 }
