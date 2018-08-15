@@ -94,6 +94,9 @@ func TemplateFunc() template.FuncMap {
 		"incr": func(v int) int {
 			return v + 1
 		},
+		"fallbackImage": func() string {
+			return "https://storage.googleapis.com/acourse/static/d509b7d8-88ad-478c-aa40-2984878c87cd.svg"
+		},
 	}
 }
 

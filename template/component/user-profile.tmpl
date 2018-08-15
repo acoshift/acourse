@@ -1,6 +1,6 @@
 {{define "user-profile"}}
 <div id="profile-card" class="_flex-column _cross-center">
-  <img class="acourse-block-big acourse-circle -large _img-cover" src="{{.Image}}" onerror="this.src = 'https://storage.googleapis.com/acourse/static/d509b7d8-88ad-478c-aa40-2984878c87cd.svg'">
+  <img class="acourse-block-big acourse-circle -large _img-cover" src="{{.Image}}" onerror="this.src = '{{fallbackImage}}'">
   <h3 class="_no-margin _color-sub">{{.Name}}</h3>
   {{if .Email}}
     <p class="_font-size-small">{{.Email}}</p>

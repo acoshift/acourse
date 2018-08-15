@@ -10,7 +10,7 @@
           id="cover"
           class="_full-width _img-cover acourse-block-big"
           src="{{.Course.Image}}"
-          onerror="this.src = 'https://storage.googleapis.com/acourse/static/d509b7d8-88ad-478c-aa40-2984878c87cd.svg'">
+          onerror="this.src = '{{fallbackImage}}'">
 
         <form method="POST" enctype="multipart/form-data">
           <div class="input-field _flex-column">

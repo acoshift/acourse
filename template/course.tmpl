@@ -127,7 +127,7 @@
                       <img
                         class="acourse-block acourse-circle _img-cover"
                         src="{{.Course.Owner.Image}}"
-                        onerror="this.src = 'https://storage.googleapis.com/acourse/static/d509b7d8-88ad-478c-aa40-2984878c87cd.svg'">
+                        onerror="this.src = '{{fallbackImage}}'">
                       <div class="_font-bold _font-size-big">{{.Course.Owner.Name}}</div>
                     </div>
                   </div>

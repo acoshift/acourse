@@ -10,7 +10,7 @@
 
       <form method="POST" enctype="multipart/form-data">
         <div class="acourse-block _flex-row _main-center">
-          <img id="avatar" class="acourse-circle -large _img-cover" src="{{.Me.Image}}" onerror="this.src = 'https://storage.googleapis.com/acourse/static/d509b7d8-88ad-478c-aa40-2984878c87cd.svg'">
+          <img id="avatar" class="acourse-circle -large _img-cover" src="{{.Me.Image}}" onerror="this.src = '{{fallbackImage}}'">
         </div>
         <div class="input-field _flex-column">
           <label>รูปของคุณ</label>

@@ -24,10 +24,7 @@
             <tr>
               <td class="acourse-word-breakeable" style="min-width: 120px" data-column="ID">{{.ID}}</td>
               <td data-column="Image">
-                <img
-                  class="acourse-circle _img-cover"
-                  src="{{.Image}}"
-                  onerror="this.src = 'https://storage.googleapis.com/acourse/static/d509b7d8-88ad-478c-aa40-2984878c87cd.svg'">
+                <img class="acourse-circle _img-cover" src="{{.Image}}" onerror="this.src = '{{fallbackImage}}'">
               </td>
               <td class="acourse-word-breakeable" data-column="Username" style="min-width: 120px">{{.Username}}</td>
               <td class="acourse-word-breakeable" data-column="Name" style="min-width: 120px">{{.Name}}</td>
