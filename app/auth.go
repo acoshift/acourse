@@ -57,7 +57,7 @@ func postSignIn(ctx *hime.Context) error {
 		return ctx.RedirectToGet()
 	}
 
-	ok, err := repository.CanAcquireMagicLink(redisClient, redisPrefix, email)
+	ok, err := repository.CanAcquireMagicLink(ctx, email)
 	if err != nil {
 		return err
 	}
@@ -80,7 +80,7 @@ func postSignIn(ctx *hime.Context) error {
 
 	linkID := generateMagicLinkID()
 
-	err = repository.StoreMagicLink(redisClient, redisPrefix, linkID, user.ID)
+	err = repository.StoreMagicLink(ctx, linkID, user.ID)
 	if err != nil {
 		return err
 	}
@@ -120,7 +120,7 @@ func signInLink(ctx *hime.Context) error {
 	s := appctx.GetSession(ctx)
 	f := s.Flash()
 
-	userID, err := repository.FindMagicLink(redisClient, redisPrefix, linkID)
+	userID, err := repository.FindMagicLink(ctx, linkID)
 	if err != nil {
 		f.Add("Errors", "ไม่พบ Magic Link ของคุณ")
 		return ctx.RedirectTo("signin")

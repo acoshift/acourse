@@ -7,9 +7,10 @@ import (
 	"encoding/gob"
 	"time"
 
+	"github.com/acoshift/acourse/context/redisctx"
+
 	"github.com/acoshift/pgsql"
 
-	"github.com/go-redis/redis"
 	"github.com/lib/pq"
 
 	"github.com/acoshift/acourse/context/sqlctx"
@@ -251,8 +252,11 @@ func ListCourses(ctx context.Context, limit, offset int64) ([]*entity.Course, er
 
 // ListPublicCourses lists public course sort by created at desc
 // TODO: add pagination
-func ListPublicCourses(ctx context.Context, c *redis.Client, cachePrefix string) ([]*entity.Course, error) {
+func ListPublicCourses(ctx context.Context) ([]*entity.Course, error) {
 	// TODO: move cache logic out from repo
+
+	c := redisctx.GetClient(ctx)
+	cachePrefix := redisctx.GetPrefix(ctx)
 
 	// look from cache
 	{

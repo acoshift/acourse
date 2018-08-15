@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/acoshift/acourse/context/redisctx"
 	"github.com/acoshift/acourse/context/sqlctx"
 
 	"cloud.google.com/go/profiler"
@@ -117,6 +118,7 @@ func main() {
 
 	mux.Handle("/", middleware.Chain(
 		sqlctx.Middleware(db),
+		redisctx.Middleware(redisClient, config.String("redis_prefix")),
 		session.Middleware(session.Config{
 			Secret:   config.Bytes("session_secret"),
 			Path:     "/",
@@ -133,8 +135,6 @@ func main() {
 		}),
 	)(app.New(app.Config{
 		BaseURL:      baseURL,
-		RedisPrefix:  config.String("redis_prefix"),
-		RedisClient:  redisClient,
 		Auth:         firAuth,
 		Location:     loc,
 		SlackURL:     config.String("slack_url"),

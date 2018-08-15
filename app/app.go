@@ -12,7 +12,6 @@ import (
 	"github.com/acoshift/methodmux"
 	"github.com/acoshift/middleware"
 	"github.com/acoshift/prefixhandler"
-	"github.com/go-redis/redis"
 	"gopkg.in/gomail.v2"
 )
 
@@ -25,8 +24,6 @@ var (
 	baseURL      string
 	bucketHandle *storage.BucketHandle
 	bucketName   string
-	redisClient  *redis.Client
-	redisPrefix  string
 )
 
 // New creates new app
@@ -39,8 +36,6 @@ func New(config Config) http.Handler {
 	baseURL = config.BaseURL
 	bucketHandle = config.BucketHandle
 	bucketName = config.BucketName
-	redisClient = config.RedisClient
-	redisPrefix = config.RedisPrefix
 
 	mux := http.NewServeMux()
 

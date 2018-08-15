@@ -11,7 +11,7 @@ func index(ctx *hime.Context) error {
 		return notFound(ctx)
 	}
 
-	courses, err := repository.ListPublicCourses(ctx, redisClient, redisPrefix)
+	courses, err := repository.ListPublicCourses(ctx)
 	if err != nil {
 		return err
 	}
