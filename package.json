@@ -3,10 +3,6 @@
   "version": "1.0.0",
   "description": "Acoshift's course system",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "node build.js"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/acoshift/acourse.git"
@@ -17,8 +13,17 @@
     "url": "https://github.com/acoshift/acourse/issues"
   },
   "homepage": "https://github.com/acoshift/acourse#readme",
-  "devDependencies": {
-    "md5": "^2.2.1",
-    "node-sass": "^4.5.2"
+  "dependencies": {
+    "fs-extra": "^7.0.0",
+    "gulp": "^3.9.1",
+    "gulp-concat": "^2.6.1",
+    "gulp-filenames": "^4.0.1",
+    "gulp-freeze": "^0.0.2",
+    "gulp-noop": "^1.0.0",
+    "gulp-purgecss": "^1.0.0",
+    "gulp-sass": "^4.0.1",
+    "gulp-sync": "^0.1.4",
+    "node-sass": "^4.9.3",
+    "purgecss": "^1.0.1"
   }
 }

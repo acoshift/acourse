@@ -72,6 +72,11 @@ func main() {
 	himeApp := hime.New()
 	himeApp.ParseConfigFile("settings/routes.yaml")
 
+	static := configfile.NewYAMLReader("static.yaml")
+	himeApp.TemplateFunc("static", func(s string) string {
+		return "/~/" + static.StringDefault(s, s)
+	})
+
 	himeApp.Template().
 		Funcs(app.TemplateFunc()).
 		ParseConfigFile("settings/template.yaml")

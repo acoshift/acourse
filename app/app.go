@@ -2,7 +2,6 @@ package app
 
 import (
 	"database/sql"
-	"io/ioutil"
 	"math/rand"
 	"net/http"
 	"time"
@@ -19,7 +18,6 @@ import (
 	"github.com/acoshift/webstatic"
 	"github.com/go-redis/redis"
 	"gopkg.in/gomail.v2"
-	"gopkg.in/yaml.v2"
 )
 
 var (
@@ -34,7 +32,6 @@ var (
 	redisClient  *redis.Client
 	redisPrefix  string
 	db           *sql.DB
-	staticConf   = make(map[string]string)
 )
 
 // New creates new app
@@ -51,13 +48,6 @@ func New(config Config) http.Handler {
 	redisPrefix = config.RedisPrefix
 	db = config.DB
 
-	// load static config
-	// TODO: move to main
-	{
-		bs, _ := ioutil.ReadFile("static.yaml")
-		yaml.Unmarshal(bs, &staticConf)
-	}
-
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
@@ -65,10 +55,10 @@ func New(config Config) http.Handler {
 	})
 
 	mux.Handle("/~/", http.StripPrefix("/~", webstatic.New(webstatic.Config{
-		Dir:          "static",
+		Dir:          "assets",
 		CacheControl: "public, max-age=31536000",
 	})))
-	mux.Handle("/favicon.ico", fileHandler("static/favicon.ico"))
+	mux.Handle("/favicon.ico", fileHandler("assets/favicon.ico"))
 
 	methodmux.FallbackHandler = hime.Handler(notFound)
 

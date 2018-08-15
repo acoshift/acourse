@@ -4,10 +4,9 @@ config/email_user
 config/email_password
 config/sql_url
 node_modules/
-static/style.*.css
-static/script.*.js
+assets/style.css
 private/
 acourse
-static.yaml
 *.swp
 .goreload
+.build/

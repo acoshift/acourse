@@ -19,9 +19,6 @@ func TemplateFunc() template.FuncMap {
 		"currency": func(v float64) string {
 			return humanize.FormatFloat("#,###.##", v)
 		},
-		"static": func(s string) string {
-			return "/~/" + staticConf[s]
-		},
 		"paginate": func(p, n int) []int {
 			r := make([]int, 0, 7)
 			r = append(r, 1)
