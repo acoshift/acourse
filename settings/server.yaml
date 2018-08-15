@@ -1,0 +1,5 @@
+server:
+  addr: :8080
+  gracefulShutdown:
+    wait: 5s
+    timeout: 10s

@@ -70,6 +70,7 @@ func main() {
 	db.SetMaxOpenConns(4)
 
 	himeApp := hime.New()
+	himeApp.ParseConfigFile("settings/server.yaml")
 	himeApp.ParseConfigFile("settings/routes.yaml")
 
 	static := configfile.NewYAMLReader("static.yaml")
@@ -98,10 +99,6 @@ func main() {
 
 	err = himeApp.
 		Handler(h).
-		Address(":8080").
-		GracefulShutdown().
-		Wait(5 * time.Second).
-		Timeout(10 * time.Second).
 		ListenAndServe()
 	if err != nil {
 		log.Fatal(err)
