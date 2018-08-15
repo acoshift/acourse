@@ -14,24 +14,25 @@ import (
 	"github.com/acoshift/prefixhandler"
 
 	"github.com/acoshift/acourse/email"
+	"github.com/acoshift/acourse/notify"
 )
 
 var (
-	auth         *firebase.Auth
-	loc          *time.Location
-	slackURL     string
-	emailSender  email.Sender
-	baseURL      string
-	bucketHandle *storage.BucketHandle
-	bucketName   string
+	auth          *firebase.Auth
+	loc           *time.Location
+	emailSender   email.Sender
+	adminNotifier notify.AdminNotifier
+	baseURL       string
+	bucketHandle  *storage.BucketHandle
+	bucketName    string
 )
 
 // New creates new app
 func New(config Config) http.Handler {
 	auth = config.Auth
 	loc = config.Location
-	slackURL = config.SlackURL
 	emailSender = config.EmailSender
+	adminNotifier = config.AdminNotifier
 	baseURL = config.BaseURL
 	bucketHandle = config.BucketHandle
 	bucketName = config.BucketName

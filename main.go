@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/acoshift/acourse/notify"
+
 	"github.com/acoshift/acourse/context/redisctx"
 	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/email"
@@ -67,6 +69,8 @@ func main() {
 		Password: config.String("email_password"),
 		From:     config.String("email_from"),
 	})
+
+	adminNotifier := notify.NewOutgoingWebhookAdminNotifier(config.String("slack_url"))
 
 	// init redis pool
 	redisClient := redis.NewClient(&redis.Options{
@@ -140,13 +144,13 @@ func main() {
 			}),
 		}),
 	)(app.New(app.Config{
-		BaseURL:      baseURL,
-		Auth:         firAuth,
-		Location:     loc,
-		SlackURL:     config.String("slack_url"),
-		EmailSender:  emailSender,
-		BucketHandle: bucketHandle,
-		BucketName:   config.String("bucket"),
+		BaseURL:       baseURL,
+		Auth:          firAuth,
+		Location:      loc,
+		AdminNotifier: adminNotifier,
+		EmailSender:   emailSender,
+		BucketHandle:  bucketHandle,
+		BucketName:    config.String("bucket"),
 	})))
 
 	h := middleware.Chain(

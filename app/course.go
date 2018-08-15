@@ -544,11 +544,7 @@ func postCourseEnroll(ctx *hime.Context) error {
 	}
 
 	if newPayment {
-		go func() {
-			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-			defer cancel()
-			sendSlackMessage(ctx, fmt.Sprintf("New payment for course %s, price %.2f", x.Title, price))
-		}()
+		go adminNotifier.Notify(fmt.Sprintf("New payment for course %s, price %.2f", x.Title, price))
 	}
 
 	return ctx.RedirectTo("course", link)

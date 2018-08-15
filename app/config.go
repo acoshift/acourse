@@ -8,17 +8,18 @@ import (
 	"github.com/go-redis/redis"
 
 	"github.com/acoshift/acourse/email"
+	"github.com/acoshift/acourse/notify"
 )
 
 // Config use to init app package
 type Config struct {
-	BaseURL      string
-	RedisClient  *redis.Client
-	RedisPrefix  string
-	Auth         *firebase.Auth
-	Location     *time.Location
-	SlackURL     string
-	EmailSender  email.Sender
-	BucketHandle *storage.BucketHandle
-	BucketName   string
+	BaseURL       string
+	RedisClient   *redis.Client
+	RedisPrefix   string
+	Auth          *firebase.Auth
+	Location      *time.Location
+	EmailSender   email.Sender
+	AdminNotifier notify.AdminNotifier
+	BucketHandle  *storage.BucketHandle
+	BucketName    string
 }
