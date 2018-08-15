@@ -3,15 +3,11 @@ package main
 import (
 	"context"
 	"database/sql"
+	_ "image/jpeg"
+	_ "image/png"
 	"log"
 	"net/http"
 	"time"
-
-	"github.com/acoshift/acourse/notify"
-
-	"github.com/acoshift/acourse/context/redisctx"
-	"github.com/acoshift/acourse/context/sqlctx"
-	"github.com/acoshift/acourse/email"
 
 	"cloud.google.com/go/profiler"
 	"cloud.google.com/go/storage"
@@ -28,7 +24,12 @@ import (
 	"google.golang.org/api/option"
 
 	"github.com/acoshift/acourse/app"
+	"github.com/acoshift/acourse/context/redisctx"
+	"github.com/acoshift/acourse/context/sqlctx"
+	"github.com/acoshift/acourse/email"
+	"github.com/acoshift/acourse/image"
 	"github.com/acoshift/acourse/internal"
+	"github.com/acoshift/acourse/notify"
 )
 
 func main() {
@@ -144,13 +145,14 @@ func main() {
 			}),
 		}),
 	)(app.New(app.Config{
-		BaseURL:       baseURL,
-		Auth:          firAuth,
-		Location:      loc,
-		AdminNotifier: adminNotifier,
-		EmailSender:   emailSender,
-		BucketHandle:  bucketHandle,
-		BucketName:    config.String("bucket"),
+		BaseURL:            baseURL,
+		Auth:               firAuth,
+		Location:           loc,
+		AdminNotifier:      adminNotifier,
+		EmailSender:        emailSender,
+		BucketHandle:       bucketHandle,
+		BucketName:         config.String("bucket"),
+		ImageResizeEncoder: image.NewJPEGResizeEncoder(),
 	})))
 
 	h := middleware.Chain(

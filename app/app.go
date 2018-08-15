@@ -14,17 +14,19 @@ import (
 	"github.com/acoshift/prefixhandler"
 
 	"github.com/acoshift/acourse/email"
+	"github.com/acoshift/acourse/image"
 	"github.com/acoshift/acourse/notify"
 )
 
 var (
-	auth          *firebase.Auth
-	loc           *time.Location
-	emailSender   email.Sender
-	adminNotifier notify.AdminNotifier
-	baseURL       string
-	bucketHandle  *storage.BucketHandle
-	bucketName    string
+	auth               *firebase.Auth
+	loc                *time.Location
+	emailSender        email.Sender
+	adminNotifier      notify.AdminNotifier
+	baseURL            string
+	bucketHandle       *storage.BucketHandle
+	bucketName         string
+	imageResizeEncoder image.JPEGResizeEncoder
 )
 
 // New creates new app
@@ -36,6 +38,7 @@ func New(config Config) http.Handler {
 	baseURL = config.BaseURL
 	bucketHandle = config.BucketHandle
 	bucketName = config.BucketName
+	imageResizeEncoder = config.ImageResizeEncoder
 
 	mux := http.NewServeMux()
 
