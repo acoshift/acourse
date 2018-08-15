@@ -29,12 +29,12 @@ func profile(ctx *hime.Context) error {
 		return err
 	}
 
-	page := newPage(ctx)
-	page["Navbar"] = "profile"
-	page["Title"] = user.Username + " | " + page["Title"].(string)
-	page["OwnCourses"] = ownCourses
-	page["EnrolledCourses"] = enrolledCourses
-	return ctx.View("profile", page)
+	p := page(ctx)
+	p["Navbar"] = "profile"
+	p["Title"] = user.Username + " | " + p["Title"].(string)
+	p["OwnCourses"] = ownCourses
+	p["EnrolledCourses"] = enrolledCourses
+	return ctx.View("profile", p)
 }
 
 func profileEdit(ctx *hime.Context) error {
@@ -50,9 +50,9 @@ func profileEdit(ctx *hime.Context) error {
 		f.Set("AboutMe", user.AboutMe)
 	}
 
-	page := newPage(ctx)
-	page["Title"] = user.Username + " | " + page["Title"].(string)
-	return ctx.View("profile.edit", page)
+	p := page(ctx)
+	p["Title"] = user.Username + " | " + p["Title"].(string)
+	return ctx.View("profile.edit", p)
 }
 
 func postProfileEdit(ctx *hime.Context) error {

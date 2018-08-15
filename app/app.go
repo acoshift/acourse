@@ -170,8 +170,8 @@ var notFoundImages = []string{
 }
 
 func notFound(ctx *hime.Context) error {
-	page := newPage(ctx)
-	page["Image"] = notFoundImages[rand.Intn(len(notFoundImages))]
+	p := page(ctx)
+	p["Image"] = notFoundImages[rand.Intn(len(notFoundImages))]
 	ctx.ResponseWriter().Header().Set(header.XContentTypeOptions, "nosniff")
-	return ctx.Status(http.StatusNotFound).View("error.not-found", page)
+	return ctx.Status(http.StatusNotFound).View("error.not-found", p)
 }

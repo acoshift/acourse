@@ -16,7 +16,7 @@ func index(ctx *hime.Context) error {
 		return err
 	}
 
-	page := newPage(ctx)
-	page["Courses"] = courses
-	return ctx.View("index", page)
+	p := page(ctx)
+	p["Courses"] = courses
+	return ctx.View("index", p)
 }

@@ -35,7 +35,7 @@ func generateMagicLinkID() string {
 }
 
 func signIn(ctx *hime.Context) error {
-	return ctx.View("signin", newPage(ctx))
+	return ctx.View("signin", page(ctx))
 }
 
 func postSignIn(ctx *hime.Context) error {
@@ -105,7 +105,7 @@ func checkEmail(ctx *hime.Context) error {
 	if !f.Has("CheckEmail") {
 		return ctx.Redirect("/")
 	}
-	return ctx.View("check-email", newPage(ctx))
+	return ctx.View("check-email", page(ctx))
 }
 
 func signInLink(ctx *hime.Context) error {
@@ -128,7 +128,7 @@ func signInLink(ctx *hime.Context) error {
 }
 
 func signInPassword(ctx *hime.Context) error {
-	return ctx.View("signin.password", newPage(ctx))
+	return ctx.View("signin.password", page(ctx))
 }
 
 func postSignInPassword(ctx *hime.Context) error {
@@ -246,7 +246,7 @@ func openIDCallback(ctx *hime.Context) error {
 }
 
 func signUp(ctx *hime.Context) error {
-	return ctx.View("signup", newPage(ctx))
+	return ctx.View("signup", page(ctx))
 }
 
 func postSignUp(ctx *hime.Context) error {
@@ -304,7 +304,7 @@ func signOut(ctx *hime.Context) error {
 }
 
 func resetPassword(ctx *hime.Context) error {
-	return ctx.View("reset.password", newPage(ctx))
+	return ctx.View("reset.password", page(ctx))
 }
 
 func postResetPassword(ctx *hime.Context) error {

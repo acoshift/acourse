@@ -95,16 +95,16 @@ func courseView(ctx *hime.Context) error {
 		}
 	}
 
-	page := newPage(ctx)
-	page["Title"] = x.Title + " | " + page["Title"].(string)
-	page["Desc"] = x.ShortDesc
-	page["Image"] = x.Image
-	page["URL"] = baseURL + "/course/" + url.PathEscape(x.Link())
-	page["Course"] = x
-	page["Enrolled"] = enrolled
-	page["Owned"] = owned
-	page["pendingEnroll"] = pendingEnroll
-	return ctx.View("course", page)
+	p := page(ctx)
+	p["Title"] = x.Title + " | " + p["Title"].(string)
+	p["Desc"] = x.ShortDesc
+	p["Image"] = x.Image
+	p["URL"] = baseURL + "/course/" + url.PathEscape(x.Link())
+	p["Course"] = x
+	p["Enrolled"] = enrolled
+	p["Owned"] = owned
+	p["pendingEnroll"] = pendingEnroll
+	return ctx.View("course", p)
 }
 
 func courseContent(ctx *hime.Context) error {
@@ -157,28 +157,28 @@ func courseContent(ctx *hime.Context) error {
 	}
 
 	var content *entity.CourseContent
-	p, _ := strconv.Atoi(ctx.FormValue("p"))
-	if p < 0 {
-		p = 0
+	pg, _ := strconv.Atoi(ctx.FormValue("p"))
+	if pg < 0 {
+		pg = 0
 	}
-	if p > len(x.Contents)-1 {
-		p = len(x.Contents) - 1
+	if pg > len(x.Contents)-1 {
+		pg = len(x.Contents) - 1
 	}
-	if p >= 0 {
-		content = x.Contents[p]
+	if pg >= 0 {
+		content = x.Contents[pg]
 	}
 
-	page := newPage(ctx)
-	page["Title"] = x.Title + " | " + page["Title"].(string)
-	page["Desc"] = x.ShortDesc
-	page["Image"] = x.Image
-	page["Course"] = x
-	page["Content"] = content
-	return ctx.View("course.content", page)
+	p := page(ctx)
+	p["Title"] = x.Title + " | " + p["Title"].(string)
+	p["Desc"] = x.ShortDesc
+	p["Image"] = x.Image
+	p["Course"] = x
+	p["Content"] = content
+	return ctx.View("course.content", p)
 }
 
 func editorCreate(ctx *hime.Context) error {
-	return ctx.View("editor.create", newPage(ctx))
+	return ctx.View("editor.create", page(ctx))
 }
 
 func postEditorCreate(ctx *hime.Context) error {
@@ -260,9 +260,9 @@ func editorCourse(ctx *hime.Context) error {
 		return err
 	}
 
-	page := newPage(ctx)
-	page["Course"] = course
-	return ctx.View("editor.course", page)
+	p := page(ctx)
+	p["Course"] = course
+	return ctx.View("editor.course", p)
 }
 
 func postEditorCourse(ctx *hime.Context) error {
@@ -356,9 +356,9 @@ func editorContent(ctx *hime.Context) error {
 		return err
 	}
 
-	page := newPage(ctx)
-	page["Course"] = course
-	return ctx.View("editor.content", page)
+	p := page(ctx)
+	p["Course"] = course
+	return ctx.View("editor.content", p)
 }
 
 func postEditorContent(ctx *hime.Context) error {
@@ -423,13 +423,13 @@ func courseEnroll(ctx *hime.Context) error {
 		return ctx.RedirectTo("course", link)
 	}
 
-	page := newPage(ctx)
-	page["Title"] = x.Title + " | " + page["Title"].(string)
-	page["Desc"] = x.ShortDesc
-	page["Image"] = x.Image
-	page["URL"] = baseURL + "/course/" + url.PathEscape(x.Link())
-	page["Course"] = x
-	return ctx.View("course.enroll", page)
+	p := page(ctx)
+	p["Title"] = x.Title + " | " + p["Title"].(string)
+	p["Desc"] = x.ShortDesc
+	p["Image"] = x.Image
+	p["URL"] = baseURL + "/course/" + url.PathEscape(x.Link())
+	p["Course"] = x
+	return ctx.View("course.enroll", p)
 }
 
 func postCourseEnroll(ctx *hime.Context) error {
@@ -598,14 +598,14 @@ func courseAssignment(ctx *hime.Context) error {
 		return err
 	}
 
-	page := newPage(ctx)
-	page["Title"] = x.Title + " | " + page["Title"].(string)
-	page["Desc"] = x.ShortDesc
-	page["Image"] = x.Image
-	page["URL"] = baseURL + "/course/" + url.PathEscape(x.Link())
-	page["Course"] = x
-	page["Assignments"] = assignments
-	return ctx.View("assignment", page)
+	p := page(ctx)
+	p["Title"] = x.Title + " | " + p["Title"].(string)
+	p["Desc"] = x.ShortDesc
+	p["Image"] = x.Image
+	p["URL"] = baseURL + "/course/" + url.PathEscape(x.Link())
+	p["Course"] = x
+	p["Assignments"] = assignments
+	return ctx.View("assignment", p)
 }
 
 func editorContentCreate(ctx *hime.Context) error {
@@ -616,9 +616,9 @@ func editorContentCreate(ctx *hime.Context) error {
 		return err
 	}
 
-	page := newPage(ctx)
-	page["Course"] = course
-	return ctx.View("editor.content.create", page)
+	p := page(ctx)
+	p["Course"] = course
+	return ctx.View("editor.content.create", p)
 }
 
 func postEditorContentCreate(ctx *hime.Context) error {
@@ -667,10 +667,10 @@ func editorContentEdit(ctx *hime.Context) error {
 		return ctx.Status(http.StatusForbidden).StatusText()
 	}
 
-	page := newPage(ctx)
-	page["Course"] = course
-	page["Content"] = content
-	return ctx.View("editor.content.edit", page)
+	p := page(ctx)
+	p["Course"] = course
+	p["Content"] = content
+	return ctx.View("editor.content.edit", p)
 }
 
 func postEditorContentEdit(ctx *hime.Context) error {

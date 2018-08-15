@@ -27,11 +27,11 @@ func adminUsers(ctx *hime.Context) error {
 		return err
 	}
 
-	page := newPage(ctx)
-	page["Navbar"] = "admin.users"
-	page["Users"] = users
-	page["Paginate"] = pn
-	return ctx.View("admin.users", page)
+	p := page(ctx)
+	p["Navbar"] = "admin.users"
+	p["Users"] = users
+	p["Paginate"] = pn
+	return ctx.View("admin.users", p)
 }
 
 func adminCourses(ctx *hime.Context) error {
@@ -48,11 +48,11 @@ func adminCourses(ctx *hime.Context) error {
 		return err
 	}
 
-	page := newPage(ctx)
-	page["Navbar"] = "admin.courses"
-	page["Courses"] = courses
-	page["Paginate"] = pn
-	return ctx.View("admin.courses", page)
+	p := page(ctx)
+	p["Navbar"] = "admin.courses"
+	p["Courses"] = courses
+	p["Paginate"] = pn
+	return ctx.View("admin.courses", p)
 }
 
 func adminRejectPayment(ctx *hime.Context) error {
@@ -99,10 +99,10 @@ func adminRejectPayment(ctx *hime.Context) error {
 		x.Course.Link(),
 	)
 
-	page := newPage(ctx)
-	page["Payment"] = x
-	page["message"] = message
-	return ctx.View("admin.payments.reject", page)
+	p := page(ctx)
+	p["Payment"] = x
+	p["message"] = message
+	return ctx.View("admin.payments.reject", p)
 }
 
 func postAdminRejectPayment(ctx *hime.Context) error {
@@ -236,11 +236,11 @@ func adminPendingPayments(ctx *hime.Context) error {
 		return err
 	}
 
-	page := newPage(ctx)
-	page["Navbar"] = "admin.payment.pending"
-	page["Payments"] = payments
-	page["Paginate"] = pn
-	return ctx.View("admin.payments", page)
+	p := page(ctx)
+	p["Navbar"] = "admin.payment.pending"
+	p["Payments"] = payments
+	p["Paginate"] = pn
+	return ctx.View("admin.payments", p)
 }
 
 func adminHistoryPayments(ctx *hime.Context) error {
@@ -253,14 +253,13 @@ func adminHistoryPayments(ctx *hime.Context) error {
 	pn := paginate.New(int64(pg), 30, cnt)
 
 	payments, err := repository.ListPaymentsByStatus(ctx, []int{entity.Accepted, entity.Rejected, entity.Refunded}, pn.Limit(), pn.Offset())
-
 	if err != nil {
 		return err
 	}
 
-	page := newPage(ctx)
-	page["Navbar"] = "admin.payment.history"
-	page["Payments"] = payments
-	page["Paginate"] = pn
-	return ctx.View("admin.payments", page)
+	p := page(ctx)
+	p["Navbar"] = "admin.payment.history"
+	p["Payments"] = payments
+	p["Paginate"] = pn
+	return ctx.View("admin.payments", p)
 }

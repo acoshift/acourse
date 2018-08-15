@@ -19,35 +19,6 @@ func TemplateFunc() template.FuncMap {
 		"currency": func(v float64) string {
 			return humanize.FormatFloat("#,###.##", v)
 		},
-		"paginate": func(p, n int) []int {
-			r := make([]int, 0, 7)
-			r = append(r, 1)
-			if n <= 1 {
-				return r
-			}
-			if n <= 2 {
-				return append(r, 2)
-			}
-			if p <= 3 {
-				r = append(r, 2, 3)
-			}
-			if p > 3 {
-				r = append(r, -1, p-1)
-				if p < n {
-					r = append(r, p)
-				}
-			}
-			if n-p+1 >= 3 && p >= 3 {
-				r = append(r, p+1)
-			}
-			if n-p >= 3 {
-				r = append(r, -1)
-			}
-			if n >= 4 {
-				r = append(r, n)
-			}
-			return r
-		},
 		"courseType": func(v int) string {
 			switch v {
 			case entity.Live:
@@ -123,13 +94,10 @@ func TemplateFunc() template.FuncMap {
 		"incr": func(v int) int {
 			return v + 1
 		},
-		"decr": func(v int) int {
-			return v - 1
-		},
 	}
 }
 
-func newPage(ctx context.Context) map[string]interface{} {
+func page(ctx context.Context) map[string]interface{} {
 	return map[string]interface{}{
 		"Title":  "Acourse",
 		"Desc":   "แหล่งเรียนรู้ออนไลน์ ที่ทุกคนเข้าถึงได้",
