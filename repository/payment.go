@@ -3,6 +3,8 @@ package repository
 import (
 	"context"
 
+	"github.com/acoshift/pgsql"
+
 	"github.com/lib/pq"
 
 	"github.com/acoshift/acourse/context/sqlctx"
@@ -89,7 +91,7 @@ func SetPaymentStatus(ctx context.Context, paymentID string, status int) error {
 func scanPayment(scan scanFunc, x *entity.Payment) error {
 	err := scan(&x.ID,
 		&x.Image, &x.Price, &x.OriginalPrice, &x.Code, &x.Status, &x.CreatedAt, &x.UpdatedAt, &x.At,
-		&x.User.ID, &x.User.Username, &x.User.Name, &x.User.Email, &x.User.Image,
+		&x.User.ID, &x.User.Username, &x.User.Name, pgsql.NullString(&x.User.Email), &x.User.Image,
 		&x.Course.ID, &x.Course.Title, &x.Course.Image, &x.Course.URL,
 	)
 	if err != nil {
