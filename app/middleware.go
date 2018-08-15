@@ -139,10 +139,3 @@ func setHeaders(h http.Handler) http.Handler {
 		h.ServeHTTP(w, r)
 	})
 }
-
-func cache(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set(header.CacheControl, "public, max-age=31536000")
-		h.ServeHTTP(w, r)
-	})
-}

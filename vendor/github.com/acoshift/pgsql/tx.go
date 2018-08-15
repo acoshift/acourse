@@ -7,6 +7,11 @@ import (
 	"github.com/lib/pq"
 )
 
+// BeginTxer type
+type BeginTxer interface {
+	BeginTx(context.Context, *sql.TxOptions) (*sql.Tx, error)
+}
+
 // TxOptions is the transaction options
 type TxOptions struct {
 	sql.TxOptions
@@ -18,12 +23,12 @@ const (
 )
 
 // RunInTx runs fn inside retryable transaction
-func RunInTx(db *sql.DB, opts *TxOptions, fn func(*sql.Tx) error) error {
+func RunInTx(db BeginTxer, opts *TxOptions, fn func(*sql.Tx) error) error {
 	return RunInTxContext(context.Background(), db, opts, fn)
 }
 
 // RunInTxContext runs fn inside retryable transaction with context
-func RunInTxContext(ctx context.Context, db *sql.DB, opts *TxOptions, fn func(*sql.Tx) error) error {
+func RunInTxContext(ctx context.Context, db BeginTxer, opts *TxOptions, fn func(*sql.Tx) error) error {
 	if opts == nil {
 		opts = &TxOptions{}
 	}

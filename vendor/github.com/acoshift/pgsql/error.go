@@ -13,7 +13,7 @@ func contains(xs []string, x string) bool {
 	return false
 }
 
-// IsUniqueViolation checks is error unique_violation with given constraint,
+// IsUniqueViolation checks is error an unique_violation with given constraint,
 // constraint can be empty to ignore constraint name checks
 func IsUniqueViolation(err error, constraint ...string) bool {
 	if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "23505" {
@@ -21,6 +21,14 @@ func IsUniqueViolation(err error, constraint ...string) bool {
 			return true
 		}
 		return contains(constraint, pqErr.Constraint)
+	}
+	return false
+}
+
+// IsInvalidTextRepresentation checks is error an invalid_text_representation
+func IsInvalidTextRepresentation(err error) bool {
+	if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "22P02" {
+		return true
 	}
 	return false
 }

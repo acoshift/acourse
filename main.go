@@ -6,13 +6,13 @@ import (
 	"log"
 	"time"
 
+	"cloud.google.com/go/profiler"
 	"cloud.google.com/go/storage"
 	"github.com/acoshift/configfile"
 	"github.com/acoshift/go-firebase-admin"
 	"github.com/acoshift/hime"
 	"github.com/go-redis/redis"
 	_ "github.com/lib/pq"
-	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 	"gopkg.in/gomail.v2"
 
@@ -31,11 +31,8 @@ func main() {
 
 	ctx := context.Background()
 
-	// init google cloud config
-	gconf, err := google.JWTConfigFromJSON(config.Bytes("service_account"), storage.ScopeReadWrite)
-	if err != nil {
-		log.Fatal(err)
-	}
+	// init profiler
+	profiler.Start(profiler.Config{Service: "acourse"})
 
 	firApp, err := firebase.InitializeApp(ctx, firebase.AppOptions{
 		ProjectID: config.String("project_id"),
@@ -46,7 +43,7 @@ func main() {
 	firAuth := firApp.Auth()
 
 	// init google storage
-	storageClient, err := storage.NewClient(ctx, option.WithTokenSource(gconf.TokenSource(ctx)))
+	storageClient, err := storage.NewClient(ctx, option.WithCredentialsFile("config/service_account"))
 	if err != nil {
 		log.Fatal(err)
 	}

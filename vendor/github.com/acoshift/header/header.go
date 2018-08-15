@@ -86,6 +86,7 @@ const (
 	P3P                           = "P3P"
 	ProxyAuthenticate             = "Proxy-Authenticate"
 	PublicKeyPins                 = "Public-Key-Pins"
+	ReferrerPolicy                = "Referrer-Policy"
 	Refresh                       = "Refresh"
 	RetryAfter                    = "Retry-After"
 	Server                        = "Server"

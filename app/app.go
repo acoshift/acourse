@@ -64,7 +64,10 @@ func New(config Config) http.Handler {
 		w.WriteHeader(http.StatusOK)
 	})
 
-	mux.Handle("/~/", http.StripPrefix("/~", cache(webstatic.New("static"))))
+	mux.Handle("/~/", http.StripPrefix("/~", webstatic.New(webstatic.Config{
+		Dir:          "static",
+		CacheControl: "public, max-age=31536000",
+	})))
 	mux.Handle("/favicon.ico", fileHandler("static/favicon.ico"))
 
 	methodmux.FallbackHandler = hime.Handler(notFound)
