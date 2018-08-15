@@ -104,7 +104,7 @@ func courseView(ctx *hime.Context) error {
 	p["Course"] = x
 	p["Enrolled"] = enrolled
 	p["Owned"] = owned
-	p["pendingEnroll"] = pendingEnroll
+	p["PendingEnroll"] = pendingEnroll
 	return ctx.View("course", p)
 }
 
