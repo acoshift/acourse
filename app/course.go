@@ -12,12 +12,12 @@ import (
 
 	"github.com/acoshift/header"
 	"github.com/acoshift/hime"
-	"github.com/acoshift/pgsql"
 	"github.com/acoshift/prefixhandler"
 	"github.com/google/uuid"
 	"github.com/lib/pq"
 
 	"github.com/acoshift/acourse/appctx"
+	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/entity"
 	"github.com/acoshift/acourse/repository"
 )
@@ -37,7 +37,7 @@ func courseView(ctx *hime.Context) error {
 	_, err := uuid.Parse(link)
 	if err != nil {
 		// link can not parse to uuid get course id from url
-		id, err = repository.GetCourseIDFromURL(db, link)
+		id, err = repository.GetCourseIDFromURL(ctx, link)
 		if err == entity.ErrNotFound {
 			return notFound(ctx)
 		}
@@ -45,7 +45,7 @@ func courseView(ctx *hime.Context) error {
 			return err
 		}
 	}
-	x, err := repository.GetCourse(db, id)
+	x, err := repository.GetCourse(ctx, id)
 	if err == entity.ErrNotFound {
 		return notFound(ctx)
 	}
@@ -61,13 +61,13 @@ func courseView(ctx *hime.Context) error {
 	enrolled := false
 	pendingEnroll := false
 	if user != nil {
-		enrolled, err = repository.IsEnrolled(db, user.ID, x.ID)
+		enrolled, err = repository.IsEnrolled(ctx, user.ID, x.ID)
 		if err != nil {
 			return err
 		}
 
 		if !enrolled {
-			pendingEnroll, err = repository.HasPendingPayment(db, user.ID, x.ID)
+			pendingEnroll, err = repository.HasPendingPayment(ctx, user.ID, x.ID)
 			if err != nil {
 				return err
 			}
@@ -81,7 +81,7 @@ func courseView(ctx *hime.Context) error {
 
 	// if user enrolled or user is owner fetch course contents
 	if enrolled || owned {
-		x.Contents, err = repository.GetCourseContents(db, x.ID)
+		x.Contents, err = repository.GetCourseContents(ctx, x.ID)
 		if err != nil {
 			return err
 		}
@@ -90,7 +90,7 @@ func courseView(ctx *hime.Context) error {
 	if owned {
 		x.Owner = user
 	} else {
-		x.Owner, err = repository.GetUser(db, x.UserID)
+		x.Owner, err = repository.GetUser(ctx, x.UserID)
 		if err != nil {
 			return err
 		}
@@ -117,7 +117,7 @@ func courseContent(ctx *hime.Context) error {
 	_, err := uuid.Parse(link)
 	if err != nil {
 		// link can not parse to uuid get course id from url
-		id, err = repository.GetCourseIDFromURL(db, link)
+		id, err = repository.GetCourseIDFromURL(ctx, link)
 		if err == entity.ErrNotFound {
 			return notFound(ctx)
 		}
@@ -125,7 +125,7 @@ func courseContent(ctx *hime.Context) error {
 			return err
 		}
 	}
-	x, err := repository.GetCourse(db, id)
+	x, err := repository.GetCourse(ctx, id)
 	if err == entity.ErrNotFound {
 		return notFound(ctx)
 	}
@@ -138,7 +138,7 @@ func courseContent(ctx *hime.Context) error {
 		return ctx.RedirectTo("course", x.URL.String, "content")
 	}
 
-	enrolled, err := repository.IsEnrolled(db, user.ID, x.ID)
+	enrolled, err := repository.IsEnrolled(ctx, user.ID, x.ID)
 	if err != nil {
 		return err
 	}
@@ -147,12 +147,12 @@ func courseContent(ctx *hime.Context) error {
 		return ctx.Status(http.StatusForbidden).StatusText()
 	}
 
-	x.Contents, err = repository.GetCourseContents(db, x.ID)
+	x.Contents, err = repository.GetCourseContents(ctx, x.ID)
 	if err != nil {
 		return err
 	}
 
-	x.Owner, err = repository.GetUser(db, x.UserID)
+	x.Owner, err = repository.GetUser(ctx, x.UserID)
 	if err != nil {
 		return err
 	}
@@ -226,40 +226,37 @@ func postEditorCreate(ctx *hime.Context) error {
 	}
 
 	var id string
-	err := pgsql.RunInTx(db, nil, func(tx *sql.Tx) error {
-		err := db.QueryRow(`
-			insert into courses
-				(user_id, title, short_desc, long_desc, image, start)
-			values
-				($1, $2, $3, $4, $5, $6)
-			returning id
-		`, user.ID, title, shortDesc, desc, imageURL, start).Scan(&id)
+	err := sqlctx.RunInTx(ctx, func(ctx context.Context) error {
+		var err error
+
+		id, err = repository.RegisterCourse(ctx, &entity.RegisterCourse{
+			UserID:    user.ID,
+			Title:     title,
+			ShortDesc: shortDesc,
+			LongDesc:  desc,
+			Image:     imageURL,
+			Start:     start,
+		})
 		if err != nil {
 			return err
 		}
-		_, err = db.Exec(`
-			insert into course_options
-				(course_id)
-			values
-				($1)
-		`, id)
-		return err
+
+		return repository.SetCourseOption(ctx, id, &entity.CourseOption{})
 	})
 	if err != nil {
 		return err
 	}
 
-	var link sql.NullString
-	db.QueryRow(`select url from courses where id = $1`, id).Scan(&link)
-	if !link.Valid {
+	link, _ := repository.GetCourseURL(ctx, id)
+	if link == "" {
 		return ctx.RedirectTo("course", id)
 	}
-	return ctx.RedirectTo("course", link.String)
+	return ctx.RedirectTo("course", link)
 }
 
 func editorCourse(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
-	course, err := repository.GetCourse(db, id)
+	course, err := repository.GetCourse(ctx, id)
 	if err != nil {
 		return err
 	}
@@ -313,64 +310,49 @@ func postEditorCourse(ctx *hime.Context) error {
 		}
 	}
 
-	err := pgsql.RunInTx(db, nil, func(tx *sql.Tx) error {
-		_, err := tx.Exec(`
-			update courses
-			set
-				title = $2,
-				short_desc = $3,
-				long_desc = $4,
-				start = $5,
-				updated_at = now()
-			where id = $1
-		`, id, title, shortDesc, desc, start)
+	err := sqlctx.RunInTx(ctx, func(ctx context.Context) error {
+		err := repository.UpdateCourse(ctx, &entity.UpdateCourse{
+			ID:        id,
+			Title:     title,
+			ShortDesc: shortDesc,
+			LongDesc:  desc,
+			Start:     start,
+		})
 		if err != nil {
 			return err
 		}
 
 		if len(imageURL) > 0 {
-			_, err = tx.Exec(`
-				update courses
-				set
-					image = $2
-				where id = $1
-			`, id, imageURL)
+			err = repository.SetCourseImage(ctx, id, imageURL)
 			if err != nil {
 				return err
 			}
 		}
-		// _, err = tx.Exec(`
-		// 	upsert into course_options
-		// 		(course_id, assignment)
-		// 	values
-		// 		($1, $2)
-		// `, id, assignment)
-		// must(err)
+
 		return nil
 	})
 	if err != nil {
 		return err
 	}
 
-	var link sql.NullString
-	db.QueryRow(`select url from courses where id = $1`, id).Scan(&link)
-	if !link.Valid {
+	link, _ := repository.GetCourseURL(ctx, id)
+	if link == "" {
 		return ctx.RedirectTo("course", id)
 	}
-	return ctx.RedirectTo("course", link.String)
+	return ctx.RedirectTo("course", link)
 }
 
 func editorContent(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 
-	course, err := repository.GetCourse(db, id)
+	course, err := repository.GetCourse(ctx, id)
 	if err == entity.ErrNotFound {
 		return notFound(ctx)
 	}
 	if err != nil {
 		return err
 	}
-	course.Contents, err = repository.GetCourseContents(db, id)
+	course.Contents, err = repository.GetCourseContents(ctx, id)
 	if err != nil {
 		return err
 	}
@@ -385,7 +367,8 @@ func postEditorContent(ctx *hime.Context) error {
 
 	if ctx.FormValue("action") == "delete" {
 		contentID := ctx.FormValue("contentId")
-		_, err := db.Exec(`delete from course_contents where id = $1 and course_id = $2`, contentID, id)
+
+		err := repository.DeleteCourseContent(ctx, id, contentID)
 		if err != nil {
 			return err
 		}
@@ -401,7 +384,7 @@ func courseEnroll(ctx *hime.Context) error {
 	id := link
 	_, err := uuid.Parse(link)
 	if err != nil {
-		id, err = repository.GetCourseIDFromURL(db, link)
+		id, err = repository.GetCourseIDFromURL(ctx, link)
 		if err == entity.ErrNotFound {
 			return notFound(ctx)
 		}
@@ -410,7 +393,7 @@ func courseEnroll(ctx *hime.Context) error {
 		}
 	}
 
-	x, err := repository.GetCourse(db, id)
+	x, err := repository.GetCourse(ctx, id)
 	if err == entity.ErrNotFound {
 		return notFound(ctx)
 	}
@@ -424,7 +407,7 @@ func courseEnroll(ctx *hime.Context) error {
 	}
 
 	// redirect enrolled user back to course page
-	enrolled, err := repository.IsEnrolled(db, user.ID, id)
+	enrolled, err := repository.IsEnrolled(ctx, user.ID, id)
 	if err != nil {
 		return err
 	}
@@ -433,7 +416,7 @@ func courseEnroll(ctx *hime.Context) error {
 	}
 
 	// check is user has pending enroll
-	pendingPayment, err := repository.HasPendingPayment(db, user.ID, id)
+	pendingPayment, err := repository.HasPendingPayment(ctx, user.ID, id)
 	if err != nil {
 		return err
 	}
@@ -459,7 +442,7 @@ func postCourseEnroll(ctx *hime.Context) error {
 	id := link
 	_, err := uuid.Parse(link)
 	if err != nil {
-		id, err = repository.GetCourseIDFromURL(db, link)
+		id, err = repository.GetCourseIDFromURL(ctx, link)
 		if err == entity.ErrNotFound {
 			return notFound(ctx)
 		}
@@ -468,7 +451,7 @@ func postCourseEnroll(ctx *hime.Context) error {
 		}
 	}
 
-	x, err := repository.GetCourse(db, id)
+	x, err := repository.GetCourse(ctx, id)
 	if err == entity.ErrNotFound {
 		return notFound(ctx)
 	}
@@ -482,7 +465,7 @@ func postCourseEnroll(ctx *hime.Context) error {
 	}
 
 	// redirect enrolled user back to course page
-	enrolled, err := repository.IsEnrolled(db, user.ID, id)
+	enrolled, err := repository.IsEnrolled(ctx, user.ID, id)
 	if err != nil {
 		return err
 	}
@@ -491,7 +474,7 @@ func postCourseEnroll(ctx *hime.Context) error {
 	}
 
 	// check is user has pending enroll
-	pendingPayment, err := repository.HasPendingPayment(db, user.ID, id)
+	pendingPayment, err := repository.HasPendingPayment(ctx, user.ID, id)
 	if err != nil {
 		return err
 	}
@@ -536,14 +519,14 @@ func postCourseEnroll(ctx *hime.Context) error {
 
 	newPayment := false
 
-	err = pgsql.RunInTx(db, nil, func(tx *sql.Tx) error {
+	err = sqlctx.RunInTx(ctx, func(ctx context.Context) error {
 		if x.Price == 0 {
-			err := repository.Enroll(tx, user.ID, x.ID)
+			err := repository.Enroll(ctx, user.ID, x.ID)
 			if err != nil {
 				return err
 			}
 		} else {
-			err = repository.CreatePayment(tx, &entity.Payment{
+			err = repository.CreatePayment(ctx, &entity.Payment{
 				CourseID:      x.ID,
 				UserID:        user.ID,
 				Image:         imageURL,
@@ -581,7 +564,7 @@ func courseAssignment(ctx *hime.Context) error {
 	_, err := uuid.Parse(link)
 	if err != nil {
 		// link can not parse to int64 get course id from url
-		id, err = repository.GetCourseIDFromURL(db, link)
+		id, err = repository.GetCourseIDFromURL(ctx, link)
 		if err == entity.ErrNotFound {
 			return notFound(ctx)
 		}
@@ -589,7 +572,7 @@ func courseAssignment(ctx *hime.Context) error {
 			return err
 		}
 	}
-	x, err := repository.GetCourse(db, id)
+	x, err := repository.GetCourse(ctx, id)
 	if err == entity.ErrNotFound {
 		return notFound(ctx)
 	}
@@ -602,7 +585,7 @@ func courseAssignment(ctx *hime.Context) error {
 		return ctx.RedirectTo("course", x.URL.String, "assignment")
 	}
 
-	enrolled, err := repository.IsEnrolled(db, user.ID, x.ID)
+	enrolled, err := repository.IsEnrolled(ctx, user.ID, x.ID)
 	if err != nil {
 		return err
 	}
@@ -611,7 +594,7 @@ func courseAssignment(ctx *hime.Context) error {
 		return ctx.Status(http.StatusForbidden).StatusText()
 	}
 
-	assignments, err := repository.GetAssignments(db, x.ID)
+	assignments, err := repository.GetAssignments(ctx, x.ID)
 	if err != nil {
 		return err
 	}
@@ -629,7 +612,7 @@ func courseAssignment(ctx *hime.Context) error {
 func editorContentCreate(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 
-	course, err := repository.GetCourse(db, id)
+	course, err := repository.GetCourse(ctx, id)
 	if err != nil {
 		return err
 	}
@@ -646,27 +629,14 @@ func postEditorContentCreate(ctx *hime.Context) error {
 		title   = ctx.FormValue("Title")
 		desc    = ctx.FormValue("Desc")
 		videoID = ctx.FormValue("VideoID")
-		i       int64
 	)
 
-	err := pgsql.RunInTx(db, nil, func(tx *sql.Tx) error {
-		// get content index
-		err := tx.QueryRow(`
-			select i from course_contents where course_id = $1 order by i desc limit 1
-		`, id).Scan(&i)
-		if err == sql.ErrNoRows {
-			i = -1
-		}
-		_, err = tx.Exec(`
-			insert into course_contents
-				(course_id, i, title, long_desc, video_id, video_type)
-			values
-				($1, $2, $3, $4, $5, $6)
-		`, id, i+1, title, desc, videoID, entity.Youtube)
-		if err != nil {
-			return err
-		}
-		return nil
+	_, err := repository.RegisterCourseContent(ctx, &entity.RegisterCourseContent{
+		CourseID:  id,
+		Title:     title,
+		LongDesc:  desc,
+		VideoID:   videoID,
+		VideoType: entity.Youtube,
 	})
 	if err != nil {
 		return err
@@ -679,7 +649,7 @@ func editorContentEdit(ctx *hime.Context) error {
 	// course content id
 	id := ctx.FormValue("id")
 
-	content, err := repository.GetCourseContent(db, id)
+	content, err := repository.GetCourseContent(ctx, id)
 	if err == sql.ErrNoRows {
 		return notFound(ctx)
 	}
@@ -687,7 +657,7 @@ func editorContentEdit(ctx *hime.Context) error {
 		return err
 	}
 
-	course, err := repository.GetCourse(db, content.CourseID)
+	course, err := repository.GetCourse(ctx, content.CourseID)
 	if err != nil {
 		return err
 	}
@@ -708,7 +678,7 @@ func postEditorContentEdit(ctx *hime.Context) error {
 	// course content id
 	id := ctx.FormValue("id")
 
-	content, err := repository.GetCourseContent(db, id)
+	content, err := repository.GetCourseContent(ctx, id)
 	if err == sql.ErrNoRows {
 		return notFound(ctx)
 	}
@@ -716,7 +686,7 @@ func postEditorContentEdit(ctx *hime.Context) error {
 		return err
 	}
 
-	course, err := repository.GetCourse(db, content.CourseID)
+	course, err := repository.GetCourse(ctx, content.CourseID)
 	if err != nil {
 		return err
 	}
@@ -733,15 +703,7 @@ func postEditorContentEdit(ctx *hime.Context) error {
 		videoID = ctx.FormValue("VideoID")
 	)
 
-	_, err = db.Exec(`
-		update course_contents
-		set
-			title = $3,
-			long_desc = $4,
-			video_id = $5,
-			updated_at = now()
-		where id = $1 and course_id = $2
-	`, id, course.ID, title, desc, videoID)
+	err = repository.UpdateCourseContent(ctx, course.ID, id, title, desc, videoID)
 	if err != nil {
 		return err
 	}

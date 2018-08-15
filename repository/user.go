@@ -1,10 +1,12 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 
 	"github.com/lib/pq"
 
+	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/entity"
 )
 
@@ -56,7 +58,9 @@ func scanUser(scan scanFunc, x *entity.User) error {
 }
 
 // GetUsers gets users
-func GetUsers(q Queryer, userIDs []string) ([]*entity.User, error) {
+func GetUsers(ctx context.Context, userIDs []string) ([]*entity.User, error) {
+	q := sqlctx.GetQueryer(ctx)
+
 	xs := make([]*entity.User, 0, len(userIDs))
 	rows, err := q.Query(queryGetUsers, pq.Array(userIDs))
 	if err != nil {
@@ -78,7 +82,9 @@ func GetUsers(q Queryer, userIDs []string) ([]*entity.User, error) {
 }
 
 // GetUser gets user from id
-func GetUser(q Queryer, userID string) (*entity.User, error) {
+func GetUser(ctx context.Context, userID string) (*entity.User, error) {
+	q := sqlctx.GetQueryer(ctx)
+
 	var x entity.User
 	err := scanUser(q.QueryRow(queryGetUser, userID).Scan, &x)
 	if err == sql.ErrNoRows {
@@ -91,7 +97,9 @@ func GetUser(q Queryer, userID string) (*entity.User, error) {
 }
 
 // GetUserFromUsername gets user from username
-func GetUserFromUsername(q Queryer, username string) (*entity.User, error) {
+func GetUserFromUsername(ctx context.Context, username string) (*entity.User, error) {
+	q := sqlctx.GetQueryer(ctx)
+
 	var x entity.User
 	err := scanUser(q.QueryRow(queryGetUserFromUsername, username).Scan, &x)
 	if err != nil {
@@ -101,7 +109,9 @@ func GetUserFromUsername(q Queryer, username string) (*entity.User, error) {
 }
 
 // FindUserByEmail finds user by email
-func FindUserByEmail(q Queryer, email string) (*entity.User, error) {
+func FindUserByEmail(ctx context.Context, email string) (*entity.User, error) {
+	q := sqlctx.GetQueryer(ctx)
+
 	var x entity.User
 	err := scanUser(q.QueryRow(queryGetUserFromEmail, email).Scan, &x)
 	if err == sql.ErrNoRows {
@@ -114,7 +124,9 @@ func FindUserByEmail(q Queryer, email string) (*entity.User, error) {
 }
 
 // ListUsers lists users
-func ListUsers(q Queryer, limit, offset int64) ([]*entity.User, error) {
+func ListUsers(ctx context.Context, limit, offset int64) ([]*entity.User, error) {
+	q := sqlctx.GetQueryer(ctx)
+
 	xs := make([]*entity.User, 0)
 	rows, err := q.Query(queryListUsers, limit, offset)
 	if err != nil {
@@ -136,7 +148,9 @@ func ListUsers(q Queryer, limit, offset int64) ([]*entity.User, error) {
 }
 
 // CountUsers counts users
-func CountUsers(q Queryer) (int64, error) {
+func CountUsers(ctx context.Context) (int64, error) {
+	q := sqlctx.GetQueryer(ctx)
+
 	var cnt int64
 	err := q.QueryRow(`
 		SELECT count(*)
@@ -149,27 +163,54 @@ func CountUsers(q Queryer) (int64, error) {
 }
 
 // IsUserExists checks is user exists
-func IsUserExists(q Queryer, id string) (bool, error) {
-	var cnt int64
-	err := q.QueryRow(`
-		SELECT count(*)
-		  FROM users
-		 WHERE id = $1;
-	`, id).Scan(&cnt)
-	if err != nil {
-		return false, err
-	}
-	return cnt > 0, nil
+func IsUserExists(ctx context.Context, id string) (exists bool, err error) {
+	q := sqlctx.GetQueryer(ctx)
+
+	err = q.QueryRow(`
+		select exists (
+			select 1
+			from users
+			where id = $1
+		)
+	`, id).Scan(&exists)
+	return
 }
 
 // CreateUser creates new users
-func CreateUser(q Queryer, x *entity.User) error {
+func CreateUser(ctx context.Context, x *entity.User) error {
+	q := sqlctx.GetQueryer(ctx)
+
 	_, err := q.Exec(`
-		INSERT INTO users (id, username, name, email)
-		VALUES ($1, $2, $3, $4);
-	`, x.ID, x.ID, "", x.Email)
-	if err != nil {
-		return err
-	}
-	return nil
+		insert into users (id, username, name, email, image)
+		values ($1, $2, $3, $4, $5)
+	`, x.ID, x.Username, x.Name, x.Email, x.Image)
+	return err
+}
+
+// SetUserImage sets user's image
+func SetUserImage(ctx context.Context, userID string, image string) error {
+	q := sqlctx.GetQueryer(ctx)
+
+	_, err := q.Exec(`
+		update users
+		set image = $2
+		where id = $1
+	`, userID, image)
+	return err
+}
+
+// UpdateUser updates user
+func UpdateUser(ctx context.Context, userID string, username, name, aboutMe string) error {
+	q := sqlctx.GetQueryer(ctx)
+
+	_, err := q.Exec(`
+		update users
+		set
+			username = $2,
+			name = $3,
+			about_me = $4,
+			updated_at = now()
+		where id = $1
+	`, userID, username, name, aboutMe)
+	return err
 }

@@ -1,7 +1,6 @@
 package app
 
 import (
-	"database/sql"
 	"time"
 
 	"cloud.google.com/go/storage"
@@ -12,7 +11,6 @@ import (
 
 // Config use to init app package
 type Config struct {
-	DB           *sql.DB
 	BaseURL      string
 	RedisClient  *redis.Client
 	RedisPrefix  string

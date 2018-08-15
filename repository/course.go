@@ -2,13 +2,17 @@ package repository
 
 import (
 	"bytes"
+	"context"
 	"database/sql"
 	"encoding/gob"
 	"time"
 
+	"github.com/acoshift/pgsql"
+
 	"github.com/go-redis/redis"
 	"github.com/lib/pq"
 
+	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/entity"
 )
 
@@ -79,13 +83,16 @@ func scanCourse(scan scanFunc, x *entity.Course) error {
 }
 
 // GetCourses gets courses
-func GetCourses(q Queryer, courseIDs []string) ([]*entity.Course, error) {
-	xs := make([]*entity.Course, 0, len(courseIDs))
+func GetCourses(ctx context.Context, courseIDs []string) ([]*entity.Course, error) {
+	q := sqlctx.GetQueryer(ctx)
+
 	rows, err := q.Query(queryGetCourses, pq.Array(courseIDs))
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
+
+	xs := make([]*entity.Course, 0, len(courseIDs))
 	for rows.Next() {
 		var x entity.Course
 		err = scanCourse(rows.Scan, &x)
@@ -101,7 +108,9 @@ func GetCourses(q Queryer, courseIDs []string) ([]*entity.Course, error) {
 }
 
 // GetCourse gets course
-func GetCourse(q Queryer, courseID string) (*entity.Course, error) {
+func GetCourse(ctx context.Context, courseID string) (*entity.Course, error) {
+	q := sqlctx.GetQueryer(ctx)
+
 	var x entity.Course
 	err := q.QueryRow(`
 		SELECT id, user_id, title, short_desc, long_desc, image,
@@ -126,7 +135,9 @@ func GetCourse(q Queryer, courseID string) (*entity.Course, error) {
 }
 
 // GetCourseContents gets course contents for given course id
-func GetCourseContents(q Queryer, courseID string) ([]*entity.CourseContent, error) {
+func GetCourseContents(ctx context.Context, courseID string) ([]*entity.CourseContent, error) {
+	q := sqlctx.GetQueryer(ctx)
+
 	rows, err := q.Query(`
 		  SELECT id, course_id, title, long_desc, video_id, video_type, download_url
 		    FROM course_contents
@@ -137,6 +148,7 @@ func GetCourseContents(q Queryer, courseID string) ([]*entity.CourseContent, err
 		return nil, err
 	}
 	defer rows.Close()
+
 	xs := make([]*entity.CourseContent, 0)
 	for rows.Next() {
 		var x entity.CourseContent
@@ -155,7 +167,9 @@ func GetCourseContents(q Queryer, courseID string) ([]*entity.CourseContent, err
 }
 
 // GetCourseContent gets course content from id
-func GetCourseContent(q Queryer, courseContentID string) (*entity.CourseContent, error) {
+func GetCourseContent(ctx context.Context, courseContentID string) (*entity.CourseContent, error) {
+	q := sqlctx.GetQueryer(ctx)
+
 	var x entity.CourseContent
 	err := q.QueryRow(`
 		SELECT id, course_id, title, long_desc, video_id, video_type, download_url
@@ -171,7 +185,9 @@ func GetCourseContent(q Queryer, courseContentID string) (*entity.CourseContent,
 }
 
 // GetCourseIDFromURL gets course id from url
-func GetCourseIDFromURL(q Queryer, url string) (string, error) {
+func GetCourseIDFromURL(ctx context.Context, url string) (string, error) {
+	q := sqlctx.GetQueryer(ctx)
+
 	var id string
 	err := q.QueryRow(`
 		SELECT id
@@ -188,8 +204,9 @@ func GetCourseIDFromURL(q Queryer, url string) (string, error) {
 }
 
 // ListCourses lists all courses
-func ListCourses(q Queryer, limit, offset int64) ([]*entity.Course, error) {
-	xs := make([]*entity.Course, 0)
+func ListCourses(ctx context.Context, limit, offset int64) ([]*entity.Course, error) {
+	q := sqlctx.GetQueryer(ctx)
+
 	rows, err := q.Query(`
 		  SELECT courses.id, courses.title, courses.short_desc, courses.long_desc, courses.image,
 		         courses.start, courses.url, courses.type, courses.price, courses.discount,
@@ -209,6 +226,8 @@ func ListCourses(q Queryer, limit, offset int64) ([]*entity.Course, error) {
 		return nil, err
 	}
 	defer rows.Close()
+
+	xs := make([]*entity.Course, 0)
 	for rows.Next() {
 		var x entity.Course
 		x.Owner = &entity.User{}
@@ -232,7 +251,7 @@ func ListCourses(q Queryer, limit, offset int64) ([]*entity.Course, error) {
 
 // ListPublicCourses lists public course sort by created at desc
 // TODO: add pagination
-func ListPublicCourses(q Queryer, c *redis.Client, cachePrefix string) ([]*entity.Course, error) {
+func ListPublicCourses(ctx context.Context, c *redis.Client, cachePrefix string) ([]*entity.Course, error) {
 	// TODO: move cache logic out from repo
 
 	// look from cache
@@ -250,6 +269,8 @@ func ListPublicCourses(q Queryer, c *redis.Client, cachePrefix string) ([]*entit
 	xs := make([]*entity.Course, 0)
 	m := make(map[string]*entity.Course)
 	ids := make([]string, 0)
+
+	q := sqlctx.GetQueryer(ctx)
 
 	{
 		rows, err := q.Query(queryListCoursesPublic)
@@ -308,7 +329,9 @@ func ListPublicCourses(q Queryer, c *redis.Client, cachePrefix string) ([]*entit
 
 // ListOwnCourses lists courses that owned by given user
 // TODO: add pagination
-func ListOwnCourses(q Queryer, userID string) ([]*entity.Course, error) {
+func ListOwnCourses(ctx context.Context, userID string) ([]*entity.Course, error) {
+	q := sqlctx.GetQueryer(ctx)
+
 	rows, err := q.Query(queryListCoursesOwn, userID)
 	if err != nil {
 		return nil, err
@@ -356,7 +379,9 @@ func ListOwnCourses(q Queryer, userID string) ([]*entity.Course, error) {
 
 // ListEnrolledCourses lists courses that enrolled by given user
 // TODO: add pagination
-func ListEnrolledCourses(q Queryer, userID string) ([]*entity.Course, error) {
+func ListEnrolledCourses(ctx context.Context, userID string) ([]*entity.Course, error) {
+	q := sqlctx.GetQueryer(ctx)
+
 	xs := make([]*entity.Course, 0)
 	rows, err := q.Query(queryListCoursesEnrolled, userID)
 	if err != nil {
@@ -378,10 +403,138 @@ func ListEnrolledCourses(q Queryer, userID string) ([]*entity.Course, error) {
 }
 
 // CountCourses counts courses
-func CountCourses(q Queryer) (cnt int64, err error) {
+func CountCourses(ctx context.Context) (cnt int64, err error) {
+	q := sqlctx.GetQueryer(ctx)
+
 	err = q.QueryRow(`
 		SELECT count(*)
 		  FROM courses;
 	`).Scan(&cnt)
+	return
+}
+
+// DeleteCourseContent deletes course content
+func DeleteCourseContent(ctx context.Context, courseID string, contentID string) error {
+	q := sqlctx.GetQueryer(ctx)
+
+	_, err := q.Exec(`
+		delete from course_contents
+		where id = $1 and course_id = $2
+	`, contentID, courseID)
+	return err
+}
+
+// UpdateCourseContent updates course content
+func UpdateCourseContent(ctx context.Context, courseID, contentID, title, desc, videoID string) error {
+	q := sqlctx.GetQueryer(ctx)
+
+	_, err := q.Exec(`
+		update course_contents
+		set
+			title = $3,
+			long_desc = $4,
+			video_id = $5,
+			updated_at = now()
+		where id = $1 and course_id = $2
+	`, contentID, courseID, title, desc, videoID)
+	return err
+}
+
+// RegisterCourse registers new course
+func RegisterCourse(ctx context.Context, x *entity.RegisterCourse) (courseID string, err error) {
+	q := sqlctx.GetQueryer(ctx)
+
+	err = q.QueryRow(`
+		insert into courses
+			(user_id, title, short_desc, long_desc, image, start)
+		values
+			($1, $2, $3, $4, $5, $6)
+		returning id
+	`, x.UserID, x.Title, x.ShortDesc, x.LongDesc, x.Image, x.Start).Scan(&courseID)
+	return
+}
+
+// SetCourseOption sets course option
+func SetCourseOption(ctx context.Context, courseID string, x *entity.CourseOption) error {
+	q := sqlctx.GetQueryer(ctx)
+
+	_, err := q.Exec(`
+		insert into course_options
+			(course_id, public, enroll, attend, assignment, discount)
+		values
+			($1, $2, $3, $4, $5, $6)
+		on conflict (course_id) do update set
+			public = excluded.public,
+			enroll = excluded.enroll,
+			attend = excluded.attend,
+			assignment = excluded.assignment,
+			discount = excluded.discount
+	`, courseID, x.Public, x.Enroll, x.Attend, x.Assignment, x.Discount)
+	return err
+}
+
+// GetCourseURL gets course url
+func GetCourseURL(ctx context.Context, courseID string) (url string, err error) {
+	q := sqlctx.GetQueryer(ctx)
+
+	err = q.QueryRow(`select url from courses where id = $1`, courseID).Scan(pgsql.NullString(&url))
+	return
+}
+
+// GetCourseUserID gets course user id
+func GetCourseUserID(ctx context.Context, courseID string) (userID string, err error) {
+	q := sqlctx.GetQueryer(ctx)
+
+	err = q.QueryRow(`select user_id from courses where id = $1`, courseID).Scan(&userID)
+	return
+}
+
+// SetCourseImage sets course image
+func SetCourseImage(ctx context.Context, courseID string, image string) error {
+	q := sqlctx.GetQueryer(ctx)
+
+	_, err := q.Exec(`update courses set image = $2 where id = $1`, courseID, image)
+	return err
+}
+
+// UpdateCourse updates course
+func UpdateCourse(ctx context.Context, x *entity.UpdateCourse) error {
+	q := sqlctx.GetQueryer(ctx)
+
+	_, err := q.Exec(`
+		update courses
+		set
+			title = $2,
+			short_desc = $3,
+			long_desc = $4,
+			start = $5,
+			updated_at = now()
+		where id = $1
+	`, x.ID, x.Title, x.ShortDesc, x.LongDesc, x.Start)
+	return err
+}
+
+// RegisterCourseContent registers course content
+func RegisterCourseContent(ctx context.Context, x *entity.RegisterCourseContent) (contentID string, err error) {
+	q := sqlctx.GetQueryer(ctx)
+
+	err = q.QueryRow(`
+		insert into course_contents
+			(
+				course_id,
+				i,
+				title, long_desc, video_id, video_type
+			)
+		values
+			(
+				$1,
+				(select coalesce(max(i)+1, 0) from course_contents where course_id = $1),
+				$2, $3, $4, $5
+			)
+		returning id
+	`,
+		x.CourseID,
+		x.Title, x.LongDesc, x.VideoID, x.VideoType,
+	).Scan(&contentID)
 	return
 }

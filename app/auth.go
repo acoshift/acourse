@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"crypto/rand"
 	"database/sql"
 	"encoding/base64"
@@ -12,10 +13,10 @@ import (
 
 	"github.com/acoshift/go-firebase-admin"
 	"github.com/acoshift/hime"
-	"github.com/acoshift/pgsql"
 	"github.com/asaskevich/govalidator"
 
 	"github.com/acoshift/acourse/appctx"
+	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/entity"
 	"github.com/acoshift/acourse/repository"
 )
@@ -67,7 +68,7 @@ func postSignIn(ctx *hime.Context) error {
 
 	f.Set("CheckEmail", "1")
 
-	user, err := repository.FindUserByEmail(db, email)
+	user, err := repository.FindUserByEmail(ctx, email)
 	// don't lets user know if email is wrong
 	if err == entity.ErrNotFound {
 		return ctx.RedirectTo("signin.check-email")
@@ -162,12 +163,17 @@ func postSignInPassword(ctx *hime.Context) error {
 	// if user not found in our database, insert new user
 	// this happend when database out of sync with firebase authentication
 	{
-		ok, err := repository.IsUserExists(db, userID)
+		ok, err := repository.IsUserExists(ctx, userID)
 		if err != nil {
 			return err
 		}
 		if !ok {
-			err = repository.CreateUser(db, &entity.User{ID: userID, Email: sql.NullString{String: email, Valid: len(email) > 0}})
+			err = repository.CreateUser(ctx, &entity.User{
+				ID:       userID,
+				Username: userID,
+				Name:     userID,
+				Email:    sql.NullString{String: email, Valid: len(email) > 0},
+			})
 			if err != nil {
 				return err
 			}
@@ -208,23 +214,27 @@ func openIDCallback(ctx *hime.Context) error {
 		return err
 	}
 
-	err = pgsql.RunInTx(db, nil, func(tx *sql.Tx) error {
+	err = sqlctx.RunInTx(ctx, func(ctx context.Context) error {
 		// check is user sign up
-		var cnt int64
-		err = tx.QueryRowContext(ctx, `select 1 from users where id = $1`, user.UserID).Scan(&cnt)
-		if err == sql.ErrNoRows {
+		exists, err := repository.IsUserExists(ctx, user.UserID)
+		if err != nil {
+			return err
+		}
+		if !exists {
 			// user not found, insert new user
 			imageURL := uploadProfileFromURLAsync(user.PhotoURL)
-			_, err = tx.ExecContext(ctx, `
-				insert into users
-					(id, name, username, email, image)
-				values
-					($1, $2, $3, $4, $5)
-			`, user.UserID, user.DisplayName, user.UserID, sql.NullString{String: user.Email, Valid: len(user.Email) > 0}, imageURL)
+			err = repository.CreateUser(ctx, &entity.User{
+				ID:       user.UserID,
+				Name:     user.DisplayName,
+				Username: user.UserID,
+				Email:    sql.NullString{String: user.Email, Valid: len(user.Email) > 0},
+				Image:    imageURL,
+			})
 			if err != nil {
 				return err
 			}
 		}
+
 		return nil
 	})
 	if err != nil {
@@ -274,12 +284,11 @@ func postSignUp(ctx *hime.Context) error {
 		return ctx.RedirectToGet()
 	}
 
-	_, err = db.ExecContext(ctx, `
-		insert into users
-			(id, username, name, email)
-		values
-			($1, $2, '', $3)
-	`, userID, userID, email)
+	err = repository.CreateUser(ctx, &entity.User{
+		ID:       userID,
+		Username: userID,
+		Email:    sql.NullString{String: email, Valid: email != ""},
+	})
 	if err != nil {
 		return err
 	}

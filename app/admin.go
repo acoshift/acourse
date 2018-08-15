@@ -1,14 +1,14 @@
 package app
 
 import (
-	"database/sql"
+	"context"
 	"fmt"
 	"math"
 	"strconv"
 
 	"github.com/acoshift/hime"
-	"github.com/acoshift/pgsql"
 
+	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/entity"
 	"github.com/acoshift/acourse/repository"
 )
@@ -20,7 +20,7 @@ func adminUsers(ctx *hime.Context) error {
 	}
 	limit := int64(30)
 
-	cnt, err := repository.CountUsers(db)
+	cnt, err := repository.CountUsers(ctx)
 	if err != nil {
 		return err
 	}
@@ -32,7 +32,7 @@ func adminUsers(ctx *hime.Context) error {
 	}
 	totalPage := cnt / limit
 
-	users, err := repository.ListUsers(db, limit, offset)
+	users, err := repository.ListUsers(ctx, limit, offset)
 	if err != nil {
 		return err
 	}
@@ -51,7 +51,7 @@ func adminCourses(ctx *hime.Context) error {
 	}
 	limit := int64(30)
 
-	cnt, err := repository.CountCourses(db)
+	cnt, err := repository.CountCourses(ctx)
 	if err != nil {
 		return err
 	}
@@ -63,7 +63,7 @@ func adminCourses(ctx *hime.Context) error {
 	}
 	totalPage := int64(math.Ceil(float64(cnt) / float64(limit)))
 
-	courses, err := repository.ListCourses(db, limit, offset)
+	courses, err := repository.ListCourses(ctx, limit, offset)
 	if err != nil {
 		return err
 	}
@@ -85,9 +85,9 @@ func adminPayments(ctx *hime.Context, history bool) error {
 	var err error
 	var cnt int64
 	if history {
-		cnt, err = repository.CountHistoryPayments(db)
+		cnt, err = repository.CountHistoryPayments(ctx)
 	} else {
-		cnt, err = repository.CountPendingPayments(db)
+		cnt, err = repository.CountPendingPayments(ctx)
 	}
 	if err != nil {
 		return err
@@ -102,9 +102,9 @@ func adminPayments(ctx *hime.Context, history bool) error {
 
 	var payments []*entity.Payment
 	if history {
-		payments, err = repository.ListHistoryPayments(db, limit, offset)
+		payments, err = repository.ListHistoryPayments(ctx, limit, offset)
 	} else {
-		payments, err = repository.ListPendingPayments(db, limit, offset)
+		payments, err = repository.ListPendingPayments(ctx, limit, offset)
 	}
 	if err != nil {
 		return err
@@ -119,7 +119,7 @@ func adminPayments(ctx *hime.Context, history bool) error {
 
 func adminRejectPayment(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
-	x, err := repository.GetPayment(db, id)
+	x, err := repository.GetPayment(ctx, id)
 	if err != nil {
 		return err
 	}
@@ -172,13 +172,13 @@ func postAdminRejectPayment(ctx *hime.Context) error {
 	id := ctx.FormValue("ID")
 
 	var x *entity.Payment
-	err := pgsql.RunInTx(db, nil, func(tx *sql.Tx) error {
+	err := sqlctx.RunInTx(ctx, func(ctx context.Context) error {
 		var err error
-		x, err = repository.GetPayment(tx, id)
+		x, err = repository.GetPayment(ctx, id)
 		if err != nil {
 			return err
 		}
-		return repository.RejectPayment(tx, x)
+		return repository.RejectPayment(ctx, x)
 	})
 	if err != nil {
 		return err
@@ -186,7 +186,7 @@ func postAdminRejectPayment(ctx *hime.Context) error {
 
 	if x.User.Email.Valid {
 		go func() {
-			x, err := repository.GetPayment(db, id)
+			x, err := repository.GetPayment(ctx, id)
 			if err != nil {
 				return
 			}
@@ -205,13 +205,13 @@ func postAdminPendingPayment(ctx *hime.Context) error {
 	id := ctx.FormValue("ID")
 	if action == "accept" {
 		var x *entity.Payment
-		err := pgsql.RunInTx(db, nil, func(tx *sql.Tx) error {
+		err := sqlctx.RunInTx(ctx, func(ctx context.Context) error {
 			var err error
-			x, err = repository.GetPayment(tx, id)
+			x, err = repository.GetPayment(ctx, id)
 			if err != nil {
 				return err
 			}
-			return repository.AcceptPayment(tx, x)
+			return repository.AcceptPayment(ctx, x)
 		})
 		if err != nil {
 			return err
@@ -219,7 +219,7 @@ func postAdminPendingPayment(ctx *hime.Context) error {
 		if x.User.Email.Valid {
 			go func() {
 				// re-fetch payment to get latest timestamp
-				x, err := repository.GetPayment(db, id)
+				x, err := repository.GetPayment(ctx, id)
 				if err != nil {
 					return
 				}

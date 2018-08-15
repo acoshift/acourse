@@ -1,7 +1,6 @@
 package app
 
 import (
-	"database/sql"
 	"math/rand"
 	"net/http"
 	"time"
@@ -28,7 +27,6 @@ var (
 	bucketName   string
 	redisClient  *redis.Client
 	redisPrefix  string
-	db           *sql.DB
 )
 
 // New creates new app
@@ -43,7 +41,6 @@ func New(config Config) http.Handler {
 	bucketName = config.BucketName
 	redisClient = config.RedisClient
 	redisPrefix = config.RedisPrefix
-	db = config.DB
 
 	mux := http.NewServeMux()
 

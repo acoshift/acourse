@@ -44,7 +44,7 @@ func fetchUser() middleware.Middleware {
 			s := appctx.GetSession(ctx)
 			id := getUserID(s)
 			if len(id) > 0 {
-				u, err := repository.GetUser(db, id)
+				u, err := repository.GetUser(ctx, id)
 				if err == entity.ErrNotFound {
 					u = &entity.User{
 						ID:       id,
@@ -97,8 +97,7 @@ func isCourseOwner(h http.Handler) http.Handler {
 
 		id := ctx.FormValue("id")
 
-		var ownerID string
-		err := db.QueryRowContext(ctx, `select user_id from courses where id = $1`, id).Scan(&ownerID)
+		ownerID, err := repository.GetCourseUserID(ctx, id)
 		if err == sql.ErrNoRows {
 			return notFound(ctx)
 		}

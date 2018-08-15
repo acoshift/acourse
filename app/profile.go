@@ -1,29 +1,29 @@
 package app
 
 import (
-	"database/sql"
+	"context"
 	"net/http"
 	"strings"
 	"unicode/utf8"
 
 	"github.com/acoshift/header"
 	"github.com/acoshift/hime"
-	"github.com/acoshift/pgsql"
 	"github.com/asaskevich/govalidator"
 
 	"github.com/acoshift/acourse/appctx"
+	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/repository"
 )
 
 func profile(ctx *hime.Context) error {
 	user := appctx.GetUser(ctx)
 
-	ownCourses, err := repository.ListOwnCourses(db, user.ID)
+	ownCourses, err := repository.ListOwnCourses(ctx, user.ID)
 	if err != nil {
 		return err
 	}
 
-	enrolledCourses, err := repository.ListEnrolledCourses(db, user.ID)
+	enrolledCourses, err := repository.ListEnrolledCourses(ctx, user.ID)
 	if err != nil {
 		return err
 	}
@@ -101,30 +101,15 @@ func postProfileEdit(ctx *hime.Context) error {
 		return ctx.RedirectToGet()
 	}
 
-	err := pgsql.RunInTx(db, nil, func(tx *sql.Tx) error {
+	err := sqlctx.RunInTx(ctx, func(ctx context.Context) error {
 		if len(imageURL) > 0 {
-			_, err := tx.Exec(`
-				update users
-				set image = $2
-				where id = $1
-			`, user.ID, imageURL)
+			err := repository.SetUserImage(ctx, user.ID, imageURL)
 			if err != nil {
 				return err
 			}
 		}
-		_, err := tx.Exec(`
-			update users
-			set
-				username = $2,
-				name = $3,
-				about_me = $4,
-				updated_at = now()
-			where id = $1
-		`, user.ID, username, name, aboutMe)
-		if err != nil {
-			return err
-		}
-		return nil
+
+		return repository.UpdateUser(ctx, user.ID, username, name, aboutMe)
 	})
 	if err != nil {
 		f.Add("Errors", err.Error())

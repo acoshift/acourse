@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/acoshift/acourse/context/sqlctx"
+
 	"cloud.google.com/go/profiler"
 	"cloud.google.com/go/storage"
 	"github.com/acoshift/configfile"
@@ -114,6 +116,7 @@ func main() {
 	mux.Handle("/favicon.ico", internal.FileHandler("assets/favicon.ico"))
 
 	mux.Handle("/", middleware.Chain(
+		sqlctx.Middleware(db),
 		session.Middleware(session.Config{
 			Secret:   config.Bytes("session_secret"),
 			Path:     "/",
@@ -129,7 +132,6 @@ func main() {
 			}),
 		}),
 	)(app.New(app.Config{
-		DB:           db,
 		BaseURL:      baseURL,
 		RedisPrefix:  config.String("redis_prefix"),
 		RedisClient:  redisClient,
