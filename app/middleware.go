@@ -1,7 +1,6 @@
 package app
 
 import (
-	"database/sql"
 	"net/http"
 	"net/url"
 
@@ -98,7 +97,7 @@ func isCourseOwner(h http.Handler) http.Handler {
 		id := ctx.FormValue("id")
 
 		ownerID, err := repository.GetCourseUserID(ctx, id)
-		if err == sql.ErrNoRows {
+		if err == entity.ErrNotFound {
 			return notFound(ctx)
 		}
 		if err != nil {

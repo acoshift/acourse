@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -650,7 +649,7 @@ func editorContentEdit(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 
 	content, err := repository.GetCourseContent(ctx, id)
-	if err == sql.ErrNoRows {
+	if err == entity.ErrNotFound {
 		return notFound(ctx)
 	}
 	if err != nil {
@@ -679,7 +678,7 @@ func postEditorContentEdit(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 
 	content, err := repository.GetCourseContent(ctx, id)
-	if err == sql.ErrNoRows {
+	if err == entity.ErrNotFound {
 		return notFound(ctx)
 	}
 	if err != nil {

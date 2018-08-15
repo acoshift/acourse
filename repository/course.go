@@ -179,6 +179,9 @@ func GetCourseContent(ctx context.Context, courseContentID string) (*entity.Cour
 	`, courseContentID).Scan(
 		&x.ID, &x.CourseID, &x.Title, &x.Desc, &x.VideoID, &x.VideoType, &x.DownloadURL,
 	)
+	if err == sql.ErrNoRows {
+		return nil, entity.ErrNotFound
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -490,6 +493,9 @@ func GetCourseUserID(ctx context.Context, courseID string) (userID string, err e
 	q := sqlctx.GetQueryer(ctx)
 
 	err = q.QueryRow(`select user_id from courses where id = $1`, courseID).Scan(&userID)
+	if err == sql.ErrNoRows {
+		err = entity.ErrNotFound
+	}
 	return
 }
 
