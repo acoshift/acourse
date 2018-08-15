@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/lib/pq"
 
@@ -72,13 +71,9 @@ func CreatePayment(ctx context.Context, x *entity.Payment) error {
 	return nil
 }
 
-// AcceptPayment accepts a payment and create new enroll
-func AcceptPayment(ctx context.Context, x *entity.Payment) error {
+// SetPaymentStatus sets payment status
+func SetPaymentStatus(ctx context.Context, paymentID string, status int) error {
 	q := sqlctx.GetQueryer(ctx)
-
-	if len(x.ID) == 0 {
-		return fmt.Errorf("payment must be save before accept")
-	}
 
 	_, err := q.Exec(`
 		update payments
@@ -87,39 +82,8 @@ func AcceptPayment(ctx context.Context, x *entity.Payment) error {
 			updated_at = now(),
 			at = now()
 		where id = $1
-	`, x.ID, entity.Accepted)
-	if err != nil {
-		return err
-	}
-
-	err = Enroll(ctx, x.UserID, x.CourseID)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// RejectPayment rejects a payment
-func RejectPayment(ctx context.Context, x *entity.Payment) error {
-	if len(x.ID) == 0 {
-		return fmt.Errorf("payment must be save before accept")
-	}
-
-	q := sqlctx.GetQueryer(ctx)
-
-	_, err := q.Exec(`
-		update payments
-		set
-			status = $2,
-			updated_at = now(),
-			at = now()
-		where id = $1;
-	`, x.ID, entity.Rejected)
-	if err != nil {
-		return err
-	}
-	return nil
+	`, paymentID, status)
+	return err
 }
 
 func scanPayment(scan scanFunc, x *entity.Payment) error {

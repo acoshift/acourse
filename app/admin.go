@@ -174,11 +174,13 @@ func postAdminRejectPayment(ctx *hime.Context) error {
 	var x *entity.Payment
 	err := sqlctx.RunInTx(ctx, func(ctx context.Context) error {
 		var err error
+
 		x, err = repository.GetPayment(ctx, id)
 		if err != nil {
 			return err
 		}
-		return repository.RejectPayment(ctx, x)
+
+		return repository.SetPaymentStatus(ctx, x.ID, entity.Rejected)
 	})
 	if err != nil {
 		return err
@@ -211,7 +213,13 @@ func postAdminPendingPayment(ctx *hime.Context) error {
 			if err != nil {
 				return err
 			}
-			return repository.AcceptPayment(ctx, x)
+
+			err = repository.SetPaymentStatus(ctx, x.ID, entity.Accepted)
+			if err != nil {
+				return err
+			}
+
+			return repository.Enroll(ctx, x.UserID, x.CourseID)
 		})
 		if err != nil {
 			return err
