@@ -21,7 +21,7 @@ gulp.task('style', () => gulp
 	.src('./style/main.scss')
 	.pipe(sass(sassOption).on('error', sass.logError))
 	.pipe(concat('style.css'))
-	.pipe(prod ? purgecss({ content: ['template/**/*.tmpl'] }) : noop())
+	// .pipe(prod ? purgecss({ content: ['template/**/*.tmpl'] }) : noop())
 	.pipe(prod ? freeze() : noop())
 	.pipe(filenames('style'))
 	.pipe(gulp.dest('./assets'))
