@@ -3,8 +3,9 @@ package service
 import (
 	"context"
 
-	"github.com/acoshift/acourse/entity"
 	"github.com/stretchr/testify/mock"
+
+	"github.com/acoshift/acourse/entity"
 )
 
 type mockRepo struct {
@@ -26,9 +27,9 @@ func (m *mockRepo) CanAcquireMagicLink(ctx context.Context, email string) (bool,
 	return args.Bool(0), args.Error(1)
 }
 
-func (m *mockRepo) GetEmailSignInUserByEmail(ctx context.Context, email string) (*entity.EmailSignInUser, error) {
+func (m *mockRepo) GetUserByEmail(ctx context.Context, email string) (*User, error) {
 	args := m.Mock.Called(ctx, email)
-	return args.Get(0).(*entity.EmailSignInUser), args.Error(1)
+	return args.Get(0).(*User), args.Error(1)
 }
 
 func (m *mockRepo) RegisterUser(ctx context.Context, x *RegisterUser) error {

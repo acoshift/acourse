@@ -24,13 +24,6 @@ type UserRole struct {
 	Instructor bool
 }
 
-// EmailSignInUser type
-type EmailSignInUser struct {
-	ID    string
-	Name  string
-	Email string
-}
-
 // Course model
 type Course struct {
 	ID            string

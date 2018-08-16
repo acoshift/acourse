@@ -68,10 +68,10 @@ func (svcRepo) CanAcquireMagicLink(ctx context.Context, email string) (bool, err
 	return true, nil
 }
 
-func (svcRepo) GetEmailSignInUserByEmail(ctx context.Context, email string) (*entity.EmailSignInUser, error) {
+func (svcRepo) GetUserByEmail(ctx context.Context, email string) (*service.User, error) {
 	q := sqlctx.GetQueryer(ctx)
 
-	var x entity.EmailSignInUser
+	var x service.User
 	err := q.QueryRow(`
 		select
 			id, name, email

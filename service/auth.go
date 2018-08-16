@@ -95,7 +95,7 @@ func (s *svc) SendSignInMagicLinkEmail(ctx context.Context, email string) error 
 		return newUIError("อีเมลของคุณได้ขอ Magic Link จากเราไปแล้ว กรุณาตรวจสอบอีเมล")
 	}
 
-	user, err := s.Repository.GetEmailSignInUserByEmail(ctx, email)
+	user, err := s.Repository.GetUserByEmail(ctx, email)
 	if err == entity.ErrNotFound {
 		return nil
 	}

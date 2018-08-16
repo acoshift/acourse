@@ -12,9 +12,8 @@ type Repository interface {
 	FindMagicLink(ctx context.Context, linkID string) (string, error)
 	CanAcquireMagicLink(ctx context.Context, email string) (bool, error)
 
-	GetEmailSignInUserByEmail(ctx context.Context, email string) (*entity.EmailSignInUser, error)
-
 	RegisterUser(ctx context.Context, x *RegisterUser) error
+	GetUserByEmail(ctx context.Context, email string) (*User, error)
 	UpdateUser(ctx context.Context, x *UpdateUser) error
 	SetUserImage(ctx context.Context, userID string, image string) error
 	IsUserExists(ctx context.Context, userID string) (exists bool, err error)

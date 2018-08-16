@@ -70,3 +70,10 @@ type RegisterPayment struct {
 	Code          string
 	Status        int
 }
+
+// User type
+type User struct {
+	ID    string
+	Name  string
+	Email string
+}
