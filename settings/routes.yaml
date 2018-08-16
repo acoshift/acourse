@@ -1,5 +1,7 @@
 routes:
   index: /
+
+  # auth
   signin: /auth/signin
   signin.password: /auth/signin/password
   signin.check-email: /auth/signin/check-email
@@ -9,16 +11,22 @@ routes:
   openid.github: /auth/openid?p=github.com
   openid.callback: /auth/openid/callback
   signup: /auth/signup
+
+  # app
   signout: /signout
   reset.password: /auth/reset/password
   profile: /profile
   profile.edit: /profile/edit
   course: /course/
-  editor.create: /editor/create
-  editor.course: /editor/course
+
+  # editor
+  editor.course.create: /editor/course/create
+  editor.course.edit: /editor/course/edit
   editor.content: /editor/content
   editor.content.create: /editor/content/create
   editor.content.edit: /editor/content/edit
+
+  # admin
   admin.users: /admin/users
   admin.courses: /admin/courses
   admin.payments.pending: /admin/payments/pending

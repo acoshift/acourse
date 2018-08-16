@@ -21,11 +21,11 @@ func New(cfg Config) http.Handler {
 	c := &ctrl{cfg}
 
 	mux := http.NewServeMux()
-	mux.Handle("/create", onlyInstructor(methodmux.GetPost(
+	mux.Handle("/course/create", onlyInstructor(methodmux.GetPost(
 		hime.Handler(c.courseCreate),
 		hime.Handler(c.postCourseCreate),
 	)))
-	mux.Handle("/course", isCourseOwner(methodmux.GetPost(
+	mux.Handle("/course/edit", isCourseOwner(methodmux.GetPost(
 		hime.Handler(c.courseEdit),
 		hime.Handler(c.postCourseEdit),
 	)))

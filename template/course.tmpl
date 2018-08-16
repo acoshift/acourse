@@ -112,7 +112,7 @@
 										<a href="{{route "course" .Course.Link "content"}}">
 											<button class="acourse-button -positive _font-sub _full-width acourse-block">เริ่มเรียน</button>
 										</a>
-										<a href="{{route "editor.course" (param "id" .Course.ID)}}">
+										<a href="{{route "editor.course.edit" (param "id" .Course.ID)}}">
 											<button class="acourse-button -primary _font-sub _full-width acourse-block">แก้ไขคอร์ส</button>
 										</a>
 										<a href="{{route "editor.content" (param "id" .Course.ID)}}">
