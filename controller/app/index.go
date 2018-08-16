@@ -20,5 +20,5 @@ func index(ctx *hime.Context) error {
 
 	p := view.Page(ctx)
 	p["Courses"] = courses
-	return ctx.View("index", p)
+	return ctx.View("app.index", p)
 }

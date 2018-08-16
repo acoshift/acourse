@@ -104,7 +104,7 @@ func courseView(ctx *hime.Context) error {
 	p["Enrolled"] = enrolled
 	p["Owned"] = owned
 	p["PendingEnroll"] = pendingEnroll
-	return ctx.View("course", p)
+	return ctx.View("app.course", p)
 }
 
 func courseContent(ctx *hime.Context) error {
@@ -174,7 +174,7 @@ func courseContent(ctx *hime.Context) error {
 	p["Image"] = x.Image
 	p["Course"] = x
 	p["Content"] = content
-	return ctx.View("course.content", p)
+	return ctx.View("app.course-content", p)
 }
 
 func courseEnroll(ctx *hime.Context) error {
@@ -231,7 +231,7 @@ func courseEnroll(ctx *hime.Context) error {
 	p["Image"] = x.Image
 	p["URL"] = baseURL + "/course/" + url.PathEscape(x.Link())
 	p["Course"] = x
-	return ctx.View("course.enroll", p)
+	return ctx.View("app.course-enroll", p)
 }
 
 func postCourseEnroll(ctx *hime.Context) error {
@@ -403,5 +403,5 @@ func courseAssignment(ctx *hime.Context) error {
 	p["URL"] = baseURL + "/course/" + url.PathEscape(x.Link())
 	p["Course"] = x
 	p["Assignments"] = assignments
-	return ctx.View("assignment", p)
+	return ctx.View("app.assignment", p)
 }

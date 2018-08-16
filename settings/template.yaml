@@ -8,35 +8,35 @@ components:
 - component/error-message.tmpl
 list:
   # share
-  error.not-found:
-  - not-found.tmpl
+  share.not-found:
+  - share/not-found.tmpl
   - app.tmpl
 
   # app
-  index:
-  - index.tmpl
+  app.index:
+  - app/index.tmpl
   - app.tmpl
   - component/course-card.tmpl
-  profile:
-  - profile.tmpl
+  app.profile:
+  - app/profile.tmpl
   - app.tmpl
   - component/user-profile.tmpl
   - component/own-course-card.tmpl
   - component/enrolled-course-card.tmpl
-  profile.edit:
-  - profile-edit.tmpl
+  app.profile-edit:
+  - app/profile-edit.tmpl
   - app.tmpl
-  course:
-  - course.tmpl
+  app.course:
+  - app/course.tmpl
   - app.tmpl
-  course.content:
-  - course-content.tmpl
+  app.course-content:
+  - app/course-content.tmpl
   - app.tmpl
-  course.enroll:
-  - enroll.tmpl
+  app.course-enroll:
+  - app/course-enroll.tmpl
   - app.tmpl
-  assignment:
-  - assignment.tmpl
+  app.assignment:
+  - app/assignment.tmpl
   - app.tmpl
 
   # auth

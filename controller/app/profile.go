@@ -40,7 +40,7 @@ func profile(ctx *hime.Context) error {
 	p["Title"] = user.Username
 	p["OwnCourses"] = ownCourses
 	p["EnrolledCourses"] = enrolledCourses
-	return ctx.View("profile", p)
+	return ctx.View("app.profile", p)
 }
 
 func profileEdit(ctx *hime.Context) error {
@@ -58,7 +58,7 @@ func profileEdit(ctx *hime.Context) error {
 
 	p := view.Page(ctx)
 	p["Title"] = user.Username
-	return ctx.View("profile.edit", p)
+	return ctx.View("app.profile-edit", p)
 }
 
 func postProfileEdit(ctx *hime.Context) error {
