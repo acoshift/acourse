@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	keyUserID          = "user_id"
-	keyOpenIDSessionID = "openid_session"
+	keyUserID      = "user_id"
+	keyOpenIDState = "openid_state"
 )
 
 // SetUserID sets user id to session
@@ -21,19 +21,19 @@ func GetUserID(ctx context.Context) string {
 	return getSession(ctx).GetString(keyUserID)
 }
 
-// SetOpenIDSessionID sets open id session id to session
-func SetOpenIDSessionID(ctx context.Context, openIDSessionID string) {
-	getSession(ctx).Set(keyOpenIDSessionID, openIDSessionID)
+// SetOpenIDState sets open id state to session
+func SetOpenIDState(ctx context.Context, state string) {
+	getSession(ctx).Set(keyOpenIDState, state)
 }
 
-// DelOpenIDSessionID deletes open id session id from session
-func DelOpenIDSessionID(ctx context.Context) {
-	getSession(ctx).Del(keyOpenIDSessionID)
+// DelOpenIDState deletes open id state from session
+func DelOpenIDState(ctx context.Context) {
+	getSession(ctx).Del(keyOpenIDState)
 }
 
-// GetOpenIDSessionID gets open id session id from session
-func GetOpenIDSessionID(ctx context.Context) string {
-	return getSession(ctx).GetString(keyOpenIDSessionID)
+// GetOpenIDState gets open id state from session
+func GetOpenIDState(ctx context.Context) string {
+	return getSession(ctx).GetString(keyOpenIDState)
 }
 
 // GetFlash gets flash from context

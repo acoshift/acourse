@@ -12,6 +12,7 @@ import (
 
 type (
 	userKey struct{}
+	sessKey struct{}
 )
 
 // session id
@@ -28,13 +29,13 @@ func GetUser(ctx context.Context) *entity.User {
 	return x
 }
 
+func newSessionContext(ctx context.Context, s *session.Session) context.Context {
+	return context.WithValue(ctx, sessKey{}, s)
+}
+
 // getSession gets session from context
 func getSession(ctx context.Context) *session.Session {
-	s, err := session.Get(ctx, sessName)
-	if err != nil {
-		panic(err)
-	}
-	return s
+	return ctx.Value(sessKey{}).(*session.Session)
 }
 
 // Repository is appctx middleware storage
@@ -47,6 +48,13 @@ func Middleware(repo Repository) middleware.Middleware {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
+
+			sess, err := session.Get(ctx, sessName)
+			if err != nil {
+				panic(err)
+			}
+			ctx = newSessionContext(ctx, sess)
+
 			userID := GetUserID(ctx)
 			if userID != "" {
 				u, err := repo.GetUser(ctx, userID)
@@ -59,8 +67,10 @@ func Middleware(repo Repository) middleware.Middleware {
 				if err != nil {
 					panic(err)
 				}
-				r = r.WithContext(NewUserContext(ctx, u))
+				ctx = NewUserContext(ctx, u)
 			}
+
+			r = r.WithContext(ctx)
 			h.ServeHTTP(w, r)
 		})
 	}

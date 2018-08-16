@@ -26,13 +26,13 @@ func (c *ctrl) openID(ctx *hime.Context) error {
 		return err
 	}
 
-	appctx.SetOpenIDSessionID(ctx, state)
+	appctx.SetOpenIDState(ctx, state)
 	return ctx.Redirect(redirect)
 }
 
 func (c *ctrl) openIDCallback(ctx *hime.Context) error {
-	sessID := appctx.GetOpenIDSessionID(ctx)
-	appctx.DelOpenIDSessionID(ctx)
+	sessID := appctx.GetOpenIDState(ctx)
+	appctx.DelOpenIDState(ctx)
 
 	userID, err := c.Service.SignInOpenIDCallback(ctx, ctx.Request().RequestURI, sessID)
 	if service.IsUIError(err) {
