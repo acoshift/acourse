@@ -457,7 +457,7 @@ func RegisterCourse(ctx context.Context, x *entity.RegisterCourse) (courseID str
 		values
 			($1, $2, $3, $4, $5, $6)
 		returning id
-	`, x.UserID, x.Title, x.ShortDesc, x.LongDesc, x.Image, x.Start).Scan(&courseID)
+	`, x.UserID, x.Title, x.ShortDesc, x.LongDesc, x.Image, pgsql.NullTime(&x.Start)).Scan(&courseID)
 	return
 }
 
@@ -520,7 +520,7 @@ func UpdateCourse(ctx context.Context, x *entity.UpdateCourse) error {
 			start = $5,
 			updated_at = now()
 		where id = $1
-	`, x.ID, x.Title, x.ShortDesc, x.LongDesc, x.Start)
+	`, x.ID, x.Title, x.ShortDesc, x.LongDesc, pgsql.NullTime(&x.Start))
 	return err
 }
 

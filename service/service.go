@@ -32,8 +32,12 @@ type Service interface {
 	SignInPassword(ctx context.Context, email, password string) (userID string, err error)
 	SignInMagicLink(ctx context.Context, link string) (userID string, err error)
 	SignInOpenIDCallback(ctx context.Context, uri string, state string) (userID string, err error)
+
 	AcceptPayment(ctx context.Context, paymentID string) error
 	RejectPayment(ctx context.Context, paymentID string, msg string) error
+
+	CreateCourse(ctx context.Context, x *CreateCourse) (courseID string, err error)
+	UpdateCourse(ctx context.Context, x *UpdateCourse) error
 }
 
 // New creates new service

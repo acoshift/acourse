@@ -169,8 +169,7 @@ func main() {
 	m.Handle("/editor/", http.StripPrefix("/editor", middleware.Chain(
 	// -
 	)(editor.New(editor.Config{
-		FileStorage:        fileStorage,
-		ImageResizeEncoder: imageResizeEncoder,
+		Service: svc,
 	}))))
 
 	m.Handle("/admin/", http.StripPrefix("/admin", middleware.Chain(

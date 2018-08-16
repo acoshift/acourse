@@ -6,14 +6,12 @@ import (
 	"github.com/acoshift/hime"
 	"github.com/acoshift/methodmux"
 
-	"github.com/acoshift/acourse/file"
-	"github.com/acoshift/acourse/image"
+	"github.com/acoshift/acourse/service"
 )
 
 // Config is editor config
 type Config struct {
-	ImageResizeEncoder image.JPEGResizeEncoder
-	FileStorage        file.Storage
+	Service service.Service
 }
 
 // New creates new editor handler

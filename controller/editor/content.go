@@ -3,12 +3,13 @@ package editor
 import (
 	"net/http"
 
+	"github.com/acoshift/hime"
+
 	"github.com/acoshift/acourse/context/appctx"
 	"github.com/acoshift/acourse/controller/share"
 	"github.com/acoshift/acourse/entity"
 	"github.com/acoshift/acourse/repository"
 	"github.com/acoshift/acourse/view"
-	"github.com/acoshift/hime"
 )
 
 func (c *ctrl) contentList(ctx *hime.Context) error {

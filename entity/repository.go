@@ -1,6 +1,8 @@
 package entity
 
-import "github.com/lib/pq"
+import (
+	"time"
+)
 
 // RegisterUser type
 type RegisterUser struct {
@@ -26,7 +28,7 @@ type RegisterCourse struct {
 	ShortDesc string
 	LongDesc  string
 	Image     string
-	Start     pq.NullTime
+	Start     time.Time
 }
 
 // UpdateCourse type
@@ -35,7 +37,7 @@ type UpdateCourse struct {
 	Title     string
 	ShortDesc string
 	LongDesc  string
-	Start     pq.NullTime
+	Start     time.Time
 }
 
 // RegisterCourseContent type
