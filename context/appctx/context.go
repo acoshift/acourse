@@ -4,10 +4,10 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/acoshift/middleware"
 	"github.com/acoshift/session"
 
 	"github.com/acoshift/acourse/entity"
-	"github.com/acoshift/acourse/repository"
 )
 
 type (
@@ -37,21 +37,31 @@ func getSession(ctx context.Context) *session.Session {
 	return s
 }
 
+// Repository is appctx middleware storage
+type Repository interface {
+	GetUser(ctx context.Context, userID string) (*entity.User, error)
+}
+
 // Middleware is appctx middleware
-func Middleware(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-		id := GetUserID(ctx)
-		if len(id) > 0 {
-			u, err := repository.GetUser(ctx, id)
-			if err == entity.ErrNotFound {
-				u = &entity.User{
-					ID:       id,
-					Username: id,
+func Middleware(repo Repository) middleware.Middleware {
+	return func(h http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ctx := r.Context()
+			userID := GetUserID(ctx)
+			if userID != "" {
+				u, err := repo.GetUser(ctx, userID)
+				if err == entity.ErrNotFound {
+					u = &entity.User{
+						ID:       userID,
+						Username: userID,
+					}
 				}
+				if err != nil {
+					panic(err)
+				}
+				r = r.WithContext(NewUserContext(ctx, u))
 			}
-			r = r.WithContext(NewUserContext(ctx, u))
-		}
-		h.ServeHTTP(w, r)
-	})
+			h.ServeHTTP(w, r)
+		})
+	}
 }

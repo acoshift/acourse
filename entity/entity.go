@@ -149,3 +149,12 @@ type UserAssignment struct {
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }
+
+// RegisterCourseContent type
+type RegisterCourseContent struct {
+	CourseID  string
+	Title     string
+	LongDesc  string
+	VideoID   string
+	VideoType int
+}

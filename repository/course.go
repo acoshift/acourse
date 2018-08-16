@@ -447,39 +447,6 @@ func UpdateCourseContent(ctx context.Context, courseID, contentID, title, desc, 
 	return err
 }
 
-// RegisterCourse registers new course
-func RegisterCourse(ctx context.Context, x *entity.RegisterCourse) (courseID string, err error) {
-	q := sqlctx.GetQueryer(ctx)
-
-	err = q.QueryRow(`
-		insert into courses
-			(user_id, title, short_desc, long_desc, image, start)
-		values
-			($1, $2, $3, $4, $5, $6)
-		returning id
-	`, x.UserID, x.Title, x.ShortDesc, x.LongDesc, x.Image, pgsql.NullTime(&x.Start)).Scan(&courseID)
-	return
-}
-
-// SetCourseOption sets course option
-func SetCourseOption(ctx context.Context, courseID string, x *entity.CourseOption) error {
-	q := sqlctx.GetQueryer(ctx)
-
-	_, err := q.Exec(`
-		insert into course_options
-			(course_id, public, enroll, attend, assignment, discount)
-		values
-			($1, $2, $3, $4, $5, $6)
-		on conflict (course_id) do update set
-			public = excluded.public,
-			enroll = excluded.enroll,
-			attend = excluded.attend,
-			assignment = excluded.assignment,
-			discount = excluded.discount
-	`, courseID, x.Public, x.Enroll, x.Attend, x.Assignment, x.Discount)
-	return err
-}
-
 // GetCourseURL gets course url
 func GetCourseURL(ctx context.Context, courseID string) (url string, err error) {
 	q := sqlctx.GetQueryer(ctx)
@@ -497,31 +464,6 @@ func GetCourseUserID(ctx context.Context, courseID string) (userID string, err e
 		err = entity.ErrNotFound
 	}
 	return
-}
-
-// SetCourseImage sets course image
-func SetCourseImage(ctx context.Context, courseID string, image string) error {
-	q := sqlctx.GetQueryer(ctx)
-
-	_, err := q.Exec(`update courses set image = $2 where id = $1`, courseID, image)
-	return err
-}
-
-// UpdateCourse updates course
-func UpdateCourse(ctx context.Context, x *entity.UpdateCourse) error {
-	q := sqlctx.GetQueryer(ctx)
-
-	_, err := q.Exec(`
-		update courses
-		set
-			title = $2,
-			short_desc = $3,
-			long_desc = $4,
-			start = $5,
-			updated_at = now()
-		where id = $1
-	`, x.ID, x.Title, x.ShortDesc, x.LongDesc, pgsql.NullTime(&x.Start))
-	return err
 }
 
 // RegisterCourseContent registers course content

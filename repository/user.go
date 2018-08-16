@@ -41,28 +41,6 @@ func GetUser(ctx context.Context, userID string) (*entity.User, error) {
 	return &x, nil
 }
 
-// GetEmailSignInUserByEmail gets email sign in user by email
-func GetEmailSignInUserByEmail(ctx context.Context, email string) (*entity.EmailSignInUser, error) {
-	q := sqlctx.GetQueryer(ctx)
-
-	var x entity.EmailSignInUser
-	err := q.QueryRow(`
-		select
-			id, name, email
-		from users
-		where email = $1
-	`, email).Scan(
-		&x.ID, &x.Name, pgsql.NullString(&x.Email),
-	)
-	if err == sql.ErrNoRows {
-		return nil, entity.ErrNotFound
-	}
-	if err != nil {
-		return nil, err
-	}
-	return &x, nil
-}
-
 // ListUsers lists users
 func ListUsers(ctx context.Context, limit, offset int64) ([]*entity.UserItem, error) {
 	q := sqlctx.GetQueryer(ctx)
@@ -104,65 +82,4 @@ func CountUsers(ctx context.Context) (cnt int64, err error) {
 
 	err = q.QueryRow(`select count(*) from users`).Scan(&cnt)
 	return
-}
-
-// IsUserExists checks is user exists
-func IsUserExists(ctx context.Context, id string) (exists bool, err error) {
-	q := sqlctx.GetQueryer(ctx)
-
-	err = q.QueryRow(`
-		select exists (
-			select 1
-			from users
-			where id = $1
-		)
-	`, id).Scan(&exists)
-	return
-}
-
-// RegisterUser registers new users
-func RegisterUser(ctx context.Context, x *entity.RegisterUser) error {
-	q := sqlctx.GetQueryer(ctx)
-
-	_, err := q.Exec(`
-		insert into users
-			(id, username, name, email, image)
-		values
-			($1, $2, $3, $4, $5)
-	`, x.ID, x.Username, x.Name, pgsql.NullString(&x.Email), x.Image)
-	if pgsql.IsUniqueViolation(err, "users_email_key") {
-		return entity.ErrEmailNotAvailable
-	}
-	if pgsql.IsUniqueViolation(err, "users_username_key") {
-		return entity.ErrUsernameNotAvailable
-	}
-	return err
-}
-
-// SetUserImage sets user's image
-func SetUserImage(ctx context.Context, userID string, image string) error {
-	q := sqlctx.GetQueryer(ctx)
-
-	_, err := q.Exec(`
-		update users
-		set image = $2
-		where id = $1
-	`, userID, image)
-	return err
-}
-
-// UpdateUser updates user
-func UpdateUser(ctx context.Context, x *entity.UpdateUser) error {
-	q := sqlctx.GetQueryer(ctx)
-
-	_, err := q.Exec(`
-		update users
-		set
-			username = $2,
-			name = $3,
-			about_me = $4,
-			updated_at = now()
-		where id = $1
-	`, x.ID, x.Username, x.Name, x.AboutMe)
-	return err
 }

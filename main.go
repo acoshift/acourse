@@ -37,6 +37,7 @@ import (
 	"github.com/acoshift/acourse/image"
 	"github.com/acoshift/acourse/internal"
 	"github.com/acoshift/acourse/notify"
+	"github.com/acoshift/acourse/repository"
 	"github.com/acoshift/acourse/service"
 )
 
@@ -113,6 +114,7 @@ func main() {
 	methodmux.FallbackHandler = hime.Handler(share.NotFound)
 
 	svc := service.New(service.Config{
+		Repository:         repository.NewService(),
 		Auth:               firAuth,
 		EmailSender:        emailSender,
 		BaseURL:            baseURL,
@@ -189,7 +191,7 @@ func main() {
 				Client: redisClient,
 			}),
 		}),
-		appctx.Middleware,
+		appctx.Middleware(repository.NewAppCtx()),
 	)(m))
 
 	h := middleware.Chain(

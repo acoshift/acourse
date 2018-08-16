@@ -15,6 +15,7 @@ import (
 
 // Config is service config
 type Config struct {
+	Repository         Repository
 	Auth               *firebase.Auth
 	EmailSender        email.Sender
 	BaseURL            string

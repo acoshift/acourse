@@ -6,23 +6,12 @@ import (
 	"fmt"
 	"io"
 	"mime/multipart"
-	"time"
 
 	"github.com/acoshift/acourse/context/appctx"
 	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/entity"
 	"github.com/acoshift/acourse/file"
-	"github.com/acoshift/acourse/repository"
 )
-
-// CreateCourse type
-type CreateCourse struct {
-	Title     string
-	ShortDesc string
-	LongDesc  string
-	Image     *multipart.FileHeader
-	Start     time.Time
-}
 
 func (s *svc) CreateCourse(ctx context.Context, x *CreateCourse) (courseID string, err error) {
 	// TODO: validate user role
@@ -55,7 +44,7 @@ func (s *svc) CreateCourse(ctx context.Context, x *CreateCourse) (courseID strin
 	err = sqlctx.RunInTx(ctx, func(ctx context.Context) error {
 		var err error
 
-		courseID, err = repository.RegisterCourse(ctx, &entity.RegisterCourse{
+		courseID, err = s.Repository.RegisterCourse(ctx, &RegisterCourse{
 			UserID:    user.ID,
 			Title:     x.Title,
 			ShortDesc: x.ShortDesc,
@@ -67,20 +56,10 @@ func (s *svc) CreateCourse(ctx context.Context, x *CreateCourse) (courseID strin
 			return err
 		}
 
-		return repository.SetCourseOption(ctx, courseID, &entity.CourseOption{})
+		return s.Repository.SetCourseOption(ctx, courseID, &entity.CourseOption{})
 	})
 
 	return
-}
-
-// UpdateCourse type
-type UpdateCourse struct {
-	ID        string
-	Title     string
-	ShortDesc string
-	LongDesc  string
-	Image     *multipart.FileHeader
-	Start     time.Time
 }
 
 func (s *svc) UpdateCourse(ctx context.Context, x *UpdateCourse) error {
@@ -116,7 +95,7 @@ func (s *svc) UpdateCourse(ctx context.Context, x *UpdateCourse) error {
 	}
 
 	err := sqlctx.RunInTx(ctx, func(ctx context.Context) error {
-		err := repository.UpdateCourse(ctx, &entity.UpdateCourse{
+		err := s.Repository.UpdateCourse(ctx, &UpdateCourseModel{
 			ID:        x.ID,
 			Title:     x.Title,
 			ShortDesc: x.ShortDesc,
@@ -128,7 +107,7 @@ func (s *svc) UpdateCourse(ctx context.Context, x *UpdateCourse) error {
 		}
 
 		if imageURL != "" {
-			err = repository.SetCourseImage(ctx, x.ID, imageURL)
+			err = s.Repository.SetCourseImage(ctx, x.ID, imageURL)
 			if err != nil {
 				return err
 			}
@@ -143,7 +122,7 @@ func (s *svc) UpdateCourse(ctx context.Context, x *UpdateCourse) error {
 func (s *svc) EnrollCourse(ctx context.Context, courseID string, price float64, paymentImage *multipart.FileHeader) error {
 	user := appctx.GetUser(ctx)
 
-	course, err := repository.GetCourse(ctx, courseID)
+	course, err := s.Repository.GetCourse(ctx, courseID)
 	if err == entity.ErrNotFound {
 		return entity.ErrNotFound
 	}
@@ -157,7 +136,7 @@ func (s *svc) EnrollCourse(ctx context.Context, courseID string, price float64, 
 	}
 
 	// is enrolled
-	enrolled, err := repository.IsEnrolled(ctx, user.ID, courseID)
+	enrolled, err := s.Repository.IsEnrolled(ctx, user.ID, courseID)
 	if err != nil {
 		return err
 	}
@@ -166,7 +145,7 @@ func (s *svc) EnrollCourse(ctx context.Context, courseID string, price float64, 
 	}
 
 	// has pending enroll
-	pendingPayment, err := repository.HasPendingPayment(ctx, user.ID, courseID)
+	pendingPayment, err := s.Repository.HasPendingPayment(ctx, user.ID, courseID)
 	if err != nil {
 		return err
 	}
@@ -211,17 +190,18 @@ func (s *svc) EnrollCourse(ctx context.Context, courseID string, price float64, 
 
 	err = sqlctx.RunInTx(ctx, func(ctx context.Context) error {
 		if course.Price == 0 {
-			return repository.RegisterEnroll(ctx, user.ID, course.ID)
+			return s.Repository.RegisterEnroll(ctx, user.ID, course.ID)
 		}
 
 		newPayment = true
 
-		return repository.CreatePayment(ctx, &entity.Payment{
+		return s.Repository.RegisterPayment(ctx, &RegisterPayment{
 			CourseID:      course.ID,
 			UserID:        user.ID,
 			Image:         imageURL,
 			Price:         price,
 			OriginalPrice: originalPrice,
+			Status:        entity.Pending,
 		})
 	})
 	if err != nil {

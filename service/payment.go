@@ -6,13 +6,12 @@ import (
 
 	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/entity"
-	"github.com/acoshift/acourse/repository"
 	"github.com/acoshift/acourse/view"
 )
 
 func (s *svc) AcceptPayment(ctx context.Context, paymentID string) error {
 	err := sqlctx.RunInTx(ctx, func(ctx context.Context) error {
-		x, err := repository.GetPayment(ctx, paymentID)
+		x, err := s.Repository.GetPayment(ctx, paymentID)
 		if err == entity.ErrNotFound {
 			return newUIError("payment not found")
 		}
@@ -20,12 +19,12 @@ func (s *svc) AcceptPayment(ctx context.Context, paymentID string) error {
 			return err
 		}
 
-		err = repository.SetPaymentStatus(ctx, x.ID, entity.Accepted)
+		err = s.Repository.SetPaymentStatus(ctx, x.ID, entity.Accepted)
 		if err != nil {
 			return err
 		}
 
-		return repository.RegisterEnroll(ctx, x.UserID, x.CourseID)
+		return s.Repository.RegisterEnroll(ctx, x.UserID, x.CourseID)
 	})
 	if err != nil {
 		return err
@@ -33,7 +32,7 @@ func (s *svc) AcceptPayment(ctx context.Context, paymentID string) error {
 
 	go func() {
 		// re-fetch payment to get latest timestamp
-		x, err := repository.GetPayment(ctx, paymentID)
+		x, err := s.Repository.GetPayment(ctx, paymentID)
 		if err != nil {
 			return
 		}
@@ -91,7 +90,7 @@ https://acourse.io
 
 func (s *svc) RejectPayment(ctx context.Context, paymentID string, msg string) error {
 	err := sqlctx.RunInTx(ctx, func(ctx context.Context) error {
-		x, err := repository.GetPayment(ctx, paymentID)
+		x, err := s.Repository.GetPayment(ctx, paymentID)
 		if err == entity.ErrNotFound {
 			return newUIError("payment not found")
 		}
@@ -99,14 +98,14 @@ func (s *svc) RejectPayment(ctx context.Context, paymentID string, msg string) e
 			return err
 		}
 
-		return repository.SetPaymentStatus(ctx, x.ID, entity.Rejected)
+		return s.Repository.SetPaymentStatus(ctx, x.ID, entity.Rejected)
 	})
 	if err != nil {
 		return err
 	}
 
 	go func() {
-		x, err := repository.GetPayment(ctx, paymentID)
+		x, err := s.Repository.GetPayment(ctx, paymentID)
 		if err != nil {
 			return
 		}

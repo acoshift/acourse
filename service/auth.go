@@ -13,7 +13,6 @@ import (
 	"github.com/asaskevich/govalidator"
 
 	"github.com/acoshift/acourse/entity"
-	"github.com/acoshift/acourse/repository"
 	"github.com/acoshift/acourse/view"
 )
 
@@ -42,7 +41,7 @@ func (s *svc) SignUp(ctx context.Context, email, password string) (string, error
 		return "", err
 	}
 
-	err = repository.RegisterUser(ctx, &entity.RegisterUser{
+	err = s.Repository.RegisterUser(ctx, &RegisterUser{
 		ID:       userID,
 		Username: userID,
 		Email:    email,
@@ -88,7 +87,7 @@ func (s *svc) SendSignInMagicLinkEmail(ctx context.Context, email string) error 
 		return newUIError("invalid email")
 	}
 
-	ok, err := repository.CanAcquireMagicLink(ctx, email)
+	ok, err := s.Repository.CanAcquireMagicLink(ctx, email)
 	if err != nil {
 		return err
 	}
@@ -96,7 +95,7 @@ func (s *svc) SendSignInMagicLinkEmail(ctx context.Context, email string) error 
 		return newUIError("อีเมลของคุณได้ขอ Magic Link จากเราไปแล้ว กรุณาตรวจสอบอีเมล")
 	}
 
-	user, err := repository.GetEmailSignInUserByEmail(ctx, email)
+	user, err := s.Repository.GetEmailSignInUserByEmail(ctx, email)
 	if err == entity.ErrNotFound {
 		return nil
 	}
@@ -106,7 +105,7 @@ func (s *svc) SendSignInMagicLinkEmail(ctx context.Context, email string) error 
 
 	linkID := generateMagicLinkID()
 
-	err = repository.StoreMagicLink(ctx, linkID, user.ID)
+	err = s.Repository.StoreMagicLink(ctx, linkID, user.ID)
 	if err != nil {
 		return err
 	}
@@ -145,14 +144,14 @@ func (s *svc) SignInPassword(ctx context.Context, email, password string) (strin
 	// if user not found in our database, insert new user
 	// this happend when database out of sync with firebase authentication
 	{
-		ok, err := repository.IsUserExists(ctx, userID)
+		ok, err := s.Repository.IsUserExists(ctx, userID)
 		if err != nil {
 			return "", err
 		}
 
 		if !ok {
 			email, _ = govalidator.NormalizeEmail(email)
-			err = repository.RegisterUser(ctx, &entity.RegisterUser{
+			err = s.Repository.RegisterUser(ctx, &RegisterUser{
 				ID:       userID,
 				Username: userID,
 				Name:     userID,
@@ -172,7 +171,7 @@ func (s *svc) SignInMagicLink(ctx context.Context, link string) (string, error) 
 		return "", newUIError("ไม่พบ Magic Link ของคุณ")
 	}
 
-	userID, err := repository.FindMagicLink(ctx, link)
+	userID, err := s.Repository.FindMagicLink(ctx, link)
 	if err == entity.ErrNotFound {
 		return "", newUIError("ไม่พบ Magic Link ของคุณ")
 	}

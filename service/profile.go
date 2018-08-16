@@ -9,9 +9,7 @@ import (
 
 	"github.com/acoshift/acourse/context/appctx"
 	"github.com/acoshift/acourse/context/sqlctx"
-	"github.com/acoshift/acourse/entity"
 	"github.com/acoshift/acourse/file"
-	"github.com/acoshift/acourse/repository"
 	"github.com/asaskevich/govalidator"
 )
 
@@ -60,13 +58,13 @@ func (s *svc) UpdateProfile(ctx context.Context, x *Profile) error {
 
 	err := sqlctx.RunInTx(ctx, func(ctx context.Context) error {
 		if imageURL != "" {
-			err := repository.SetUserImage(ctx, user.ID, imageURL)
+			err := s.Repository.SetUserImage(ctx, user.ID, imageURL)
 			if err != nil {
 				return err
 			}
 		}
 
-		return repository.UpdateUser(ctx, &entity.UpdateUser{
+		return s.Repository.UpdateUser(ctx, &UpdateUser{
 			ID:       user.ID,
 			Username: x.Username,
 			Name:     x.Name,

@@ -9,7 +9,6 @@ import (
 	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/entity"
 	"github.com/acoshift/acourse/file"
-	"github.com/acoshift/acourse/repository"
 )
 
 var allowProvider = map[string]bool{
@@ -40,14 +39,14 @@ func (s *svc) SignInOpenIDCallback(ctx context.Context, uri string, state string
 
 	err = sqlctx.RunInTx(ctx, func(ctx context.Context) error {
 		// check is user sign up
-		exists, err := repository.IsUserExists(ctx, user.UserID)
+		exists, err := s.Repository.IsUserExists(ctx, user.UserID)
 		if err != nil {
 			return err
 		}
 		if !exists {
 			// user not found, insert new user
 			imageURL := s.uploadProfileFromURLAsync(user.PhotoURL)
-			err = repository.RegisterUser(ctx, &entity.RegisterUser{
+			err = s.Repository.RegisterUser(ctx, &RegisterUser{
 				ID:       user.UserID,
 				Name:     user.DisplayName,
 				Username: user.UserID,
