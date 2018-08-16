@@ -59,8 +59,8 @@
   version = "6.13.2"
 
 [[constraint]]
-  name = "github.com/google/uuid"
-  version = "0.2.0"
+  name = "github.com/satori/go.uuid"
+  branch = "master"
 
 [[constraint]]
   branch = "master"

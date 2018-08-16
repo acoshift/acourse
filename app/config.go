@@ -5,7 +5,7 @@ import (
 	"github.com/acoshift/go-firebase-admin"
 	"github.com/go-redis/redis"
 
-	"github.com/acoshift/acourse/email"
+	"github.com/acoshift/acourse/file"
 	"github.com/acoshift/acourse/image"
 	"github.com/acoshift/acourse/notify"
 )
@@ -16,9 +16,9 @@ type Config struct {
 	RedisClient        *redis.Client
 	RedisPrefix        string
 	Auth               *firebase.Auth
-	EmailSender        email.Sender
 	AdminNotifier      notify.AdminNotifier
 	BucketHandle       *storage.BucketHandle
 	BucketName         string
 	ImageResizeEncoder image.JPEGResizeEncoder
+	FileStorage        file.Storage
 }

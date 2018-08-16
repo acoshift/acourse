@@ -25,10 +25,12 @@ import (
 
 	"github.com/acoshift/acourse/admin"
 	"github.com/acoshift/acourse/app"
+	"github.com/acoshift/acourse/auth"
 	"github.com/acoshift/acourse/context/appctx"
 	"github.com/acoshift/acourse/context/redisctx"
 	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/email"
+	"github.com/acoshift/acourse/file"
 	"github.com/acoshift/acourse/image"
 	"github.com/acoshift/acourse/internal"
 	"github.com/acoshift/acourse/notify"
@@ -62,7 +64,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	bucketHandle := storageClient.Bucket(config.String("bucket"))
 
 	// init email sender
 	emailSender := email.NewSMTPSender(email.SMTPConfig{
@@ -83,6 +84,9 @@ func main() {
 		Addr:        config.String("redis_addr"),
 		Password:    config.String("redis_pass"),
 	})
+
+	fileStorage := file.NewGCS(storageClient, config.String("bucket"))
+	imageResizeEncoder := image.NewJPEGResizeEncoder()
 
 	// init databases
 	db, err := sql.Open("postgres", config.String("sql_url"))
@@ -135,11 +139,20 @@ func main() {
 		BaseURL:            baseURL,
 		Auth:               firAuth,
 		AdminNotifier:      adminNotifier,
-		EmailSender:        emailSender,
-		BucketHandle:       bucketHandle,
-		BucketName:         config.String("bucket"),
-		ImageResizeEncoder: image.NewJPEGResizeEncoder(),
+		FileStorage:        fileStorage,
+		ImageResizeEncoder: imageResizeEncoder,
 	}))
+
+	m.Handle("/auth/", http.StripPrefix("/auth", middleware.Chain(
+		internal.NotSignedIn,
+	)(auth.New(auth.Config{
+		AdminNotifier:      adminNotifier,
+		Auth:               firAuth,
+		BaseURL:            baseURL,
+		EmailSender:        emailSender,
+		FileStorage:        fileStorage,
+		ImageResizeEncoder: imageResizeEncoder,
+	}))))
 
 	m.Handle("/admin/", http.StripPrefix("/admin", middleware.Chain(
 		internal.OnlyAdmin,

@@ -1,6 +1,6 @@
 # acourse
 
-Acoshift's course system
+Acoshift's course system [acourse.io](https://acourse.io)
 
 ## Development
 
@@ -28,7 +28,7 @@ Acoshift's course system
 
 ## Deployment
 
-After GCB finished (and live in staging), run `git push origin HEAD:production` to trigger production deployment.
+After GCB finished (and live in [staging](https://staging.acourse.io)), run `git push origin HEAD:production` to trigger production deployment.
 
 ## License
 

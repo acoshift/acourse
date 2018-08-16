@@ -17,6 +17,11 @@ import (
 	"github.com/acoshift/acourse/view"
 )
 
+func signOut(ctx *hime.Context) error {
+	appctx.GetSession(ctx).Destroy()
+	return ctx.Redirect("/")
+}
+
 func profile(ctx *hime.Context) error {
 	user := appctx.GetUser(ctx)
 

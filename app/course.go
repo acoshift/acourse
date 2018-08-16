@@ -12,8 +12,8 @@ import (
 	"github.com/acoshift/header"
 	"github.com/acoshift/hime"
 	"github.com/acoshift/prefixhandler"
-	"github.com/google/uuid"
 	"github.com/lib/pq"
+	"github.com/satori/go.uuid"
 
 	"github.com/acoshift/acourse/context/appctx"
 	"github.com/acoshift/acourse/context/sqlctx"
@@ -34,7 +34,7 @@ func courseView(ctx *hime.Context) error {
 
 	// if id can parse to uuid get course from id
 	id := link
-	_, err := uuid.Parse(link)
+	_, err := uuid.FromString(link)
 	if err != nil {
 		// link can not parse to uuid get course id from url
 		id, err = repository.GetCourseIDFromURL(ctx, link)
@@ -114,7 +114,7 @@ func courseContent(ctx *hime.Context) error {
 
 	// if id can parse to uuid get course from id
 	id := link
-	_, err := uuid.Parse(link)
+	_, err := uuid.FromString(link)
 	if err != nil {
 		// link can not parse to uuid get course id from url
 		id, err = repository.GetCourseIDFromURL(ctx, link)
@@ -382,7 +382,7 @@ func courseEnroll(ctx *hime.Context) error {
 	link := prefixhandler.Get(ctx, courseURLKey{})
 
 	id := link
-	_, err := uuid.Parse(link)
+	_, err := uuid.FromString(link)
 	if err != nil {
 		id, err = repository.GetCourseIDFromURL(ctx, link)
 		if err == entity.ErrNotFound {
@@ -440,7 +440,7 @@ func postCourseEnroll(ctx *hime.Context) error {
 	link := prefixhandler.Get(ctx, courseURLKey{})
 
 	id := link
-	_, err := uuid.Parse(link)
+	_, err := uuid.FromString(link)
 	if err != nil {
 		id, err = repository.GetCourseIDFromURL(ctx, link)
 		if err == entity.ErrNotFound {
@@ -557,7 +557,7 @@ func courseAssignment(ctx *hime.Context) error {
 
 	// if id can parse to int64 get course from id
 	id := link
-	_, err := uuid.Parse(link)
+	_, err := uuid.FromString(link)
 	if err != nil {
 		// link can not parse to int64 get course id from url
 		id, err = repository.GetCourseIDFromURL(ctx, link)

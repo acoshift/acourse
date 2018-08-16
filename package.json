@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Acoshift's course system",
   "main": "index.js",
+  "private": true,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/acoshift/acourse.git"

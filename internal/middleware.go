@@ -7,6 +7,7 @@ import (
 
 	"github.com/acoshift/header"
 
+	"github.com/acoshift/acourse/appsess"
 	"github.com/acoshift/acourse/context/appctx"
 )
 
@@ -46,6 +47,19 @@ func OnlyAdmin(h http.Handler) http.Handler {
 		}
 		if !u.Role.Admin {
 			http.Error(w, "Forbidden", http.StatusForbidden)
+			return
+		}
+		h.ServeHTTP(w, r)
+	})
+}
+
+// NotSignedIn allows only not signed in
+func NotSignedIn(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		s := appctx.GetSession(r.Context())
+		id := appsess.GetUserID(s)
+		if len(id) > 0 {
+			http.Redirect(w, r, "/", http.StatusFound)
 			return
 		}
 		h.ServeHTTP(w, r)

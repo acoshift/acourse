@@ -24,18 +24,6 @@ func mustSignedIn(h http.Handler) http.Handler {
 	})
 }
 
-func mustNotSignedIn(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		s := appctx.GetSession(r.Context())
-		id := appsess.GetUserID(s)
-		if len(id) > 0 {
-			http.Redirect(w, r, "/", http.StatusFound)
-			return
-		}
-		h.ServeHTTP(w, r)
-	})
-}
-
 func onlyInstructor(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		u := appctx.GetUser(r.Context())

@@ -1,16 +1,16 @@
 routes:
   index: /
-  signin: /signin
-  signin.password: /signin/password
-  signin.check-email: /signin/check-email
-  signin.link: /signin/link
-  openid: /openid
-  openid.google: /openid?p=google.com
-  openid.github: /openid?p=github.com
-  openid.callback: /openid/callback
-  signup: /signup
+  signin: /auth/signin
+  signin.password: /auth/signin/password
+  signin.check-email: /auth/signin/check-email
+  signin.link: /auth/signin/link
+  openid: /auth/openid
+  openid.google: /auth/openid?p=google.com
+  openid.github: /auth/openid?p=github.com
+  openid.callback: /auth/openid/callback
+  signup: /auth/signup
   signout: /signout
-  reset.password: /reset/password
+  reset.password: /auth/reset/password
   profile: /profile
   profile.edit: /profile/edit
   course: /course/

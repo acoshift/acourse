@@ -4,14 +4,13 @@ import (
 	"math/rand"
 	"net/http"
 
-	"cloud.google.com/go/storage"
 	"github.com/acoshift/go-firebase-admin"
 	"github.com/acoshift/header"
 	"github.com/acoshift/hime"
 	"github.com/acoshift/methodmux"
 	"github.com/acoshift/prefixhandler"
 
-	"github.com/acoshift/acourse/email"
+	"github.com/acoshift/acourse/file"
 	"github.com/acoshift/acourse/image"
 	"github.com/acoshift/acourse/notify"
 	"github.com/acoshift/acourse/view"
@@ -19,22 +18,18 @@ import (
 
 var (
 	auth               *firebase.Auth
-	emailSender        email.Sender
 	adminNotifier      notify.AdminNotifier
 	baseURL            string
-	bucketHandle       *storage.BucketHandle
-	bucketName         string
+	fileStorage        file.Storage
 	imageResizeEncoder image.JPEGResizeEncoder
 )
 
 // New creates new app
 func New(config Config) http.Handler {
 	auth = config.Auth
-	emailSender = config.EmailSender
 	adminNotifier = config.AdminNotifier
 	baseURL = config.BaseURL
-	bucketHandle = config.BucketHandle
-	bucketName = config.BucketName
+	fileStorage = config.FileStorage
 	imageResizeEncoder = config.ImageResizeEncoder
 
 	mux := http.NewServeMux()
@@ -44,37 +39,6 @@ func New(config Config) http.Handler {
 	mux.Handle("/", methodmux.Get(
 		hime.Handler(index),
 	))
-
-	// auth
-	mux.Handle("/signin", mustNotSignedIn(methodmux.GetPost(
-		hime.Handler(signIn),
-		hime.Handler(postSignIn),
-	)))
-	mux.Handle("/signin/password", mustNotSignedIn(methodmux.GetPost(
-		hime.Handler(signInPassword),
-		hime.Handler(postSignInPassword),
-	)))
-	mux.Handle("/signin/check-email", mustNotSignedIn(methodmux.Get(
-		hime.Handler(checkEmail),
-	)))
-	mux.Handle("/signin/link", mustNotSignedIn(methodmux.Get(
-		hime.Handler(signInLink),
-	)))
-	mux.Handle("/reset/password", mustNotSignedIn(methodmux.GetPost(
-		hime.Handler(resetPassword),
-		hime.Handler(postResetPassword),
-	)))
-
-	mux.Handle("/openid", mustNotSignedIn(methodmux.Get(
-		hime.Handler(openID),
-	)))
-	mux.Handle("/openid/callback", mustNotSignedIn(methodmux.Get(
-		hime.Handler(openIDCallback),
-	)))
-	mux.Handle("/signup", mustNotSignedIn(methodmux.GetPost(
-		hime.Handler(signUp),
-		hime.Handler(postSignUp),
-	)))
 	mux.Handle("/signout", methodmux.Post(
 		hime.Handler(signOut),
 	))
