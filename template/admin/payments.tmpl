@@ -21,7 +21,6 @@
 						<th>Original Price</th>
 						<th>Status</th>
 						<th>Created At</th>
-						<th>Updated At</th>
 						<th>Actions</th>
 					</tr>
 				</thead>
@@ -30,7 +29,7 @@
 						<tr>
 							<td data-column="ID">{{.ID}}</td>
 							<td data-column="Course">
-								<a href="{{route "app.course" .Course.Link}}" target="_blank">
+								<a href="{{route "app.course" .CourseLink}}" target="_blank">
 									<img
 										class="_img-cover"
 										src="{{.Course.Image}}"
@@ -82,7 +81,6 @@
 								{{end}}
 							</td>
 							<td data-column="Created At">{{.CreatedAt | dateTime}}</td>
-							<td data-column="Updated At">{{.UpdatedAt | dateTime}}</td>
 							<td data-column="Actions">
 								{{if eq .Status pending}}
 									<form method="POST" class="acourse-block">
@@ -94,7 +92,7 @@
 										<button class="acourse-button -negative _font-main _full-width">Reject</button>
 									</a>
 								{{else}}
-									<div>-</div>
+									<div>{{.At | dateTime}}</div>
 								{{end}}
 							</td>
 						</tr>

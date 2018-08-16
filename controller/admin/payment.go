@@ -17,6 +17,9 @@ func (c *ctrl) rejectPayment(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 
 	x, err := c.Repository.GetPayment(ctx, id)
+	if err == entity.ErrNotFound {
+		return ctx.RedirectTo("admin.payments.pending")
+	}
 	if err != nil {
 		return err
 	}
@@ -55,7 +58,7 @@ func (c *ctrl) rejectPayment(ctx *hime.Context) error {
 		name,
 		x.Course.Title,
 		x.CreatedAt.In(c.Location).Format("02/01/2006 15:04:05"),
-		x.Course.Link(),
+		x.CourseLink(),
 	)
 
 	p := view.Page(ctx)
@@ -97,7 +100,7 @@ func (c *ctrl) postPendingPayment(ctx *hime.Context) error {
 }
 
 func (c *ctrl) pendingPayments(ctx *hime.Context) error {
-	cnt, err := c.Repository.CountPaymentsByStatuses(ctx, []int{entity.Pending})
+	cnt, err := c.Repository.CountPaymentsByStatus(ctx, []int{entity.Pending})
 	if err != nil {
 		return err
 	}
@@ -118,7 +121,7 @@ func (c *ctrl) pendingPayments(ctx *hime.Context) error {
 }
 
 func (c *ctrl) historyPayments(ctx *hime.Context) error {
-	cnt, err := c.Repository.CountPaymentsByStatuses(ctx, []int{entity.Accepted, entity.Rejected})
+	cnt, err := c.Repository.CountPaymentsByStatus(ctx, []int{entity.Accepted, entity.Rejected})
 	if err != nil {
 		return err
 	}

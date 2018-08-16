@@ -31,16 +31,6 @@ type EmailSignInUser struct {
 	Email string
 }
 
-// UserItem type
-type UserItem struct {
-	ID        string
-	Username  string
-	Name      string
-	Email     string
-	Image     string
-	CreatedAt time.Time
-}
-
 // Course model
 type Course struct {
 	ID            string
