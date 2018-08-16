@@ -62,7 +62,7 @@ func (c *ctrl) rejectPayment(ctx *hime.Context) error {
 	p := view.Page(ctx)
 	p["Payment"] = x
 	p["Message"] = message
-	return ctx.View("admin.payments.reject", p)
+	return ctx.View("admin.payment-reject", p)
 }
 
 func (c *ctrl) postRejectPayment(ctx *hime.Context) error {

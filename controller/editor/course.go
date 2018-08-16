@@ -18,7 +18,7 @@ import (
 )
 
 func (c *ctrl) courseCreate(ctx *hime.Context) error {
-	return ctx.View("editor.create", view.Page(ctx))
+	return ctx.View("editor.course-create", view.Page(ctx))
 }
 
 func (c *ctrl) postCourseCreate(ctx *hime.Context) error {
@@ -102,7 +102,7 @@ func (c *ctrl) courseEdit(ctx *hime.Context) error {
 
 	p := view.Page(ctx)
 	p["Course"] = course
-	return ctx.View("editor.course", p)
+	return ctx.View("editor.course-edit", p)
 }
 
 func (c *ctrl) postCourseEdit(ctx *hime.Context) error {

@@ -7,28 +7,16 @@ components:
 - component/pagination.tmpl
 - component/error-message.tmpl
 list:
+  # share
+  error.not-found:
+  - not-found.tmpl
+  - app.tmpl
+
+  # app
   index:
   - index.tmpl
   - app.tmpl
   - component/course-card.tmpl
-  error.not-found:
-  - not-found.tmpl
-  - app.tmpl
-  signin:
-  - signin.tmpl
-  - auth.tmpl
-  signin.password:
-  - signin-password.tmpl
-  - auth.tmpl
-  signup:
-  - signup.tmpl
-  - auth.tmpl
-  reset.password:
-  - reset-password.tmpl
-  - auth.tmpl
-  check-email:
-  - check-email.tmpl
-  - auth.tmpl
   profile:
   - profile.tmpl
   - app.tmpl
@@ -50,21 +38,42 @@ list:
   assignment:
   - assignment.tmpl
   - app.tmpl
-  editor.create:
-  - editor/create.tmpl
+
+  # auth
+  auth.signin:
+  - auth/signin.tmpl
+  - auth/layout.tmpl
+  auth.signin-password:
+  - auth/signin-password.tmpl
+  - auth/layout.tmpl
+  auth.signup:
+  - auth/signup.tmpl
+  - auth/layout.tmpl
+  auth.reset-password:
+  - auth/reset-password.tmpl
+  - auth/layout.tmpl
+  auth.check-email:
+  - auth/check-email.tmpl
+  - auth/layout.tmpl
+
+  # editor
+  editor.course-create:
+  - editor/course-create.tmpl
   - app.tmpl
-  editor.course:
-  - editor/course.tmpl
+  editor.course-edit:
+  - editor/course-edit.tmpl
   - app.tmpl
   editor.content:
   - editor/content.tmpl
   - app.tmpl
-  editor.content.create:
+  editor.content-create:
   - editor/content-create.tmpl
   - app.tmpl
-  editor.content.edit:
+  editor.content-edit:
   - editor/content-edit.tmpl
   - app.tmpl
+
+  # admin
   admin.users:
   - admin/users.tmpl
   - app.tmpl
@@ -74,6 +83,6 @@ list:
   admin.payments:
   - admin/payments.tmpl
   - app.tmpl
-  admin.payments.reject:
+  admin.payment-reject:
   - admin/payment-reject.tmpl
   - app.tmpl

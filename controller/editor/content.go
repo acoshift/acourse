@@ -55,7 +55,7 @@ func (c *ctrl) contentCreate(ctx *hime.Context) error {
 
 	p := view.Page(ctx)
 	p["Course"] = course
-	return ctx.View("editor.content.create", p)
+	return ctx.View("editor.content-create", p)
 }
 
 func (c *ctrl) postContentCreate(ctx *hime.Context) error {
@@ -107,7 +107,7 @@ func (c *ctrl) contentEdit(ctx *hime.Context) error {
 	p := view.Page(ctx)
 	p["Course"] = course
 	p["Content"] = content
-	return ctx.View("editor.content.edit", p)
+	return ctx.View("editor.content-edit", p)
 }
 
 func (c *ctrl) postContentEdit(ctx *hime.Context) error {

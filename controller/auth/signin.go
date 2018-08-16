@@ -15,7 +15,7 @@ import (
 )
 
 func (c *ctrl) signIn(ctx *hime.Context) error {
-	return ctx.View("signin", view.Page(ctx))
+	return ctx.View("auth.signin", view.Page(ctx))
 }
 
 func (c *ctrl) postSignIn(ctx *hime.Context) error {
@@ -85,7 +85,7 @@ func (c *ctrl) checkEmail(ctx *hime.Context) error {
 	if !f.Has("CheckEmail") {
 		return ctx.Redirect("/")
 	}
-	return ctx.View("check-email", view.Page(ctx))
+	return ctx.View("auth.check-email", view.Page(ctx))
 }
 
 func (c *ctrl) signInLink(ctx *hime.Context) error {
@@ -108,7 +108,7 @@ func (c *ctrl) signInLink(ctx *hime.Context) error {
 }
 
 func (c *ctrl) signInPassword(ctx *hime.Context) error {
-	return ctx.View("signin.password", view.Page(ctx))
+	return ctx.View("auth.signin-password", view.Page(ctx))
 }
 
 func (c *ctrl) postSignInPassword(ctx *hime.Context) error {
