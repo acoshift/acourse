@@ -4,8 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/acoshift/acourse/entity"
 	. "github.com/smartystreets/goconvey/convey"
+
+	"github.com/acoshift/acourse/entity"
 )
 
 func TestSendSignInMagicLinkEmail(t *testing.T) {
@@ -18,11 +19,8 @@ func TestSendSignInMagicLinkEmail(t *testing.T) {
 			s := &svc{}
 			err := s.SendSignInMagicLinkEmail(ctx, email)
 
-			Convey("Then error should be return", func() {
+			Convey("Then ui error should be return", func() {
 				So(err, ShouldNotBeNil)
-			})
-
-			Convey("Then error should be ui error", func() {
 				So(IsUIError(err), ShouldBeTrue)
 			})
 		})
@@ -35,11 +33,8 @@ func TestSendSignInMagicLinkEmail(t *testing.T) {
 			s := &svc{}
 			err := s.SendSignInMagicLinkEmail(ctx, email)
 
-			Convey("Then error should be return", func() {
+			Convey("Then ui error should be return", func() {
 				So(err, ShouldNotBeNil)
-			})
-
-			Convey("Then error should be ui error", func() {
 				So(IsUIError(err), ShouldBeTrue)
 			})
 		})
@@ -59,11 +54,8 @@ func TestSignInPassword(t *testing.T) {
 				s := &svc{}
 				userID, err := s.SignInPassword(ctx, email, password)
 
-				Convey("Then error should be return", func() {
+				Convey("Then ui error should be return", func() {
 					So(err, ShouldNotBeNil)
-				})
-
-				Convey("Then error should be ui error", func() {
 					So(IsUIError(err), ShouldBeTrue)
 				})
 
@@ -80,11 +72,8 @@ func TestSignInPassword(t *testing.T) {
 				s := &svc{}
 				userID, err := s.SignInPassword(ctx, email, password)
 
-				Convey("Then error should be return", func() {
+				Convey("Then ui error should be return", func() {
 					So(err, ShouldNotBeNil)
-				})
-
-				Convey("Then error should be ui error", func() {
 					So(IsUIError(err), ShouldBeTrue)
 				})
 
@@ -105,11 +94,8 @@ func TestSignInPassword(t *testing.T) {
 				s := &svc{}
 				userID, err := s.SignInPassword(ctx, email, password)
 
-				Convey("Then error should be return", func() {
+				Convey("Then ui error should be return", func() {
 					So(err, ShouldNotBeNil)
-				})
-
-				Convey("Then error should be ui error", func() {
 					So(IsUIError(err), ShouldBeTrue)
 				})
 
@@ -131,11 +117,8 @@ func TestSignInMagicLink(t *testing.T) {
 			s := &svc{}
 			userID, err := s.SignInMagicLink(ctx, link)
 
-			Convey("Then error should be return", func() {
+			Convey("Then ui error should be return", func() {
 				So(err, ShouldNotBeNil)
-			})
-
-			Convey("Then error should be ui error", func() {
 				So(IsUIError(err), ShouldBeTrue)
 			})
 
@@ -154,15 +137,9 @@ func TestSignInMagicLink(t *testing.T) {
 			s := &svc{Config{Repository: repo}}
 			userID, err := s.SignInMagicLink(ctx, link)
 
-			Convey("Then error should be return", func() {
+			Convey("Then ui error should be return", func() {
 				So(err, ShouldNotBeNil)
-			})
-
-			Convey("Then error should be ui error", func() {
 				So(IsUIError(err), ShouldBeTrue)
-			})
-
-			Convey("Then error should not be repository error", func() {
 				So(err, ShouldNotEqual, entity.ErrNotFound)
 			})
 
