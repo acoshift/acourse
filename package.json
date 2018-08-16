@@ -26,5 +26,8 @@
     "node-sass": "^4.9.3",
     "normalize.css": "^8.0.0",
     "purgecss": "^1.0.1"
+  },
+  "engines" : {
+    "node" : ">=8.0.0"
   }
 }
