@@ -24,7 +24,7 @@ func (s *svc) AcceptPayment(ctx context.Context, paymentID string) error {
 			return err
 		}
 
-		return s.Repository.RegisterEnroll(ctx, x.UserID, x.CourseID)
+		return s.Repository.RegisterEnroll(ctx, x.User.ID, x.Course.ID)
 	})
 	if err != nil {
 		return err

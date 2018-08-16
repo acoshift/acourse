@@ -25,7 +25,7 @@ type Repository interface {
 	SetCourseOption(ctx context.Context, courseID string, x *entity.CourseOption) error
 
 	RegisterPayment(ctx context.Context, x *RegisterPayment) error
-	GetPayment(ctx context.Context, paymentID string) (*entity.Payment, error)
+	GetPayment(ctx context.Context, paymentID string) (*Payment, error)
 	SetPaymentStatus(ctx context.Context, paymentID string, status int) error
 	HasPendingPayment(ctx context.Context, userID string, courseID string) (bool, error)
 

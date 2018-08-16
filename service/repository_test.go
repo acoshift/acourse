@@ -82,9 +82,9 @@ func (m *mockRepo) RegisterPayment(ctx context.Context, x *RegisterPayment) erro
 	return args.Error(0)
 }
 
-func (m *mockRepo) GetPayment(ctx context.Context, paymentID string) (*entity.Payment, error) {
+func (m *mockRepo) GetPayment(ctx context.Context, paymentID string) (*Payment, error) {
 	args := m.Mock.Called(ctx, paymentID)
-	return args.Get(0).(*entity.Payment), args.Error(1)
+	return args.Get(0).(*Payment), args.Error(1)
 }
 
 func (m *mockRepo) SetPaymentStatus(ctx context.Context, paymentID string, status int) error {

@@ -124,7 +124,7 @@ func (adminRepo) GetPayment(ctx context.Context, paymentID string) (*admin.Payme
 		from payments as p
 			left join users as u on p.user_id = u.id
 			left join courses as c on p.course_id = c.id
-		where payments.id = $1
+		where p.id = $1
 	`, paymentID).Scan(
 		&x.ID,
 		&x.Image, &x.Price, &x.OriginalPrice, &x.Code,

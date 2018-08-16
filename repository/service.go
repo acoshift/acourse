@@ -242,39 +242,27 @@ func (svcRepo) RegisterPayment(ctx context.Context, x *service.RegisterPayment) 
 	return nil
 }
 
-func (svcRepo) GetPayment(ctx context.Context, paymentID string) (*entity.Payment, error) {
+func (svcRepo) GetPayment(ctx context.Context, paymentID string) (*service.Payment, error) {
 	q := sqlctx.GetQueryer(ctx)
 
-	var x entity.Payment
+	var x service.Payment
 	err := q.QueryRow(`
 		select
-			payments.id,
-			payments.image,
-			payments.price,
-			payments.original_price,
-			payments.code,
-			payments.status,
-			payments.created_at,
-			payments.updated_at,
-			payments.at,
-			users.id,
-			users.username,
-			users.name,
-			users.email,
-			users.image,
-			courses.id,
-			courses.title,
-			courses.image,
-			courses.url
-		from payments
-			left join users on payments.user_id = users.id
-			left join courses on payments.course_id = courses.id
-		where payments.id = $1
+			p.id,
+			p.image, p.price, p.original_price, p.code,
+			p.status, p.created_at, p.at,
+			u.id, u.username, u.name, u.email, u.image,
+			c.id, c.title, c.image, c.url
+		from payments as p
+			left join users as u on p.user_id = u.id
+			left join courses as c on p.course_id = c.id
+		where p.id = $1
 	`, paymentID).Scan(
 		&x.ID,
-		&x.Image, &x.Price, &x.OriginalPrice, &x.Code, &x.Status, &x.CreatedAt, &x.UpdatedAt, &x.At,
+		&x.Image, &x.Price, &x.OriginalPrice, &x.Code,
+		&x.Status, &x.CreatedAt, &x.At,
 		&x.User.ID, &x.User.Username, &x.User.Name, pgsql.NullString(&x.User.Email), &x.User.Image,
-		&x.Course.ID, &x.Course.Title, &x.Course.Image, &x.Course.URL,
+		&x.Course.ID, &x.Course.Title, &x.Course.Image, pgsql.NullString(&x.Course.URL),
 	)
 	if err == sql.ErrNoRows {
 		return nil, entity.ErrNotFound
@@ -282,8 +270,6 @@ func (svcRepo) GetPayment(ctx context.Context, paymentID string) (*entity.Paymen
 	if err != nil {
 		return nil, err
 	}
-	x.UserID = x.User.ID
-	x.CourseID = x.Course.ID
 	return &x, nil
 }
 
