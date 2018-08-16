@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"mime/multipart"
-	"strings"
 	"time"
 
 	"github.com/acoshift/acourse/context/appctx"
@@ -14,7 +13,6 @@ import (
 	"github.com/acoshift/acourse/entity"
 	"github.com/acoshift/acourse/file"
 	"github.com/acoshift/acourse/repository"
-	"github.com/acoshift/header"
 )
 
 // CreateCourse type
@@ -36,9 +34,9 @@ func (s *svc) CreateCourse(ctx context.Context, x *CreateCourse) (courseID strin
 
 	var imageURL string
 	if x.Image != nil {
-		// TODO: allow only jpeg, png
-		if !strings.Contains(x.Image.Header.Get(header.ContentType), "image") {
-			return "", newUIError("file is not an image")
+		err := validateImage(x.Image)
+		if err != nil {
+			return "", err
 		}
 
 		image, err := x.Image.Open()
@@ -99,9 +97,9 @@ func (s *svc) UpdateCourse(ctx context.Context, x *UpdateCourse) error {
 
 	var imageURL string
 	if x.Image != nil {
-		// TODO: allow only jpeg, png
-		if !strings.Contains(x.Image.Header.Get(header.ContentType), "image") {
-			return newUIError("file is not an image")
+		err := validateImage(x.Image)
+		if err != nil {
+			return err
 		}
 
 		image, err := x.Image.Open()
@@ -191,9 +189,9 @@ func (s *svc) EnrollCourse(ctx context.Context, courseID string, price float64, 
 			return newUIError("กรุณาอัพโหลดรูปภาพ")
 		}
 
-		// TODO: allow only jpeg, png
-		if !strings.Contains(paymentImage.Header.Get(header.ContentType), "image") {
-			return newUIError("file is not an image")
+		err := validateImage(paymentImage)
+		if err != nil {
+			return err
 		}
 
 		image, err := paymentImage.Open()

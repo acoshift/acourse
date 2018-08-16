@@ -5,14 +5,12 @@ import (
 	"context"
 	"io"
 	"mime/multipart"
-	"strings"
 
 	"github.com/acoshift/acourse/context/appctx"
 	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/entity"
 	"github.com/acoshift/acourse/file"
 	"github.com/acoshift/acourse/repository"
-	"github.com/acoshift/header"
 )
 
 // Profile type
@@ -30,9 +28,9 @@ func (s *svc) UpdateProfile(ctx context.Context, x *Profile) error {
 
 	var imageURL string
 	if x.Image != nil {
-		// TODO: allow only jpeg, png
-		if !strings.Contains(x.Image.Header.Get(header.ContentType), "image") {
-			return newUIError("file is not an image")
+		err := validateImage(x.Image)
+		if err != nil {
+			return err
 		}
 
 		image, err := x.Image.Open()
