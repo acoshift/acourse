@@ -4,18 +4,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/acoshift/hime"
+
 	"github.com/acoshift/acourse/appsess"
 	"github.com/acoshift/acourse/context/appctx"
 )
 
 func mustSignedIn(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		s := appctx.GetSession(r.Context())
+	return hime.Handler(func(ctx *hime.Context) error {
+		s := appctx.GetSession(ctx)
 		id := appsess.GetUserID(s)
 		if len(id) == 0 {
-			http.Redirect(w, r, "/signin?r="+url.QueryEscape(r.RequestURI), http.StatusFound)
-			return
+			return ctx.RedirectTo("auth.signin", ctx.Param("r", url.QueryEscape(ctx.Request().RequestURI)))
 		}
-		h.ServeHTTP(w, r)
+		return ctx.Handle(h)
 	})
 }

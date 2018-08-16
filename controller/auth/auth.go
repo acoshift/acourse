@@ -46,7 +46,7 @@ func (c *ctrl) openID(ctx *hime.Context) error {
 	}
 
 	sessID := generateSessionID()
-	redirectURL, err := c.Auth.CreateAuthURI(ctx, p, c.BaseURL+ctx.Route("openid.callback"), sessID)
+	redirectURL, err := c.Auth.CreateAuthURI(ctx, p, c.BaseURL+ctx.Route("auth.openid.callback"), sessID)
 	if err != nil {
 		return err
 	}

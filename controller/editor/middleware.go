@@ -30,7 +30,7 @@ func isCourseOwner(h http.Handler) http.Handler {
 	return hime.Handler(func(ctx *hime.Context) error {
 		u := appctx.GetUser(ctx)
 		if u == nil {
-			return ctx.Redirect("signin")
+			return ctx.Redirect("auth.signin")
 		}
 
 		id := ctx.FormValue("id")

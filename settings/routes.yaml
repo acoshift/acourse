@@ -2,19 +2,19 @@ routes:
   index: /
 
   # auth
-  signin: /auth/signin
-  signin.password: /auth/signin/password
-  signin.check-email: /auth/signin/check-email
-  signin.link: /auth/signin/link
-  openid: /auth/openid
-  openid.google: /auth/openid?p=google.com
-  openid.github: /auth/openid?p=github.com
-  openid.callback: /auth/openid/callback
-  signup: /auth/signup
+  auth.signin: /auth/signin
+  auth.signin.password: /auth/signin/password
+  auth.signin.check-email: /auth/signin/check-email
+  auth.signin.link: /auth/signin/link
+  auth.openid: /auth/openid
+  auth.openid.google: /auth/openid?p=google.com
+  auth.openid.github: /auth/openid?p=github.com
+  auth.openid.callback: /auth/openid/callback
+  auth.signup: /auth/signup
+  auth.reset.password: /auth/reset/password
 
   # app
   signout: /signout
-  reset.password: /auth/reset/password
   profile: /profile
   profile.edit: /profile/edit
   course: /course/

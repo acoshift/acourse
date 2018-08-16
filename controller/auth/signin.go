@@ -48,7 +48,7 @@ func (c *ctrl) postSignIn(ctx *hime.Context) error {
 
 	user, err := repository.GetEmailSignInUserByEmail(ctx, email)
 	if err == entity.ErrNotFound {
-		return ctx.RedirectTo("signin.check-email")
+		return ctx.RedirectTo("auth.signin.check-email")
 	}
 	if err != nil {
 		f.Add("Errors", err.Error())
@@ -73,11 +73,11 @@ func (c *ctrl) postSignIn(ctx *hime.Context) error {
 %s
 
 ทีมงาน acourse.io
-	`, user.Name, c.BaseURL+"/signin/link?id="+linkID)
+	`, user.Name, c.BaseURL+ctx.Route("auth.signin.link", ctx.Param("id", linkID)))
 
 	go c.EmailSender.Send(user.Email, "Magic Link Request", view.Markdown(message))
 
-	return ctx.RedirectTo("signin.check-email")
+	return ctx.RedirectTo("auth.signin.check-email")
 }
 
 func (c *ctrl) checkEmail(ctx *hime.Context) error {
@@ -91,7 +91,7 @@ func (c *ctrl) checkEmail(ctx *hime.Context) error {
 func (c *ctrl) signInLink(ctx *hime.Context) error {
 	linkID := ctx.FormValue("id")
 	if len(linkID) == 0 {
-		return ctx.RedirectTo("signin")
+		return ctx.RedirectTo("auth.signin")
 	}
 
 	s := appctx.GetSession(ctx)
@@ -100,7 +100,7 @@ func (c *ctrl) signInLink(ctx *hime.Context) error {
 	userID, err := repository.FindMagicLink(ctx, linkID)
 	if err != nil {
 		f.Add("Errors", "ไม่พบ Magic Link ของคุณ")
-		return ctx.RedirectTo("signin")
+		return ctx.RedirectTo("auth.signin")
 	}
 
 	appsess.SetUserID(s, userID)
