@@ -129,5 +129,5 @@ func postProfileEdit(ctx *hime.Context) error {
 		return ctx.RedirectToGet()
 	}
 
-	return ctx.RedirectTo("profile")
+	return ctx.RedirectTo("app.profile")
 }

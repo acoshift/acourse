@@ -54,7 +54,7 @@ func courseView(ctx *hime.Context) error {
 
 	// if course has url, redirect to course url
 	if x.URL.Valid && x.URL.String != link {
-		return ctx.RedirectTo("course", x.URL.String)
+		return ctx.RedirectTo("app.course", x.URL.String)
 	}
 
 	enrolled := false
@@ -99,7 +99,7 @@ func courseView(ctx *hime.Context) error {
 	p["Title"] = x.Title
 	p["Desc"] = x.ShortDesc
 	p["Image"] = x.Image
-	p["URL"] = baseURL + "/course/" + url.PathEscape(x.Link())
+	p["URL"] = baseURL + ctx.Route("app.course", url.PathEscape(x.Link()))
 	p["Course"] = x
 	p["Enrolled"] = enrolled
 	p["Owned"] = owned
@@ -134,7 +134,7 @@ func courseContent(ctx *hime.Context) error {
 
 	// if course has url, redirect to course url
 	if x.URL.Valid && x.URL.String != link {
-		return ctx.RedirectTo("course", x.URL.String, "content")
+		return ctx.RedirectTo("app.course", x.URL.String, "content")
 	}
 
 	enrolled, err := repository.IsEnrolled(ctx, user.ID, x.ID)
@@ -204,7 +204,7 @@ func courseEnroll(ctx *hime.Context) error {
 
 	// if user is course owner redirect back to course page
 	if user.ID == x.UserID {
-		return ctx.RedirectTo("course", link)
+		return ctx.RedirectTo("app.course", link)
 	}
 
 	// redirect enrolled user back to course page
@@ -213,7 +213,7 @@ func courseEnroll(ctx *hime.Context) error {
 		return err
 	}
 	if enrolled {
-		return ctx.RedirectTo("course", link)
+		return ctx.RedirectTo("app.course", link)
 	}
 
 	// check is user has pending enroll
@@ -222,14 +222,14 @@ func courseEnroll(ctx *hime.Context) error {
 		return err
 	}
 	if pendingPayment {
-		return ctx.RedirectTo("course", link)
+		return ctx.RedirectTo("app.course", link)
 	}
 
 	p := view.Page(ctx)
 	p["Title"] = x.Title
 	p["Desc"] = x.ShortDesc
 	p["Image"] = x.Image
-	p["URL"] = baseURL + "/course/" + url.PathEscape(x.Link())
+	p["URL"] = baseURL + ctx.Route("app.course", url.PathEscape(x.Link()))
 	p["Course"] = x
 	return ctx.View("app.course-enroll", p)
 }
@@ -262,7 +262,7 @@ func postCourseEnroll(ctx *hime.Context) error {
 
 	// if user is course owner redirect back to course page
 	if user.ID == x.UserID {
-		return ctx.RedirectTo("course", link)
+		return ctx.RedirectTo("app.course", link)
 	}
 
 	// redirect enrolled user back to course page
@@ -271,7 +271,7 @@ func postCourseEnroll(ctx *hime.Context) error {
 		return err
 	}
 	if enrolled {
-		return ctx.RedirectTo("course", link)
+		return ctx.RedirectTo("app.course", link)
 	}
 
 	// check is user has pending enroll
@@ -280,7 +280,7 @@ func postCourseEnroll(ctx *hime.Context) error {
 		return err
 	}
 	if pendingPayment {
-		return ctx.RedirectTo("course", link)
+		return ctx.RedirectTo("app.course", link)
 	}
 
 	originalPrice := x.Price
@@ -349,7 +349,7 @@ func postCourseEnroll(ctx *hime.Context) error {
 		go adminNotifier.Notify(fmt.Sprintf("New payment for course %s, price %.2f", x.Title, price))
 	}
 
-	return ctx.RedirectTo("course", link)
+	return ctx.RedirectTo("app.course", link)
 }
 
 func courseAssignment(ctx *hime.Context) error {
@@ -379,7 +379,7 @@ func courseAssignment(ctx *hime.Context) error {
 
 	// if course has url, redirect to course url
 	if x.URL.Valid && x.URL.String != link {
-		return ctx.RedirectTo("course", x.URL.String, "assignment")
+		return ctx.RedirectTo("app.course", x.URL.String, "assignment")
 	}
 
 	enrolled, err := repository.IsEnrolled(ctx, user.ID, x.ID)
@@ -400,8 +400,8 @@ func courseAssignment(ctx *hime.Context) error {
 	p["Title"] = x.Title
 	p["Desc"] = x.ShortDesc
 	p["Image"] = x.Image
-	p["URL"] = baseURL + "/course/" + url.PathEscape(x.Link())
+	p["URL"] = baseURL + ctx.Route("app.course", url.PathEscape(x.Link()))
 	p["Course"] = x
 	p["Assignments"] = assignments
-	return ctx.View("app.assignment", p)
+	return ctx.View("app.course-assignment", p)
 }

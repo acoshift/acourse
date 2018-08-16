@@ -12,7 +12,7 @@
 					<div class="acourse-block">
 						<div class="acourse-header _color-sub">{{.Content.Title}}</div>
 						<span class="_font-bold _color-dark">คอร์ส: </span>
-						<a href="{{route "course" .Course.Link}}" class="acourse-link">{{.Course.Title}}</a>
+						<a href="{{route "app.course" .Course.Link}}" class="acourse-link">{{.Course.Title}}</a>
 					</div>
 				</div>
 
@@ -46,7 +46,7 @@
 							</div>
 							<div class="playlist-list">
 							{{range $i, $x := .Course.Contents}}
-								<a href="{{route "course" $.Course.Link "content" (param "p" $i)}}">
+								<a href="{{route "app.course" $.Course.Link "content" (param "p" $i)}}">
 									<div class="list {{if eq $x.ID $.Content.ID}}active{{end}}">
 										{{incr $i}}. {{$x.Title}}
 									</div>
@@ -64,7 +64,7 @@
 					</div>
 				</div>
 				<div class="acourse-block-bigger _flex-row _main-center">
-					 กลับไปที่คอร์ส <a href="{{route "course" .Course.Link}}" class="_color-sub">&nbsp;{{.Course.Title}}</a>
+					 กลับไปที่คอร์ส <a href="{{route "app.course" .Course.Link}}" class="_color-sub">&nbsp;{{.Course.Title}}</a>
 				</div>
 				{{end}}
 			</div>

@@ -77,5 +77,5 @@ func (c *ctrl) openIDCallback(ctx *hime.Context) error {
 
 	s.Regenerate()
 	appsess.SetUserID(s, user.UserID)
-	return ctx.RedirectTo("index")
+	return ctx.RedirectTo("app.index")
 }

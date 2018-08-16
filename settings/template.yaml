@@ -35,8 +35,8 @@ list:
   app.course-enroll:
   - app/course-enroll.tmpl
   - app.tmpl
-  app.assignment:
-  - app/assignment.tmpl
+  app.course-assignment:
+  - app/course-assignment.tmpl
   - app.tmpl
 
   # auth

@@ -1,10 +1,10 @@
 routes:
   # app
-  index: /
-  signout: /signout
-  profile: /profile
-  profile.edit: /profile/edit
-  course: /course/
+  app.index: /
+  app.signout: /signout
+  app.profile: /profile
+  app.profile.edit: /profile/edit
+  app.course: /course/
 
   # auth
   auth.signin: /auth/signin

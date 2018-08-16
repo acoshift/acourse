@@ -88,9 +88,9 @@ func (c *ctrl) postCourseCreate(ctx *hime.Context) error {
 
 	link, _ := repository.GetCourseURL(ctx, id)
 	if link == "" {
-		return ctx.RedirectTo("course", id)
+		return ctx.RedirectTo("app.course", id)
 	}
-	return ctx.RedirectTo("course", link)
+	return ctx.RedirectTo("app.course", link)
 }
 
 func (c *ctrl) courseEdit(ctx *hime.Context) error {
@@ -176,7 +176,7 @@ func (c *ctrl) postCourseEdit(ctx *hime.Context) error {
 
 	link, _ := repository.GetCourseURL(ctx, id)
 	if link == "" {
-		return ctx.RedirectTo("course", id)
+		return ctx.RedirectTo("app.course", id)
 	}
-	return ctx.RedirectTo("course", link)
+	return ctx.RedirectTo("app.course", link)
 }
