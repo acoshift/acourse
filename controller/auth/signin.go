@@ -38,7 +38,7 @@ func (c *ctrl) postSignIn(ctx *hime.Context) error {
 
 func (c *ctrl) checkEmail(ctx *hime.Context) error {
 	f := appctx.GetFlash(ctx)
-	if f.GetBool("CheckEmail") {
+	if !f.GetBool("CheckEmail") {
 		return ctx.Redirect("/")
 	}
 	return ctx.View("auth.check-email", view.Page(ctx))
