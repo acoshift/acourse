@@ -39,19 +39,3 @@ func uploadProfileImage(ctx context.Context, r io.Reader) (string, error) {
 	}
 	return downloadURL, nil
 }
-
-// UploadCourseCoverImage uploads course cover image
-func uploadCourseCoverImage(ctx context.Context, r io.Reader) (string, error) {
-	buf := &bytes.Buffer{}
-	err := imageResizeEncoder.ResizeEncode(buf, r, 1200, 0, 90, false)
-	if err != nil {
-		return "", err
-	}
-	filename := file.GenerateFilename() + ".jpg"
-	downloadURL := fileStorage.DownloadURL(filename)
-	err = fileStorage.Store(ctx, buf, filename)
-	if err != nil {
-		return "", err
-	}
-	return downloadURL, nil
-}

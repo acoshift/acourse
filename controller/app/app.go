@@ -1,11 +1,9 @@
 package app
 
 import (
-	"math/rand"
 	"net/http"
 
 	"github.com/acoshift/go-firebase-admin"
-	"github.com/acoshift/header"
 	"github.com/acoshift/hime"
 	"github.com/acoshift/methodmux"
 	"github.com/acoshift/prefixhandler"
@@ -13,7 +11,6 @@ import (
 	"github.com/acoshift/acourse/file"
 	"github.com/acoshift/acourse/image"
 	"github.com/acoshift/acourse/notify"
-	"github.com/acoshift/acourse/view"
 )
 
 var (
@@ -33,8 +30,6 @@ func New(config Config) http.Handler {
 	imageResizeEncoder = config.ImageResizeEncoder
 
 	mux := http.NewServeMux()
-
-	methodmux.FallbackHandler = hime.Handler(notFound)
 
 	mux.Handle("/", methodmux.Get(
 		hime.Handler(index),
@@ -72,45 +67,5 @@ func New(config Config) http.Handler {
 		mux.Handle("/course/", prefixhandler.New("/course", courseURLKey{}, m))
 	}
 
-	// editor
-	{
-		m := http.NewServeMux()
-		m.Handle("/create", onlyInstructor(methodmux.GetPost(
-			hime.Handler(editorCreate),
-			hime.Handler(postEditorCreate),
-		)))
-		m.Handle("/course", isCourseOwner(methodmux.GetPost(
-			hime.Handler(editorCourse),
-			hime.Handler(postEditorCourse),
-		)))
-		m.Handle("/content", isCourseOwner(methodmux.GetPost(
-			hime.Handler(editorContent),
-			hime.Handler(postEditorContent),
-		)))
-		m.Handle("/content/create", isCourseOwner(methodmux.GetPost(
-			hime.Handler(editorContentCreate),
-			hime.Handler(postEditorContentCreate),
-		)))
-		// TODO: add middleware ?
-		m.Handle("/content/edit", methodmux.GetPost(
-			hime.Handler(editorContentEdit),
-			hime.Handler(postEditorContentEdit),
-		))
-
-		mux.Handle("/editor/", http.StripPrefix("/editor", m))
-	}
-
 	return mux
-}
-
-var notFoundImages = []string{
-	"https://storage.googleapis.com/acourse/static/9961f3c1-575f-4b98-af4f-447566ee1cb3.png",
-	"https://storage.googleapis.com/acourse/static/b14a40c9-d3a4-465d-9453-ce7fcfbc594c.png",
-}
-
-func notFound(ctx *hime.Context) error {
-	p := view.Page(ctx)
-	p["Image"] = notFoundImages[rand.Intn(len(notFoundImages))]
-	ctx.ResponseWriter().Header().Set(header.XContentTypeOptions, "nosniff")
-	return ctx.Status(http.StatusNotFound).View("error.not-found", p)
 }

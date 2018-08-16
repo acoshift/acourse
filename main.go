@@ -14,6 +14,7 @@ import (
 	"github.com/acoshift/configfile"
 	"github.com/acoshift/go-firebase-admin"
 	"github.com/acoshift/hime"
+	"github.com/acoshift/methodmux"
 	"github.com/acoshift/middleware"
 	"github.com/acoshift/probehandler"
 	"github.com/acoshift/session"
@@ -29,6 +30,8 @@ import (
 	"github.com/acoshift/acourse/controller/admin"
 	"github.com/acoshift/acourse/controller/app"
 	"github.com/acoshift/acourse/controller/auth"
+	"github.com/acoshift/acourse/controller/editor"
+	"github.com/acoshift/acourse/controller/share"
 	"github.com/acoshift/acourse/email"
 	"github.com/acoshift/acourse/file"
 	"github.com/acoshift/acourse/image"
@@ -111,6 +114,8 @@ func main() {
 		Funcs(internal.TemplateFunc(loc)).
 		ParseConfigFile("settings/template.yaml")
 
+	methodmux.FallbackHandler = hime.Handler(share.NotFound)
+
 	mux := http.NewServeMux()
 
 	// health check
@@ -150,6 +155,13 @@ func main() {
 		Auth:               firAuth,
 		BaseURL:            baseURL,
 		EmailSender:        emailSender,
+		FileStorage:        fileStorage,
+		ImageResizeEncoder: imageResizeEncoder,
+	}))))
+
+	m.Handle("/editor/", http.StripPrefix("/editor", middleware.Chain(
+	// -
+	)(editor.New(editor.Config{
 		FileStorage:        fileStorage,
 		ImageResizeEncoder: imageResizeEncoder,
 	}))))

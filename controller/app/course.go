@@ -7,16 +7,15 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/acoshift/header"
 	"github.com/acoshift/hime"
 	"github.com/acoshift/prefixhandler"
-	"github.com/lib/pq"
 	"github.com/satori/go.uuid"
 
 	"github.com/acoshift/acourse/context/appctx"
 	"github.com/acoshift/acourse/context/sqlctx"
+	"github.com/acoshift/acourse/controller/share"
 	"github.com/acoshift/acourse/entity"
 	"github.com/acoshift/acourse/repository"
 	"github.com/acoshift/acourse/view"
@@ -26,7 +25,7 @@ type courseURLKey struct{}
 
 func courseView(ctx *hime.Context) error {
 	if ctx.Request().URL.Path != "/" {
-		return notFound(ctx)
+		return share.NotFound(ctx)
 	}
 
 	user := appctx.GetUser(ctx)
@@ -39,7 +38,7 @@ func courseView(ctx *hime.Context) error {
 		// link can not parse to uuid get course id from url
 		id, err = repository.GetCourseIDFromURL(ctx, link)
 		if err == entity.ErrNotFound {
-			return notFound(ctx)
+			return share.NotFound(ctx)
 		}
 		if err != nil {
 			return err
@@ -47,7 +46,7 @@ func courseView(ctx *hime.Context) error {
 	}
 	x, err := repository.GetCourse(ctx, id)
 	if err == entity.ErrNotFound {
-		return notFound(ctx)
+		return share.NotFound(ctx)
 	}
 	if err != nil {
 		return err
@@ -119,7 +118,7 @@ func courseContent(ctx *hime.Context) error {
 		// link can not parse to uuid get course id from url
 		id, err = repository.GetCourseIDFromURL(ctx, link)
 		if err == entity.ErrNotFound {
-			return notFound(ctx)
+			return share.NotFound(ctx)
 		}
 		if err != nil {
 			return err
@@ -127,7 +126,7 @@ func courseContent(ctx *hime.Context) error {
 	}
 	x, err := repository.GetCourse(ctx, id)
 	if err == entity.ErrNotFound {
-		return notFound(ctx)
+		return share.NotFound(ctx)
 	}
 	if err != nil {
 		return err
@@ -178,204 +177,6 @@ func courseContent(ctx *hime.Context) error {
 	return ctx.View("course.content", p)
 }
 
-func editorCreate(ctx *hime.Context) error {
-	return ctx.View("editor.create", view.Page(ctx))
-}
-
-func postEditorCreate(ctx *hime.Context) error {
-	f := appctx.GetSession(ctx).Flash()
-	user := appctx.GetUser(ctx)
-
-	var (
-		title     = ctx.FormValue("title")
-		shortDesc = ctx.FormValue("shortDesc")
-		desc      = ctx.FormValue("desc")
-		imageURL  string
-		start     pq.NullTime
-		// assignment, _ = strconv.ParseBool(ctx.FormValue("assignment"))
-	)
-	if len(title) == 0 {
-		f.Add("Errors", "title required")
-		return ctx.RedirectToGet()
-	}
-
-	if v := ctx.FormValue("start"); len(v) > 0 {
-		t, _ := time.Parse("2006-01-02", v)
-		if !t.IsZero() {
-			start.Time = t
-			start.Valid = true
-		}
-	}
-
-	if image, info, err := ctx.FormFileNotEmpty("image"); err != http.ErrMissingFile {
-		if err != nil {
-			f.Add("Errors", err.Error())
-			return ctx.RedirectToGet()
-		}
-
-		if !strings.Contains(info.Header.Get(header.ContentType), "image") {
-			f.Add("Errors", "file is not an image")
-			return ctx.RedirectToGet()
-		}
-
-		imageURL, err = uploadCourseCoverImage(ctx, image)
-		if err != nil {
-			f.Add("Errors", err.Error())
-			return ctx.RedirectToGet()
-		}
-	}
-
-	var id string
-	err := sqlctx.RunInTx(ctx, func(ctx context.Context) error {
-		var err error
-
-		id, err = repository.RegisterCourse(ctx, &entity.RegisterCourse{
-			UserID:    user.ID,
-			Title:     title,
-			ShortDesc: shortDesc,
-			LongDesc:  desc,
-			Image:     imageURL,
-			Start:     start,
-		})
-		if err != nil {
-			return err
-		}
-
-		return repository.SetCourseOption(ctx, id, &entity.CourseOption{})
-	})
-	if err != nil {
-		return err
-	}
-
-	link, _ := repository.GetCourseURL(ctx, id)
-	if link == "" {
-		return ctx.RedirectTo("course", id)
-	}
-	return ctx.RedirectTo("course", link)
-}
-
-func editorCourse(ctx *hime.Context) error {
-	id := ctx.FormValue("id")
-	course, err := repository.GetCourse(ctx, id)
-	if err != nil {
-		return err
-	}
-
-	p := view.Page(ctx)
-	p["Course"] = course
-	return ctx.View("editor.course", p)
-}
-
-func postEditorCourse(ctx *hime.Context) error {
-	id := ctx.FormValue("id")
-
-	f := appctx.GetSession(ctx).Flash()
-
-	var (
-		title     = ctx.FormValue("title")
-		shortDesc = ctx.FormValue("shortDesc")
-		desc      = ctx.FormValue("desc")
-		imageURL  string
-		start     pq.NullTime
-		// assignment, _ = strconv.ParseBool(ctx.FormValue("assignment"))
-	)
-	if len(title) == 0 {
-		f.Add("Errors", "title required")
-		return ctx.RedirectToGet()
-	}
-
-	if v := ctx.FormValue("start"); len(v) > 0 {
-		t, _ := time.Parse("2006-01-02", v)
-		if !t.IsZero() {
-			start.Time = t
-			start.Valid = true
-		}
-	}
-
-	if image, info, err := ctx.FormFileNotEmpty("image"); err != http.ErrMissingFile {
-		if err != nil {
-			f.Add("Errors", err.Error())
-			return ctx.RedirectToGet()
-		}
-
-		if !strings.Contains(info.Header.Get(header.ContentType), "image") {
-			f.Add("Errors", "file is not an image")
-			return ctx.RedirectToGet()
-		}
-
-		imageURL, err = uploadCourseCoverImage(ctx, image)
-		if err != nil {
-			f.Add("Errors", err.Error())
-			return ctx.RedirectToGet()
-		}
-	}
-
-	err := sqlctx.RunInTx(ctx, func(ctx context.Context) error {
-		err := repository.UpdateCourse(ctx, &entity.UpdateCourse{
-			ID:        id,
-			Title:     title,
-			ShortDesc: shortDesc,
-			LongDesc:  desc,
-			Start:     start,
-		})
-		if err != nil {
-			return err
-		}
-
-		if len(imageURL) > 0 {
-			err = repository.SetCourseImage(ctx, id, imageURL)
-			if err != nil {
-				return err
-			}
-		}
-
-		return nil
-	})
-	if err != nil {
-		return err
-	}
-
-	link, _ := repository.GetCourseURL(ctx, id)
-	if link == "" {
-		return ctx.RedirectTo("course", id)
-	}
-	return ctx.RedirectTo("course", link)
-}
-
-func editorContent(ctx *hime.Context) error {
-	id := ctx.FormValue("id")
-
-	course, err := repository.GetCourse(ctx, id)
-	if err == entity.ErrNotFound {
-		return notFound(ctx)
-	}
-	if err != nil {
-		return err
-	}
-	course.Contents, err = repository.GetCourseContents(ctx, id)
-	if err != nil {
-		return err
-	}
-
-	p := view.Page(ctx)
-	p["Course"] = course
-	return ctx.View("editor.content", p)
-}
-
-func postEditorContent(ctx *hime.Context) error {
-	id := ctx.FormValue("id")
-
-	if ctx.FormValue("action") == "delete" {
-		contentID := ctx.FormValue("contentId")
-
-		err := repository.DeleteCourseContent(ctx, id, contentID)
-		if err != nil {
-			return err
-		}
-	}
-	return ctx.RedirectToGet()
-}
-
 func courseEnroll(ctx *hime.Context) error {
 	user := appctx.GetUser(ctx)
 
@@ -386,7 +187,7 @@ func courseEnroll(ctx *hime.Context) error {
 	if err != nil {
 		id, err = repository.GetCourseIDFromURL(ctx, link)
 		if err == entity.ErrNotFound {
-			return notFound(ctx)
+			return share.NotFound(ctx)
 		}
 		if err != nil {
 			return err
@@ -395,7 +196,7 @@ func courseEnroll(ctx *hime.Context) error {
 
 	x, err := repository.GetCourse(ctx, id)
 	if err == entity.ErrNotFound {
-		return notFound(ctx)
+		return share.NotFound(ctx)
 	}
 	if err != nil {
 		return err
@@ -444,7 +245,7 @@ func postCourseEnroll(ctx *hime.Context) error {
 	if err != nil {
 		id, err = repository.GetCourseIDFromURL(ctx, link)
 		if err == entity.ErrNotFound {
-			return notFound(ctx)
+			return share.NotFound(ctx)
 		}
 		if err != nil {
 			return err
@@ -453,7 +254,7 @@ func postCourseEnroll(ctx *hime.Context) error {
 
 	x, err := repository.GetCourse(ctx, id)
 	if err == entity.ErrNotFound {
-		return notFound(ctx)
+		return share.NotFound(ctx)
 	}
 	if err != nil {
 		return err
@@ -562,7 +363,7 @@ func courseAssignment(ctx *hime.Context) error {
 		// link can not parse to int64 get course id from url
 		id, err = repository.GetCourseIDFromURL(ctx, link)
 		if err == entity.ErrNotFound {
-			return notFound(ctx)
+			return share.NotFound(ctx)
 		}
 		if err != nil {
 			return err
@@ -570,7 +371,7 @@ func courseAssignment(ctx *hime.Context) error {
 	}
 	x, err := repository.GetCourse(ctx, id)
 	if err == entity.ErrNotFound {
-		return notFound(ctx)
+		return share.NotFound(ctx)
 	}
 	if err != nil {
 		return err
@@ -603,106 +404,4 @@ func courseAssignment(ctx *hime.Context) error {
 	p["Course"] = x
 	p["Assignments"] = assignments
 	return ctx.View("assignment", p)
-}
-
-func editorContentCreate(ctx *hime.Context) error {
-	id := ctx.FormValue("id")
-
-	course, err := repository.GetCourse(ctx, id)
-	if err != nil {
-		return err
-	}
-
-	p := view.Page(ctx)
-	p["Course"] = course
-	return ctx.View("editor.content.create", p)
-}
-
-func postEditorContentCreate(ctx *hime.Context) error {
-	id := ctx.FormValue("id")
-
-	var (
-		title   = ctx.FormValue("title")
-		desc    = ctx.FormValue("desc")
-		videoID = ctx.FormValue("videoId")
-	)
-
-	_, err := repository.RegisterCourseContent(ctx, &entity.RegisterCourseContent{
-		CourseID:  id,
-		Title:     title,
-		LongDesc:  desc,
-		VideoID:   videoID,
-		VideoType: entity.Youtube,
-	})
-	if err != nil {
-		return err
-	}
-
-	return ctx.RedirectTo("editor.content", ctx.Param("id", ctx.FormValue("id")))
-}
-
-func editorContentEdit(ctx *hime.Context) error {
-	// course content id
-	id := ctx.FormValue("id")
-
-	content, err := repository.GetCourseContent(ctx, id)
-	if err == entity.ErrNotFound {
-		return notFound(ctx)
-	}
-	if err != nil {
-		return err
-	}
-
-	course, err := repository.GetCourse(ctx, content.CourseID)
-	if err != nil {
-		return err
-	}
-
-	user := appctx.GetUser(ctx)
-	// user is not course owner
-	if user.ID != course.UserID {
-		return ctx.Status(http.StatusForbidden).StatusText()
-	}
-
-	p := view.Page(ctx)
-	p["Course"] = course
-	p["Content"] = content
-	return ctx.View("editor.content.edit", p)
-}
-
-func postEditorContentEdit(ctx *hime.Context) error {
-	// course content id
-	id := ctx.FormValue("id")
-
-	content, err := repository.GetCourseContent(ctx, id)
-	if err == entity.ErrNotFound {
-		return notFound(ctx)
-	}
-	if err != nil {
-		return err
-	}
-
-	course, err := repository.GetCourse(ctx, content.CourseID)
-	if err != nil {
-		return err
-	}
-
-	user := appctx.GetUser(ctx)
-	// user is not course owner
-	if user.ID != course.UserID {
-		return ctx.Status(http.StatusForbidden).StatusText()
-	}
-
-	var (
-		title   = ctx.FormValue("title")
-		desc    = ctx.FormValue("desc")
-		videoID = ctx.FormValue("videoId")
-	)
-
-	err = repository.UpdateCourseContent(ctx, course.ID, id, title, desc, videoID)
-	if err != nil {
-		return err
-	}
-
-	return ctx.RedirectTo("editor.content", ctx.Param("id", course.ID))
 }
