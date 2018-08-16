@@ -1,5 +1,8 @@
 # acourse
 
+[![Build Status](https://travis-ci.org/acoshift/acourse.svg?branch=master)](https://travis-ci.org/acoshift/acourse)
+[![Coverage Status](https://coveralls.io/repos/github/acoshift/acourse/badge.svg?branch=master)](https://coveralls.io/github/acoshift/acourse?branch=master)
+
 Acoshift's course system [acourse.io](https://acourse.io)
 
 ## Development
