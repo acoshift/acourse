@@ -5,12 +5,14 @@ import (
 	"context"
 	"io"
 	"mime/multipart"
+	"unicode/utf8"
 
 	"github.com/acoshift/acourse/context/appctx"
 	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/entity"
 	"github.com/acoshift/acourse/file"
 	"github.com/acoshift/acourse/repository"
+	"github.com/asaskevich/govalidator"
 )
 
 // Profile type
@@ -24,7 +26,18 @@ type Profile struct {
 func (s *svc) UpdateProfile(ctx context.Context, x *Profile) error {
 	user := appctx.GetUser(ctx)
 
-	// TODO: validate profile
+	if !govalidator.IsAlphanumeric(x.Username) {
+		return newUIError("username allow only a-z, A-Z, and 0-9")
+	}
+	if n := utf8.RuneCountInString(x.Username); n < 4 || n > 32 {
+		return newUIError("username must have 4 - 32 characters")
+	}
+	if n := utf8.RuneCountInString(x.Name); n < 4 || n > 40 {
+		return newUIError("name must have 4 - 40 characters")
+	}
+	if n := utf8.RuneCountInString(x.AboutMe); n > 256 {
+		return newUIError("about me must have lower than 256 characters")
+	}
 
 	var imageURL string
 	if x.Image != nil {
