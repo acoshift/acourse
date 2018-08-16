@@ -170,8 +170,9 @@ func main() {
 	m.Handle("/admin/", http.StripPrefix("/admin", middleware.Chain(
 		internal.OnlyAdmin,
 	)(admin.New(admin.Config{
-		Location: loc,
-		Service:  svc,
+		Location:   loc,
+		Repository: repository.NewAdmin(),
+		Service:    svc,
 	}))))
 
 	mux.Handle("/", middleware.Chain(

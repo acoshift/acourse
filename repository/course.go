@@ -207,52 +207,6 @@ func GetCourseIDFromURL(ctx context.Context, url string) (string, error) {
 	return id, nil
 }
 
-// ListCourses lists all courses
-func ListCourses(ctx context.Context, limit, offset int64) ([]*entity.Course, error) {
-	q := sqlctx.GetQueryer(ctx)
-
-	rows, err := q.Query(`
-		  SELECT courses.id, courses.title, courses.short_desc, courses.long_desc, courses.image,
-		         courses.start, courses.url, courses.type, courses.price, courses.discount,
-		         courses.enroll_detail, courses.created_at, courses.updated_at,
-		         opt.public, opt.enroll, opt.attend, opt.assignment, opt.discount,
-		         users.id, users.username, users.image
-		    FROM courses
-		         LEFT JOIN course_options AS opt
-		         ON opt.course_id = courses.id
-		         LEFT JOIN users
-		         ON users.id = courses.user_id
-		ORDER BY courses.created_at DESC
-		   LIMIT $1
-		  OFFSET $2;
-	`, limit, offset)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	xs := make([]*entity.Course, 0)
-	for rows.Next() {
-		var x entity.Course
-		x.Owner = &entity.User{}
-		err := rows.Scan(
-			&x.ID, &x.Title, &x.ShortDesc, &x.Desc, &x.Image,
-			&x.Start, &x.URL, &x.Type, &x.Price, &x.Discount,
-			&x.EnrollDetail, &x.CreatedAt, &x.UpdatedAt,
-			&x.Option.Public, &x.Option.Enroll, &x.Option.Attend, &x.Option.Assignment, &x.Option.Discount,
-			&x.Owner.ID, &x.Owner.Username, &x.Owner.Image,
-		)
-		if err != nil {
-			return nil, err
-		}
-		xs = append(xs, &x)
-	}
-	if err = rows.Err(); err != nil {
-		return nil, err
-	}
-	return xs, nil
-}
-
 // ListPublicCourses lists public course sort by created at desc
 // TODO: add pagination
 func ListPublicCourses(ctx context.Context) ([]*entity.Course, error) {
@@ -407,17 +361,6 @@ func ListEnrolledCourses(ctx context.Context, userID string) ([]*entity.Course, 
 		return nil, err
 	}
 	return xs, nil
-}
-
-// CountCourses counts courses
-func CountCourses(ctx context.Context) (cnt int64, err error) {
-	q := sqlctx.GetQueryer(ctx)
-
-	err = q.QueryRow(`
-		SELECT count(*)
-		  FROM courses;
-	`).Scan(&cnt)
-	return
 }
 
 // DeleteCourseContent deletes course content

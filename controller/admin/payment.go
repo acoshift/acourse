@@ -9,7 +9,6 @@ import (
 	"github.com/acoshift/paginate"
 
 	"github.com/acoshift/acourse/entity"
-	"github.com/acoshift/acourse/repository"
 	"github.com/acoshift/acourse/service"
 	"github.com/acoshift/acourse/view"
 )
@@ -17,7 +16,7 @@ import (
 func (c *ctrl) rejectPayment(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 
-	x, err := repository.GetPayment(ctx, id)
+	x, err := c.Repository.GetPayment(ctx, id)
 	if err != nil {
 		return err
 	}
@@ -98,7 +97,7 @@ func (c *ctrl) postPendingPayment(ctx *hime.Context) error {
 }
 
 func (c *ctrl) pendingPayments(ctx *hime.Context) error {
-	cnt, err := repository.CountPaymentsByStatuses(ctx, []int{entity.Pending})
+	cnt, err := c.Repository.CountPaymentsByStatuses(ctx, []int{entity.Pending})
 	if err != nil {
 		return err
 	}
@@ -106,7 +105,7 @@ func (c *ctrl) pendingPayments(ctx *hime.Context) error {
 	pg, _ := strconv.ParseInt(ctx.FormValue("page"), 10, 64)
 	pn := paginate.New(pg, 30, cnt)
 
-	payments, err := repository.ListPaymentsByStatus(ctx, []int{entity.Pending}, pn.Limit(), pn.Offset())
+	payments, err := c.Repository.ListPaymentsByStatus(ctx, []int{entity.Pending}, pn.Limit(), pn.Offset())
 	if err != nil {
 		return err
 	}
@@ -119,7 +118,7 @@ func (c *ctrl) pendingPayments(ctx *hime.Context) error {
 }
 
 func (c *ctrl) historyPayments(ctx *hime.Context) error {
-	cnt, err := repository.CountPaymentsByStatuses(ctx, []int{entity.Accepted, entity.Rejected})
+	cnt, err := c.Repository.CountPaymentsByStatuses(ctx, []int{entity.Accepted, entity.Rejected})
 	if err != nil {
 		return err
 	}
@@ -127,7 +126,7 @@ func (c *ctrl) historyPayments(ctx *hime.Context) error {
 	pg, _ := strconv.ParseInt(ctx.FormValue("page"), 10, 64)
 	pn := paginate.New(pg, 30, cnt)
 
-	payments, err := repository.ListPaymentsByStatus(ctx, []int{entity.Accepted, entity.Rejected, entity.Refunded}, pn.Limit(), pn.Offset())
+	payments, err := c.Repository.ListPaymentsByStatus(ctx, []int{entity.Accepted, entity.Rejected, entity.Refunded}, pn.Limit(), pn.Offset())
 	if err != nil {
 		return err
 	}

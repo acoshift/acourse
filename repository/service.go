@@ -271,6 +271,7 @@ func (svcRepo) GetPayment(ctx context.Context, paymentID string) (*entity.Paymen
 			left join courses on payments.course_id = courses.id
 		where payments.id = $1
 	`, paymentID).Scan(
+		&x.ID,
 		&x.Image, &x.Price, &x.OriginalPrice, &x.Code, &x.Status, &x.CreatedAt, &x.UpdatedAt, &x.At,
 		&x.User.ID, &x.User.Username, &x.User.Name, pgsql.NullString(&x.User.Email), &x.User.Image,
 		&x.Course.ID, &x.Course.Title, &x.Course.Image, &x.Course.URL,
