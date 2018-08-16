@@ -33,6 +33,11 @@ Acoshift's course system [acourse.io](https://acourse.io)
 
 After GCB finished (and live in [staging](https://staging.acourse.io)), run `git push origin HEAD:production` to trigger production deployment.
 
+## Testing
+
+- go get -u github.com/smartystreets/goconvey
+- goconvey
+
 ## License
 
 Apache-2.0
