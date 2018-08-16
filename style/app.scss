@@ -1,5 +1,16 @@
+:root {
+    --navbar-height: 80px;
+    --footer-height: 199px;
+    --content-height: calc(100vh - var(--navbar-height) - var(--footer-height));
+}
+
 .app-container {
 	padding-top: 80px;
+	min-height: var(--content-height);
+}
+
+#navbar {
+    height: var(--navbar-height);
 }
 
 footer {
@@ -9,6 +20,7 @@ footer {
 	backface-visibility: hidden;
 	background-color: #292d35;
 	color: #777777;
+	height: var(--footer-height);
 
 	.bottomline {
 		div:first-child {

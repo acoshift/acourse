@@ -1,5 +1,5 @@
 default:
-	# `make dev` starts server in localhost:8000
+	# `make dev` starts server in localhost:8080
 	# `make style` builds style
 
 dev:
