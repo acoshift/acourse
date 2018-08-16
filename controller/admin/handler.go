@@ -7,13 +7,13 @@ import (
 	"github.com/acoshift/hime"
 	"github.com/acoshift/methodmux"
 
-	"github.com/acoshift/acourse/email"
+	"github.com/acoshift/acourse/service"
 )
 
 // Config is admin config
 type Config struct {
-	Location    *time.Location
-	EmailSender email.Sender
+	Location *time.Location
+	Service  service.Service
 }
 
 // New creates admin handler

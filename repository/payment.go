@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/acoshift/pgsql"
 
@@ -133,6 +134,9 @@ func GetPayment(ctx context.Context, paymentID string) (*entity.Payment, error) 
 
 	var x entity.Payment
 	err := scanPayment(q.QueryRow(queryGetPayment, paymentID).Scan, &x)
+	if err == sql.ErrNoRows {
+		return nil, entity.ErrNotFound
+	}
 	if err != nil {
 		return nil, err
 	}

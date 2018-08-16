@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"time"
 
 	"github.com/acoshift/go-firebase-admin"
 
@@ -17,6 +18,7 @@ type Config struct {
 	BaseURL            string
 	FileStorage        file.Storage
 	ImageResizeEncoder image.JPEGResizeEncoder
+	Location           *time.Location
 	MagicLinkCallback  string
 	OpenIDCallback     string
 }
@@ -30,6 +32,8 @@ type Service interface {
 	SignInPassword(ctx context.Context, email, password string) (userID string, err error)
 	SignInMagicLink(ctx context.Context, link string) (userID string, err error)
 	SignInOpenIDCallback(ctx context.Context, uri string, state string) (userID string, err error)
+	AcceptPayment(ctx context.Context, paymentID string) error
+	RejectPayment(ctx context.Context, paymentID string, msg string) error
 }
 
 // New creates new service

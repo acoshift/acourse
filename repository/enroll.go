@@ -6,8 +6,8 @@ import (
 	"github.com/acoshift/acourse/context/sqlctx"
 )
 
-// Enroll an user to a course
-func Enroll(ctx context.Context, userID string, courseID string) error {
+// RegisterEnroll create enroll data for an user to a course
+func RegisterEnroll(ctx context.Context, userID string, courseID string) error {
 	q := sqlctx.GetQueryer(ctx)
 
 	_, err := q.Exec(`

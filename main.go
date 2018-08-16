@@ -123,6 +123,7 @@ func main() {
 		BaseURL:            baseURL,
 		FileStorage:        fileStorage,
 		ImageResizeEncoder: imageResizeEncoder,
+		Location:           loc,
 		MagicLinkCallback:  himeApp.Route("auth.signin.link"),
 		OpenIDCallback:     himeApp.Route("auth.openid.callback"),
 	})
@@ -175,8 +176,8 @@ func main() {
 	m.Handle("/admin/", http.StripPrefix("/admin", middleware.Chain(
 		internal.OnlyAdmin,
 	)(admin.New(admin.Config{
-		Location:    loc,
-		EmailSender: emailSender,
+		Location: loc,
+		Service:  svc,
 	}))))
 
 	mux.Handle("/", middleware.Chain(

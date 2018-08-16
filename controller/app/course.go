@@ -322,7 +322,7 @@ func postCourseEnroll(ctx *hime.Context) error {
 
 	err = sqlctx.RunInTx(ctx, func(ctx context.Context) error {
 		if x.Price == 0 {
-			err := repository.Enroll(ctx, user.ID, x.ID)
+			err := repository.RegisterEnroll(ctx, user.ID, x.ID)
 			if err != nil {
 				return err
 			}

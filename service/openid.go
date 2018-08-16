@@ -85,6 +85,7 @@ func (s *svc) uploadProfileFromURLAsync(url string) string {
 		return ""
 	}
 
+	// TODO: refactor
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return ""
