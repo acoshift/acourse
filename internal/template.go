@@ -5,10 +5,9 @@ import (
 	"time"
 
 	"github.com/dustin/go-humanize"
-	"github.com/microcosm-cc/bluemonday"
-	"github.com/russross/blackfriday"
 
 	"github.com/acoshift/acourse/entity"
+	"github.com/acoshift/acourse/view"
 )
 
 // TemplateFunc returns template funcs
@@ -38,33 +37,7 @@ func TemplateFunc(loc *time.Location) template.FuncMap {
 		"dateInput": func(v time.Time) string {
 			return v.Format("2006-01-02")
 		},
-		"markdown": func(s string) template.HTML {
-			renderer := blackfriday.HtmlRenderer(
-				0|
-					blackfriday.HTML_USE_XHTML|
-					blackfriday.HTML_USE_SMARTYPANTS|
-					blackfriday.HTML_SMARTYPANTS_FRACTIONS|
-					blackfriday.HTML_SMARTYPANTS_DASHES|
-					blackfriday.HTML_SMARTYPANTS_LATEX_DASHES|
-					blackfriday.HTML_HREF_TARGET_BLANK,
-				"", "")
-			md := blackfriday.MarkdownOptions([]byte(s), renderer, blackfriday.Options{
-				Extensions: 0 |
-					blackfriday.EXTENSION_NO_INTRA_EMPHASIS |
-					blackfriday.EXTENSION_TABLES |
-					blackfriday.EXTENSION_FENCED_CODE |
-					blackfriday.EXTENSION_AUTOLINK |
-					blackfriday.EXTENSION_STRIKETHROUGH |
-					blackfriday.EXTENSION_SPACE_HEADERS |
-					blackfriday.EXTENSION_HEADER_IDS |
-					blackfriday.EXTENSION_BACKSLASH_LINE_BREAK |
-					blackfriday.EXTENSION_DEFINITION_LISTS,
-			})
-			p := bluemonday.UGCPolicy()
-			p.AllowAttrs("target").OnElements("a")
-			r := p.SanitizeBytes(md)
-			return template.HTML(r)
-		},
+		"markdown": view.MarkdownHTML,
 		"live": func() int {
 			return entity.Live
 		},

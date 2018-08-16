@@ -5,7 +5,6 @@ import (
 
 	"github.com/acoshift/hime"
 
-	"github.com/acoshift/acourse/appsess"
 	"github.com/acoshift/acourse/context/appctx"
 	"github.com/acoshift/acourse/service"
 )
@@ -27,15 +26,13 @@ func (c *ctrl) openID(ctx *hime.Context) error {
 		return err
 	}
 
-	s := appctx.GetSession(ctx)
-	appsess.SetOpenIDSessionID(s, state)
+	appctx.SetOpenIDSessionID(ctx, state)
 	return ctx.Redirect(redirect)
 }
 
 func (c *ctrl) openIDCallback(ctx *hime.Context) error {
-	s := appctx.GetSession(ctx)
-	sessID := appsess.GetOpenIDSessionID(s)
-	appsess.DelOpenIDSessionID(s)
+	sessID := appctx.GetOpenIDSessionID(ctx)
+	appctx.DelOpenIDSessionID(ctx)
 
 	userID, err := c.Service.SignInOpenIDCallback(ctx, ctx.Request().RequestURI, sessID)
 	if service.IsUIError(err) {
@@ -46,7 +43,7 @@ func (c *ctrl) openIDCallback(ctx *hime.Context) error {
 		return err
 	}
 
-	s.Regenerate()
-	appsess.SetUserID(s, userID)
+	appctx.RegenerateSessionID(ctx)
+	appctx.SetUserID(ctx, userID)
 	return ctx.RedirectTo("app.index")
 }

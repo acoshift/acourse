@@ -3,7 +3,6 @@ package auth
 import (
 	"github.com/acoshift/hime"
 
-	"github.com/acoshift/acourse/appsess"
 	"github.com/acoshift/acourse/context/appctx"
 	"github.com/acoshift/acourse/service"
 	"github.com/acoshift/acourse/view"
@@ -14,7 +13,7 @@ func (c *ctrl) signUp(ctx *hime.Context) error {
 }
 
 func (c *ctrl) postSignUp(ctx *hime.Context) error {
-	f := appctx.GetSession(ctx).Flash()
+	f := appctx.GetFlash(ctx)
 
 	email := ctx.PostFormValueTrimSpace("email")
 	if email == "" {
@@ -39,8 +38,8 @@ func (c *ctrl) postSignUp(ctx *hime.Context) error {
 		return err
 	}
 
-	s := appctx.GetSession(ctx)
-	appsess.SetUserID(s, userID)
+	appctx.RegenerateSessionID(ctx)
+	appctx.SetUserID(ctx, userID)
 
 	return ctx.SafeRedirect(ctx.FormValue("r"))
 }
@@ -50,7 +49,7 @@ func (c *ctrl) resetPassword(ctx *hime.Context) error {
 }
 
 func (c *ctrl) postResetPassword(ctx *hime.Context) error {
-	f := appctx.GetSession(ctx).Flash()
+	f := appctx.GetFlash(ctx)
 	f.Set("OK", "1")
 
 	email := ctx.PostFormValueTrimSpace("email")

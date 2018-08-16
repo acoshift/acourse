@@ -231,7 +231,7 @@ func (c *ctrl) courseEnroll(ctx *hime.Context) error {
 }
 
 func (c *ctrl) postCourseEnroll(ctx *hime.Context) error {
-	f := appctx.GetSession(ctx).Flash()
+	f := appctx.GetFlash(ctx)
 
 	link := prefixhandler.Get(ctx, courseURLKey{})
 

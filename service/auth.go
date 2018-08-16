@@ -124,7 +124,7 @@ func (s *svc) SendSignInMagicLinkEmail(ctx context.Context, email string) error 
 ทีมงาน acourse.io
 	`, user.Name, s.BaseURL+s.MagicLinkCallback+"?"+linkQuery.Encode())
 
-	go s.EmailSender.Send(user.Email, "Magic Link Request", view.Markdown(message))
+	go s.EmailSender.Send(user.Email, "Magic Link Request", view.MarkdownEmail(message))
 
 	return nil
 }

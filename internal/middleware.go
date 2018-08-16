@@ -7,7 +7,6 @@ import (
 
 	"github.com/acoshift/header"
 
-	"github.com/acoshift/acourse/appsess"
 	"github.com/acoshift/acourse/context/appctx"
 )
 
@@ -56,8 +55,7 @@ func OnlyAdmin(h http.Handler) http.Handler {
 // NotSignedIn allows only not signed in
 func NotSignedIn(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		s := appctx.GetSession(r.Context())
-		id := appsess.GetUserID(s)
+		id := appctx.GetUserID(r.Context())
 		if len(id) > 0 {
 			http.Redirect(w, r, "/", http.StatusFound)
 			return

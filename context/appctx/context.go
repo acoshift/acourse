@@ -6,7 +6,6 @@ import (
 
 	"github.com/acoshift/session"
 
-	"github.com/acoshift/acourse/appsess"
 	"github.com/acoshift/acourse/entity"
 	"github.com/acoshift/acourse/repository"
 )
@@ -29,8 +28,8 @@ func GetUser(ctx context.Context) *entity.User {
 	return x
 }
 
-// GetSession gets session from context
-func GetSession(ctx context.Context) *session.Session {
+// getSession gets session from context
+func getSession(ctx context.Context) *session.Session {
 	s, err := session.Get(ctx, sessName)
 	if err != nil {
 		panic(err)
@@ -42,8 +41,7 @@ func GetSession(ctx context.Context) *session.Session {
 func Middleware(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		s := GetSession(ctx)
-		id := appsess.GetUserID(s)
+		id := GetUserID(ctx)
 		if len(id) > 0 {
 			u, err := repository.GetUser(ctx, id)
 			if err == entity.ErrNotFound {

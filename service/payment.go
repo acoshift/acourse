@@ -42,7 +42,7 @@ func (s *svc) AcceptPayment(ctx context.Context, paymentID string) error {
 		if len(name) == 0 {
 			name = x.User.Username
 		}
-		body := view.Markdown(fmt.Sprintf(`สวัสดีครับคุณ %s,
+		body := view.MarkdownEmail(fmt.Sprintf(`สวัสดีครับคุณ %s,
 
 
 อีเมล์ฉบับนี้ยืนยันว่าท่านได้รับการอนุมัติการชำระเงินสำหรับหลักสูตร "%s" เสร็จสิ้น ท่านสามารถทำการ login เข้าสู่ Website Acourse แล้วเข้าเรียนหลักสูตร "%s" ได้ทันที
@@ -110,7 +110,7 @@ func (s *svc) RejectPayment(ctx context.Context, paymentID string, msg string) e
 		if err != nil {
 			return
 		}
-		body := view.Markdown(msg)
+		body := view.MarkdownEmail(msg)
 		title := fmt.Sprintf("คำขอเพื่อเรียนหลักสูตร %s ได้รับการปฏิเสธ", x.Course.Title)
 		s.EmailSender.Send(x.User.Email, title, body)
 	}()

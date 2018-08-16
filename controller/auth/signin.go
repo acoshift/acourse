@@ -3,7 +3,6 @@ package auth
 import (
 	"github.com/acoshift/hime"
 
-	"github.com/acoshift/acourse/appsess"
 	"github.com/acoshift/acourse/context/appctx"
 	"github.com/acoshift/acourse/service"
 	"github.com/acoshift/acourse/view"
@@ -14,8 +13,7 @@ func (c *ctrl) signIn(ctx *hime.Context) error {
 }
 
 func (c *ctrl) postSignIn(ctx *hime.Context) error {
-	s := appctx.GetSession(ctx)
-	f := s.Flash()
+	f := appctx.GetFlash(ctx)
 
 	email := ctx.FormValueTrimSpace("email")
 	if email == "" {
@@ -39,7 +37,7 @@ func (c *ctrl) postSignIn(ctx *hime.Context) error {
 }
 
 func (c *ctrl) checkEmail(ctx *hime.Context) error {
-	f := appctx.GetSession(ctx).Flash()
+	f := appctx.GetFlash(ctx)
 	if f.GetBool("CheckEmail") {
 		return ctx.Redirect("/")
 	}
@@ -52,8 +50,7 @@ func (c *ctrl) signInLink(ctx *hime.Context) error {
 		return ctx.RedirectTo("auth.signin")
 	}
 
-	s := appctx.GetSession(ctx)
-	f := s.Flash()
+	f := appctx.GetFlash(ctx)
 
 	userID, err := c.Service.SignInMagicLink(ctx, linkID)
 	if service.IsUIError(err) {
@@ -64,7 +61,7 @@ func (c *ctrl) signInLink(ctx *hime.Context) error {
 		return err
 	}
 
-	appsess.SetUserID(s, userID)
+	appctx.SetUserID(ctx, userID)
 	return ctx.Redirect("/")
 }
 
@@ -73,8 +70,7 @@ func (c *ctrl) signInPassword(ctx *hime.Context) error {
 }
 
 func (c *ctrl) postSignInPassword(ctx *hime.Context) error {
-	s := appctx.GetSession(ctx)
-	f := s.Flash()
+	f := appctx.GetFlash(ctx)
 
 	email := ctx.PostFormValue("email")
 	if email == "" {
@@ -98,8 +94,8 @@ func (c *ctrl) postSignInPassword(ctx *hime.Context) error {
 		return err
 	}
 
-	s.Regenerate()
-	appsess.SetUserID(s, userID)
+	appctx.RegenerateSessionID(ctx)
+	appctx.SetUserID(ctx, userID)
 
 	return ctx.SafeRedirect(ctx.FormValue("r"))
 }

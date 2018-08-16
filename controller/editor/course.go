@@ -16,7 +16,7 @@ func (c *ctrl) courseCreate(ctx *hime.Context) error {
 }
 
 func (c *ctrl) postCourseCreate(ctx *hime.Context) error {
-	f := appctx.GetSession(ctx).Flash()
+	f := appctx.GetFlash(ctx)
 
 	var (
 		title     = ctx.PostFormValueTrimSpace("title")
@@ -73,7 +73,7 @@ func (c *ctrl) courseEdit(ctx *hime.Context) error {
 func (c *ctrl) postCourseEdit(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 
-	f := appctx.GetSession(ctx).Flash()
+	f := appctx.GetFlash(ctx)
 
 	var (
 		title     = ctx.FormValue("title")

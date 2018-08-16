@@ -13,7 +13,7 @@ import (
 )
 
 func (c *ctrl) signOut(ctx *hime.Context) error {
-	appctx.GetSession(ctx).Destroy()
+	appctx.DestroySession(ctx)
 	return ctx.Redirect("/")
 }
 
@@ -40,7 +40,7 @@ func (c *ctrl) profile(ctx *hime.Context) error {
 
 func (c *ctrl) profileEdit(ctx *hime.Context) error {
 	user := appctx.GetUser(ctx)
-	f := appctx.GetSession(ctx).Flash()
+	f := appctx.GetFlash(ctx)
 	if !f.Has("Username") {
 		f.Set("Username", user.Username)
 	}
@@ -57,7 +57,7 @@ func (c *ctrl) profileEdit(ctx *hime.Context) error {
 }
 
 func (c *ctrl) postProfileEdit(ctx *hime.Context) error {
-	f := appctx.GetSession(ctx).Flash()
+	f := appctx.GetFlash(ctx)
 
 	var (
 		username = ctx.FormValue("username")
