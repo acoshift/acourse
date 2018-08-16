@@ -45,7 +45,7 @@ func main() {
 
 	config := configfile.NewReader("config")
 
-	loc, err := time.LoadLocation("Asia/Bangkok")
+	loc, err := time.LoadLocation(config.StringDefault("location", "Asia/Bangkok"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -53,7 +53,7 @@ func main() {
 	ctx := context.Background()
 
 	// init profiler
-	profiler.Start(profiler.Config{Service: "acourse"})
+	profiler.Start(profiler.Config{Service: config.StringDefault("profiler_service", "acourse")})
 
 	firApp, err := firebase.InitializeApp(ctx, firebase.AppOptions{
 		ProjectID: config.String("project_id"),
@@ -78,19 +78,14 @@ func main() {
 		From:     config.String("email_from"),
 	})
 
-	adminNotifier := notify.NewOutgoingWebhookAdminNotifier(config.String("slack_url"))
-
 	// init redis pool
 	redisClient := redis.NewClient(&redis.Options{
-		MaxRetries:  3,
-		PoolSize:    5,
-		IdleTimeout: 60 * time.Minute,
+		MaxRetries:  config.IntDefault("redis_max_retries", 3),
+		PoolSize:    config.IntDefault("redis_pool_size", 5),
+		IdleTimeout: config.DurationDefault("redis_idle_timeout", 60*time.Minute),
 		Addr:        config.String("redis_addr"),
 		Password:    config.String("redis_pass"),
 	})
-
-	fileStorage := file.NewGCS(storageClient, config.String("bucket"))
-	imageResizeEncoder := image.NewJPEGResizeEncoder()
 
 	// init databases
 	db, err := sql.Open("postgres", config.String("sql_url"))
@@ -98,7 +93,7 @@ func main() {
 		log.Fatal(err)
 	}
 	defer db.Close()
-	db.SetMaxOpenConns(4)
+	db.SetMaxOpenConns(config.IntDefault("sql_max_open_conns", 5))
 
 	himeApp := hime.New()
 	himeApp.ParseConfigFile("settings/server.yaml")
@@ -121,8 +116,9 @@ func main() {
 		Auth:               firAuth,
 		EmailSender:        emailSender,
 		BaseURL:            baseURL,
-		FileStorage:        fileStorage,
-		ImageResizeEncoder: imageResizeEncoder,
+		FileStorage:        file.NewGCS(storageClient, config.String("bucket")),
+		ImageResizeEncoder: image.NewJPEGResizeEncoder(),
+		AdminNotifier:      notify.NewOutgoingWebhookAdminNotifier(config.String("slack_url")),
 		Location:           loc,
 		MagicLinkCallback:  himeApp.Route("auth.signin.link"),
 		OpenIDCallback:     himeApp.Route("auth.openid.callback"),
@@ -153,11 +149,8 @@ func main() {
 	m := http.NewServeMux()
 
 	m.Handle("/", app.New(app.Config{
-		BaseURL:            baseURL,
-		Auth:               firAuth,
-		AdminNotifier:      adminNotifier,
-		FileStorage:        fileStorage,
-		ImageResizeEncoder: imageResizeEncoder,
+		BaseURL: baseURL,
+		Service: svc,
 	}))
 
 	m.Handle("/auth/", http.StripPrefix("/auth", middleware.Chain(

@@ -8,7 +8,7 @@ import (
 	"github.com/acoshift/acourse/view"
 )
 
-func index(ctx *hime.Context) error {
+func (c *ctrl) index(ctx *hime.Context) error {
 	if ctx.Request().URL.Path != "/" {
 		return share.NotFound(ctx)
 	}

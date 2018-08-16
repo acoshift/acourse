@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"mime/multipart"
 	"time"
 
 	"github.com/acoshift/go-firebase-admin"
@@ -9,6 +10,7 @@ import (
 	"github.com/acoshift/acourse/email"
 	"github.com/acoshift/acourse/file"
 	"github.com/acoshift/acourse/image"
+	"github.com/acoshift/acourse/notify"
 )
 
 // Config is service config
@@ -18,6 +20,7 @@ type Config struct {
 	BaseURL            string
 	FileStorage        file.Storage
 	ImageResizeEncoder image.JPEGResizeEncoder
+	AdminNotifier      notify.AdminNotifier
 	Location           *time.Location
 	MagicLinkCallback  string
 	OpenIDCallback     string
@@ -38,6 +41,9 @@ type Service interface {
 
 	CreateCourse(ctx context.Context, x *CreateCourse) (courseID string, err error)
 	UpdateCourse(ctx context.Context, x *UpdateCourse) error
+	EnrollCourse(ctx context.Context, courseID string, price float64, paymentImage *multipart.FileHeader) error
+
+	UpdateProfile(ctx context.Context, x *Profile) error
 }
 
 // New creates new service

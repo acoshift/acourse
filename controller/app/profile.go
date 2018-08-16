@@ -1,28 +1,23 @@
 package app
 
 import (
-	"context"
-	"net/http"
-	"strings"
 	"unicode/utf8"
 
-	"github.com/acoshift/header"
 	"github.com/acoshift/hime"
 	"github.com/asaskevich/govalidator"
 
 	"github.com/acoshift/acourse/context/appctx"
-	"github.com/acoshift/acourse/context/sqlctx"
-	"github.com/acoshift/acourse/entity"
 	"github.com/acoshift/acourse/repository"
+	"github.com/acoshift/acourse/service"
 	"github.com/acoshift/acourse/view"
 )
 
-func signOut(ctx *hime.Context) error {
+func (c *ctrl) signOut(ctx *hime.Context) error {
 	appctx.GetSession(ctx).Destroy()
 	return ctx.Redirect("/")
 }
 
-func profile(ctx *hime.Context) error {
+func (c *ctrl) profile(ctx *hime.Context) error {
 	user := appctx.GetUser(ctx)
 
 	ownCourses, err := repository.ListOwnCourses(ctx, user.ID)
@@ -43,7 +38,7 @@ func profile(ctx *hime.Context) error {
 	return ctx.View("app.profile", p)
 }
 
-func profileEdit(ctx *hime.Context) error {
+func (c *ctrl) profileEdit(ctx *hime.Context) error {
 	user := appctx.GetUser(ctx)
 	f := appctx.GetSession(ctx).Flash()
 	if !f.Has("Username") {
@@ -61,28 +56,8 @@ func profileEdit(ctx *hime.Context) error {
 	return ctx.View("app.profile-edit", p)
 }
 
-func postProfileEdit(ctx *hime.Context) error {
-	user := appctx.GetUser(ctx)
+func (c *ctrl) postProfileEdit(ctx *hime.Context) error {
 	f := appctx.GetSession(ctx).Flash()
-
-	var imageURL string
-	if image, info, err := ctx.FormFileNotEmpty("image"); err != http.ErrMissingFile {
-		if err != nil {
-			f.Add("Errors", err.Error())
-			return ctx.RedirectToGet()
-		}
-
-		if !strings.Contains(info.Header.Get(header.ContentType), "image") {
-			f.Add("Errors", "file is not an image")
-			return ctx.RedirectToGet()
-		}
-
-		imageURL, err = uploadProfileImage(ctx, image)
-		if err != nil {
-			f.Add("Errors", err.Error())
-			return ctx.RedirectToGet()
-		}
-	}
 
 	var (
 		username = ctx.FormValue("username")
@@ -109,24 +84,16 @@ func postProfileEdit(ctx *hime.Context) error {
 		return ctx.RedirectToGet()
 	}
 
-	err := sqlctx.RunInTx(ctx, func(ctx context.Context) error {
-		if len(imageURL) > 0 {
-			err := repository.SetUserImage(ctx, user.ID, imageURL)
-			if err != nil {
-				return err
-			}
-		}
-
-		return repository.UpdateUser(ctx, &entity.UpdateUser{
-			ID:       user.ID,
-			Username: username,
-			Name:     name,
-			AboutMe:  aboutMe,
-		})
+	image, _ := ctx.FormFileHeaderNotEmpty("image")
+	err := c.Service.UpdateProfile(ctx, &service.Profile{
+		Username: username,
+		Name:     name,
+		AboutMe:  aboutMe,
+		Image:    image,
 	})
-	if err != nil {
+	if service.IsUIError(err) {
 		f.Add("Errors", err.Error())
-		return ctx.RedirectToGet()
+		return ctx.RedirectBackToGet()
 	}
 
 	return ctx.RedirectTo("app.profile")

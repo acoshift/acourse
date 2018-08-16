@@ -1,29 +1,25 @@
 package app
 
 import (
-	"context"
-	"fmt"
 	"net/http"
 	"net/url"
 	"strconv"
-	"strings"
 
-	"github.com/acoshift/header"
 	"github.com/acoshift/hime"
 	"github.com/acoshift/prefixhandler"
 	"github.com/satori/go.uuid"
 
 	"github.com/acoshift/acourse/context/appctx"
-	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/controller/share"
 	"github.com/acoshift/acourse/entity"
 	"github.com/acoshift/acourse/repository"
+	"github.com/acoshift/acourse/service"
 	"github.com/acoshift/acourse/view"
 )
 
 type courseURLKey struct{}
 
-func courseView(ctx *hime.Context) error {
+func (c *ctrl) courseView(ctx *hime.Context) error {
 	if ctx.Request().URL.Path != "/" {
 		return share.NotFound(ctx)
 	}
@@ -99,7 +95,7 @@ func courseView(ctx *hime.Context) error {
 	p["Title"] = x.Title
 	p["Desc"] = x.ShortDesc
 	p["Image"] = x.Image
-	p["URL"] = baseURL + ctx.Route("app.course", url.PathEscape(x.Link()))
+	p["URL"] = c.BaseURL + ctx.Route("app.course", url.PathEscape(x.Link()))
 	p["Course"] = x
 	p["Enrolled"] = enrolled
 	p["Owned"] = owned
@@ -107,7 +103,7 @@ func courseView(ctx *hime.Context) error {
 	return ctx.View("app.course", p)
 }
 
-func courseContent(ctx *hime.Context) error {
+func (c *ctrl) courseContent(ctx *hime.Context) error {
 	user := appctx.GetUser(ctx)
 	link := prefixhandler.Get(ctx, courseURLKey{})
 
@@ -177,7 +173,7 @@ func courseContent(ctx *hime.Context) error {
 	return ctx.View("app.course-content", p)
 }
 
-func courseEnroll(ctx *hime.Context) error {
+func (c *ctrl) courseEnroll(ctx *hime.Context) error {
 	user := appctx.GetUser(ctx)
 
 	link := prefixhandler.Get(ctx, courseURLKey{})
@@ -229,13 +225,12 @@ func courseEnroll(ctx *hime.Context) error {
 	p["Title"] = x.Title
 	p["Desc"] = x.ShortDesc
 	p["Image"] = x.Image
-	p["URL"] = baseURL + ctx.Route("app.course", url.PathEscape(x.Link()))
+	p["URL"] = c.BaseURL + ctx.Route("app.course", url.PathEscape(x.Link()))
 	p["Course"] = x
 	return ctx.View("app.course-enroll", p)
 }
 
-func postCourseEnroll(ctx *hime.Context) error {
-	user := appctx.GetUser(ctx)
+func (c *ctrl) postCourseEnroll(ctx *hime.Context) error {
 	f := appctx.GetSession(ctx).Flash()
 
 	link := prefixhandler.Get(ctx, courseURLKey{})
@@ -252,7 +247,7 @@ func postCourseEnroll(ctx *hime.Context) error {
 		}
 	}
 
-	x, err := repository.GetCourse(ctx, id)
+	_, err = repository.GetCourse(ctx, id)
 	if err == entity.ErrNotFound {
 		return share.NotFound(ctx)
 	}
@@ -260,99 +255,22 @@ func postCourseEnroll(ctx *hime.Context) error {
 		return err
 	}
 
-	// if user is course owner redirect back to course page
-	if user.ID == x.UserID {
-		return ctx.RedirectTo("app.course", link)
-	}
-
-	// redirect enrolled user back to course page
-	enrolled, err := repository.IsEnrolled(ctx, user.ID, id)
-	if err != nil {
-		return err
-	}
-	if enrolled {
-		return ctx.RedirectTo("app.course", link)
-	}
-
-	// check is user has pending enroll
-	pendingPayment, err := repository.HasPendingPayment(ctx, user.ID, id)
-	if err != nil {
-		return err
-	}
-	if pendingPayment {
-		return ctx.RedirectTo("app.course", link)
-	}
-
-	originalPrice := x.Price
-	if x.Option.Discount {
-		originalPrice = x.Discount
-	}
-
 	price, _ := strconv.ParseFloat(ctx.FormValue("price"), 64)
+	image, _ := ctx.FormFileHeaderNotEmpty("image")
 
-	if price < 0 {
-		f.Add("Errors", "price can not be negative")
+	err = c.Service.EnrollCourse(ctx, id, price, image)
+	if service.IsUIError(err) {
+		f.Add("Errors", "image required")
 		return ctx.RedirectToGet()
 	}
-
-	var imageURL string
-	if originalPrice != 0 {
-		image, info, err := ctx.FormFileNotEmpty("image")
-		if err == http.ErrMissingFile {
-			f.Add("Errors", "image required")
-			return ctx.RedirectToGet()
-		}
-		if err != nil {
-			f.Add("Errors", err.Error())
-			return ctx.RedirectToGet()
-		}
-		if !strings.Contains(info.Header.Get(header.ContentType), "image") {
-			f.Add("Errors", "file is not an image")
-			return ctx.RedirectToGet()
-		}
-
-		imageURL, err = uploadPaymentImage(ctx, image)
-		if err != nil {
-			f.Add("Errors", err.Error())
-			return ctx.RedirectToGet()
-		}
-	}
-
-	newPayment := false
-
-	err = sqlctx.RunInTx(ctx, func(ctx context.Context) error {
-		if x.Price == 0 {
-			err := repository.RegisterEnroll(ctx, user.ID, x.ID)
-			if err != nil {
-				return err
-			}
-		} else {
-			err = repository.CreatePayment(ctx, &entity.Payment{
-				CourseID:      x.ID,
-				UserID:        user.ID,
-				Image:         imageURL,
-				Price:         price,
-				OriginalPrice: originalPrice,
-			})
-			if err != nil {
-				return err
-			}
-			newPayment = true
-		}
-		return nil
-	})
 	if err != nil {
 		return err
-	}
-
-	if newPayment {
-		go adminNotifier.Notify(fmt.Sprintf("New payment for course %s, price %.2f", x.Title, price))
 	}
 
 	return ctx.RedirectTo("app.course", link)
 }
 
-func courseAssignment(ctx *hime.Context) error {
+func (c *ctrl) courseAssignment(ctx *hime.Context) error {
 	user := appctx.GetUser(ctx)
 	link := prefixhandler.Get(ctx, courseURLKey{})
 
@@ -400,7 +318,7 @@ func courseAssignment(ctx *hime.Context) error {
 	p["Title"] = x.Title
 	p["Desc"] = x.ShortDesc
 	p["Image"] = x.Image
-	p["URL"] = baseURL + ctx.Route("app.course", url.PathEscape(x.Link()))
+	p["URL"] = c.BaseURL + ctx.Route("app.course", url.PathEscape(x.Link()))
 	p["Course"] = x
 	p["Assignments"] = assignments
 	return ctx.View("app.course-assignment", p)
