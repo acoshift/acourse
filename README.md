@@ -36,6 +36,7 @@ After GCB finished (and live in [staging](https://staging.acourse.io)), run `git
 ## Testing
 
 - go get -u github.com/smartystreets/goconvey
+- go get -u github.com/stretchr/testify/mock
 - goconvey
 
 ## License

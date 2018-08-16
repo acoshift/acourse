@@ -6,6 +6,7 @@ go:
 before_install:
   - go get github.com/mattn/goveralls
   - go get github.com/smartystreets/goconvey
+  - go get github.com/stretchr/testify/mock
 
 script:
   - $HOME/gopath/bin/goveralls -service=travis-ci
