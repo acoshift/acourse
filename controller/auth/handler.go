@@ -3,24 +3,15 @@ package auth
 import (
 	"net/http"
 
-	"github.com/acoshift/go-firebase-admin"
 	"github.com/acoshift/hime"
 	"github.com/acoshift/methodmux"
 
-	"github.com/acoshift/acourse/email"
-	"github.com/acoshift/acourse/file"
-	"github.com/acoshift/acourse/image"
-	"github.com/acoshift/acourse/notify"
+	"github.com/acoshift/acourse/service"
 )
 
 // Config is auth config
 type Config struct {
-	Auth               *firebase.Auth
-	EmailSender        email.Sender
-	AdminNotifier      notify.AdminNotifier
-	FileStorage        file.Storage
-	ImageResizeEncoder image.JPEGResizeEncoder
-	BaseURL            string
+	Service service.Service
 }
 
 // New creates new auth handler

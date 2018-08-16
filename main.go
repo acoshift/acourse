@@ -37,6 +37,7 @@ import (
 	"github.com/acoshift/acourse/image"
 	"github.com/acoshift/acourse/internal"
 	"github.com/acoshift/acourse/notify"
+	"github.com/acoshift/acourse/service"
 )
 
 func main() {
@@ -116,6 +117,16 @@ func main() {
 
 	methodmux.FallbackHandler = hime.Handler(share.NotFound)
 
+	svc := service.New(service.Config{
+		Auth:               firAuth,
+		EmailSender:        emailSender,
+		BaseURL:            baseURL,
+		FileStorage:        fileStorage,
+		ImageResizeEncoder: imageResizeEncoder,
+		MagicLinkCallback:  himeApp.Route("auth.signin.link"),
+		OpenIDCallback:     himeApp.Route("auth.openid.callback"),
+	})
+
 	mux := http.NewServeMux()
 
 	// health check
@@ -151,12 +162,7 @@ func main() {
 	m.Handle("/auth/", http.StripPrefix("/auth", middleware.Chain(
 		internal.NotSignedIn,
 	)(auth.New(auth.Config{
-		AdminNotifier:      adminNotifier,
-		Auth:               firAuth,
-		BaseURL:            baseURL,
-		EmailSender:        emailSender,
-		FileStorage:        fileStorage,
-		ImageResizeEncoder: imageResizeEncoder,
+		Service: svc,
 	}))))
 
 	m.Handle("/editor/", http.StripPrefix("/editor", middleware.Chain(

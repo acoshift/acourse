@@ -130,6 +130,12 @@ func RegisterUser(ctx context.Context, x *entity.RegisterUser) error {
 		values
 			($1, $2, $3, $4, $5)
 	`, x.ID, x.Username, x.Name, pgsql.NullString(&x.Email), x.Image)
+	if pgsql.IsUniqueViolation(err, "users_email_key") {
+		return entity.ErrEmailNotAvailable
+	}
+	if pgsql.IsUniqueViolation(err, "users_username_key") {
+		return entity.ErrUsernameNotAvailable
+	}
 	return err
 }
 
