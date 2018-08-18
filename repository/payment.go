@@ -55,17 +55,3 @@ func GetPayment(ctx context.Context, paymentID string) (*entity.Payment, error) 
 	x.CourseID = x.Course.ID
 	return &x, nil
 }
-
-// HasPendingPayment returns ture if given user has pending payment for given course
-func HasPendingPayment(ctx context.Context, userID string, courseID string) (exists bool, err error) {
-	q := sqlctx.GetQueryer(ctx)
-
-	err = q.QueryRow(`
-		select exists (
-			select 1
-			from payments
-			where user_id = $1 and course_id = $2 and status = $3
-		)
-	`, userID, courseID, entity.Pending).Scan(&exists)
-	return
-}

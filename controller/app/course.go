@@ -12,7 +12,6 @@ import (
 	"github.com/acoshift/acourse/context/appctx"
 	"github.com/acoshift/acourse/controller/share"
 	"github.com/acoshift/acourse/entity"
-	"github.com/acoshift/acourse/repository"
 	"github.com/acoshift/acourse/service"
 	"github.com/acoshift/acourse/view"
 )
@@ -32,7 +31,7 @@ func (c *ctrl) courseView(ctx *hime.Context) error {
 	_, err := uuid.FromString(link)
 	if err != nil {
 		// link can not parse to uuid get course id from url
-		id, err = repository.GetCourseIDFromURL(ctx, link)
+		id, err = c.Repository.GetCourseIDByURL(ctx, link)
 		if err == entity.ErrNotFound {
 			return share.NotFound(ctx)
 		}
@@ -40,7 +39,7 @@ func (c *ctrl) courseView(ctx *hime.Context) error {
 			return err
 		}
 	}
-	x, err := repository.GetCourse(ctx, id)
+	x, err := c.Repository.GetCourse(ctx, id)
 	if err == entity.ErrNotFound {
 		return share.NotFound(ctx)
 	}
@@ -56,13 +55,13 @@ func (c *ctrl) courseView(ctx *hime.Context) error {
 	enrolled := false
 	pendingEnroll := false
 	if user != nil {
-		enrolled, err = repository.IsEnrolled(ctx, user.ID, x.ID)
+		enrolled, err = c.Repository.IsEnrolled(ctx, user.ID, x.ID)
 		if err != nil {
 			return err
 		}
 
 		if !enrolled {
-			pendingEnroll, err = repository.HasPendingPayment(ctx, user.ID, x.ID)
+			pendingEnroll, err = c.Repository.HasPendingPayment(ctx, user.ID, x.ID)
 			if err != nil {
 				return err
 			}
@@ -76,7 +75,7 @@ func (c *ctrl) courseView(ctx *hime.Context) error {
 
 	// if user enrolled or user is owner fetch course contents
 	if enrolled || owned {
-		x.Contents, err = repository.GetCourseContents(ctx, x.ID)
+		x.Contents, err = c.Repository.GetCourseContents(ctx, x.ID)
 		if err != nil {
 			return err
 		}
@@ -85,7 +84,7 @@ func (c *ctrl) courseView(ctx *hime.Context) error {
 	if owned {
 		x.Owner = user
 	} else {
-		x.Owner, err = repository.GetUser(ctx, x.UserID)
+		x.Owner, err = c.Repository.GetUser(ctx, x.UserID)
 		if err != nil {
 			return err
 		}
@@ -112,7 +111,7 @@ func (c *ctrl) courseContent(ctx *hime.Context) error {
 	_, err := uuid.FromString(link)
 	if err != nil {
 		// link can not parse to uuid get course id from url
-		id, err = repository.GetCourseIDFromURL(ctx, link)
+		id, err = c.Repository.GetCourseIDByURL(ctx, link)
 		if err == entity.ErrNotFound {
 			return share.NotFound(ctx)
 		}
@@ -120,7 +119,7 @@ func (c *ctrl) courseContent(ctx *hime.Context) error {
 			return err
 		}
 	}
-	x, err := repository.GetCourse(ctx, id)
+	x, err := c.Repository.GetCourse(ctx, id)
 	if err == entity.ErrNotFound {
 		return share.NotFound(ctx)
 	}
@@ -133,7 +132,7 @@ func (c *ctrl) courseContent(ctx *hime.Context) error {
 		return ctx.RedirectTo("app.course", x.URL.String, "content")
 	}
 
-	enrolled, err := repository.IsEnrolled(ctx, user.ID, x.ID)
+	enrolled, err := c.Repository.IsEnrolled(ctx, user.ID, x.ID)
 	if err != nil {
 		return err
 	}
@@ -142,12 +141,12 @@ func (c *ctrl) courseContent(ctx *hime.Context) error {
 		return ctx.Status(http.StatusForbidden).StatusText()
 	}
 
-	x.Contents, err = repository.GetCourseContents(ctx, x.ID)
+	x.Contents, err = c.Repository.GetCourseContents(ctx, x.ID)
 	if err != nil {
 		return err
 	}
 
-	x.Owner, err = repository.GetUser(ctx, x.UserID)
+	x.Owner, err = c.Repository.GetUser(ctx, x.UserID)
 	if err != nil {
 		return err
 	}
@@ -181,7 +180,7 @@ func (c *ctrl) courseEnroll(ctx *hime.Context) error {
 	id := link
 	_, err := uuid.FromString(link)
 	if err != nil {
-		id, err = repository.GetCourseIDFromURL(ctx, link)
+		id, err = c.Repository.GetCourseIDByURL(ctx, link)
 		if err == entity.ErrNotFound {
 			return share.NotFound(ctx)
 		}
@@ -190,7 +189,7 @@ func (c *ctrl) courseEnroll(ctx *hime.Context) error {
 		}
 	}
 
-	x, err := repository.GetCourse(ctx, id)
+	x, err := c.Repository.GetCourse(ctx, id)
 	if err == entity.ErrNotFound {
 		return share.NotFound(ctx)
 	}
@@ -204,7 +203,7 @@ func (c *ctrl) courseEnroll(ctx *hime.Context) error {
 	}
 
 	// redirect enrolled user back to course page
-	enrolled, err := repository.IsEnrolled(ctx, user.ID, id)
+	enrolled, err := c.Repository.IsEnrolled(ctx, user.ID, id)
 	if err != nil {
 		return err
 	}
@@ -213,7 +212,7 @@ func (c *ctrl) courseEnroll(ctx *hime.Context) error {
 	}
 
 	// check is user has pending enroll
-	pendingPayment, err := repository.HasPendingPayment(ctx, user.ID, id)
+	pendingPayment, err := c.Repository.HasPendingPayment(ctx, user.ID, id)
 	if err != nil {
 		return err
 	}
@@ -238,7 +237,7 @@ func (c *ctrl) postCourseEnroll(ctx *hime.Context) error {
 	id := link
 	_, err := uuid.FromString(link)
 	if err != nil {
-		id, err = repository.GetCourseIDFromURL(ctx, link)
+		id, err = c.Repository.GetCourseIDByURL(ctx, link)
 		if err == entity.ErrNotFound {
 			return share.NotFound(ctx)
 		}
@@ -247,7 +246,7 @@ func (c *ctrl) postCourseEnroll(ctx *hime.Context) error {
 		}
 	}
 
-	_, err = repository.GetCourse(ctx, id)
+	_, err = c.Repository.GetCourse(ctx, id)
 	if err == entity.ErrNotFound {
 		return share.NotFound(ctx)
 	}
@@ -279,7 +278,7 @@ func (c *ctrl) courseAssignment(ctx *hime.Context) error {
 	_, err := uuid.FromString(link)
 	if err != nil {
 		// link can not parse to int64 get course id from url
-		id, err = repository.GetCourseIDFromURL(ctx, link)
+		id, err = c.Repository.GetCourseIDByURL(ctx, link)
 		if err == entity.ErrNotFound {
 			return share.NotFound(ctx)
 		}
@@ -287,7 +286,7 @@ func (c *ctrl) courseAssignment(ctx *hime.Context) error {
 			return err
 		}
 	}
-	x, err := repository.GetCourse(ctx, id)
+	x, err := c.Repository.GetCourse(ctx, id)
 	if err == entity.ErrNotFound {
 		return share.NotFound(ctx)
 	}
@@ -300,7 +299,7 @@ func (c *ctrl) courseAssignment(ctx *hime.Context) error {
 		return ctx.RedirectTo("app.course", x.URL.String, "assignment")
 	}
 
-	enrolled, err := repository.IsEnrolled(ctx, user.ID, x.ID)
+	enrolled, err := c.Repository.IsEnrolled(ctx, user.ID, x.ID)
 	if err != nil {
 		return err
 	}
@@ -309,7 +308,7 @@ func (c *ctrl) courseAssignment(ctx *hime.Context) error {
 		return ctx.Status(http.StatusForbidden).StatusText()
 	}
 
-	assignments, err := repository.GetAssignments(ctx, x.ID)
+	assignments, err := c.Repository.FindAssignmentsByCourseID(ctx, x.ID)
 	if err != nil {
 		return err
 	}

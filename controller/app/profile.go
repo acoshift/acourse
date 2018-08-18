@@ -7,7 +7,6 @@ import (
 	"github.com/asaskevich/govalidator"
 
 	"github.com/acoshift/acourse/context/appctx"
-	"github.com/acoshift/acourse/repository"
 	"github.com/acoshift/acourse/service"
 	"github.com/acoshift/acourse/view"
 )
@@ -20,12 +19,12 @@ func (c *ctrl) signOut(ctx *hime.Context) error {
 func (c *ctrl) profile(ctx *hime.Context) error {
 	user := appctx.GetUser(ctx)
 
-	ownCourses, err := repository.ListOwnCourses(ctx, user.ID)
+	ownCourses, err := c.Repository.ListOwnCourses(ctx, user.ID)
 	if err != nil {
 		return err
 	}
 
-	enrolledCourses, err := repository.ListEnrolledCourses(ctx, user.ID)
+	enrolledCourses, err := c.Repository.ListEnrolledCourses(ctx, user.ID)
 	if err != nil {
 		return err
 	}
