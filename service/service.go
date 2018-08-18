@@ -47,7 +47,9 @@ type Service interface {
 
 	UpdateProfile(ctx context.Context, x *Profile) error
 
+	CreateCourseContent(ctx context.Context, x *entity.RegisterCourseContent) (contentID string, err error)
 	GetCourseContent(ctx context.Context, contentID string) (*entity.CourseContent, error)
+	UpdateCourseContent(ctx context.Context, contentID string, title string, desc string, videoID string) error
 	DeleteCourseContent(ctx context.Context, contentID string) error
 }
 

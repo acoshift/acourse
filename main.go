@@ -165,7 +165,8 @@ func main() {
 	m.Handle("/editor/", http.StripPrefix("/editor", middleware.Chain(
 	// -
 	)(editor.New(editor.Config{
-		Service: svc,
+		Service:    svc,
+		Repository: repository.NewEditor(),
 	}))))
 
 	m.Handle("/admin/", http.StripPrefix("/admin", middleware.Chain(

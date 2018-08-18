@@ -33,8 +33,6 @@ func (c *ctrl) contentList(ctx *hime.Context) error {
 }
 
 func (c *ctrl) postContentList(ctx *hime.Context) error {
-	id := ctx.FormValue("id")
-
 	if ctx.FormValue("action") == "delete" {
 		contentID := ctx.FormValue("contentId")
 
@@ -72,7 +70,7 @@ func (c *ctrl) postContentCreate(ctx *hime.Context) error {
 		videoID = ctx.FormValue("videoId")
 	)
 
-	_, err := c.Repository.RegisterCourseContent(ctx, &entity.RegisterCourseContent{
+	_, err := c.Service.CreateCourseContent(ctx, &entity.RegisterCourseContent{
 		CourseID:  id,
 		Title:     title,
 		LongDesc:  desc,
@@ -145,7 +143,7 @@ func (c *ctrl) postContentEdit(ctx *hime.Context) error {
 		videoID = ctx.FormValue("videoId")
 	)
 
-	err = c.Repository.UpdateCourseContent(ctx, course.ID, id, title, desc, videoID)
+	err = c.Service.UpdateCourseContent(ctx, id, title, desc, videoID)
 	if err != nil {
 		return err
 	}

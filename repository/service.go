@@ -226,6 +226,30 @@ func (svcRepo) SetCourseOption(ctx context.Context, courseID string, x *entity.C
 	return err
 }
 
+func (svcRepo) RegisterCourseContent(ctx context.Context, x *entity.RegisterCourseContent) (contentID string, err error) {
+	q := sqlctx.GetQueryer(ctx)
+
+	err = q.QueryRow(`
+		insert into course_contents
+			(
+				course_id,
+				i,
+				title, long_desc, video_id, video_type
+			)
+		values
+			(
+				$1,
+				(select coalesce(max(i)+1, 0) from course_contents where course_id = $1),
+				$2, $3, $4, $5
+			)
+		returning id
+	`,
+		x.CourseID,
+		x.Title, x.LongDesc, x.VideoID, x.VideoType,
+	).Scan(&contentID)
+	return
+}
+
 func (svcRepo) GetCourseContent(ctx context.Context, contentID string) (*entity.CourseContent, error) {
 	q := sqlctx.GetQueryer(ctx)
 
@@ -245,6 +269,21 @@ func (svcRepo) GetCourseContent(ctx context.Context, contentID string) (*entity.
 		return nil, err
 	}
 	return &x, nil
+}
+
+func (svcRepo) UpdateCourseContent(ctx context.Context, contentID, title, desc, videoID string) error {
+	q := sqlctx.GetQueryer(ctx)
+
+	_, err := q.Exec(`
+		update course_contents
+		set
+			title = $2,
+			long_desc = $3,
+			video_id = $4,
+			updated_at = now()
+		where id = $1
+	`, contentID, title, desc, videoID)
+	return err
 }
 
 func (svcRepo) DeleteCourseContent(ctx context.Context, contentID string) error {

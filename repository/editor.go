@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/acoshift/pgsql"
+
 	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/controller/editor"
 	"github.com/acoshift/acourse/entity"
@@ -24,5 +26,12 @@ func (editorRepo) GetCourseUserID(ctx context.Context, courseID string) (userID 
 	if err == sql.ErrNoRows {
 		err = entity.ErrNotFound
 	}
+	return
+}
+
+func (editorRepo) GetCourseURL(ctx context.Context, courseID string) (url string, err error) {
+	q := sqlctx.GetQueryer(ctx)
+
+	err = q.QueryRow(`select url from courses where id = $1`, courseID).Scan(pgsql.NullString(&url))
 	return
 }

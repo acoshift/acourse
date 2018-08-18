@@ -4,8 +4,6 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/acoshift/pgsql"
-
 	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/entity"
 )
@@ -107,55 +105,6 @@ func GetCourseContents(ctx context.Context, courseID string) ([]*entity.CourseCo
 		return nil, err
 	}
 	return xs, nil
-}
-
-// UpdateCourseContent updates course content
-func UpdateCourseContent(ctx context.Context, courseID, contentID, title, desc, videoID string) error {
-	q := sqlctx.GetQueryer(ctx)
-
-	_, err := q.Exec(`
-		update course_contents
-		set
-			title = $3,
-			long_desc = $4,
-			video_id = $5,
-			updated_at = now()
-		where id = $1 and course_id = $2
-	`, contentID, courseID, title, desc, videoID)
-	return err
-}
-
-// GetCourseURL gets course url
-func GetCourseURL(ctx context.Context, courseID string) (url string, err error) {
-	q := sqlctx.GetQueryer(ctx)
-
-	err = q.QueryRow(`select url from courses where id = $1`, courseID).Scan(pgsql.NullString(&url))
-	return
-}
-
-// RegisterCourseContent registers course content
-func RegisterCourseContent(ctx context.Context, x *entity.RegisterCourseContent) (contentID string, err error) {
-	q := sqlctx.GetQueryer(ctx)
-
-	err = q.QueryRow(`
-		insert into course_contents
-			(
-				course_id,
-				i,
-				title, long_desc, video_id, video_type
-			)
-		values
-			(
-				$1,
-				(select coalesce(max(i)+1, 0) from course_contents where course_id = $1),
-				$2, $3, $4, $5
-			)
-		returning id
-	`,
-		x.CourseID,
-		x.Title, x.LongDesc, x.VideoID, x.VideoType,
-	).Scan(&contentID)
-	return
 }
 
 // GetCourse get course by id
