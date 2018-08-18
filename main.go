@@ -151,8 +151,9 @@ func main() {
 	m := http.NewServeMux()
 
 	m.Handle("/", app.New(app.Config{
-		BaseURL: baseURL,
-		Service: svc,
+		BaseURL:    baseURL,
+		Service:    svc,
+		Repository: repository.NewApp(),
 	}))
 
 	m.Handle("/auth/", http.StripPrefix("/auth", middleware.Chain(
