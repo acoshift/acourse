@@ -24,6 +24,9 @@ type Repository interface {
 	SetCourseImage(ctx context.Context, courseID string, image string) error
 	SetCourseOption(ctx context.Context, courseID string, x *entity.CourseOption) error
 
+	GetCourseContent(ctx context.Context, contentID string) (*entity.CourseContent, error)
+	DeleteCourseContent(ctx context.Context, contentID string) error
+
 	RegisterPayment(ctx context.Context, x *RegisterPayment) error
 	GetPayment(ctx context.Context, paymentID string) (*Payment, error)
 	SetPaymentStatus(ctx context.Context, paymentID string, status int) error

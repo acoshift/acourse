@@ -109,39 +109,6 @@ func GetCourseContents(ctx context.Context, courseID string) ([]*entity.CourseCo
 	return xs, nil
 }
 
-// GetCourseContent gets course content from id
-func GetCourseContent(ctx context.Context, courseContentID string) (*entity.CourseContent, error) {
-	q := sqlctx.GetQueryer(ctx)
-
-	var x entity.CourseContent
-	err := q.QueryRow(`
-		select
-			id, course_id, title, long_desc, video_id, video_type, download_url
-		from course_contents
-		where id = $1
-	`, courseContentID).Scan(
-		&x.ID, &x.CourseID, &x.Title, &x.Desc, &x.VideoID, &x.VideoType, &x.DownloadURL,
-	)
-	if err == sql.ErrNoRows {
-		return nil, entity.ErrNotFound
-	}
-	if err != nil {
-		return nil, err
-	}
-	return &x, nil
-}
-
-// DeleteCourseContent deletes course content
-func DeleteCourseContent(ctx context.Context, courseID string, contentID string) error {
-	q := sqlctx.GetQueryer(ctx)
-
-	_, err := q.Exec(`
-		delete from course_contents
-		where id = $1 and course_id = $2
-	`, contentID, courseID)
-	return err
-}
-
 // UpdateCourseContent updates course content
 func UpdateCourseContent(ctx context.Context, courseID, contentID, title, desc, videoID string) error {
 	q := sqlctx.GetQueryer(ctx)
@@ -163,17 +130,6 @@ func GetCourseURL(ctx context.Context, courseID string) (url string, err error) 
 	q := sqlctx.GetQueryer(ctx)
 
 	err = q.QueryRow(`select url from courses where id = $1`, courseID).Scan(pgsql.NullString(&url))
-	return
-}
-
-// GetCourseUserID gets course user id
-func GetCourseUserID(ctx context.Context, courseID string) (userID string, err error) {
-	q := sqlctx.GetQueryer(ctx)
-
-	err = q.QueryRow(`select user_id from courses where id = $1`, courseID).Scan(&userID)
-	if err == sql.ErrNoRows {
-		err = entity.ErrNotFound
-	}
 	return
 }
 

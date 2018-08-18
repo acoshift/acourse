@@ -226,6 +226,34 @@ func (svcRepo) SetCourseOption(ctx context.Context, courseID string, x *entity.C
 	return err
 }
 
+func (svcRepo) GetCourseContent(ctx context.Context, contentID string) (*entity.CourseContent, error) {
+	q := sqlctx.GetQueryer(ctx)
+
+	var x entity.CourseContent
+	err := q.QueryRow(`
+		select
+			id, course_id, title, long_desc, video_id, video_type, download_url
+		from course_contents
+		where id = $1
+	`, contentID).Scan(
+		&x.ID, &x.CourseID, &x.Title, &x.Desc, &x.VideoID, &x.VideoType, &x.DownloadURL,
+	)
+	if err == sql.ErrNoRows {
+		return nil, entity.ErrNotFound
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &x, nil
+}
+
+func (svcRepo) DeleteCourseContent(ctx context.Context, contentID string) error {
+	q := sqlctx.GetQueryer(ctx)
+
+	_, err := q.Exec(`delete from course_contents where id = $1`, contentID)
+	return err
+}
+
 func (svcRepo) RegisterPayment(ctx context.Context, x *service.RegisterPayment) error {
 	q := sqlctx.GetQueryer(ctx)
 

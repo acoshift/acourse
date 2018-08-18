@@ -11,7 +11,8 @@ import (
 
 // Config is editor config
 type Config struct {
-	Service service.Service
+	Service    service.Service
+	Repository Repository
 }
 
 // New creates new editor handler
@@ -19,19 +20,19 @@ func New(cfg Config) http.Handler {
 	c := &ctrl{cfg}
 
 	mux := http.NewServeMux()
-	mux.Handle("/course/create", onlyInstructor(methodmux.GetPost(
+	mux.Handle("/course/create", c.onlyInstructor(methodmux.GetPost(
 		hime.Handler(c.courseCreate),
 		hime.Handler(c.postCourseCreate),
 	)))
-	mux.Handle("/course/edit", isCourseOwner(methodmux.GetPost(
+	mux.Handle("/course/edit", c.isCourseOwner(methodmux.GetPost(
 		hime.Handler(c.courseEdit),
 		hime.Handler(c.postCourseEdit),
 	)))
-	mux.Handle("/content", isCourseOwner(methodmux.GetPost(
+	mux.Handle("/content", c.isCourseOwner(methodmux.GetPost(
 		hime.Handler(c.contentList),
 		hime.Handler(c.postContentList),
 	)))
-	mux.Handle("/content/create", isCourseOwner(methodmux.GetPost(
+	mux.Handle("/content/create", c.isCourseOwner(methodmux.GetPost(
 		hime.Handler(c.contentCreate),
 		hime.Handler(c.postContentCreate),
 	)))

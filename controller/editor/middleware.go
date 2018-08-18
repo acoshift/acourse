@@ -8,10 +8,9 @@ import (
 	"github.com/acoshift/acourse/context/appctx"
 	"github.com/acoshift/acourse/controller/share"
 	"github.com/acoshift/acourse/entity"
-	"github.com/acoshift/acourse/repository"
 )
 
-func onlyInstructor(h http.Handler) http.Handler {
+func (c *ctrl) onlyInstructor(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		u := appctx.GetUser(r.Context())
 		if u == nil {
@@ -26,7 +25,7 @@ func onlyInstructor(h http.Handler) http.Handler {
 	})
 }
 
-func isCourseOwner(h http.Handler) http.Handler {
+func (c *ctrl) isCourseOwner(h http.Handler) http.Handler {
 	return hime.Handler(func(ctx *hime.Context) error {
 		u := appctx.GetUser(ctx)
 		if u == nil {
@@ -35,7 +34,7 @@ func isCourseOwner(h http.Handler) http.Handler {
 
 		id := ctx.FormValue("id")
 
-		ownerID, err := repository.GetCourseUserID(ctx, id)
+		ownerID, err := c.Repository.GetCourseUserID(ctx, id)
 		if err == entity.ErrNotFound {
 			return share.NotFound(ctx)
 		}
