@@ -308,7 +308,7 @@ func (c *ctrl) courseAssignment(ctx *hime.Context) error {
 		return ctx.Status(http.StatusForbidden).StatusText()
 	}
 
-	assignments, err := c.Repository.GetAssignments(ctx, x.ID)
+	assignments, err := c.Repository.FindAssignmentsByCourseID(ctx, x.ID)
 	if err != nil {
 		return err
 	}
