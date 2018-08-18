@@ -12,8 +12,9 @@ import (
 
 // Config is the app config
 type Config struct {
-	BaseURL string
-	Service service.Service
+	BaseURL    string
+	Service    service.Service
+	Repository Repository
 }
 
 // New creates new app

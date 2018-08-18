@@ -4,7 +4,6 @@ import (
 	"github.com/acoshift/hime"
 
 	"github.com/acoshift/acourse/controller/share"
-	"github.com/acoshift/acourse/repository"
 	"github.com/acoshift/acourse/view"
 )
 
@@ -13,7 +12,7 @@ func (c *ctrl) index(ctx *hime.Context) error {
 		return share.NotFound(ctx)
 	}
 
-	courses, err := repository.ListPublicCourses(ctx)
+	courses, err := c.Repository.ListPublicCourses(ctx)
 	if err != nil {
 		return err
 	}
