@@ -2,6 +2,7 @@ package service_test
 
 import (
 	"context"
+	"fmt"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -49,6 +50,14 @@ var _ = Describe("Auth", func() {
 
 			Expect(err).NotTo(BeNil())
 			Expect(IsUIError(err)).To(BeTrue())
+			Expect(userID).To(BeZero())
+		})
+
+		It("should error when sign in with valid email but wrong password", func() {
+			auth.On("VerifyPassword", "test@test.com", "fakepass").Return("", fmt.Errorf("invalid"))
+
+			userID, err := s.SignInPassword(ctx, "test@test.com", "fakepass")
+			Expect(err).NotTo(BeNil())
 			Expect(userID).To(BeZero())
 		})
 
