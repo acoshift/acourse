@@ -1,7 +1,6 @@
 package entity
 
 import (
-	"database/sql"
 	"time"
 
 	"github.com/lib/pq"
@@ -36,7 +35,7 @@ type Course struct {
 	Image         string
 	UserID        string
 	Start         pq.NullTime
-	URL           sql.NullString // MUST not parsable to int
+	URL           string
 	Type          int
 	Price         float64
 	Discount      float64
@@ -83,10 +82,10 @@ type CourseOption struct {
 
 // Link returns id if url is invalid
 func (x *Course) Link() string {
-	if !x.URL.Valid || len(x.URL.String) == 0 {
+	if x.URL == "" {
 		return x.ID
 	}
-	return x.URL.String
+	return x.URL
 }
 
 // Payment model

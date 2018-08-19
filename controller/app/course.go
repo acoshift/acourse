@@ -1,11 +1,13 @@
 package app
 
 import (
+	"context"
 	"net/http"
 	"net/url"
 	"strconv"
 
 	"github.com/acoshift/hime"
+	"github.com/acoshift/methodmux"
 	"github.com/acoshift/prefixhandler"
 	"github.com/satori/go.uuid"
 
@@ -16,53 +18,92 @@ import (
 	"github.com/acoshift/acourse/view"
 )
 
-type courseURLKey struct{}
+type (
+	courseIDKey struct{}
+	courseKey   struct{}
+)
 
-func (c *ctrl) courseView(ctx *hime.Context) error {
-	if ctx.Request().URL.Path != "/" {
-		return share.NotFound(ctx)
+func newCourseHandler(appCtrl *ctrl) http.Handler {
+	c := courseCtrl{
+		ctrl: appCtrl,
 	}
 
-	user := appctx.GetUser(ctx)
-	link := prefixhandler.Get(ctx, courseURLKey{})
+	mux := http.NewServeMux()
+	mux.Handle("/", methodmux.Get(
+		hime.Handler(c.view),
+	))
+	mux.Handle("/content", mustSignedIn(methodmux.Get(
+		hime.Handler(c.content),
+	)))
+	mux.Handle("/enroll", mustSignedIn(methodmux.GetPost(
+		hime.Handler(c.enroll),
+		hime.Handler(c.postEnroll),
+	)))
+	mux.Handle("/assignment", mustSignedIn(methodmux.Get(
+		hime.Handler(c.assignment),
+	)))
 
-	// if id can parse to uuid get course from id
-	id := link
-	_, err := uuid.FromString(link)
-	if err != nil {
-		// link can not parse to uuid get course id from url
-		id, err = c.Repository.GetCourseIDByURL(ctx, link)
+	return hime.Handler(func(ctx *hime.Context) error {
+		courseID := prefixhandler.Get(ctx, courseIDKey{})
+
+		_, err := uuid.FromString(courseID)
+		if err != nil {
+			// link can not parse to uuid get course id from url
+			courseID, err = c.Repository.GetCourseIDByURL(ctx, courseID)
+			if err == entity.ErrNotFound {
+				return share.NotFound(ctx)
+			}
+			if err != nil {
+				return err
+			}
+		}
+
+		x, err := c.Repository.GetCourse(ctx, courseID)
 		if err == entity.ErrNotFound {
 			return share.NotFound(ctx)
 		}
 		if err != nil {
 			return err
 		}
-	}
 
-	x, err := c.Repository.GetCourse(ctx, id)
-	if err == entity.ErrNotFound {
+		// if course has url, redirect to course url
+		if link := x.Link(); link != courseID {
+			return ctx.RedirectTo("app.course", link)
+		}
+
+		ctx.WithValue(courseKey{}, x)
+
+		return ctx.Handle(mux)
+	})
+}
+
+type courseCtrl struct {
+	*ctrl
+}
+
+func (c *courseCtrl) getCourse(ctx context.Context) *entity.Course {
+	return ctx.Value(courseKey{}).(*entity.Course)
+}
+
+func (c *courseCtrl) view(ctx *hime.Context) error {
+	if ctx.Request().URL.Path != "/" {
 		return share.NotFound(ctx)
 	}
-	if err != nil {
-		return err
-	}
 
-	// if course has url, redirect to course url
-	if x.URL.Valid && x.URL.String != link {
-		return ctx.RedirectTo("app.course", x.URL.String)
-	}
+	user := appctx.GetUser(ctx)
+	course := c.getCourse(ctx)
 
+	var err error
 	enrolled := false
 	pendingEnroll := false
 	if user != nil {
-		enrolled, err = c.Repository.IsEnrolled(ctx, user.ID, x.ID)
+		enrolled, err = c.Repository.IsEnrolled(ctx, user.ID, course.ID)
 		if err != nil {
 			return err
 		}
 
 		if !enrolled {
-			pendingEnroll, err = c.Repository.HasPendingPayment(ctx, user.ID, x.ID)
+			pendingEnroll, err = c.Repository.HasPendingPayment(ctx, user.ID, course.ID)
 			if err != nil {
 				return err
 			}
@@ -71,70 +112,44 @@ func (c *ctrl) courseView(ctx *hime.Context) error {
 
 	var owned bool
 	if user != nil {
-		owned = user.ID == x.UserID
+		owned = user.ID == course.UserID
 	}
 
 	if owned {
-		x.Owner = user
+		course.Owner = user
 	} else {
-		x.Owner, err = c.Repository.GetUser(ctx, x.UserID)
+		course.Owner, err = c.Repository.GetUser(ctx, course.UserID)
 		if err != nil {
 			return err
 		}
 	}
 
 	p := view.Page(ctx)
-	p["Title"] = x.Title
-	p["Desc"] = x.ShortDesc
-	p["Image"] = x.Image
-	p["URL"] = c.BaseURL + ctx.Route("app.course", url.PathEscape(x.Link()))
-	p["Course"] = x
+	p["Title"] = course.Title
+	p["Desc"] = course.ShortDesc
+	p["Image"] = course.Image
+	p["URL"] = c.BaseURL + ctx.Route("app.course", url.PathEscape(course.Link()))
+	p["Course"] = course
 	p["Enrolled"] = enrolled
 	p["Owned"] = owned
 	p["PendingEnroll"] = pendingEnroll
 	return ctx.View("app.course", p)
 }
 
-func (c *ctrl) courseContent(ctx *hime.Context) error {
+func (c *courseCtrl) content(ctx *hime.Context) error {
 	user := appctx.GetUser(ctx)
-	link := prefixhandler.Get(ctx, courseURLKey{})
+	course := c.getCourse(ctx)
 
-	// if id can parse to uuid get course from id
-	id := link
-	_, err := uuid.FromString(link)
-	if err != nil {
-		// link can not parse to uuid get course id from url
-		id, err = c.Repository.GetCourseIDByURL(ctx, link)
-		if err == entity.ErrNotFound {
-			return share.NotFound(ctx)
-		}
-		if err != nil {
-			return err
-		}
-	}
-	x, err := c.Repository.GetCourse(ctx, id)
-	if err == entity.ErrNotFound {
-		return share.NotFound(ctx)
-	}
+	enrolled, err := c.Repository.IsEnrolled(ctx, user.ID, course.ID)
 	if err != nil {
 		return err
 	}
 
-	// if course has url, redirect to course url
-	if x.URL.Valid && x.URL.String != link {
-		return ctx.RedirectTo("app.course", x.URL.String, "content")
-	}
-
-	enrolled, err := c.Repository.IsEnrolled(ctx, user.ID, x.ID)
-	if err != nil {
-		return err
-	}
-
-	if !enrolled && user.ID != x.UserID {
+	if !enrolled && user.ID != course.UserID {
 		return ctx.Status(http.StatusForbidden).StatusText()
 	}
 
-	x.Contents, err = c.Repository.GetCourseContents(ctx, x.ID)
+	course.Contents, err = c.Repository.GetCourseContents(ctx, course.ID)
 	if err != nil {
 		return err
 	}
@@ -144,108 +159,62 @@ func (c *ctrl) courseContent(ctx *hime.Context) error {
 	if pg < 0 {
 		pg = 0
 	}
-	if pg > len(x.Contents)-1 {
-		pg = len(x.Contents) - 1
+	if pg > len(course.Contents)-1 {
+		pg = len(course.Contents) - 1
 	}
 	if pg >= 0 {
-		content = x.Contents[pg]
+		content = course.Contents[pg]
 	}
 
 	p := view.Page(ctx)
-	p["Title"] = x.Title
-	p["Desc"] = x.ShortDesc
-	p["Image"] = x.Image
-	p["Course"] = x
+	p["Title"] = course.Title
+	p["Desc"] = course.ShortDesc
+	p["Image"] = course.Image
+	p["Course"] = course
 	p["Content"] = content
 	return ctx.View("app.course-content", p)
 }
 
-func (c *ctrl) courseEnroll(ctx *hime.Context) error {
+func (c *courseCtrl) enroll(ctx *hime.Context) error {
 	user := appctx.GetUser(ctx)
-
-	link := prefixhandler.Get(ctx, courseURLKey{})
-
-	id := link
-	_, err := uuid.FromString(link)
-	if err != nil {
-		id, err = c.Repository.GetCourseIDByURL(ctx, link)
-		if err == entity.ErrNotFound {
-			return share.NotFound(ctx)
-		}
-		if err != nil {
-			return err
-		}
-	}
-
-	x, err := c.Repository.GetCourse(ctx, id)
-	if err == entity.ErrNotFound {
-		return share.NotFound(ctx)
-	}
-	if err != nil {
-		return err
-	}
-
-	// if user is course owner redirect back to course page
-	if user.ID == x.UserID {
-		return ctx.RedirectTo("app.course", link)
-	}
+	course := c.getCourse(ctx)
 
 	// redirect enrolled user back to course page
-	enrolled, err := c.Repository.IsEnrolled(ctx, user.ID, id)
+	enrolled, err := c.Repository.IsEnrolled(ctx, user.ID, course.ID)
 	if err != nil {
 		return err
 	}
 	if enrolled {
-		return ctx.RedirectTo("app.course", link)
+		return ctx.RedirectTo("app.course", course.Link())
 	}
 
 	// check is user has pending enroll
-	pendingPayment, err := c.Repository.HasPendingPayment(ctx, user.ID, id)
+	pendingPayment, err := c.Repository.HasPendingPayment(ctx, user.ID, course.ID)
 	if err != nil {
 		return err
 	}
 	if pendingPayment {
-		return ctx.RedirectTo("app.course", link)
+		return ctx.RedirectTo("app.course", course.Link())
 	}
 
 	p := view.Page(ctx)
-	p["Title"] = x.Title
-	p["Desc"] = x.ShortDesc
-	p["Image"] = x.Image
-	p["URL"] = c.BaseURL + ctx.Route("app.course", url.PathEscape(x.Link()))
-	p["Course"] = x
+	p["Title"] = course.Title
+	p["Desc"] = course.ShortDesc
+	p["Image"] = course.Image
+	p["URL"] = c.BaseURL + ctx.Route("app.course", url.PathEscape(course.Link()))
+	p["Course"] = course
 	return ctx.View("app.course-enroll", p)
 }
 
-func (c *ctrl) postCourseEnroll(ctx *hime.Context) error {
+func (c *courseCtrl) postEnroll(ctx *hime.Context) error {
+	course := c.getCourse(ctx)
+
 	f := appctx.GetFlash(ctx)
-
-	link := prefixhandler.Get(ctx, courseURLKey{})
-
-	id := link
-	_, err := uuid.FromString(link)
-	if err != nil {
-		id, err = c.Repository.GetCourseIDByURL(ctx, link)
-		if err == entity.ErrNotFound {
-			return share.NotFound(ctx)
-		}
-		if err != nil {
-			return err
-		}
-	}
-
-	_, err = c.Repository.GetCourse(ctx, id)
-	if err == entity.ErrNotFound {
-		return share.NotFound(ctx)
-	}
-	if err != nil {
-		return err
-	}
 
 	price, _ := strconv.ParseFloat(ctx.FormValue("price"), 64)
 	image, _ := ctx.FormFileHeaderNotEmpty("image")
 
-	err = c.Service.EnrollCourse(ctx, id, price, image)
+	err := c.Service.EnrollCourse(ctx, course.ID, price, image)
 	if service.IsUIError(err) {
 		f.Add("Errors", "image required")
 		return ctx.RedirectToGet()
@@ -254,59 +223,33 @@ func (c *ctrl) postCourseEnroll(ctx *hime.Context) error {
 		return err
 	}
 
-	return ctx.RedirectTo("app.course", link)
+	return ctx.RedirectTo("app.course", course.Link())
 }
 
-func (c *ctrl) courseAssignment(ctx *hime.Context) error {
+func (c *courseCtrl) assignment(ctx *hime.Context) error {
 	user := appctx.GetUser(ctx)
-	link := prefixhandler.Get(ctx, courseURLKey{})
+	course := c.getCourse(ctx)
 
-	// if id can parse to int64 get course from id
-	id := link
-	_, err := uuid.FromString(link)
-	if err != nil {
-		// link can not parse to int64 get course id from url
-		id, err = c.Repository.GetCourseIDByURL(ctx, link)
-		if err == entity.ErrNotFound {
-			return share.NotFound(ctx)
-		}
-		if err != nil {
-			return err
-		}
-	}
-	x, err := c.Repository.GetCourse(ctx, id)
-	if err == entity.ErrNotFound {
-		return share.NotFound(ctx)
-	}
+	enrolled, err := c.Repository.IsEnrolled(ctx, user.ID, course.ID)
 	if err != nil {
 		return err
 	}
 
-	// if course has url, redirect to course url
-	if x.URL.Valid && x.URL.String != link {
-		return ctx.RedirectTo("app.course", x.URL.String, "assignment")
-	}
-
-	enrolled, err := c.Repository.IsEnrolled(ctx, user.ID, x.ID)
-	if err != nil {
-		return err
-	}
-
-	if !enrolled && user.ID != x.UserID {
+	if !enrolled && user.ID != course.UserID {
 		return ctx.Status(http.StatusForbidden).StatusText()
 	}
 
-	assignments, err := c.Repository.FindAssignmentsByCourseID(ctx, x.ID)
+	assignments, err := c.Repository.FindAssignmentsByCourseID(ctx, course.ID)
 	if err != nil {
 		return err
 	}
 
 	p := view.Page(ctx)
-	p["Title"] = x.Title
-	p["Desc"] = x.ShortDesc
-	p["Image"] = x.Image
-	p["URL"] = c.BaseURL + ctx.Route("app.course", url.PathEscape(x.Link()))
-	p["Course"] = x
+	p["Title"] = course.Title
+	p["Desc"] = course.ShortDesc
+	p["Image"] = course.Image
+	p["URL"] = c.BaseURL + ctx.Route("app.course", url.PathEscape(course.Link()))
+	p["Course"] = course
 	p["Assignments"] = assignments
 	return ctx.View("app.course-assignment", p)
 }

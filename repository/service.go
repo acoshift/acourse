@@ -171,7 +171,7 @@ func (svcRepo) GetCourse(ctx context.Context, courseID string) (*entity.Course, 
 		where id = $1
 	`, courseID).Scan(
 		&x.ID, &x.UserID, &x.Title, &x.ShortDesc, &x.Desc, &x.Image,
-		&x.Start, &x.URL, &x.Type, &x.Price, &x.Discount, &x.EnrollDetail,
+		&x.Start, pgsql.NullString(&x.URL), &x.Type, &x.Price, &x.Discount, &x.EnrollDetail,
 		&x.Option.Public, &x.Option.Enroll, &x.Option.Attend, &x.Option.Assignment, &x.Option.Discount,
 	)
 	if err == sql.ErrNoRows {

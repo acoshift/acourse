@@ -40,24 +40,7 @@ func New(cfg Config) http.Handler {
 	)))
 
 	// course
-	{
-		m := http.NewServeMux()
-		m.Handle("/", methodmux.Get(
-			hime.Handler(c.courseView),
-		))
-		m.Handle("/content", mustSignedIn(methodmux.Get(
-			hime.Handler(c.courseContent),
-		)))
-		m.Handle("/enroll", mustSignedIn(methodmux.GetPost(
-			hime.Handler(c.courseEnroll),
-			hime.Handler(c.postCourseEnroll),
-		)))
-		m.Handle("/assignment", mustSignedIn(methodmux.Get(
-			hime.Handler(c.courseAssignment),
-		)))
-
-		mux.Handle("/course/", prefixhandler.New("/course", courseURLKey{}, m))
-	}
+	mux.Handle("/course/", prefixhandler.New("/course", courseIDKey{}, newCourseHandler(c)))
 
 	return mux
 }
