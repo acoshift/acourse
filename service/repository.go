@@ -26,6 +26,7 @@ type Repository interface {
 
 	RegisterCourseContent(ctx context.Context, x *entity.RegisterCourseContent) (contentID string, err error)
 	GetCourseContent(ctx context.Context, contentID string) (*entity.CourseContent, error)
+	ListCourseContents(ctx context.Context, courseID string) ([]*entity.CourseContent, error)
 	UpdateCourseContent(ctx context.Context, contentID, title, desc, videoID string) error
 	DeleteCourseContent(ctx context.Context, contentID string) error
 

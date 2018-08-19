@@ -1,10 +1,6 @@
 package repository
 
 import (
-	"context"
-	"database/sql"
-
-	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/entity"
 )
 
@@ -31,10 +27,6 @@ const (
 			course_options.discount
 		from courses
 			left join course_options on courses.id = course_options.course_id
-	`
-
-	queryGetCourses = selectCourses + `
-		where courses.id = any($1)
 	`
 
 	queryListCoursesPublic = selectCourses + `
@@ -72,64 +64,4 @@ func scanCourse(scan scanFunc, x *entity.Course) error {
 		x.URL.String = x.ID
 	}
 	return nil
-}
-
-// GetCourseContents gets course contents for given course id
-func GetCourseContents(ctx context.Context, courseID string) ([]*entity.CourseContent, error) {
-	q := sqlctx.GetQueryer(ctx)
-
-	rows, err := q.Query(`
-		select
-			id, course_id, title, long_desc, video_id, video_type, download_url
-		from course_contents
-		where course_id = $1
-		order by i
-	`, courseID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var xs []*entity.CourseContent
-	for rows.Next() {
-		var x entity.CourseContent
-		err = rows.Scan(
-			&x.ID, &x.CourseID, &x.Title, &x.Desc, &x.VideoID, &x.VideoType, &x.DownloadURL,
-		)
-		if err != nil {
-			return nil, err
-		}
-		xs = append(xs, &x)
-	}
-	if err = rows.Err(); err != nil {
-		return nil, err
-	}
-	return xs, nil
-}
-
-// GetCourse get course by id
-func GetCourse(ctx context.Context, courseID string) (*entity.Course, error) {
-	q := sqlctx.GetQueryer(ctx)
-
-	var x entity.Course
-	err := q.QueryRow(`
-		select
-			id, user_id, title, short_desc, long_desc, image,
-			start, url, type, price, courses.discount, enroll_detail,
-			opt.public, opt.enroll, opt.attend, opt.assignment, opt.discount
-		from courses
-			left join course_options as opt on opt.course_id = courses.id
-		where id = $1
-	`, courseID).Scan(
-		&x.ID, &x.UserID, &x.Title, &x.ShortDesc, &x.Desc, &x.Image,
-		&x.Start, &x.URL, &x.Type, &x.Price, &x.Discount, &x.EnrollDetail,
-		&x.Option.Public, &x.Option.Enroll, &x.Option.Attend, &x.Option.Assignment, &x.Option.Discount,
-	)
-	if err == sql.ErrNoRows {
-		return nil, entity.ErrNotFound
-	}
-	if err != nil {
-		return nil, err
-	}
-	return &x, nil
 }

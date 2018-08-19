@@ -22,7 +22,7 @@ func (c *ctrl) contentList(ctx *hime.Context) error {
 	if err != nil {
 		return err
 	}
-	course.Contents, err = c.Repository.ListCourseContents(ctx, id)
+	course.Contents, err = c.Service.ListCourseContents(ctx, id)
 	if err != nil {
 		return err
 	}

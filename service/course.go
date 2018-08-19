@@ -227,6 +227,12 @@ func (s *svc) GetCourseContent(ctx context.Context, contentID string) (*entity.C
 	return s.Repository.GetCourseContent(ctx, contentID)
 }
 
+func (s *svc) ListCourseContents(ctx context.Context, courseID string) ([]*entity.CourseContent, error) {
+	// TODO: validate ownership
+
+	return s.Repository.ListCourseContents(ctx, courseID)
+}
+
 func (s *svc) UpdateCourseContent(ctx context.Context, contentID string, title string, desc string, videoID string) error {
 	// TODO: validate ownership
 

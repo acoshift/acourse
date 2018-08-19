@@ -271,6 +271,38 @@ func (svcRepo) GetCourseContent(ctx context.Context, contentID string) (*entity.
 	return &x, nil
 }
 
+func (svcRepo) ListCourseContents(ctx context.Context, courseID string) ([]*entity.CourseContent, error) {
+	q := sqlctx.GetQueryer(ctx)
+
+	rows, err := q.Query(`
+		select
+			id, course_id, title, long_desc, video_id, video_type, download_url
+		from course_contents
+		where course_id = $1
+		order by i
+	`, courseID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var xs []*entity.CourseContent
+	for rows.Next() {
+		var x entity.CourseContent
+		err = rows.Scan(
+			&x.ID, &x.CourseID, &x.Title, &x.Desc, &x.VideoID, &x.VideoType, &x.DownloadURL,
+		)
+		if err != nil {
+			return nil, err
+		}
+		xs = append(xs, &x)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+	return xs, nil
+}
+
 func (svcRepo) UpdateCourseContent(ctx context.Context, contentID, title, desc, videoID string) error {
 	q := sqlctx.GetQueryer(ctx)
 
