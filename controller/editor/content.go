@@ -28,7 +28,7 @@ func (c *ctrl) contentList(ctx *hime.Context) error {
 	}
 
 	p := view.Page(ctx)
-	p["Course"] = course
+	p.Data["Course"] = course
 	return ctx.View("editor.content", p)
 }
 
@@ -57,7 +57,7 @@ func (c *ctrl) contentCreate(ctx *hime.Context) error {
 	}
 
 	p := view.Page(ctx)
-	p["Course"] = course
+	p.Data["Course"] = course
 	return ctx.View("editor.content-create", p)
 }
 
@@ -108,8 +108,8 @@ func (c *ctrl) contentEdit(ctx *hime.Context) error {
 	}
 
 	p := view.Page(ctx)
-	p["Course"] = course
-	p["Content"] = content
+	p.Data["Course"] = course
+	p.Data["Content"] = content
 	return ctx.View("editor.content-edit", p)
 }
 

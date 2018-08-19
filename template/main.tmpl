@@ -3,6 +3,8 @@
 <html lang="th">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
+{{with .Meta}}
 <title>{{if .Title}}{{.Title}} | {{end}}Acourse</title>
 <link rel="icon" type="image/png" href="/-/favicon.png">
 <meta name="theme-color" content="#336b87">
@@ -15,9 +17,12 @@
 <meta property="og:title" content="{{.Title}}">
 <meta property="og:description" content="{{.Desc}}">
 <meta property="og:site_name" content="Acourse">
+{{if .Image}}
 <meta property="og:image" content="{{.Image}}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
+{{end}}
+{{end}}
 
 <link rel="dns-prefetch" href="https://storage.googleapis.com" data-turbolinks-permanent>
 <link rel="dns-prefetch" href="https://fonts.googleapis.com" data-turbolinks-permanent>
@@ -36,9 +41,9 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/turbolinks/5.1.1/turbolinks.js" defer></script>
 
-{{template "body" $}}
+{{template "body" .Data}}
 
 {{template "global.script"}}
-{{block "script" .}}{{end}}
+{{block "script" .Data}}{{end}}
 
 {{end}}

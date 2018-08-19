@@ -24,8 +24,8 @@ func (c *ctrl) users(ctx *hime.Context) error {
 	}
 
 	p := view.Page(ctx)
-	p["Navbar"] = "admin.users"
-	p["Users"] = users
-	p["Paginate"] = pn
+	p.Data["Navbar"] = "admin.users"
+	p.Data["Users"] = users
+	p.Data["Paginate"] = pn
 	return ctx.View("admin.users", p)
 }

@@ -18,6 +18,6 @@ func (c *ctrl) index(ctx *hime.Context) error {
 	}
 
 	p := view.Page(ctx)
-	p["Courses"] = courses
+	p.Data["Courses"] = courses
 	return ctx.View("app.index", p)
 }
