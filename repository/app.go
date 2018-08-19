@@ -207,16 +207,54 @@ func (appRepo) ListPublicCourses(ctx context.Context) ([]*entity.Course, error) 
 	q := sqlctx.GetQueryer(ctx)
 
 	{
-		rows, err := q.Query(queryListCoursesPublic)
+		rows, err := q.Query(`
+			select
+				courses.id,
+				courses.title,
+				courses.short_desc,
+				courses.long_desc,
+				courses.image,
+				courses.start,
+				courses.url,
+				courses.type,
+				courses.price,
+				courses.discount,
+				courses.enroll_detail,
+				courses.created_at,
+				courses.updated_at,
+				course_options.public,
+				course_options.enroll,
+				course_options.attend,
+				course_options.assignment,
+				course_options.discount
+			from courses
+				left join course_options on courses.id = course_options.course_id
+			where course_options.public = true
+			order by
+				case when courses.type = 1
+					then 1
+					else null
+				end,
+				courses.created_at desc
+		`)
 		if err != nil {
 			return nil, err
 		}
 		defer rows.Close()
+
 		for rows.Next() {
 			var x entity.Course
-			err = scanCourse(rows.Scan, &x)
+			err = rows.Scan(
+				&x.ID,
+				&x.Title, &x.ShortDesc, &x.Desc, &x.Image, &x.Start, &x.URL, &x.Type, &x.Price, &x.Discount, &x.EnrollDetail,
+				&x.CreatedAt, &x.UpdatedAt,
+				&x.Option.Public, &x.Option.Enroll, &x.Option.Attend, &x.Option.Assignment, &x.Option.Discount,
+			)
 			if err != nil {
 				return nil, err
+			}
+			if len(x.URL.String) == 0 {
+				x.URL.String = x.ID
 			}
 			xs = append(xs, &x)
 			ids = append(ids, x.ID)
@@ -264,7 +302,31 @@ func (appRepo) ListPublicCourses(ctx context.Context) ([]*entity.Course, error) 
 func (appRepo) ListOwnCourses(ctx context.Context, userID string) ([]*entity.Course, error) {
 	q := sqlctx.GetQueryer(ctx)
 
-	rows, err := q.Query(queryListCoursesOwn, userID)
+	rows, err := q.Query(`
+		select
+			courses.id,
+			courses.title,
+			courses.short_desc,
+			courses.long_desc,
+			courses.image,
+			courses.start,
+			courses.url,
+			courses.type,
+			courses.price,
+			courses.discount,
+			courses.enroll_detail,
+			courses.created_at,
+			courses.updated_at,
+			course_options.public,
+			course_options.enroll,
+			course_options.attend,
+			course_options.assignment,
+			course_options.discount
+		from courses
+			left join course_options on courses.id = course_options.course_id
+		where courses.user_id = $1
+		order by courses.created_at desc
+	`, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -274,9 +336,17 @@ func (appRepo) ListOwnCourses(ctx context.Context, userID string) ([]*entity.Cou
 	m := make(map[string]*entity.Course)
 	for rows.Next() {
 		var x entity.Course
-		err = scanCourse(rows.Scan, &x)
+		err = rows.Scan(
+			&x.ID,
+			&x.Title, &x.ShortDesc, &x.Desc, &x.Image, &x.Start, &x.URL, &x.Type, &x.Price, &x.Discount, &x.EnrollDetail,
+			&x.CreatedAt, &x.UpdatedAt,
+			&x.Option.Public, &x.Option.Enroll, &x.Option.Attend, &x.Option.Assignment, &x.Option.Discount,
+		)
 		if err != nil {
 			return nil, err
+		}
+		if len(x.URL.String) == 0 {
+			x.URL.String = x.ID
 		}
 		xs = append(xs, &x)
 		ids = append(ids, x.ID)
@@ -314,7 +384,32 @@ func (appRepo) ListEnrolledCourses(ctx context.Context, userID string) ([]*entit
 	q := sqlctx.GetQueryer(ctx)
 
 	xs := make([]*entity.Course, 0)
-	rows, err := q.Query(queryListCoursesEnrolled, userID)
+	rows, err := q.Query(`
+		select
+			courses.id,
+			courses.title,
+			courses.short_desc,
+			courses.long_desc,
+			courses.image,
+			courses.start,
+			courses.url,
+			courses.type,
+			courses.price,
+			courses.discount,
+			courses.enroll_detail,
+			courses.created_at,
+			courses.updated_at,
+			course_options.public,
+			course_options.enroll,
+			course_options.attend,
+			course_options.assignment,
+			course_options.discount
+		from courses
+			left join course_options on courses.id = course_options.course_id
+		inner join enrolls on courses.id = enrolls.course_id
+		where enrolls.user_id = $1
+		order by enrolls.created_at desc
+	`, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -322,9 +417,17 @@ func (appRepo) ListEnrolledCourses(ctx context.Context, userID string) ([]*entit
 
 	for rows.Next() {
 		var x entity.Course
-		err = scanCourse(rows.Scan, &x)
+		err = rows.Scan(
+			&x.ID,
+			&x.Title, &x.ShortDesc, &x.Desc, &x.Image, &x.Start, &x.URL, &x.Type, &x.Price, &x.Discount, &x.EnrollDetail,
+			&x.CreatedAt, &x.UpdatedAt,
+			&x.Option.Public, &x.Option.Enroll, &x.Option.Attend, &x.Option.Assignment, &x.Option.Discount,
+		)
 		if err != nil {
 			return nil, err
+		}
+		if len(x.URL.String) == 0 {
+			x.URL.String = x.ID
 		}
 		xs = append(xs, &x)
 	}
