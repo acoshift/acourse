@@ -172,13 +172,18 @@ func (c *courseCtrl) enroll(ctx *hime.Context) error {
 	user := appctx.GetUser(ctx)
 	course := c.getCourse(ctx)
 
-	// redirect enrolled user back to course page
+	// owner redirect to course content
+	if user != nil && user.ID == course.Owner.ID {
+		return ctx.RedirectTo("app.course", course.Link(), "content")
+	}
+
+	// redirect enrolled user to course content page
 	enrolled, err := c.Repository.IsEnrolled(ctx, user.ID, course.ID)
 	if err != nil {
 		return err
 	}
 	if enrolled {
-		return ctx.RedirectTo("app.course", course.Link())
+		return ctx.RedirectTo("app.course", course.Link(), "content")
 	}
 
 	// check is user has pending enroll
@@ -200,14 +205,38 @@ func (c *courseCtrl) enroll(ctx *hime.Context) error {
 }
 
 func (c *courseCtrl) postEnroll(ctx *hime.Context) error {
+	user := appctx.GetUser(ctx)
 	course := c.getCourse(ctx)
+
+	// owner redirect to course content
+	if user != nil && user.ID == course.Owner.ID {
+		return ctx.RedirectTo("app.course", course.Link(), "content")
+	}
+
+	// redirect enrolled user to course content page
+	enrolled, err := c.Repository.IsEnrolled(ctx, user.ID, course.ID)
+	if err != nil {
+		return err
+	}
+	if enrolled {
+		return ctx.RedirectTo("app.course", course.Link(), "content")
+	}
+
+	// check is user has pending enroll
+	pendingPayment, err := c.Repository.HasPendingPayment(ctx, user.ID, course.ID)
+	if err != nil {
+		return err
+	}
+	if pendingPayment {
+		return ctx.RedirectTo("app.course", course.Link())
+	}
 
 	f := appctx.GetFlash(ctx)
 
 	price, _ := strconv.ParseFloat(ctx.FormValue("price"), 64)
 	image, _ := ctx.FormFileHeaderNotEmpty("image")
 
-	err := c.Service.EnrollCourse(ctx, course.ID, price, image)
+	err = c.Service.EnrollCourse(ctx, course.ID, price, image)
 	if service.IsUIError(err) {
 		f.Add("Errors", "image required")
 		return ctx.RedirectToGet()

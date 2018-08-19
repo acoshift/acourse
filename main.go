@@ -193,6 +193,7 @@ func main() {
 				Client: redisClient,
 			}),
 		}),
+		internal.Turbolinks,
 		appctx.Middleware(repository.NewAppCtx()),
 	)(m))
 

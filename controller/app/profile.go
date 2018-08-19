@@ -95,5 +95,7 @@ func (c *ctrl) postProfileEdit(ctx *hime.Context) error {
 		return ctx.RedirectBackToGet()
 	}
 
+	f.Clear()
+
 	return ctx.RedirectTo("app.profile")
 }

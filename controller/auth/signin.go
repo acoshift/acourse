@@ -1,6 +1,8 @@
 package auth
 
 import (
+	"net/url"
+
 	"github.com/acoshift/hime"
 
 	"github.com/acoshift/acourse/context/appctx"
@@ -40,5 +42,6 @@ func (c *ctrl) postSignIn(ctx *hime.Context) error {
 	appctx.RegenerateSessionID(ctx)
 	appctx.SetUserID(ctx, userID)
 
-	return ctx.SafeRedirect(ctx.FormValue("r"))
+	rd, _ := url.QueryUnescape(ctx.FormValue("r"))
+	return ctx.SafeRedirect(rd)
 }
