@@ -23,21 +23,24 @@ func NewApp() app.Repository {
 type appRepo struct {
 }
 
-func (appRepo) GetCourse(ctx context.Context, courseID string) (*entity.Course, error) {
+func (appRepo) GetCourse(ctx context.Context, courseID string) (*app.Course, error) {
 	q := sqlctx.GetQueryer(ctx)
 
-	var x entity.Course
+	var x app.Course
 	err := q.QueryRow(`
 		select
-			id, user_id, title, short_desc, long_desc, image,
-			start, url, type, price, courses.discount, enroll_detail,
+			c.id, c.title, c.short_desc, c.long_desc, c.image,
+			c.start, c.url, c.type, c.price, c.discount, c.enroll_detail,
+			u.id, u.name, u.image,
 			opt.public, opt.enroll, opt.attend, opt.assignment, opt.discount
-		from courses
-			left join course_options as opt on opt.course_id = courses.id
-		where id = $1
+		from courses as c
+			left join course_options as opt on opt.course_id = c.id
+			inner join users as u on u.id = c.user_id
+		where c.id = $1
 	`, courseID).Scan(
-		&x.ID, &x.UserID, &x.Title, &x.ShortDesc, &x.Desc, &x.Image,
-		&x.Start, pgsql.NullString(&x.URL), &x.Type, &x.Price, &x.Discount, &x.EnrollDetail,
+		&x.ID, &x.Title, &x.ShortDesc, &x.Desc, &x.Image,
+		pgsql.NullTime(&x.Start), pgsql.NullString(&x.URL), &x.Type, &x.Price, &x.Discount, &x.EnrollDetail,
+		&x.Owner.ID, &x.Owner.Name, &x.Owner.Image,
 		&x.Option.Public, &x.Option.Enroll, &x.Option.Attend, &x.Option.Assignment, &x.Option.Discount,
 	)
 	if err == sql.ErrNoRows {

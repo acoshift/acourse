@@ -81,8 +81,8 @@ type courseCtrl struct {
 	*ctrl
 }
 
-func (c *courseCtrl) getCourse(ctx context.Context) *entity.Course {
-	return ctx.Value(courseKey{}).(*entity.Course)
+func (c *courseCtrl) getCourse(ctx context.Context) *Course {
+	return ctx.Value(courseKey{}).(*Course)
 }
 
 func (c *courseCtrl) view(ctx *hime.Context) error {
@@ -112,16 +112,7 @@ func (c *courseCtrl) view(ctx *hime.Context) error {
 
 	var owned bool
 	if user != nil {
-		owned = user.ID == course.UserID
-	}
-
-	if owned {
-		course.Owner = user
-	} else {
-		course.Owner, err = c.Repository.GetUser(ctx, course.UserID)
-		if err != nil {
-			return err
-		}
+		owned = user.ID == course.Owner.ID
 	}
 
 	p := view.Page(ctx)
@@ -145,11 +136,11 @@ func (c *courseCtrl) content(ctx *hime.Context) error {
 		return err
 	}
 
-	if !enrolled && user.ID != course.UserID {
+	if !enrolled && user.ID != course.Owner.ID {
 		return ctx.Status(http.StatusForbidden).StatusText()
 	}
 
-	course.Contents, err = c.Repository.GetCourseContents(ctx, course.ID)
+	contents, err := c.Repository.GetCourseContents(ctx, course.ID)
 	if err != nil {
 		return err
 	}
@@ -159,11 +150,11 @@ func (c *courseCtrl) content(ctx *hime.Context) error {
 	if pg < 0 {
 		pg = 0
 	}
-	if pg > len(course.Contents)-1 {
-		pg = len(course.Contents) - 1
+	if pg > len(contents)-1 {
+		pg = len(contents) - 1
 	}
 	if pg >= 0 {
-		content = course.Contents[pg]
+		content = contents[pg]
 	}
 
 	p := view.Page(ctx)
@@ -171,6 +162,7 @@ func (c *courseCtrl) content(ctx *hime.Context) error {
 	p["Desc"] = course.ShortDesc
 	p["Image"] = course.Image
 	p["Course"] = course
+	p["Contents"] = contents
 	p["Content"] = content
 	return ctx.View("app.course-content", p)
 }
@@ -235,7 +227,7 @@ func (c *courseCtrl) assignment(ctx *hime.Context) error {
 		return err
 	}
 
-	if !enrolled && user.ID != course.UserID {
+	if !enrolled && user.ID != course.Owner.ID {
 		return ctx.Status(http.StatusForbidden).StatusText()
 	}
 

@@ -8,7 +8,7 @@ import (
 
 // Repository is app storage
 type Repository interface {
-	GetCourse(ctx context.Context, courseID string) (*entity.Course, error)
+	GetCourse(ctx context.Context, courseID string) (*Course, error)
 	GetCourseIDByURL(ctx context.Context, url string) (string, error)
 	IsEnrolled(ctx context.Context, userID string, courseID string) (bool, error)
 	HasPendingPayment(ctx context.Context, userID string, courseID string) (bool, error)

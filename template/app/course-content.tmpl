@@ -42,10 +42,10 @@
 
 						<div class="playlist-container _no-padding _flex-column col-xs-12 col-md-4">
 							<div class="playlist-title _font-bold">
-								{{len .Course.Contents}} {{if eq .Course.Type eBook}}eBook(s){{else}}Video(s){{end}}
+								{{len .Contents}} {{if eq .Course.Type eBook}}eBook(s){{else}}Video(s){{end}}
 							</div>
 							<div class="playlist-list">
-							{{range $i, $x := .Course.Contents}}
+							{{range $i, $x := .Contents}}
 								<a href="{{route "app.course" $.Course.Link "content" (param "p" $i)}}">
 									<div class="list {{if eq $x.ID $.Content.ID}}active{{end}}">
 										{{incr $i}}. {{$x.Title}}

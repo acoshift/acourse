@@ -81,3 +81,35 @@ func (x *OwnCourse) Link() string {
 func (x *OwnCourse) ShowStart() bool {
 	return x.Type == entity.Live && !x.Start.IsZero()
 }
+
+// Course type
+type Course struct {
+	ID           string
+	Option       entity.CourseOption
+	Owner        CourseOwner
+	Title        string
+	ShortDesc    string
+	Desc         string
+	Image        string
+	Start        time.Time
+	URL          string
+	Type         int
+	Price        float64
+	Discount     float64
+	EnrollDetail string
+}
+
+// Link returns course link
+func (x *Course) Link() string {
+	if x.URL != "" {
+		return x.URL
+	}
+	return x.ID
+}
+
+// CourseOwner type
+type CourseOwner struct {
+	ID    string
+	Name  string
+	Image string
+}
