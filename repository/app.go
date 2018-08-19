@@ -228,7 +228,7 @@ func (appRepo) ListPublicCourses(ctx context.Context) ([]*app.PublicCourse, erro
 		var x app.PublicCourse
 		err = rows.Scan(
 			&x.ID,
-			&x.Title, &x.Desc, &x.Image, &x.Start, pgsql.NullString(&x.URL),
+			&x.Title, &x.Desc, &x.Image, pgsql.NullTime(&x.Start), pgsql.NullString(&x.URL),
 			&x.Type, &x.Price, &x.Discount,
 			&x.Option.Public, &x.Option.Enroll, &x.Option.Attend, &x.Option.Assignment, &x.Option.Discount,
 		)
@@ -280,7 +280,7 @@ func (appRepo) ListOwnCourses(ctx context.Context, userID string) ([]*app.OwnCou
 		err = rows.Scan(
 			&x.ID,
 			&x.Title, &x.Desc, &x.Image,
-			&x.Start, pgsql.NullString(&x.URL), &x.Type,
+			pgsql.NullTime(&x.Start), pgsql.NullString(&x.URL), &x.Type,
 			&x.EnrollCount,
 		)
 		if err != nil {
@@ -320,7 +320,7 @@ func (appRepo) ListEnrolledCourses(ctx context.Context, userID string) ([]*app.E
 		err = rows.Scan(
 			&x.ID,
 			&x.Title, &x.Desc, &x.Image,
-			&x.Start, pgsql.NullString(&x.URL), &x.Type,
+			pgsql.NullTime(&x.Start), pgsql.NullString(&x.URL), &x.Type,
 		)
 		if err != nil {
 			return nil, err
