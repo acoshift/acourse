@@ -35,7 +35,7 @@ func (s *svc) SignUp(ctx context.Context, email, password string) (string, error
 		Password: password,
 	})
 	if err != nil {
-		return "", err
+		return "", newUIError(err.Error())
 	}
 
 	err = s.Repository.RegisterUser(ctx, &RegisterUser{
