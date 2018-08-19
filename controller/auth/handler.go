@@ -24,21 +24,10 @@ func New(cfg Config) http.Handler {
 		hime.Handler(c.signIn),
 		hime.Handler(c.postSignIn),
 	))
-	mux.Handle("/signin/password", methodmux.GetPost(
-		hime.Handler(c.signInPassword),
-		hime.Handler(c.postSignInPassword),
-	))
-	mux.Handle("/signin/check-email", methodmux.Get(
-		hime.Handler(c.checkEmail),
-	))
-	mux.Handle("/signin/link", methodmux.Get(
-		hime.Handler(c.signInLink),
-	))
 	mux.Handle("/reset/password", methodmux.GetPost(
 		hime.Handler(c.resetPassword),
 		hime.Handler(c.postResetPassword),
 	))
-
 	mux.Handle("/openid", methodmux.Get(
 		hime.Handler(c.openID),
 	))

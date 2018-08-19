@@ -8,9 +8,6 @@ routes:
 
   # auth
   auth.signin: /auth/signin
-  auth.signin.password: /auth/signin/password
-  auth.signin.check-email: /auth/signin/check-email
-  auth.signin.link: /auth/signin/link
   auth.openid: /auth/openid
   auth.openid.google: /auth/openid?p=google.com
   auth.openid.github: /auth/openid?p=github.com

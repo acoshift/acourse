@@ -43,9 +43,6 @@ list:
   auth.signin:
   - auth/signin.tmpl
   - auth/layout.tmpl
-  auth.signin-password:
-  - auth/signin-password.tmpl
-  - auth/layout.tmpl
   auth.signup:
   - auth/signup.tmpl
   - auth/layout.tmpl

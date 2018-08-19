@@ -24,7 +24,6 @@ type Config struct {
 	ImageResizeEncoder image.JPEGResizeEncoder
 	AdminNotifier      notify.AdminNotifier
 	Location           *time.Location
-	MagicLinkCallback  string
 	OpenIDCallback     string
 }
 
@@ -32,10 +31,8 @@ type Config struct {
 type Service interface {
 	SignUp(ctx context.Context, email, password string) (userID string, err error)
 	SendPasswordResetEmail(ctx context.Context, email string) error
-	SendSignInMagicLinkEmail(ctx context.Context, email string) error
 	GenerateOpenIDURI(ctx context.Context, provider string) (redirectURI string, state string, err error)
 	SignInPassword(ctx context.Context, email, password string) (userID string, err error)
-	SignInMagicLink(ctx context.Context, link string) (userID string, err error)
 	SignInOpenIDCallback(ctx context.Context, uri string, state string) (userID string, err error)
 
 	AcceptPayment(ctx context.Context, paymentID string) error

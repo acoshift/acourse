@@ -4,16 +4,13 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/base64"
-	"fmt"
 	"io"
-	"net/url"
 	"unicode/utf8"
 
 	"github.com/acoshift/go-firebase-admin"
 	"github.com/asaskevich/govalidator"
 
 	"github.com/acoshift/acourse/entity"
-	"github.com/acoshift/acourse/view"
 )
 
 func (s *svc) SignUp(ctx context.Context, email, password string) (string, error) {
@@ -78,56 +75,6 @@ func (s *svc) SendPasswordResetEmail(ctx context.Context, email string) error {
 	return nil
 }
 
-func (s *svc) SendSignInMagicLinkEmail(ctx context.Context, email string) error {
-	if email == "" {
-		return newUIError("email required")
-	}
-	email, err := govalidator.NormalizeEmail(email)
-	if err != nil {
-		return newUIError("invalid email")
-	}
-
-	ok, err := s.Repository.CanAcquireMagicLink(ctx, email)
-	if err != nil {
-		return err
-	}
-	if !ok {
-		return newUIError("อีเมลของคุณได้ขอ Magic Link จากเราไปแล้ว กรุณาตรวจสอบอีเมล")
-	}
-
-	user, err := s.Repository.GetUserByEmail(ctx, email)
-	if err == entity.ErrNotFound {
-		return nil
-	}
-	if err != nil {
-		return err
-	}
-
-	linkID := generateMagicLinkID()
-
-	err = s.Repository.StoreMagicLink(ctx, linkID, user.ID)
-	if err != nil {
-		return err
-	}
-
-	linkQuery := make(url.Values)
-	linkQuery.Set("id", linkID)
-
-	message := fmt.Sprintf(`สวัสดีครับคุณ %s,
-
-
-ตามที่ท่านได้ขอ Magic Link เพื่อเข้าสู่ระบบสำหรับ acourse.io นั้นท่านสามารถเข้าได้ผ่าน Link ข้างล่างนี้ ภายใน 1 ชม.
-
-%s
-
-ทีมงาน acourse.io
-	`, user.Name, s.BaseURL+s.MagicLinkCallback+"?"+linkQuery.Encode())
-
-	go s.EmailSender.Send(user.Email, "Magic Link Request", view.MarkdownEmail(message))
-
-	return nil
-}
-
 func (s *svc) SignInPassword(ctx context.Context, email, password string) (string, error) {
 	if email == "" {
 		return "", newUIError("email required")
@@ -166,24 +113,8 @@ func (s *svc) SignInPassword(ctx context.Context, email, password string) (strin
 	return userID, err
 }
 
-func (s *svc) SignInMagicLink(ctx context.Context, link string) (string, error) {
-	if link == "" {
-		return "", newUIError("ไม่พบ Magic Link ของคุณ")
-	}
-
-	userID, err := s.Repository.FindMagicLink(ctx, link)
-	if err == entity.ErrNotFound {
-		return "", newUIError("ไม่พบ Magic Link ของคุณ")
-	}
-	return userID, err
-}
-
 func generateRandomString(n int) string {
 	b := make([]byte, n)
 	io.ReadFull(rand.Reader, b)
 	return base64.RawURLEncoding.EncodeToString(b)
-}
-
-func generateMagicLinkID() string {
-	return generateRandomString(64)
 }

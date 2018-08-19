@@ -8,10 +8,6 @@ import (
 
 // Repository is the service storage
 type Repository interface {
-	StoreMagicLink(ctx context.Context, linkID string, userID string) error
-	FindMagicLink(ctx context.Context, linkID string) (string, error)
-	CanAcquireMagicLink(ctx context.Context, email string) (bool, error)
-
 	RegisterUser(ctx context.Context, x *RegisterUser) error
 	GetUserByEmail(ctx context.Context, email string) (*User, error)
 	UpdateUser(ctx context.Context, x *UpdateUser) error

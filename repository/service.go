@@ -3,12 +3,9 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"time"
 
 	"github.com/acoshift/pgsql"
-	"github.com/go-redis/redis"
 
-	"github.com/acoshift/acourse/context/redisctx"
 	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/entity"
 	"github.com/acoshift/acourse/service"
@@ -20,50 +17,6 @@ func NewService() service.Repository {
 }
 
 type svcRepo struct {
-}
-
-func (svcRepo) StoreMagicLink(ctx context.Context, linkID string, userID string) error {
-	c := redisctx.GetClient(ctx)
-	prefix := redisctx.GetPrefix(ctx)
-
-	return c.Set(prefix+"magic:"+linkID, userID, time.Hour).Err()
-}
-
-func (svcRepo) FindMagicLink(ctx context.Context, linkID string) (string, error) {
-	c := redisctx.GetClient(ctx)
-	prefix := redisctx.GetPrefix(ctx)
-
-	key := prefix + "magic:" + linkID
-	userID, err := c.Get(key).Result()
-	if err == redis.Nil {
-		return "", entity.ErrNotFound
-	}
-	if err != nil {
-		return "", err
-	}
-	c.Del(key)
-	return userID, nil
-}
-
-func (svcRepo) CanAcquireMagicLink(ctx context.Context, email string) (bool, error) {
-	c := redisctx.GetClient(ctx)
-	prefix := redisctx.GetPrefix(ctx)
-
-	key := prefix + "magic-rate:" + email
-	current, err := c.Incr(key).Result()
-	if err != nil {
-		return false, err
-	}
-	if current > 1 {
-		return false, nil
-	}
-
-	err = c.Expire(key, 5*time.Minute).Err()
-	if err != nil {
-		return false, err
-	}
-
-	return true, nil
 }
 
 func (svcRepo) GetUserByEmail(ctx context.Context, email string) (*service.User, error) {
