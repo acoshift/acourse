@@ -23,7 +23,7 @@ func (s *svc) CreateCourse(ctx context.Context, x *CreateCourse) (courseID strin
 
 	var imageURL string
 	if x.Image != nil {
-		err := validateImage(x.Image)
+		err := ValidateImage(x.Image)
 		if err != nil {
 			return "", err
 		}
@@ -76,7 +76,7 @@ func (s *svc) UpdateCourse(ctx context.Context, x *UpdateCourse) error {
 
 	var imageURL string
 	if x.Image != nil {
-		err := validateImage(x.Image)
+		err := ValidateImage(x.Image)
 		if err != nil {
 			return err
 		}
@@ -168,7 +168,7 @@ func (s *svc) EnrollCourse(ctx context.Context, courseID string, price float64, 
 			return newUIError("กรุณาอัพโหลดรูปภาพ")
 		}
 
-		err := validateImage(paymentImage)
+		err := ValidateImage(paymentImage)
 		if err != nil {
 			return err
 		}

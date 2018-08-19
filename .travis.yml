@@ -4,9 +4,11 @@ go:
   - 1.10.x
 
 before_install:
-  - go get github.com/mattn/goveralls
-  - go get github.com/smartystreets/goconvey
-  - go get github.com/stretchr/testify/mock
+- go get github.com/mattn/goveralls
+- go get github.com/smartystreets/goconvey
+- go get -u github.com/onsi/ginkgo/ginkgo
+- go get -u github.com/onsi/gomega/...
+- go get github.com/stretchr/testify/mock
 
 script:
 - go test -v -covermode=count -coverprofile=profile.cov ./...

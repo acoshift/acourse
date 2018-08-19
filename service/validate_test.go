@@ -1,111 +1,80 @@
-package service
+package service_test
 
 import (
 	"mime/multipart"
 	"net/textproto"
-	"testing"
 
-	. "github.com/smartystreets/goconvey/convey"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
+
+	. "github.com/acoshift/acourse/service"
 )
 
-func TestValidateImage(t *testing.T) {
-	Convey("Given empty file header", t, func() {
-		fh := &multipart.FileHeader{}
+var _ = Describe("Validate", func() {
+	Describe("ValidateImage", func() {
+		It("should return error when file is empty", func() {
+			fh := &multipart.FileHeader{}
+			err := ValidateImage(fh)
 
-		Convey("When validate", func() {
-			err := validateImage(fh)
+			Expect(err).ToNot(BeNil())
+			Expect(IsUIError(err)).To(BeTrue())
+		})
 
-			Convey("Then ui error should be return", func() {
-				So(err, ShouldNotBeNil)
-				So(IsUIError(err), ShouldBeTrue)
-			})
+		It("should return error when file is html", func() {
+			fh := &multipart.FileHeader{}
+			fh.Header = make(textproto.MIMEHeader)
+			fh.Header.Set("Content-Type", "text/html")
+			err := ValidateImage(fh)
+
+			Expect(err).ToNot(BeNil())
+			Expect(IsUIError(err)).To(BeTrue())
+		})
+
+		It("should success when file is jpg", func() {
+			fh := &multipart.FileHeader{}
+			fh.Header = make(textproto.MIMEHeader)
+			fh.Header.Set("Content-Type", "image/jpg")
+			err := ValidateImage(fh)
+
+			Expect(err).To(BeNil())
+		})
+
+		It("should success when file is jpeg", func() {
+			fh := &multipart.FileHeader{}
+			fh.Header = make(textproto.MIMEHeader)
+			fh.Header.Set("Content-Type", "image/jpeg")
+			err := ValidateImage(fh)
+
+			Expect(err).To(BeNil())
+		})
+
+		It("should success when file is png", func() {
+			fh := &multipart.FileHeader{}
+			fh.Header = make(textproto.MIMEHeader)
+			fh.Header.Set("Content-Type", "image/png")
+			err := ValidateImage(fh)
+
+			Expect(err).To(BeNil())
+		})
+
+		It("should return error when file is bmp", func() {
+			fh := &multipart.FileHeader{}
+			fh.Header = make(textproto.MIMEHeader)
+			fh.Header.Set("Content-Type", "image/bmp")
+			err := ValidateImage(fh)
+
+			Expect(err).ToNot(BeNil())
+			Expect(IsUIError(err)).To(BeTrue())
+		})
+
+		It("should return error when file is svg", func() {
+			fh := &multipart.FileHeader{}
+			fh.Header = make(textproto.MIMEHeader)
+			fh.Header.Set("Content-Type", "image/svg+xml")
+			err := ValidateImage(fh)
+
+			Expect(err).ToNot(BeNil())
+			Expect(IsUIError(err)).To(BeTrue())
 		})
 	})
-
-	Convey("Given html file header", t, func() {
-		fh := &multipart.FileHeader{}
-		fh.Header = make(textproto.MIMEHeader)
-		fh.Header.Set("Content-Type", "text/html")
-
-		Convey("When validate", func() {
-			err := validateImage(fh)
-
-			Convey("Then ui error should be return", func() {
-				So(err, ShouldNotBeNil)
-				So(IsUIError(err), ShouldBeTrue)
-			})
-		})
-	})
-
-	Convey("Given jpg file header", t, func() {
-		fh := &multipart.FileHeader{}
-		fh.Header = make(textproto.MIMEHeader)
-		fh.Header.Set("Content-Type", "image/jpg")
-
-		Convey("When validate", func() {
-			err := validateImage(fh)
-
-			Convey("Then no error should be return", func() {
-				So(err, ShouldBeNil)
-			})
-		})
-	})
-
-	Convey("Given jpeg file header", t, func() {
-		fh := &multipart.FileHeader{}
-		fh.Header = make(textproto.MIMEHeader)
-		fh.Header.Set("Content-Type", "image/jpeg")
-
-		Convey("When validate", func() {
-			err := validateImage(fh)
-
-			Convey("Then no error should be return", func() {
-				So(err, ShouldBeNil)
-			})
-		})
-	})
-
-	Convey("Given png file header", t, func() {
-		fh := &multipart.FileHeader{}
-		fh.Header = make(textproto.MIMEHeader)
-		fh.Header.Set("Content-Type", "image/png")
-
-		Convey("When validate", func() {
-			err := validateImage(fh)
-
-			Convey("Then no error should be return", func() {
-				So(err, ShouldBeNil)
-			})
-		})
-	})
-
-	Convey("Given bmp file header", t, func() {
-		fh := &multipart.FileHeader{}
-		fh.Header = make(textproto.MIMEHeader)
-		fh.Header.Set("Content-Type", "image/bmp")
-
-		Convey("When validate", func() {
-			err := validateImage(fh)
-
-			Convey("Then ui error should be return", func() {
-				So(err, ShouldNotBeNil)
-				So(IsUIError(err), ShouldBeTrue)
-			})
-		})
-	})
-
-	Convey("Given svg file header", t, func() {
-		fh := &multipart.FileHeader{}
-		fh.Header = make(textproto.MIMEHeader)
-		fh.Header.Set("Content-Type", "image/svg+xml")
-
-		Convey("When validate", func() {
-			err := validateImage(fh)
-
-			Convey("Then ui error should be return", func() {
-				So(err, ShouldNotBeNil)
-				So(IsUIError(err), ShouldBeTrue)
-			})
-		})
-	})
-}
+})
