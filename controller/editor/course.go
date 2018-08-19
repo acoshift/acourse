@@ -6,7 +6,6 @@ import (
 	"github.com/acoshift/hime"
 
 	"github.com/acoshift/acourse/context/appctx"
-	"github.com/acoshift/acourse/repository"
 	"github.com/acoshift/acourse/service"
 	"github.com/acoshift/acourse/view"
 )
@@ -51,7 +50,7 @@ func (c *ctrl) postCourseCreate(ctx *hime.Context) error {
 		return err
 	}
 
-	link, _ := repository.GetCourseURL(ctx, courseID)
+	link, _ := c.Repository.GetCourseURL(ctx, courseID)
 	if link == "" {
 		return ctx.RedirectTo("app.course", courseID)
 	}
@@ -60,7 +59,7 @@ func (c *ctrl) postCourseCreate(ctx *hime.Context) error {
 
 func (c *ctrl) courseEdit(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
-	course, err := repository.GetCourse(ctx, id)
+	course, err := c.Repository.GetCourse(ctx, id)
 	if err != nil {
 		return err
 	}
@@ -109,7 +108,7 @@ func (c *ctrl) postCourseEdit(ctx *hime.Context) error {
 		return err
 	}
 
-	link, _ := repository.GetCourseURL(ctx, id)
+	link, _ := c.Repository.GetCourseURL(ctx, id)
 	if link == "" {
 		return ctx.RedirectTo("app.course", id)
 	}

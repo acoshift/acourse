@@ -39,6 +39,7 @@ func (c *ctrl) courseView(ctx *hime.Context) error {
 			return err
 		}
 	}
+
 	x, err := c.Repository.GetCourse(ctx, id)
 	if err == entity.ErrNotFound {
 		return share.NotFound(ctx)
@@ -71,14 +72,6 @@ func (c *ctrl) courseView(ctx *hime.Context) error {
 	var owned bool
 	if user != nil {
 		owned = user.ID == x.UserID
-	}
-
-	// if user enrolled or user is owner fetch course contents
-	if enrolled || owned {
-		x.Contents, err = c.Repository.GetCourseContents(ctx, x.ID)
-		if err != nil {
-			return err
-		}
 	}
 
 	if owned {
@@ -142,11 +135,6 @@ func (c *ctrl) courseContent(ctx *hime.Context) error {
 	}
 
 	x.Contents, err = c.Repository.GetCourseContents(ctx, x.ID)
-	if err != nil {
-		return err
-	}
-
-	x.Owner, err = c.Repository.GetUser(ctx, x.UserID)
 	if err != nil {
 		return err
 	}

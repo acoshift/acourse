@@ -26,11 +26,7 @@ func (svcRepo) StoreMagicLink(ctx context.Context, linkID string, userID string)
 	c := redisctx.GetClient(ctx)
 	prefix := redisctx.GetPrefix(ctx)
 
-	err := c.Set(prefix+"magic:"+linkID, userID, time.Hour).Err()
-	if err != nil {
-		return err
-	}
-	return nil
+	return c.Set(prefix+"magic:"+linkID, userID, time.Hour).Err()
 }
 
 func (svcRepo) FindMagicLink(ctx context.Context, linkID string) (string, error) {
@@ -61,10 +57,12 @@ func (svcRepo) CanAcquireMagicLink(ctx context.Context, email string) (bool, err
 	if current > 1 {
 		return false, nil
 	}
+
 	err = c.Expire(key, 5*time.Minute).Err()
 	if err != nil {
 		return false, err
 	}
+
 	return true, nil
 }
 
@@ -223,6 +221,105 @@ func (svcRepo) SetCourseOption(ctx context.Context, courseID string, x *entity.C
 			assignment = excluded.assignment,
 			discount = excluded.discount
 	`, courseID, x.Public, x.Enroll, x.Attend, x.Assignment, x.Discount)
+	return err
+}
+
+func (svcRepo) RegisterCourseContent(ctx context.Context, x *entity.RegisterCourseContent) (contentID string, err error) {
+	q := sqlctx.GetQueryer(ctx)
+
+	err = q.QueryRow(`
+		insert into course_contents
+			(
+				course_id,
+				i,
+				title, long_desc, video_id, video_type
+			)
+		values
+			(
+				$1,
+				(select coalesce(max(i)+1, 0) from course_contents where course_id = $1),
+				$2, $3, $4, $5
+			)
+		returning id
+	`,
+		x.CourseID,
+		x.Title, x.LongDesc, x.VideoID, x.VideoType,
+	).Scan(&contentID)
+	return
+}
+
+func (svcRepo) GetCourseContent(ctx context.Context, contentID string) (*entity.CourseContent, error) {
+	q := sqlctx.GetQueryer(ctx)
+
+	var x entity.CourseContent
+	err := q.QueryRow(`
+		select
+			id, course_id, title, long_desc, video_id, video_type, download_url
+		from course_contents
+		where id = $1
+	`, contentID).Scan(
+		&x.ID, &x.CourseID, &x.Title, &x.Desc, &x.VideoID, &x.VideoType, &x.DownloadURL,
+	)
+	if err == sql.ErrNoRows {
+		return nil, entity.ErrNotFound
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &x, nil
+}
+
+func (svcRepo) ListCourseContents(ctx context.Context, courseID string) ([]*entity.CourseContent, error) {
+	q := sqlctx.GetQueryer(ctx)
+
+	rows, err := q.Query(`
+		select
+			id, course_id, title, long_desc, video_id, video_type, download_url
+		from course_contents
+		where course_id = $1
+		order by i
+	`, courseID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var xs []*entity.CourseContent
+	for rows.Next() {
+		var x entity.CourseContent
+		err = rows.Scan(
+			&x.ID, &x.CourseID, &x.Title, &x.Desc, &x.VideoID, &x.VideoType, &x.DownloadURL,
+		)
+		if err != nil {
+			return nil, err
+		}
+		xs = append(xs, &x)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+	return xs, nil
+}
+
+func (svcRepo) UpdateCourseContent(ctx context.Context, contentID, title, desc, videoID string) error {
+	q := sqlctx.GetQueryer(ctx)
+
+	_, err := q.Exec(`
+		update course_contents
+		set
+			title = $2,
+			long_desc = $3,
+			video_id = $4,
+			updated_at = now()
+		where id = $1
+	`, contentID, title, desc, videoID)
+	return err
+}
+
+func (svcRepo) DeleteCourseContent(ctx context.Context, contentID string) error {
+	q := sqlctx.GetQueryer(ctx)
+
+	_, err := q.Exec(`delete from course_contents where id = $1`, contentID)
 	return err
 }
 

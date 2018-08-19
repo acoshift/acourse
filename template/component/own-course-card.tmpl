@@ -7,13 +7,13 @@
 
 			<div class="acourse-block">
 				<div class="acourse-label {{.Type | courseType}} _font-bold">{{.Type | courseType}}</div>
-				{{if and (eq .Type live) .Start.Valid}}
-					<div class="live-date _font-size-small">เริ่มเรียน {{.Start.Time | date}}</div>
+				{{if .ShowStart}}
+					<div class="live-date _font-size-small">เริ่มเรียน {{.Start | date}}</div>
 				{{end}}
 			</div>
 
 			<div class="acourse-block-big _flex-span _font-sub _font-size-normal">
-				{{.ShortDesc}}
+				{{.Desc}}
 			</div>
 
 			<div class="_flex-row _main-space-between">

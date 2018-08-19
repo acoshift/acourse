@@ -77,6 +77,31 @@ func (m *mockRepo) SetCourseOption(ctx context.Context, courseID string, x *enti
 	return args.Error(0)
 }
 
+func (m *mockRepo) RegisterCourseContent(ctx context.Context, x *entity.RegisterCourseContent) (contentID string, err error) {
+	args := m.Mock.Called(ctx, x)
+	return args.String(0), args.Error(1)
+}
+
+func (m *mockRepo) GetCourseContent(ctx context.Context, contentID string) (*entity.CourseContent, error) {
+	args := m.Mock.Called(ctx, contentID)
+	return args.Get(0).(*entity.CourseContent), args.Error(1)
+}
+
+func (m *mockRepo) ListCourseContents(ctx context.Context, courseID string) ([]*entity.CourseContent, error) {
+	args := m.Mock.Called(ctx, courseID)
+	return args.Get(0).([]*entity.CourseContent), args.Error(1)
+}
+
+func (m *mockRepo) UpdateCourseContent(ctx context.Context, contentID, title, desc, videoID string) error {
+	args := m.Mock.Called(ctx, contentID, title, desc, videoID)
+	return args.Error(0)
+}
+
+func (m *mockRepo) DeleteCourseContent(ctx context.Context, contentID string) error {
+	args := m.Mock.Called(ctx, contentID)
+	return args.Error(0)
+}
+
 func (m *mockRepo) RegisterPayment(ctx context.Context, x *RegisterPayment) error {
 	args := m.Mock.Called(ctx, x)
 	return args.Error(0)

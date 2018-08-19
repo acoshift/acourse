@@ -215,6 +215,36 @@ func (s *svc) EnrollCourse(ctx context.Context, courseID string, price float64, 
 	return nil
 }
 
+func (s *svc) CreateCourseContent(ctx context.Context, x *entity.RegisterCourseContent) (contentID string, err error) {
+	// TODO: validate instructor
+
+	return s.Repository.RegisterCourseContent(ctx, x)
+}
+
+func (s *svc) GetCourseContent(ctx context.Context, contentID string) (*entity.CourseContent, error) {
+	// TODO: validate ownership
+
+	return s.Repository.GetCourseContent(ctx, contentID)
+}
+
+func (s *svc) ListCourseContents(ctx context.Context, courseID string) ([]*entity.CourseContent, error) {
+	// TODO: validate ownership
+
+	return s.Repository.ListCourseContents(ctx, courseID)
+}
+
+func (s *svc) UpdateCourseContent(ctx context.Context, contentID string, title string, desc string, videoID string) error {
+	// TODO: validate ownership
+
+	return s.Repository.UpdateCourseContent(ctx, contentID, title, desc, videoID)
+}
+
+func (s *svc) DeleteCourseContent(ctx context.Context, contentID string) error {
+	// TODO: validate ownership
+
+	return s.Repository.DeleteCourseContent(ctx, contentID)
+}
+
 // UploadCourseCoverImage uploads course cover image
 func (s *svc) uploadCourseCoverImage(ctx context.Context, r io.Reader) (string, error) {
 	buf := &bytes.Buffer{}

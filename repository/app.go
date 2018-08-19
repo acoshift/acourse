@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/acoshift/pgsql"
-	"github.com/lib/pq"
 
 	"github.com/acoshift/acourse/context/redisctx"
 	"github.com/acoshift/acourse/context/sqlctx"
@@ -167,7 +166,7 @@ func (appRepo) FindAssignmentsByCourseID(ctx context.Context, courseID string) (
 	}
 	defer rows.Close()
 
-	xs := make([]*entity.Assignment, 0)
+	var xs []*entity.Assignment
 	for rows.Next() {
 		var x entity.Assignment
 		err = rows.Scan(&x.ID, &x.Title, &x.Desc, &x.Open)
@@ -182,9 +181,7 @@ func (appRepo) FindAssignmentsByCourseID(ctx context.Context, courseID string) (
 	return xs, nil
 }
 
-func (appRepo) ListPublicCourses(ctx context.Context) ([]*entity.Course, error) {
-	// TODO: move cache logic out from repo
-
+func (appRepo) ListPublicCourses(ctx context.Context) ([]*app.PublicCourse, error) {
 	c := redisctx.GetClient(ctx)
 	cachePrefix := redisctx.GetPrefix(ctx)
 
@@ -192,7 +189,7 @@ func (appRepo) ListPublicCourses(ctx context.Context) ([]*entity.Course, error) 
 	{
 		bs, err := c.Get(cachePrefix + "cache:list_public_course").Bytes()
 		if err == nil {
-			var xs []*entity.Course
+			var xs []*app.PublicCourse
 			err = gob.NewDecoder(bytes.NewReader(bs)).Decode(&xs)
 			if err == nil {
 				return xs, nil
@@ -200,53 +197,46 @@ func (appRepo) ListPublicCourses(ctx context.Context) ([]*entity.Course, error) 
 		}
 	}
 
-	xs := make([]*entity.Course, 0)
-	m := make(map[string]*entity.Course)
-	ids := make([]string, 0)
-
 	q := sqlctx.GetQueryer(ctx)
 
-	{
-		rows, err := q.Query(queryListCoursesPublic)
-		if err != nil {
-			return nil, err
-		}
-		defer rows.Close()
-		for rows.Next() {
-			var x entity.Course
-			err = scanCourse(rows.Scan, &x)
-			if err != nil {
-				return nil, err
-			}
-			xs = append(xs, &x)
-			ids = append(ids, x.ID)
-			m[x.ID] = &x
-		}
-		if err = rows.Err(); err != nil {
-			return nil, err
-		}
-		rows.Close()
-	}
-
 	rows, err := q.Query(`
-		select course_id, count(*)
-		from enrolls
-		where course_id = any($1)
-		group by course_id
-	`, pq.Array(ids))
+			select
+				c.id,
+				c.title, c.short_desc, c.image, c.start, c.url,
+				c.type, c.price, c.discount,
+				opt.public, opt.enroll, opt.attend, opt.assignment, opt.discount
+			from courses as c
+				left join course_options as opt on c.id = opt.course_id
+			where opt.public = true
+			order by
+				case
+					when c.type = 1 then 1
+					else null
+				end,
+				c.created_at desc
+		`)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
+	var xs []*app.PublicCourse
 	for rows.Next() {
-		var courseID string
-		var cnt int64
-		err = rows.Scan(&courseID, &cnt)
+		var x app.PublicCourse
+		err = rows.Scan(
+			&x.ID,
+			&x.Title, &x.Desc, &x.Image, &x.Start, pgsql.NullString(&x.URL),
+			&x.Type, &x.Price, &x.Discount,
+			&x.Option.Public, &x.Option.Enroll, &x.Option.Attend, &x.Option.Assignment, &x.Option.Discount,
+		)
 		if err != nil {
 			return nil, err
 		}
-		m[courseID].EnrollCount = cnt
+		xs = append(xs, &x)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
 	}
 
 	// save to cache
@@ -254,75 +244,81 @@ func (appRepo) ListPublicCourses(ctx context.Context) ([]*entity.Course, error) 
 		buf := bytes.Buffer{}
 		err := gob.NewEncoder(&buf).Encode(xs)
 		if err == nil {
-			c.Set(cachePrefix+"cache:list_public_course", buf.Bytes(), 10*time.Second)
+			c.Set(cachePrefix+"cache:list_public_course", buf.Bytes(), time.Minute)
 		}
 	}()
 
 	return xs, nil
 }
 
-func (appRepo) ListOwnCourses(ctx context.Context, userID string) ([]*entity.Course, error) {
+func (appRepo) ListOwnCourses(ctx context.Context, userID string) ([]*app.OwnCourse, error) {
 	q := sqlctx.GetQueryer(ctx)
 
-	rows, err := q.Query(queryListCoursesOwn, userID)
+	rows, err := q.Query(`
+		select
+			c.id,
+			c.title, c.short_desc, c.image,
+			c.start, c.url, c.type,
+			count(e.user_id)
+		from courses as c
+			left join enrolls as e on e.course_id = c.id
+		where c.user_id = $1
+		group by c.id
+		order by c.created_at desc
+	`, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	xs := make([]*entity.Course, 0)
-	ids := make([]string, 0)
-	m := make(map[string]*entity.Course)
+
+	var xs []*app.OwnCourse
 	for rows.Next() {
-		var x entity.Course
-		err = scanCourse(rows.Scan, &x)
+		var x app.OwnCourse
+		err = rows.Scan(
+			&x.ID,
+			&x.Title, &x.Desc, &x.Image,
+			&x.Start, pgsql.NullString(&x.URL), &x.Type,
+			&x.EnrollCount,
+		)
 		if err != nil {
 			return nil, err
 		}
 		xs = append(xs, &x)
-		ids = append(ids, x.ID)
-		m[x.ID] = &x
 	}
+
 	if err = rows.Err(); err != nil {
 		return nil, err
 	}
-	rows.Close()
 
-	rows, err = q.Query(`
-		select course_id, count(*)
-		from enrolls
-		where course_id = any($1)
-		group by course_id
-	`, pq.Array(ids))
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var courseID string
-		var cnt int64
-		err = rows.Scan(&courseID, &cnt)
-		if err != nil {
-			return nil, err
-		}
-		m[courseID].EnrollCount = cnt
-	}
 	return xs, nil
 }
 
-func (appRepo) ListEnrolledCourses(ctx context.Context, userID string) ([]*entity.Course, error) {
+func (appRepo) ListEnrolledCourses(ctx context.Context, userID string) ([]*app.EnrolledCourse, error) {
 	q := sqlctx.GetQueryer(ctx)
 
-	xs := make([]*entity.Course, 0)
-	rows, err := q.Query(queryListCoursesEnrolled, userID)
+	rows, err := q.Query(`
+		select
+			c.id,
+			c.title, c.short_desc, c.image,
+			c.start, c.url, c.type
+		from courses as c
+			inner join enrolls as e on c.id = e.course_id
+		where e.user_id = $1
+		order by e.created_at desc
+	`, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
+	var xs []*app.EnrolledCourse
 	for rows.Next() {
-		var x entity.Course
-		err = scanCourse(rows.Scan, &x)
+		var x app.EnrolledCourse
+		err = rows.Scan(
+			&x.ID,
+			&x.Title, &x.Desc, &x.Image,
+			&x.Start, pgsql.NullString(&x.URL), &x.Type,
+		)
 		if err != nil {
 			return nil, err
 		}
@@ -332,5 +328,6 @@ func (appRepo) ListEnrolledCourses(ctx context.Context, userID string) ([]*entit
 	if err = rows.Err(); err != nil {
 		return nil, err
 	}
+
 	return xs, nil
 }

@@ -7,18 +7,34 @@
 					<span class="_no-wrap">แหล่งเรียนรู้ออนไลน์</span>
 					<span class="_no-wrap">ที่ทุกคนเข้าถึงได้</span>
 					<div class="row">&nbsp;</div>
-					<a href="https://startupcto.typeform.com/to/qd1Utf" class="acourse-button -negative" target="_blank" rel="noopener">สมัครเป็นผู้สอน</a>
+					<a
+						href="https://startupcto.typeform.com/to/qd1Utf"
+						class="acourse-button -negative"
+						target="_blank"
+						rel="noopener"
+					>
+						สมัครเป็นผู้สอน
+					</a>
 					<br>
-					<a href="https://aintern.acourse.io" class="acourse-button -negative" target="_blank" rel="noopener">AIntern - ฝึกงาน online รายได้ดี</a>
+					<a
+						href="https://aintern.acourse.io"
+						class="acourse-button -negative"
+						target="_blank"
+						rel="noopener"
+					>
+						AIntern - ฝึกงาน online รายได้ดี
+					</a>
 				</p>
 			</div>
 		</div>
 		<div class="grid-container row">
+
 		{{range .Courses}}
 			<div class="col-xs-12 col-sm-6 col-md-4 col-lg-3 _flex-row _main-strech">
-				{{template "course-card" .}}
+				{{template "public-course-card" .}}
 			</div>
 		{{end}}
+
 		</div>
 	</div>
 {{end}}

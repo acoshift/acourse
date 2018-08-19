@@ -8,6 +8,7 @@ import (
 	"github.com/acoshift/go-firebase-admin"
 
 	"github.com/acoshift/acourse/email"
+	"github.com/acoshift/acourse/entity"
 	"github.com/acoshift/acourse/file"
 	"github.com/acoshift/acourse/image"
 	"github.com/acoshift/acourse/notify"
@@ -45,6 +46,12 @@ type Service interface {
 	EnrollCourse(ctx context.Context, courseID string, price float64, paymentImage *multipart.FileHeader) error
 
 	UpdateProfile(ctx context.Context, x *Profile) error
+
+	CreateCourseContent(ctx context.Context, x *entity.RegisterCourseContent) (contentID string, err error)
+	GetCourseContent(ctx context.Context, contentID string) (*entity.CourseContent, error)
+	ListCourseContents(ctx context.Context, courseID string) ([]*entity.CourseContent, error)
+	UpdateCourseContent(ctx context.Context, contentID string, title string, desc string, videoID string) error
+	DeleteCourseContent(ctx context.Context, contentID string) error
 }
 
 // New creates new service
