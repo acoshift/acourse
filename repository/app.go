@@ -166,7 +166,7 @@ func (appRepo) FindAssignmentsByCourseID(ctx context.Context, courseID string) (
 	}
 	defer rows.Close()
 
-	xs := make([]*entity.Assignment, 0)
+	var xs []*entity.Assignment
 	for rows.Next() {
 		var x entity.Assignment
 		err = rows.Scan(&x.ID, &x.Title, &x.Desc, &x.Open)

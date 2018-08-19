@@ -4,8 +4,6 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/acoshift/pgsql"
-
 	"github.com/acoshift/acourse/context/appctx"
 	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/entity"
@@ -25,19 +23,13 @@ func (appctxRepo) GetUser(ctx context.Context, userID string) (*entity.User, err
 	var x entity.User
 	err := q.QueryRow(`
 		select
-			users.id,
-			users.name,
-			users.username,
-			users.email,
-			users.about_me,
-			users.image,
-			coalesce(roles.admin, false),
-			coalesce(roles.instructor, false)
-		from users
-			left join roles on users.id = roles.user_id
-		where users.id = $1
+			u.id, u.name, u.username, coalesce(u.email, ''), u.about_me, u.image,
+			coalesce(r.admin, false), coalesce(r.instructor, false)
+		from users as u
+			left join roles as r on u.id = r.user_id
+		where u.id = $1
 	`, userID).Scan(
-		&x.ID, &x.Name, &x.Username, pgsql.NullString(&x.Email), &x.AboutMe, &x.Image,
+		&x.ID, &x.Name, &x.Username, &x.Email, &x.AboutMe, &x.Image,
 		&x.Role.Admin, &x.Role.Instructor,
 	)
 	if err == sql.ErrNoRows {

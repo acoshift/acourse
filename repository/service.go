@@ -26,11 +26,7 @@ func (svcRepo) StoreMagicLink(ctx context.Context, linkID string, userID string)
 	c := redisctx.GetClient(ctx)
 	prefix := redisctx.GetPrefix(ctx)
 
-	err := c.Set(prefix+"magic:"+linkID, userID, time.Hour).Err()
-	if err != nil {
-		return err
-	}
-	return nil
+	return c.Set(prefix+"magic:"+linkID, userID, time.Hour).Err()
 }
 
 func (svcRepo) FindMagicLink(ctx context.Context, linkID string) (string, error) {
@@ -61,10 +57,12 @@ func (svcRepo) CanAcquireMagicLink(ctx context.Context, email string) (bool, err
 	if current > 1 {
 		return false, nil
 	}
+
 	err = c.Expire(key, 5*time.Minute).Err()
 	if err != nil {
 		return false, err
 	}
+
 	return true, nil
 }
 
