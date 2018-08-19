@@ -12,21 +12,6 @@ type mockRepo struct {
 	mock.Mock
 }
 
-func (m *mockRepo) StoreMagicLink(ctx context.Context, linkID string, userID string) error {
-	args := m.Mock.Called(ctx, linkID, userID)
-	return args.Error(0)
-}
-
-func (m *mockRepo) FindMagicLink(ctx context.Context, linkID string) (string, error) {
-	args := m.Mock.Called(ctx, linkID)
-	return args.String(0), args.Error(1)
-}
-
-func (m *mockRepo) CanAcquireMagicLink(ctx context.Context, email string) (bool, error) {
-	args := m.Mock.Called(ctx, email)
-	return args.Bool(0), args.Error(1)
-}
-
 func (m *mockRepo) GetUserByEmail(ctx context.Context, email string) (*User, error) {
 	args := m.Mock.Called(ctx, email)
 	return args.Get(0).(*User), args.Error(1)
