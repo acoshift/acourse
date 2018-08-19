@@ -16,7 +16,7 @@ list:
   app.index:
   - app/index.tmpl
   - app.tmpl
-  - component/course-card.tmpl
+  - component/public-course-card.tmpl
   app.profile:
   - app/profile.tmpl
   - app.tmpl

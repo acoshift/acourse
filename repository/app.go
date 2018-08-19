@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/acoshift/pgsql"
-	"github.com/lib/pq"
 
 	"github.com/acoshift/acourse/context/redisctx"
 	"github.com/acoshift/acourse/context/sqlctx"
@@ -182,9 +181,7 @@ func (appRepo) FindAssignmentsByCourseID(ctx context.Context, courseID string) (
 	return xs, nil
 }
 
-func (appRepo) ListPublicCourses(ctx context.Context) ([]*entity.Course, error) {
-	// TODO: move cache logic out from repo
-
+func (appRepo) ListPublicCourses(ctx context.Context) ([]*app.PublicCourse, error) {
 	c := redisctx.GetClient(ctx)
 	cachePrefix := redisctx.GetPrefix(ctx)
 
@@ -192,7 +189,7 @@ func (appRepo) ListPublicCourses(ctx context.Context) ([]*entity.Course, error) 
 	{
 		bs, err := c.Get(cachePrefix + "cache:list_public_course").Bytes()
 		if err == nil {
-			var xs []*entity.Course
+			var xs []*app.PublicCourse
 			err = gob.NewDecoder(bytes.NewReader(bs)).Decode(&xs)
 			if err == nil {
 				return xs, nil
@@ -200,91 +197,46 @@ func (appRepo) ListPublicCourses(ctx context.Context) ([]*entity.Course, error) 
 		}
 	}
 
-	xs := make([]*entity.Course, 0)
-	m := make(map[string]*entity.Course)
-	ids := make([]string, 0)
-
 	q := sqlctx.GetQueryer(ctx)
 
-	{
-		rows, err := q.Query(`
+	rows, err := q.Query(`
 			select
-				courses.id,
-				courses.title,
-				courses.short_desc,
-				courses.long_desc,
-				courses.image,
-				courses.start,
-				courses.url,
-				courses.type,
-				courses.price,
-				courses.discount,
-				courses.enroll_detail,
-				courses.created_at,
-				courses.updated_at,
-				course_options.public,
-				course_options.enroll,
-				course_options.attend,
-				course_options.assignment,
-				course_options.discount
-			from courses
-				left join course_options on courses.id = course_options.course_id
-			where course_options.public = true
+				c.id,
+				c.title, c.short_desc, c.image, c.start, c.url,
+				c.type, c.price, c.discount,
+				opt.public, opt.enroll, opt.attend, opt.assignment, opt.discount
+			from courses as c
+				left join course_options as opt on c.id = opt.course_id
+			where opt.public = true
 			order by
-				case when courses.type = 1
-					then 1
+				case
+					when c.type = 1 then 1
 					else null
 				end,
-				courses.created_at desc
+				c.created_at desc
 		`)
-		if err != nil {
-			return nil, err
-		}
-		defer rows.Close()
-
-		for rows.Next() {
-			var x entity.Course
-			err = rows.Scan(
-				&x.ID,
-				&x.Title, &x.ShortDesc, &x.Desc, &x.Image, &x.Start, &x.URL, &x.Type, &x.Price, &x.Discount, &x.EnrollDetail,
-				&x.CreatedAt, &x.UpdatedAt,
-				&x.Option.Public, &x.Option.Enroll, &x.Option.Attend, &x.Option.Assignment, &x.Option.Discount,
-			)
-			if err != nil {
-				return nil, err
-			}
-			if len(x.URL.String) == 0 {
-				x.URL.String = x.ID
-			}
-			xs = append(xs, &x)
-			ids = append(ids, x.ID)
-			m[x.ID] = &x
-		}
-		if err = rows.Err(); err != nil {
-			return nil, err
-		}
-		rows.Close()
-	}
-
-	rows, err := q.Query(`
-		select course_id, count(*)
-		from enrolls
-		where course_id = any($1)
-		group by course_id
-	`, pq.Array(ids))
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
+	var xs []*app.PublicCourse
 	for rows.Next() {
-		var courseID string
-		var cnt int64
-		err = rows.Scan(&courseID, &cnt)
+		var x app.PublicCourse
+		err = rows.Scan(
+			&x.ID,
+			&x.Title, &x.Desc, &x.Image, &x.Start, pgsql.NullString(&x.URL),
+			&x.Type, &x.Price, &x.Discount,
+			&x.Option.Public, &x.Option.Enroll, &x.Option.Attend, &x.Option.Assignment, &x.Option.Discount,
+		)
 		if err != nil {
 			return nil, err
 		}
-		m[courseID].EnrollCount = cnt
+		xs = append(xs, &x)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
 	}
 
 	// save to cache
@@ -292,142 +244,83 @@ func (appRepo) ListPublicCourses(ctx context.Context) ([]*entity.Course, error) 
 		buf := bytes.Buffer{}
 		err := gob.NewEncoder(&buf).Encode(xs)
 		if err == nil {
-			c.Set(cachePrefix+"cache:list_public_course", buf.Bytes(), 10*time.Second)
+			c.Set(cachePrefix+"cache:list_public_course", buf.Bytes(), time.Minute)
 		}
 	}()
 
 	return xs, nil
 }
 
-func (appRepo) ListOwnCourses(ctx context.Context, userID string) ([]*entity.Course, error) {
+func (appRepo) ListOwnCourses(ctx context.Context, userID string) ([]*app.OwnCourse, error) {
 	q := sqlctx.GetQueryer(ctx)
 
 	rows, err := q.Query(`
 		select
-			courses.id,
-			courses.title,
-			courses.short_desc,
-			courses.long_desc,
-			courses.image,
-			courses.start,
-			courses.url,
-			courses.type,
-			courses.price,
-			courses.discount,
-			courses.enroll_detail,
-			courses.created_at,
-			courses.updated_at,
-			course_options.public,
-			course_options.enroll,
-			course_options.attend,
-			course_options.assignment,
-			course_options.discount
-		from courses
-			left join course_options on courses.id = course_options.course_id
-		where courses.user_id = $1
-		order by courses.created_at desc
+			c.id,
+			c.title, c.short_desc, c.image,
+			c.start, c.url, c.type,
+			count(e.user_id)
+		from courses as c
+			left join enrolls as e on e.course_id = c.id
+		where c.user_id = $1
+		group by c.id
+		order by c.created_at desc
 	`, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	xs := make([]*entity.Course, 0)
-	ids := make([]string, 0)
-	m := make(map[string]*entity.Course)
+
+	var xs []*app.OwnCourse
 	for rows.Next() {
-		var x entity.Course
+		var x app.OwnCourse
 		err = rows.Scan(
 			&x.ID,
-			&x.Title, &x.ShortDesc, &x.Desc, &x.Image, &x.Start, &x.URL, &x.Type, &x.Price, &x.Discount, &x.EnrollDetail,
-			&x.CreatedAt, &x.UpdatedAt,
-			&x.Option.Public, &x.Option.Enroll, &x.Option.Attend, &x.Option.Assignment, &x.Option.Discount,
+			&x.Title, &x.Desc, &x.Image,
+			&x.Start, pgsql.NullString(&x.URL), &x.Type,
+			&x.EnrollCount,
 		)
 		if err != nil {
 			return nil, err
 		}
-		if len(x.URL.String) == 0 {
-			x.URL.String = x.ID
-		}
 		xs = append(xs, &x)
-		ids = append(ids, x.ID)
-		m[x.ID] = &x
 	}
+
 	if err = rows.Err(); err != nil {
 		return nil, err
 	}
-	rows.Close()
 
-	rows, err = q.Query(`
-		select course_id, count(*)
-		from enrolls
-		where course_id = any($1)
-		group by course_id
-	`, pq.Array(ids))
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var courseID string
-		var cnt int64
-		err = rows.Scan(&courseID, &cnt)
-		if err != nil {
-			return nil, err
-		}
-		m[courseID].EnrollCount = cnt
-	}
 	return xs, nil
 }
 
-func (appRepo) ListEnrolledCourses(ctx context.Context, userID string) ([]*entity.Course, error) {
+func (appRepo) ListEnrolledCourses(ctx context.Context, userID string) ([]*app.EnrolledCourse, error) {
 	q := sqlctx.GetQueryer(ctx)
 
-	xs := make([]*entity.Course, 0)
 	rows, err := q.Query(`
 		select
-			courses.id,
-			courses.title,
-			courses.short_desc,
-			courses.long_desc,
-			courses.image,
-			courses.start,
-			courses.url,
-			courses.type,
-			courses.price,
-			courses.discount,
-			courses.enroll_detail,
-			courses.created_at,
-			courses.updated_at,
-			course_options.public,
-			course_options.enroll,
-			course_options.attend,
-			course_options.assignment,
-			course_options.discount
-		from courses
-			left join course_options on courses.id = course_options.course_id
-		inner join enrolls on courses.id = enrolls.course_id
-		where enrolls.user_id = $1
-		order by enrolls.created_at desc
+			c.id,
+			c.title, c.short_desc, c.image,
+			c.start, c.url, c.type
+		from courses as c
+			inner join enrolls as e on c.id = e.course_id
+		where e.user_id = $1
+		order by e.created_at desc
 	`, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
+	var xs []*app.EnrolledCourse
 	for rows.Next() {
-		var x entity.Course
+		var x app.EnrolledCourse
 		err = rows.Scan(
 			&x.ID,
-			&x.Title, &x.ShortDesc, &x.Desc, &x.Image, &x.Start, &x.URL, &x.Type, &x.Price, &x.Discount, &x.EnrollDetail,
-			&x.CreatedAt, &x.UpdatedAt,
-			&x.Option.Public, &x.Option.Enroll, &x.Option.Attend, &x.Option.Assignment, &x.Option.Discount,
+			&x.Title, &x.Desc, &x.Image,
+			&x.Start, pgsql.NullString(&x.URL), &x.Type,
 		)
 		if err != nil {
 			return nil, err
-		}
-		if len(x.URL.String) == 0 {
-			x.URL.String = x.ID
 		}
 		xs = append(xs, &x)
 	}
@@ -435,5 +328,6 @@ func (appRepo) ListEnrolledCourses(ctx context.Context, userID string) ([]*entit
 	if err = rows.Err(); err != nil {
 		return nil, err
 	}
+
 	return xs, nil
 }

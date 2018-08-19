@@ -15,7 +15,7 @@ type Repository interface {
 	GetCourseContents(ctx context.Context, courseID string) ([]*entity.CourseContent, error)
 	GetUser(ctx context.Context, userID string) (*entity.User, error)
 	FindAssignmentsByCourseID(ctx context.Context, courseID string) ([]*entity.Assignment, error)
-	ListPublicCourses(ctx context.Context) ([]*entity.Course, error)
-	ListOwnCourses(ctx context.Context, userID string) ([]*entity.Course, error)
-	ListEnrolledCourses(ctx context.Context, userID string) ([]*entity.Course, error)
+	ListPublicCourses(ctx context.Context) ([]*PublicCourse, error)
+	ListOwnCourses(ctx context.Context, userID string) ([]*OwnCourse, error)
+	ListEnrolledCourses(ctx context.Context, userID string) ([]*EnrolledCourse, error)
 }
