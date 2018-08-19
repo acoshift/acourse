@@ -44,12 +44,13 @@ func newCourseHandler(appCtrl *ctrl) http.Handler {
 	)))
 
 	return hime.Handler(func(ctx *hime.Context) error {
-		courseID := prefixhandler.Get(ctx, courseIDKey{})
+		link := prefixhandler.Get(ctx, courseIDKey{})
 
-		_, err := uuid.FromString(courseID)
+		courseID := link
+		_, err := uuid.FromString(link)
 		if err != nil {
 			// link can not parse to uuid get course id from url
-			courseID, err = c.Repository.GetCourseIDByURL(ctx, courseID)
+			courseID, err = c.Repository.GetCourseIDByURL(ctx, link)
 			if err == entity.ErrNotFound {
 				return share.NotFound(ctx)
 			}
@@ -67,8 +68,8 @@ func newCourseHandler(appCtrl *ctrl) http.Handler {
 		}
 
 		// if course has url, redirect to course url
-		if link := x.Link(); link != courseID {
-			return ctx.RedirectTo("app.course", link)
+		if l := x.Link(); l != link {
+			return ctx.RedirectTo("app.course", l)
 		}
 
 		ctx.WithValue(courseKey{}, x)
