@@ -69,7 +69,7 @@ func newCourseHandler(appCtrl *ctrl) http.Handler {
 
 		// if course has url, redirect to course url
 		if l := x.Link(); l != link {
-			return ctx.RedirectTo("app.course", l)
+			return ctx.RedirectTo("app.course", l, ctx.Request().URL.Path)
 		}
 
 		ctx.WithValue(courseKey{}, x)
