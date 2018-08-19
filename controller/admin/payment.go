@@ -62,8 +62,8 @@ func (c *ctrl) rejectPayment(ctx *hime.Context) error {
 	)
 
 	p := view.Page(ctx)
-	p["Payment"] = x
-	p["Message"] = message
+	p.Data["Payment"] = x
+	p.Data["Message"] = message
 	return ctx.View("admin.payment-reject", p)
 }
 
@@ -114,9 +114,9 @@ func (c *ctrl) pendingPayments(ctx *hime.Context) error {
 	}
 
 	p := view.Page(ctx)
-	p["Navbar"] = "admin.payment.pending"
-	p["Payments"] = payments
-	p["Paginate"] = pn
+	p.Data["Navbar"] = "admin.payment.pending"
+	p.Data["Payments"] = payments
+	p.Data["Paginate"] = pn
 	return ctx.View("admin.payments", p)
 }
 
@@ -135,8 +135,8 @@ func (c *ctrl) historyPayments(ctx *hime.Context) error {
 	}
 
 	p := view.Page(ctx)
-	p["Navbar"] = "admin.payment.history"
-	p["Payments"] = payments
-	p["Paginate"] = pn
+	p.Data["Navbar"] = "admin.payment.history"
+	p.Data["Payments"] = payments
+	p.Data["Paginate"] = pn
 	return ctx.View("admin.payments", p)
 }

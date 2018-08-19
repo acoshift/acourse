@@ -30,10 +30,10 @@ func (c *ctrl) profile(ctx *hime.Context) error {
 	}
 
 	p := view.Page(ctx)
-	p["Navbar"] = "profile"
-	p["Title"] = user.Username
-	p["OwnCourses"] = ownCourses
-	p["EnrolledCourses"] = enrolledCourses
+	p.Meta.Title = user.Username
+	p.Data["Navbar"] = "profile"
+	p.Data["OwnCourses"] = ownCourses
+	p.Data["EnrolledCourses"] = enrolledCourses
 	return ctx.View("app.profile", p)
 }
 
@@ -51,7 +51,7 @@ func (c *ctrl) profileEdit(ctx *hime.Context) error {
 	}
 
 	p := view.Page(ctx)
-	p["Title"] = user.Username
+	p.Meta.Title = user.Username
 	return ctx.View("app.profile-edit", p)
 }
 

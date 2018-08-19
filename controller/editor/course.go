@@ -65,7 +65,7 @@ func (c *ctrl) courseEdit(ctx *hime.Context) error {
 	}
 
 	p := view.Page(ctx)
-	p["Course"] = course
+	p.Data["Course"] = course
 	return ctx.View("editor.course-edit", p)
 }
 

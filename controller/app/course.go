@@ -117,14 +117,14 @@ func (c *courseCtrl) view(ctx *hime.Context) error {
 	}
 
 	p := view.Page(ctx)
-	p["Title"] = course.Title
-	p["Desc"] = course.ShortDesc
-	p["Image"] = course.Image
-	p["URL"] = c.BaseURL + ctx.Route("app.course", url.PathEscape(course.Link()))
-	p["Course"] = course
-	p["Enrolled"] = enrolled
-	p["Owned"] = owned
-	p["PendingEnroll"] = pendingEnroll
+	p.Meta.Title = course.Title
+	p.Meta.Desc = course.ShortDesc
+	p.Meta.Image = course.Image
+	p.Meta.URL = c.BaseURL + ctx.Route("app.course", url.PathEscape(course.Link()))
+	p.Data["Course"] = course
+	p.Data["Enrolled"] = enrolled
+	p.Data["Owned"] = owned
+	p.Data["PendingEnroll"] = pendingEnroll
 	return ctx.View("app.course", p)
 }
 
@@ -159,12 +159,12 @@ func (c *courseCtrl) content(ctx *hime.Context) error {
 	}
 
 	p := view.Page(ctx)
-	p["Title"] = course.Title
-	p["Desc"] = course.ShortDesc
-	p["Image"] = course.Image
-	p["Course"] = course
-	p["Contents"] = contents
-	p["Content"] = content
+	p.Meta.Title = course.Title
+	p.Meta.Desc = course.ShortDesc
+	p.Meta.Image = course.Image
+	p.Data["Course"] = course
+	p.Data["Contents"] = contents
+	p.Data["Content"] = content
 	return ctx.View("app.course-content", p)
 }
 
@@ -191,11 +191,11 @@ func (c *courseCtrl) enroll(ctx *hime.Context) error {
 	}
 
 	p := view.Page(ctx)
-	p["Title"] = course.Title
-	p["Desc"] = course.ShortDesc
-	p["Image"] = course.Image
-	p["URL"] = c.BaseURL + ctx.Route("app.course", url.PathEscape(course.Link()))
-	p["Course"] = course
+	p.Meta.Title = course.Title
+	p.Meta.Desc = course.ShortDesc
+	p.Meta.Image = course.Image
+	p.Meta.URL = c.BaseURL + ctx.Route("app.course", url.PathEscape(course.Link()))
+	p.Data["Course"] = course
 	return ctx.View("app.course-enroll", p)
 }
 
@@ -238,11 +238,11 @@ func (c *courseCtrl) assignment(ctx *hime.Context) error {
 	}
 
 	p := view.Page(ctx)
-	p["Title"] = course.Title
-	p["Desc"] = course.ShortDesc
-	p["Image"] = course.Image
-	p["URL"] = c.BaseURL + ctx.Route("app.course", url.PathEscape(course.Link()))
-	p["Course"] = course
-	p["Assignments"] = assignments
+	p.Meta.Title = course.Title
+	p.Meta.Desc = course.ShortDesc
+	p.Meta.Image = course.Image
+	p.Meta.URL = c.BaseURL + ctx.Route("app.course", url.PathEscape(course.Link()))
+	p.Data["Course"] = course
+	p.Data["Assignments"] = assignments
 	return ctx.View("app.course-assignment", p)
 }
