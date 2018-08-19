@@ -122,7 +122,6 @@ func main() {
 		ImageResizeEncoder: image.NewJPEGResizeEncoder(),
 		AdminNotifier:      notify.NewOutgoingWebhookAdminNotifier(config.String("slack_url")),
 		Location:           loc,
-		MagicLinkCallback:  himeApp.Route("auth.signin.link"),
 		OpenIDCallback:     himeApp.Route("auth.openid.callback"),
 	})
 
