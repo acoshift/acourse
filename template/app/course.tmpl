@@ -38,9 +38,9 @@
 							</div>
 
 							{{if eq .Course.Type live}}
-								{{if not .Course.Start.Time.IsZero}}
+								{{if not .Course.Start.IsZero}}
 								<div class="acourse-block-bigger">
-									<div class="acourse-label -red _font-bold">เริ่มสอน: {{.Course.Start.Time | date}}</div>
+									<div class="acourse-label -red _font-bold">เริ่มสอน: {{.Course.Start | date}}</div>
 								</div>
 								{{end}}
 							{{end}}
