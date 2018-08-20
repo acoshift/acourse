@@ -116,7 +116,7 @@ github.com/onsi/gomega/matchers/support/goraph/util
 github.com/pmezard/go-difflib/difflib
 # github.com/russross/blackfriday v2.0.0+incompatible
 github.com/russross/blackfriday
-# github.com/satori/go.uuid v1.2.0
+# github.com/satori/go.uuid v1.2.1-0.20180103174451-36e9d2ebbde5
 github.com/satori/go.uuid
 # github.com/shurcooL/sanitized_anchor_name v0.0.0-20170918181015-86672fcb3f95
 github.com/shurcooL/sanitized_anchor_name
