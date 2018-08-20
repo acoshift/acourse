@@ -7,6 +7,8 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	"github.com/acoshift/go-firebase-admin"
+
 	. "github.com/acoshift/acourse/service"
 )
 
@@ -57,6 +59,7 @@ var _ = Describe("Auth", func() {
 			auth.On("VerifyPassword", "test@test.com", "fakepass").Return("", fmt.Errorf("invalid"))
 
 			userID, err := s.SignInPassword(ctx, "test@test.com", "fakepass")
+
 			Expect(err).NotTo(BeNil())
 			Expect(userID).To(BeZero())
 		})
@@ -66,8 +69,55 @@ var _ = Describe("Auth", func() {
 			repo.On("IsUserExists", "aqswde").Return(true, nil)
 
 			userID, err := s.SignInPassword(ctx, "test@test.com", "123456")
+
 			Expect(err).To(BeNil())
 			Expect(userID).To(Equal("aqswde"))
+		})
+	})
+
+	Describe("SendPasswordResetEmail", func() {
+		It("should error when email is empty", func() {
+			err := s.SendPasswordResetEmail(ctx, "")
+
+			Expect(err).NotTo(BeNil())
+			Expect(IsUIError(err)).To(BeTrue())
+		})
+
+		It("should success when email not found in firebase", func() {
+			auth.On("GetUserByEmail", "notfound@test.com").Return((*firebase.UserRecord)(nil), fmt.Errorf("not found"))
+
+			err := s.SendPasswordResetEmail(ctx, "notfound@test.com")
+
+			Expect(err).To(BeNil())
+		})
+
+		It("should propagate error when firebase send email error", func() {
+			auth.On("GetUserByEmail", "test@test.com").Return(&firebase.UserRecord{
+				DisplayName:   "tester",
+				Email:         "test@test.com",
+				EmailVerified: true,
+				UserID:        "12345",
+			}, nil)
+			auth.On("SendPasswordResetEmail", "test@test.com").Return(fmt.Errorf("some error"))
+
+			err := s.SendPasswordResetEmail(ctx, "test@test.com")
+
+			Expect(err).NotTo(BeNil())
+			Expect(IsUIError(err)).To(BeTrue())
+		})
+
+		It("should success when email valid", func() {
+			auth.On("GetUserByEmail", "test@test.com").Return(&firebase.UserRecord{
+				DisplayName:   "tester",
+				Email:         "test@test.com",
+				EmailVerified: true,
+				UserID:        "12345",
+			}, nil)
+			auth.On("SendPasswordResetEmail", "test@test.com").Return(nil)
+
+			err := s.SendPasswordResetEmail(ctx, "test@test.com")
+
+			Expect(err).To(BeNil())
 		})
 	})
 })
