@@ -3,6 +3,8 @@ package service
 import (
 	"context"
 
+	"github.com/acoshift/go-firebase-admin"
+
 	"github.com/acoshift/acourse/entity"
 )
 
@@ -33,4 +35,14 @@ type Repository interface {
 
 	RegisterEnroll(ctx context.Context, userID string, courseID string) error
 	IsEnrolled(ctx context.Context, userID string, courseID string) (bool, error)
+}
+
+// FirebaseAuth is the firebase auth interface
+type FirebaseAuth interface {
+	CreateAuthURI(ctx context.Context, providerID string, continueURI string, sessionID string) (string, error)
+	VerifyAuthCallbackURI(ctx context.Context, callbackURI string, sessionID string) (*firebase.UserInfo, error)
+	GetUserByEmail(ctx context.Context, email string) (*firebase.UserRecord, error)
+	SendPasswordResetEmail(ctx context.Context, email string) error
+	VerifyPassword(ctx context.Context, email, password string) (string, error)
+	CreateUser(ctx context.Context, user *firebase.User) (string, error)
 }

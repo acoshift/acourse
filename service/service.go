@@ -5,8 +5,6 @@ import (
 	"mime/multipart"
 	"time"
 
-	"github.com/acoshift/go-firebase-admin"
-
 	"github.com/acoshift/acourse/email"
 	"github.com/acoshift/acourse/entity"
 	"github.com/acoshift/acourse/file"
@@ -17,7 +15,7 @@ import (
 // Config is service config
 type Config struct {
 	Repository         Repository
-	Auth               *firebase.Auth
+	Auth               FirebaseAuth
 	EmailSender        email.Sender
 	BaseURL            string
 	FileStorage        file.Storage

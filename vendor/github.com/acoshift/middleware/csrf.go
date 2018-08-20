@@ -3,6 +3,8 @@ package middleware
 import (
 	"net/http"
 	"strings"
+
+	"github.com/acoshift/header"
 )
 
 // CSRFConfig is the csrf config
@@ -10,13 +12,12 @@ type CSRFConfig struct {
 	Origins          []string
 	ForbiddenHandler http.Handler
 	IgnoreProto      bool
-	Force            bool
 }
 
 // CSRF creates new csrf middleware
-func CSRF(c CSRFConfig) func(http.Handler) http.Handler {
-	if c.ForbiddenHandler == nil {
-		c.ForbiddenHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+func CSRF(config CSRFConfig) Middleware {
+	if config.ForbiddenHandler == nil {
+		config.ForbiddenHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Forbidden", http.StatusForbidden)
 		})
 	}
@@ -25,9 +26,9 @@ func CSRF(c CSRFConfig) func(http.Handler) http.Handler {
 		return s, true
 	}
 
-	origins := make([]string, len(c.Origins))
-	copy(origins, c.Origins)
-	if c.IgnoreProto {
+	origins := make([]string, len(config.Origins))
+	copy(origins, config.Origins)
+	if config.IgnoreProto {
 		for i := range origins {
 			origins[i], _ = removeProto(origins[i])
 		}
@@ -36,50 +37,43 @@ func CSRF(c CSRFConfig) func(http.Handler) http.Handler {
 	}
 
 	checkOrigin := func(r *http.Request) bool {
-		origin := r.Header.Get("Origin")
-
-		if c.Force || origin != "" {
+		origin := r.Header.Get(header.Origin)
+		if origin != "" {
 			origin, b := normalize(origin)
 			if !b {
 				return false
 			}
-
 			for _, allow := range origins {
 				if origin == allow {
 					return true
 				}
 			}
-			return false
 		}
 
-		return true
+		return false
 	}
 
 	checkReferer := func(r *http.Request) bool {
 		referer := r.Referer()
-
-		if c.Force || referer != "" {
+		if referer != "" {
 			referer, b := normalize(referer)
 			if !b {
 				return false
 			}
-
 			for _, allow := range origins {
 				if strings.HasPrefix(referer, allow+"/") {
 					return true
 				}
 			}
-			return false
 		}
-
-		return true
+		return false
 	}
 
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if r.Method == http.MethodPost {
-				if !checkOrigin(r) || !checkReferer(r) {
-					c.ForbiddenHandler.ServeHTTP(w, r)
+				if !checkOrigin(r) && !checkReferer(r) {
+					config.ForbiddenHandler.ServeHTTP(w, r)
 					return
 				}
 			}

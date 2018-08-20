@@ -39,7 +39,7 @@ func (s *svc) UpdateProfile(ctx context.Context, x *Profile) error {
 
 	var imageURL string
 	if x.Image != nil {
-		err := validateImage(x.Image)
+		err := ValidateImage(x.Image)
 		if err != nil {
 			return err
 		}
