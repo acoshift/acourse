@@ -30,6 +30,15 @@ var _ = Describe("Auth", func() {
 		})
 	})
 
+	Describe("SignUp", func() {
+		It("should error when sign up with zero value email", func() {
+			userID, err := s.SignUp(ctx, "", "123456")
+
+			Expect(err).NotTo(BeNil())
+			Expect(userID).To(BeZero())
+		})
+	})
+
 	Describe("SignInPassword", func() {
 		It("should error when sign in with zero value email and password", func() {
 			userID, err := s.SignInPassword(ctx, "", "")
