@@ -69,7 +69,7 @@ func newCourseHandler(appCtrl *ctrl) http.Handler {
 
 		// if course has url, redirect to course url
 		if l := x.Link(); l != link {
-			return ctx.RedirectTo("app.course", l, ctx.Request().URL.Path)
+			return ctx.RedirectTo("app.course", l, ctx.URL.Path)
 		}
 
 		ctx.WithValue(courseKey{}, x)
@@ -87,7 +87,7 @@ func (c *courseCtrl) getCourse(ctx context.Context) *Course {
 }
 
 func (c *courseCtrl) view(ctx *hime.Context) error {
-	if ctx.Request().URL.Path != "/" {
+	if ctx.URL.Path != "/" {
 		return share.NotFound(ctx)
 	}
 
