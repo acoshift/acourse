@@ -7,7 +7,7 @@ require (
 	github.com/acoshift/flash v1.0.0
 	github.com/acoshift/go-firebase-admin v0.0.6
 	github.com/acoshift/header v0.0.0-20180524134832-fbb24d14e0c3
-	github.com/acoshift/hime v0.8.2
+	github.com/acoshift/hime v0.9.0
 	github.com/acoshift/methodmux v1.1.1
 	github.com/acoshift/middleware v0.4.1
 	github.com/acoshift/paginate v1.1.1
@@ -38,7 +38,7 @@ require (
 	github.com/stretchr/testify v1.2.2
 	go.opencensus.io v0.15.0 // indirect
 	golang.org/x/image v0.0.0-20180708004352-c73c2afc3b81 // indirect
-	golang.org/x/net v0.0.0-20180816102801-aaf60122140d // indirect
+	golang.org/x/net v0.0.0-20180821023952-922f4815f713 // indirect
 	golang.org/x/oauth2 v0.0.0-20180724155351-3d292e4d0cdc // indirect
 	golang.org/x/sys v0.0.0-20180816055513-1c9583448a9c // indirect
 	golang.org/x/text v0.3.0 // indirect
@@ -47,6 +47,7 @@ require (
 	google.golang.org/genproto v0.0.0-20180817151627-c66870c02cf8 // indirect
 	google.golang.org/grpc v1.14.0 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
+	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	gopkg.in/fsnotify.v1 v1.4.7 // indirect
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect

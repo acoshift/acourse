@@ -13,7 +13,7 @@ func mustSignedIn(h http.Handler) http.Handler {
 	return hime.Handler(func(ctx *hime.Context) error {
 		id := appctx.GetUserID(ctx)
 		if len(id) == 0 {
-			return ctx.RedirectTo("auth.signin", ctx.Param("r", url.QueryEscape(ctx.Request().RequestURI)))
+			return ctx.RedirectTo("auth.signin", ctx.Param("r", url.QueryEscape(ctx.RequestURI)))
 		}
 		return ctx.Handle(h)
 	})

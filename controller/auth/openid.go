@@ -34,7 +34,7 @@ func (c *ctrl) openIDCallback(ctx *hime.Context) error {
 	sessID := appctx.GetOpenIDState(ctx)
 	appctx.DelOpenIDState(ctx)
 
-	userID, err := c.Service.SignInOpenIDCallback(ctx, ctx.Request().RequestURI, sessID)
+	userID, err := c.Service.SignInOpenIDCallback(ctx, ctx.RequestURI, sessID)
 	if service.IsUIError(err) {
 		// TODO: redirect to sign in page
 		return ctx.Status(http.StatusBadRequest).String(err.Error())

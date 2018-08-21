@@ -19,6 +19,6 @@ var notFoundImages = []string{
 func NotFound(ctx *hime.Context) error {
 	p := view.Page(ctx)
 	p.Data["Image"] = notFoundImages[rand.Intn(len(notFoundImages))]
-	ctx.ResponseWriter().Header().Set(header.XContentTypeOptions, "nosniff")
+	ctx.SetHeader(header.XContentTypeOptions, "nosniff")
 	return ctx.Status(http.StatusNotFound).View("share.not-found", p)
 }

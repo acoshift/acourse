@@ -209,10 +209,11 @@ func main() {
 		}),
 	)(mux)
 
+	himeApp.GracefulShutdown().
+		Notify(probe.Fail)
+
 	err = himeApp.
 		Handler(h).
-		GracefulShutdown().
-		Notify(probe.Fail).
 		ListenAndServe()
 	if err != nil {
 		log.Fatal(err)

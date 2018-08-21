@@ -8,7 +8,7 @@ import (
 )
 
 func (c *ctrl) index(ctx *hime.Context) error {
-	if ctx.Request().URL.Path != "/" {
+	if ctx.URL.Path != "/" {
 		return share.NotFound(ctx)
 	}
 
