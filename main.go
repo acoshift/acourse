@@ -7,8 +7,10 @@ import (
 	_ "image/png"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
+	"cloud.google.com/go/errorreporting"
 	"cloud.google.com/go/profiler"
 	"cloud.google.com/go/storage"
 	"github.com/acoshift/configfile"
@@ -53,8 +55,20 @@ func main() {
 
 	ctx := context.Background()
 
-	// init profiler
-	profiler.Start(profiler.Config{Service: config.StringDefault("profiler_service", "acourse")})
+	serviceName := config.StringDefault("service", "acourse")
+
+	runningProjectID := config.StringDefault("running_project", os.Getenv("GOOGLE_CLOUD_PROJECT"))
+
+	// init profiler, ignore error
+	profiler.Start(profiler.Config{Service: serviceName, ProjectID: runningProjectID})
+
+	// init error reporting, ignore error
+	errClient, _ := errorreporting.NewClient(ctx, runningProjectID, errorreporting.Config{
+		ServiceName: serviceName,
+		OnError: func(err error) {
+			log.Printf("could not log error: %v", err)
+		},
+	})
 
 	firApp, err := firebase.InitializeApp(ctx, firebase.AppOptions{
 		ProjectID: config.String("project_id"),
@@ -198,7 +212,7 @@ func main() {
 	)(m))
 
 	h := middleware.Chain(
-		internal.ErrorRecovery,
+		internal.ErrorLogger(errClient),
 		internal.SetHeaders,
 		middleware.CSRF(middleware.CSRFConfig{
 			Origins:     []string{baseURL},

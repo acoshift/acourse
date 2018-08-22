@@ -5,23 +5,36 @@ import (
 	"net/http"
 	"runtime/debug"
 
+	"cloud.google.com/go/errorreporting"
 	"github.com/acoshift/header"
+	"github.com/acoshift/middleware"
 
 	"github.com/acoshift/acourse/context/appctx"
 )
 
-// ErrorRecovery recoveries error
-func ErrorRecovery(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		defer func() {
-			if err := recover(); err != nil {
-				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-				log.Println(err)
-				debug.PrintStack()
-			}
-		}()
-		h.ServeHTTP(w, r)
-	})
+// ErrorLogger logs error and send error page back to response
+func ErrorLogger(errClient *errorreporting.Client) middleware.Middleware {
+	return func(h http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			defer func() {
+				if err := recover(); err != nil {
+					http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+					log.Println(err)
+					debug.PrintStack()
+
+					if errClient != nil {
+						nerr, _ := err.(error)
+						errClient.Report(errorreporting.Entry{
+							Error: nerr,
+							Req:   r,
+							Stack: debug.Stack(),
+						})
+					}
+				}
+			}()
+			h.ServeHTTP(w, r)
+		})
+	}
 }
 
 // SetHeaders sets default headers
