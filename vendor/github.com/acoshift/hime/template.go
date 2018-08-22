@@ -12,7 +12,7 @@ import (
 	"github.com/tdewolff/minify/css"
 	"github.com/tdewolff/minify/html"
 	"github.com/tdewolff/minify/js"
-	yaml "gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v2"
 )
 
 // TemplateConfig is template config
@@ -32,7 +32,7 @@ func (app *App) Template() *Template {
 	}
 	return &Template{
 		list: app.template,
-		funcs: append([]template.FuncMap{template.FuncMap{
+		funcs: append([]template.FuncMap{{
 			"route":  app.Route,
 			"global": app.Global,
 		}}, app.templateFuncs...),
@@ -198,23 +198,19 @@ func (tp *Template) newTemplate(name string, parser func(t *template.Template) *
 		t.Funcs(fn)
 	}
 
-	parser(t)
-
 	// parse components
 	if len(tp.components) > 0 {
 		t = template.Must(t.ParseFiles(joinTemplateDir(tp.dir, tp.components...)...))
 	}
 
+	t = parser(t)
+
 	if tp.root != "" {
 		t = t.Lookup(tp.root)
-	} else {
-		// if root not defined, lookup first not empty template
-		for _, x := range t.Templates() {
-			if x.Name() != "" {
-				t = t.Lookup(x.Name())
-				break
-			}
-		}
+	}
+
+	if t == nil {
+		panicf("no root layout")
 	}
 
 	tp.list[name] = &tmpl{
@@ -226,7 +222,7 @@ func (tp *Template) newTemplate(name string, parser func(t *template.Template) *
 // Parse parses template from text
 func (tp *Template) Parse(name string, text string) *Template {
 	tp.newTemplate(name, func(t *template.Template) *template.Template {
-		return template.Must(t.Parse(text))
+		return template.Must(t.New(name).Parse(text))
 	})
 
 	return tp
@@ -235,7 +231,11 @@ func (tp *Template) Parse(name string, text string) *Template {
 // ParseFiles loads template from file
 func (tp *Template) ParseFiles(name string, filenames ...string) *Template {
 	tp.newTemplate(name, func(t *template.Template) *template.Template {
-		return template.Must(t.ParseFiles(joinTemplateDir(tp.dir, filenames...)...))
+		t = template.Must(t.ParseFiles(joinTemplateDir(tp.dir, filenames...)...))
+		if tp.root == "" {
+			t = t.Lookup(filenames[0])
+		}
+		return t
 	})
 
 	return tp
@@ -243,12 +243,16 @@ func (tp *Template) ParseFiles(name string, filenames ...string) *Template {
 
 // ParseGlob loads template from pattern
 func (tp *Template) ParseGlob(name string, pattern string) *Template {
+	if tp.root == "" {
+		panicf("parse glob can not use without root")
+	}
+
 	tp.newTemplate(name, func(t *template.Template) *template.Template {
 		d := tp.dir
 		if !strings.HasSuffix(d, "/") {
 			d += "/"
 		}
-		return template.Must(t.ParseGlob(tp.dir + pattern))
+		return template.Must(t.ParseGlob(d + pattern))
 	})
 
 	return tp
