@@ -2,8 +2,11 @@
 	<div id="navbar" class="navbar-color">
 		<div class="navbar-container grid-container _flex-row _main-space-between _cross-stretch">
 
-			<a href="{{route "app.index"}}" class="_flex-row _cross-center">
-				<img class="logo" src="https://storage.googleapis.com/acourse/static/16e99da4-5af9-47e9-880c-babd8d6ba8cc.svg" height="45">
+			<a href="{{route "app.index"}}" class="_flex-row _cross-center show-sm-upper">
+				<img class="logo" src="/-/logo-w-2.svg" height="45">
+			</a>
+			<a href="{{route "app.index"}}" class="_flex-row _cross-center hide-sm-upper">
+				<img class="logo" src="/-/logo-s.svg" height="45">
 			</a>
 			<div class="_flex-row _cross-center _main-end">
 			{{if .Me}}
