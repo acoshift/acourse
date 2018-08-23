@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"time"
 
+	"cloud.google.com/go/errorreporting"
 	"cloud.google.com/go/profiler"
 	"cloud.google.com/go/storage"
 	"github.com/acoshift/configfile"
@@ -53,19 +54,32 @@ func main() {
 
 	ctx := context.Background()
 
-	// init profiler
-	profiler.Start(profiler.Config{Service: config.StringDefault("profiler_service", "acourse")})
+	googClientOpts := []option.ClientOption{option.WithCredentialsFile("config/service_account")}
+
+	serviceName := config.StringDefault("service", "acourse")
+	projectID := config.String("project_id")
+
+	// init profiler, ignore error
+	profiler.Start(profiler.Config{Service: serviceName, ProjectID: projectID}, googClientOpts...)
+
+	// init error reporting, ignore error
+	errClient, _ := errorreporting.NewClient(ctx, projectID, errorreporting.Config{
+		ServiceName: serviceName,
+		OnError: func(err error) {
+			log.Printf("could not log error: %v", err)
+		},
+	}, googClientOpts...)
 
 	firApp, err := firebase.InitializeApp(ctx, firebase.AppOptions{
-		ProjectID: config.String("project_id"),
-	}, option.WithCredentialsFile("config/service_account"))
+		ProjectID: projectID,
+	}, googClientOpts...)
 	if err != nil {
 		log.Fatal(err)
 	}
 	firAuth := firApp.Auth()
 
 	// init google storage
-	storageClient, err := storage.NewClient(ctx, option.WithCredentialsFile("config/service_account"))
+	storageClient, err := storage.NewClient(ctx, googClientOpts...)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -198,7 +212,7 @@ func main() {
 	)(m))
 
 	h := middleware.Chain(
-		internal.ErrorRecovery,
+		internal.ErrorLogger(errClient),
 		internal.SetHeaders,
 		middleware.CSRF(middleware.CSRFConfig{
 			Origins:     []string{baseURL},
