@@ -7,7 +7,6 @@ import (
 	_ "image/png"
 	"log"
 	"net/http"
-	"os"
 	"time"
 
 	"cloud.google.com/go/errorreporting"
@@ -55,31 +54,32 @@ func main() {
 
 	ctx := context.Background()
 
-	serviceName := config.StringDefault("service", "acourse")
+	googClientOpts := []option.ClientOption{option.WithCredentialsFile("config/service_account")}
 
-	runningProjectID := config.StringDefault("running_project", os.Getenv("GOOGLE_CLOUD_PROJECT"))
+	serviceName := config.StringDefault("service", "acourse")
+	projectID := config.String("project_id")
 
 	// init profiler, ignore error
-	profiler.Start(profiler.Config{Service: serviceName, ProjectID: runningProjectID})
+	profiler.Start(profiler.Config{Service: serviceName, ProjectID: projectID}, googClientOpts...)
 
 	// init error reporting, ignore error
-	errClient, _ := errorreporting.NewClient(ctx, runningProjectID, errorreporting.Config{
+	errClient, _ := errorreporting.NewClient(ctx, projectID, errorreporting.Config{
 		ServiceName: serviceName,
 		OnError: func(err error) {
 			log.Printf("could not log error: %v", err)
 		},
-	})
+	}, googClientOpts...)
 
 	firApp, err := firebase.InitializeApp(ctx, firebase.AppOptions{
-		ProjectID: config.String("project_id"),
-	}, option.WithCredentialsFile("config/service_account"))
+		ProjectID: projectID,
+	}, googClientOpts...)
 	if err != nil {
 		log.Fatal(err)
 	}
 	firAuth := firApp.Auth()
 
 	// init google storage
-	storageClient, err := storage.NewClient(ctx, option.WithCredentialsFile("config/service_account"))
+	storageClient, err := storage.NewClient(ctx, googClientOpts...)
 	if err != nil {
 		log.Fatal(err)
 	}
