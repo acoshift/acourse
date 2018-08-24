@@ -2,6 +2,7 @@
 cloud.google.com/go/errorreporting
 cloud.google.com/go/profiler
 cloud.google.com/go/storage
+cloud.google.com/go/trace
 cloud.google.com/go/errorreporting/apiv1beta1
 cloud.google.com/go/internal/version
 cloud.google.com/go/compute/metadata
@@ -9,6 +10,7 @@ cloud.google.com/go/iam
 cloud.google.com/go/internal
 cloud.google.com/go/internal/optional
 cloud.google.com/go/internal/trace
+cloud.google.com/go/internal/tracecontext
 # contrib.go.opencensus.io/exporter/stackdriver v0.6.0
 contrib.go.opencensus.io/exporter/stackdriver/propagation
 # github.com/acoshift/configfile v1.3.0
@@ -202,6 +204,8 @@ golang.org/x/text/runes
 golang.org/x/text/internal/language
 golang.org/x/text/internal/language/compact
 golang.org/x/text/internal/tag
+# golang.org/x/time v0.0.0-20180412165947-fbb02b2291d2
+golang.org/x/time/rate
 # google.golang.org/api v0.0.0-20180822000451-0873c9a91f71
 google.golang.org/api/option
 google.golang.org/api/support/bundler
@@ -210,11 +214,12 @@ google.golang.org/api/googleapi
 google.golang.org/api/iterator
 google.golang.org/api/storage/v1
 google.golang.org/api/transport/http
+google.golang.org/api/cloudtrace/v1
+google.golang.org/api/gensupport
 google.golang.org/api/identitytoolkit/v3
 google.golang.org/api/transport
 google.golang.org/api/internal
 google.golang.org/api/googleapi/internal/uritemplates
-google.golang.org/api/gensupport
 google.golang.org/api/googleapi/transport
 # google.golang.org/appengine v1.1.0
 google.golang.org/appengine
