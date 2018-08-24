@@ -31,7 +31,15 @@ Acoshift's course system [acourse.io](https://acourse.io)
 
 ## Deployment
 
-After GCB finished (and live in [staging](https://staging.acourse.io)), run `git push origin HEAD:production` to trigger production deployment.
+After GCB finished
+
+### [Staging](https://staging.acourse.io)
+
+Run `git push origin HEAD:staging` to trigger staging deployment.
+
+### Production
+
+Run `git push origin HEAD:production` to trigger production deployment.
 
 ## Testing
 
