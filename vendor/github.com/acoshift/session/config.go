@@ -1,6 +1,7 @@
 package session
 
 import (
+	"net/http"
 	"time"
 )
 
@@ -20,7 +21,7 @@ type Config struct {
 	Path     string
 	MaxAge   time.Duration
 	Secure   Secure
-	SameSite SameSite
+	SameSite http.SameSite
 
 	// IdleTimeout is the ttl for storage
 	// if IdleTimeout is zero, it will use MaxAge
@@ -54,18 +55,6 @@ const (
 	NoSecure     Secure = iota
 	PreferSecure        // if request is https will set secure cookie
 	ForceSecure         // always set secure cookie
-)
-
-// SameSite config
-//
-// http://httpwg.org/http-extensions/draft-ietf-httpbis-cookie-same-site.html
-type SameSite string
-
-// SameSite values
-const (
-	SameSiteNone   SameSite = ""
-	SameSiteLax    SameSite = "Lax"
-	SameSiteStrict SameSite = "Strict"
 )
 
 // Global Session Config

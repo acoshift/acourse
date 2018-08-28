@@ -29,7 +29,7 @@ type Session struct {
 	HTTPOnly bool
 	MaxAge   time.Duration
 	Secure   bool
-	SameSite SameSite
+	SameSite http.SameSite
 	Rolling  bool
 
 	manager *Manager
@@ -247,15 +247,13 @@ func (s *Session) setCookie(w http.ResponseWriter) {
 		value += "." + digest
 	}
 
-	cs := cookie{
-		Cookie: http.Cookie{
-			Name:     s.Name,
-			Domain:   s.Domain,
-			Path:     s.Path,
-			HttpOnly: s.HTTPOnly,
-			Value:    value,
-			Secure:   s.Secure,
-		},
+	cs := http.Cookie{
+		Name:     s.Name,
+		Domain:   s.Domain,
+		Path:     s.Path,
+		HttpOnly: s.HTTPOnly,
+		Value:    value,
+		Secure:   s.Secure,
 		SameSite: s.SameSite,
 	}
 	if s.MaxAge > 0 {
@@ -263,7 +261,7 @@ func (s *Session) setCookie(w http.ResponseWriter) {
 		cs.Expires = time.Now().Add(s.MaxAge)
 	}
 
-	setCookie(w, cs)
+	http.SetCookie(w, &cs)
 }
 
 // Flash returns flash from session

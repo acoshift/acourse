@@ -204,7 +204,7 @@ func main() {
 			MaxAge:   7 * 24 * time.Hour,
 			HTTPOnly: true,
 			Secure:   session.PreferSecure,
-			SameSite: session.SameSiteLax,
+			SameSite: http.SameSiteLaxMode,
 			Rolling:  true,
 			Proxy:    true,
 			Store: redisstore.New(redisstore.Config{
