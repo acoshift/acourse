@@ -7,6 +7,8 @@
 
 Session Middleware for Golang
 
+> For Go1.10 below please use version 0.11, 0.12 will support only Go1.11 onward.
+
 ## Example with Middleware
 
 ```go

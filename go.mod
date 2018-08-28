@@ -14,19 +14,21 @@ require (
 	github.com/acoshift/pgsql v0.2.6
 	github.com/acoshift/prefixhandler v1.0.0
 	github.com/acoshift/probehandler v0.0.0-20180407104626-3b189a71087b
-	github.com/acoshift/session v0.11.0
+	github.com/acoshift/session v0.12.0
 	github.com/acoshift/webstatic v2.1.1+incompatible
 	github.com/asaskevich/govalidator v0.0.0-20180720115003-f9ffefc3facf
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/disintegration/imaging v1.5.0
 	github.com/dustin/go-humanize v0.0.0-20180713052910-9f541cc9db5d
-	github.com/go-redis/redis v6.13.2+incompatible
+	github.com/go-redis/redis v6.14.0+incompatible
 	github.com/golang/mock v1.1.1 // indirect
 	github.com/golang/protobuf v1.2.0 // indirect
-	github.com/google/pprof v0.0.0-20180818232756-e98137b3ea71 // indirect
+	github.com/google/go-github v17.0.0+incompatible // indirect
+	github.com/google/pprof v0.0.0-20180827170648-d723c7237b64 // indirect
+	github.com/gopherjs/gopherjs v0.0.0-20180825215210-0210a2f0f73c // indirect
 	github.com/hpcloud/tail v1.0.0 // indirect
-	github.com/lib/pq v0.0.0-20180822103908-55f6f2718ccb
+	github.com/lib/pq v1.0.0
 	github.com/microcosm-cc/bluemonday v1.0.1
 	github.com/onsi/ginkgo v1.6.0
 	github.com/onsi/gomega v1.4.1
@@ -36,12 +38,15 @@ require (
 	github.com/stretchr/testify v1.2.2
 	github.com/tdewolff/test v0.0.0-20171106182207-265427085153 // indirect
 	go.opencensus.io v0.15.0 // indirect
-	golang.org/x/build v0.0.0-20180822011048-8dcad780e313 // indirect
+	go4.org v0.0.0-20180809161055-417644f6feb5 // indirect
+	golang.org/x/build v0.0.0-20180827034702-6f834499dcf7 // indirect
+	golang.org/x/crypto v0.0.0-20180820150726-614d502a4dac // indirect
 	golang.org/x/image v0.0.0-20180708004352-c73c2afc3b81 // indirect
-	golang.org/x/net v0.0.0-20180821023952-922f4815f713 // indirect
+	golang.org/x/net v0.0.0-20180826012351-8a410e7b638d // indirect
 	golang.org/x/oauth2 v0.0.0-20180821212333-d2e6202438be // indirect
-	golang.org/x/sys v0.0.0-20180821140842-3b58ed4ad339 // indirect
-	google.golang.org/api v0.0.0-20180822000451-0873c9a91f71
+	golang.org/x/sys v0.0.0-20180828065106-d99a578cf41b // indirect
+	golang.org/x/tools v0.0.0-20180828015842-6cd1fcedba52 // indirect
+	google.golang.org/api v0.0.0-20180826000528-7954115fcf34
 	google.golang.org/genproto v0.0.0-20180817151627-c66870c02cf8 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
