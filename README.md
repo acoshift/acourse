@@ -31,15 +31,9 @@ Acoshift's course system [acourse.io](https://acourse.io)
 
 ## Deployment
 
-After GCB finished
+[Staging](https://staging.acourse.io) will automated build and deploy when push commits to master using GCB.
 
-### [Staging](https://staging.acourse.io)
-
-Run `git push origin HEAD:staging` to trigger staging deployment.
-
-### Production
-
-Run `git push origin HEAD:production` to trigger production deployment.
+Run `make production` to trigger production deployment.
 
 ## Testing
 

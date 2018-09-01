@@ -17,3 +17,6 @@ clean:
 
 build:
 	env GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o acourse -ldflags '-w -s' main.go
+
+production:
+	git push origin HEAD:production

@@ -19,6 +19,21 @@ steps:
 
 - name: gcr.io/cloud-builders/docker
   args: [build, -t, gcr.io/$PROJECT_ID/acourse:$COMMIT_SHA, '.']
+- name: gcr.io/cloud-builders/docker
+  args: [push, gcr.io/$PROJECT_ID/acourse:$COMMIT_SHA]
+
+- name: acoshift/kubectl
+  args: [set, image, $_RESOURCE, acourse=gcr.io/$PROJECT_ID/acourse:$COMMIT_SHA]
+  env:
+  - SERVER=$_SERVER
+  - NAMESPACE=$_NAMESPACE
+  secretEnv:
+  - TOKEN
 
 images:
 - gcr.io/$PROJECT_ID/acourse:$COMMIT_SHA
+
+secrets:
+- kmsKeyName: projects/acourse-d9d0a/locations/global/keyRings/builder/cryptoKeys/key
+  secretEnv:
+    TOKEN: CiQAKWs1n/rPRIMPxVk/uoTbcskKPQfihk8kj9QGYNDfJvlK0UES8AYA2nfHugYZAmf44Smf/anCYE/MvjTfh/ExJNaiDgr3HJWKnVLpSmrxBN5lmbxvNsQQE+0+e7TRnq1mWtfpyf4EZE6Vi7XtxQLrZ1Wuo1iO1YzTFToMPq8LY7lcJHHofT7b6HEwKUwrzE06W26XghOuvVhib8IurkHTHdKqdG/T/L6K79uhPEYPAiUHixBAykxpL60aaLrTCWEYTq65ECTZ+OxuvbXgJxeqZF86RzAZ7BQFsWjOt3T8PLYFV51ZlHDsKNGkcouwcYTueLZJQmSUZ04PynMDbwczRol73Du0hby2aIXudFG7HJj2EvE7vXS/G47R6Lr17w7DEnhiA0MdxdcTJl7NQI+IIdIDKdI3wqtFdtvRDVrMEoRu8XUOrgsJ8tx6bjsCKFDp5Epq4+M8K2jtfxpyVln7R+L9zJMT5ASIOh01w6ovaD9c2yHSkcVJ+UceHhEGRKFMPYEtr0mUu6l3xfbxNfjvpJZmXy0+zV759KD2n9ne26mvuIJ6qARuUqbfNtBClnEIG63EY3ak1oaUTlB+cW/mmQRLVtJhbHWSkv6qQDcAGvKqypa+elm/XOYcvrWxWckivc4u98Ni8A+KuClO7ZOtr5U1hRfJ0WKo0jRYfFisJwhmCZLaRTe1wylZuf9xfDKKKIGhhtd+YZ/2ubUlaGrBXOsb2IUjAIxZfqEoRVbP0NuJ+2uDll5M3MPkiw13UzzEUTfxN2ApI2d2OH4ovut0r1aCvJkFqkuy0F9cTo21N72+4z2cBRu2hoPneEC9jCSQJLoqcwFURZReNzAePYtsLX37Qx2ZVsQ2O8Xu8mRfefd4YI89KvsgTk6VnU10i/tWQ1LJ6DLPS31VHIEWBKNvwognXCT7dPChEQnTjPEEHMdS90qqcK+0UpIl8XFt+gpWWcjhZBx+WhyDzDu9WrNOpZf/CHiFiQxM0gzCXqyt6sWaAs/GhaqQnpve0Y+i1qtw6FT8bFM5YiA4oUlvBZE7oqUZZ/OxPxf4zN4x64TVgcNnmKMv3SU4Jkz4rIDNX4QFwj7J0WF750XXJQOQVMqk78+zfs63rGZtiiYWcLt8OXxr5ye92QxDnbqBIX1StXvsYxTJckwQ5biFe6vWZpJE3sIV+92jNlLflmBnxyXIu7sg/qv81s40bnkjyS7cyabsDedWOJV9
