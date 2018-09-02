@@ -7,7 +7,7 @@ require (
 	github.com/acoshift/flash v1.0.0
 	github.com/acoshift/go-firebase-admin v0.0.6
 	github.com/acoshift/header v0.0.0-20180524134832-fbb24d14e0c3
-	github.com/acoshift/hime v0.9.4
+	github.com/acoshift/hime v0.9.5-0.20180902092151-83b2da8f2a51
 	github.com/acoshift/methodmux v1.1.1
 	github.com/acoshift/middleware v0.4.1
 	github.com/acoshift/paginate v1.1.1
@@ -17,6 +17,7 @@ require (
 	github.com/acoshift/session v0.12.0
 	github.com/acoshift/webstatic v2.1.1+incompatible
 	github.com/asaskevich/govalidator v0.0.0-20180720115003-f9ffefc3facf
+	github.com/coreos/go-systemd v0.0.0-20180828140353-eee3db372b31 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/disintegration/imaging v1.5.0
@@ -36,18 +37,19 @@ require (
 	github.com/satori/go.uuid v1.2.1-0.20180103174451-36e9d2ebbde5
 	github.com/stretchr/objx v0.1.1 // indirect
 	github.com/stretchr/testify v1.2.2
+	github.com/tarm/serial v0.0.0-20180830185346-98f6abe2eb07 // indirect
 	github.com/tdewolff/test v0.0.0-20171106182207-265427085153 // indirect
 	go.opencensus.io v0.15.0 // indirect
 	go4.org v0.0.0-20180809161055-417644f6feb5 // indirect
-	golang.org/x/build v0.0.0-20180827034702-6f834499dcf7 // indirect
-	golang.org/x/crypto v0.0.0-20180820150726-614d502a4dac // indirect
+	golang.org/x/build v0.0.0-20180831181811-978be913b44d // indirect
+	golang.org/x/crypto v0.0.0-20180830192347-182538f80094 // indirect
 	golang.org/x/image v0.0.0-20180708004352-c73c2afc3b81 // indirect
 	golang.org/x/net v0.0.0-20180826012351-8a410e7b638d // indirect
 	golang.org/x/oauth2 v0.0.0-20180821212333-d2e6202438be // indirect
-	golang.org/x/sys v0.0.0-20180828065106-d99a578cf41b // indirect
-	golang.org/x/tools v0.0.0-20180828015842-6cd1fcedba52 // indirect
-	google.golang.org/api v0.0.0-20180826000528-7954115fcf34
-	google.golang.org/genproto v0.0.0-20180817151627-c66870c02cf8 // indirect
+	golang.org/x/sys v0.0.0-20180831094639-fa5fdf94c789 // indirect
+	golang.org/x/tools v0.0.0-20180831211245-7ca132754999 // indirect
+	google.golang.org/api v0.0.0-20180831000444-b810576d88a0
+	google.golang.org/genproto v0.0.0-20180831171423-11092d34479b // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	gopkg.in/fsnotify.v1 v1.4.7 // indirect
