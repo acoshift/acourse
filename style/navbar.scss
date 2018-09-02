@@ -91,4 +91,18 @@
 	.dropdown:hover .dropdown-content {
 		display: block;
 	}
+
+	.logo-text {
+		font-size: 26px;
+		font-weight: 200;
+		text-decoration: none;
+		margin-left: 12px;
+		color: #474f57;
+	}
+
+	@media only screen and (max-width: 767px) {
+		.logo-text {
+			display: none;
+		}
+	}
 }
