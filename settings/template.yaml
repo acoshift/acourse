@@ -6,6 +6,8 @@ components:
 - component/global.script.tmpl
 - component/pagination.tmpl
 - component/error-message.tmpl
+- component/footer.tmpl
+- component/nav.tmpl
 list:
   # share
   share.not-found:

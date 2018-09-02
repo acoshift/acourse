@@ -1,0 +1,29 @@
+html, body {
+    height: 100%;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+.content {
+    flex: 1 0 auto;
+}
+
+footer {
+    flex-shrink: 0;
+}
+
+.offscreen-nav {
+    height: 0;
+    overflow: hidden;
+    transform: scaleY(0);
+    transform-origin: top;
+    transition: transform 0.16s ease;
+}
+
+#hamburger:checked + .offscreen-nav {
+    height: auto;
+    transform: scaleY(1);
+}

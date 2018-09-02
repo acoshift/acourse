@@ -29,20 +29,19 @@
 <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com" data-turbolinks-permanent>
 
 <link rel="preload" as="image" href="{{fallbackImage}}" data-turbolinks-permanent>
+<link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/tachyons/4.11.1/tachyons.min.css" data-turbolinks-permanent>
 <link rel="preload" as="style" href="{{static "style.css"}}" data-turbolinks-permanent>
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500" data-turbolinks-permanent>
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600" data-turbolinks-permanent>
-<link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" data-turbolinks-permanent>
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tachyons/4.11.1/tachyons.min.css" data-turbolinks-track="reload">
 <link rel="stylesheet" href="{{static "style.css"}}" data-turbolinks-track="reload">
 
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/turbolinks/5.1.1/turbolinks.js" defer></script>
 
-{{template "body" .Data}}
+<body class="helvetica">
+	{{template "body" .Data}}
+</body>
 
+<script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js" integrity="sha384-kW+oWsYx3YpxvjtZjFXqazFpA7UP/MbiY4jvs+RWZo2+N94PFZ36T6TFkc9O3qoB" crossorigin="anonymous"></script>
 {{template "global.script"}}
 {{block "script" .Data}}{{end}}
 

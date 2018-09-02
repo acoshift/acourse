@@ -1,35 +1,42 @@
 {{define "public-course-card"}}
-	<a href="{{route "app.course" .Link}}" class="course-card acourse-card -hover-rise _flex-column _color-dark">
-		<img class="course-cover placeholder" {{if .Image}}src="{{.Image}}"{{end}} width="100%">
-		<div class="course-detail acourse-segment _flex-column _flex-span _main-start">
-
-			<h4>{{.Title}}</h4>
-
-			<div class="acourse-block">
-				<div class="acourse-label {{.Type | courseType}} _font-bold">{{.Type | courseType}}</div>
-				{{if .ShowStart}}
-					<div class="live-date _font-size-small">เริ่มเรียน {{.Start | date}}</div>
+<article class="flex w-100 w-50-m w-25-l pa2">
+	<a href="{{route "app.course" .Link}}" class="flex flex-column w-100 link dim dark-gray">
+		<div class="aspect-ratio aspect-ratio--4x3">
+			<img
+				class="db bg-center cover aspect-ratio--object bg-black-10"
+				{{if .Image}}
+				style="background-image:url({{.Image}})"
 				{{end}}
-			</div>
-
-			<div class="acourse-block-big _flex-span _font-sub _font-size-normal">
-				{{.Desc}}
-			</div>
-			<div class="_flex-row _main-space-between">
-				<div></div>
-				<div class="course-price _flex-row _cross-end">
-					{{if le .Price 0.0}}
-						<p class="_font-bold _no-margin">ฟรี</p>
-					{{else}}
-						<p class="_no-margin {{if .Option.Discount}}discount _color-positive{{else}}_font-bold{{end}}">
-							฿ {{.Price | currency}}
-							{{if .Option.Discount}}
-								<p class="_font-bold _no-margin">&nbsp;฿ {{.Discount | currency}}</p>
-							{{end}}
-						</p>
-					{{end}}
-				</div>
-			</div>
+			>
 		</div>
+		<h2 class="mt3 mb2">{{.Title}}</h2>
+		<div class="acourse-block">
+			<div class="acourse-label {{.Type | courseType}} _font-bold">{{.Type | courseType}}</div>
+			{{if .ShowStart}}
+			<div class="live-date _font-size-small">เริ่มเรียน {{.Start | date}}</div>
+			{{end}}
+		</div>
+
+		<p class="f6 lh-copy flex-auto">{{.Desc}}</p>
+
+		{{if le .Price 0.0}}
+			<p class="tr b dark-red">ฟรี</p>
+		{{else}}
+			{{if .Option.Discount}}
+				<p class="tr b">
+					<span class="normal strike f7">฿ {{.Price | currency}}</span>
+					<span class="dark-red">
+						{{if le .Discount 0.0}}
+						ฟรี
+						{{else}}
+						฿ {{.Discount | currency}}
+						{{end}}
+					</span>
+				</p>
+			{{else}}
+				<p class="tr b dark-red">฿ {{.Price | currency}}</p>
+			{{end}}
+		{{end}}
 	</a>
+</article>
 {{end}}

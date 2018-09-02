@@ -18,8 +18,7 @@ const sassOption = {
 gulp.task('default', sync(['style', 'static']))
 
 gulp.task('style', () => gulp
-	.src('./style/main.scss')
-	.pipe(sass(sassOption).on('error', sass.logError))
+	.src('./style/main.css')
 	.pipe(concat('style.css'))
 	// .pipe(prod ? purgecss({ content: ['template/**/*.tmpl'] }) : noop())
 	.pipe(prod ? freeze() : noop())

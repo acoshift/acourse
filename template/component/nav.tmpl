@@ -1,0 +1,68 @@
+{{define "nav"}}
+<input type="checkbox" id="hamburger" class="dn">
+<div class="f3 offscreen-nav w-100 tc center bg-black white flex jusitfy-center items-center flex-row">
+	<nav class="center pv4">
+		<a class="db pv3 link b f4 white-80" href="{{route "auth.signin"}}">เข้าสู่ระบบ</a>
+		<a class="db pv3 link b f4 white-80" href="{{route "auth.signup"}}">สมัครใช้งาน</a>
+	</nav>
+</div>
+<div class="w-100 w-90-l ph3 ph0-l center flex items-center justify-between contain" style="height: 64px">
+	<a class="dtc v-mid mid-gray link dim" href="{{route "app.index"}}" title="Home" style="width: 128px">
+		<img src="/-/logo-w-2.svg" class="dib h3" alt="Acourse">
+	</a>
+	<label for="hamburger" class="db dn-ns">
+		<svg width="25px" height="18px" viewBox="0 3 25 18" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+			<g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" transform="translate(0.000000, 3.000000)">
+				<rect class="hamburger" id="bottom" fill="#1D1D1D" x="0" y="16" width="24" height="2"></rect>
+				<rect class="hamburger" id="mid" fill="#1D1D1D" x="0" y="8" width="24" height="2"></rect>
+				<rect class="hamburger" id="top" fill="#1D1D1D" x="0" y="0" width="24" height="2"></rect>
+			</g>
+		</svg>
+	</label>
+	<div class="dn flex-ns">
+		<a class="db b pv3 link black-80 mr4" href="{{route "auth.signin"}}">เข้าสู่ระบบ</a>
+		<a class="db b pv3 link black-80" href="{{route "auth.signup"}}">สมัครใช้งาน</a>
+	</div>
+</div>
+
+<!-- <div id="navbar" class="navbar-color">
+	<div class="navbar-container grid-container _flex-row _main-space-between _cross-stretch">
+		<div class="_flex-row _cross-center _main-end">
+			{{if .Me}}
+			<div class="dropdown _full-height">
+				<div class="dropbtn _full-height _flex-row _cross-center ">
+					<img
+					class="acourse-block-big acourse-circle _img-cover _no-margin"
+					src="{{.Me.Image}}"
+					onerror="this.src = '{{fallbackImage}}'">
+					<div class="username">&nbsp;&nbsp;{{.Me.Username}}</div>
+					&nbsp;&nbsp;<i class="fa fa-caret-down"></i>
+				</div>
+				<div class="dropdown-content-w">
+					<div class="dropdown-content">
+						<a class="_font-main _font-bold _font-size-big {{if eq .Navbar "profile"}} active{{end}}" href="{{route "app.profile"}}">โปรไฟล์</a>
+						{{if .Me.Role.Admin}}
+						<a class="_font-main _font-bold _font-size-big {{if eq .Navbar "admin.users"}} active{{end}}" href="{{route "admin.users"}}">รายชื่อผู้ใช้</a>
+						<a class="_font-main _font-bold _font-size-big {{if eq .Navbar "admin.courses"}} active{{end}}" href="{{route "admin.courses"}}">รายชื่อคอร์ส</a>
+						<a class="_font-main _font-bold _font-size-big {{if eq .Navbar "admin.payment.pending"}} active{{end}}" href="{{route "admin.payments.pending"}}">รอดำเนินการ</a>
+						<a class="_font-main _font-bold _font-size-big {{if eq .Navbar "admin.payment.history"}} active{{end}}" href="{{route "admin.payments.history"}}">ประวัติการชำระเงิน</a>
+						{{end}}
+
+						<form method="POST" action="{{route "app.signout"}}">
+							<button class="_font-main _font-bold _font-size-big">ออกจากระบบ</button>
+						</form>
+					</div>
+				</div>
+			</div>
+			{{else}}
+			<a class="link _flex-row _cross-center _font-sub" href="{{route "auth.signin"}}">
+				เข้าสู่ระบบ
+			</a>
+			<a href="{{route "auth.signup"}}">
+				<div class="acourse-button -primary _font-sub acourse-side-space">สมัครใช้งาน</div>
+			</a>
+			{{end}}
+		</div>
+	</div>
+</div> -->
+{{end}}

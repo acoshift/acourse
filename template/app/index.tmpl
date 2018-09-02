@@ -1,40 +1,34 @@
 {{define "app-body"}}
-	<div id="home">
-		<div class="banner">
-			<div class="grid-container _flex-column _cross-center _main-center">
-				<p class="tag-line _font-sub">acourse.io</p>
-				<p class="sub-tag-line _font-sub _font-thin _align-center">
-					<span class="_no-wrap">แหล่งเรียนรู้ออนไลน์</span>
-					<span class="_no-wrap">ที่ทุกคนเข้าถึงได้</span>
-					<div class="row">&nbsp;</div>
-					<a
-						href="https://startupcto.typeform.com/to/qd1Utf"
-						class="acourse-button -negative"
-						target="_blank"
-						rel="noopener"
-					>
-						สมัครเป็นผู้สอน
-					</a>
-					<br>
-					<a
-						href="https://aintern.acourse.io"
-						class="acourse-button -negative"
-						target="_blank"
-						rel="noopener"
-					>
-						AIntern - ฝึกงาน online รายได้ดี
-					</a>
-				</p>
-			</div>
-		</div>
-		<div class="grid-container row">
+	<header class="tc ph4 pv5 bg-center cover" style="background-image:url(/-/header.jpg)">
+		<h1 class="f1 fw2 white mv3">
+			acourse.io
+		</h1>
+		<h2 class="f5 f4-m f3-l fw2 white-70 mt0 lh-copy">
+			แหล่งเรียนรู้ออนไลน์ ที่ทุกคนเข้าถึงได้
+		</h2>
+		<a
+			href="https://startupcto.typeform.com/to/qd1Utf"
+			class="f5 no-underline white bg-white-10 bg-animate hover-bg-black hover-white inline-flex items-center pa3 ba border-box ma3"
+			target="_blank"
+			rel="noopener"
+		>
+			สมัครเป็นผู้สอน
+		</a>
+		<a
+			href="https://aintern.acourse.io"
+			class="f5 no-underline white bg-white-10 bg-animate hover-bg-black hover-white inline-flex items-center pa3 ba border-box ma3"
+			target="_blank"
+			rel="noopener"
+		>
+			AIntern - ฝึกงาน online รายได้ดี
+		</a>
+	</header>
 
+	<div class="cf mh3-ns mh4-m mh5-l mv4 flex flex-wrap">
 		{{range .Courses}}
-			<div class="col-xs-12 col-sm-6 col-md-4 col-lg-3 _flex-row _main-strech">
-				{{template "public-course-card" .}}
-			</div>
+		{{template "public-course-card" .}}
+		{{else}}
+		No course avaliable right now
 		{{end}}
-
-		</div>
 	</div>
 {{end}}
