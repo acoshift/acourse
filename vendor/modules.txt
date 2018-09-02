@@ -22,7 +22,7 @@ github.com/acoshift/flash
 github.com/acoshift/go-firebase-admin
 # github.com/acoshift/header v0.0.0-20180524134832-fbb24d14e0c3
 github.com/acoshift/header
-# github.com/acoshift/hime v0.9.4
+# github.com/acoshift/hime v0.9.5-0.20180902092151-83b2da8f2a51
 github.com/acoshift/hime
 # github.com/acoshift/methodmux v1.1.1
 github.com/acoshift/methodmux
@@ -181,7 +181,7 @@ golang.org/x/oauth2/jws
 # golang.org/x/sync v0.0.0-20180314180146-1d60e4601c6f
 golang.org/x/sync/errgroup
 golang.org/x/sync/semaphore
-# golang.org/x/sys v0.0.0-20180828065106-d99a578cf41b
+# golang.org/x/sys v0.0.0-20180831094639-fa5fdf94c789
 golang.org/x/sys/unix
 # golang.org/x/text v0.3.1-0.20180807135948-17ff2d5776d2
 golang.org/x/text/secure/bidirule
@@ -206,7 +206,7 @@ golang.org/x/text/internal/language/compact
 golang.org/x/text/internal/tag
 # golang.org/x/time v0.0.0-20180412165947-fbb02b2291d2
 golang.org/x/time/rate
-# google.golang.org/api v0.0.0-20180826000528-7954115fcf34
+# google.golang.org/api v0.0.0-20180831000444-b810576d88a0
 google.golang.org/api/option
 google.golang.org/api/support/bundler
 google.golang.org/api/transport/grpc
@@ -234,7 +234,7 @@ google.golang.org/appengine/internal/base
 google.golang.org/appengine/internal/datastore
 google.golang.org/appengine/internal/log
 google.golang.org/appengine/internal/remote_api
-# google.golang.org/genproto v0.0.0-20180817151627-c66870c02cf8
+# google.golang.org/genproto v0.0.0-20180831171423-11092d34479b
 google.golang.org/genproto/googleapis/devtools/clouderrorreporting/v1beta1
 google.golang.org/genproto/googleapis/devtools/cloudprofiler/v2
 google.golang.org/genproto/googleapis/rpc/errdetails

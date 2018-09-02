@@ -1,7 +1,7 @@
 dir: template
 root: root
 minify: true
-components:
+preload:
 - main.tmpl
 - component/global.script.tmpl
 - component/pagination.tmpl
