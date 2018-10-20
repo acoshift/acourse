@@ -14,7 +14,7 @@ import (
 	"cloud.google.com/go/storage"
 	"cloud.google.com/go/trace"
 	"github.com/acoshift/configfile"
-	"github.com/acoshift/go-firebase-admin"
+	firadmin "github.com/acoshift/go-firebase-admin"
 	"github.com/acoshift/methodmux"
 	"github.com/acoshift/middleware"
 	"github.com/acoshift/probehandler"
@@ -40,6 +40,7 @@ import (
 	"github.com/acoshift/acourse/service"
 	"github.com/acoshift/acourse/service/email"
 	"github.com/acoshift/acourse/service/file"
+	"github.com/acoshift/acourse/service/firebase"
 	"github.com/acoshift/acourse/service/image"
 )
 
@@ -74,7 +75,7 @@ func main() {
 	// init trace
 	traceClient, _ := trace.NewClient(ctx, projectID, googClientOpts...)
 
-	firApp, err := firebase.InitializeApp(ctx, firebase.AppOptions{
+	firApp, err := firadmin.InitializeApp(ctx, firadmin.AppOptions{
 		ProjectID: projectID,
 	}, googClientOpts...)
 	if err != nil {
@@ -98,6 +99,7 @@ func main() {
 	})
 	file.InitGCS(storageClient, config.String("bucket"))
 	image.Init()
+	firebase.Init(firAuth)
 
 	// init redis pool
 	redisClient := redis.NewClient(&redis.Options{
@@ -135,7 +137,6 @@ func main() {
 
 	svc := service.New(service.Config{
 		Repository:     repository.NewService(),
-		Auth:           firAuth,
 		BaseURL:        baseURL,
 		AdminNotifier:  notify.NewOutgoingWebhookAdminNotifier(config.String("slack_url")),
 		Location:       loc,

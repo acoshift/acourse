@@ -12,7 +12,6 @@ import (
 // Config is service config
 type Config struct {
 	Repository     Repository
-	Auth           FirebaseAuth
 	BaseURL        string
 	AdminNotifier  notify.AdminNotifier
 	Location       *time.Location

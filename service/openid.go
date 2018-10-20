@@ -11,6 +11,7 @@ import (
 	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/entity"
 	"github.com/acoshift/acourse/model/file"
+	"github.com/acoshift/acourse/model/firebase"
 	"github.com/acoshift/acourse/model/image"
 )
 
@@ -26,19 +27,29 @@ func (s *svc) GenerateOpenIDURI(ctx context.Context, provider string) (string, s
 
 	sessID := generateSessionID()
 
-	redirect, err := s.Auth.CreateAuthURI(ctx, provider, s.BaseURL+s.OpenIDCallback, sessID)
+	authURI := firebase.CreateAuthURI{
+		ProviderID:  provider,
+		ContinueURI: s.BaseURL + s.OpenIDCallback,
+		SessionID:   sessID,
+	}
+	err := dispatcher.Dispatch(ctx, &authURI)
 	if err != nil {
 		return "", "", err
 	}
 
-	return redirect, sessID, nil
+	return authURI.Result, sessID, nil
 }
 
 func (s *svc) SignInOpenIDCallback(ctx context.Context, uri string, state string) (string, error) {
-	user, err := s.Auth.VerifyAuthCallbackURI(ctx, s.BaseURL+uri, state)
+	q := firebase.VerifyAuthCallbackURI{
+		CallbackURI: s.BaseURL + uri,
+		SessionID:   state,
+	}
+	err := dispatcher.Dispatch(ctx, &q)
 	if err != nil {
 		return "", newUIError(err.Error())
 	}
+	user := q.Result
 
 	err = sqlctx.RunInTx(ctx, func(ctx context.Context) error {
 		// check is user sign up

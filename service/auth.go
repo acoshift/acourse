@@ -7,10 +7,12 @@ import (
 	"io"
 	"unicode/utf8"
 
-	"github.com/acoshift/go-firebase-admin"
+	admin "github.com/acoshift/go-firebase-admin"
 	"github.com/asaskevich/govalidator"
+	"github.com/moonrhythm/dispatcher"
 
 	"github.com/acoshift/acourse/entity"
+	"github.com/acoshift/acourse/model/firebase"
 )
 
 func (s *svc) SignUp(ctx context.Context, email, password string) (string, error) {
@@ -30,13 +32,17 @@ func (s *svc) SignUp(ctx context.Context, email, password string) (string, error
 		return "", newUIError("password must have 6 to 64 characters")
 	}
 
-	userID, err := s.Auth.CreateUser(ctx, &firebase.User{
-		Email:    email,
-		Password: password,
-	})
+	createUser := firebase.CreateUser{
+		User: &admin.User{
+			Email:    email,
+			Password: password,
+		},
+	}
+	err = dispatcher.Dispatch(ctx, &createUser)
 	if err != nil {
 		return "", newUIError(err.Error())
 	}
+	userID := createUser.Result
 
 	err = s.Repository.RegisterUser(ctx, &RegisterUser{
 		ID:       userID,
@@ -61,13 +67,14 @@ func (s *svc) SendPasswordResetEmail(ctx context.Context, email string) error {
 		return newUIError("email required")
 	}
 
-	user, err := s.Auth.GetUserByEmail(ctx, email)
+	getUser := firebase.GetUserByEmail{Email: email}
+	err := dispatcher.Dispatch(ctx, &getUser)
 	if err != nil {
 		// don't send any error back to user
 		return nil
 	}
 
-	err = s.Auth.SendPasswordResetEmail(ctx, user.Email)
+	err = dispatcher.Dispatch(ctx, &firebase.SendPasswordResetEmail{Email: getUser.Email})
 	if err != nil {
 		return newUIError(err.Error())
 	}
@@ -83,10 +90,12 @@ func (s *svc) SignInPassword(ctx context.Context, email, password string) (strin
 		return "", newUIError("password required")
 	}
 
-	userID, err := s.Auth.VerifyPassword(ctx, email, password)
+	q := firebase.VerifyPassword{Email: email, Password: password}
+	err := dispatcher.Dispatch(ctx, &q)
 	if err != nil {
 		return "", newUIError(err.Error())
 	}
+	userID := q.Result
 
 	// if user not found in our database, insert new user
 	// this happend when database out of sync with firebase authentication
