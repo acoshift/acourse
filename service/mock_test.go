@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/acoshift/acourse/entity"
+	"github.com/acoshift/acourse/model/course"
 	"github.com/acoshift/acourse/service"
 )
 
@@ -68,14 +69,14 @@ func (m *mockRepo) RegisterCourseContent(ctx context.Context, x *entity.Register
 	return args.String(0), args.Error(1)
 }
 
-func (m *mockRepo) GetCourseContent(ctx context.Context, contentID string) (*entity.CourseContent, error) {
+func (m *mockRepo) GetCourseContent(ctx context.Context, contentID string) (*course.Content, error) {
 	args := m.Mock.Called(contentID)
-	return args.Get(0).(*entity.CourseContent), args.Error(1)
+	return args.Get(0).(*course.Content), args.Error(1)
 }
 
-func (m *mockRepo) ListCourseContents(ctx context.Context, courseID string) ([]*entity.CourseContent, error) {
+func (m *mockRepo) ListCourseContents(ctx context.Context, courseID string) ([]*course.Content, error) {
 	args := m.Mock.Called(courseID)
-	return args.Get(0).([]*entity.CourseContent), args.Error(1)
+	return args.Get(0).([]*course.Content), args.Error(1)
 }
 
 func (m *mockRepo) UpdateCourseContent(ctx context.Context, contentID, title, desc, videoID string) error {

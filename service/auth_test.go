@@ -27,7 +27,7 @@ var _ = Describe("Auth", func() {
 	BeforeEach(func() {
 		ctx = context.Background()
 		repo = &mockRepo{}
-		New(Config{
+		Init(Config{
 			Repository: repo,
 		})
 	})
