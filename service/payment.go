@@ -9,12 +9,13 @@ import (
 	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/entity"
 	"github.com/acoshift/acourse/model/email"
+	"github.com/acoshift/acourse/model/payment"
 	"github.com/acoshift/acourse/view"
 )
 
-func (s *svc) AcceptPayment(ctx context.Context, paymentID string) error {
+func (s *svc) acceptPayment(ctx context.Context, m *payment.Accept) error {
 	err := sqlctx.RunInTx(ctx, func(ctx context.Context) error {
-		x, err := s.Repository.GetPayment(ctx, paymentID)
+		x, err := s.Repository.GetPayment(ctx, m.ID)
 		if err == entity.ErrNotFound {
 			return newUIError("payment not found")
 		}
@@ -35,7 +36,7 @@ func (s *svc) AcceptPayment(ctx context.Context, paymentID string) error {
 
 	go func() {
 		// re-fetch payment to get latest timestamp
-		x, err := s.Repository.GetPayment(ctx, paymentID)
+		x, err := s.Repository.GetPayment(ctx, m.ID)
 		if err != nil {
 			return
 		}
@@ -95,9 +96,9 @@ https://acourse.io
 	return nil
 }
 
-func (s *svc) RejectPayment(ctx context.Context, paymentID string, msg string) error {
+func (s *svc) rejectPayment(ctx context.Context, m *payment.Reject) error {
 	err := sqlctx.RunInTx(ctx, func(ctx context.Context) error {
-		x, err := s.Repository.GetPayment(ctx, paymentID)
+		x, err := s.Repository.GetPayment(ctx, m.ID)
 		if err == entity.ErrNotFound {
 			return newUIError("payment not found")
 		}
@@ -112,11 +113,11 @@ func (s *svc) RejectPayment(ctx context.Context, paymentID string, msg string) e
 	}
 
 	go func() {
-		x, err := s.Repository.GetPayment(ctx, paymentID)
+		x, err := s.Repository.GetPayment(ctx, m.ID)
 		if err != nil {
 			return
 		}
-		body := view.MarkdownEmail(msg)
+		body := view.MarkdownEmail(m.Message)
 		title := fmt.Sprintf("คำขอเพื่อเรียนหลักสูตร %s ได้รับการปฏิเสธ", x.Course.Title)
 		dispatcher.Dispatch(context.Background(), &email.Send{
 			To:      x.User.Email,

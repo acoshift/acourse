@@ -23,9 +23,6 @@ type Service interface {
 	GenerateOpenIDURI(ctx context.Context, provider string) (redirectURI string, state string, err error)
 	SignInOpenIDCallback(ctx context.Context, uri string, state string) (userID string, err error)
 
-	AcceptPayment(ctx context.Context, paymentID string) error
-	RejectPayment(ctx context.Context, paymentID string, msg string) error
-
 	CreateCourse(ctx context.Context, x *CreateCourse) (courseID string, err error)
 	UpdateCourse(ctx context.Context, x *UpdateCourse) error
 	EnrollCourse(ctx context.Context, courseID string, price float64, paymentImage *multipart.FileHeader) error
@@ -45,6 +42,8 @@ func New(cfg Config) Service {
 	dispatcher.Register(s.sendPasswordResetEmail)
 	dispatcher.Register(s.signInPassword)
 	dispatcher.Register(s.updateProfile)
+	dispatcher.Register(s.acceptPayment)
+	dispatcher.Register(s.rejectPayment)
 	return s
 }
 

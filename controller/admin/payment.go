@@ -5,10 +5,12 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/moonrhythm/hime"
 	"github.com/acoshift/paginate"
+	"github.com/moonrhythm/dispatcher"
+	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/entity"
+	"github.com/acoshift/acourse/model/payment"
 	"github.com/acoshift/acourse/service"
 	"github.com/acoshift/acourse/view"
 )
@@ -71,7 +73,7 @@ func (c *ctrl) postRejectPayment(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 	message := ctx.PostFormValue("message")
 
-	err := c.Service.RejectPayment(ctx, id, message)
+	err := dispatcher.Dispatch(ctx, &payment.Reject{ID: id, Message: message})
 	if service.IsUIError(err) {
 		return ctx.Status(http.StatusBadRequest).String(err.Error())
 	}
@@ -87,7 +89,7 @@ func (c *ctrl) postPendingPayment(ctx *hime.Context) error {
 
 	id := ctx.PostFormValue("id")
 	if action == "accept" {
-		err := c.Service.AcceptPayment(ctx, id)
+		err := dispatcher.Dispatch(ctx, &payment.Accept{ID: id})
 		if service.IsUIError(err) {
 			return ctx.Status(http.StatusBadRequest).String(err.Error())
 		}
