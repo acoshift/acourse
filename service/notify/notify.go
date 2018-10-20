@@ -2,41 +2,43 @@ package notify
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"time"
+
+	"github.com/moonrhythm/dispatcher"
+
+	"github.com/acoshift/acourse/model/notify"
 )
 
-// AdminNotifier type
-type AdminNotifier interface {
-	Notify(message string) error
-}
-
-// NewOutgoingWebhookAdminNotifier returns new admin notifier
-func NewOutgoingWebhookAdminNotifier(webhookURL string) AdminNotifier {
-	return &outgoingWebhookAdminNotifier{
+// Init registers notify service
+func Init(webhookURL string) {
+	s := outgoingWebhookNotifier{
 		client: &http.Client{
 			Timeout: 10 * time.Second,
 		},
 		url: webhookURL,
 	}
+
+	dispatcher.Register(s.admin)
 }
 
-type outgoingWebhookAdminNotifier struct {
+type outgoingWebhookNotifier struct {
 	client *http.Client
 	url    string
 }
 
-func (n *outgoingWebhookAdminNotifier) Notify(message string) error {
+func (n *outgoingWebhookNotifier) admin(_ context.Context, m *notify.Admin) error {
 	if n.url == "" {
 		return nil
 	}
 
 	payload := struct {
 		Text string `json:"text"`
-	}{message}
+	}{m.Message}
 	buf := bytes.Buffer{}
 	err := json.NewEncoder(&buf).Encode(&payload)
 	if err != nil {

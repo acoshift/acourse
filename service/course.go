@@ -14,6 +14,7 @@ import (
 	"github.com/acoshift/acourse/entity"
 	"github.com/acoshift/acourse/model/file"
 	"github.com/acoshift/acourse/model/image"
+	"github.com/acoshift/acourse/model/notify"
 )
 
 func (s *svc) CreateCourse(ctx context.Context, x *CreateCourse) (courseID string, err error) {
@@ -212,7 +213,7 @@ func (s *svc) EnrollCourse(ctx context.Context, courseID string, price float64, 
 	}
 
 	if newPayment {
-		go s.AdminNotifier.Notify(fmt.Sprintf("New payment for course %s, price %.2f", course.Title, price))
+		go dispatcher.Dispatch(ctx, &notify.Admin{Message: fmt.Sprintf("New payment for course %s, price %.2f", course.Title, price)})
 	}
 
 	return nil

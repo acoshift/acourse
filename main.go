@@ -35,13 +35,13 @@ import (
 	"github.com/acoshift/acourse/controller/editor"
 	"github.com/acoshift/acourse/controller/share"
 	"github.com/acoshift/acourse/internal"
-	"github.com/acoshift/acourse/notify"
 	"github.com/acoshift/acourse/repository"
 	"github.com/acoshift/acourse/service"
 	"github.com/acoshift/acourse/service/email"
 	"github.com/acoshift/acourse/service/file"
 	"github.com/acoshift/acourse/service/firebase"
 	"github.com/acoshift/acourse/service/image"
+	"github.com/acoshift/acourse/service/notify"
 )
 
 func main() {
@@ -100,6 +100,7 @@ func main() {
 	file.InitGCS(storageClient, config.String("bucket"))
 	image.Init()
 	firebase.Init(firAuth)
+	notify.Init(config.String("slack_url"))
 
 	// init redis pool
 	redisClient := redis.NewClient(&redis.Options{
@@ -138,7 +139,6 @@ func main() {
 	svc := service.New(service.Config{
 		Repository:     repository.NewService(),
 		BaseURL:        baseURL,
-		AdminNotifier:  notify.NewOutgoingWebhookAdminNotifier(config.String("slack_url")),
 		Location:       loc,
 		OpenIDCallback: himeApp.Route("auth.openid.callback"),
 	})

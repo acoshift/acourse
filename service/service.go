@@ -6,14 +6,12 @@ import (
 	"time"
 
 	"github.com/acoshift/acourse/entity"
-	"github.com/acoshift/acourse/notify"
 )
 
 // Config is service config
 type Config struct {
 	Repository     Repository
 	BaseURL        string
-	AdminNotifier  notify.AdminNotifier
 	Location       *time.Location
 	OpenIDCallback string
 }
