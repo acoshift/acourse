@@ -30,8 +30,6 @@ type Service interface {
 	UpdateCourse(ctx context.Context, x *UpdateCourse) error
 	EnrollCourse(ctx context.Context, courseID string, price float64, paymentImage *multipart.FileHeader) error
 
-	UpdateProfile(ctx context.Context, x *Profile) error
-
 	CreateCourseContent(ctx context.Context, x *entity.RegisterCourseContent) (contentID string, err error)
 	GetCourseContent(ctx context.Context, contentID string) (*entity.CourseContent, error)
 	ListCourseContents(ctx context.Context, courseID string) ([]*entity.CourseContent, error)
@@ -46,6 +44,7 @@ func New(cfg Config) Service {
 	dispatcher.Register(s.signUp)
 	dispatcher.Register(s.sendPasswordResetEmail)
 	dispatcher.Register(s.signInPassword)
+	dispatcher.Register(s.updateProfile)
 	return s
 }
 

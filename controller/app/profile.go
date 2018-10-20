@@ -3,10 +3,12 @@ package app
 import (
 	"unicode/utf8"
 
-	"github.com/moonrhythm/hime"
 	"github.com/asaskevich/govalidator"
+	"github.com/moonrhythm/dispatcher"
+	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/context/appctx"
+	"github.com/acoshift/acourse/model/user"
 	"github.com/acoshift/acourse/service"
 	"github.com/acoshift/acourse/view"
 )
@@ -84,7 +86,8 @@ func (c *ctrl) postProfileEdit(ctx *hime.Context) error {
 	}
 
 	image, _ := ctx.FormFileHeaderNotEmpty("image")
-	err := c.Service.UpdateProfile(ctx, &service.Profile{
+	err := dispatcher.Dispatch(ctx, &user.UpdateProfile{
+		ID:       appctx.GetUserID(ctx),
 		Username: username,
 		Name:     name,
 		AboutMe:  aboutMe,
