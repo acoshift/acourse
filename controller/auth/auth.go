@@ -67,7 +67,7 @@ func (c *ctrl) postResetPassword(ctx *hime.Context) error {
 		return ctx.RedirectToGet()
 	}
 
-	err := c.Service.SendPasswordResetEmail(ctx, email)
+	err := dispatcher.Dispatch(ctx, &auth.SendPasswordResetEmail{Email: email})
 	if service.IsUIError(err) {
 		f.Add("Errors", err.Error())
 		return ctx.RedirectToGet()

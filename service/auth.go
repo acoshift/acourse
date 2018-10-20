@@ -65,12 +65,12 @@ func (s *svc) signUp(ctx context.Context, m *auth.SignUp) error {
 	return nil
 }
 
-func (s *svc) SendPasswordResetEmail(ctx context.Context, email string) error {
-	if email == "" {
+func (s *svc) sendPasswordResetEmail(ctx context.Context, m *auth.SendPasswordResetEmail) error {
+	if m.Email == "" {
 		return newUIError("email required")
 	}
 
-	getUser := firebase.GetUserByEmail{Email: email}
+	getUser := firebase.GetUserByEmail{Email: m.Email}
 	err := dispatcher.Dispatch(ctx, &getUser)
 	if err != nil {
 		// don't send any error back to user

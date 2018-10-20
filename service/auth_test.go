@@ -41,7 +41,7 @@ var _ = Describe("Auth", func() {
 			}
 			err := dispatcher.Dispatch(ctx, &q)
 
-			Expect(err).NotTo(BeNil())
+			Expect(err).To(HaveOccurred())
 			Expect(IsUIError(err)).To(BeTrue())
 			Expect(q.Result).To(BeZero())
 		})
@@ -53,7 +53,7 @@ var _ = Describe("Auth", func() {
 			}
 			err := dispatcher.Dispatch(ctx, &q)
 
-			Expect(err).NotTo(BeNil())
+			Expect(err).To(HaveOccurred())
 			Expect(IsUIError(err)).To(BeTrue())
 			Expect(q.Result).To(BeZero())
 		})
@@ -65,7 +65,7 @@ var _ = Describe("Auth", func() {
 			}
 			err := dispatcher.Dispatch(ctx, &q)
 
-			Expect(err).NotTo(BeNil())
+			Expect(err).To(HaveOccurred())
 			Expect(IsUIError(err)).To(BeTrue())
 			Expect(q.Result).To(BeZero())
 		})
@@ -77,7 +77,7 @@ var _ = Describe("Auth", func() {
 			}
 			err := dispatcher.Dispatch(ctx, &q)
 
-			Expect(err).NotTo(BeNil())
+			Expect(err).To(HaveOccurred())
 			Expect(IsUIError(err)).To(BeTrue())
 			Expect(q.Result).To(BeZero())
 		})
@@ -89,7 +89,7 @@ var _ = Describe("Auth", func() {
 			}
 			err := dispatcher.Dispatch(ctx, &q)
 
-			Expect(err).NotTo(BeNil())
+			Expect(err).To(HaveOccurred())
 			Expect(IsUIError(err)).To(BeTrue())
 			Expect(q.Result).To(BeZero())
 		})
@@ -107,7 +107,7 @@ var _ = Describe("Auth", func() {
 			}
 			err := dispatcher.Dispatch(ctx, &q)
 
-			Expect(err).NotTo(BeNil())
+			Expect(err).To(HaveOccurred())
 			Expect(IsUIError(err)).To(BeTrue())
 			Expect(q.Result).To(BeZero())
 		})
@@ -131,7 +131,7 @@ var _ = Describe("Auth", func() {
 			}
 			err := dispatcher.Dispatch(ctx, &q)
 
-			Expect(err).NotTo(BeNil())
+			Expect(err).To(HaveOccurred())
 			Expect(IsUIError(err)).To(BeTrue())
 			Expect(q.Result).To(BeZero())
 		})
@@ -155,7 +155,7 @@ var _ = Describe("Auth", func() {
 			}
 			err := dispatcher.Dispatch(ctx, &q)
 
-			Expect(err).NotTo(BeNil())
+			Expect(err).To(HaveOccurred())
 			Expect(IsUIError(err)).To(BeTrue())
 			Expect(q.Result).To(BeZero())
 		})
@@ -179,7 +179,7 @@ var _ = Describe("Auth", func() {
 			}
 			err := dispatcher.Dispatch(ctx, &q)
 
-			Expect(err).NotTo(BeNil())
+			Expect(err).To(HaveOccurred())
 			Expect(q.Result).To(BeZero())
 		})
 
@@ -202,7 +202,7 @@ var _ = Describe("Auth", func() {
 			}
 			err := dispatcher.Dispatch(ctx, &q)
 
-			Expect(err).To(BeNil())
+			Expect(err).NotTo(HaveOccurred())
 			Expect(q.Result).To(Equal("123"))
 		})
 	})
@@ -211,7 +211,7 @@ var _ = Describe("Auth", func() {
 		It("should error when sign in with zero value email and password", func() {
 			userID, err := s.SignInPassword(ctx, "", "")
 
-			Expect(err).NotTo(BeNil())
+			Expect(err).To(HaveOccurred())
 			Expect(IsUIError(err)).To(BeTrue())
 			Expect(userID).To(BeZero())
 		})
@@ -219,7 +219,7 @@ var _ = Describe("Auth", func() {
 		It("should error when sign in with valid email but zero password", func() {
 			userID, err := s.SignInPassword(ctx, "test@test.com", "")
 
-			Expect(err).NotTo(BeNil())
+			Expect(err).To(HaveOccurred())
 			Expect(IsUIError(err)).To(BeTrue())
 			Expect(userID).To(BeZero())
 		})
@@ -227,7 +227,7 @@ var _ = Describe("Auth", func() {
 		It("should error when sign in with zero email but valid password", func() {
 			userID, err := s.SignInPassword(ctx, "", "123456")
 
-			Expect(err).NotTo(BeNil())
+			Expect(err).To(HaveOccurred())
 			Expect(IsUIError(err)).To(BeTrue())
 			Expect(userID).To(BeZero())
 		})
@@ -241,7 +241,7 @@ var _ = Describe("Auth", func() {
 
 			userID, err := s.SignInPassword(ctx, "test@test.com", "fakepass")
 
-			Expect(err).NotTo(BeNil())
+			Expect(err).To(HaveOccurred())
 			Expect(userID).To(BeZero())
 		})
 
@@ -256,16 +256,16 @@ var _ = Describe("Auth", func() {
 
 			userID, err := s.SignInPassword(ctx, "test@test.com", "123456")
 
-			Expect(err).To(BeNil())
+			Expect(err).NotTo(HaveOccurred())
 			Expect(userID).To(Equal("aqswde"))
 		})
 	})
 
 	Describe("SendPasswordResetEmail", func() {
 		It("should error when email is empty", func() {
-			err := s.SendPasswordResetEmail(ctx, "")
+			err := dispatcher.Dispatch(ctx, &auth.SendPasswordResetEmail{})
 
-			Expect(err).NotTo(BeNil())
+			Expect(err).To(HaveOccurred())
 			Expect(IsUIError(err)).To(BeTrue())
 		})
 
@@ -275,9 +275,11 @@ var _ = Describe("Auth", func() {
 				return fmt.Errorf("not found")
 			})
 
-			err := s.SendPasswordResetEmail(ctx, "notfound@test.com")
+			err := dispatcher.Dispatch(ctx, &auth.SendPasswordResetEmail{
+				Email: "notfound@test.com",
+			})
 
-			Expect(err).To(BeNil())
+			Expect(err).NotTo(HaveOccurred())
 		})
 
 		It("should propagate error when firebase send email error", func() {
@@ -296,9 +298,11 @@ var _ = Describe("Auth", func() {
 				return fmt.Errorf("some error")
 			})
 
-			err := s.SendPasswordResetEmail(ctx, "test@test.com")
+			err := dispatcher.Dispatch(ctx, &auth.SendPasswordResetEmail{
+				Email: "test@test.com",
+			})
 
-			Expect(err).NotTo(BeNil())
+			Expect(err).To(HaveOccurred())
 			Expect(IsUIError(err)).To(BeTrue())
 		})
 
@@ -318,9 +322,11 @@ var _ = Describe("Auth", func() {
 				return nil
 			})
 
-			err := s.SendPasswordResetEmail(ctx, "test@test.com")
+			err := dispatcher.Dispatch(ctx, &auth.SendPasswordResetEmail{
+				Email: "test@test.com",
+			})
 
-			Expect(err).To(BeNil())
+			Expect(err).NotTo(HaveOccurred())
 		})
 	})
 })

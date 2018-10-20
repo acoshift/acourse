@@ -7,3 +7,8 @@ type SignUp struct {
 
 	Result string // user id
 }
+
+// SendPasswordResetEmail command
+type SendPasswordResetEmail struct {
+	Email string
+}

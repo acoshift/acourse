@@ -36,7 +36,7 @@ var _ = Describe("Validate", func() {
 			fh.Header.Set("Content-Type", "image/jpg")
 			err := ValidateImage(fh)
 
-			Expect(err).To(BeNil())
+			Expect(err).NotTo(HaveOccurred())
 		})
 
 		It("should success when file is jpeg", func() {
@@ -45,7 +45,7 @@ var _ = Describe("Validate", func() {
 			fh.Header.Set("Content-Type", "image/jpeg")
 			err := ValidateImage(fh)
 
-			Expect(err).To(BeNil())
+			Expect(err).NotTo(HaveOccurred())
 		})
 
 		It("should success when file is png", func() {
@@ -54,7 +54,7 @@ var _ = Describe("Validate", func() {
 			fh.Header.Set("Content-Type", "image/png")
 			err := ValidateImage(fh)
 
-			Expect(err).To(BeNil())
+			Expect(err).NotTo(HaveOccurred())
 		})
 
 		It("should return error when file is bmp", func() {
