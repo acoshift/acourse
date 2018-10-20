@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/acoshift/middleware"
-	"github.com/acoshift/session"
+	"github.com/moonrhythm/session"
 
 	"github.com/acoshift/acourse/entity"
 )

@@ -125,6 +125,7 @@ const (
 	EncodingCompress = "compress"
 	EncodingDeflate  = "deflate"
 	EncodingGzip     = "gzip"
+	EncodingBr       = "br"
 	EncodingIdentity = "identity"
 )
 

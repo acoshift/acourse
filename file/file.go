@@ -25,7 +25,7 @@ func NewGCS(client *storage.Client, bucket string) Storage {
 
 // GenerateFilename generates new filename
 func GenerateFilename() string {
-	return "upload/" + uuid.Must(uuid.NewV4()).String()
+	return "upload/" + uuid.NewV4().String()
 }
 
 type gcs struct {

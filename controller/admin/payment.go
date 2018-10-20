@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/acoshift/hime"
+	"github.com/moonrhythm/hime"
 	"github.com/acoshift/paginate"
 
 	"github.com/acoshift/acourse/entity"

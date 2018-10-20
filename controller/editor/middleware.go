@@ -3,7 +3,7 @@ package editor
 import (
 	"net/http"
 
-	"github.com/acoshift/hime"
+	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/context/appctx"
 	"github.com/acoshift/acourse/controller/share"

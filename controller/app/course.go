@@ -6,9 +6,9 @@ import (
 	"net/url"
 	"strconv"
 
-	"github.com/acoshift/hime"
 	"github.com/acoshift/methodmux"
 	"github.com/acoshift/prefixhandler"
+	"github.com/moonrhythm/hime"
 	"github.com/satori/go.uuid"
 
 	"github.com/acoshift/acourse/context/appctx"
@@ -72,7 +72,7 @@ func newCourseHandler(appCtrl *ctrl) http.Handler {
 			return ctx.RedirectTo("app.course", l, ctx.URL.Path)
 		}
 
-		ctx.WithValue(courseKey{}, x)
+		ctx = ctx.WithValue(courseKey{}, x)
 
 		return ctx.Handle(mux)
 	})

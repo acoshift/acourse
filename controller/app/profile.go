@@ -3,7 +3,7 @@ package app
 import (
 	"unicode/utf8"
 
-	"github.com/acoshift/hime"
+	"github.com/moonrhythm/hime"
 	"github.com/asaskevich/govalidator"
 
 	"github.com/acoshift/acourse/context/appctx"

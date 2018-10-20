@@ -1,7 +1,7 @@
 package app
 
 import (
-	"github.com/acoshift/hime"
+	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/controller/share"
 	"github.com/acoshift/acourse/view"

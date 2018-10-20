@@ -3,7 +3,7 @@ package appctx
 import (
 	"context"
 
-	"github.com/acoshift/flash"
+	"github.com/moonrhythm/session"
 )
 
 const (
@@ -37,7 +37,7 @@ func GetOpenIDState(ctx context.Context) string {
 }
 
 // GetFlash gets flash from context
-func GetFlash(ctx context.Context) *flash.Flash {
+func GetFlash(ctx context.Context) *session.Flash {
 	return getSession(ctx).Flash()
 }
 
