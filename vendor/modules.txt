@@ -78,6 +78,8 @@ github.com/lib/pq
 github.com/lib/pq/oid
 # github.com/microcosm-cc/bluemonday v1.0.1
 github.com/microcosm-cc/bluemonday
+# github.com/moonrhythm/dispatcher v1.0.2
+github.com/moonrhythm/dispatcher
 # github.com/moonrhythm/hime v0.11.0
 github.com/moonrhythm/hime
 # github.com/moonrhythm/session v0.13.0

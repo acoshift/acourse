@@ -15,15 +15,15 @@ import (
 	"cloud.google.com/go/trace"
 	"github.com/acoshift/configfile"
 	"github.com/acoshift/go-firebase-admin"
-	"github.com/moonrhythm/hime"
 	"github.com/acoshift/methodmux"
 	"github.com/acoshift/middleware"
 	"github.com/acoshift/probehandler"
-	"github.com/moonrhythm/session"
-	redisstore "github.com/moonrhythm/session/store/goredis"
 	"github.com/acoshift/webstatic"
 	"github.com/go-redis/redis"
 	_ "github.com/lib/pq"
+	"github.com/moonrhythm/hime"
+	"github.com/moonrhythm/session"
+	redisstore "github.com/moonrhythm/session/store/goredis"
 	"google.golang.org/api/option"
 
 	"github.com/acoshift/acourse/context/appctx"
@@ -34,13 +34,13 @@ import (
 	"github.com/acoshift/acourse/controller/auth"
 	"github.com/acoshift/acourse/controller/editor"
 	"github.com/acoshift/acourse/controller/share"
-	"github.com/acoshift/acourse/email"
 	"github.com/acoshift/acourse/file"
 	"github.com/acoshift/acourse/image"
 	"github.com/acoshift/acourse/internal"
 	"github.com/acoshift/acourse/notify"
 	"github.com/acoshift/acourse/repository"
 	"github.com/acoshift/acourse/service"
+	"github.com/acoshift/acourse/service/email"
 )
 
 func main() {
@@ -88,8 +88,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// init email sender
-	emailSender := email.NewSMTPSender(email.SMTPConfig{
+	// init services
+	email.InitSMTP(email.SMTPConfig{
 		Server:   config.String("email_server"),
 		Port:     config.Int("email_port"),
 		User:     config.String("email_user"),
@@ -134,7 +134,6 @@ func main() {
 	svc := service.New(service.Config{
 		Repository:         repository.NewService(),
 		Auth:               firAuth,
-		EmailSender:        emailSender,
 		BaseURL:            baseURL,
 		FileStorage:        file.NewGCS(storageClient, config.String("bucket")),
 		ImageResizeEncoder: image.NewJPEGResizeEncoder(),

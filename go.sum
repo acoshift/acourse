@@ -88,6 +88,8 @@ github.com/matttproud/golang_protobuf_extensions v1.0.1/go.mod h1:D8He9yQNgCq6Z5
 github.com/microcosm-cc/bluemonday v1.0.0/go.mod h1:hsXNsILzKxV+sX77C5b8FSuKF00vh2OMYv+xgHpAMF4=
 github.com/microcosm-cc/bluemonday v1.0.1 h1:SIYunPjnlXcW+gVfvm0IlSeR5U3WZUOLfVmqg85Go44=
 github.com/microcosm-cc/bluemonday v1.0.1/go.mod h1:hsXNsILzKxV+sX77C5b8FSuKF00vh2OMYv+xgHpAMF4=
+github.com/moonrhythm/dispatcher v1.0.2 h1:18juU/kIClH8jyzJYAGRJlr5gLCO58oZdF3jZyw+tMw=
+github.com/moonrhythm/dispatcher v1.0.2/go.mod h1:FQmTGd7va12hJOH68NyyypAEtDF1dGVIXUwqKoRKArg=
 github.com/moonrhythm/hime v0.11.0 h1:AH0ULBkwqz+nLIUiyFFy4zxK1u1t64PZBhlgOnfesTM=
 github.com/moonrhythm/hime v0.11.0/go.mod h1:f0LGF68HR1wQSXQ0gjNTh2SfFyAck7CzVjSdrHLCB9E=
 github.com/moonrhythm/session v0.13.0 h1:sMmSG6dHn2ZGj4tBQcU1RszJKUsHEN9QIegXmutYmNM=

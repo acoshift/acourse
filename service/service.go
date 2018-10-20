@@ -5,7 +5,6 @@ import (
 	"mime/multipart"
 	"time"
 
-	"github.com/acoshift/acourse/email"
 	"github.com/acoshift/acourse/entity"
 	"github.com/acoshift/acourse/file"
 	"github.com/acoshift/acourse/image"
@@ -16,7 +15,6 @@ import (
 type Config struct {
 	Repository         Repository
 	Auth               FirebaseAuth
-	EmailSender        email.Sender
 	BaseURL            string
 	FileStorage        file.Storage
 	ImageResizeEncoder image.JPEGResizeEncoder

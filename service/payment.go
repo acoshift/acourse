@@ -4,8 +4,11 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/moonrhythm/dispatcher"
+
 	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/entity"
+	"github.com/acoshift/acourse/model/email"
 	"github.com/acoshift/acourse/view"
 )
 
@@ -82,7 +85,11 @@ https://acourse.io
 		))
 
 		title := fmt.Sprintf("ยืนยันการชำระเงิน หลักสูตร %s", x.Course.Title)
-		s.EmailSender.Send(x.User.Email, title, body)
+		dispatcher.Dispatch(context.Background(), &email.Send{
+			To:      x.User.Email,
+			Subject: title,
+			Body:    body,
+		})
 	}()
 
 	return nil
@@ -111,7 +118,11 @@ func (s *svc) RejectPayment(ctx context.Context, paymentID string, msg string) e
 		}
 		body := view.MarkdownEmail(msg)
 		title := fmt.Sprintf("คำขอเพื่อเรียนหลักสูตร %s ได้รับการปฏิเสธ", x.Course.Title)
-		s.EmailSender.Send(x.User.Email, title, body)
+		dispatcher.Dispatch(context.Background(), &email.Send{
+			To:      x.User.Email,
+			Subject: title,
+			Body:    body,
+		})
 	}()
 
 	return nil

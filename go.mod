@@ -22,6 +22,7 @@ require (
 	github.com/google/pprof v0.0.0-20181019215846-45cef528221a // indirect
 	github.com/lib/pq v1.0.0
 	github.com/microcosm-cc/bluemonday v1.0.1
+	github.com/moonrhythm/dispatcher v1.0.2
 	github.com/moonrhythm/hime v0.11.0
 	github.com/moonrhythm/session v0.13.0
 	github.com/onsi/ginkgo v1.6.0
