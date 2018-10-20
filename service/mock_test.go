@@ -3,7 +3,6 @@ package service_test
 import (
 	"context"
 
-	"github.com/acoshift/go-firebase-admin"
 	"github.com/stretchr/testify/mock"
 
 	"github.com/acoshift/acourse/entity"
@@ -117,38 +116,4 @@ func (m *mockRepo) RegisterEnroll(ctx context.Context, userID string, courseID s
 func (m *mockRepo) IsEnrolled(ctx context.Context, userID string, courseID string) (bool, error) {
 	args := m.Mock.Called(userID, courseID)
 	return args.Bool(0), args.Error(1)
-}
-
-type mockAuth struct {
-	mock.Mock
-}
-
-func (m *mockAuth) CreateAuthURI(ctx context.Context, providerID string, continueURI string, sessionID string) (string, error) {
-	args := m.Mock.Called(providerID, continueURI, sessionID)
-	return args.String(0), args.Error(1)
-}
-
-func (m *mockAuth) VerifyAuthCallbackURI(ctx context.Context, callbackURI string, sessionID string) (*firebase.UserInfo, error) {
-	args := m.Mock.Called(callbackURI, sessionID)
-	return args.Get(0).(*firebase.UserInfo), args.Error(1)
-}
-
-func (m *mockAuth) GetUserByEmail(ctx context.Context, email string) (*firebase.UserRecord, error) {
-	args := m.Mock.Called(email)
-	return args.Get(0).(*firebase.UserRecord), args.Error(1)
-}
-
-func (m *mockAuth) SendPasswordResetEmail(ctx context.Context, email string) error {
-	args := m.Mock.Called(email)
-	return args.Error(0)
-}
-
-func (m *mockAuth) VerifyPassword(ctx context.Context, email, password string) (string, error) {
-	args := m.Mock.Called(email, password)
-	return args.String(0), args.Error(1)
-}
-
-func (m *mockAuth) CreateUser(ctx context.Context, user *firebase.User) (string, error) {
-	args := m.Mock.Called(user)
-	return args.String(0), args.Error(1)
 }
