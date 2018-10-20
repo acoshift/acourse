@@ -3,9 +3,11 @@ package editor
 import (
 	"time"
 
+	"github.com/moonrhythm/dispatcher"
 	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/context/appctx"
+	"github.com/acoshift/acourse/model/course"
 	"github.com/acoshift/acourse/service"
 	"github.com/acoshift/acourse/view"
 )
@@ -35,13 +37,14 @@ func (c *ctrl) postCourseCreate(ctx *hime.Context) error {
 
 	image, _ := ctx.FormFileHeaderNotEmpty("image")
 
-	courseID, err := c.Service.CreateCourse(ctx, &service.CreateCourse{
+	q := course.Create{
 		Title:     title,
 		ShortDesc: shortDesc,
 		LongDesc:  desc,
 		Image:     image,
 		Start:     start,
-	})
+	}
+	err := dispatcher.Dispatch(ctx, &q)
 	if service.IsUIError(err) {
 		f.Add("Errors", err.Error())
 		return ctx.RedirectToGet()
@@ -50,9 +53,9 @@ func (c *ctrl) postCourseCreate(ctx *hime.Context) error {
 		return err
 	}
 
-	link, _ := c.Repository.GetCourseURL(ctx, courseID)
+	link, _ := c.Repository.GetCourseURL(ctx, q.Result)
 	if link == "" {
-		return ctx.RedirectTo("app.course", courseID)
+		return ctx.RedirectTo("app.course", q.Result)
 	}
 	return ctx.RedirectTo("app.course", link)
 }
@@ -92,14 +95,15 @@ func (c *ctrl) postCourseEdit(ctx *hime.Context) error {
 
 	image, _ := ctx.FormFileHeaderNotEmpty("image")
 
-	err := c.Service.UpdateCourse(ctx, &service.UpdateCourse{
+	q := course.Update{
 		ID:        id,
 		Title:     title,
 		ShortDesc: shortDesc,
 		LongDesc:  desc,
 		Image:     image,
 		Start:     start,
-	})
+	}
+	err := dispatcher.Dispatch(ctx, &q)
 	if service.IsUIError(err) {
 		f.Add("Errors", err.Error())
 		return ctx.RedirectToGet()

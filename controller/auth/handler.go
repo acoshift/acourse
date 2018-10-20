@@ -3,20 +3,13 @@ package auth
 import (
 	"net/http"
 
-	"github.com/moonrhythm/hime"
 	"github.com/acoshift/methodmux"
-
-	"github.com/acoshift/acourse/service"
+	"github.com/moonrhythm/hime"
 )
 
-// Config is auth config
-type Config struct {
-	Service service.Service
-}
-
 // New creates new auth handler
-func New(cfg Config) http.Handler {
-	c := &ctrl{cfg}
+func New() http.Handler {
+	c := &ctrl{}
 
 	mux := http.NewServeMux()
 
@@ -42,6 +35,4 @@ func New(cfg Config) http.Handler {
 	return mux
 }
 
-type ctrl struct {
-	Config
-}
+type ctrl struct{}

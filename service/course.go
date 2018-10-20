@@ -5,87 +5,85 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"mime/multipart"
 
 	"github.com/moonrhythm/dispatcher"
 
 	"github.com/acoshift/acourse/context/appctx"
 	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/entity"
+	"github.com/acoshift/acourse/model/course"
 	"github.com/acoshift/acourse/model/file"
 	"github.com/acoshift/acourse/model/image"
 	"github.com/acoshift/acourse/model/notify"
 )
 
-func (s *svc) CreateCourse(ctx context.Context, x *CreateCourse) (courseID string, err error) {
+func (s *svc) createCourse(ctx context.Context, m *course.Create) error {
 	// TODO: validate user role
 	user := appctx.GetUser(ctx)
 
-	if x.Title == "" {
-		return "", newUIError("title required")
+	if m.Title == "" {
+		return newUIError("title required")
 	}
 
 	var imageURL string
-	if x.Image != nil {
-		err := ValidateImage(x.Image)
+	if m.Image != nil {
+		err := ValidateImage(m.Image)
 		if err != nil {
-			return "", err
+			return err
 		}
 
-		image, err := x.Image.Open()
+		image, err := m.Image.Open()
 		if err != nil {
-			return "", err
+			return err
 		}
 		defer image.Close()
 
 		imageURL, err = s.uploadCourseCoverImage(ctx, image)
 		image.Close()
 		if err != nil {
-			return "", newUIError(err.Error())
+			return newUIError(err.Error())
 		}
 	}
 
-	err = sqlctx.RunInTx(ctx, func(ctx context.Context) error {
+	return sqlctx.RunInTx(ctx, func(ctx context.Context) error {
 		var err error
 
-		courseID, err = s.Repository.RegisterCourse(ctx, &RegisterCourse{
+		m.Result, err = s.Repository.RegisterCourse(ctx, &RegisterCourse{
 			UserID:    user.ID,
-			Title:     x.Title,
-			ShortDesc: x.ShortDesc,
-			LongDesc:  x.LongDesc,
+			Title:     m.Title,
+			ShortDesc: m.ShortDesc,
+			LongDesc:  m.LongDesc,
 			Image:     imageURL,
-			Start:     x.Start,
+			Start:     m.Start,
 		})
 		if err != nil {
 			return err
 		}
 
-		return s.Repository.SetCourseOption(ctx, courseID, &entity.CourseOption{})
+		return s.Repository.SetCourseOption(ctx, m.Result, &entity.CourseOption{})
 	})
-
-	return
 }
 
-func (s *svc) UpdateCourse(ctx context.Context, x *UpdateCourse) error {
+func (s *svc) updateCourse(ctx context.Context, m *course.Update) error {
 	// TODO: validate user role
 	// user := appctx.GetUser(ctx)
 
-	if x.ID == "" {
+	if m.ID == "" {
 		return newUIError("course id required")
 	}
 
-	if x.Title == "" {
+	if m.Title == "" {
 		return newUIError("title required")
 	}
 
 	var imageURL string
-	if x.Image != nil {
-		err := ValidateImage(x.Image)
+	if m.Image != nil {
+		err := ValidateImage(m.Image)
 		if err != nil {
 			return err
 		}
 
-		image, err := x.Image.Open()
+		image, err := m.Image.Open()
 		if err != nil {
 			return err
 		}
@@ -100,18 +98,18 @@ func (s *svc) UpdateCourse(ctx context.Context, x *UpdateCourse) error {
 
 	err := sqlctx.RunInTx(ctx, func(ctx context.Context) error {
 		err := s.Repository.UpdateCourse(ctx, &UpdateCourseModel{
-			ID:        x.ID,
-			Title:     x.Title,
-			ShortDesc: x.ShortDesc,
-			LongDesc:  x.LongDesc,
-			Start:     x.Start,
+			ID:        m.ID,
+			Title:     m.Title,
+			ShortDesc: m.ShortDesc,
+			LongDesc:  m.LongDesc,
+			Start:     m.Start,
 		})
 		if err != nil {
 			return err
 		}
 
 		if imageURL != "" {
-			err = s.Repository.SetCourseImage(ctx, x.ID, imageURL)
+			err = s.Repository.SetCourseImage(ctx, m.ID, imageURL)
 			if err != nil {
 				return err
 			}
@@ -123,10 +121,10 @@ func (s *svc) UpdateCourse(ctx context.Context, x *UpdateCourse) error {
 	return err
 }
 
-func (s *svc) EnrollCourse(ctx context.Context, courseID string, price float64, paymentImage *multipart.FileHeader) error {
+func (s *svc) enrollCourse(ctx context.Context, m *course.Enroll) error {
 	user := appctx.GetUser(ctx)
 
-	course, err := s.Repository.GetCourse(ctx, courseID)
+	course, err := s.Repository.GetCourse(ctx, m.ID)
 	if err == entity.ErrNotFound {
 		return entity.ErrNotFound
 	}
@@ -140,7 +138,7 @@ func (s *svc) EnrollCourse(ctx context.Context, courseID string, price float64, 
 	}
 
 	// is enrolled
-	enrolled, err := s.Repository.IsEnrolled(ctx, user.ID, courseID)
+	enrolled, err := s.Repository.IsEnrolled(ctx, user.ID, m.ID)
 	if err != nil {
 		return err
 	}
@@ -149,7 +147,7 @@ func (s *svc) EnrollCourse(ctx context.Context, courseID string, price float64, 
 	}
 
 	// has pending enroll
-	pendingPayment, err := s.Repository.HasPendingPayment(ctx, user.ID, courseID)
+	pendingPayment, err := s.Repository.HasPendingPayment(ctx, user.ID, m.ID)
 	if err != nil {
 		return err
 	}
@@ -162,22 +160,22 @@ func (s *svc) EnrollCourse(ctx context.Context, courseID string, price float64, 
 		originalPrice = course.Discount
 	}
 
-	if price < 0 {
+	if m.Price < 0 {
 		return newUIError("จำนวนเงินติดลบไม่ได้")
 	}
 
 	var imageURL string
 	if originalPrice != 0 {
-		if paymentImage == nil {
+		if m.PaymentImage == nil {
 			return newUIError("กรุณาอัพโหลดรูปภาพ")
 		}
 
-		err := ValidateImage(paymentImage)
+		err := ValidateImage(m.PaymentImage)
 		if err != nil {
 			return err
 		}
 
-		image, err := paymentImage.Open()
+		image, err := m.PaymentImage.Open()
 		if err != nil {
 			return newUIError(err.Error())
 		}
@@ -203,7 +201,7 @@ func (s *svc) EnrollCourse(ctx context.Context, courseID string, price float64, 
 			CourseID:      course.ID,
 			UserID:        user.ID,
 			Image:         imageURL,
-			Price:         price,
+			Price:         m.Price,
 			OriginalPrice: originalPrice,
 			Status:        entity.Pending,
 		})
@@ -213,40 +211,58 @@ func (s *svc) EnrollCourse(ctx context.Context, courseID string, price float64, 
 	}
 
 	if newPayment {
-		go dispatcher.Dispatch(ctx, &notify.Admin{Message: fmt.Sprintf("New payment for course %s, price %.2f", course.Title, price)})
+		go dispatcher.Dispatch(ctx, &notify.Admin{Message: fmt.Sprintf("New payment for course %s, price %.2f", course.Title, m.Price)})
 	}
 
 	return nil
 }
 
-func (s *svc) CreateCourseContent(ctx context.Context, x *entity.RegisterCourseContent) (contentID string, err error) {
+func (s *svc) createCourseContent(ctx context.Context, m *course.CreateContent) error {
 	// TODO: validate instructor
 
-	return s.Repository.RegisterCourseContent(ctx, x)
+	contentID, err := s.Repository.RegisterCourseContent(ctx, &entity.RegisterCourseContent{
+		CourseID:  m.ID,
+		Title:     m.Title,
+		LongDesc:  m.LongDesc,
+		VideoID:   m.VideoID,
+		VideoType: m.VideoType,
+	})
+	m.Result = contentID
+	return err
 }
 
-func (s *svc) GetCourseContent(ctx context.Context, contentID string) (*entity.CourseContent, error) {
+func (s *svc) getCourseContent(ctx context.Context, m *course.GetContent) error {
 	// TODO: validate ownership
 
-	return s.Repository.GetCourseContent(ctx, contentID)
+	x, err := s.Repository.GetCourseContent(ctx, m.ContentID)
+	if err != nil {
+		return err
+	}
+	m.Result = x
+	return nil
 }
 
-func (s *svc) ListCourseContents(ctx context.Context, courseID string) ([]*entity.CourseContent, error) {
+func (s *svc) listCourseContents(ctx context.Context, m *course.ListContents) error {
 	// TODO: validate ownership
 
-	return s.Repository.ListCourseContents(ctx, courseID)
+	xs, err := s.Repository.ListCourseContents(ctx, m.ID)
+	if err != nil {
+		return err
+	}
+	m.Result = xs
+	return nil
 }
 
-func (s *svc) UpdateCourseContent(ctx context.Context, contentID string, title string, desc string, videoID string) error {
+func (s *svc) updateCourseContent(ctx context.Context, m *course.UpdateContent) error {
 	// TODO: validate ownership
 
-	return s.Repository.UpdateCourseContent(ctx, contentID, title, desc, videoID)
+	return s.Repository.UpdateCourseContent(ctx, m.ContentID, m.Title, m.Desc, m.VideoID)
 }
 
-func (s *svc) DeleteCourseContent(ctx context.Context, contentID string) error {
+func (s *svc) deleteCourseContent(ctx context.Context, m *course.DeleteContent) error {
 	// TODO: validate ownership
 
-	return s.Repository.DeleteCourseContent(ctx, contentID)
+	return s.Repository.DeleteCourseContent(ctx, m.ContentID)
 }
 
 // UploadCourseCoverImage uploads course cover image

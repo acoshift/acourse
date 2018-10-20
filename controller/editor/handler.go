@@ -3,15 +3,12 @@ package editor
 import (
 	"net/http"
 
-	"github.com/moonrhythm/hime"
 	"github.com/acoshift/methodmux"
-
-	"github.com/acoshift/acourse/service"
+	"github.com/moonrhythm/hime"
 )
 
 // Config is editor config
 type Config struct {
-	Service    service.Service
 	Repository Repository
 }
 

@@ -1,7 +1,6 @@
 package service
 
 import (
-	"mime/multipart"
 	"time"
 
 	"github.com/lib/pq"
@@ -22,25 +21,6 @@ type UpdateUser struct {
 	Username string
 	Name     string
 	AboutMe  string
-}
-
-// CreateCourse type
-type CreateCourse struct {
-	Title     string
-	ShortDesc string
-	LongDesc  string
-	Image     *multipart.FileHeader
-	Start     time.Time
-}
-
-// UpdateCourse type
-type UpdateCourse struct {
-	ID        string
-	Title     string
-	ShortDesc string
-	LongDesc  string
-	Image     *multipart.FileHeader
-	Start     time.Time
 }
 
 // RegisterCourse type

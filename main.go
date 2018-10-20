@@ -89,19 +89,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// init services
-	email.InitSMTP(email.SMTPConfig{
-		Server:   config.String("email_server"),
-		Port:     config.Int("email_port"),
-		User:     config.String("email_user"),
-		Password: config.String("email_password"),
-		From:     config.String("email_from"),
-	})
-	file.InitGCS(storageClient, config.String("bucket"))
-	image.Init()
-	firebase.Init(firAuth)
-	notify.Init(config.String("slack_url"))
-
 	// init redis pool
 	redisClient := redis.NewClient(&redis.Options{
 		MaxRetries:  config.IntDefault("redis_max_retries", 3),
@@ -134,14 +121,26 @@ func main() {
 		Funcs(internal.TemplateFunc(loc)).
 		ParseConfigFile("settings/template.yaml")
 
-	methodmux.FallbackHandler = hime.Handler(share.NotFound)
-
-	svc := service.New(service.Config{
+	// init services
+	email.InitSMTP(email.SMTPConfig{
+		Server:   config.String("email_server"),
+		Port:     config.Int("email_port"),
+		User:     config.String("email_user"),
+		Password: config.String("email_password"),
+		From:     config.String("email_from"),
+	})
+	file.InitGCS(storageClient, config.String("bucket"))
+	image.Init()
+	firebase.Init(firAuth)
+	notify.Init(config.String("slack_url"))
+	service.Init(service.Config{
 		Repository:     repository.NewService(),
 		BaseURL:        baseURL,
 		Location:       loc,
 		OpenIDCallback: himeApp.Route("auth.openid.callback"),
 	})
+
+	methodmux.FallbackHandler = hime.Handler(share.NotFound)
 
 	mux := http.NewServeMux()
 
@@ -169,20 +168,16 @@ func main() {
 
 	m.Handle("/", app.New(app.Config{
 		BaseURL:    baseURL,
-		Service:    svc,
 		Repository: repository.NewApp(),
 	}))
 
 	m.Handle("/auth/", http.StripPrefix("/auth", middleware.Chain(
 		internal.NotSignedIn,
-	)(auth.New(auth.Config{
-		Service: svc,
-	}))))
+	)(auth.New())))
 
 	m.Handle("/editor/", http.StripPrefix("/editor", middleware.Chain(
 	// -
 	)(editor.New(editor.Config{
-		Service:    svc,
 		Repository: repository.NewEditor(),
 	}))))
 
@@ -191,7 +186,6 @@ func main() {
 	)(admin.New(admin.Config{
 		Location:   loc,
 		Repository: repository.NewAdmin(),
-		Service:    svc,
 	}))))
 
 	mux.Handle("/", middleware.Chain(

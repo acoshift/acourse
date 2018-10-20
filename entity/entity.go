@@ -4,6 +4,8 @@ import (
 	"time"
 
 	"github.com/lib/pq"
+
+	"github.com/acoshift/acourse/model/course"
 )
 
 // User type
@@ -39,7 +41,7 @@ type Course struct {
 	Type          int
 	Price         float64
 	Discount      float64
-	Contents      []*CourseContent
+	Contents      []*course.Content
 	EnrollDetail  string
 	AssignmentIDs []string
 	CreatedAt     time.Time
@@ -59,17 +61,6 @@ const (
 	_ = iota
 	Youtube
 )
-
-// CourseContent type
-type CourseContent struct {
-	ID          string
-	CourseID    string
-	Title       string
-	Desc        string
-	VideoID     string
-	VideoType   int
-	DownloadURL string
-}
 
 // CourseOption type
 type CourseOption struct {

@@ -3,11 +3,13 @@ package editor
 import (
 	"net/http"
 
+	"github.com/moonrhythm/dispatcher"
 	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/context/appctx"
 	"github.com/acoshift/acourse/controller/share"
 	"github.com/acoshift/acourse/entity"
+	"github.com/acoshift/acourse/model/course"
 	"github.com/acoshift/acourse/service"
 	"github.com/acoshift/acourse/view"
 )
@@ -15,20 +17,25 @@ import (
 func (c *ctrl) contentList(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 
-	course, err := c.Repository.GetCourse(ctx, id)
+	x, err := c.Repository.GetCourse(ctx, id)
 	if err == entity.ErrNotFound {
 		return share.NotFound(ctx)
 	}
 	if err != nil {
 		return err
 	}
-	course.Contents, err = c.Service.ListCourseContents(ctx, id)
-	if err != nil {
-		return err
+
+	{
+		q := course.ListContents{ID: id}
+		err := dispatcher.Dispatch(ctx, &q)
+		if err != nil {
+			return err
+		}
+		x.Contents = q.Result
 	}
 
 	p := view.Page(ctx)
-	p.Data["Course"] = course
+	p.Data["Course"] = x
 	return ctx.View("editor.content", p)
 }
 
@@ -36,7 +43,7 @@ func (c *ctrl) postContentList(ctx *hime.Context) error {
 	if ctx.FormValue("action") == "delete" {
 		contentID := ctx.FormValue("contentId")
 
-		err := c.Service.DeleteCourseContent(ctx, contentID)
+		err := dispatcher.Dispatch(ctx, &course.DeleteContent{ContentID: contentID})
 		if service.IsUIError(err) {
 			// TODO: use flash
 			return ctx.Status(http.StatusBadRequest).Error(err.Error())
@@ -70,8 +77,8 @@ func (c *ctrl) postContentCreate(ctx *hime.Context) error {
 		videoID = ctx.FormValue("videoId")
 	)
 
-	_, err := c.Service.CreateCourseContent(ctx, &entity.RegisterCourseContent{
-		CourseID:  id,
+	err := dispatcher.Dispatch(ctx, &course.CreateContent{
+		ID:        id,
 		Title:     title,
 		LongDesc:  desc,
 		VideoID:   videoID,
@@ -88,13 +95,15 @@ func (c *ctrl) contentEdit(ctx *hime.Context) error {
 	// course content id
 	id := ctx.FormValue("id")
 
-	content, err := c.Service.GetCourseContent(ctx, id)
+	getContent := course.GetContent{ContentID: id}
+	err := dispatcher.Dispatch(ctx, &getContent)
 	if err == entity.ErrNotFound {
 		return share.NotFound(ctx)
 	}
 	if err != nil {
 		return err
 	}
+	content := getContent.Result
 
 	course, err := c.Repository.GetCourse(ctx, content.CourseID)
 	if err != nil {
@@ -117,7 +126,15 @@ func (c *ctrl) postContentEdit(ctx *hime.Context) error {
 	// course content id
 	id := ctx.FormValue("id")
 
-	content, err := c.Service.GetCourseContent(ctx, id)
+	getContent := course.GetContent{ContentID: id}
+	err := dispatcher.Dispatch(ctx, &getContent)
+	if err == entity.ErrNotFound {
+		return share.NotFound(ctx)
+	}
+	if err != nil {
+		return err
+	}
+	content := getContent.Result
 	if err == entity.ErrNotFound {
 		return share.NotFound(ctx)
 	}
@@ -125,16 +142,18 @@ func (c *ctrl) postContentEdit(ctx *hime.Context) error {
 		return err
 	}
 
-	course, err := c.Repository.GetCourse(ctx, content.CourseID)
-	if err != nil {
-		return err
-	}
+	{
+		course, err := c.Repository.GetCourse(ctx, content.CourseID)
+		if err != nil {
+			return err
+		}
 
-	user := appctx.GetUser(ctx)
-	// user is not course owner
-	// TODO: move to service
-	if user.ID != course.UserID {
-		return ctx.Status(http.StatusForbidden).StatusText()
+		user := appctx.GetUser(ctx)
+		// user is not course owner
+		// TODO: move to service
+		if user.ID != course.UserID {
+			return ctx.Status(http.StatusForbidden).StatusText()
+		}
 	}
 
 	var (
@@ -143,10 +162,15 @@ func (c *ctrl) postContentEdit(ctx *hime.Context) error {
 		videoID = ctx.FormValue("videoId")
 	)
 
-	err = c.Service.UpdateCourseContent(ctx, id, title, desc, videoID)
+	err = dispatcher.Dispatch(ctx, &course.UpdateContent{
+		ContentID: id,
+		Title:     title,
+		Desc:      desc,
+		VideoID:   videoID,
+	})
 	if err != nil {
 		return err
 	}
 
-	return ctx.RedirectTo("editor.content", ctx.Param("id", course.ID))
+	return ctx.RedirectTo("editor.content", ctx.Param("id", content.CourseID))
 }

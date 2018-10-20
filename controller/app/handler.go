@@ -3,17 +3,14 @@ package app
 import (
 	"net/http"
 
-	"github.com/moonrhythm/hime"
 	"github.com/acoshift/methodmux"
 	"github.com/acoshift/prefixhandler"
-
-	"github.com/acoshift/acourse/service"
+	"github.com/moonrhythm/hime"
 )
 
 // Config is the app config
 type Config struct {
 	BaseURL    string
-	Service    service.Service
 	Repository Repository
 }
 

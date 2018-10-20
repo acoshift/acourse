@@ -8,6 +8,7 @@ import (
 
 	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/entity"
+	"github.com/acoshift/acourse/model/course"
 	"github.com/acoshift/acourse/service"
 )
 
@@ -201,10 +202,10 @@ func (svcRepo) RegisterCourseContent(ctx context.Context, x *entity.RegisterCour
 	return
 }
 
-func (svcRepo) GetCourseContent(ctx context.Context, contentID string) (*entity.CourseContent, error) {
+func (svcRepo) GetCourseContent(ctx context.Context, contentID string) (*course.Content, error) {
 	q := sqlctx.GetQueryer(ctx)
 
-	var x entity.CourseContent
+	var x course.Content
 	err := q.QueryRow(`
 		select
 			id, course_id, title, long_desc, video_id, video_type, download_url
@@ -222,7 +223,7 @@ func (svcRepo) GetCourseContent(ctx context.Context, contentID string) (*entity.
 	return &x, nil
 }
 
-func (svcRepo) ListCourseContents(ctx context.Context, courseID string) ([]*entity.CourseContent, error) {
+func (svcRepo) ListCourseContents(ctx context.Context, courseID string) ([]*course.Content, error) {
 	q := sqlctx.GetQueryer(ctx)
 
 	rows, err := q.Query(`
@@ -237,9 +238,9 @@ func (svcRepo) ListCourseContents(ctx context.Context, courseID string) ([]*enti
 	}
 	defer rows.Close()
 
-	var xs []*entity.CourseContent
+	var xs []*course.Content
 	for rows.Next() {
-		var x entity.CourseContent
+		var x course.Content
 		err = rows.Scan(
 			&x.ID, &x.CourseID, &x.Title, &x.Desc, &x.VideoID, &x.VideoType, &x.DownloadURL,
 		)

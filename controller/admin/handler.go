@@ -4,17 +4,14 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/moonrhythm/hime"
 	"github.com/acoshift/methodmux"
-
-	"github.com/acoshift/acourse/service"
+	"github.com/moonrhythm/hime"
 )
 
 // Config is admin config
 type Config struct {
 	Location   *time.Location
 	Repository Repository
-	Service    service.Service
 }
 
 // New creates admin handler

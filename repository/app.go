@@ -13,6 +13,7 @@ import (
 	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/controller/app"
 	"github.com/acoshift/acourse/entity"
+	"github.com/acoshift/acourse/model/course"
 )
 
 // NewApp creates new app repository
@@ -92,7 +93,7 @@ func (appRepo) HasPendingPayment(ctx context.Context, userID string, courseID st
 	return
 }
 
-func (appRepo) GetCourseContents(ctx context.Context, courseID string) ([]*entity.CourseContent, error) {
+func (appRepo) GetCourseContents(ctx context.Context, courseID string) ([]*course.Content, error) {
 	q := sqlctx.GetQueryer(ctx)
 
 	rows, err := q.Query(`
@@ -107,9 +108,9 @@ func (appRepo) GetCourseContents(ctx context.Context, courseID string) ([]*entit
 	}
 	defer rows.Close()
 
-	var xs []*entity.CourseContent
+	var xs []*course.Content
 	for rows.Next() {
-		var x entity.CourseContent
+		var x course.Content
 		err = rows.Scan(
 			&x.ID, &x.CourseID, &x.Title, &x.Desc, &x.VideoID, &x.VideoType, &x.DownloadURL,
 		)

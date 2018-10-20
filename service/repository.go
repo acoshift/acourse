@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/acoshift/acourse/entity"
+	"github.com/acoshift/acourse/model/course"
 )
 
 // Repository is the service storage
@@ -21,8 +22,8 @@ type Repository interface {
 	SetCourseOption(ctx context.Context, courseID string, x *entity.CourseOption) error
 
 	RegisterCourseContent(ctx context.Context, x *entity.RegisterCourseContent) (contentID string, err error)
-	GetCourseContent(ctx context.Context, contentID string) (*entity.CourseContent, error)
-	ListCourseContents(ctx context.Context, courseID string) ([]*entity.CourseContent, error)
+	GetCourseContent(ctx context.Context, contentID string) (*course.Content, error)
+	ListCourseContents(ctx context.Context, courseID string) ([]*course.Content, error)
 	UpdateCourseContent(ctx context.Context, contentID, title, desc, videoID string) error
 	DeleteCourseContent(ctx context.Context, contentID string) error
 
