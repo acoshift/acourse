@@ -7,6 +7,8 @@ import (
 	"io"
 	"mime/multipart"
 
+	"github.com/moonrhythm/dispatcher"
+
 	"github.com/acoshift/acourse/context/appctx"
 	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/entity"
@@ -253,12 +255,12 @@ func (s *svc) uploadCourseCoverImage(ctx context.Context, r io.Reader) (string, 
 		return "", err
 	}
 	filename := file.GenerateFilename() + ".jpg"
-	downloadURL := s.FileStorage.DownloadURL(filename)
-	err = s.FileStorage.Store(ctx, buf, filename)
-	if err != nil {
+
+	store := file.Store{Reader: buf, Filename: filename}
+	if err = dispatcher.Dispatch(ctx, &store); err != nil {
 		return "", err
 	}
-	return downloadURL, nil
+	return store.Result, nil
 }
 
 // UploadPaymentImage uploads payment image
@@ -269,10 +271,9 @@ func (s *svc) uploadPaymentImage(ctx context.Context, r io.Reader) (string, erro
 		return "", err
 	}
 	filename := file.GenerateFilename() + ".jpg"
-	downloadURL := s.FileStorage.DownloadURL(filename)
-	err = s.FileStorage.Store(ctx, buf, filename)
-	if err != nil {
+	store := file.Store{Reader: buf, Filename: filename}
+	if err = dispatcher.Dispatch(ctx, &store); err != nil {
 		return "", err
 	}
-	return downloadURL, nil
+	return store.Result, nil
 }

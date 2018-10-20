@@ -34,13 +34,13 @@ import (
 	"github.com/acoshift/acourse/controller/auth"
 	"github.com/acoshift/acourse/controller/editor"
 	"github.com/acoshift/acourse/controller/share"
-	"github.com/acoshift/acourse/file"
 	"github.com/acoshift/acourse/image"
 	"github.com/acoshift/acourse/internal"
 	"github.com/acoshift/acourse/notify"
 	"github.com/acoshift/acourse/repository"
 	"github.com/acoshift/acourse/service"
 	"github.com/acoshift/acourse/service/email"
+	"github.com/acoshift/acourse/service/file"
 )
 
 func main() {
@@ -96,6 +96,7 @@ func main() {
 		Password: config.String("email_password"),
 		From:     config.String("email_from"),
 	})
+	file.InitGCS(storageClient, config.String("bucket"))
 
 	// init redis pool
 	redisClient := redis.NewClient(&redis.Options{
@@ -135,7 +136,6 @@ func main() {
 		Repository:         repository.NewService(),
 		Auth:               firAuth,
 		BaseURL:            baseURL,
-		FileStorage:        file.NewGCS(storageClient, config.String("bucket")),
 		ImageResizeEncoder: image.NewJPEGResizeEncoder(),
 		AdminNotifier:      notify.NewOutgoingWebhookAdminNotifier(config.String("slack_url")),
 		Location:           loc,

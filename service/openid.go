@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/moonrhythm/dispatcher"
+
 	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/entity"
 	"github.com/acoshift/acourse/file"
@@ -90,27 +92,28 @@ func (s *svc) uploadProfileFromURLAsync(url string) string {
 		return ""
 	}
 	filename := file.GenerateFilename() + ".jpg"
-	go func() {
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
-		req = req.WithContext(ctx)
-		resp, err := http.DefaultClient.Do(req)
-		if err != nil {
-			return
-		}
-		defer resp.Body.Close()
-		buf := &bytes.Buffer{}
-		err = s.ImageResizeEncoder.ResizeEncode(buf, resp.Body, 500, 500, 90, true)
-		if err != nil {
-			return
-		}
-		cancel()
-		ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
-		err = s.FileStorage.Store(ctx, buf, filename)
-		if err != nil {
-			return
-		}
-	}()
-	return s.FileStorage.DownloadURL(filename)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	req = req.WithContext(ctx)
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return ""
+	}
+	defer resp.Body.Close()
+
+	buf := &bytes.Buffer{}
+	err = s.ImageResizeEncoder.ResizeEncode(buf, resp.Body, 500, 500, 90, true)
+	if err != nil {
+		return ""
+	}
+	cancel()
+	ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	store := file.Store{Reader: buf, Filename: filename, Async: true}
+	err = dispatcher.Dispatch(ctx, &store)
+	if err != nil {
+		return ""
+	}
+	return store.Result
 }

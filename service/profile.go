@@ -7,10 +7,12 @@ import (
 	"mime/multipart"
 	"unicode/utf8"
 
+	"github.com/asaskevich/govalidator"
+	"github.com/moonrhythm/dispatcher"
+
 	"github.com/acoshift/acourse/context/appctx"
 	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/file"
-	"github.com/asaskevich/govalidator"
 )
 
 // Profile type
@@ -83,10 +85,9 @@ func (s *svc) uploadProfileImage(ctx context.Context, r io.Reader) (string, erro
 		return "", err
 	}
 	filename := file.GenerateFilename() + ".jpg"
-	downloadURL := s.FileStorage.DownloadURL(filename)
-	err = s.FileStorage.Store(ctx, buf, filename)
-	if err != nil {
+	store := file.Store{Reader: buf, Filename: filename}
+	if err = dispatcher.Dispatch(ctx, &store); err != nil {
 		return "", err
 	}
-	return downloadURL, nil
+	return store.Result, nil
 }

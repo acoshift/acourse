@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/acoshift/acourse/entity"
-	"github.com/acoshift/acourse/file"
 	"github.com/acoshift/acourse/image"
 	"github.com/acoshift/acourse/notify"
 )
@@ -16,7 +15,6 @@ type Config struct {
 	Repository         Repository
 	Auth               FirebaseAuth
 	BaseURL            string
-	FileStorage        file.Storage
 	ImageResizeEncoder image.JPEGResizeEncoder
 	AdminNotifier      notify.AdminNotifier
 	Location           *time.Location
