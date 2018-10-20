@@ -12,3 +12,11 @@ type SignUp struct {
 type SendPasswordResetEmail struct {
 	Email string
 }
+
+// SignInPassword command
+type SignInPassword struct {
+	Email    string
+	Password string
+
+	Result string // user id
+}

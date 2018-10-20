@@ -85,18 +85,18 @@ func (s *svc) sendPasswordResetEmail(ctx context.Context, m *auth.SendPasswordRe
 	return nil
 }
 
-func (s *svc) SignInPassword(ctx context.Context, email, password string) (string, error) {
-	if email == "" {
-		return "", newUIError("email required")
+func (s *svc) signInPassword(ctx context.Context, m *auth.SignInPassword) error {
+	if m.Email == "" {
+		return newUIError("email required")
 	}
-	if password == "" {
-		return "", newUIError("password required")
+	if m.Password == "" {
+		return newUIError("password required")
 	}
 
-	q := firebase.VerifyPassword{Email: email, Password: password}
+	q := firebase.VerifyPassword{Email: m.Email, Password: m.Password}
 	err := dispatcher.Dispatch(ctx, &q)
 	if err != nil {
-		return "", newUIError(err.Error())
+		return newUIError(err.Error())
 	}
 	userID := q.Result
 
@@ -105,11 +105,11 @@ func (s *svc) SignInPassword(ctx context.Context, email, password string) (strin
 	{
 		ok, err := s.Repository.IsUserExists(ctx, userID)
 		if err != nil {
-			return "", err
+			return err
 		}
 
 		if !ok {
-			email, _ = govalidator.NormalizeEmail(email)
+			email, _ := govalidator.NormalizeEmail(m.Email)
 			err = s.Repository.RegisterUser(ctx, &RegisterUser{
 				ID:       userID,
 				Username: userID,
@@ -117,12 +117,14 @@ func (s *svc) SignInPassword(ctx context.Context, email, password string) (strin
 				Email:    email,
 			})
 			if err != nil {
-				return "", err
+				return err
 			}
 		}
 	}
 
-	return userID, err
+	m.Result = userID
+
+	return nil
 }
 
 func generateRandomString(n int) string {

@@ -20,7 +20,6 @@ import (
 
 var _ = Describe("Auth", func() {
 	var (
-		s    Service
 		repo *mockRepo
 		ctx  context.Context
 	)
@@ -28,7 +27,7 @@ var _ = Describe("Auth", func() {
 	BeforeEach(func() {
 		ctx = context.Background()
 		repo = &mockRepo{}
-		s = New(Config{
+		New(Config{
 			Repository: repo,
 		})
 	})
@@ -209,27 +208,34 @@ var _ = Describe("Auth", func() {
 
 	Describe("SignInPassword", func() {
 		It("should error when sign in with zero value email and password", func() {
-			userID, err := s.SignInPassword(ctx, "", "")
+			q := auth.SignInPassword{}
+			err := dispatcher.Dispatch(ctx, &q)
 
 			Expect(err).To(HaveOccurred())
 			Expect(IsUIError(err)).To(BeTrue())
-			Expect(userID).To(BeZero())
+			Expect(q.Result).To(BeZero())
 		})
 
 		It("should error when sign in with valid email but zero password", func() {
-			userID, err := s.SignInPassword(ctx, "test@test.com", "")
+			q := auth.SignInPassword{
+				Email: "test@test.com",
+			}
+			err := dispatcher.Dispatch(ctx, &q)
 
 			Expect(err).To(HaveOccurred())
 			Expect(IsUIError(err)).To(BeTrue())
-			Expect(userID).To(BeZero())
+			Expect(q.Result).To(BeZero())
 		})
 
 		It("should error when sign in with zero email but valid password", func() {
-			userID, err := s.SignInPassword(ctx, "", "123456")
+			q := auth.SignInPassword{
+				Password: "123456",
+			}
+			err := dispatcher.Dispatch(ctx, &q)
 
 			Expect(err).To(HaveOccurred())
 			Expect(IsUIError(err)).To(BeTrue())
-			Expect(userID).To(BeZero())
+			Expect(q.Result).To(BeZero())
 		})
 
 		It("should error when sign in with valid email but wrong password", func() {
@@ -239,10 +245,14 @@ var _ = Describe("Auth", func() {
 				return fmt.Errorf("invalid")
 			})
 
-			userID, err := s.SignInPassword(ctx, "test@test.com", "fakepass")
+			q := auth.SignInPassword{
+				Email:    "test@test.com",
+				Password: "fakepass",
+			}
+			err := dispatcher.Dispatch(ctx, &q)
 
 			Expect(err).To(HaveOccurred())
-			Expect(userID).To(BeZero())
+			Expect(q.Result).To(BeZero())
 		})
 
 		It("should success when sign in with valid email and password", func() {
@@ -254,10 +264,14 @@ var _ = Describe("Auth", func() {
 			})
 			repo.On("IsUserExists", "aqswde").Return(true, nil)
 
-			userID, err := s.SignInPassword(ctx, "test@test.com", "123456")
+			q := auth.SignInPassword{
+				Email:    "test@test.com",
+				Password: "123456",
+			}
+			err := dispatcher.Dispatch(ctx, &q)
 
 			Expect(err).NotTo(HaveOccurred())
-			Expect(userID).To(Equal("aqswde"))
+			Expect(q.Result).To(Equal("aqswde"))
 		})
 	})
 

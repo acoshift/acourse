@@ -21,7 +21,6 @@ type Config struct {
 // Service type
 type Service interface {
 	GenerateOpenIDURI(ctx context.Context, provider string) (redirectURI string, state string, err error)
-	SignInPassword(ctx context.Context, email, password string) (userID string, err error)
 	SignInOpenIDCallback(ctx context.Context, uri string, state string) (userID string, err error)
 
 	AcceptPayment(ctx context.Context, paymentID string) error
@@ -46,6 +45,7 @@ func New(cfg Config) Service {
 
 	dispatcher.Register(s.signUp)
 	dispatcher.Register(s.sendPasswordResetEmail)
+	dispatcher.Register(s.signInPassword)
 	return s
 }
 
