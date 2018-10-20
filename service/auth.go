@@ -12,35 +12,36 @@ import (
 	"github.com/moonrhythm/dispatcher"
 
 	"github.com/acoshift/acourse/entity"
+	"github.com/acoshift/acourse/model/auth"
 	"github.com/acoshift/acourse/model/firebase"
 )
 
-func (s *svc) SignUp(ctx context.Context, email, password string) (string, error) {
-	if email == "" {
-		return "", newUIError("email required")
+func (s *svc) signUp(ctx context.Context, m *auth.SignUp) error {
+	if m.Email == "" {
+		return newUIError("email required")
 	}
 
-	email, err := govalidator.NormalizeEmail(email)
+	email, err := govalidator.NormalizeEmail(m.Email)
 	if err != nil {
-		return "", newUIError("invalid email")
+		return newUIError("invalid email")
 	}
 
-	if password == "" {
-		return "", newUIError("password required")
+	if m.Password == "" {
+		return newUIError("password required")
 	}
-	if n := utf8.RuneCountInString(password); n < 6 || n > 64 {
-		return "", newUIError("password must have 6 to 64 characters")
+	if n := utf8.RuneCountInString(m.Password); n < 6 || n > 64 {
+		return newUIError("password must have 6 to 64 characters")
 	}
 
 	createUser := firebase.CreateUser{
 		User: &admin.User{
 			Email:    email,
-			Password: password,
+			Password: m.Password,
 		},
 	}
 	err = dispatcher.Dispatch(ctx, &createUser)
 	if err != nil {
-		return "", newUIError(err.Error())
+		return newUIError(err.Error())
 	}
 	userID := createUser.Result
 
@@ -50,16 +51,18 @@ func (s *svc) SignUp(ctx context.Context, email, password string) (string, error
 		Email:    email,
 	})
 	if err == entity.ErrEmailNotAvailable {
-		return "", newUIError("อีเมลนี้ถูกสมัครแล้ว")
+		return newUIError("อีเมลนี้ถูกสมัครแล้ว")
 	}
 	if err == entity.ErrUsernameNotAvailable {
-		return "", newUIError("username นี้ถูกใช้งานแล้ว")
+		return newUIError("username นี้ถูกใช้งานแล้ว")
 	}
 	if err != nil {
-		return "", err
+		return err
 	}
 
-	return userID, nil
+	m.Result = userID
+
+	return nil
 }
 
 func (s *svc) SendPasswordResetEmail(ctx context.Context, email string) error {

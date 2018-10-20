@@ -5,6 +5,8 @@ import (
 	"mime/multipart"
 	"time"
 
+	"github.com/moonrhythm/dispatcher"
+
 	"github.com/acoshift/acourse/entity"
 )
 
@@ -18,7 +20,6 @@ type Config struct {
 
 // Service type
 type Service interface {
-	SignUp(ctx context.Context, email, password string) (userID string, err error)
 	SendPasswordResetEmail(ctx context.Context, email string) error
 	GenerateOpenIDURI(ctx context.Context, provider string) (redirectURI string, state string, err error)
 	SignInPassword(ctx context.Context, email, password string) (userID string, err error)
@@ -42,7 +43,10 @@ type Service interface {
 
 // New creates new service
 func New(cfg Config) Service {
-	return &svc{cfg}
+	s := &svc{cfg}
+
+	dispatcher.Register(s.signUp)
+	return s
 }
 
 type svc struct {

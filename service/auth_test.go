@@ -12,6 +12,7 @@ import (
 	"github.com/moonrhythm/dispatcher"
 
 	"github.com/acoshift/acourse/entity"
+	"github.com/acoshift/acourse/model/auth"
 	"github.com/acoshift/acourse/model/firebase"
 
 	. "github.com/acoshift/acourse/service"
@@ -34,43 +35,63 @@ var _ = Describe("Auth", func() {
 
 	Describe("SignUp", func() {
 		It("should error with zero value email", func() {
-			userID, err := s.SignUp(ctx, "", "123456")
+			q := auth.SignUp{
+				Email:    "",
+				Password: "123456",
+			}
+			err := dispatcher.Dispatch(ctx, &q)
 
 			Expect(err).NotTo(BeNil())
 			Expect(IsUIError(err)).To(BeTrue())
-			Expect(userID).To(BeZero())
+			Expect(q.Result).To(BeZero())
 		})
 
 		It("should error with invalid email", func() {
-			userID, err := s.SignUp(ctx, "invalid email", "123456")
+			q := auth.SignUp{
+				Email:    "invalid email",
+				Password: "123456",
+			}
+			err := dispatcher.Dispatch(ctx, &q)
 
 			Expect(err).NotTo(BeNil())
 			Expect(IsUIError(err)).To(BeTrue())
-			Expect(userID).To(BeZero())
+			Expect(q.Result).To(BeZero())
 		})
 
 		It("should error with zero value password", func() {
-			userID, err := s.SignUp(ctx, "test@test.com", "")
+			q := auth.SignUp{
+				Email:    "test@test.com",
+				Password: "",
+			}
+			err := dispatcher.Dispatch(ctx, &q)
 
 			Expect(err).NotTo(BeNil())
 			Expect(IsUIError(err)).To(BeTrue())
-			Expect(userID).To(BeZero())
+			Expect(q.Result).To(BeZero())
 		})
 
 		It("should error with too short password", func() {
-			userID, err := s.SignUp(ctx, "test@test.com", "123")
+			q := auth.SignUp{
+				Email:    "test@test.com",
+				Password: "123",
+			}
+			err := dispatcher.Dispatch(ctx, &q)
 
 			Expect(err).NotTo(BeNil())
 			Expect(IsUIError(err)).To(BeTrue())
-			Expect(userID).To(BeZero())
+			Expect(q.Result).To(BeZero())
 		})
 
 		It("should error with too long password", func() {
-			userID, err := s.SignUp(ctx, "test@test.com", strings.Repeat("1", 100))
+			q := auth.SignUp{
+				Email:    "test@test.com",
+				Password: strings.Repeat("1", 100),
+			}
+			err := dispatcher.Dispatch(ctx, &q)
 
 			Expect(err).NotTo(BeNil())
 			Expect(IsUIError(err)).To(BeTrue())
-			Expect(userID).To(BeZero())
+			Expect(q.Result).To(BeZero())
 		})
 
 		It("should propagate error when firebase error", func() {
@@ -80,11 +101,15 @@ var _ = Describe("Auth", func() {
 				return fmt.Errorf("error")
 			})
 
-			userID, err := s.SignUp(ctx, "test@test.com", "12345678")
+			q := auth.SignUp{
+				Email:    "test@test.com",
+				Password: "12345678",
+			}
+			err := dispatcher.Dispatch(ctx, &q)
 
 			Expect(err).NotTo(BeNil())
 			Expect(IsUIError(err)).To(BeTrue())
-			Expect(userID).To(BeZero())
+			Expect(q.Result).To(BeZero())
 		})
 
 		It("should error when email not available", func() {
@@ -100,11 +125,15 @@ var _ = Describe("Auth", func() {
 				Email:    "test@test.com",
 			}).Return(entity.ErrEmailNotAvailable)
 
-			userID, err := s.SignUp(ctx, "test@test.com", "12345678")
+			q := auth.SignUp{
+				Email:    "test@test.com",
+				Password: "12345678",
+			}
+			err := dispatcher.Dispatch(ctx, &q)
 
 			Expect(err).NotTo(BeNil())
 			Expect(IsUIError(err)).To(BeTrue())
-			Expect(userID).To(BeZero())
+			Expect(q.Result).To(BeZero())
 		})
 
 		It("should error when username not available", func() {
@@ -120,11 +149,15 @@ var _ = Describe("Auth", func() {
 				Email:    "test@test.com",
 			}).Return(entity.ErrUsernameNotAvailable)
 
-			userID, err := s.SignUp(ctx, "test@test.com", "12345678")
+			q := auth.SignUp{
+				Email:    "test@test.com",
+				Password: "12345678",
+			}
+			err := dispatcher.Dispatch(ctx, &q)
 
 			Expect(err).NotTo(BeNil())
 			Expect(IsUIError(err)).To(BeTrue())
-			Expect(userID).To(BeZero())
+			Expect(q.Result).To(BeZero())
 		})
 
 		It("should error when database return error", func() {
@@ -140,10 +173,14 @@ var _ = Describe("Auth", func() {
 				Email:    "test@test.com",
 			}).Return(fmt.Errorf("db error"))
 
-			userID, err := s.SignUp(ctx, "test@test.com", "12345678")
+			q := auth.SignUp{
+				Email:    "test@test.com",
+				Password: "12345678",
+			}
+			err := dispatcher.Dispatch(ctx, &q)
 
 			Expect(err).NotTo(BeNil())
-			Expect(userID).To(BeZero())
+			Expect(q.Result).To(BeZero())
 		})
 
 		It("should return user id when success", func() {
@@ -159,10 +196,14 @@ var _ = Describe("Auth", func() {
 				Email:    "test@test.com",
 			}).Return(nil)
 
-			userID, err := s.SignUp(ctx, "test@test.com", "12345678")
+			q := auth.SignUp{
+				Email:    "test@test.com",
+				Password: "12345678",
+			}
+			err := dispatcher.Dispatch(ctx, &q)
 
 			Expect(err).To(BeNil())
-			Expect(userID).To(Equal("123"))
+			Expect(q.Result).To(Equal("123"))
 		})
 	})
 
