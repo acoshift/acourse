@@ -34,13 +34,13 @@ import (
 	"github.com/acoshift/acourse/controller/auth"
 	"github.com/acoshift/acourse/controller/editor"
 	"github.com/acoshift/acourse/controller/share"
-	"github.com/acoshift/acourse/image"
 	"github.com/acoshift/acourse/internal"
 	"github.com/acoshift/acourse/notify"
 	"github.com/acoshift/acourse/repository"
 	"github.com/acoshift/acourse/service"
 	"github.com/acoshift/acourse/service/email"
 	"github.com/acoshift/acourse/service/file"
+	"github.com/acoshift/acourse/service/image"
 )
 
 func main() {
@@ -97,6 +97,7 @@ func main() {
 		From:     config.String("email_from"),
 	})
 	file.InitGCS(storageClient, config.String("bucket"))
+	image.Init()
 
 	// init redis pool
 	redisClient := redis.NewClient(&redis.Options{
@@ -133,13 +134,12 @@ func main() {
 	methodmux.FallbackHandler = hime.Handler(share.NotFound)
 
 	svc := service.New(service.Config{
-		Repository:         repository.NewService(),
-		Auth:               firAuth,
-		BaseURL:            baseURL,
-		ImageResizeEncoder: image.NewJPEGResizeEncoder(),
-		AdminNotifier:      notify.NewOutgoingWebhookAdminNotifier(config.String("slack_url")),
-		Location:           loc,
-		OpenIDCallback:     himeApp.Route("auth.openid.callback"),
+		Repository:     repository.NewService(),
+		Auth:           firAuth,
+		BaseURL:        baseURL,
+		AdminNotifier:  notify.NewOutgoingWebhookAdminNotifier(config.String("slack_url")),
+		Location:       loc,
+		OpenIDCallback: himeApp.Route("auth.openid.callback"),
 	})
 
 	mux := http.NewServeMux()

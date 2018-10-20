@@ -13,6 +13,7 @@ import (
 	"github.com/acoshift/acourse/context/appctx"
 	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/model/file"
+	"github.com/acoshift/acourse/model/image"
 )
 
 // Profile type
@@ -80,13 +81,21 @@ func (s *svc) UpdateProfile(ctx context.Context, x *Profile) error {
 // uploadProfileImage uploads profile image and return url
 func (s *svc) uploadProfileImage(ctx context.Context, r io.Reader) (string, error) {
 	buf := &bytes.Buffer{}
-	err := s.ImageResizeEncoder.ResizeEncode(buf, r, 500, 500, 90, true)
-	if err != nil {
+
+	if err := dispatcher.Dispatch(ctx, &image.JPEG{
+		Writer:  buf,
+		Reader:  r,
+		Width:   500,
+		Height:  500,
+		Quality: 90,
+		Crop:    true,
+	}); err != nil {
 		return "", err
 	}
+
 	filename := file.GenerateFilename() + ".jpg"
 	store := file.Store{Reader: buf, Filename: filename}
-	if err = dispatcher.Dispatch(ctx, &store); err != nil {
+	if err := dispatcher.Dispatch(ctx, &store); err != nil {
 		return "", err
 	}
 	return store.Result, nil

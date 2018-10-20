@@ -11,6 +11,7 @@ import (
 	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/entity"
 	"github.com/acoshift/acourse/model/file"
+	"github.com/acoshift/acourse/model/image"
 )
 
 var allowProvider = map[string]bool{
@@ -102,8 +103,14 @@ func (s *svc) uploadProfileFromURLAsync(url string) string {
 	defer resp.Body.Close()
 
 	buf := &bytes.Buffer{}
-	err = s.ImageResizeEncoder.ResizeEncode(buf, resp.Body, 500, 500, 90, true)
-	if err != nil {
+	if err := dispatcher.Dispatch(ctx, &image.JPEG{
+		Writer:  buf,
+		Reader:  resp.Body,
+		Width:   500,
+		Height:  500,
+		Quality: 90,
+		Crop:    true,
+	}); err != nil {
 		return ""
 	}
 	cancel()

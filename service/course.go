@@ -13,6 +13,7 @@ import (
 	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/entity"
 	"github.com/acoshift/acourse/model/file"
+	"github.com/acoshift/acourse/model/image"
 )
 
 func (s *svc) CreateCourse(ctx context.Context, x *CreateCourse) (courseID string, err error) {
@@ -250,14 +251,20 @@ func (s *svc) DeleteCourseContent(ctx context.Context, contentID string) error {
 // UploadCourseCoverImage uploads course cover image
 func (s *svc) uploadCourseCoverImage(ctx context.Context, r io.Reader) (string, error) {
 	buf := &bytes.Buffer{}
-	err := s.ImageResizeEncoder.ResizeEncode(buf, r, 1200, 0, 90, false)
-	if err != nil {
+
+	if err := dispatcher.Dispatch(ctx, &image.JPEG{
+		Writer:  buf,
+		Reader:  r,
+		Width:   1200,
+		Quality: 90,
+	}); err != nil {
 		return "", err
 	}
+
 	filename := file.GenerateFilename() + ".jpg"
 
 	store := file.Store{Reader: buf, Filename: filename}
-	if err = dispatcher.Dispatch(ctx, &store); err != nil {
+	if err := dispatcher.Dispatch(ctx, &store); err != nil {
 		return "", err
 	}
 	return store.Result, nil
@@ -266,13 +273,19 @@ func (s *svc) uploadCourseCoverImage(ctx context.Context, r io.Reader) (string, 
 // UploadPaymentImage uploads payment image
 func (s *svc) uploadPaymentImage(ctx context.Context, r io.Reader) (string, error) {
 	buf := &bytes.Buffer{}
-	err := s.ImageResizeEncoder.ResizeEncode(buf, r, 700, 0, 60, false)
-	if err != nil {
+
+	if err := dispatcher.Dispatch(ctx, &image.JPEG{
+		Writer:  buf,
+		Reader:  r,
+		Width:   700,
+		Quality: 60,
+	}); err != nil {
 		return "", err
 	}
+
 	filename := file.GenerateFilename() + ".jpg"
 	store := file.Store{Reader: buf, Filename: filename}
-	if err = dispatcher.Dispatch(ctx, &store); err != nil {
+	if err := dispatcher.Dispatch(ctx, &store); err != nil {
 		return "", err
 	}
 	return store.Result, nil
