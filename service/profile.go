@@ -12,7 +12,7 @@ import (
 
 	"github.com/acoshift/acourse/context/appctx"
 	"github.com/acoshift/acourse/context/sqlctx"
-	"github.com/acoshift/acourse/file"
+	"github.com/acoshift/acourse/model/file"
 )
 
 // Profile type

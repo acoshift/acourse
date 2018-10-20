@@ -8,7 +8,7 @@ import (
 	"cloud.google.com/go/storage"
 	"github.com/moonrhythm/dispatcher"
 
-	"github.com/acoshift/acourse/file"
+	"github.com/acoshift/acourse/model/file"
 )
 
 // InitGCS registers file dispatcher with gcs strategy

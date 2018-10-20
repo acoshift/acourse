@@ -10,7 +10,7 @@ import (
 
 	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/entity"
-	"github.com/acoshift/acourse/file"
+	"github.com/acoshift/acourse/model/file"
 )
 
 var allowProvider = map[string]bool{
