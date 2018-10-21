@@ -1,4 +1,4 @@
-package service_test
+package auth_test
 
 import (
 	"context"
@@ -12,24 +12,20 @@ import (
 	"github.com/moonrhythm/dispatcher"
 
 	"github.com/acoshift/acourse/entity"
+	"github.com/acoshift/acourse/model/app"
 	"github.com/acoshift/acourse/model/auth"
 	"github.com/acoshift/acourse/model/firebase"
+	"github.com/acoshift/acourse/model/user"
 
-	. "github.com/acoshift/acourse/service"
+	. "github.com/acoshift/acourse/service/auth"
 )
 
 var _ = Describe("Auth", func() {
-	var (
-		repo *mockRepo
-		ctx  context.Context
-	)
+	var ctx context.Context
 
 	BeforeEach(func() {
 		ctx = context.Background()
-		repo = &mockRepo{}
-		Init(Config{
-			Repository: repo,
-		})
+		Init("", "")
 	})
 
 	Describe("SignUp", func() {
@@ -41,7 +37,7 @@ var _ = Describe("Auth", func() {
 			err := dispatcher.Dispatch(ctx, &q)
 
 			Expect(err).To(HaveOccurred())
-			Expect(IsUIError(err)).To(BeTrue())
+			Expect(app.IsUIError(err)).To(BeTrue())
 			Expect(q.Result).To(BeZero())
 		})
 
@@ -53,7 +49,7 @@ var _ = Describe("Auth", func() {
 			err := dispatcher.Dispatch(ctx, &q)
 
 			Expect(err).To(HaveOccurred())
-			Expect(IsUIError(err)).To(BeTrue())
+			Expect(app.IsUIError(err)).To(BeTrue())
 			Expect(q.Result).To(BeZero())
 		})
 
@@ -65,7 +61,7 @@ var _ = Describe("Auth", func() {
 			err := dispatcher.Dispatch(ctx, &q)
 
 			Expect(err).To(HaveOccurred())
-			Expect(IsUIError(err)).To(BeTrue())
+			Expect(app.IsUIError(err)).To(BeTrue())
 			Expect(q.Result).To(BeZero())
 		})
 
@@ -77,7 +73,7 @@ var _ = Describe("Auth", func() {
 			err := dispatcher.Dispatch(ctx, &q)
 
 			Expect(err).To(HaveOccurred())
-			Expect(IsUIError(err)).To(BeTrue())
+			Expect(app.IsUIError(err)).To(BeTrue())
 			Expect(q.Result).To(BeZero())
 		})
 
@@ -89,7 +85,7 @@ var _ = Describe("Auth", func() {
 			err := dispatcher.Dispatch(ctx, &q)
 
 			Expect(err).To(HaveOccurred())
-			Expect(IsUIError(err)).To(BeTrue())
+			Expect(app.IsUIError(err)).To(BeTrue())
 			Expect(q.Result).To(BeZero())
 		})
 
@@ -107,7 +103,7 @@ var _ = Describe("Auth", func() {
 			err := dispatcher.Dispatch(ctx, &q)
 
 			Expect(err).To(HaveOccurred())
-			Expect(IsUIError(err)).To(BeTrue())
+			Expect(app.IsUIError(err)).To(BeTrue())
 			Expect(q.Result).To(BeZero())
 		})
 
@@ -118,11 +114,12 @@ var _ = Describe("Auth", func() {
 				m.Result = "123"
 				return nil
 			})
-			repo.On("RegisterUser", &RegisterUser{
-				ID:       "123",
-				Username: "123",
-				Email:    "test@test.com",
-			}).Return(entity.ErrEmailNotAvailable)
+			dispatcher.Register(func(_ context.Context, m *user.Create) error {
+				Expect(m.ID).To(Equal("123"))
+				Expect(m.Username).To(Equal("123"))
+				Expect(m.Email).To(Equal("test@test.com"))
+				return entity.ErrEmailNotAvailable
+			})
 
 			q := auth.SignUp{
 				Email:    "test@test.com",
@@ -131,7 +128,7 @@ var _ = Describe("Auth", func() {
 			err := dispatcher.Dispatch(ctx, &q)
 
 			Expect(err).To(HaveOccurred())
-			Expect(IsUIError(err)).To(BeTrue())
+			Expect(app.IsUIError(err)).To(BeTrue())
 			Expect(q.Result).To(BeZero())
 		})
 
@@ -142,11 +139,12 @@ var _ = Describe("Auth", func() {
 				m.Result = "123"
 				return nil
 			})
-			repo.On("RegisterUser", &RegisterUser{
-				ID:       "123",
-				Username: "123",
-				Email:    "test@test.com",
-			}).Return(entity.ErrUsernameNotAvailable)
+			dispatcher.Register(func(_ context.Context, m *user.Create) error {
+				Expect(m.ID).To(Equal("123"))
+				Expect(m.Username).To(Equal("123"))
+				Expect(m.Email).To(Equal("test@test.com"))
+				return entity.ErrUsernameNotAvailable
+			})
 
 			q := auth.SignUp{
 				Email:    "test@test.com",
@@ -155,7 +153,7 @@ var _ = Describe("Auth", func() {
 			err := dispatcher.Dispatch(ctx, &q)
 
 			Expect(err).To(HaveOccurred())
-			Expect(IsUIError(err)).To(BeTrue())
+			Expect(app.IsUIError(err)).To(BeTrue())
 			Expect(q.Result).To(BeZero())
 		})
 
@@ -166,11 +164,12 @@ var _ = Describe("Auth", func() {
 				m.Result = "123"
 				return nil
 			})
-			repo.On("RegisterUser", &RegisterUser{
-				ID:       "123",
-				Username: "123",
-				Email:    "test@test.com",
-			}).Return(fmt.Errorf("db error"))
+			dispatcher.Register(func(_ context.Context, m *user.Create) error {
+				Expect(m.ID).To(Equal("123"))
+				Expect(m.Username).To(Equal("123"))
+				Expect(m.Email).To(Equal("test@test.com"))
+				return fmt.Errorf("db error")
+			})
 
 			q := auth.SignUp{
 				Email:    "test@test.com",
@@ -189,11 +188,12 @@ var _ = Describe("Auth", func() {
 				m.Result = "123"
 				return nil
 			})
-			repo.On("RegisterUser", &RegisterUser{
-				ID:       "123",
-				Username: "123",
-				Email:    "test@test.com",
-			}).Return(nil)
+			dispatcher.Register(func(_ context.Context, m *user.Create) error {
+				Expect(m.ID).To(Equal("123"))
+				Expect(m.Username).To(Equal("123"))
+				Expect(m.Email).To(Equal("test@test.com"))
+				return nil
+			})
 
 			q := auth.SignUp{
 				Email:    "test@test.com",
@@ -212,7 +212,7 @@ var _ = Describe("Auth", func() {
 			err := dispatcher.Dispatch(ctx, &q)
 
 			Expect(err).To(HaveOccurred())
-			Expect(IsUIError(err)).To(BeTrue())
+			Expect(app.IsUIError(err)).To(BeTrue())
 			Expect(q.Result).To(BeZero())
 		})
 
@@ -223,7 +223,7 @@ var _ = Describe("Auth", func() {
 			err := dispatcher.Dispatch(ctx, &q)
 
 			Expect(err).To(HaveOccurred())
-			Expect(IsUIError(err)).To(BeTrue())
+			Expect(app.IsUIError(err)).To(BeTrue())
 			Expect(q.Result).To(BeZero())
 		})
 
@@ -234,7 +234,7 @@ var _ = Describe("Auth", func() {
 			err := dispatcher.Dispatch(ctx, &q)
 
 			Expect(err).To(HaveOccurred())
-			Expect(IsUIError(err)).To(BeTrue())
+			Expect(app.IsUIError(err)).To(BeTrue())
 			Expect(q.Result).To(BeZero())
 		})
 
@@ -262,7 +262,11 @@ var _ = Describe("Auth", func() {
 				m.Result = "aqswde"
 				return nil
 			})
-			repo.On("IsUserExists", "aqswde").Return(true, nil)
+			dispatcher.Register(func(_ context.Context, m *user.IsExists) error {
+				Expect(m.ID).To(Equal("aqswde"))
+				m.Result = true
+				return nil
+			})
 
 			q := auth.SignInPassword{
 				Email:    "test@test.com",
@@ -280,7 +284,7 @@ var _ = Describe("Auth", func() {
 			err := dispatcher.Dispatch(ctx, &auth.SendPasswordResetEmail{})
 
 			Expect(err).To(HaveOccurred())
-			Expect(IsUIError(err)).To(BeTrue())
+			Expect(app.IsUIError(err)).To(BeTrue())
 		})
 
 		It("should success when email not found in firebase", func() {
@@ -317,7 +321,7 @@ var _ = Describe("Auth", func() {
 			})
 
 			Expect(err).To(HaveOccurred())
-			Expect(IsUIError(err)).To(BeTrue())
+			Expect(app.IsUIError(err)).To(BeTrue())
 		})
 
 		It("should success when email valid", func() {

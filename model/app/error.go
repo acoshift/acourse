@@ -1,4 +1,4 @@
-package service
+package app
 
 // IsUIError returns true if given error is ui error
 func IsUIError(err error) bool {
@@ -14,6 +14,7 @@ func (err *uiError) Error() string {
 	return err.msg
 }
 
-func newUIError(msg string) error {
+// NewUIError creates new ui error
+func NewUIError(msg string) error {
 	return &uiError{msg}
 }

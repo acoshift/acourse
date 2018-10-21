@@ -1,4 +1,4 @@
-package service
+package auth
 
 import (
 	"context"
@@ -12,25 +12,46 @@ import (
 	"github.com/moonrhythm/dispatcher"
 
 	"github.com/acoshift/acourse/entity"
+	"github.com/acoshift/acourse/model/app"
 	"github.com/acoshift/acourse/model/auth"
 	"github.com/acoshift/acourse/model/firebase"
+	"github.com/acoshift/acourse/model/user"
 )
+
+// Init inits auth service
+func Init(baseURL string, openIDCallback string) {
+	s := svc{
+		BaseURL:        baseURL,
+		OpenIDCallback: openIDCallback,
+	}
+
+	dispatcher.Register(s.signUp)
+	dispatcher.Register(s.sendPasswordResetEmail)
+	dispatcher.Register(s.signInPassword)
+	dispatcher.Register(s.generateOpenIDURI)
+	dispatcher.Register(s.signInOpenIDCallback)
+}
+
+type svc struct {
+	BaseURL        string
+	OpenIDCallback string
+}
 
 func (s *svc) signUp(ctx context.Context, m *auth.SignUp) error {
 	if m.Email == "" {
-		return newUIError("email required")
+		return app.NewUIError("email required")
 	}
 
 	email, err := govalidator.NormalizeEmail(m.Email)
 	if err != nil {
-		return newUIError("invalid email")
+		return app.NewUIError("invalid email")
 	}
 
 	if m.Password == "" {
-		return newUIError("password required")
+		return app.NewUIError("password required")
 	}
 	if n := utf8.RuneCountInString(m.Password); n < 6 || n > 64 {
-		return newUIError("password must have 6 to 64 characters")
+		return app.NewUIError("password must have 6 to 64 characters")
 	}
 
 	createUser := firebase.CreateUser{
@@ -41,20 +62,20 @@ func (s *svc) signUp(ctx context.Context, m *auth.SignUp) error {
 	}
 	err = dispatcher.Dispatch(ctx, &createUser)
 	if err != nil {
-		return newUIError(err.Error())
+		return app.NewUIError(err.Error())
 	}
 	userID := createUser.Result
 
-	err = s.Repository.RegisterUser(ctx, &RegisterUser{
+	err = dispatcher.Dispatch(ctx, &user.Create{
 		ID:       userID,
 		Username: userID,
 		Email:    email,
 	})
 	if err == entity.ErrEmailNotAvailable {
-		return newUIError("อีเมลนี้ถูกสมัครแล้ว")
+		return app.NewUIError("อีเมลนี้ถูกสมัครแล้ว")
 	}
 	if err == entity.ErrUsernameNotAvailable {
-		return newUIError("username นี้ถูกใช้งานแล้ว")
+		return app.NewUIError("username นี้ถูกใช้งานแล้ว")
 	}
 	if err != nil {
 		return err
@@ -67,7 +88,7 @@ func (s *svc) signUp(ctx context.Context, m *auth.SignUp) error {
 
 func (s *svc) sendPasswordResetEmail(ctx context.Context, m *auth.SendPasswordResetEmail) error {
 	if m.Email == "" {
-		return newUIError("email required")
+		return app.NewUIError("email required")
 	}
 
 	getUser := firebase.GetUserByEmail{Email: m.Email}
@@ -79,7 +100,7 @@ func (s *svc) sendPasswordResetEmail(ctx context.Context, m *auth.SendPasswordRe
 
 	err = dispatcher.Dispatch(ctx, &firebase.SendPasswordResetEmail{Email: getUser.Email})
 	if err != nil {
-		return newUIError(err.Error())
+		return app.NewUIError(err.Error())
 	}
 
 	return nil
@@ -87,30 +108,31 @@ func (s *svc) sendPasswordResetEmail(ctx context.Context, m *auth.SendPasswordRe
 
 func (s *svc) signInPassword(ctx context.Context, m *auth.SignInPassword) error {
 	if m.Email == "" {
-		return newUIError("email required")
+		return app.NewUIError("email required")
 	}
 	if m.Password == "" {
-		return newUIError("password required")
+		return app.NewUIError("password required")
 	}
 
 	q := firebase.VerifyPassword{Email: m.Email, Password: m.Password}
 	err := dispatcher.Dispatch(ctx, &q)
 	if err != nil {
-		return newUIError(err.Error())
+		return app.NewUIError(err.Error())
 	}
 	userID := q.Result
 
 	// if user not found in our database, insert new user
 	// this happend when database out of sync with firebase authentication
 	{
-		ok, err := s.Repository.IsUserExists(ctx, userID)
+		exists := user.IsExists{ID: userID}
+		err = dispatcher.Dispatch(ctx, &exists)
 		if err != nil {
 			return err
 		}
 
-		if !ok {
+		if !exists.Result {
 			email, _ := govalidator.NormalizeEmail(m.Email)
-			err = s.Repository.RegisterUser(ctx, &RegisterUser{
+			err = dispatcher.Dispatch(ctx, &user.Create{
 				ID:       userID,
 				Username: userID,
 				Name:     userID,

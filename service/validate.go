@@ -5,6 +5,8 @@ import (
 	"mime/multipart"
 
 	"github.com/acoshift/header"
+
+	"github.com/acoshift/acourse/model/app"
 )
 
 var allowImageType = map[string]bool{
@@ -15,7 +17,7 @@ var allowImageType = map[string]bool{
 
 // ValidateImage validates is file header an image
 func ValidateImage(img *multipart.FileHeader) (err error) {
-	err = newUIError("รองรับไฟล์ jpeg และ png เท่านั้น")
+	err = app.NewUIError("รองรับไฟล์ jpeg และ png เท่านั้น")
 
 	if img == nil || img.Header == nil {
 		return

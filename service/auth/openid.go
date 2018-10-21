@@ -1,4 +1,4 @@
-package service
+package auth
 
 import (
 	"bytes"
@@ -10,10 +10,12 @@ import (
 
 	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/entity"
+	"github.com/acoshift/acourse/model/app"
 	"github.com/acoshift/acourse/model/auth"
 	"github.com/acoshift/acourse/model/file"
 	"github.com/acoshift/acourse/model/firebase"
 	"github.com/acoshift/acourse/model/image"
+	"github.com/acoshift/acourse/model/user"
 )
 
 var allowProvider = map[string]bool{
@@ -23,7 +25,7 @@ var allowProvider = map[string]bool{
 
 func (s *svc) generateOpenIDURI(ctx context.Context, m *auth.GenerateOpenIDURI) error {
 	if !allowProvider[m.Provider] {
-		return newUIError("provider not allowed")
+		return app.NewUIError("provider not allowed")
 	}
 
 	sessID := generateSessionID()
@@ -51,24 +53,26 @@ func (s *svc) signInOpenIDCallback(ctx context.Context, m *auth.SignInOpenIDCall
 	}
 	err := dispatcher.Dispatch(ctx, &q)
 	if err != nil {
-		return newUIError(err.Error())
+		return app.NewUIError(err.Error())
 	}
-	user := q.Result
+	u := q.Result
 
 	err = sqlctx.RunInTx(ctx, func(ctx context.Context) error {
 		// check is user sign up
-		exists, err := s.Repository.IsUserExists(ctx, user.UserID)
+		exists := user.IsExists{ID: u.UserID}
+		err = dispatcher.Dispatch(ctx, &exists)
 		if err != nil {
 			return err
 		}
-		if !exists {
+
+		if !exists.Result {
 			// user not found, insert new user
-			imageURL := s.uploadProfileFromURLAsync(user.PhotoURL)
-			err = s.Repository.RegisterUser(ctx, &RegisterUser{
-				ID:       user.UserID,
-				Name:     user.DisplayName,
-				Username: user.UserID,
-				Email:    user.Email,
+			imageURL := s.uploadProfileFromURLAsync(u.PhotoURL)
+			err = dispatcher.Dispatch(ctx, &user.Create{
+				ID:       u.UserID,
+				Name:     u.DisplayName,
+				Username: u.UserID,
+				Email:    u.Email,
 				Image:    imageURL,
 			})
 			if err != nil {
@@ -79,16 +83,16 @@ func (s *svc) signInOpenIDCallback(ctx context.Context, m *auth.SignInOpenIDCall
 		return nil
 	})
 	if err == entity.ErrEmailNotAvailable {
-		return newUIError("อีเมลนี้ถูกสมัครแล้ว")
+		return app.NewUIError("อีเมลนี้ถูกสมัครแล้ว")
 	}
 	if err == entity.ErrUsernameNotAvailable {
-		return newUIError("username นี้ถูกใช้งานแล้ว")
+		return app.NewUIError("username นี้ถูกใช้งานแล้ว")
 	}
 	if err != nil {
 		return err
 	}
 
-	m.Result = user.UserID
+	m.Result = u.UserID
 
 	return nil
 }

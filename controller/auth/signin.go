@@ -8,8 +8,8 @@ import (
 	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/context/appctx"
+	"github.com/acoshift/acourse/model/app"
 	"github.com/acoshift/acourse/model/auth"
-	"github.com/acoshift/acourse/service"
 	"github.com/acoshift/acourse/view"
 )
 
@@ -38,7 +38,7 @@ func (c *ctrl) postSignIn(ctx *hime.Context) error {
 		Password: pass,
 	}
 	err := dispatcher.Dispatch(ctx, &q)
-	if service.IsUIError(err) {
+	if app.IsUIError(err) {
 		f.Add("Errors", err.Error())
 		return ctx.RedirectToGet()
 	}

@@ -7,8 +7,8 @@ import (
 	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/context/appctx"
+	"github.com/acoshift/acourse/model/app"
 	"github.com/acoshift/acourse/model/course"
-	"github.com/acoshift/acourse/service"
 	"github.com/acoshift/acourse/view"
 )
 
@@ -45,7 +45,7 @@ func (c *ctrl) postCourseCreate(ctx *hime.Context) error {
 		Start:     start,
 	}
 	err := dispatcher.Dispatch(ctx, &q)
-	if service.IsUIError(err) {
+	if app.IsUIError(err) {
 		f.Add("Errors", err.Error())
 		return ctx.RedirectToGet()
 	}
@@ -104,7 +104,7 @@ func (c *ctrl) postCourseEdit(ctx *hime.Context) error {
 		Start:     start,
 	}
 	err := dispatcher.Dispatch(ctx, &q)
-	if service.IsUIError(err) {
+	if app.IsUIError(err) {
 		f.Add("Errors", err.Error())
 		return ctx.RedirectToGet()
 	}

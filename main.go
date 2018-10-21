@@ -15,7 +15,6 @@ import (
 	"cloud.google.com/go/trace"
 	"github.com/acoshift/configfile"
 	firadmin "github.com/acoshift/go-firebase-admin"
-	"github.com/acoshift/methodmux"
 	"github.com/acoshift/middleware"
 	"github.com/acoshift/probehandler"
 	"github.com/acoshift/webstatic"
@@ -29,19 +28,17 @@ import (
 	"github.com/acoshift/acourse/context/appctx"
 	"github.com/acoshift/acourse/context/redisctx"
 	"github.com/acoshift/acourse/context/sqlctx"
-	"github.com/acoshift/acourse/controller/admin"
-	"github.com/acoshift/acourse/controller/app"
-	"github.com/acoshift/acourse/controller/auth"
-	"github.com/acoshift/acourse/controller/editor"
-	"github.com/acoshift/acourse/controller/share"
+	"github.com/acoshift/acourse/controller"
 	"github.com/acoshift/acourse/internal"
 	"github.com/acoshift/acourse/repository"
 	"github.com/acoshift/acourse/service"
+	"github.com/acoshift/acourse/service/auth"
 	"github.com/acoshift/acourse/service/email"
 	"github.com/acoshift/acourse/service/file"
 	"github.com/acoshift/acourse/service/firebase"
 	"github.com/acoshift/acourse/service/image"
 	"github.com/acoshift/acourse/service/notify"
+	"github.com/acoshift/acourse/service/user"
 )
 
 func main() {
@@ -133,14 +130,12 @@ func main() {
 	image.Init()
 	firebase.Init(firAuth)
 	notify.Init(config.String("slack_url"))
+	auth.Init(baseURL, himeApp.Route("auth.openid.callback"))
+	user.Init()
 	service.Init(service.Config{
-		Repository:     repository.NewService(),
-		BaseURL:        baseURL,
-		Location:       loc,
-		OpenIDCallback: himeApp.Route("auth.openid.callback"),
+		Repository: repository.NewService(),
+		Location:   loc,
 	})
-
-	methodmux.FallbackHandler = hime.Handler(share.NotFound)
 
 	mux := http.NewServeMux()
 
@@ -165,28 +160,7 @@ func main() {
 	mux.Handle("/favicon.ico", internal.FileHandler("assets/favicon.ico"))
 
 	m := http.NewServeMux()
-
-	m.Handle("/", app.New(app.Config{
-		BaseURL:    baseURL,
-		Repository: repository.NewApp(),
-	}))
-
-	m.Handle("/auth/", http.StripPrefix("/auth", middleware.Chain(
-		internal.NotSignedIn,
-	)(auth.New())))
-
-	m.Handle("/editor/", http.StripPrefix("/editor", middleware.Chain(
-	// -
-	)(editor.New(editor.Config{
-		Repository: repository.NewEditor(),
-	}))))
-
-	m.Handle("/admin/", http.StripPrefix("/admin", middleware.Chain(
-		internal.OnlyAdmin,
-	)(admin.New(admin.Config{
-		Location:   loc,
-		Repository: repository.NewAdmin(),
-	}))))
+	controller.Mount(m, baseURL, loc)
 
 	mux.Handle("/", middleware.Chain(
 		traceClient.HTTPHandler,

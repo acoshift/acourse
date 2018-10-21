@@ -6,23 +6,6 @@ import (
 	"github.com/lib/pq"
 )
 
-// RegisterUser type
-type RegisterUser struct {
-	ID       string
-	Username string
-	Name     string
-	Email    string
-	Image    string
-}
-
-// UpdateUser type
-type UpdateUser struct {
-	ID       string
-	Username string
-	Name     string
-	AboutMe  string
-}
-
 // RegisterCourse type
 type RegisterCourse struct {
 	UserID    string

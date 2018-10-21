@@ -11,6 +11,7 @@ import (
 	"github.com/acoshift/acourse/context/appctx"
 	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/entity"
+	"github.com/acoshift/acourse/model/app"
 	"github.com/acoshift/acourse/model/course"
 	"github.com/acoshift/acourse/model/file"
 	"github.com/acoshift/acourse/model/image"
@@ -22,7 +23,7 @@ func (s *svc) createCourse(ctx context.Context, m *course.Create) error {
 	user := appctx.GetUser(ctx)
 
 	if m.Title == "" {
-		return newUIError("title required")
+		return app.NewUIError("title required")
 	}
 
 	var imageURL string
@@ -41,7 +42,7 @@ func (s *svc) createCourse(ctx context.Context, m *course.Create) error {
 		imageURL, err = s.uploadCourseCoverImage(ctx, image)
 		image.Close()
 		if err != nil {
-			return newUIError(err.Error())
+			return app.NewUIError(err.Error())
 		}
 	}
 
@@ -69,11 +70,11 @@ func (s *svc) updateCourse(ctx context.Context, m *course.Update) error {
 	// user := appctx.GetUser(ctx)
 
 	if m.ID == "" {
-		return newUIError("course id required")
+		return app.NewUIError("course id required")
 	}
 
 	if m.Title == "" {
-		return newUIError("title required")
+		return app.NewUIError("title required")
 	}
 
 	var imageURL string
@@ -92,7 +93,7 @@ func (s *svc) updateCourse(ctx context.Context, m *course.Update) error {
 		imageURL, err = s.uploadCourseCoverImage(ctx, image)
 		image.Close()
 		if err != nil {
-			return newUIError(err.Error())
+			return app.NewUIError(err.Error())
 		}
 	}
 
@@ -161,13 +162,13 @@ func (s *svc) enrollCourse(ctx context.Context, m *course.Enroll) error {
 	}
 
 	if m.Price < 0 {
-		return newUIError("จำนวนเงินติดลบไม่ได้")
+		return app.NewUIError("จำนวนเงินติดลบไม่ได้")
 	}
 
 	var imageURL string
 	if originalPrice != 0 {
 		if m.PaymentImage == nil {
-			return newUIError("กรุณาอัพโหลดรูปภาพ")
+			return app.NewUIError("กรุณาอัพโหลดรูปภาพ")
 		}
 
 		err := ValidateImage(m.PaymentImage)
@@ -177,14 +178,14 @@ func (s *svc) enrollCourse(ctx context.Context, m *course.Enroll) error {
 
 		image, err := m.PaymentImage.Open()
 		if err != nil {
-			return newUIError(err.Error())
+			return app.NewUIError(err.Error())
 		}
 		defer image.Close()
 
 		imageURL, err = s.uploadPaymentImage(ctx, image)
 		image.Close()
 		if err != nil {
-			return newUIError(err.Error())
+			return app.NewUIError(err.Error())
 		}
 	}
 

@@ -9,11 +9,7 @@ import (
 
 // Repository is the service storage
 type Repository interface {
-	RegisterUser(ctx context.Context, x *RegisterUser) error
 	GetUserByEmail(ctx context.Context, email string) (*User, error)
-	UpdateUser(ctx context.Context, x *UpdateUser) error
-	SetUserImage(ctx context.Context, userID string, image string) error
-	IsUserExists(ctx context.Context, userID string) (exists bool, err error)
 
 	RegisterCourse(ctx context.Context, x *RegisterCourse) (courseID string, err error)
 	GetCourse(ctx context.Context, courseID string) (*entity.Course, error)

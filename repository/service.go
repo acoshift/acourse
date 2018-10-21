@@ -41,63 +41,6 @@ func (svcRepo) GetUserByEmail(ctx context.Context, email string) (*service.User,
 	return &x, nil
 }
 
-func (svcRepo) RegisterUser(ctx context.Context, x *service.RegisterUser) error {
-	q := sqlctx.GetQueryer(ctx)
-
-	_, err := q.Exec(`
-		insert into users
-			(id, username, name, email, image)
-		values
-			($1, $2, $3, $4, $5)
-	`, x.ID, x.Username, x.Name, pgsql.NullString(&x.Email), x.Image)
-	if pgsql.IsUniqueViolation(err, "users_email_key") {
-		return entity.ErrEmailNotAvailable
-	}
-	if pgsql.IsUniqueViolation(err, "users_username_key") {
-		return entity.ErrUsernameNotAvailable
-	}
-	return err
-}
-
-func (svcRepo) UpdateUser(ctx context.Context, x *service.UpdateUser) error {
-	q := sqlctx.GetQueryer(ctx)
-
-	_, err := q.Exec(`
-		update users
-		set
-			username = $2,
-			name = $3,
-			about_me = $4,
-			updated_at = now()
-		where id = $1
-	`, x.ID, x.Username, x.Name, x.AboutMe)
-	return err
-}
-
-func (svcRepo) SetUserImage(ctx context.Context, userID string, image string) error {
-	q := sqlctx.GetQueryer(ctx)
-
-	_, err := q.Exec(`
-		update users
-		set image = $2
-		where id = $1
-	`, userID, image)
-	return err
-}
-
-func (svcRepo) IsUserExists(ctx context.Context, userID string) (exists bool, err error) {
-	q := sqlctx.GetQueryer(ctx)
-
-	err = q.QueryRow(`
-		select exists (
-			select 1
-			from users
-			where id = $1
-		)
-	`, userID).Scan(&exists)
-	return
-}
-
 func (svcRepo) RegisterCourse(ctx context.Context, x *service.RegisterCourse) (courseID string, err error) {
 	q := sqlctx.GetQueryer(ctx)
 

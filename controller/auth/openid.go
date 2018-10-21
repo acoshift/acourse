@@ -7,8 +7,8 @@ import (
 	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/context/appctx"
+	"github.com/acoshift/acourse/model/app"
 	"github.com/acoshift/acourse/model/auth"
-	"github.com/acoshift/acourse/service"
 )
 
 var allowProvider = map[string]bool{
@@ -21,7 +21,7 @@ func (c *ctrl) openID(ctx *hime.Context) error {
 
 	q := auth.GenerateOpenIDURI{Provider: p}
 	err := dispatcher.Dispatch(ctx, &q)
-	if service.IsUIError(err) {
+	if app.IsUIError(err) {
 		// TODO: redirect to sign in page
 		return ctx.Status(http.StatusBadRequest).String(err.Error())
 	}
@@ -39,7 +39,7 @@ func (c *ctrl) openIDCallback(ctx *hime.Context) error {
 
 	q := auth.SignInOpenIDCallback{URI: ctx.RequestURI, State: sessID}
 	err := dispatcher.Dispatch(ctx, &q)
-	if service.IsUIError(err) {
+	if app.IsUIError(err) {
 		// TODO: redirect to sign in page
 		return ctx.Status(http.StatusBadRequest).String(err.Error())
 	}

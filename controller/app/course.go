@@ -15,8 +15,8 @@ import (
 	"github.com/acoshift/acourse/context/appctx"
 	"github.com/acoshift/acourse/controller/share"
 	"github.com/acoshift/acourse/entity"
+	"github.com/acoshift/acourse/model/app"
 	"github.com/acoshift/acourse/model/course"
-	"github.com/acoshift/acourse/service"
 	"github.com/acoshift/acourse/view"
 )
 
@@ -243,7 +243,7 @@ func (c *courseCtrl) postEnroll(ctx *hime.Context) error {
 		Price:        price,
 		PaymentImage: image,
 	})
-	if service.IsUIError(err) {
+	if app.IsUIError(err) {
 		f.Add("Errors", "image required")
 		return ctx.RedirectToGet()
 	}

@@ -9,8 +9,8 @@ import (
 	"github.com/acoshift/acourse/context/appctx"
 	"github.com/acoshift/acourse/controller/share"
 	"github.com/acoshift/acourse/entity"
+	"github.com/acoshift/acourse/model/app"
 	"github.com/acoshift/acourse/model/course"
-	"github.com/acoshift/acourse/service"
 	"github.com/acoshift/acourse/view"
 )
 
@@ -44,7 +44,7 @@ func (c *ctrl) postContentList(ctx *hime.Context) error {
 		contentID := ctx.FormValue("contentId")
 
 		err := dispatcher.Dispatch(ctx, &course.DeleteContent{ContentID: contentID})
-		if service.IsUIError(err) {
+		if app.IsUIError(err) {
 			// TODO: use flash
 			return ctx.Status(http.StatusBadRequest).Error(err.Error())
 		}

@@ -1,46 +1,39 @@
-package service
+package user
 
 import (
 	"bytes"
 	"context"
 	"io"
-	"mime/multipart"
 	"unicode/utf8"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/moonrhythm/dispatcher"
 
 	"github.com/acoshift/acourse/context/sqlctx"
+	"github.com/acoshift/acourse/model/app"
 	"github.com/acoshift/acourse/model/file"
 	"github.com/acoshift/acourse/model/image"
 	"github.com/acoshift/acourse/model/user"
+	"github.com/acoshift/acourse/service"
 )
 
-// Profile type
-type Profile struct {
-	Username string
-	Name     string
-	AboutMe  string
-	Image    *multipart.FileHeader
-}
-
-func (s *svc) updateProfile(ctx context.Context, m *user.UpdateProfile) error {
+func updateProfile(ctx context.Context, m *user.UpdateProfile) error {
 	if !govalidator.IsAlphanumeric(m.Username) {
-		return newUIError("username allow only a-z, A-Z, and 0-9")
+		return app.NewUIError("username allow only a-z, A-Z, and 0-9")
 	}
 	if n := utf8.RuneCountInString(m.Username); n < 4 || n > 32 {
-		return newUIError("username must have 4 - 32 characters")
+		return app.NewUIError("username must have 4 - 32 characters")
 	}
 	if n := utf8.RuneCountInString(m.Name); n < 4 || n > 40 {
-		return newUIError("name must have 4 - 40 characters")
+		return app.NewUIError("name must have 4 - 40 characters")
 	}
 	if n := utf8.RuneCountInString(m.AboutMe); n > 256 {
-		return newUIError("about me must have lower than 256 characters")
+		return app.NewUIError("about me must have lower than 256 characters")
 	}
 
 	var imageURL string
 	if m.Image != nil {
-		err := ValidateImage(m.Image)
+		err := service.ValidateImage(m.Image)
 		if err != nil {
 			return err
 		}
@@ -51,21 +44,21 @@ func (s *svc) updateProfile(ctx context.Context, m *user.UpdateProfile) error {
 		}
 		defer image.Close()
 
-		imageURL, err = s.uploadProfileImage(ctx, image)
+		imageURL, err = uploadProfileImage(ctx, image)
 		if err != nil {
-			return newUIError(err.Error())
+			return app.NewUIError(err.Error())
 		}
 	}
 
 	err := sqlctx.RunInTx(ctx, func(ctx context.Context) error {
 		if imageURL != "" {
-			err := s.Repository.SetUserImage(ctx, m.ID, imageURL)
+			err := dispatcher.Dispatch(ctx, &user.SetImage{ID: m.ID, Image: imageURL})
 			if err != nil {
 				return err
 			}
 		}
 
-		return s.Repository.UpdateUser(ctx, &UpdateUser{
+		return dispatcher.Dispatch(ctx, &user.Update{
 			ID:       m.ID,
 			Username: m.Username,
 			Name:     m.Name,
@@ -77,7 +70,7 @@ func (s *svc) updateProfile(ctx context.Context, m *user.UpdateProfile) error {
 }
 
 // uploadProfileImage uploads profile image and return url
-func (s *svc) uploadProfileImage(ctx context.Context, r io.Reader) (string, error) {
+func uploadProfileImage(ctx context.Context, r io.Reader) (string, error) {
 	buf := &bytes.Buffer{}
 
 	if err := dispatcher.Dispatch(ctx, &image.JPEG{

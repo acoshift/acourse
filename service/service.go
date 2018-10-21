@@ -8,22 +8,14 @@ import (
 
 // Config is service config
 type Config struct {
-	Repository     Repository
-	BaseURL        string
-	Location       *time.Location
-	OpenIDCallback string
+	Repository Repository
+	Location   *time.Location
 }
 
 // Init registers service into dispatcher
 func Init(cfg Config) {
 	s := &svc{cfg}
 
-	dispatcher.Register(s.signUp)
-	dispatcher.Register(s.sendPasswordResetEmail)
-	dispatcher.Register(s.signInPassword)
-	dispatcher.Register(s.generateOpenIDURI)
-	dispatcher.Register(s.signInOpenIDCallback)
-	dispatcher.Register(s.updateProfile)
 	dispatcher.Register(s.createCourse)
 	dispatcher.Register(s.updateCourse)
 	dispatcher.Register(s.enrollCourse)

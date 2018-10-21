@@ -7,6 +7,8 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	"github.com/acoshift/acourse/model/app"
+
 	. "github.com/acoshift/acourse/service"
 )
 
@@ -17,7 +19,7 @@ var _ = Describe("Validate", func() {
 			err := ValidateImage(fh)
 
 			Expect(err).ToNot(BeNil())
-			Expect(IsUIError(err)).To(BeTrue())
+			Expect(app.IsUIError(err)).To(BeTrue())
 		})
 
 		It("should return error when file is html", func() {
@@ -27,7 +29,7 @@ var _ = Describe("Validate", func() {
 			err := ValidateImage(fh)
 
 			Expect(err).ToNot(BeNil())
-			Expect(IsUIError(err)).To(BeTrue())
+			Expect(app.IsUIError(err)).To(BeTrue())
 		})
 
 		It("should success when file is jpg", func() {
@@ -64,7 +66,7 @@ var _ = Describe("Validate", func() {
 			err := ValidateImage(fh)
 
 			Expect(err).ToNot(BeNil())
-			Expect(IsUIError(err)).To(BeTrue())
+			Expect(app.IsUIError(err)).To(BeTrue())
 		})
 
 		It("should return error when file is svg", func() {
@@ -74,7 +76,7 @@ var _ = Describe("Validate", func() {
 			err := ValidateImage(fh)
 
 			Expect(err).ToNot(BeNil())
-			Expect(IsUIError(err)).To(BeTrue())
+			Expect(app.IsUIError(err)).To(BeTrue())
 		})
 	})
 })

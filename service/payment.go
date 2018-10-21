@@ -8,6 +8,7 @@ import (
 
 	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/entity"
+	"github.com/acoshift/acourse/model/app"
 	"github.com/acoshift/acourse/model/email"
 	"github.com/acoshift/acourse/model/payment"
 	"github.com/acoshift/acourse/view"
@@ -17,7 +18,7 @@ func (s *svc) acceptPayment(ctx context.Context, m *payment.Accept) error {
 	err := sqlctx.RunInTx(ctx, func(ctx context.Context) error {
 		x, err := s.Repository.GetPayment(ctx, m.ID)
 		if err == entity.ErrNotFound {
-			return newUIError("payment not found")
+			return app.NewUIError("payment not found")
 		}
 		if err != nil {
 			return err
@@ -100,7 +101,7 @@ func (s *svc) rejectPayment(ctx context.Context, m *payment.Reject) error {
 	err := sqlctx.RunInTx(ctx, func(ctx context.Context) error {
 		x, err := s.Repository.GetPayment(ctx, m.ID)
 		if err == entity.ErrNotFound {
-			return newUIError("payment not found")
+			return app.NewUIError("payment not found")
 		}
 		if err != nil {
 			return err
