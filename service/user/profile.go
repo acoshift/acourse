@@ -14,7 +14,6 @@ import (
 	"github.com/acoshift/acourse/model/file"
 	"github.com/acoshift/acourse/model/image"
 	"github.com/acoshift/acourse/model/user"
-	"github.com/acoshift/acourse/service"
 )
 
 func updateProfile(ctx context.Context, m *user.UpdateProfile) error {
@@ -33,7 +32,7 @@ func updateProfile(ctx context.Context, m *user.UpdateProfile) error {
 
 	var imageURL string
 	if m.Image != nil {
-		err := service.ValidateImage(m.Image)
+		err := image.Validate(m.Image)
 		if err != nil {
 			return err
 		}

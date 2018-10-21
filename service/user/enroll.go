@@ -18,7 +18,6 @@ import (
 	"github.com/acoshift/acourse/model/notify"
 	"github.com/acoshift/acourse/model/payment"
 	"github.com/acoshift/acourse/model/user"
-	"github.com/acoshift/acourse/service"
 )
 
 func enroll(ctx context.Context, m *user.Enroll) error {
@@ -78,7 +77,7 @@ func enroll(ctx context.Context, m *user.Enroll) error {
 			return app.NewUIError("กรุณาอัพโหลดรูปภาพ")
 		}
 
-		err := service.ValidateImage(m.PaymentImage)
+		err := image.Validate(m.PaymentImage)
 		if err != nil {
 			return err
 		}

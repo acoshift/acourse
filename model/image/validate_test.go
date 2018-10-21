@@ -1,4 +1,4 @@
-package service_test
+package image_test
 
 import (
 	"mime/multipart"

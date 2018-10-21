@@ -11,19 +11,6 @@ import (
 	"github.com/acoshift/acourse/model/course"
 )
 
-func registerCourse(ctx context.Context, x *RegisterCourse) (courseID string, err error) {
-	q := sqlctx.GetQueryer(ctx)
-
-	err = q.QueryRow(`
-		insert into courses
-			(user_id, title, short_desc, long_desc, image, start)
-		values
-			($1, $2, $3, $4, $5, $6)
-		returning id
-	`, x.UserID, x.Title, x.ShortDesc, x.LongDesc, x.Image, pgsql.NullTime(&x.Start)).Scan(&courseID)
-	return
-}
-
 func getCourse(ctx context.Context, courseID string) (*course.Course, error) {
 	q := sqlctx.GetQueryer(ctx)
 
@@ -48,22 +35,6 @@ func getCourse(ctx context.Context, courseID string) (*course.Course, error) {
 		return nil, err
 	}
 	return &x, nil
-}
-
-func updateCourse(ctx context.Context, x *UpdateCourseModel) error {
-	q := sqlctx.GetQueryer(ctx)
-
-	_, err := q.Exec(`
-		update courses
-		set
-			title = $2,
-			short_desc = $3,
-			long_desc = $4,
-			start = $5,
-			updated_at = now()
-		where id = $1
-	`, x.ID, x.Title, x.ShortDesc, x.LongDesc, pgsql.NullTime(&x.Start))
-	return err
 }
 
 func getPayment(ctx context.Context, paymentID string) (*Payment, error) {

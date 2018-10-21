@@ -1,4 +1,4 @@
-package service
+package image
 
 import (
 	"mime"
@@ -15,8 +15,8 @@ var allowImageType = map[string]bool{
 	"image/png":  true,
 }
 
-// ValidateImage validates is file header an image
-func ValidateImage(img *multipart.FileHeader) (err error) {
+// Validate validates is file header an image
+func Validate(img *multipart.FileHeader) (err error) {
 	err = app.NewUIError("รองรับไฟล์ jpeg และ png เท่านั้น")
 
 	if img == nil || img.Header == nil {

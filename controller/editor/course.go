@@ -38,6 +38,7 @@ func (c *ctrl) postCourseCreate(ctx *hime.Context) error {
 	image, _ := ctx.FormFileHeaderNotEmpty("image")
 
 	q := course.Create{
+		UserID:    appctx.GetUserID(ctx),
 		Title:     title,
 		ShortDesc: shortDesc,
 		LongDesc:  desc,

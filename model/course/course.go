@@ -51,6 +51,7 @@ type Option struct {
 
 // Create creates new course
 type Create struct {
+	UserID    string
 	Title     string
 	ShortDesc string
 	LongDesc  string

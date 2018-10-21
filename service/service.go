@@ -15,8 +15,6 @@ type Config struct {
 func Init(cfg Config) {
 	s := &svc{cfg}
 
-	dispatcher.Register(s.createCourse)
-	dispatcher.Register(s.updateCourse)
 	dispatcher.Register(s.acceptPayment)
 	dispatcher.Register(s.rejectPayment)
 }
