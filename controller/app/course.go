@@ -17,6 +17,7 @@ import (
 	"github.com/acoshift/acourse/entity"
 	"github.com/acoshift/acourse/model/app"
 	"github.com/acoshift/acourse/model/course"
+	"github.com/acoshift/acourse/model/user"
 	"github.com/acoshift/acourse/view"
 )
 
@@ -93,20 +94,20 @@ func (c *courseCtrl) view(ctx *hime.Context) error {
 		return share.NotFound(ctx)
 	}
 
-	user := appctx.GetUser(ctx)
+	u := appctx.GetUser(ctx)
 	course := c.getCourse(ctx)
 
-	var err error
 	enrolled := false
 	pendingEnroll := false
-	if user != nil {
-		enrolled, err = c.Repository.IsEnrolled(ctx, user.ID, course.ID)
+	if u != nil {
+		enrolled := user.IsEnroll{ID: u.ID, CourseID: course.ID}
+		err := dispatcher.Dispatch(ctx, &enrolled)
 		if err != nil {
 			return err
 		}
 
-		if !enrolled {
-			pendingEnroll, err = c.Repository.HasPendingPayment(ctx, user.ID, course.ID)
+		if !enrolled.Result {
+			pendingEnroll, err = c.Repository.HasPendingPayment(ctx, u.ID, course.ID)
 			if err != nil {
 				return err
 			}
@@ -114,8 +115,8 @@ func (c *courseCtrl) view(ctx *hime.Context) error {
 	}
 
 	var owned bool
-	if user != nil {
-		owned = user.ID == course.Owner.ID
+	if u != nil {
+		owned = u.ID == course.Owner.ID
 	}
 
 	p := view.Page(ctx)
@@ -131,15 +132,16 @@ func (c *courseCtrl) view(ctx *hime.Context) error {
 }
 
 func (c *courseCtrl) content(ctx *hime.Context) error {
-	user := appctx.GetUser(ctx)
+	u := appctx.GetUser(ctx)
 	x := c.getCourse(ctx)
 
-	enrolled, err := c.Repository.IsEnrolled(ctx, user.ID, x.ID)
+	enrolled := user.IsEnroll{ID: u.ID, CourseID: x.ID}
+	err := dispatcher.Dispatch(ctx, &enrolled)
 	if err != nil {
 		return err
 	}
 
-	if !enrolled && user.ID != x.Owner.ID {
+	if !enrolled.Result && u.ID != x.Owner.ID {
 		return ctx.Status(http.StatusForbidden).StatusText()
 	}
 
@@ -171,25 +173,26 @@ func (c *courseCtrl) content(ctx *hime.Context) error {
 }
 
 func (c *courseCtrl) enroll(ctx *hime.Context) error {
-	user := appctx.GetUser(ctx)
+	u := appctx.GetUser(ctx)
 	course := c.getCourse(ctx)
 
 	// owner redirect to course content
-	if user != nil && user.ID == course.Owner.ID {
+	if u != nil && u.ID == course.Owner.ID {
 		return ctx.RedirectTo("app.course", course.Link(), "content")
 	}
 
 	// redirect enrolled user to course content page
-	enrolled, err := c.Repository.IsEnrolled(ctx, user.ID, course.ID)
+	enrolled := user.IsEnroll{ID: u.ID, CourseID: course.ID}
+	err := dispatcher.Dispatch(ctx, &enrolled)
 	if err != nil {
 		return err
 	}
-	if enrolled {
+	if enrolled.Result {
 		return ctx.RedirectTo("app.course", course.Link(), "content")
 	}
 
 	// check is user has pending enroll
-	pendingPayment, err := c.Repository.HasPendingPayment(ctx, user.ID, course.ID)
+	pendingPayment, err := c.Repository.HasPendingPayment(ctx, u.ID, course.ID)
 	if err != nil {
 		return err
 	}
@@ -207,25 +210,26 @@ func (c *courseCtrl) enroll(ctx *hime.Context) error {
 }
 
 func (c *courseCtrl) postEnroll(ctx *hime.Context) error {
-	user := appctx.GetUser(ctx)
+	u := appctx.GetUser(ctx)
 	x := c.getCourse(ctx)
 
 	// owner redirect to course content
-	if user != nil && user.ID == x.Owner.ID {
+	if u != nil && u.ID == x.Owner.ID {
 		return ctx.RedirectTo("app.course", x.Link(), "content")
 	}
 
 	// redirect enrolled user to course content page
-	enrolled, err := c.Repository.IsEnrolled(ctx, user.ID, x.ID)
+	enrolled := user.IsEnroll{ID: u.ID, CourseID: x.ID}
+	err := dispatcher.Dispatch(ctx, &enrolled)
 	if err != nil {
 		return err
 	}
-	if enrolled {
+	if enrolled.Result {
 		return ctx.RedirectTo("app.course", x.Link(), "content")
 	}
 
 	// check is user has pending enroll
-	pendingPayment, err := c.Repository.HasPendingPayment(ctx, user.ID, x.ID)
+	pendingPayment, err := c.Repository.HasPendingPayment(ctx, u.ID, x.ID)
 	if err != nil {
 		return err
 	}
@@ -255,15 +259,16 @@ func (c *courseCtrl) postEnroll(ctx *hime.Context) error {
 }
 
 func (c *courseCtrl) assignment(ctx *hime.Context) error {
-	user := appctx.GetUser(ctx)
+	u := appctx.GetUser(ctx)
 	course := c.getCourse(ctx)
 
-	enrolled, err := c.Repository.IsEnrolled(ctx, user.ID, course.ID)
+	enrolled := user.IsEnroll{ID: u.ID, CourseID: course.ID}
+	err := dispatcher.Dispatch(ctx, &enrolled)
 	if err != nil {
 		return err
 	}
 
-	if !enrolled && user.ID != course.Owner.ID {
+	if !enrolled.Result && u.ID != course.Owner.ID {
 		return ctx.Status(http.StatusForbidden).StatusText()
 	}
 

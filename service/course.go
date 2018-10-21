@@ -17,6 +17,7 @@ import (
 	"github.com/acoshift/acourse/model/image"
 	"github.com/acoshift/acourse/model/notify"
 	"github.com/acoshift/acourse/model/payment"
+	"github.com/acoshift/acourse/model/user"
 )
 
 func (s *svc) createCourse(ctx context.Context, m *course.Create) error {
@@ -124,7 +125,7 @@ func (s *svc) updateCourse(ctx context.Context, m *course.Update) error {
 }
 
 func (s *svc) enrollCourse(ctx context.Context, m *course.Enroll) error {
-	user := appctx.GetUser(ctx)
+	u := appctx.GetUser(ctx)
 
 	course, err := s.Repository.GetCourse(ctx, m.ID)
 	if err == entity.ErrNotFound {
@@ -135,22 +136,25 @@ func (s *svc) enrollCourse(ctx context.Context, m *course.Enroll) error {
 	}
 
 	// is owner
-	if user.ID == course.UserID {
+	if u.ID == course.UserID {
 		return nil
 	}
 
 	// is enrolled
-	enrolled, err := s.Repository.IsEnrolled(ctx, user.ID, m.ID)
-	if err != nil {
-		return err
-	}
-	if enrolled {
-		return nil
+	{
+		q := user.IsEnroll{ID: u.ID, CourseID: m.ID}
+		err = dispatcher.Dispatch(ctx, &q)
+		if err != nil {
+			return err
+		}
+		if q.Result {
+			return nil
+		}
 	}
 
 	// has pending enroll
 	{
-		q := payment.HasPending{UserID: user.ID, CourseID: m.ID}
+		q := payment.HasPending{UserID: u.ID, CourseID: m.ID}
 		err := dispatcher.Dispatch(ctx, &q)
 		if err != nil {
 			return err
@@ -197,14 +201,14 @@ func (s *svc) enrollCourse(ctx context.Context, m *course.Enroll) error {
 
 	err = sqlctx.RunInTx(ctx, func(ctx context.Context) error {
 		if course.Price == 0 {
-			return s.Repository.RegisterEnroll(ctx, user.ID, course.ID)
+			return s.Repository.RegisterEnroll(ctx, u.ID, course.ID)
 		}
 
 		newPayment = true
 
 		return s.Repository.RegisterPayment(ctx, &RegisterPayment{
 			CourseID:      course.ID,
-			UserID:        user.ID,
+			UserID:        u.ID,
 			Image:         imageURL,
 			Price:         m.Price,
 			OriginalPrice: originalPrice,

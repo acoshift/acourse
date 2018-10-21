@@ -18,5 +18,4 @@ type Repository interface {
 	GetPayment(ctx context.Context, paymentID string) (*Payment, error)
 
 	RegisterEnroll(ctx context.Context, userID string, courseID string) error
-	IsEnrolled(ctx context.Context, userID string, courseID string) (bool, error)
 }

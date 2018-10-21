@@ -67,19 +67,6 @@ func (appRepo) GetCourseIDByURL(ctx context.Context, url string) (courseID strin
 	return
 }
 
-func (appRepo) IsEnrolled(ctx context.Context, userID string, courseID string) (enrolled bool, err error) {
-	q := sqlctx.GetQueryer(ctx)
-
-	err = q.QueryRow(`
-		select exists (
-			select 1
-			from enrolls
-			where user_id = $1 and course_id = $2
-		)
-	`, userID, courseID).Scan(&enrolled)
-	return
-}
-
 func (appRepo) HasPendingPayment(ctx context.Context, userID string, courseID string) (exists bool, err error) {
 	q := sqlctx.GetQueryer(ctx)
 

@@ -29,3 +29,11 @@ type SetImage struct {
 	ID    string
 	Image string
 }
+
+// IsEnroll checks is user enrolled a course
+type IsEnroll struct {
+	ID       string
+	CourseID string
+
+	Result bool
+}

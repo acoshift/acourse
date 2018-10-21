@@ -153,16 +153,3 @@ func (svcRepo) RegisterEnroll(ctx context.Context, userID string, courseID strin
 	`, userID, courseID)
 	return err
 }
-
-func (svcRepo) IsEnrolled(ctx context.Context, userID string, courseID string) (enrolled bool, err error) {
-	q := sqlctx.GetQueryer(ctx)
-
-	err = q.QueryRow(`
-		select exists (
-			select 1
-			from enrolls
-			where user_id = $1 and course_id = $2
-		)
-	`, userID, courseID).Scan(&enrolled)
-	return
-}

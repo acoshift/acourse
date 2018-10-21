@@ -18,6 +18,7 @@ func Init() {
 	dispatcher.Register(isExists)
 	dispatcher.Register(setImage)
 	dispatcher.Register(updateProfile)
+	dispatcher.Register(isEnroll)
 }
 
 func create(ctx context.Context, m *user.Create) error {
@@ -74,4 +75,16 @@ func setImage(ctx context.Context, m *user.SetImage) error {
 		where id = $1
 	`, m.ID, m.Image)
 	return err
+}
+
+func isEnroll(ctx context.Context, m *user.IsEnroll) error {
+	q := sqlctx.GetQueryer(ctx)
+
+	return q.QueryRow(`
+		select exists (
+			select 1
+			from enrolls
+			where user_id = $1 and course_id = $2
+		)
+	`, m.ID, m.CourseID).Scan(&m.Result)
 }
