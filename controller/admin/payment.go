@@ -5,18 +5,21 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/acoshift/hime"
 	"github.com/acoshift/paginate"
+	"github.com/moonrhythm/dispatcher"
+	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/entity"
-	"github.com/acoshift/acourse/service"
+	"github.com/acoshift/acourse/model/admin"
+	"github.com/acoshift/acourse/model/app"
 	"github.com/acoshift/acourse/view"
 )
 
 func (c *ctrl) rejectPayment(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 
-	x, err := c.Repository.GetPayment(ctx, id)
+	q := admin.GetPayment{PaymentID: id}
+	err := dispatcher.Dispatch(ctx, &q)
 	if err == entity.ErrNotFound {
 		return ctx.RedirectTo("admin.payments.pending")
 	}
@@ -24,6 +27,7 @@ func (c *ctrl) rejectPayment(ctx *hime.Context) error {
 		return err
 	}
 
+	x := &q.Result
 	name := x.User.Name
 	if len(name) == 0 {
 		name = x.User.Username
@@ -71,8 +75,8 @@ func (c *ctrl) postRejectPayment(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 	message := ctx.PostFormValue("message")
 
-	err := c.Service.RejectPayment(ctx, id, message)
-	if service.IsUIError(err) {
+	err := dispatcher.Dispatch(ctx, &admin.RejectPayment{ID: id, Message: message})
+	if app.IsUIError(err) {
 		return ctx.Status(http.StatusBadRequest).String(err.Error())
 	}
 	if err != nil {
@@ -87,8 +91,8 @@ func (c *ctrl) postPendingPayment(ctx *hime.Context) error {
 
 	id := ctx.PostFormValue("id")
 	if action == "accept" {
-		err := c.Service.AcceptPayment(ctx, id)
-		if service.IsUIError(err) {
+		err := dispatcher.Dispatch(ctx, &admin.AcceptPayment{ID: id, Location: c.Location})
+		if app.IsUIError(err) {
 			return ctx.Status(http.StatusBadRequest).String(err.Error())
 		}
 		if err != nil {
@@ -100,43 +104,47 @@ func (c *ctrl) postPendingPayment(ctx *hime.Context) error {
 }
 
 func (c *ctrl) pendingPayments(ctx *hime.Context) error {
-	cnt, err := c.Repository.CountPaymentsByStatus(ctx, []int{entity.Pending})
+	cnt := admin.CountPayments{Status: []int{entity.Pending}}
+	err := dispatcher.Dispatch(ctx, &cnt)
 	if err != nil {
 		return err
 	}
 
 	pg, _ := strconv.ParseInt(ctx.FormValue("page"), 10, 64)
-	pn := paginate.New(pg, 30, cnt)
+	pn := paginate.New(pg, 30, cnt.Result)
 
-	payments, err := c.Repository.ListPaymentsByStatus(ctx, []int{entity.Pending}, pn.Limit(), pn.Offset())
+	list := admin.ListPayments{Status: []int{entity.Pending}, Limit: pn.Limit(), Offset: pn.Offset()}
+	err = dispatcher.Dispatch(ctx, &list)
 	if err != nil {
 		return err
 	}
 
 	p := view.Page(ctx)
 	p.Data["Navbar"] = "admin.payment.pending"
-	p.Data["Payments"] = payments
+	p.Data["Payments"] = list.Result
 	p.Data["Paginate"] = pn
 	return ctx.View("admin.payments", p)
 }
 
 func (c *ctrl) historyPayments(ctx *hime.Context) error {
-	cnt, err := c.Repository.CountPaymentsByStatus(ctx, []int{entity.Accepted, entity.Rejected})
+	cnt := admin.CountPayments{Status: []int{entity.Accepted, entity.Rejected}}
+	err := dispatcher.Dispatch(ctx, &cnt)
 	if err != nil {
 		return err
 	}
 
 	pg, _ := strconv.ParseInt(ctx.FormValue("page"), 10, 64)
-	pn := paginate.New(pg, 30, cnt)
+	pn := paginate.New(pg, 30, cnt.Result)
 
-	payments, err := c.Repository.ListPaymentsByStatus(ctx, []int{entity.Accepted, entity.Rejected, entity.Refunded}, pn.Limit(), pn.Offset())
+	list := admin.ListPayments{Status: []int{entity.Accepted, entity.Rejected, entity.Refunded}, Limit: pn.Limit(), Offset: pn.Offset()}
+	err = dispatcher.Dispatch(ctx, &list)
 	if err != nil {
 		return err
 	}
 
 	p := view.Page(ctx)
 	p.Data["Navbar"] = "admin.payment.history"
-	p.Data["Payments"] = payments
+	p.Data["Payments"] = list.Result
 	p.Data["Paginate"] = pn
 	return ctx.View("admin.payments", p)
 }

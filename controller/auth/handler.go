@@ -3,22 +3,18 @@ package auth
 import (
 	"net/http"
 
-	"github.com/acoshift/hime"
 	"github.com/acoshift/methodmux"
+	"github.com/moonrhythm/hime"
 
-	"github.com/acoshift/acourse/service"
+	"github.com/acoshift/acourse/controller/share"
 )
 
-// Config is auth config
-type Config struct {
-	Service service.Service
-}
-
 // New creates new auth handler
-func New(cfg Config) http.Handler {
-	c := &ctrl{cfg}
+func New() http.Handler {
+	c := &ctrl{}
 
 	mux := http.NewServeMux()
+	mux.Handle("/", hime.Handler(share.NotFound))
 
 	mux.Handle("/signin", methodmux.GetPost(
 		hime.Handler(c.signIn),
@@ -42,6 +38,4 @@ func New(cfg Config) http.Handler {
 	return mux
 }
 
-type ctrl struct {
-	Config
-}
+type ctrl struct{}

@@ -3,10 +3,12 @@ package auth
 import (
 	"net/url"
 
-	"github.com/acoshift/hime"
+	"github.com/moonrhythm/dispatcher"
+	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/context/appctx"
-	"github.com/acoshift/acourse/service"
+	"github.com/acoshift/acourse/model/app"
+	"github.com/acoshift/acourse/model/auth"
 	"github.com/acoshift/acourse/view"
 )
 
@@ -30,8 +32,12 @@ func (c *ctrl) postSignUp(ctx *hime.Context) error {
 		return ctx.RedirectToGet()
 	}
 
-	userID, err := c.Service.SignUp(ctx, email, pass)
-	if service.IsUIError(err) {
+	q := auth.SignUp{
+		Email:    email,
+		Password: pass,
+	}
+	err := dispatcher.Dispatch(ctx, &q)
+	if app.IsUIError(err) {
 		f.Set("Email", email)
 		f.Add("Errors", err.Error())
 		return ctx.RedirectToGet()
@@ -41,7 +47,7 @@ func (c *ctrl) postSignUp(ctx *hime.Context) error {
 	}
 
 	appctx.RegenerateSessionID(ctx)
-	appctx.SetUserID(ctx, userID)
+	appctx.SetUserID(ctx, q.Result)
 
 	rd, _ := url.QueryUnescape(ctx.FormValue("r"))
 	return ctx.SafeRedirect(rd)
@@ -61,8 +67,8 @@ func (c *ctrl) postResetPassword(ctx *hime.Context) error {
 		return ctx.RedirectToGet()
 	}
 
-	err := c.Service.SendPasswordResetEmail(ctx, email)
-	if service.IsUIError(err) {
+	err := dispatcher.Dispatch(ctx, &auth.SendPasswordResetEmail{Email: email})
+	if app.IsUIError(err) {
 		f.Add("Errors", err.Error())
 		return ctx.RedirectToGet()
 	}

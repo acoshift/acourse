@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/acoshift/hime"
+	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/context/appctx"
 )

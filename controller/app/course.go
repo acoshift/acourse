@@ -6,15 +6,18 @@ import (
 	"net/url"
 	"strconv"
 
-	"github.com/acoshift/hime"
 	"github.com/acoshift/methodmux"
 	"github.com/acoshift/prefixhandler"
+	"github.com/moonrhythm/dispatcher"
+	"github.com/moonrhythm/hime"
 	"github.com/satori/go.uuid"
 
 	"github.com/acoshift/acourse/context/appctx"
 	"github.com/acoshift/acourse/controller/share"
 	"github.com/acoshift/acourse/entity"
-	"github.com/acoshift/acourse/service"
+	"github.com/acoshift/acourse/model/app"
+	"github.com/acoshift/acourse/model/course"
+	"github.com/acoshift/acourse/model/user"
 	"github.com/acoshift/acourse/view"
 )
 
@@ -50,7 +53,7 @@ func newCourseHandler(appCtrl *ctrl) http.Handler {
 		_, err := uuid.FromString(link)
 		if err != nil {
 			// link can not parse to uuid get course id from url
-			courseID, err = c.Repository.GetCourseIDByURL(ctx, link)
+			courseID, err = getCourseIDByURL(ctx, link)
 			if err == entity.ErrNotFound {
 				return share.NotFound(ctx)
 			}
@@ -59,7 +62,7 @@ func newCourseHandler(appCtrl *ctrl) http.Handler {
 			}
 		}
 
-		x, err := c.Repository.GetCourse(ctx, courseID)
+		x, err := getCourse(ctx, courseID)
 		if err == entity.ErrNotFound {
 			return share.NotFound(ctx)
 		}
@@ -72,7 +75,7 @@ func newCourseHandler(appCtrl *ctrl) http.Handler {
 			return ctx.RedirectTo("app.course", l, ctx.URL.Path)
 		}
 
-		ctx.WithValue(courseKey{}, x)
+		ctx = ctx.WithValue(courseKey{}, x)
 
 		return ctx.Handle(mux)
 	})
@@ -91,20 +94,20 @@ func (c *courseCtrl) view(ctx *hime.Context) error {
 		return share.NotFound(ctx)
 	}
 
-	user := appctx.GetUser(ctx)
+	u := appctx.GetUser(ctx)
 	course := c.getCourse(ctx)
 
-	var err error
 	enrolled := false
 	pendingEnroll := false
-	if user != nil {
-		enrolled, err = c.Repository.IsEnrolled(ctx, user.ID, course.ID)
+	if u != nil {
+		enrolled := user.IsEnroll{ID: u.ID, CourseID: course.ID}
+		err := dispatcher.Dispatch(ctx, &enrolled)
 		if err != nil {
 			return err
 		}
 
-		if !enrolled {
-			pendingEnroll, err = c.Repository.HasPendingPayment(ctx, user.ID, course.ID)
+		if !enrolled.Result {
+			pendingEnroll, err = hasPendingPayment(ctx, u.ID, course.ID)
 			if err != nil {
 				return err
 			}
@@ -112,8 +115,8 @@ func (c *courseCtrl) view(ctx *hime.Context) error {
 	}
 
 	var owned bool
-	if user != nil {
-		owned = user.ID == course.Owner.ID
+	if u != nil {
+		owned = u.ID == course.Owner.ID
 	}
 
 	p := view.Page(ctx)
@@ -129,24 +132,25 @@ func (c *courseCtrl) view(ctx *hime.Context) error {
 }
 
 func (c *courseCtrl) content(ctx *hime.Context) error {
-	user := appctx.GetUser(ctx)
-	course := c.getCourse(ctx)
+	u := appctx.GetUser(ctx)
+	x := c.getCourse(ctx)
 
-	enrolled, err := c.Repository.IsEnrolled(ctx, user.ID, course.ID)
+	enrolled := user.IsEnroll{ID: u.ID, CourseID: x.ID}
+	err := dispatcher.Dispatch(ctx, &enrolled)
 	if err != nil {
 		return err
 	}
 
-	if !enrolled && user.ID != course.Owner.ID {
+	if !enrolled.Result && u.ID != x.Owner.ID {
 		return ctx.Status(http.StatusForbidden).StatusText()
 	}
 
-	contents, err := c.Repository.GetCourseContents(ctx, course.ID)
+	contents, err := getCourseContents(ctx, x.ID)
 	if err != nil {
 		return err
 	}
 
-	var content *entity.CourseContent
+	var content *course.Content
 	pg, _ := strconv.Atoi(ctx.FormValue("p"))
 	if pg < 0 {
 		pg = 0
@@ -159,35 +163,36 @@ func (c *courseCtrl) content(ctx *hime.Context) error {
 	}
 
 	p := view.Page(ctx)
-	p.Meta.Title = course.Title
-	p.Meta.Desc = course.ShortDesc
-	p.Meta.Image = course.Image
-	p.Data["Course"] = course
+	p.Meta.Title = x.Title
+	p.Meta.Desc = x.ShortDesc
+	p.Meta.Image = x.Image
+	p.Data["Course"] = x
 	p.Data["Contents"] = contents
 	p.Data["Content"] = content
 	return ctx.View("app.course-content", p)
 }
 
 func (c *courseCtrl) enroll(ctx *hime.Context) error {
-	user := appctx.GetUser(ctx)
+	u := appctx.GetUser(ctx)
 	course := c.getCourse(ctx)
 
 	// owner redirect to course content
-	if user != nil && user.ID == course.Owner.ID {
+	if u != nil && u.ID == course.Owner.ID {
 		return ctx.RedirectTo("app.course", course.Link(), "content")
 	}
 
 	// redirect enrolled user to course content page
-	enrolled, err := c.Repository.IsEnrolled(ctx, user.ID, course.ID)
+	enrolled := user.IsEnroll{ID: u.ID, CourseID: course.ID}
+	err := dispatcher.Dispatch(ctx, &enrolled)
 	if err != nil {
 		return err
 	}
-	if enrolled {
+	if enrolled.Result {
 		return ctx.RedirectTo("app.course", course.Link(), "content")
 	}
 
 	// check is user has pending enroll
-	pendingPayment, err := c.Repository.HasPendingPayment(ctx, user.ID, course.ID)
+	pendingPayment, err := hasPendingPayment(ctx, u.ID, course.ID)
 	if err != nil {
 		return err
 	}
@@ -205,30 +210,31 @@ func (c *courseCtrl) enroll(ctx *hime.Context) error {
 }
 
 func (c *courseCtrl) postEnroll(ctx *hime.Context) error {
-	user := appctx.GetUser(ctx)
-	course := c.getCourse(ctx)
+	u := appctx.GetUser(ctx)
+	x := c.getCourse(ctx)
 
 	// owner redirect to course content
-	if user != nil && user.ID == course.Owner.ID {
-		return ctx.RedirectTo("app.course", course.Link(), "content")
+	if u != nil && u.ID == x.Owner.ID {
+		return ctx.RedirectTo("app.course", x.Link(), "content")
 	}
 
 	// redirect enrolled user to course content page
-	enrolled, err := c.Repository.IsEnrolled(ctx, user.ID, course.ID)
+	enrolled := user.IsEnroll{ID: u.ID, CourseID: x.ID}
+	err := dispatcher.Dispatch(ctx, &enrolled)
 	if err != nil {
 		return err
 	}
-	if enrolled {
-		return ctx.RedirectTo("app.course", course.Link(), "content")
+	if enrolled.Result {
+		return ctx.RedirectTo("app.course", x.Link(), "content")
 	}
 
 	// check is user has pending enroll
-	pendingPayment, err := c.Repository.HasPendingPayment(ctx, user.ID, course.ID)
+	pendingPayment, err := hasPendingPayment(ctx, u.ID, x.ID)
 	if err != nil {
 		return err
 	}
 	if pendingPayment {
-		return ctx.RedirectTo("app.course", course.Link())
+		return ctx.RedirectTo("app.course", x.Link())
 	}
 
 	f := appctx.GetFlash(ctx)
@@ -236,8 +242,13 @@ func (c *courseCtrl) postEnroll(ctx *hime.Context) error {
 	price, _ := strconv.ParseFloat(ctx.FormValue("price"), 64)
 	image, _ := ctx.FormFileHeaderNotEmpty("image")
 
-	err = c.Service.EnrollCourse(ctx, course.ID, price, image)
-	if service.IsUIError(err) {
+	err = dispatcher.Dispatch(ctx, &user.Enroll{
+		ID:           u.ID,
+		CourseID:     x.ID,
+		Price:        price,
+		PaymentImage: image,
+	})
+	if app.IsUIError(err) {
 		f.Add("Errors", "image required")
 		return ctx.RedirectToGet()
 	}
@@ -245,23 +256,24 @@ func (c *courseCtrl) postEnroll(ctx *hime.Context) error {
 		return err
 	}
 
-	return ctx.RedirectTo("app.course", course.Link())
+	return ctx.RedirectTo("app.course", x.Link())
 }
 
 func (c *courseCtrl) assignment(ctx *hime.Context) error {
-	user := appctx.GetUser(ctx)
+	u := appctx.GetUser(ctx)
 	course := c.getCourse(ctx)
 
-	enrolled, err := c.Repository.IsEnrolled(ctx, user.ID, course.ID)
+	enrolled := user.IsEnroll{ID: u.ID, CourseID: course.ID}
+	err := dispatcher.Dispatch(ctx, &enrolled)
 	if err != nil {
 		return err
 	}
 
-	if !enrolled && user.ID != course.Owner.ID {
+	if !enrolled.Result && u.ID != course.Owner.ID {
 		return ctx.Status(http.StatusForbidden).StatusText()
 	}
 
-	assignments, err := c.Repository.FindAssignmentsByCourseID(ctx, course.ID)
+	assignments, err := findAssignmentsByCourseID(ctx, course.ID)
 	if err != nil {
 		return err
 	}

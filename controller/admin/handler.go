@@ -4,17 +4,15 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/acoshift/hime"
 	"github.com/acoshift/methodmux"
+	"github.com/moonrhythm/hime"
 
-	"github.com/acoshift/acourse/service"
+	"github.com/acoshift/acourse/controller/share"
 )
 
 // Config is admin config
 type Config struct {
-	Location   *time.Location
-	Repository Repository
-	Service    service.Service
+	Location *time.Location
 }
 
 // New creates admin handler
@@ -22,6 +20,7 @@ func New(cfg Config) http.Handler {
 	c := &ctrl{cfg}
 
 	mux := http.NewServeMux()
+	mux.Handle("/", hime.Handler(share.NotFound))
 
 	mux.Handle("/users", methodmux.Get(
 		hime.Handler(c.users),

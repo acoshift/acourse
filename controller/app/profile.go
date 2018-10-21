@@ -3,11 +3,13 @@ package app
 import (
 	"unicode/utf8"
 
-	"github.com/acoshift/hime"
 	"github.com/asaskevich/govalidator"
+	"github.com/moonrhythm/dispatcher"
+	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/context/appctx"
-	"github.com/acoshift/acourse/service"
+	"github.com/acoshift/acourse/model/app"
+	"github.com/acoshift/acourse/model/user"
 	"github.com/acoshift/acourse/view"
 )
 
@@ -19,12 +21,12 @@ func (c *ctrl) signOut(ctx *hime.Context) error {
 func (c *ctrl) profile(ctx *hime.Context) error {
 	user := appctx.GetUser(ctx)
 
-	ownCourses, err := c.Repository.ListOwnCourses(ctx, user.ID)
+	ownCourses, err := listOwnCourses(ctx, user.ID)
 	if err != nil {
 		return err
 	}
 
-	enrolledCourses, err := c.Repository.ListEnrolledCourses(ctx, user.ID)
+	enrolledCourses, err := listEnrolledCourses(ctx, user.ID)
 	if err != nil {
 		return err
 	}
@@ -84,13 +86,14 @@ func (c *ctrl) postProfileEdit(ctx *hime.Context) error {
 	}
 
 	image, _ := ctx.FormFileHeaderNotEmpty("image")
-	err := c.Service.UpdateProfile(ctx, &service.Profile{
+	err := dispatcher.Dispatch(ctx, &user.UpdateProfile{
+		ID:       appctx.GetUserID(ctx),
 		Username: username,
 		Name:     name,
 		AboutMe:  aboutMe,
 		Image:    image,
 	})
-	if service.IsUIError(err) {
+	if app.IsUIError(err) {
 		f.Add("Errors", err.Error())
 		return ctx.RedirectBackToGet()
 	}

@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/acoshift/header"
-	"github.com/acoshift/hime"
+	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/view"
 )

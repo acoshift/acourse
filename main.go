@@ -14,33 +14,32 @@ import (
 	"cloud.google.com/go/storage"
 	"cloud.google.com/go/trace"
 	"github.com/acoshift/configfile"
-	"github.com/acoshift/go-firebase-admin"
-	"github.com/acoshift/hime"
-	"github.com/acoshift/methodmux"
+	firadmin "github.com/acoshift/go-firebase-admin"
 	"github.com/acoshift/middleware"
 	"github.com/acoshift/probehandler"
-	"github.com/acoshift/session"
-	redisstore "github.com/acoshift/session/store/goredis"
 	"github.com/acoshift/webstatic"
 	"github.com/go-redis/redis"
 	_ "github.com/lib/pq"
+	"github.com/moonrhythm/hime"
+	"github.com/moonrhythm/session"
+	redisstore "github.com/moonrhythm/session/store/goredis"
 	"google.golang.org/api/option"
 
 	"github.com/acoshift/acourse/context/appctx"
 	"github.com/acoshift/acourse/context/redisctx"
 	"github.com/acoshift/acourse/context/sqlctx"
-	"github.com/acoshift/acourse/controller/admin"
-	"github.com/acoshift/acourse/controller/app"
-	"github.com/acoshift/acourse/controller/auth"
-	"github.com/acoshift/acourse/controller/editor"
-	"github.com/acoshift/acourse/controller/share"
-	"github.com/acoshift/acourse/email"
-	"github.com/acoshift/acourse/file"
-	"github.com/acoshift/acourse/image"
+	"github.com/acoshift/acourse/controller"
 	"github.com/acoshift/acourse/internal"
-	"github.com/acoshift/acourse/notify"
-	"github.com/acoshift/acourse/repository"
-	"github.com/acoshift/acourse/service"
+	"github.com/acoshift/acourse/service/admin"
+	"github.com/acoshift/acourse/service/auth"
+	"github.com/acoshift/acourse/service/course"
+	"github.com/acoshift/acourse/service/email"
+	"github.com/acoshift/acourse/service/file"
+	"github.com/acoshift/acourse/service/firebase"
+	"github.com/acoshift/acourse/service/image"
+	"github.com/acoshift/acourse/service/notify"
+	"github.com/acoshift/acourse/service/payment"
+	"github.com/acoshift/acourse/service/user"
 )
 
 func main() {
@@ -74,7 +73,7 @@ func main() {
 	// init trace
 	traceClient, _ := trace.NewClient(ctx, projectID, googClientOpts...)
 
-	firApp, err := firebase.InitializeApp(ctx, firebase.AppOptions{
+	firApp, err := firadmin.InitializeApp(ctx, firadmin.AppOptions{
 		ProjectID: projectID,
 	}, googClientOpts...)
 	if err != nil {
@@ -87,15 +86,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	// init email sender
-	emailSender := email.NewSMTPSender(email.SMTPConfig{
-		Server:   config.String("email_server"),
-		Port:     config.Int("email_port"),
-		User:     config.String("email_user"),
-		Password: config.String("email_password"),
-		From:     config.String("email_from"),
-	})
 
 	// init redis pool
 	redisClient := redis.NewClient(&redis.Options{
@@ -129,19 +119,23 @@ func main() {
 		Funcs(internal.TemplateFunc(loc)).
 		ParseConfigFile("settings/template.yaml")
 
-	methodmux.FallbackHandler = hime.Handler(share.NotFound)
-
-	svc := service.New(service.Config{
-		Repository:         repository.NewService(),
-		Auth:               firAuth,
-		EmailSender:        emailSender,
-		BaseURL:            baseURL,
-		FileStorage:        file.NewGCS(storageClient, config.String("bucket")),
-		ImageResizeEncoder: image.NewJPEGResizeEncoder(),
-		AdminNotifier:      notify.NewOutgoingWebhookAdminNotifier(config.String("slack_url")),
-		Location:           loc,
-		OpenIDCallback:     himeApp.Route("auth.openid.callback"),
+	// init services
+	email.InitSMTP(email.SMTPConfig{
+		Server:   config.String("email_server"),
+		Port:     config.Int("email_port"),
+		User:     config.String("email_user"),
+		Password: config.String("email_password"),
+		From:     config.String("email_from"),
 	})
+	file.InitGCS(storageClient, config.String("bucket"))
+	image.Init()
+	firebase.Init(firAuth)
+	notify.Init(config.String("slack_url"))
+	auth.Init(baseURL, himeApp.Route("auth.openid.callback"))
+	user.Init()
+	course.Init()
+	payment.Init()
+	admin.Init()
 
 	mux := http.NewServeMux()
 
@@ -166,33 +160,7 @@ func main() {
 	mux.Handle("/favicon.ico", internal.FileHandler("assets/favicon.ico"))
 
 	m := http.NewServeMux()
-
-	m.Handle("/", app.New(app.Config{
-		BaseURL:    baseURL,
-		Service:    svc,
-		Repository: repository.NewApp(),
-	}))
-
-	m.Handle("/auth/", http.StripPrefix("/auth", middleware.Chain(
-		internal.NotSignedIn,
-	)(auth.New(auth.Config{
-		Service: svc,
-	}))))
-
-	m.Handle("/editor/", http.StripPrefix("/editor", middleware.Chain(
-	// -
-	)(editor.New(editor.Config{
-		Service:    svc,
-		Repository: repository.NewEditor(),
-	}))))
-
-	m.Handle("/admin/", http.StripPrefix("/admin", middleware.Chain(
-		internal.OnlyAdmin,
-	)(admin.New(admin.Config{
-		Location:   loc,
-		Repository: repository.NewAdmin(),
-		Service:    svc,
-	}))))
+	controller.Mount(m, baseURL, loc)
 
 	mux.Handle("/", middleware.Chain(
 		traceClient.HTTPHandler,
@@ -213,7 +181,7 @@ func main() {
 			}),
 		}),
 		internal.Turbolinks,
-		appctx.Middleware(repository.NewAppCtx()),
+		appctx.Middleware(),
 	)(m))
 
 	h := middleware.Chain(
