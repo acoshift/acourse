@@ -25,17 +25,6 @@ type UpdateCourseModel struct {
 	Start     time.Time
 }
 
-// RegisterPayment type
-type RegisterPayment struct {
-	UserID        string
-	CourseID      string
-	Image         string
-	Price         float64
-	OriginalPrice float64
-	Code          string
-	Status        int
-}
-
 // User type
 type User struct {
 	ID    string

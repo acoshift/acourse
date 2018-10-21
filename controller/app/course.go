@@ -242,8 +242,9 @@ func (c *courseCtrl) postEnroll(ctx *hime.Context) error {
 	price, _ := strconv.ParseFloat(ctx.FormValue("price"), 64)
 	image, _ := ctx.FormFileHeaderNotEmpty("image")
 
-	err = dispatcher.Dispatch(ctx, &course.Enroll{
-		ID:           x.ID,
+	err = dispatcher.Dispatch(ctx, &user.Enroll{
+		ID:           u.ID,
+		CourseID:     x.ID,
 		Price:        price,
 		PaymentImage: image,
 	})

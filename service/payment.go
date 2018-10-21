@@ -9,6 +9,7 @@ import (
 	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/entity"
 	"github.com/acoshift/acourse/model/app"
+	"github.com/acoshift/acourse/model/course"
 	"github.com/acoshift/acourse/model/email"
 	"github.com/acoshift/acourse/model/payment"
 	"github.com/acoshift/acourse/view"
@@ -29,7 +30,7 @@ func (s *svc) acceptPayment(ctx context.Context, m *payment.Accept) error {
 			return err
 		}
 
-		return registerEnroll(ctx, x.User.ID, x.Course.ID)
+		return dispatcher.Dispatch(ctx, &course.InsertEnroll{ID: x.Course.ID, UserID: x.User.ID})
 	})
 	if err != nil {
 		return err

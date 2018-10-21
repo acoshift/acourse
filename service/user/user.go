@@ -21,6 +21,7 @@ func Init() {
 	dispatcher.Register(setImage)
 	dispatcher.Register(updateProfile)
 	dispatcher.Register(isEnroll)
+	dispatcher.Register(enroll)
 }
 
 func create(ctx context.Context, m *user.Create) error {

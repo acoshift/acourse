@@ -66,22 +66,6 @@ func updateCourse(ctx context.Context, x *UpdateCourseModel) error {
 	return err
 }
 
-func registerPayment(ctx context.Context, x *RegisterPayment) error {
-	q := sqlctx.GetQueryer(ctx)
-
-	_, err := q.Exec(`
-		insert into payments
-			(user_id, course_id, image, price, original_price, code, status)
-		values
-			($1, $2, $3, $4, $5, $6, $7)
-		returning id
-	`, x.UserID, x.CourseID, x.Image, x.Price, x.OriginalPrice, x.Code, x.Status)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 func getPayment(ctx context.Context, paymentID string) (*Payment, error) {
 	q := sqlctx.GetQueryer(ctx)
 
@@ -111,16 +95,4 @@ func getPayment(ctx context.Context, paymentID string) (*Payment, error) {
 		return nil, err
 	}
 	return &x, nil
-}
-
-func registerEnroll(ctx context.Context, userID string, courseID string) error {
-	q := sqlctx.GetQueryer(ctx)
-
-	_, err := q.Exec(`
-		insert into enrolls
-			(user_id, course_id)
-		values
-			($1, $2)
-	`, userID, courseID)
-	return err
 }

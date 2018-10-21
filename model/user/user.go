@@ -1,5 +1,7 @@
 package user
 
+import "mime/multipart"
+
 // User type
 type User struct {
 	ID       string
@@ -45,6 +47,14 @@ type IsExists struct {
 type SetImage struct {
 	ID    string
 	Image string
+}
+
+// Enroll enrolls a course
+type Enroll struct {
+	ID           string
+	CourseID     string
+	Price        float64
+	PaymentImage *multipart.FileHeader
 }
 
 // IsEnroll checks is user enrolled a course

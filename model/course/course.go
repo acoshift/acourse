@@ -82,13 +82,6 @@ type SetImage struct {
 	Image string
 }
 
-// Enroll enrolls a course
-type Enroll struct {
-	ID           string
-	Price        float64
-	PaymentImage *multipart.FileHeader
-}
-
 // GetURL gets course url
 type GetURL struct {
 	ID string
@@ -108,4 +101,10 @@ type Get struct {
 	ID string
 
 	Result *Course
+}
+
+// InsertEnroll inserts enroll
+type InsertEnroll struct {
+	ID     string
+	UserID string
 }

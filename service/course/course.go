@@ -24,6 +24,7 @@ func Init() {
 	dispatcher.Register(getContent)
 	dispatcher.Register(deleteContent)
 	dispatcher.Register(listContents)
+	dispatcher.Register(insertEnroll)
 }
 
 func setOption(ctx context.Context, m *course.SetOption) error {
@@ -205,4 +206,16 @@ func listContents(ctx context.Context, m *course.ListContents) error {
 	}
 	m.Result = xs
 	return nil
+}
+
+func insertEnroll(ctx context.Context, m *course.InsertEnroll) error {
+	q := sqlctx.GetQueryer(ctx)
+
+	_, err := q.Exec(`
+		insert into enrolls
+			(user_id, course_id)
+		values
+			($1, $2)
+	`, m.UserID, m.ID)
+	return err
 }
