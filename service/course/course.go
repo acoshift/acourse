@@ -35,9 +35,7 @@ func Init() {
 }
 
 func setOption(ctx context.Context, m *course.SetOption) error {
-	q := sqlctx.GetQueryer(ctx)
-
-	_, err := q.Exec(`
+	_, err := sqlctx.Exec(ctx, `
 		insert into course_options
 			(course_id, public, enroll, attend, assignment, discount)
 		values
@@ -53,25 +51,19 @@ func setOption(ctx context.Context, m *course.SetOption) error {
 }
 
 func setImage(ctx context.Context, m *course.SetImage) error {
-	q := sqlctx.GetQueryer(ctx)
-
-	_, err := q.Exec(`update courses set image = $2 where id = $1`, m.ID, m.Image)
+	_, err := sqlctx.Exec(ctx, `update courses set image = $2 where id = $1`, m.ID, m.Image)
 	return err
 }
 
 func getURL(ctx context.Context, m *course.GetURL) error {
-	q := sqlctx.GetQueryer(ctx)
-
-	return q.QueryRow(
+	return sqlctx.QueryRow(ctx,
 		`select url from courses where id = $1`,
 		m.ID,
 	).Scan(pgsql.NullString(&m.Result))
 }
 
 func getUserID(ctx context.Context, m *course.GetUserID) error {
-	q := sqlctx.GetQueryer(ctx)
-
-	err := q.QueryRow(`select user_id from courses where id = $1`, m.ID).Scan(&m.Result)
+	err := sqlctx.QueryRow(ctx, `select user_id from courses where id = $1`, m.ID).Scan(&m.Result)
 	if err == sql.ErrNoRows {
 		return entity.ErrNotFound
 	}
@@ -79,10 +71,8 @@ func getUserID(ctx context.Context, m *course.GetUserID) error {
 }
 
 func get(ctx context.Context, m *course.Get) error {
-	q := sqlctx.GetQueryer(ctx)
-
 	var x course.Course
-	err := q.QueryRow(`
+	err := sqlctx.QueryRow(ctx, `
 		select
 			id, user_id, title, short_desc, long_desc, image,
 			start, url, type, price, courses.discount, enroll_detail,
@@ -109,9 +99,7 @@ func get(ctx context.Context, m *course.Get) error {
 func createContent(ctx context.Context, m *course.CreateContent) error {
 	// TODO: validate instructor
 
-	q := sqlctx.GetQueryer(ctx)
-
-	return q.QueryRow(`
+	return sqlctx.QueryRow(ctx, `
 		insert into course_contents
 			(
 				course_id,
@@ -134,9 +122,7 @@ func createContent(ctx context.Context, m *course.CreateContent) error {
 func updateContent(ctx context.Context, m *course.UpdateContent) error {
 	// TODO: validate ownership
 
-	q := sqlctx.GetQueryer(ctx)
-
-	_, err := q.Exec(`
+	_, err := sqlctx.Exec(ctx, `
 		update course_contents
 		set
 			title = $2,
@@ -151,10 +137,8 @@ func updateContent(ctx context.Context, m *course.UpdateContent) error {
 func getContent(ctx context.Context, m *course.GetContent) error {
 	// TODO: validate ownership
 
-	q := sqlctx.GetQueryer(ctx)
-
 	var x course.Content
-	err := q.QueryRow(`
+	err := sqlctx.QueryRow(ctx, `
 		select
 			id, course_id, title, long_desc, video_id, video_type, download_url
 		from course_contents
@@ -174,18 +158,15 @@ func getContent(ctx context.Context, m *course.GetContent) error {
 
 func deleteContent(ctx context.Context, m *course.DeleteContent) error {
 	// TODO: validate ownership
-	q := sqlctx.GetQueryer(ctx)
 
-	_, err := q.Exec(`delete from course_contents where id = $1`, m.ContentID)
+	_, err := sqlctx.Exec(ctx, `delete from course_contents where id = $1`, m.ContentID)
 	return err
 }
 
 func listContents(ctx context.Context, m *course.ListContents) error {
 	// TODO: validate ownership
 
-	q := sqlctx.GetQueryer(ctx)
-
-	rows, err := q.Query(`
+	rows, err := sqlctx.Query(ctx, `
 		select
 			id, course_id, title, long_desc, video_id, video_type, download_url
 		from course_contents
@@ -216,9 +197,7 @@ func listContents(ctx context.Context, m *course.ListContents) error {
 }
 
 func insertEnroll(ctx context.Context, m *course.InsertEnroll) error {
-	q := sqlctx.GetQueryer(ctx)
-
-	_, err := q.Exec(`
+	_, err := sqlctx.Exec(ctx, `
 		insert into enrolls
 			(user_id, course_id)
 		values
@@ -255,10 +234,7 @@ func create(ctx context.Context, m *course.Create) error {
 	}
 
 	return sqlctx.RunInTx(ctx, func(ctx context.Context) error {
-		var err error
-
-		q := sqlctx.GetQueryer(ctx)
-		err = q.QueryRow(`
+		err := sqlctx.QueryRow(ctx, `
 			insert into courses
 				(user_id, title, short_desc, long_desc, image, start)
 			values
@@ -327,9 +303,7 @@ func update(ctx context.Context, m *course.Update) error {
 	}
 
 	err := sqlctx.RunInTx(ctx, func(ctx context.Context) error {
-		q := sqlctx.GetQueryer(ctx)
-
-		_, err := q.Exec(`
+		_, err := sqlctx.Exec(ctx, `
 			update courses
 			set
 				title = $2,

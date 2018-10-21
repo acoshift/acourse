@@ -12,10 +12,8 @@ import (
 )
 
 func getCourse(ctx context.Context, courseID string) (*course.Course, error) {
-	q := sqlctx.GetQueryer(ctx)
-
 	var x course.Course
-	err := q.QueryRow(`
+	err := sqlctx.QueryRow(ctx, `
 		select
 			id, user_id, title, short_desc, long_desc, image,
 			start, url, type, price, courses.discount, enroll_detail,
@@ -38,10 +36,8 @@ func getCourse(ctx context.Context, courseID string) (*course.Course, error) {
 }
 
 func getPayment(ctx context.Context, paymentID string) (*Payment, error) {
-	q := sqlctx.GetQueryer(ctx)
-
 	var x Payment
-	err := q.QueryRow(`
+	err := sqlctx.QueryRow(ctx, `
 		select
 			p.id,
 			p.image, p.price, p.original_price, p.code,

@@ -25,9 +25,7 @@ func Init() {
 }
 
 func create(ctx context.Context, m *user.Create) error {
-	q := sqlctx.GetQueryer(ctx)
-
-	_, err := q.Exec(`
+	_, err := sqlctx.Exec(ctx, `
 		insert into users
 			(id, username, name, email, image)
 		values
@@ -43,9 +41,7 @@ func create(ctx context.Context, m *user.Create) error {
 }
 
 func update(ctx context.Context, m *user.Update) error {
-	q := sqlctx.GetQueryer(ctx)
-
-	_, err := q.Exec(`
+	_, err := sqlctx.Exec(ctx, `
 		update users
 		set
 			username = $2,
@@ -58,10 +54,8 @@ func update(ctx context.Context, m *user.Update) error {
 }
 
 func get(ctx context.Context, m *user.Get) error {
-	q := sqlctx.GetQueryer(ctx)
-
 	var x user.User
-	err := q.QueryRow(`
+	err := sqlctx.QueryRow(ctx, `
 		select
 			u.id, u.name, u.username, coalesce(u.email, ''), u.about_me, u.image,
 			coalesce(r.admin, false), coalesce(r.instructor, false)
@@ -84,9 +78,7 @@ func get(ctx context.Context, m *user.Get) error {
 }
 
 func isExists(ctx context.Context, m *user.IsExists) error {
-	q := sqlctx.GetQueryer(ctx)
-
-	return q.QueryRow(`
+	return sqlctx.QueryRow(ctx, `
 		select exists (
 			select 1
 			from users
@@ -96,9 +88,7 @@ func isExists(ctx context.Context, m *user.IsExists) error {
 }
 
 func setImage(ctx context.Context, m *user.SetImage) error {
-	q := sqlctx.GetQueryer(ctx)
-
-	_, err := q.Exec(`
+	_, err := sqlctx.Exec(ctx, `
 		update users
 		set image = $2
 		where id = $1
@@ -107,9 +97,7 @@ func setImage(ctx context.Context, m *user.SetImage) error {
 }
 
 func isEnroll(ctx context.Context, m *user.IsEnroll) error {
-	q := sqlctx.GetQueryer(ctx)
-
-	return q.QueryRow(`
+	return sqlctx.QueryRow(ctx, `
 		select exists (
 			select 1
 			from enrolls

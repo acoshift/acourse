@@ -17,10 +17,8 @@ import (
 )
 
 func getCourse(ctx context.Context, courseID string) (*Course, error) {
-	q := sqlctx.GetQueryer(ctx)
-
 	var x Course
-	err := q.QueryRow(`
+	err := sqlctx.QueryRow(ctx, `
 		select
 			c.id, c.title, c.short_desc, c.long_desc, c.image,
 			c.start, c.url, c.type, c.price, c.discount, c.enroll_detail,
@@ -46,9 +44,7 @@ func getCourse(ctx context.Context, courseID string) (*Course, error) {
 }
 
 func getCourseIDByURL(ctx context.Context, url string) (courseID string, err error) {
-	q := sqlctx.GetQueryer(ctx)
-
-	err = q.QueryRow(`
+	err = sqlctx.QueryRow(ctx, `
 		select id
 		from courses
 		where url = $1
@@ -60,9 +56,7 @@ func getCourseIDByURL(ctx context.Context, url string) (courseID string, err err
 }
 
 func hasPendingPayment(ctx context.Context, userID string, courseID string) (exists bool, err error) {
-	q := sqlctx.GetQueryer(ctx)
-
-	err = q.QueryRow(`
+	err = sqlctx.QueryRow(ctx, `
 		select exists (
 			select 1
 			from payments
@@ -73,9 +67,7 @@ func hasPendingPayment(ctx context.Context, userID string, courseID string) (exi
 }
 
 func getCourseContents(ctx context.Context, courseID string) ([]*course.Content, error) {
-	q := sqlctx.GetQueryer(ctx)
-
-	rows, err := q.Query(`
+	rows, err := sqlctx.Query(ctx, `
 		select
 			id, course_id, title, long_desc, video_id, video_type, download_url
 		from course_contents
@@ -106,10 +98,8 @@ func getCourseContents(ctx context.Context, courseID string) ([]*course.Content,
 }
 
 func getUser(ctx context.Context, userID string) (*user.User, error) {
-	q := sqlctx.GetQueryer(ctx)
-
 	var x user.User
-	err := q.QueryRow(`
+	err := sqlctx.QueryRow(ctx, `
 		select
 			users.id,
 			users.name,
@@ -136,9 +126,7 @@ func getUser(ctx context.Context, userID string) (*user.User, error) {
 }
 
 func findAssignmentsByCourseID(ctx context.Context, courseID string) ([]*entity.Assignment, error) {
-	q := sqlctx.GetQueryer(ctx)
-
-	rows, err := q.Query(`
+	rows, err := sqlctx.Query(ctx, `
 		select id, title, long_desc, open
 		from assignments
 		where course_id = $1
@@ -180,9 +168,7 @@ func listPublicCourses(ctx context.Context) ([]*PublicCourse, error) {
 		}
 	}
 
-	q := sqlctx.GetQueryer(ctx)
-
-	rows, err := q.Query(`
+	rows, err := sqlctx.Query(ctx, `
 			select
 				c.id,
 				c.title, c.short_desc, c.image, c.start, c.url,
@@ -235,9 +221,7 @@ func listPublicCourses(ctx context.Context) ([]*PublicCourse, error) {
 }
 
 func listOwnCourses(ctx context.Context, userID string) ([]*OwnCourse, error) {
-	q := sqlctx.GetQueryer(ctx)
-
-	rows, err := q.Query(`
+	rows, err := sqlctx.Query(ctx, `
 		select
 			c.id,
 			c.title, c.short_desc, c.image,
@@ -277,9 +261,7 @@ func listOwnCourses(ctx context.Context, userID string) ([]*OwnCourse, error) {
 }
 
 func listEnrolledCourses(ctx context.Context, userID string) ([]*EnrolledCourse, error) {
-	q := sqlctx.GetQueryer(ctx)
-
-	rows, err := q.Query(`
+	rows, err := sqlctx.Query(ctx, `
 		select
 			c.id,
 			c.title, c.short_desc, c.image,

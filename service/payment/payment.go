@@ -17,9 +17,7 @@ func Init() {
 }
 
 func setStatus(ctx context.Context, m *payment.SetStatus) error {
-	q := sqlctx.GetQueryer(ctx)
-
-	_, err := q.Exec(`
+	_, err := sqlctx.Exec(ctx, `
 		update payments
 		set
 			status = $2,
@@ -31,9 +29,7 @@ func setStatus(ctx context.Context, m *payment.SetStatus) error {
 }
 
 func hasPending(ctx context.Context, m *payment.HasPending) error {
-	q := sqlctx.GetQueryer(ctx)
-
-	return q.QueryRow(`
+	return sqlctx.QueryRow(ctx, `
 		select exists (
 			select 1
 			from payments

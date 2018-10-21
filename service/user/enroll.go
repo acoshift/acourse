@@ -156,9 +156,7 @@ type RegisterPayment struct {
 }
 
 func registerPayment(ctx context.Context, x *RegisterPayment) error {
-	q := sqlctx.GetQueryer(ctx)
-
-	_, err := q.Exec(`
+	_, err := sqlctx.Exec(ctx, `
 		insert into payments
 			(user_id, course_id, image, price, original_price, code, status)
 		values

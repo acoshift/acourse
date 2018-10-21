@@ -12,9 +12,7 @@ import (
 )
 
 func listUsers(ctx context.Context, limit, offset int64) ([]*UserItem, error) {
-	q := sqlctx.GetQueryer(ctx)
-
-	rows, err := q.Query(`
+	rows, err := sqlctx.Query(ctx, `
 		select
 			id, name, username, email,
 			image, created_at
@@ -46,16 +44,12 @@ func listUsers(ctx context.Context, limit, offset int64) ([]*UserItem, error) {
 }
 
 func countUsers(ctx context.Context) (cnt int64, err error) {
-	q := sqlctx.GetQueryer(ctx)
-
-	err = q.QueryRow(`select count(*) from users`).Scan(&cnt)
+	err = sqlctx.QueryRow(ctx, `select count(*) from users`).Scan(&cnt)
 	return
 }
 
 func listCourses(ctx context.Context, limit, offset int64) ([]*CourseItem, error) {
-	q := sqlctx.GetQueryer(ctx)
-
-	rows, err := q.Query(`
+	rows, err := sqlctx.Query(ctx, `
 		select
 			c.id, c.title, c.image,
 			c.url, c.type, c.price, c.discount,
@@ -95,17 +89,13 @@ func listCourses(ctx context.Context, limit, offset int64) ([]*CourseItem, error
 }
 
 func countCourses(ctx context.Context) (cnt int64, err error) {
-	q := sqlctx.GetQueryer(ctx)
-
-	err = q.QueryRow(`select count(*) from courses`).Scan(&cnt)
+	err = sqlctx.QueryRow(ctx, `select count(*) from courses`).Scan(&cnt)
 	return
 }
 
 func getPayment(ctx context.Context, paymentID string) (*Payment, error) {
-	q := sqlctx.GetQueryer(ctx)
-
 	var x Payment
-	err := q.QueryRow(`
+	err := sqlctx.QueryRow(ctx, `
 		select
 			p.id,
 			p.image, p.price, p.original_price, p.code,
@@ -133,9 +123,7 @@ func getPayment(ctx context.Context, paymentID string) (*Payment, error) {
 }
 
 func listPaymentsByStatus(ctx context.Context, status []int, limit, offset int64) ([]*Payment, error) {
-	q := sqlctx.GetQueryer(ctx)
-
-	rows, err := q.Query(`
+	rows, err := sqlctx.Query(ctx, `
 		select
 			p.id,
 			p.image, p.price, p.original_price, p.code,
@@ -176,9 +164,7 @@ func listPaymentsByStatus(ctx context.Context, status []int, limit, offset int64
 }
 
 func countPaymentsByStatus(ctx context.Context, status []int) (cnt int64, err error) {
-	q := sqlctx.GetQueryer(ctx)
-
-	err = q.QueryRow(`
+	err = sqlctx.QueryRow(ctx, `
 		select count(*)
 		from payments
 		where status = any($1)
