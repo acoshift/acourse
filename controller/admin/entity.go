@@ -3,7 +3,7 @@ package admin
 import (
 	"time"
 
-	"github.com/acoshift/acourse/entity"
+	"github.com/acoshift/acourse/model/course"
 )
 
 // UserItem type
@@ -27,7 +27,7 @@ type CourseItem struct {
 	URL       string
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	Option    entity.CourseOption
+	Option    course.Option
 	Owner     struct {
 		ID       string
 		Username string

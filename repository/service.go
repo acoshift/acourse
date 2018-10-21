@@ -8,7 +8,6 @@ import (
 
 	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/entity"
-	"github.com/acoshift/acourse/model/course"
 	"github.com/acoshift/acourse/service"
 )
 
@@ -96,130 +95,6 @@ func (svcRepo) UpdateCourse(ctx context.Context, x *service.UpdateCourseModel) e
 	return err
 }
 
-func (svcRepo) SetCourseImage(ctx context.Context, courseID string, image string) error {
-	q := sqlctx.GetQueryer(ctx)
-
-	_, err := q.Exec(`update courses set image = $2 where id = $1`, courseID, image)
-	return err
-}
-
-func (svcRepo) SetCourseOption(ctx context.Context, courseID string, x *entity.CourseOption) error {
-	q := sqlctx.GetQueryer(ctx)
-
-	_, err := q.Exec(`
-		insert into course_options
-			(course_id, public, enroll, attend, assignment, discount)
-		values
-			($1, $2, $3, $4, $5, $6)
-		on conflict (course_id) do update set
-			public = excluded.public,
-			enroll = excluded.enroll,
-			attend = excluded.attend,
-			assignment = excluded.assignment,
-			discount = excluded.discount
-	`, courseID, x.Public, x.Enroll, x.Attend, x.Assignment, x.Discount)
-	return err
-}
-
-func (svcRepo) RegisterCourseContent(ctx context.Context, x *entity.RegisterCourseContent) (contentID string, err error) {
-	q := sqlctx.GetQueryer(ctx)
-
-	err = q.QueryRow(`
-		insert into course_contents
-			(
-				course_id,
-				i,
-				title, long_desc, video_id, video_type
-			)
-		values
-			(
-				$1,
-				(select coalesce(max(i)+1, 0) from course_contents where course_id = $1),
-				$2, $3, $4, $5
-			)
-		returning id
-	`,
-		x.CourseID,
-		x.Title, x.LongDesc, x.VideoID, x.VideoType,
-	).Scan(&contentID)
-	return
-}
-
-func (svcRepo) GetCourseContent(ctx context.Context, contentID string) (*course.Content, error) {
-	q := sqlctx.GetQueryer(ctx)
-
-	var x course.Content
-	err := q.QueryRow(`
-		select
-			id, course_id, title, long_desc, video_id, video_type, download_url
-		from course_contents
-		where id = $1
-	`, contentID).Scan(
-		&x.ID, &x.CourseID, &x.Title, &x.Desc, &x.VideoID, &x.VideoType, &x.DownloadURL,
-	)
-	if err == sql.ErrNoRows {
-		return nil, entity.ErrNotFound
-	}
-	if err != nil {
-		return nil, err
-	}
-	return &x, nil
-}
-
-func (svcRepo) ListCourseContents(ctx context.Context, courseID string) ([]*course.Content, error) {
-	q := sqlctx.GetQueryer(ctx)
-
-	rows, err := q.Query(`
-		select
-			id, course_id, title, long_desc, video_id, video_type, download_url
-		from course_contents
-		where course_id = $1
-		order by i
-	`, courseID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var xs []*course.Content
-	for rows.Next() {
-		var x course.Content
-		err = rows.Scan(
-			&x.ID, &x.CourseID, &x.Title, &x.Desc, &x.VideoID, &x.VideoType, &x.DownloadURL,
-		)
-		if err != nil {
-			return nil, err
-		}
-		xs = append(xs, &x)
-	}
-	if err = rows.Err(); err != nil {
-		return nil, err
-	}
-	return xs, nil
-}
-
-func (svcRepo) UpdateCourseContent(ctx context.Context, contentID, title, desc, videoID string) error {
-	q := sqlctx.GetQueryer(ctx)
-
-	_, err := q.Exec(`
-		update course_contents
-		set
-			title = $2,
-			long_desc = $3,
-			video_id = $4,
-			updated_at = now()
-		where id = $1
-	`, contentID, title, desc, videoID)
-	return err
-}
-
-func (svcRepo) DeleteCourseContent(ctx context.Context, contentID string) error {
-	q := sqlctx.GetQueryer(ctx)
-
-	_, err := q.Exec(`delete from course_contents where id = $1`, contentID)
-	return err
-}
-
 func (svcRepo) RegisterPayment(ctx context.Context, x *service.RegisterPayment) error {
 	q := sqlctx.GetQueryer(ctx)
 
@@ -265,33 +140,6 @@ func (svcRepo) GetPayment(ctx context.Context, paymentID string) (*service.Payme
 		return nil, err
 	}
 	return &x, nil
-}
-
-func (svcRepo) SetPaymentStatus(ctx context.Context, paymentID string, status int) error {
-	q := sqlctx.GetQueryer(ctx)
-
-	_, err := q.Exec(`
-		update payments
-		set
-			status = $2,
-			updated_at = now(),
-			at = now()
-		where id = $1
-	`, paymentID, status)
-	return err
-}
-
-func (svcRepo) HasPendingPayment(ctx context.Context, userID string, courseID string) (exists bool, err error) {
-	q := sqlctx.GetQueryer(ctx)
-
-	err = q.QueryRow(`
-		select exists (
-			select 1
-			from payments
-			where user_id = $1 and course_id = $2 and status = $3
-		)
-	`, userID, courseID, entity.Pending).Scan(&exists)
-	return
 }
 
 func (svcRepo) RegisterEnroll(ctx context.Context, userID string, courseID string) error {

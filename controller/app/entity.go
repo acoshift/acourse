@@ -4,12 +4,13 @@ import (
 	"time"
 
 	"github.com/acoshift/acourse/entity"
+	"github.com/acoshift/acourse/model/course"
 )
 
 // PublicCourse type
 type PublicCourse struct {
 	ID       string
-	Option   entity.CourseOption
+	Option   course.Option
 	Title    string
 	Desc     string
 	Image    string
@@ -85,7 +86,7 @@ func (x *OwnCourse) ShowStart() bool {
 // Course type
 type Course struct {
 	ID           string
-	Option       entity.CourseOption
+	Option       course.Option
 	Owner        CourseOwner
 	Title        string
 	ShortDesc    string

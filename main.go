@@ -33,11 +33,13 @@ import (
 	"github.com/acoshift/acourse/repository"
 	"github.com/acoshift/acourse/service"
 	"github.com/acoshift/acourse/service/auth"
+	"github.com/acoshift/acourse/service/course"
 	"github.com/acoshift/acourse/service/email"
 	"github.com/acoshift/acourse/service/file"
 	"github.com/acoshift/acourse/service/firebase"
 	"github.com/acoshift/acourse/service/image"
 	"github.com/acoshift/acourse/service/notify"
+	"github.com/acoshift/acourse/service/payment"
 	"github.com/acoshift/acourse/service/user"
 )
 
@@ -132,6 +134,8 @@ func main() {
 	notify.Init(config.String("slack_url"))
 	auth.Init(baseURL, himeApp.Route("auth.openid.callback"))
 	user.Init()
+	course.Init()
+	payment.Init()
 	service.Init(service.Config{
 		Repository: repository.NewService(),
 		Location:   loc,

@@ -16,6 +16,7 @@ import (
 	"github.com/acoshift/acourse/model/file"
 	"github.com/acoshift/acourse/model/image"
 	"github.com/acoshift/acourse/model/notify"
+	"github.com/acoshift/acourse/model/payment"
 )
 
 func (s *svc) createCourse(ctx context.Context, m *course.Create) error {
@@ -61,7 +62,7 @@ func (s *svc) createCourse(ctx context.Context, m *course.Create) error {
 			return err
 		}
 
-		return s.Repository.SetCourseOption(ctx, m.Result, &entity.CourseOption{})
+		return dispatcher.Dispatch(ctx, &course.SetOption{ID: m.Result, Option: course.Option{}})
 	})
 }
 
@@ -110,7 +111,7 @@ func (s *svc) updateCourse(ctx context.Context, m *course.Update) error {
 		}
 
 		if imageURL != "" {
-			err = s.Repository.SetCourseImage(ctx, m.ID, imageURL)
+			err = dispatcher.Dispatch(ctx, &course.SetImage{ID: m.ID, Image: imageURL})
 			if err != nil {
 				return err
 			}
@@ -148,12 +149,15 @@ func (s *svc) enrollCourse(ctx context.Context, m *course.Enroll) error {
 	}
 
 	// has pending enroll
-	pendingPayment, err := s.Repository.HasPendingPayment(ctx, user.ID, m.ID)
-	if err != nil {
-		return err
-	}
-	if pendingPayment {
-		return nil
+	{
+		q := payment.HasPending{UserID: user.ID, CourseID: m.ID}
+		err := dispatcher.Dispatch(ctx, &q)
+		if err != nil {
+			return err
+		}
+		if q.Result {
+			return nil
+		}
 	}
 
 	originalPrice := course.Price
@@ -216,54 +220,6 @@ func (s *svc) enrollCourse(ctx context.Context, m *course.Enroll) error {
 	}
 
 	return nil
-}
-
-func (s *svc) createCourseContent(ctx context.Context, m *course.CreateContent) error {
-	// TODO: validate instructor
-
-	contentID, err := s.Repository.RegisterCourseContent(ctx, &entity.RegisterCourseContent{
-		CourseID:  m.ID,
-		Title:     m.Title,
-		LongDesc:  m.LongDesc,
-		VideoID:   m.VideoID,
-		VideoType: m.VideoType,
-	})
-	m.Result = contentID
-	return err
-}
-
-func (s *svc) getCourseContent(ctx context.Context, m *course.GetContent) error {
-	// TODO: validate ownership
-
-	x, err := s.Repository.GetCourseContent(ctx, m.ContentID)
-	if err != nil {
-		return err
-	}
-	m.Result = x
-	return nil
-}
-
-func (s *svc) listCourseContents(ctx context.Context, m *course.ListContents) error {
-	// TODO: validate ownership
-
-	xs, err := s.Repository.ListCourseContents(ctx, m.ID)
-	if err != nil {
-		return err
-	}
-	m.Result = xs
-	return nil
-}
-
-func (s *svc) updateCourseContent(ctx context.Context, m *course.UpdateContent) error {
-	// TODO: validate ownership
-
-	return s.Repository.UpdateCourseContent(ctx, m.ContentID, m.Title, m.Desc, m.VideoID)
-}
-
-func (s *svc) deleteCourseContent(ctx context.Context, m *course.DeleteContent) error {
-	// TODO: validate ownership
-
-	return s.Repository.DeleteCourseContent(ctx, m.ContentID)
 }
 
 // UploadCourseCoverImage uploads course cover image

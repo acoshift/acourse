@@ -19,11 +19,6 @@ func Init(cfg Config) {
 	dispatcher.Register(s.createCourse)
 	dispatcher.Register(s.updateCourse)
 	dispatcher.Register(s.enrollCourse)
-	dispatcher.Register(s.createCourseContent)
-	dispatcher.Register(s.updateCourseContent)
-	dispatcher.Register(s.getCourseContent)
-	dispatcher.Register(s.listCourseContents)
-	dispatcher.Register(s.deleteCourseContent)
 	dispatcher.Register(s.acceptPayment)
 	dispatcher.Register(s.rejectPayment)
 }

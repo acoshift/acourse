@@ -24,7 +24,7 @@ func (s *svc) acceptPayment(ctx context.Context, m *payment.Accept) error {
 			return err
 		}
 
-		err = s.Repository.SetPaymentStatus(ctx, x.ID, entity.Accepted)
+		err = dispatcher.Dispatch(ctx, &payment.SetStatus{ID: x.ID, Status: entity.Accepted})
 		if err != nil {
 			return err
 		}
@@ -107,7 +107,7 @@ func (s *svc) rejectPayment(ctx context.Context, m *payment.Reject) error {
 			return err
 		}
 
-		return s.Repository.SetPaymentStatus(ctx, x.ID, entity.Rejected)
+		return dispatcher.Dispatch(ctx, &payment.SetStatus{ID: x.ID, Status: entity.Rejected})
 	})
 	if err != nil {
 		return err

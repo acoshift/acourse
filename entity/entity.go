@@ -28,7 +28,7 @@ type UserRole struct {
 // Course model
 type Course struct {
 	ID            string
-	Option        CourseOption
+	Option        course.Option
 	Owner         *User
 	EnrollCount   int64
 	Title         string
@@ -61,15 +61,6 @@ const (
 	_ = iota
 	Youtube
 )
-
-// CourseOption type
-type CourseOption struct {
-	Public     bool
-	Enroll     bool
-	Attend     bool
-	Assignment bool
-	Discount   bool
-}
 
 // Link returns id if url is invalid
 func (x *Course) Link() string {
@@ -121,13 +112,4 @@ type UserAssignment struct {
 	DownloadURL string
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
-}
-
-// RegisterCourseContent type
-type RegisterCourseContent struct {
-	CourseID  string
-	Title     string
-	LongDesc  string
-	VideoID   string
-	VideoType int
 }
