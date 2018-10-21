@@ -8,8 +8,6 @@ import (
 	"cloud.google.com/go/errorreporting"
 	"github.com/acoshift/header"
 	"github.com/acoshift/middleware"
-
-	"github.com/acoshift/acourse/context/appctx"
 )
 
 // ErrorLogger logs error and send error page back to response
@@ -45,34 +43,6 @@ func SetHeaders(h http.Handler) http.Handler {
 		w.Header().Set(header.XFrameOptions, "deny")
 		// w.Header().Set(header.ContentSecurityPolicy, "img-src https: data:; font-src https: data:; media-src https:;")
 		w.Header().Set(header.CacheControl, "no-cache, no-store, must-revalidate")
-		h.ServeHTTP(w, r)
-	})
-}
-
-// OnlyAdmin allows only admin
-func OnlyAdmin(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		u := appctx.GetUser(r.Context())
-		if u == nil {
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
-			return
-		}
-		if !u.Role.Admin {
-			http.Error(w, "Forbidden", http.StatusForbidden)
-			return
-		}
-		h.ServeHTTP(w, r)
-	})
-}
-
-// NotSignedIn allows only not signed in
-func NotSignedIn(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		id := appctx.GetUserID(r.Context())
-		if len(id) > 0 {
-			http.Redirect(w, r, "/", http.StatusFound)
-			return
-		}
 		h.ServeHTTP(w, r)
 	})
 }
