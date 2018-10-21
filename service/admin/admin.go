@@ -102,7 +102,7 @@ func listCourses(ctx context.Context, m *admin.ListCourses) error {
 	return rows.Err()
 }
 
-func countCourses(ctx context.Context, m *admin.CountUsers) error {
+func countCourses(ctx context.Context, m *admin.CountCourses) error {
 	return sqlctx.QueryRow(ctx,
 		`select count(*) from courses`,
 	).Scan(&m.Result)
