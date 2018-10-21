@@ -18,7 +18,8 @@ import (
 func (c *ctrl) rejectPayment(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 
-	x, err := getPayment(ctx, id)
+	q := admin.GetPayment{PaymentID: id}
+	err := dispatcher.Dispatch(ctx, &q)
 	if err == entity.ErrNotFound {
 		return ctx.RedirectTo("admin.payments.pending")
 	}
@@ -26,6 +27,7 @@ func (c *ctrl) rejectPayment(ctx *hime.Context) error {
 		return err
 	}
 
+	x := &q.Result
 	name := x.User.Name
 	if len(name) == 0 {
 		name = x.User.Username
@@ -102,43 +104,47 @@ func (c *ctrl) postPendingPayment(ctx *hime.Context) error {
 }
 
 func (c *ctrl) pendingPayments(ctx *hime.Context) error {
-	cnt, err := countPaymentsByStatus(ctx, []int{entity.Pending})
+	cnt := admin.CountPayments{Status: []int{entity.Pending}}
+	err := dispatcher.Dispatch(ctx, &cnt)
 	if err != nil {
 		return err
 	}
 
 	pg, _ := strconv.ParseInt(ctx.FormValue("page"), 10, 64)
-	pn := paginate.New(pg, 30, cnt)
+	pn := paginate.New(pg, 30, cnt.Result)
 
-	payments, err := listPaymentsByStatus(ctx, []int{entity.Pending}, pn.Limit(), pn.Offset())
+	list := admin.ListPayments{Status: []int{entity.Pending}, Limit: pn.Limit(), Offset: pn.Offset()}
+	err = dispatcher.Dispatch(ctx, &list)
 	if err != nil {
 		return err
 	}
 
 	p := view.Page(ctx)
 	p.Data["Navbar"] = "admin.payment.pending"
-	p.Data["Payments"] = payments
+	p.Data["Payments"] = list.Result
 	p.Data["Paginate"] = pn
 	return ctx.View("admin.payments", p)
 }
 
 func (c *ctrl) historyPayments(ctx *hime.Context) error {
-	cnt, err := countPaymentsByStatus(ctx, []int{entity.Accepted, entity.Rejected})
+	cnt := admin.CountPayments{Status: []int{entity.Accepted, entity.Rejected}}
+	err := dispatcher.Dispatch(ctx, &cnt)
 	if err != nil {
 		return err
 	}
 
 	pg, _ := strconv.ParseInt(ctx.FormValue("page"), 10, 64)
-	pn := paginate.New(pg, 30, cnt)
+	pn := paginate.New(pg, 30, cnt.Result)
 
-	payments, err := listPaymentsByStatus(ctx, []int{entity.Accepted, entity.Rejected, entity.Refunded}, pn.Limit(), pn.Offset())
+	list := admin.ListPayments{Status: []int{entity.Accepted, entity.Rejected, entity.Refunded}, Limit: pn.Limit(), Offset: pn.Offset()}
+	err = dispatcher.Dispatch(ctx, &list)
 	if err != nil {
 		return err
 	}
 
 	p := view.Page(ctx)
 	p.Data["Navbar"] = "admin.payment.history"
-	p.Data["Payments"] = payments
+	p.Data["Payments"] = list.Result
 	p.Data["Paginate"] = pn
 	return ctx.View("admin.payments", p)
 }

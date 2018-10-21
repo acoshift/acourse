@@ -4,8 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"time"
 
+	"github.com/acoshift/pgsql"
+	"github.com/lib/pq"
 	"github.com/moonrhythm/dispatcher"
 
 	"github.com/acoshift/acourse/context/sqlctx"
@@ -16,19 +17,171 @@ import (
 	"github.com/acoshift/acourse/model/email"
 	"github.com/acoshift/acourse/model/payment"
 	"github.com/acoshift/acourse/view"
-	"github.com/acoshift/pgsql"
 )
 
 // Init inits admin service
 func Init() {
+	dispatcher.Register(listUsers)
+	dispatcher.Register(countUsers)
+	dispatcher.Register(listCourses)
+	dispatcher.Register(countCourses)
+	dispatcher.Register(getPayment)
+	dispatcher.Register(listPayments)
+	dispatcher.Register(countPayments)
 	dispatcher.Register(acceptPayment)
 	dispatcher.Register(rejectPayment)
-	dispatcher.Register(getPayment)
+}
+
+func listUsers(ctx context.Context, m *admin.ListUsers) error {
+	rows, err := sqlctx.Query(ctx, `
+		select
+			id, name, username, email,
+			image, created_at
+		from users
+		order by created_at desc
+		limit $1 offset $2
+	`, m.Limit, m.Offset)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var x admin.UserItem
+		err = rows.Scan(
+			&x.ID, &x.Name, &x.Username, pgsql.NullString(&x.Email),
+			&x.Image, &x.CreatedAt,
+		)
+		if err != nil {
+			return err
+		}
+		m.Result = append(m.Result, &x)
+	}
+	return rows.Err()
+}
+
+func countUsers(ctx context.Context, m *admin.CountUsers) error {
+	return sqlctx.QueryRow(ctx,
+		`select count(*) from users`,
+	).Scan(&m.Result)
+}
+
+func listCourses(ctx context.Context, m *admin.ListCourses) error {
+	rows, err := sqlctx.Query(ctx, `
+		select
+			c.id, c.title, c.image,
+			c.url, c.type, c.price, c.discount,
+			c.created_at, c.updated_at,
+			opt.public, opt.enroll, opt.attend, opt.assignment, opt.discount,
+			u.id, u.username, u.image
+		from courses as c
+			left join course_options as opt on opt.course_id = c.id
+			left join users as u on u.id = c.user_id
+		order by c.created_at desc
+		limit $1 offset $2
+	`, m.Limit, m.Offset)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var x admin.CourseItem
+		err = rows.Scan(
+			&x.ID, &x.Title, &x.Image,
+			pgsql.NullString(&x.URL), &x.Type, &x.Price, &x.Discount,
+			&x.CreatedAt, &x.UpdatedAt,
+			&x.Option.Public, &x.Option.Enroll, &x.Option.Attend, &x.Option.Assignment, &x.Option.Discount,
+			&x.Owner.ID, &x.Owner.Username, &x.Owner.Image,
+		)
+		if err != nil {
+			return err
+		}
+		m.Result = append(m.Result, &x)
+	}
+	return rows.Err()
+}
+
+func countCourses(ctx context.Context, m *admin.CountUsers) error {
+	return sqlctx.QueryRow(ctx,
+		`select count(*) from courses`,
+	).Scan(&m.Result)
+}
+
+func getPayment(ctx context.Context, m *admin.GetPayment) error {
+	x := &m.Result
+	err := sqlctx.QueryRow(ctx, `
+		select
+			p.id,
+			p.image, p.price, p.original_price, p.code,
+			p.status, p.created_at, p.at,
+			u.id, u.username, u.name, u.email, u.image,
+			c.id, c.title, c.image, c.url
+		from payments as p
+			left join users as u on p.user_id = u.id
+			left join courses as c on p.course_id = c.id
+		where p.id = $1
+	`, m.PaymentID).Scan(
+		&x.ID,
+		&x.Image, &x.Price, &x.OriginalPrice, &x.Code,
+		&x.Status, &x.CreatedAt, pgsql.NullTime(&x.At),
+		&x.User.ID, &x.User.Username, &x.User.Name, pgsql.NullString(&x.User.Email), &x.User.Image,
+		&x.Course.ID, &x.Course.Title, &x.Course.Image, pgsql.NullString(&x.Course.URL),
+	)
+	if err == sql.ErrNoRows {
+		return entity.ErrNotFound
+	}
+	return err
+}
+
+func listPayments(ctx context.Context, m *admin.ListPayments) error {
+	rows, err := sqlctx.Query(ctx, `
+		select
+			p.id,
+			p.image, p.price, p.original_price, p.code,
+			p.status, p.created_at, p.at,
+			u.id, u.username, u.name, u.email, u.image,
+			c.id, c.title, c.image, c.url
+		from payments as p
+			left join users as u on p.user_id = u.id
+			left join courses as c on p.course_id = c.id
+		where p.status = any($1)
+		order by p.created_at desc
+		limit $2 offset $3
+	`, pq.Array(m.Status), m.Limit, m.Offset)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var x admin.Payment
+		err = rows.Scan(
+			&x.ID,
+			&x.Image, &x.Price, &x.OriginalPrice, &x.Code,
+			&x.Status, &x.CreatedAt, pgsql.NullTime(&x.At),
+			&x.User.ID, &x.User.Username, &x.User.Name, pgsql.NullString(&x.User.Email), &x.User.Image,
+			&x.Course.ID, &x.Course.Title, &x.Course.Image, pgsql.NullString(&x.Course.URL),
+		)
+		if err != nil {
+			return err
+		}
+		m.Result = append(m.Result, &x)
+	}
+	return rows.Err()
+}
+
+func countPayments(ctx context.Context, m *admin.CountPayments) error {
+	return sqlctx.QueryRow(ctx, `
+		select count(*)
+		from payments
+		where status = any($1)
+	`, pq.Array(m.Status)).Scan(&m.Result)
 }
 
 func acceptPayment(ctx context.Context, m *admin.AcceptPayment) error {
 	err := sqlctx.RunInTx(ctx, func(ctx context.Context) error {
-		p := getPaymentModel{PaymentID: m.ID}
+		p := admin.GetPayment{PaymentID: m.ID}
 		err := dispatcher.Dispatch(ctx, &p)
 		if err == entity.ErrNotFound {
 			return app.NewUIError("payment not found")
@@ -50,7 +203,7 @@ func acceptPayment(ctx context.Context, m *admin.AcceptPayment) error {
 
 	go func() {
 		// re-fetch payment to get latest timestamp
-		p := getPaymentModel{PaymentID: m.ID}
+		p := admin.GetPayment{PaymentID: m.ID}
 		err := dispatcher.Dispatch(ctx, &p)
 		if err != nil {
 			return
@@ -113,7 +266,7 @@ https://acourse.io
 
 func rejectPayment(ctx context.Context, m *admin.RejectPayment) error {
 	err := sqlctx.RunInTx(ctx, func(ctx context.Context) error {
-		p := getPaymentModel{PaymentID: m.ID}
+		p := admin.GetPayment{PaymentID: m.ID}
 		err := dispatcher.Dispatch(ctx, &p)
 		if err == entity.ErrNotFound {
 			return app.NewUIError("payment not found")
@@ -129,7 +282,7 @@ func rejectPayment(ctx context.Context, m *admin.RejectPayment) error {
 	}
 
 	go func() {
-		p := getPaymentModel{PaymentID: m.ID}
+		p := admin.GetPayment{PaymentID: m.ID}
 		err := dispatcher.Dispatch(ctx, &p)
 		if err != nil {
 			return
@@ -144,53 +297,4 @@ func rejectPayment(ctx context.Context, m *admin.RejectPayment) error {
 	}()
 
 	return nil
-}
-
-type getPaymentModel struct {
-	PaymentID string
-
-	Result struct {
-		ID        string
-		Price     float64
-		Status    int
-		CreatedAt time.Time
-		At        time.Time
-
-		User struct {
-			ID       string
-			Username string
-			Name     string
-			Email    string
-		}
-		Course struct {
-			ID    string
-			Title string
-		}
-	}
-}
-
-func getPayment(ctx context.Context, m *getPaymentModel) error {
-	r := &m.Result
-	err := sqlctx.QueryRow(ctx, `
-		select
-			p.id,
-			p.price,
-			p.status, p.created_at, p.at,
-			u.id, u.username, u.name, u.email,
-			c.id, c.title
-		from payments as p
-			left join users as u on p.user_id = u.id
-			left join courses as c on p.course_id = c.id
-		where p.id = $1
-	`, m.PaymentID).Scan(
-		&r.ID,
-		&r.Price,
-		&r.Status, &r.CreatedAt, pgsql.NullTime(&r.At),
-		&r.User.ID, &r.User.Username, &r.User.Name, pgsql.NullString(&r.User.Email),
-		&r.Course.ID, &r.Course.Title,
-	)
-	if err == sql.ErrNoRows {
-		return entity.ErrNotFound
-	}
-	return err
 }
