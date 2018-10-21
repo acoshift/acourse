@@ -30,6 +30,7 @@ import (
 	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/controller"
 	"github.com/acoshift/acourse/internal"
+	"github.com/acoshift/acourse/service/admin"
 	"github.com/acoshift/acourse/service/auth"
 	"github.com/acoshift/acourse/service/course"
 	"github.com/acoshift/acourse/service/email"
@@ -134,6 +135,7 @@ func main() {
 	user.Init()
 	course.Init()
 	payment.Init(loc)
+	admin.Init()
 
 	mux := http.NewServeMux()
 
