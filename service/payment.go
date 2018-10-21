@@ -16,7 +16,7 @@ import (
 
 func (s *svc) acceptPayment(ctx context.Context, m *payment.Accept) error {
 	err := sqlctx.RunInTx(ctx, func(ctx context.Context) error {
-		x, err := s.Repository.GetPayment(ctx, m.ID)
+		x, err := getPayment(ctx, m.ID)
 		if err == entity.ErrNotFound {
 			return app.NewUIError("payment not found")
 		}
@@ -29,7 +29,7 @@ func (s *svc) acceptPayment(ctx context.Context, m *payment.Accept) error {
 			return err
 		}
 
-		return s.Repository.RegisterEnroll(ctx, x.User.ID, x.Course.ID)
+		return registerEnroll(ctx, x.User.ID, x.Course.ID)
 	})
 	if err != nil {
 		return err
@@ -37,7 +37,7 @@ func (s *svc) acceptPayment(ctx context.Context, m *payment.Accept) error {
 
 	go func() {
 		// re-fetch payment to get latest timestamp
-		x, err := s.Repository.GetPayment(ctx, m.ID)
+		x, err := getPayment(ctx, m.ID)
 		if err != nil {
 			return
 		}
@@ -99,7 +99,7 @@ https://acourse.io
 
 func (s *svc) rejectPayment(ctx context.Context, m *payment.Reject) error {
 	err := sqlctx.RunInTx(ctx, func(ctx context.Context) error {
-		x, err := s.Repository.GetPayment(ctx, m.ID)
+		x, err := getPayment(ctx, m.ID)
 		if err == entity.ErrNotFound {
 			return app.NewUIError("payment not found")
 		}
@@ -114,7 +114,7 @@ func (s *svc) rejectPayment(ctx context.Context, m *payment.Reject) error {
 	}
 
 	go func() {
-		x, err := s.Repository.GetPayment(ctx, m.ID)
+		x, err := getPayment(ctx, m.ID)
 		if err != nil {
 			return
 		}

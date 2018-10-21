@@ -30,7 +30,6 @@ import (
 	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/controller"
 	"github.com/acoshift/acourse/internal"
-	"github.com/acoshift/acourse/repository"
 	"github.com/acoshift/acourse/service"
 	"github.com/acoshift/acourse/service/auth"
 	"github.com/acoshift/acourse/service/course"
@@ -137,8 +136,7 @@ func main() {
 	course.Init()
 	payment.Init()
 	service.Init(service.Config{
-		Repository: repository.NewService(),
-		Location:   loc,
+		Location: loc,
 	})
 
 	mux := http.NewServeMux()

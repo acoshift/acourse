@@ -8,8 +8,7 @@ import (
 
 // Config is service config
 type Config struct {
-	Repository Repository
-	Location   *time.Location
+	Location *time.Location
 }
 
 // Init registers service into dispatcher

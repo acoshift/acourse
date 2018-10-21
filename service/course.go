@@ -51,7 +51,7 @@ func (s *svc) createCourse(ctx context.Context, m *course.Create) error {
 	return sqlctx.RunInTx(ctx, func(ctx context.Context) error {
 		var err error
 
-		m.Result, err = s.Repository.RegisterCourse(ctx, &RegisterCourse{
+		m.Result, err = registerCourse(ctx, &RegisterCourse{
 			UserID:    user.ID,
 			Title:     m.Title,
 			ShortDesc: m.ShortDesc,
@@ -100,7 +100,7 @@ func (s *svc) updateCourse(ctx context.Context, m *course.Update) error {
 	}
 
 	err := sqlctx.RunInTx(ctx, func(ctx context.Context) error {
-		err := s.Repository.UpdateCourse(ctx, &UpdateCourseModel{
+		err := updateCourse(ctx, &UpdateCourseModel{
 			ID:        m.ID,
 			Title:     m.Title,
 			ShortDesc: m.ShortDesc,
@@ -127,7 +127,7 @@ func (s *svc) updateCourse(ctx context.Context, m *course.Update) error {
 func (s *svc) enrollCourse(ctx context.Context, m *course.Enroll) error {
 	u := appctx.GetUser(ctx)
 
-	course, err := s.Repository.GetCourse(ctx, m.ID)
+	course, err := getCourse(ctx, m.ID)
 	if err == entity.ErrNotFound {
 		return entity.ErrNotFound
 	}
@@ -201,12 +201,12 @@ func (s *svc) enrollCourse(ctx context.Context, m *course.Enroll) error {
 
 	err = sqlctx.RunInTx(ctx, func(ctx context.Context) error {
 		if course.Price == 0 {
-			return s.Repository.RegisterEnroll(ctx, u.ID, course.ID)
+			return registerEnroll(ctx, u.ID, course.ID)
 		}
 
 		newPayment = true
 
-		return s.Repository.RegisterPayment(ctx, &RegisterPayment{
+		return registerPayment(ctx, &RegisterPayment{
 			CourseID:      course.ID,
 			UserID:        u.ID,
 			Image:         imageURL,
