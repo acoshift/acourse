@@ -134,7 +134,7 @@ func main() {
 	auth.Init(baseURL, himeApp.Route("auth.openid.callback"))
 	user.Init()
 	course.Init()
-	payment.Init(loc)
+	payment.Init()
 	admin.Init()
 
 	mux := http.NewServeMux()

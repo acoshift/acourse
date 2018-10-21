@@ -10,8 +10,8 @@ import (
 	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/entity"
+	"github.com/acoshift/acourse/model/admin"
 	"github.com/acoshift/acourse/model/app"
-	"github.com/acoshift/acourse/model/payment"
 	"github.com/acoshift/acourse/view"
 )
 
@@ -73,7 +73,7 @@ func (c *ctrl) postRejectPayment(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 	message := ctx.PostFormValue("message")
 
-	err := dispatcher.Dispatch(ctx, &payment.Reject{ID: id, Message: message})
+	err := dispatcher.Dispatch(ctx, &admin.RejectPayment{ID: id, Message: message})
 	if app.IsUIError(err) {
 		return ctx.Status(http.StatusBadRequest).String(err.Error())
 	}
@@ -89,7 +89,7 @@ func (c *ctrl) postPendingPayment(ctx *hime.Context) error {
 
 	id := ctx.PostFormValue("id")
 	if action == "accept" {
-		err := dispatcher.Dispatch(ctx, &payment.Accept{ID: id})
+		err := dispatcher.Dispatch(ctx, &admin.AcceptPayment{ID: id, Location: c.Location})
 		if app.IsUIError(err) {
 			return ctx.Status(http.StatusBadRequest).String(err.Error())
 		}
