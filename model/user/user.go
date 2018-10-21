@@ -1,5 +1,22 @@
 package user
 
+// User type
+type User struct {
+	ID       string
+	Role     Role
+	Username string
+	Name     string
+	Email    string
+	AboutMe  string
+	Image    string
+}
+
+// Role type
+type Role struct {
+	Admin      bool
+	Instructor bool
+}
+
 // Create creates new user
 type Create struct {
 	ID       string

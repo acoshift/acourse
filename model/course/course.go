@@ -3,7 +3,42 @@ package course
 import (
 	"mime/multipart"
 	"time"
+
+	"github.com/lib/pq"
+
+	"github.com/acoshift/acourse/model/user"
 )
+
+// Course model
+type Course struct {
+	ID            string
+	Option        Option
+	Owner         *user.User
+	EnrollCount   int64
+	Title         string
+	ShortDesc     string
+	Desc          string
+	Image         string
+	UserID        string
+	Start         pq.NullTime
+	URL           string
+	Type          int
+	Price         float64
+	Discount      float64
+	Contents      []*Content
+	EnrollDetail  string
+	AssignmentIDs []string
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+}
+
+// Link returns id if url is invalid
+func (x *Course) Link() string {
+	if x.URL == "" {
+		return x.ID
+	}
+	return x.URL
+}
 
 // Option type
 type Option struct {
@@ -52,4 +87,25 @@ type Enroll struct {
 	ID           string
 	Price        float64
 	PaymentImage *multipart.FileHeader
+}
+
+// GetURL gets course url
+type GetURL struct {
+	ID string
+
+	Result string
+}
+
+// GetUserID gets course user id
+type GetUserID struct {
+	ID string
+
+	Result string
+}
+
+// Get gets course from id
+type Get struct {
+	ID string
+
+	Result *Course
 }

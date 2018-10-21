@@ -32,9 +32,7 @@ func Mount(m *http.ServeMux, baseURL string, loc *time.Location) {
 
 	m.Handle("/editor/", http.StripPrefix("/editor", middleware.Chain(
 	// -
-	)(editor.New(editor.Config{
-		Repository: repository.NewEditor(),
-	}))))
+	)(editor.New())))
 
 	m.Handle("/admin/", http.StripPrefix("/admin", middleware.Chain(
 		internal.OnlyAdmin,

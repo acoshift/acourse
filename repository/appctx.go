@@ -7,6 +7,7 @@ import (
 	"github.com/acoshift/acourse/context/appctx"
 	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/entity"
+	"github.com/acoshift/acourse/model/user"
 )
 
 // NewAppCtx creates new appctx repository
@@ -17,10 +18,10 @@ func NewAppCtx() appctx.Repository {
 type appctxRepo struct {
 }
 
-func (appctxRepo) GetUser(ctx context.Context, userID string) (*entity.User, error) {
+func (appctxRepo) GetUser(ctx context.Context, userID string) (*user.User, error) {
 	q := sqlctx.GetQueryer(ctx)
 
-	var x entity.User
+	var x user.User
 	err := q.QueryRow(`
 		select
 			u.id, u.name, u.username, coalesce(u.email, ''), u.about_me, u.image,

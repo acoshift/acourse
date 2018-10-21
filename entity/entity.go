@@ -6,47 +6,8 @@ import (
 	"github.com/lib/pq"
 
 	"github.com/acoshift/acourse/model/course"
+	"github.com/acoshift/acourse/model/user"
 )
-
-// User type
-type User struct {
-	ID       string
-	Role     UserRole
-	Username string
-	Name     string
-	Email    string
-	AboutMe  string
-	Image    string
-}
-
-// UserRole type
-type UserRole struct {
-	Admin      bool
-	Instructor bool
-}
-
-// Course model
-type Course struct {
-	ID            string
-	Option        course.Option
-	Owner         *User
-	EnrollCount   int64
-	Title         string
-	ShortDesc     string
-	Desc          string
-	Image         string
-	UserID        string
-	Start         pq.NullTime
-	URL           string
-	Type          int
-	Price         float64
-	Discount      float64
-	Contents      []*course.Content
-	EnrollDetail  string
-	AssignmentIDs []string
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
-}
 
 // Course type values
 const (
@@ -62,14 +23,6 @@ const (
 	Youtube
 )
 
-// Link returns id if url is invalid
-func (x *Course) Link() string {
-	if x.URL == "" {
-		return x.ID
-	}
-	return x.URL
-}
-
 // Payment model
 type Payment struct {
 	ID            string
@@ -84,8 +37,8 @@ type Payment struct {
 	UpdatedAt     time.Time
 	At            pq.NullTime
 
-	User   User
-	Course Course
+	User   user.User
+	Course course.Course
 }
 
 // PaymentStatus values

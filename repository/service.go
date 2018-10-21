@@ -8,6 +8,7 @@ import (
 
 	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/entity"
+	"github.com/acoshift/acourse/model/course"
 	"github.com/acoshift/acourse/service"
 )
 
@@ -17,27 +18,6 @@ func NewService() service.Repository {
 }
 
 type svcRepo struct {
-}
-
-func (svcRepo) GetUserByEmail(ctx context.Context, email string) (*service.User, error) {
-	q := sqlctx.GetQueryer(ctx)
-
-	var x service.User
-	err := q.QueryRow(`
-		select
-			id, name, email
-		from users
-		where email = $1
-	`, email).Scan(
-		&x.ID, &x.Name, pgsql.NullString(&x.Email),
-	)
-	if err == sql.ErrNoRows {
-		return nil, entity.ErrNotFound
-	}
-	if err != nil {
-		return nil, err
-	}
-	return &x, nil
 }
 
 func (svcRepo) RegisterCourse(ctx context.Context, x *service.RegisterCourse) (courseID string, err error) {
@@ -53,10 +33,10 @@ func (svcRepo) RegisterCourse(ctx context.Context, x *service.RegisterCourse) (c
 	return
 }
 
-func (svcRepo) GetCourse(ctx context.Context, courseID string) (*entity.Course, error) {
+func (svcRepo) GetCourse(ctx context.Context, courseID string) (*course.Course, error) {
 	q := sqlctx.GetQueryer(ctx)
 
-	var x entity.Course
+	var x course.Course
 	err := q.QueryRow(`
 		select
 			id, user_id, title, short_desc, long_desc, image,

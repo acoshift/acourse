@@ -8,6 +8,7 @@ import (
 	"github.com/moonrhythm/session"
 
 	"github.com/acoshift/acourse/entity"
+	"github.com/acoshift/acourse/model/user"
 )
 
 type (
@@ -19,13 +20,13 @@ type (
 const sessName = "sess"
 
 // NewUserContext creates new context with user
-func NewUserContext(ctx context.Context, user *entity.User) context.Context {
+func NewUserContext(ctx context.Context, user *user.User) context.Context {
 	return context.WithValue(ctx, userKey{}, user)
 }
 
 // GetUser gets user from context
-func GetUser(ctx context.Context) *entity.User {
-	x, _ := ctx.Value(userKey{}).(*entity.User)
+func GetUser(ctx context.Context) *user.User {
+	x, _ := ctx.Value(userKey{}).(*user.User)
 	return x
 }
 
@@ -40,7 +41,7 @@ func getSession(ctx context.Context) *session.Session {
 
 // Repository is appctx middleware storage
 type Repository interface {
-	GetUser(ctx context.Context, userID string) (*entity.User, error)
+	GetUser(ctx context.Context, userID string) (*user.User, error)
 }
 
 // Middleware is appctx middleware
@@ -59,7 +60,7 @@ func Middleware(repo Repository) middleware.Middleware {
 			if userID != "" {
 				u, err := repo.GetUser(ctx, userID)
 				if err == entity.ErrNotFound {
-					u = &entity.User{
+					u = &user.User{
 						ID:       userID,
 						Username: userID,
 					}

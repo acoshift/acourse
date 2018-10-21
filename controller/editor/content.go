@@ -17,13 +17,15 @@ import (
 func (c *ctrl) contentList(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 
-	x, err := c.Repository.GetCourse(ctx, id)
+	getCourse := course.Get{ID: id}
+	err := dispatcher.Dispatch(ctx, &getCourse)
 	if err == entity.ErrNotFound {
 		return share.NotFound(ctx)
 	}
 	if err != nil {
 		return err
 	}
+	x := getCourse.Result
 
 	{
 		q := course.ListContents{ID: id}
@@ -58,13 +60,15 @@ func (c *ctrl) postContentList(ctx *hime.Context) error {
 func (c *ctrl) contentCreate(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 
-	course, err := c.Repository.GetCourse(ctx, id)
+	getCourse := course.Get{ID: id}
+	err := dispatcher.Dispatch(ctx, &getCourse)
 	if err != nil {
 		return err
 	}
+	x := getCourse.Result
 
 	p := view.Page(ctx)
-	p.Data["Course"] = course
+	p.Data["Course"] = x
 	return ctx.View("editor.content-create", p)
 }
 
@@ -105,19 +109,21 @@ func (c *ctrl) contentEdit(ctx *hime.Context) error {
 	}
 	content := getContent.Result
 
-	course, err := c.Repository.GetCourse(ctx, content.CourseID)
+	getCourse := course.Get{ID: content.CourseID}
+	err = dispatcher.Dispatch(ctx, &getCourse)
 	if err != nil {
 		return err
 	}
+	x := getCourse.Result
 
 	user := appctx.GetUser(ctx)
 	// user is not course owner
-	if user.ID != course.UserID {
+	if user.ID != x.UserID {
 		return ctx.Status(http.StatusForbidden).StatusText()
 	}
 
 	p := view.Page(ctx)
-	p.Data["Course"] = course
+	p.Data["Course"] = x
 	p.Data["Content"] = content
 	return ctx.View("editor.content-edit", p)
 }
@@ -143,15 +149,17 @@ func (c *ctrl) postContentEdit(ctx *hime.Context) error {
 	}
 
 	{
-		course, err := c.Repository.GetCourse(ctx, content.CourseID)
+		getCourse := course.Get{ID: content.CourseID}
+		err := dispatcher.Dispatch(ctx, &getCourse)
 		if err != nil {
 			return err
 		}
+		x := getCourse.Result
 
 		user := appctx.GetUser(ctx)
 		// user is not course owner
 		// TODO: move to service
-		if user.ID != course.UserID {
+		if user.ID != x.UserID {
 			return ctx.Status(http.StatusForbidden).StatusText()
 		}
 	}

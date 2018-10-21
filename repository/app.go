@@ -14,6 +14,7 @@ import (
 	"github.com/acoshift/acourse/controller/app"
 	"github.com/acoshift/acourse/entity"
 	"github.com/acoshift/acourse/model/course"
+	"github.com/acoshift/acourse/model/user"
 )
 
 // NewApp creates new app repository
@@ -113,10 +114,10 @@ func (appRepo) GetCourseContents(ctx context.Context, courseID string) ([]*cours
 	return xs, nil
 }
 
-func (appRepo) GetUser(ctx context.Context, userID string) (*entity.User, error) {
+func (appRepo) GetUser(ctx context.Context, userID string) (*user.User, error) {
 	q := sqlctx.GetQueryer(ctx)
 
-	var x entity.User
+	var x user.User
 	err := q.QueryRow(`
 		select
 			users.id,

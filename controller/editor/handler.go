@@ -7,14 +7,9 @@ import (
 	"github.com/moonrhythm/hime"
 )
 
-// Config is editor config
-type Config struct {
-	Repository Repository
-}
-
 // New creates new editor handler
-func New(cfg Config) http.Handler {
-	c := &ctrl{cfg}
+func New() http.Handler {
+	c := &ctrl{}
 
 	mux := http.NewServeMux()
 	mux.Handle("/course/create", c.onlyInstructor(methodmux.GetPost(
@@ -42,6 +37,4 @@ func New(cfg Config) http.Handler {
 	return mux
 }
 
-type ctrl struct {
-	Config
-}
+type ctrl struct{}

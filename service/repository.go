@@ -3,15 +3,13 @@ package service
 import (
 	"context"
 
-	"github.com/acoshift/acourse/entity"
+	"github.com/acoshift/acourse/model/course"
 )
 
 // Repository is the service storage
 type Repository interface {
-	GetUserByEmail(ctx context.Context, email string) (*User, error)
-
 	RegisterCourse(ctx context.Context, x *RegisterCourse) (courseID string, err error)
-	GetCourse(ctx context.Context, courseID string) (*entity.Course, error)
+	GetCourse(ctx context.Context, courseID string) (*course.Course, error)
 	UpdateCourse(ctx context.Context, x *UpdateCourseModel) error
 
 	RegisterPayment(ctx context.Context, x *RegisterPayment) error

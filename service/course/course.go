@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/acoshift/pgsql"
 	"github.com/moonrhythm/dispatcher"
 
 	"github.com/acoshift/acourse/context/sqlctx"
@@ -15,6 +16,9 @@ import (
 func Init() {
 	dispatcher.Register(setOption)
 	dispatcher.Register(setImage)
+	dispatcher.Register(getURL)
+	dispatcher.Register(getUserID)
+	dispatcher.Register(get)
 	dispatcher.Register(createContent)
 	dispatcher.Register(updateContent)
 	dispatcher.Register(getContent)
@@ -45,6 +49,53 @@ func setImage(ctx context.Context, m *course.SetImage) error {
 
 	_, err := q.Exec(`update courses set image = $2 where id = $1`, m.ID, m.Image)
 	return err
+}
+
+func getURL(ctx context.Context, m *course.GetURL) error {
+	q := sqlctx.GetQueryer(ctx)
+
+	return q.QueryRow(
+		`select url from courses where id = $1`,
+		m.ID,
+	).Scan(pgsql.NullString(&m.Result))
+}
+
+func getUserID(ctx context.Context, m *course.GetUserID) error {
+	q := sqlctx.GetQueryer(ctx)
+
+	err := q.QueryRow(`select user_id from courses where id = $1`, m.ID).Scan(&m.Result)
+	if err == sql.ErrNoRows {
+		return entity.ErrNotFound
+	}
+	return err
+}
+
+func get(ctx context.Context, m *course.Get) error {
+	q := sqlctx.GetQueryer(ctx)
+
+	var x course.Course
+	err := q.QueryRow(`
+		select
+			id, user_id, title, short_desc, long_desc, image,
+			start, url, type, price, courses.discount, enroll_detail,
+			opt.public, opt.enroll, opt.attend, opt.assignment, opt.discount
+		from courses
+			left join course_options as opt on opt.course_id = courses.id
+		where id = $1
+	`, m.ID).Scan(
+		&x.ID, &x.UserID, &x.Title, &x.ShortDesc, &x.Desc, &x.Image,
+		&x.Start, pgsql.NullString(&x.URL), &x.Type, &x.Price, &x.Discount, &x.EnrollDetail,
+		&x.Option.Public, &x.Option.Enroll, &x.Option.Attend, &x.Option.Assignment, &x.Option.Discount,
+	)
+	if err == sql.ErrNoRows {
+		return entity.ErrNotFound
+	}
+	if err != nil {
+		return err
+	}
+
+	m.Result = &x
+	return nil
 }
 
 func createContent(ctx context.Context, m *course.CreateContent) error {

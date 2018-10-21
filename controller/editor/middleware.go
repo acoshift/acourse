@@ -3,11 +3,13 @@ package editor
 import (
 	"net/http"
 
+	"github.com/moonrhythm/dispatcher"
 	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/context/appctx"
 	"github.com/acoshift/acourse/controller/share"
 	"github.com/acoshift/acourse/entity"
+	"github.com/acoshift/acourse/model/course"
 )
 
 func (c *ctrl) onlyInstructor(h http.Handler) http.Handler {
@@ -34,7 +36,8 @@ func (c *ctrl) isCourseOwner(h http.Handler) http.Handler {
 
 		id := ctx.FormValue("id")
 
-		ownerID, err := c.Repository.GetCourseUserID(ctx, id)
+		ownerID := course.GetUserID{ID: id}
+		err := dispatcher.Dispatch(ctx, &ownerID)
 		if err == entity.ErrNotFound {
 			return share.NotFound(ctx)
 		}
@@ -42,7 +45,7 @@ func (c *ctrl) isCourseOwner(h http.Handler) http.Handler {
 			return err
 		}
 
-		if ownerID != u.ID {
+		if ownerID.Result != u.ID {
 			return ctx.Redirect("/")
 		}
 		return ctx.Handle(h)

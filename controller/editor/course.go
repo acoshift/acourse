@@ -53,22 +53,25 @@ func (c *ctrl) postCourseCreate(ctx *hime.Context) error {
 		return err
 	}
 
-	link, _ := c.Repository.GetCourseURL(ctx, q.Result)
-	if link == "" {
+	link := course.GetURL{ID: q.Result}
+	dispatcher.Dispatch(ctx, &link)
+	if link.Result == "" {
 		return ctx.RedirectTo("app.course", q.Result)
 	}
-	return ctx.RedirectTo("app.course", link)
+	return ctx.RedirectTo("app.course", link.Result)
 }
 
 func (c *ctrl) courseEdit(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
-	course, err := c.Repository.GetCourse(ctx, id)
+	getCourse := course.Get{ID: id}
+	err := dispatcher.Dispatch(ctx, &getCourse)
 	if err != nil {
 		return err
 	}
+	x := getCourse.Result
 
 	p := view.Page(ctx)
-	p.Data["Course"] = course
+	p.Data["Course"] = x
 	return ctx.View("editor.course-edit", p)
 }
 
@@ -112,9 +115,10 @@ func (c *ctrl) postCourseEdit(ctx *hime.Context) error {
 		return err
 	}
 
-	link, _ := c.Repository.GetCourseURL(ctx, id)
-	if link == "" {
+	link := course.GetURL{ID: id}
+	dispatcher.Dispatch(ctx, &link)
+	if link.Result == "" {
 		return ctx.RedirectTo("app.course", id)
 	}
-	return ctx.RedirectTo("app.course", link)
+	return ctx.RedirectTo("app.course", link.Result)
 }
