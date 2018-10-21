@@ -10,8 +10,7 @@ import (
 
 // Config is the app config
 type Config struct {
-	BaseURL    string
-	Repository Repository
+	BaseURL string
 }
 
 // New creates new app

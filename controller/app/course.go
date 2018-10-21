@@ -53,7 +53,7 @@ func newCourseHandler(appCtrl *ctrl) http.Handler {
 		_, err := uuid.FromString(link)
 		if err != nil {
 			// link can not parse to uuid get course id from url
-			courseID, err = c.Repository.GetCourseIDByURL(ctx, link)
+			courseID, err = getCourseIDByURL(ctx, link)
 			if err == entity.ErrNotFound {
 				return share.NotFound(ctx)
 			}
@@ -62,7 +62,7 @@ func newCourseHandler(appCtrl *ctrl) http.Handler {
 			}
 		}
 
-		x, err := c.Repository.GetCourse(ctx, courseID)
+		x, err := getCourse(ctx, courseID)
 		if err == entity.ErrNotFound {
 			return share.NotFound(ctx)
 		}
@@ -107,7 +107,7 @@ func (c *courseCtrl) view(ctx *hime.Context) error {
 		}
 
 		if !enrolled.Result {
-			pendingEnroll, err = c.Repository.HasPendingPayment(ctx, u.ID, course.ID)
+			pendingEnroll, err = hasPendingPayment(ctx, u.ID, course.ID)
 			if err != nil {
 				return err
 			}
@@ -145,7 +145,7 @@ func (c *courseCtrl) content(ctx *hime.Context) error {
 		return ctx.Status(http.StatusForbidden).StatusText()
 	}
 
-	contents, err := c.Repository.GetCourseContents(ctx, x.ID)
+	contents, err := getCourseContents(ctx, x.ID)
 	if err != nil {
 		return err
 	}
@@ -192,7 +192,7 @@ func (c *courseCtrl) enroll(ctx *hime.Context) error {
 	}
 
 	// check is user has pending enroll
-	pendingPayment, err := c.Repository.HasPendingPayment(ctx, u.ID, course.ID)
+	pendingPayment, err := hasPendingPayment(ctx, u.ID, course.ID)
 	if err != nil {
 		return err
 	}
@@ -229,7 +229,7 @@ func (c *courseCtrl) postEnroll(ctx *hime.Context) error {
 	}
 
 	// check is user has pending enroll
-	pendingPayment, err := c.Repository.HasPendingPayment(ctx, u.ID, x.ID)
+	pendingPayment, err := hasPendingPayment(ctx, u.ID, x.ID)
 	if err != nil {
 		return err
 	}
@@ -272,7 +272,7 @@ func (c *courseCtrl) assignment(ctx *hime.Context) error {
 		return ctx.Status(http.StatusForbidden).StatusText()
 	}
 
-	assignments, err := c.Repository.FindAssignmentsByCourseID(ctx, course.ID)
+	assignments, err := findAssignmentsByCourseID(ctx, course.ID)
 	if err != nil {
 		return err
 	}

@@ -12,7 +12,7 @@ func (c *ctrl) index(ctx *hime.Context) error {
 		return share.NotFound(ctx)
 	}
 
-	courses, err := c.Repository.ListPublicCourses(ctx)
+	courses, err := listPublicCourses(ctx)
 	if err != nil {
 		return err
 	}

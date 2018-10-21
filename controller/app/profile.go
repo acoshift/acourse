@@ -21,12 +21,12 @@ func (c *ctrl) signOut(ctx *hime.Context) error {
 func (c *ctrl) profile(ctx *hime.Context) error {
 	user := appctx.GetUser(ctx)
 
-	ownCourses, err := c.Repository.ListOwnCourses(ctx, user.ID)
+	ownCourses, err := listOwnCourses(ctx, user.ID)
 	if err != nil {
 		return err
 	}
 
-	enrolledCourses, err := c.Repository.ListEnrolledCourses(ctx, user.ID)
+	enrolledCourses, err := listEnrolledCourses(ctx, user.ID)
 	if err != nil {
 		return err
 	}

@@ -14,7 +14,6 @@ import (
 	"github.com/acoshift/acourse/controller/editor"
 	"github.com/acoshift/acourse/controller/share"
 	"github.com/acoshift/acourse/internal"
-	"github.com/acoshift/acourse/repository"
 )
 
 // Mount mounts controllers into mux
@@ -22,8 +21,7 @@ func Mount(m *http.ServeMux, baseURL string, loc *time.Location) {
 	methodmux.FallbackHandler = hime.Handler(share.NotFound)
 
 	m.Handle("/", app.New(app.Config{
-		BaseURL:    baseURL,
-		Repository: repository.NewApp(),
+		BaseURL: baseURL,
 	}))
 
 	m.Handle("/auth/", http.StripPrefix("/auth", middleware.Chain(
