@@ -10,8 +10,7 @@ import (
 
 // Config is admin config
 type Config struct {
-	Location   *time.Location
-	Repository Repository
+	Location *time.Location
 }
 
 // New creates admin handler

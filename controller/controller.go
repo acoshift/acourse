@@ -37,7 +37,6 @@ func Mount(m *http.ServeMux, baseURL string, loc *time.Location) {
 	m.Handle("/admin/", http.StripPrefix("/admin", middleware.Chain(
 		internal.OnlyAdmin,
 	)(admin.New(admin.Config{
-		Location:   loc,
-		Repository: repository.NewAdmin(),
+		Location: loc,
 	}))))
 }

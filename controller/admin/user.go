@@ -10,7 +10,7 @@ import (
 )
 
 func (c *ctrl) users(ctx *hime.Context) error {
-	cnt, err := c.Repository.CountUsers(ctx)
+	cnt, err := countUsers(ctx)
 	if err != nil {
 		return err
 	}
@@ -18,7 +18,7 @@ func (c *ctrl) users(ctx *hime.Context) error {
 	pg, _ := strconv.ParseInt(ctx.FormValue("page"), 10, 64)
 	pn := paginate.New(pg, 30, cnt)
 
-	users, err := c.Repository.ListUsers(ctx, pn.Limit(), pn.Offset())
+	users, err := listUsers(ctx, pn.Limit(), pn.Offset())
 	if err != nil {
 		return err
 	}

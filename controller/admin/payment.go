@@ -18,7 +18,7 @@ import (
 func (c *ctrl) rejectPayment(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 
-	x, err := c.Repository.GetPayment(ctx, id)
+	x, err := getPayment(ctx, id)
 	if err == entity.ErrNotFound {
 		return ctx.RedirectTo("admin.payments.pending")
 	}
@@ -102,7 +102,7 @@ func (c *ctrl) postPendingPayment(ctx *hime.Context) error {
 }
 
 func (c *ctrl) pendingPayments(ctx *hime.Context) error {
-	cnt, err := c.Repository.CountPaymentsByStatus(ctx, []int{entity.Pending})
+	cnt, err := countPaymentsByStatus(ctx, []int{entity.Pending})
 	if err != nil {
 		return err
 	}
@@ -110,7 +110,7 @@ func (c *ctrl) pendingPayments(ctx *hime.Context) error {
 	pg, _ := strconv.ParseInt(ctx.FormValue("page"), 10, 64)
 	pn := paginate.New(pg, 30, cnt)
 
-	payments, err := c.Repository.ListPaymentsByStatus(ctx, []int{entity.Pending}, pn.Limit(), pn.Offset())
+	payments, err := listPaymentsByStatus(ctx, []int{entity.Pending}, pn.Limit(), pn.Offset())
 	if err != nil {
 		return err
 	}
@@ -123,7 +123,7 @@ func (c *ctrl) pendingPayments(ctx *hime.Context) error {
 }
 
 func (c *ctrl) historyPayments(ctx *hime.Context) error {
-	cnt, err := c.Repository.CountPaymentsByStatus(ctx, []int{entity.Accepted, entity.Rejected})
+	cnt, err := countPaymentsByStatus(ctx, []int{entity.Accepted, entity.Rejected})
 	if err != nil {
 		return err
 	}
@@ -131,7 +131,7 @@ func (c *ctrl) historyPayments(ctx *hime.Context) error {
 	pg, _ := strconv.ParseInt(ctx.FormValue("page"), 10, 64)
 	pn := paginate.New(pg, 30, cnt)
 
-	payments, err := c.Repository.ListPaymentsByStatus(ctx, []int{entity.Accepted, entity.Rejected, entity.Refunded}, pn.Limit(), pn.Offset())
+	payments, err := listPaymentsByStatus(ctx, []int{entity.Accepted, entity.Rejected, entity.Refunded}, pn.Limit(), pn.Offset())
 	if err != nil {
 		return err
 	}
