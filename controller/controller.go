@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/acoshift/methodmux"
-	"github.com/acoshift/middleware"
 	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/context/appctx"
@@ -20,23 +19,10 @@ import (
 func Mount(m *http.ServeMux, baseURL string, loc *time.Location) {
 	methodmux.FallbackHandler = hime.Handler(share.NotFound)
 
-	m.Handle("/", app.New(app.Config{
-		BaseURL: baseURL,
-	}))
-
-	m.Handle("/auth/", http.StripPrefix("/auth", middleware.Chain(
-		notSignedIn,
-	)(auth.New())))
-
-	m.Handle("/editor/", http.StripPrefix("/editor", middleware.Chain(
-	// -
-	)(editor.New())))
-
-	m.Handle("/admin/", http.StripPrefix("/admin", middleware.Chain(
-		onlyAdmin,
-	)(admin.New(admin.Config{
-		Location: loc,
-	}))))
+	m.Handle("/", app.New(app.Config{BaseURL: baseURL}))
+	m.Handle("/auth/", http.StripPrefix("/auth", notSignedIn(auth.New())))
+	m.Handle("/editor/", http.StripPrefix("/editor", editor.New()))
+	m.Handle("/admin/", http.StripPrefix("/admin", onlyAdmin(admin.New(admin.Config{Location: loc}))))
 }
 
 func onlyAdmin(h http.Handler) http.Handler {

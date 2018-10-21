@@ -30,7 +30,6 @@ import (
 	"github.com/acoshift/acourse/context/sqlctx"
 	"github.com/acoshift/acourse/controller"
 	"github.com/acoshift/acourse/internal"
-	"github.com/acoshift/acourse/service"
 	"github.com/acoshift/acourse/service/auth"
 	"github.com/acoshift/acourse/service/course"
 	"github.com/acoshift/acourse/service/email"
@@ -134,10 +133,7 @@ func main() {
 	auth.Init(baseURL, himeApp.Route("auth.openid.callback"))
 	user.Init()
 	course.Init()
-	payment.Init()
-	service.Init(service.Config{
-		Location: loc,
-	})
+	payment.Init(loc)
 
 	mux := http.NewServeMux()
 
