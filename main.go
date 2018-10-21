@@ -185,7 +185,7 @@ func main() {
 			}),
 		}),
 		internal.Turbolinks,
-		appctx.Middleware(repository.NewAppCtx()),
+		appctx.Middleware(),
 	)(m))
 
 	h := middleware.Chain(

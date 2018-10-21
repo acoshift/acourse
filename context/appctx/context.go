@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/acoshift/middleware"
+	"github.com/moonrhythm/dispatcher"
 	"github.com/moonrhythm/session"
 
 	"github.com/acoshift/acourse/entity"
@@ -39,13 +40,8 @@ func getSession(ctx context.Context) *session.Session {
 	return ctx.Value(sessKey{}).(*session.Session)
 }
 
-// Repository is appctx middleware storage
-type Repository interface {
-	GetUser(ctx context.Context, userID string) (*user.User, error)
-}
-
 // Middleware is appctx middleware
-func Middleware(repo Repository) middleware.Middleware {
+func Middleware() middleware.Middleware {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
@@ -58,9 +54,10 @@ func Middleware(repo Repository) middleware.Middleware {
 
 			userID := GetUserID(ctx)
 			if userID != "" {
-				u, err := repo.GetUser(ctx, userID)
+				q := user.Get{ID: userID}
+				err := dispatcher.Dispatch(ctx, &q)
 				if err == entity.ErrNotFound {
-					u = &user.User{
+					q.Result = &user.User{
 						ID:       userID,
 						Username: userID,
 					}
@@ -68,7 +65,7 @@ func Middleware(repo Repository) middleware.Middleware {
 				if err != nil {
 					panic(err)
 				}
-				ctx = NewUserContext(ctx, u)
+				ctx = NewUserContext(ctx, q.Result)
 			}
 
 			r = r.WithContext(ctx)

@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/acoshift/pgsql"
 	"github.com/moonrhythm/dispatcher"
@@ -15,6 +16,7 @@ import (
 func Init() {
 	dispatcher.Register(create)
 	dispatcher.Register(update)
+	dispatcher.Register(get)
 	dispatcher.Register(isExists)
 	dispatcher.Register(setImage)
 	dispatcher.Register(updateProfile)
@@ -52,6 +54,32 @@ func update(ctx context.Context, m *user.Update) error {
 		where id = $1
 	`, m.ID, m.Username, m.Name, m.AboutMe)
 	return err
+}
+
+func get(ctx context.Context, m *user.Get) error {
+	q := sqlctx.GetQueryer(ctx)
+
+	var x user.User
+	err := q.QueryRow(`
+		select
+			u.id, u.name, u.username, coalesce(u.email, ''), u.about_me, u.image,
+			coalesce(r.admin, false), coalesce(r.instructor, false)
+		from users as u
+			left join roles as r on u.id = r.user_id
+		where u.id = $1
+	`, m.ID).Scan(
+		&x.ID, &x.Name, &x.Username, &x.Email, &x.AboutMe, &x.Image,
+		&x.Role.Admin, &x.Role.Instructor,
+	)
+	if err == sql.ErrNoRows {
+		return entity.ErrNotFound
+	}
+	if err != nil {
+		return err
+	}
+
+	m.Result = &x
+	return nil
 }
 
 func isExists(ctx context.Context, m *user.IsExists) error {

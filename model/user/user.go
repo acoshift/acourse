@@ -54,3 +54,10 @@ type IsEnroll struct {
 
 	Result bool
 }
+
+// Get gets user from id
+type Get struct {
+	ID string
+
+	Result *User
+}
