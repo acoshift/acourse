@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"cloud.google.com/go/errorreporting"
-	"cloud.google.com/go/profiler"
 	"cloud.google.com/go/storage"
 	"cloud.google.com/go/trace"
 	"github.com/acoshift/configfile"
@@ -60,7 +59,7 @@ func main() {
 	projectID := config.String("project_id")
 
 	// init profiler, ignore error
-	profiler.Start(profiler.Config{Service: serviceName, ProjectID: projectID}, googClientOpts...)
+	// profiler.Start(profiler.Config{Service: serviceName, ProjectID: projectID}, googClientOpts...)
 
 	// init error reporting, ignore error
 	errClient, _ := errorreporting.NewClient(ctx, projectID, errorreporting.Config{
