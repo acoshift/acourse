@@ -5,8 +5,8 @@ import (
 
 	"github.com/moonrhythm/hime"
 
+	"github.com/acoshift/acourse/internal/app/share"
 	"github.com/acoshift/acourse/internal/context/appctx"
-	"github.com/acoshift/acourse/internal/controller/share"
 	"github.com/acoshift/acourse/internal/entity"
 	"github.com/acoshift/acourse/internal/pkg/dispatcher"
 	"github.com/acoshift/acourse/internal/pkg/model/course"

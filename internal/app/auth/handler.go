@@ -6,7 +6,7 @@ import (
 	"github.com/acoshift/methodmux"
 	"github.com/moonrhythm/hime"
 
-	"github.com/acoshift/acourse/internal/controller/share"
+	"github.com/acoshift/acourse/internal/app/share"
 )
 
 // New creates new auth handler

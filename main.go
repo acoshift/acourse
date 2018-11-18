@@ -24,10 +24,10 @@ import (
 	"google.golang.org/api/option"
 
 	"github.com/acoshift/acourse/internal"
+	"github.com/acoshift/acourse/internal/app"
 	"github.com/acoshift/acourse/internal/context/appctx"
 	"github.com/acoshift/acourse/internal/context/redisctx"
 	"github.com/acoshift/acourse/internal/context/sqlctx"
-	"github.com/acoshift/acourse/internal/controller"
 	"github.com/acoshift/acourse/internal/service/admin"
 	"github.com/acoshift/acourse/internal/service/auth"
 	"github.com/acoshift/acourse/internal/service/course"
@@ -155,7 +155,7 @@ func main() {
 	mux.Handle("/favicon.ico", internal.FileHandler("assets/favicon.ico"))
 
 	m := http.NewServeMux()
-	controller.Mount(m, baseURL, loc)
+	app.Mount(m, baseURL, loc)
 
 	mux.Handle("/", middleware.Chain(
 		sqlctx.Middleware(db),

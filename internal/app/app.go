@@ -1,4 +1,4 @@
-package controller
+package app
 
 import (
 	"net/http"
@@ -7,12 +7,12 @@ import (
 	"github.com/acoshift/methodmux"
 	"github.com/moonrhythm/hime"
 
+	"github.com/acoshift/acourse/internal/app/admin"
+	"github.com/acoshift/acourse/internal/app/app"
+	"github.com/acoshift/acourse/internal/app/auth"
+	"github.com/acoshift/acourse/internal/app/editor"
+	"github.com/acoshift/acourse/internal/app/share"
 	"github.com/acoshift/acourse/internal/context/appctx"
-	"github.com/acoshift/acourse/internal/controller/admin"
-	"github.com/acoshift/acourse/internal/controller/app"
-	"github.com/acoshift/acourse/internal/controller/auth"
-	"github.com/acoshift/acourse/internal/controller/editor"
-	"github.com/acoshift/acourse/internal/controller/share"
 )
 
 // Mount mounts controllers into mux
