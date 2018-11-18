@@ -8,6 +8,7 @@ import (
 
 	"github.com/acoshift/acourse/internal/entity"
 	"github.com/acoshift/acourse/internal/pkg/markdown"
+	"github.com/acoshift/acourse/internal/pkg/model/course"
 )
 
 // TemplateFunc returns template funcs
@@ -18,11 +19,11 @@ func TemplateFunc(loc *time.Location) template.FuncMap {
 		},
 		"courseType": func(v int) string {
 			switch v {
-			case entity.Live:
+			case course.Live:
 				return "Live"
-			case entity.Video:
+			case course.Video:
 				return "Video"
-			case entity.EBook:
+			case course.EBook:
 				return "eBook"
 			default:
 				return ""
@@ -39,13 +40,13 @@ func TemplateFunc(loc *time.Location) template.FuncMap {
 		},
 		"markdown": markdown.HTML,
 		"live": func() int {
-			return entity.Live
+			return course.Live
 		},
 		"video": func() int {
-			return entity.Video
+			return course.Video
 		},
 		"eBook": func() int {
-			return entity.EBook
+			return course.EBook
 		},
 		"pending": func() int {
 			return entity.Pending

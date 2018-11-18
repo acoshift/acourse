@@ -9,20 +9,6 @@ import (
 	"github.com/acoshift/acourse/internal/pkg/model/user"
 )
 
-// Course type values
-const (
-	_ = iota
-	Live
-	Video
-	EBook
-)
-
-// Video type values
-const (
-	_ = iota
-	Youtube
-)
-
 // Payment model
 type Payment struct {
 	ID            string

@@ -3,7 +3,6 @@ package app
 import (
 	"time"
 
-	"github.com/acoshift/acourse/internal/entity"
 	"github.com/acoshift/acourse/internal/pkg/model/course"
 )
 
@@ -31,7 +30,7 @@ func (x *PublicCourse) Link() string {
 
 // ShowStart returns true if course should show start date
 func (x *PublicCourse) ShowStart() bool {
-	return x.Type == entity.Live && !x.Start.IsZero()
+	return x.Type == course.Live && !x.Start.IsZero()
 }
 
 // EnrolledCourse type
@@ -55,7 +54,7 @@ func (x *EnrolledCourse) Link() string {
 
 // ShowStart returns true if course should show start date
 func (x *EnrolledCourse) ShowStart() bool {
-	return x.Type == entity.Live && !x.Start.IsZero()
+	return x.Type == course.Live && !x.Start.IsZero()
 }
 
 // OwnCourse type
@@ -80,7 +79,7 @@ func (x *OwnCourse) Link() string {
 
 // ShowStart returns true if course should show start date
 func (x *OwnCourse) ShowStart() bool {
-	return x.Type == entity.Live && !x.Start.IsZero()
+	return x.Type == course.Live && !x.Start.IsZero()
 }
 
 // Course type

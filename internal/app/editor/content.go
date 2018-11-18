@@ -86,7 +86,7 @@ func (c *ctrl) postContentCreate(ctx *hime.Context) error {
 		Title:     title,
 		LongDesc:  desc,
 		VideoID:   videoID,
-		VideoType: entity.Youtube,
+		VideoType: course.Youtube,
 	})
 	if err != nil {
 		return err

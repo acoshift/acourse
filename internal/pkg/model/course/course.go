@@ -49,6 +49,20 @@ type Option struct {
 	Discount   bool
 }
 
+// Course type values
+const (
+	_ = iota
+	Live
+	Video
+	EBook
+)
+
+// Video type values
+const (
+	_ = iota
+	Youtube
+)
+
 // Create creates new course
 type Create struct {
 	UserID    string
