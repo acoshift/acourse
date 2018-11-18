@@ -5,7 +5,6 @@ import (
 
 	"github.com/moonrhythm/hime"
 
-	"github.com/acoshift/acourse/internal/app/share"
 	"github.com/acoshift/acourse/internal/app/view"
 	"github.com/acoshift/acourse/internal/entity"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
@@ -20,7 +19,7 @@ func (c *ctrl) contentList(ctx *hime.Context) error {
 	getCourse := course.Get{ID: id}
 	err := dispatcher.Dispatch(ctx, &getCourse)
 	if err == entity.ErrNotFound {
-		return share.NotFound(ctx)
+		return view.NotFound(ctx)
 	}
 	if err != nil {
 		return err
@@ -102,7 +101,7 @@ func (c *ctrl) contentEdit(ctx *hime.Context) error {
 	getContent := course.GetContent{ContentID: id}
 	err := dispatcher.Dispatch(ctx, &getContent)
 	if err == entity.ErrNotFound {
-		return share.NotFound(ctx)
+		return view.NotFound(ctx)
 	}
 	if err != nil {
 		return err
@@ -135,14 +134,14 @@ func (c *ctrl) postContentEdit(ctx *hime.Context) error {
 	getContent := course.GetContent{ContentID: id}
 	err := dispatcher.Dispatch(ctx, &getContent)
 	if err == entity.ErrNotFound {
-		return share.NotFound(ctx)
+		return view.NotFound(ctx)
 	}
 	if err != nil {
 		return err
 	}
 	content := getContent.Result
 	if err == entity.ErrNotFound {
-		return share.NotFound(ctx)
+		return view.NotFound(ctx)
 	}
 	if err != nil {
 		return err

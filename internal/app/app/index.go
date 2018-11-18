@@ -3,13 +3,12 @@ package app
 import (
 	"github.com/moonrhythm/hime"
 
-	"github.com/acoshift/acourse/internal/app/share"
 	"github.com/acoshift/acourse/internal/app/view"
 )
 
 func (c *ctrl) index(ctx *hime.Context) error {
 	if ctx.URL.Path != "/" {
-		return share.NotFound(ctx)
+		return view.NotFound(ctx)
 	}
 
 	courses, err := listPublicCourses(ctx)

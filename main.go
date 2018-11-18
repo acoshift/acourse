@@ -46,9 +46,7 @@ func main() {
 	config := configfile.NewReader("config")
 
 	loc, err := time.LoadLocation(config.StringDefault("location", "Asia/Bangkok"))
-	if err != nil {
-		log.Fatal(err)
-	}
+	must(err)
 
 	ctx := context.Background()
 
@@ -57,30 +55,23 @@ func main() {
 	serviceName := config.StringDefault("service", "acourse")
 	projectID := config.String("project_id")
 
-	// init profiler, ignore error
-	// profiler.Start(profiler.Config{Service: serviceName, ProjectID: projectID}, googClientOpts...)
-
 	// init error reporting, ignore error
 	errClient, _ := errorreporting.NewClient(ctx, projectID, errorreporting.Config{
 		ServiceName: serviceName,
 		OnError: func(err error) {
-			log.Printf("could not log error: %v", err)
+			log.Println(err)
 		},
 	}, googClientOpts...)
 
 	firApp, err := firadmin.InitializeApp(ctx, firadmin.AppOptions{
 		ProjectID: projectID,
 	}, googClientOpts...)
-	if err != nil {
-		log.Fatal(err)
-	}
+	must(err)
 	firAuth := firApp.Auth()
 
 	// init google storage
 	storageClient, err := storage.NewClient(ctx, googClientOpts...)
-	if err != nil {
-		log.Fatal(err)
-	}
+	must(err)
 
 	// init redis pool
 	redisClient := redis.NewClient(&redis.Options{
@@ -93,9 +84,7 @@ func main() {
 
 	// init databases
 	db, err := sql.Open("postgres", config.String("sql_url"))
-	if err != nil {
-		log.Fatal(err)
-	}
+	must(err)
 	defer db.Close()
 	db.SetMaxOpenConns(config.IntDefault("sql_max_open_conns", 5))
 
@@ -149,13 +138,10 @@ func main() {
 
 	mux.Handle("/-/", http.StripPrefix("/-", webstatic.New(webstatic.Config{
 		Dir:          "assets",
-		CacheControl: "public, max-age=31536000",
+		CacheControl: "public, max-age=31536000, immutable",
 	})))
 
 	mux.Handle("/favicon.ico", internal.FileHandler("assets/favicon.ico"))
-
-	m := http.NewServeMux()
-	app.Mount(m, baseURL, loc)
 
 	mux.Handle("/", middleware.Chain(
 		sqlctx.Middleware(db),
@@ -176,7 +162,7 @@ func main() {
 		}),
 		internal.Turbolinks,
 		appctx.Middleware(),
-	)(m))
+	)(app.Handler(baseURL, loc)))
 
 	h := middleware.Chain(
 		internal.ErrorLogger(errClient),
@@ -196,6 +182,10 @@ func main() {
 	err = himeApp.
 		Handler(h).
 		ListenAndServe()
+	must(err)
+}
+
+func must(err error) {
 	if err != nil {
 		log.Fatal(err)
 	}

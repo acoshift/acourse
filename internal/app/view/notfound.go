@@ -1,4 +1,4 @@
-package share
+package view
 
 import (
 	"math/rand"
@@ -6,8 +6,6 @@ import (
 
 	"github.com/acoshift/header"
 	"github.com/moonrhythm/hime"
-
-	"github.com/acoshift/acourse/internal/app/view"
 )
 
 var notFoundImages = []string{
@@ -15,9 +13,9 @@ var notFoundImages = []string{
 	"https://storage.googleapis.com/acourse/static/b14a40c9-d3a4-465d-9453-ce7fcfbc594c.png",
 }
 
-// NotFound handler
+// NotFound renders not found page
 func NotFound(ctx *hime.Context) error {
-	p := view.Page(ctx)
+	p := Page(ctx)
 	p.Data["Image"] = notFoundImages[rand.Intn(len(notFoundImages))]
 	ctx.SetHeader(header.XContentTypeOptions, "nosniff")
 	return ctx.Status(http.StatusNotFound).View("share.not-found", p)

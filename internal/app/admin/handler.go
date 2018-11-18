@@ -7,7 +7,7 @@ import (
 	"github.com/acoshift/methodmux"
 	"github.com/moonrhythm/hime"
 
-	"github.com/acoshift/acourse/internal/app/share"
+	"github.com/acoshift/acourse/internal/app/view"
 )
 
 // Config is admin config
@@ -20,7 +20,7 @@ func New(cfg Config) http.Handler {
 	c := &ctrl{cfg}
 
 	mux := http.NewServeMux()
-	mux.Handle("/", hime.Handler(share.NotFound))
+	mux.Handle("/", hime.Handler(view.NotFound))
 
 	mux.Handle("/users", methodmux.Get(
 		hime.Handler(c.users),

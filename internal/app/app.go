@@ -11,18 +11,21 @@ import (
 	"github.com/acoshift/acourse/internal/app/app"
 	"github.com/acoshift/acourse/internal/app/auth"
 	"github.com/acoshift/acourse/internal/app/editor"
-	"github.com/acoshift/acourse/internal/app/share"
+	"github.com/acoshift/acourse/internal/app/view"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
 )
 
-// Mount mounts controllers into mux
-func Mount(m *http.ServeMux, baseURL string, loc *time.Location) {
-	methodmux.FallbackHandler = hime.Handler(share.NotFound)
+// Handler creates new app's handler
+func Handler(baseURL string, loc *time.Location) http.Handler {
+	methodmux.FallbackHandler = hime.Handler(view.NotFound)
 
+	m := http.NewServeMux()
 	m.Handle("/", app.New(app.Config{BaseURL: baseURL}))
 	m.Handle("/auth/", http.StripPrefix("/auth", notSignedIn(auth.New())))
 	m.Handle("/editor/", http.StripPrefix("/editor", editor.New()))
 	m.Handle("/admin/", http.StripPrefix("/admin", onlyAdmin(admin.New(admin.Config{Location: loc}))))
+
+	return m
 }
 
 func onlyAdmin(h http.Handler) http.Handler {

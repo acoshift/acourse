@@ -11,7 +11,6 @@ import (
 	"github.com/moonrhythm/hime"
 	"github.com/satori/go.uuid"
 
-	"github.com/acoshift/acourse/internal/app/share"
 	"github.com/acoshift/acourse/internal/app/view"
 	"github.com/acoshift/acourse/internal/entity"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
@@ -55,7 +54,7 @@ func newCourseHandler(appCtrl *ctrl) http.Handler {
 			// link can not parse to uuid get course id from url
 			courseID, err = getCourseIDByURL(ctx, link)
 			if err == entity.ErrNotFound {
-				return share.NotFound(ctx)
+				return view.NotFound(ctx)
 			}
 			if err != nil {
 				return err
@@ -64,7 +63,7 @@ func newCourseHandler(appCtrl *ctrl) http.Handler {
 
 		x, err := getCourse(ctx, courseID)
 		if err == entity.ErrNotFound {
-			return share.NotFound(ctx)
+			return view.NotFound(ctx)
 		}
 		if err != nil {
 			return err
@@ -91,7 +90,7 @@ func (c *courseCtrl) getCourse(ctx context.Context) *Course {
 
 func (c *courseCtrl) view(ctx *hime.Context) error {
 	if ctx.URL.Path != "/" {
-		return share.NotFound(ctx)
+		return view.NotFound(ctx)
 	}
 
 	u := appctx.GetUser(ctx)
