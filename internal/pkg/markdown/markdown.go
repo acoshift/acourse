@@ -1,4 +1,4 @@
-package view
+package markdown
 
 import (
 	"html/template"
@@ -7,8 +7,8 @@ import (
 	"github.com/russross/blackfriday"
 )
 
-// MarkdownEmail converts markdown to html for "email"
-func MarkdownEmail(s string) string {
+// Email converts markdown to html for "email"
+func Email(s string) string {
 	renderer := blackfriday.NewHTMLRenderer(blackfriday.HTMLRendererParameters{
 		Flags: 0 |
 			blackfriday.UseXHTML |
@@ -33,8 +33,8 @@ func MarkdownEmail(s string) string {
 	return string(p.SanitizeBytes(md))
 }
 
-// MarkdownHTML converts markdown to html
-func MarkdownHTML(s string) template.HTML {
+// HTML converts markdown to html
+func HTML(s string) template.HTML {
 	renderer := blackfriday.NewHTMLRenderer(blackfriday.HTMLRendererParameters{
 		Flags: 0 |
 			blackfriday.UseXHTML |

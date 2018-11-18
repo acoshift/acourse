@@ -16,7 +16,7 @@ import (
 	"github.com/acoshift/acourse/internal/model/email"
 	"github.com/acoshift/acourse/internal/model/payment"
 	"github.com/acoshift/acourse/internal/pkg/dispatcher"
-	"github.com/acoshift/acourse/internal/view"
+	"github.com/acoshift/acourse/internal/pkg/markdown"
 )
 
 // Init inits admin service
@@ -213,7 +213,7 @@ func acceptPayment(ctx context.Context, m *admin.AcceptPayment) error {
 		if len(name) == 0 {
 			name = p.Result.User.Username
 		}
-		body := view.MarkdownEmail(fmt.Sprintf(`สวัสดีครับคุณ %s,
+		body := markdown.Email(fmt.Sprintf(`สวัสดีครับคุณ %s,
 
 
 อีเมล์ฉบับนี้ยืนยันว่าท่านได้รับการอนุมัติการชำระเงินสำหรับหลักสูตร "%s" เสร็จสิ้น ท่านสามารถทำการ login เข้าสู่ Website Acourse แล้วเข้าเรียนหลักสูตร "%s" ได้ทันที
@@ -287,7 +287,7 @@ func rejectPayment(ctx context.Context, m *admin.RejectPayment) error {
 		if err != nil {
 			return
 		}
-		body := view.MarkdownEmail(m.Message)
+		body := markdown.Email(m.Message)
 		title := fmt.Sprintf("คำขอเพื่อเรียนหลักสูตร %s ได้รับการปฏิเสธ", p.Result.Course.Title)
 		dispatcher.Dispatch(context.Background(), &email.Send{
 			To:      p.Result.User.Email,

@@ -7,7 +7,7 @@ import (
 	"github.com/dustin/go-humanize"
 
 	"github.com/acoshift/acourse/internal/entity"
-	"github.com/acoshift/acourse/internal/view"
+	"github.com/acoshift/acourse/internal/pkg/markdown"
 )
 
 // TemplateFunc returns template funcs
@@ -37,7 +37,7 @@ func TemplateFunc(loc *time.Location) template.FuncMap {
 		"dateInput": func(v time.Time) string {
 			return v.Format("2006-01-02")
 		},
-		"markdown": view.MarkdownHTML,
+		"markdown": markdown.HTML,
 		"live": func() int {
 			return entity.Live
 		},
