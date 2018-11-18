@@ -4,7 +4,7 @@ import (
 	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/internal/app/share"
-	"github.com/acoshift/acourse/internal/view"
+	"github.com/acoshift/acourse/internal/app/view"
 )
 
 func (c *ctrl) index(ctx *hime.Context) error {

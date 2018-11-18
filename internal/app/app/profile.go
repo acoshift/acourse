@@ -6,11 +6,11 @@ import (
 	"github.com/asaskevich/govalidator"
 	"github.com/moonrhythm/hime"
 
+	"github.com/acoshift/acourse/internal/app/view"
 	"github.com/acoshift/acourse/internal/context/appctx"
 	"github.com/acoshift/acourse/internal/pkg/dispatcher"
 	"github.com/acoshift/acourse/internal/pkg/model/app"
 	"github.com/acoshift/acourse/internal/pkg/model/user"
-	"github.com/acoshift/acourse/internal/view"
 )
 
 func (c *ctrl) signOut(ctx *hime.Context) error {

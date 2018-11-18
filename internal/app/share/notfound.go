@@ -7,7 +7,7 @@ import (
 	"github.com/acoshift/header"
 	"github.com/moonrhythm/hime"
 
-	"github.com/acoshift/acourse/internal/view"
+	"github.com/acoshift/acourse/internal/app/view"
 )
 
 var notFoundImages = []string{

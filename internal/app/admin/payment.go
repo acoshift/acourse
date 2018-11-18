@@ -8,11 +8,11 @@ import (
 	"github.com/acoshift/paginate"
 	"github.com/moonrhythm/hime"
 
+	"github.com/acoshift/acourse/internal/app/view"
 	"github.com/acoshift/acourse/internal/entity"
 	"github.com/acoshift/acourse/internal/pkg/dispatcher"
 	"github.com/acoshift/acourse/internal/pkg/model/admin"
 	"github.com/acoshift/acourse/internal/pkg/model/app"
-	"github.com/acoshift/acourse/internal/view"
 )
 
 func (c *ctrl) rejectPayment(ctx *hime.Context) error {
