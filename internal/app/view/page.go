@@ -3,7 +3,7 @@ package view
 import (
 	"context"
 
-	"github.com/acoshift/acourse/internal/context/appctx"
+	"github.com/acoshift/acourse/internal/pkg/context/appctx"
 )
 
 // PageData type

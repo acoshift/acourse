@@ -3,7 +3,7 @@ package payment
 import (
 	"context"
 
-	"github.com/acoshift/acourse/internal/context/sqlctx"
+	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
 	"github.com/acoshift/acourse/internal/pkg/dispatcher"
 	"github.com/acoshift/acourse/internal/pkg/model/payment"
 )

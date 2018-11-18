@@ -8,8 +8,8 @@ import (
 	"github.com/acoshift/pgsql"
 	"github.com/lib/pq"
 
-	"github.com/acoshift/acourse/internal/context/sqlctx"
 	"github.com/acoshift/acourse/internal/entity"
+	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
 	"github.com/acoshift/acourse/internal/pkg/dispatcher"
 	"github.com/acoshift/acourse/internal/pkg/markdown"
 	"github.com/acoshift/acourse/internal/pkg/model/admin"

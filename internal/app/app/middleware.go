@@ -6,7 +6,7 @@ import (
 
 	"github.com/moonrhythm/hime"
 
-	"github.com/acoshift/acourse/internal/context/appctx"
+	"github.com/acoshift/acourse/internal/pkg/context/appctx"
 )
 
 func mustSignedIn(h http.Handler) http.Handler {

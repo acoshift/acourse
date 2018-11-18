@@ -12,7 +12,7 @@ import (
 	"github.com/acoshift/acourse/internal/app/auth"
 	"github.com/acoshift/acourse/internal/app/editor"
 	"github.com/acoshift/acourse/internal/app/share"
-	"github.com/acoshift/acourse/internal/context/appctx"
+	"github.com/acoshift/acourse/internal/pkg/context/appctx"
 )
 
 // Mount mounts controllers into mux

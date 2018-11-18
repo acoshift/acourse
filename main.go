@@ -25,9 +25,9 @@ import (
 
 	"github.com/acoshift/acourse/internal"
 	"github.com/acoshift/acourse/internal/app"
-	"github.com/acoshift/acourse/internal/context/appctx"
-	"github.com/acoshift/acourse/internal/context/redisctx"
-	"github.com/acoshift/acourse/internal/context/sqlctx"
+	"github.com/acoshift/acourse/internal/pkg/context/appctx"
+	"github.com/acoshift/acourse/internal/pkg/context/redisctx"
+	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
 	"github.com/acoshift/acourse/internal/service/admin"
 	"github.com/acoshift/acourse/internal/service/auth"
 	"github.com/acoshift/acourse/internal/service/course"
