@@ -12,6 +12,7 @@ import (
 	"github.com/acoshift/acourse/internal/entity"
 	"github.com/acoshift/acourse/internal/pkg/context/redisctx"
 	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
+	"github.com/acoshift/acourse/internal/pkg/model"
 	"github.com/acoshift/acourse/internal/pkg/model/course"
 	"github.com/acoshift/acourse/internal/pkg/model/payment"
 	"github.com/acoshift/acourse/internal/pkg/model/user"
@@ -126,7 +127,7 @@ func getUser(ctx context.Context, userID string) (*user.User, error) {
 	return &x, nil
 }
 
-func findAssignmentsByCourseID(ctx context.Context, courseID string) ([]*entity.Assignment, error) {
+func findAssignmentsByCourseID(ctx context.Context, courseID string) ([]*model.Assignment, error) {
 	rows, err := sqlctx.Query(ctx, `
 		select id, title, long_desc, open
 		from assignments
@@ -138,9 +139,9 @@ func findAssignmentsByCourseID(ctx context.Context, courseID string) ([]*entity.
 	}
 	defer rows.Close()
 
-	var xs []*entity.Assignment
+	var xs []*model.Assignment
 	for rows.Next() {
-		var x entity.Assignment
+		var x model.Assignment
 		err = rows.Scan(&x.ID, &x.Title, &x.Desc, &x.Open)
 		if err != nil {
 			return nil, err

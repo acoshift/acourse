@@ -1,4 +1,4 @@
-package entity
+package model
 
 // Assignment model
 type Assignment struct {
