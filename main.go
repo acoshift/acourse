@@ -19,15 +19,11 @@ import (
 	"github.com/go-redis/redis"
 	_ "github.com/lib/pq"
 	"github.com/moonrhythm/hime"
-	"github.com/moonrhythm/session"
 	redisstore "github.com/moonrhythm/session/store/goredis"
 	"google.golang.org/api/option"
 
 	"github.com/acoshift/acourse/internal"
 	"github.com/acoshift/acourse/internal/app"
-	"github.com/acoshift/acourse/internal/pkg/context/appctx"
-	"github.com/acoshift/acourse/internal/pkg/context/redisctx"
-	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
 	"github.com/acoshift/acourse/internal/service/admin"
 	"github.com/acoshift/acourse/internal/service/auth"
 	"github.com/acoshift/acourse/internal/service/course"
@@ -88,18 +84,18 @@ func main() {
 	defer db.Close()
 	db.SetMaxOpenConns(config.IntDefault("sql_max_open_conns", 5))
 
-	himeApp := hime.New()
-	himeApp.ParseConfigFile("settings/server.yaml")
-	himeApp.ParseConfigFile("settings/routes.yaml")
+	server := hime.New()
+	server.ParseConfigFile("settings/server.yaml")
+	server.ParseConfigFile("settings/routes.yaml")
 
 	static := configfile.NewYAMLReader("static.yaml")
-	himeApp.TemplateFunc("static", func(s string) string {
+	server.TemplateFunc("static", func(s string) string {
 		return "/-/" + static.StringDefault(s, s)
 	})
 
 	baseURL := config.String("base_url")
 
-	himeApp.Template().
+	server.Template().
 		Funcs(internal.TemplateFunc(loc)).
 		ParseConfigFile("settings/template.yaml")
 
@@ -115,7 +111,7 @@ func main() {
 	image.Init()
 	firebase.Init(firAuth)
 	notify.Init(config.String("slack_url"))
-	auth.Init(baseURL, himeApp.Route("auth.openid.callback"))
+	auth.Init(baseURL, server.Route("auth.openid.callback"))
 	user.Init()
 	course.Init()
 	payment.Init()
@@ -143,26 +139,18 @@ func main() {
 
 	mux.Handle("/favicon.ico", internal.FileHandler("assets/favicon.ico"))
 
-	mux.Handle("/", middleware.Chain(
-		sqlctx.Middleware(db),
-		redisctx.Middleware(redisClient, config.String("redis_prefix")),
-		session.Middleware(session.Config{
-			Secret:   config.Bytes("session_secret"),
-			Path:     "/",
-			MaxAge:   7 * 24 * time.Hour,
-			HTTPOnly: true,
-			Secure:   session.PreferSecure,
-			SameSite: http.SameSiteLaxMode,
-			Rolling:  true,
-			Proxy:    true,
-			Store: redisstore.New(redisstore.Config{
-				Prefix: config.String("redis_prefix"),
-				Client: redisClient,
-			}),
+	mux.Handle("/", app.Handler(app.Config{
+		BaseURL:       baseURL,
+		Location:      loc,
+		DB:            db,
+		SessionSecret: config.Bytes("session_secret"),
+		SessionStore: redisstore.New(redisstore.Config{
+			Prefix: config.String("redis_prefix"),
+			Client: redisClient,
 		}),
-		internal.Turbolinks,
-		appctx.Middleware(),
-	)(app.Handler(baseURL, loc)))
+		RedisClient: redisClient,
+		RedisPrefix: config.String("redis_prefix"),
+	}))
 
 	h := middleware.Chain(
 		internal.ErrorLogger(errClient),
@@ -176,10 +164,10 @@ func main() {
 		}),
 	)(mux)
 
-	himeApp.GracefulShutdown().
+	server.GracefulShutdown().
 		Notify(probe.Fail)
 
-	err = himeApp.
+	err = server.
 		Handler(h).
 		ListenAndServe()
 	must(err)
