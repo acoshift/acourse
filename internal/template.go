@@ -6,9 +6,9 @@ import (
 
 	"github.com/dustin/go-humanize"
 
-	"github.com/acoshift/acourse/internal/entity"
 	"github.com/acoshift/acourse/internal/pkg/markdown"
 	"github.com/acoshift/acourse/internal/pkg/model/course"
+	"github.com/acoshift/acourse/internal/pkg/model/payment"
 )
 
 // TemplateFunc returns template funcs
@@ -49,16 +49,16 @@ func TemplateFunc(loc *time.Location) template.FuncMap {
 			return course.EBook
 		},
 		"pending": func() int {
-			return entity.Pending
+			return payment.Pending
 		},
 		"accepted": func() int {
-			return entity.Accepted
+			return payment.Accepted
 		},
 		"rejected": func() int {
-			return entity.Rejected
+			return payment.Rejected
 		},
 		"refunded": func() int {
-			return entity.Refunded
+			return payment.Refunded
 		},
 		"html": func(v string) template.HTML {
 			return template.HTML(v)

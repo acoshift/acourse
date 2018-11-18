@@ -190,7 +190,7 @@ func acceptPayment(ctx context.Context, m *admin.AcceptPayment) error {
 			return err
 		}
 
-		err = dispatcher.Dispatch(ctx, &payment.SetStatus{ID: p.Result.ID, Status: entity.Accepted})
+		err = dispatcher.Dispatch(ctx, &payment.SetStatus{ID: p.Result.ID, Status: payment.Accepted})
 		if err != nil {
 			return err
 		}
@@ -275,7 +275,7 @@ func rejectPayment(ctx context.Context, m *admin.RejectPayment) error {
 			return err
 		}
 
-		return dispatcher.Dispatch(ctx, &payment.SetStatus{ID: p.Result.ID, Status: entity.Rejected})
+		return dispatcher.Dispatch(ctx, &payment.SetStatus{ID: p.Result.ID, Status: payment.Rejected})
 	})
 	if err != nil {
 		return err

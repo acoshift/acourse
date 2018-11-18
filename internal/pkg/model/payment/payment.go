@@ -1,5 +1,13 @@
 package payment
 
+// Status values
+const (
+	Pending = iota
+	Accepted
+	Rejected
+	Refunded
+)
+
 // SetStatus sets payment status
 type SetStatus struct {
 	ID     string

@@ -13,6 +13,7 @@ import (
 	"github.com/acoshift/acourse/internal/pkg/dispatcher"
 	"github.com/acoshift/acourse/internal/pkg/model/admin"
 	"github.com/acoshift/acourse/internal/pkg/model/app"
+	"github.com/acoshift/acourse/internal/pkg/model/payment"
 )
 
 func (c *ctrl) rejectPayment(ctx *hime.Context) error {
@@ -104,7 +105,7 @@ func (c *ctrl) postPendingPayment(ctx *hime.Context) error {
 }
 
 func (c *ctrl) pendingPayments(ctx *hime.Context) error {
-	cnt := admin.CountPayments{Status: []int{entity.Pending}}
+	cnt := admin.CountPayments{Status: []int{payment.Pending}}
 	err := dispatcher.Dispatch(ctx, &cnt)
 	if err != nil {
 		return err
@@ -113,7 +114,7 @@ func (c *ctrl) pendingPayments(ctx *hime.Context) error {
 	pg, _ := strconv.ParseInt(ctx.FormValue("page"), 10, 64)
 	pn := paginate.New(pg, 30, cnt.Result)
 
-	list := admin.ListPayments{Status: []int{entity.Pending}, Limit: pn.Limit(), Offset: pn.Offset()}
+	list := admin.ListPayments{Status: []int{payment.Pending}, Limit: pn.Limit(), Offset: pn.Offset()}
 	err = dispatcher.Dispatch(ctx, &list)
 	if err != nil {
 		return err
@@ -127,7 +128,7 @@ func (c *ctrl) pendingPayments(ctx *hime.Context) error {
 }
 
 func (c *ctrl) historyPayments(ctx *hime.Context) error {
-	cnt := admin.CountPayments{Status: []int{entity.Accepted, entity.Rejected}}
+	cnt := admin.CountPayments{Status: []int{payment.Accepted, payment.Rejected}}
 	err := dispatcher.Dispatch(ctx, &cnt)
 	if err != nil {
 		return err
@@ -136,7 +137,7 @@ func (c *ctrl) historyPayments(ctx *hime.Context) error {
 	pg, _ := strconv.ParseInt(ctx.FormValue("page"), 10, 64)
 	pn := paginate.New(pg, 30, cnt.Result)
 
-	list := admin.ListPayments{Status: []int{entity.Accepted, entity.Rejected, entity.Refunded}, Limit: pn.Limit(), Offset: pn.Offset()}
+	list := admin.ListPayments{Status: []int{payment.Accepted, payment.Rejected, payment.Refunded}, Limit: pn.Limit(), Offset: pn.Offset()}
 	err = dispatcher.Dispatch(ctx, &list)
 	if err != nil {
 		return err

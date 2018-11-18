@@ -13,6 +13,7 @@ import (
 	"github.com/acoshift/acourse/internal/context/sqlctx"
 	"github.com/acoshift/acourse/internal/entity"
 	"github.com/acoshift/acourse/internal/pkg/model/course"
+	"github.com/acoshift/acourse/internal/pkg/model/payment"
 	"github.com/acoshift/acourse/internal/pkg/model/user"
 )
 
@@ -62,7 +63,7 @@ func hasPendingPayment(ctx context.Context, userID string, courseID string) (exi
 			from payments
 			where user_id = $1 and course_id = $2 and status = $3
 		)
-	`, userID, courseID, entity.Pending).Scan(&exists)
+	`, userID, courseID, payment.Pending).Scan(&exists)
 	return
 }
 

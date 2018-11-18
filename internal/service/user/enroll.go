@@ -109,7 +109,7 @@ func enroll(ctx context.Context, m *user.Enroll) error {
 			Image:         imageURL,
 			Price:         m.Price,
 			OriginalPrice: originalPrice,
-			Status:        entity.Pending,
+			Status:        payment.Pending,
 		})
 	})
 	if err != nil {

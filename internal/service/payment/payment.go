@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/acoshift/acourse/internal/context/sqlctx"
-	"github.com/acoshift/acourse/internal/entity"
 	"github.com/acoshift/acourse/internal/pkg/dispatcher"
 	"github.com/acoshift/acourse/internal/pkg/model/payment"
 )
@@ -34,5 +33,5 @@ func hasPending(ctx context.Context, m *payment.HasPending) error {
 			from payments
 			where user_id = $1 and course_id = $2 and status = $3
 		)
-	`, m.UserID, m.CourseID, entity.Pending).Scan(&m.Result)
+	`, m.UserID, m.CourseID, payment.Pending).Scan(&m.Result)
 }

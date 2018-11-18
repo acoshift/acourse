@@ -27,14 +27,6 @@ type Payment struct {
 	Course course.Course
 }
 
-// PaymentStatus values
-const (
-	Pending = iota
-	Accepted
-	Rejected
-	Refunded
-)
-
 // Assignment model
 type Assignment struct {
 	ID    string
