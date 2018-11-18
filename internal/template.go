@@ -6,8 +6,8 @@ import (
 
 	"github.com/dustin/go-humanize"
 
-	"github.com/acoshift/acourse/entity"
-	"github.com/acoshift/acourse/view"
+	"github.com/acoshift/acourse/internal/entity"
+	"github.com/acoshift/acourse/internal/view"
 )
 
 // TemplateFunc returns template funcs
