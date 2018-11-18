@@ -5,11 +5,11 @@ import (
 	"database/sql"
 
 	"github.com/acoshift/pgsql"
-	"github.com/moonrhythm/dispatcher"
 
 	"github.com/acoshift/acourse/internal/context/sqlctx"
 	"github.com/acoshift/acourse/internal/entity"
 	"github.com/acoshift/acourse/internal/model/user"
+	"github.com/acoshift/acourse/internal/pkg/dispatcher"
 )
 
 // Init inits user service

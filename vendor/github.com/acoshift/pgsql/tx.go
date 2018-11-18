@@ -3,9 +3,13 @@ package pgsql
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/lib/pq"
 )
+
+// ErrAbortTx rollbacks transaction and return nil error
+var ErrAbortTx = errors.New("pgsql: abort tx")
 
 // BeginTxer type
 type BeginTxer interface {
@@ -22,12 +26,18 @@ const (
 	defaultMaxAttempts = 10
 )
 
-// RunInTx runs fn inside retryable transaction
+// RunInTx runs fn inside retryable transaction.
+//
+// see RunInTxContext for more info.
 func RunInTx(db BeginTxer, opts *TxOptions, fn func(*sql.Tx) error) error {
 	return RunInTxContext(context.Background(), db, opts, fn)
 }
 
-// RunInTxContext runs fn inside retryable transaction with context
+// RunInTxContext runs fn inside retryable transaction with context.
+// It use Serializable isolation level if tx options isolation is setted to sql.LevelDefault.
+//
+// RunInTxContext DO NOT handle panic.
+// But when panic, it will rollback the transaction.
 func RunInTxContext(ctx context.Context, db BeginTxer, opts *TxOptions, fn func(*sql.Tx) error) error {
 	if opts == nil {
 		opts = &TxOptions{}
@@ -58,7 +68,7 @@ func RunInTxContext(ctx context.Context, db BeginTxer, opts *TxOptions, fn func(
 
 	for i := 0; i < opts.MaxAttempts; i++ {
 		err := f()
-		if err == nil {
+		if err == nil || err == ErrAbortTx {
 			return nil
 		}
 		pqErr, ok := err.(*pq.Error)

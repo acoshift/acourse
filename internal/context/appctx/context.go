@@ -5,11 +5,11 @@ import (
 	"net/http"
 
 	"github.com/acoshift/middleware"
-	"github.com/moonrhythm/dispatcher"
 	"github.com/moonrhythm/session"
 
 	"github.com/acoshift/acourse/internal/entity"
 	"github.com/acoshift/acourse/internal/model/user"
+	"github.com/acoshift/acourse/internal/pkg/dispatcher"
 )
 
 type (

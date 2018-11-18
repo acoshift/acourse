@@ -9,9 +9,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/moonrhythm/dispatcher"
-
 	"github.com/acoshift/acourse/internal/model/notify"
+	"github.com/acoshift/acourse/internal/pkg/dispatcher"
 )
 
 // Init registers notify service

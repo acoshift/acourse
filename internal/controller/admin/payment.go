@@ -6,12 +6,12 @@ import (
 	"strconv"
 
 	"github.com/acoshift/paginate"
-	"github.com/moonrhythm/dispatcher"
 	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/internal/entity"
 	"github.com/acoshift/acourse/internal/model/admin"
 	"github.com/acoshift/acourse/internal/model/app"
+	"github.com/acoshift/acourse/internal/pkg/dispatcher"
 	"github.com/acoshift/acourse/internal/view"
 )
 

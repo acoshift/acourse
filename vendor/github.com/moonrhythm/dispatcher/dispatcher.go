@@ -3,15 +3,9 @@ package dispatcher
 import (
 	"context"
 	"errors"
-	"fmt"
-	"log"
 	"reflect"
+	"time"
 )
-
-// New creates new dispatcher
-func New() *Dispatcher {
-	return &Dispatcher{}
-}
 
 // Errors
 var (
@@ -27,13 +21,11 @@ type Handler interface{}
 type Message interface{}
 
 // Dispatcher is the event dispatcher
-type Dispatcher struct {
-	handler map[string]Handler
-
-	Logger *log.Logger
+type Dispatcher interface {
+	Dispatch(context.Context, Message) error
 }
 
-func rtName(r reflect.Type) string {
+func reflectTypeName(r reflect.Type) string {
 	pkg := r.PkgPath()
 	name := r.Name()
 	if pkg == "" {
@@ -42,16 +34,21 @@ func rtName(r reflect.Type) string {
 	return pkg + "." + name
 }
 
-func nameFromHandler(h Handler) string {
-	return rtName(reflect.TypeOf(h).In(1).Elem())
+// MessageNameFromHandler gets message name from handler
+func MessageNameFromHandler(h Handler) string {
+	if !isHandler(h) {
+		return ""
+	}
+	return reflectTypeName(reflect.TypeOf(h).In(1).Elem())
 }
 
-func nameFromMessage(msg Message) string {
+// MessageName gets message name
+func MessageName(msg Message) string {
 	t := reflect.TypeOf(msg)
 	if t.Kind() != reflect.Ptr {
 		return ""
 	}
-	return rtName(t.Elem())
+	return reflectTypeName(t.Elem())
 }
 
 func isHandler(h Handler) bool {
@@ -64,7 +61,7 @@ func isHandler(h Handler) bool {
 	if t.NumIn() != 2 {
 		return false
 	}
-	if t.In(0).Kind() != reflect.Interface && rtName(t.In(0)) != "context.Context" {
+	if t.In(0).Kind() != reflect.Interface && reflectTypeName(t.In(0)) != "context.Context" {
 		return false
 	}
 	if t.In(1).Kind() != reflect.Ptr {
@@ -74,59 +71,45 @@ func isHandler(h Handler) bool {
 	if t.NumOut() != 1 {
 		return false
 	}
-	if rtName(t.Out(0)) != "error" {
+	if reflectTypeName(t.Out(0)) != "error" {
 		return false
 	}
 
 	return true
 }
 
-func (d *Dispatcher) logf(format string, v ...interface{}) {
-	if d.Logger != nil {
-		d.Logger.Printf(format, v...)
-	}
-}
-
-// Register registers a handler, and override old handler if exists
-func (d *Dispatcher) Register(h Handler) {
-	if !isHandler(h) {
-		panic("dispatcher: h is not a handler")
-	}
-
-	if d.handler == nil {
-		d.handler = make(map[string]Handler)
-	}
-
-	k := nameFromHandler(h)
-	d.handler[k] = h
-	d.logf("dispatcher: register %s", k)
-}
-
-// Handler returns handler for given message
-func (d *Dispatcher) Handler(msg Message) Handler {
-	return d.handler[nameFromMessage(msg)]
-}
-
-// Dispatch calls handler for given event message
-func (d *Dispatcher) Dispatch(ctx context.Context, msg Message) error {
-	k := nameFromMessage(msg)
-	if k == "" {
-		return fmt.Errorf("dispatcher: invalid message type '%s'", reflect.TypeOf(msg))
-	}
-
-	d.logf("dispatcher: dispatching %s", k)
-
-	h := d.handler[k]
-	if h == nil {
-		return ErrNotFound
-	}
-
-	err := reflect.ValueOf(h).Call([]reflect.Value{
-		reflect.ValueOf(ctx),
-		reflect.ValueOf(msg),
-	})[0].Interface()
-	if err != nil {
-		return err.(error)
+// Dispatch calls handler for given messages in sequence order,
+// when a handler returns error, dispatch will stop and return that error
+func Dispatch(ctx context.Context, d Dispatcher, msg ...Message) error {
+	for _, m := range msg {
+		err := d.Dispatch(ctx, m)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
+}
+
+// DispatchAfter calls dispatch after given duration
+// or run immediate if duration is negative,
+// then call resultFn with return error
+func DispatchAfter(ctx context.Context, d Dispatcher, duration time.Duration, resultFn func(err error), msg ...Message) {
+	if resultFn == nil {
+		resultFn = func(_ error) {}
+	}
+
+	go func() {
+		select {
+		case <-time.After(duration):
+			resultFn(Dispatch(ctx, d, msg...))
+		case <-ctx.Done():
+			resultFn(ctx.Err())
+		}
+	}()
+}
+
+// DispatchAt calls dispatch at given time,
+// and will run immediate if time already passed
+func DispatchAt(ctx context.Context, d Dispatcher, t time.Time, resultFn func(err error), msg ...Message) {
+	DispatchAfter(ctx, d, time.Until(t), resultFn, msg...)
 }

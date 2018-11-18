@@ -29,12 +29,6 @@ Acoshift's course system [acourse.io](https://acourse.io)
 - make style
 - make dev
 
-## Deployment
-
-[Staging](https://staging.acourse.io) will automated build and deploy when push commits to master using GCB.
-
-Run `make production` to trigger production deployment.
-
 ## Testing
 
 ```sh

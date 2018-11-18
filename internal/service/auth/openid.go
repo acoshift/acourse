@@ -6,8 +6,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/moonrhythm/dispatcher"
-
 	"github.com/acoshift/acourse/internal/context/sqlctx"
 	"github.com/acoshift/acourse/internal/entity"
 	"github.com/acoshift/acourse/internal/model/app"
@@ -16,6 +14,7 @@ import (
 	"github.com/acoshift/acourse/internal/model/firebase"
 	"github.com/acoshift/acourse/internal/model/image"
 	"github.com/acoshift/acourse/internal/model/user"
+	"github.com/acoshift/acourse/internal/pkg/dispatcher"
 )
 
 var allowProvider = map[string]bool{

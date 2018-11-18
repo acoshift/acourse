@@ -8,7 +8,6 @@ import (
 
 	"github.com/acoshift/methodmux"
 	"github.com/acoshift/prefixhandler"
-	"github.com/moonrhythm/dispatcher"
 	"github.com/moonrhythm/hime"
 	"github.com/satori/go.uuid"
 
@@ -18,6 +17,7 @@ import (
 	"github.com/acoshift/acourse/internal/model/app"
 	"github.com/acoshift/acourse/internal/model/course"
 	"github.com/acoshift/acourse/internal/model/user"
+	"github.com/acoshift/acourse/internal/pkg/dispatcher"
 	"github.com/acoshift/acourse/internal/view"
 )
 

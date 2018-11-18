@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/moonrhythm/dispatcher"
 	"gopkg.in/gomail.v2"
 
 	"github.com/acoshift/acourse/internal/model/email"
+	"github.com/acoshift/acourse/internal/pkg/dispatcher"
 )
 
 // SMTPConfig type

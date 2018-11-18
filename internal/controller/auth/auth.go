@@ -3,12 +3,12 @@ package auth
 import (
 	"net/url"
 
-	"github.com/moonrhythm/dispatcher"
 	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/internal/context/appctx"
 	"github.com/acoshift/acourse/internal/model/app"
 	"github.com/acoshift/acourse/internal/model/auth"
+	"github.com/acoshift/acourse/internal/pkg/dispatcher"
 	"github.com/acoshift/acourse/internal/view"
 )
 

@@ -7,7 +7,6 @@ import (
 
 	"github.com/acoshift/pgsql"
 	"github.com/lib/pq"
-	"github.com/moonrhythm/dispatcher"
 
 	"github.com/acoshift/acourse/internal/context/sqlctx"
 	"github.com/acoshift/acourse/internal/entity"
@@ -16,6 +15,7 @@ import (
 	"github.com/acoshift/acourse/internal/model/course"
 	"github.com/acoshift/acourse/internal/model/email"
 	"github.com/acoshift/acourse/internal/model/payment"
+	"github.com/acoshift/acourse/internal/pkg/dispatcher"
 	"github.com/acoshift/acourse/internal/view"
 )
 

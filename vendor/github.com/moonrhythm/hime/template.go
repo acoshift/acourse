@@ -1,17 +1,16 @@
 package hime
 
 import (
-	"bytes"
 	"html/template"
 	"io"
 	"io/ioutil"
 	"path/filepath"
 	"strings"
 
-	"github.com/tdewolff/minify"
-	"github.com/tdewolff/minify/css"
-	"github.com/tdewolff/minify/html"
-	"github.com/tdewolff/minify/js"
+	"github.com/tdewolff/minify/v2"
+	"github.com/tdewolff/minify/v2/css"
+	"github.com/tdewolff/minify/v2/html"
+	"github.com/tdewolff/minify/v2/js"
 	"gopkg.in/yaml.v2"
 )
 
@@ -64,10 +63,9 @@ func (t *tmpl) Execute(w io.Writer, data interface{}) error {
 		return t.Template.Execute(w, data)
 	}
 
-	buf := bytesPool.Get().(*bytes.Buffer)
-	defer bytesPool.Put(buf)
+	buf := getBytes()
+	defer putBytes(buf)
 
-	buf.Reset()
 	err := t.Template.Execute(buf, data)
 	if err != nil {
 		return err
@@ -150,7 +148,7 @@ func (tp *Template) Minify() *Template {
 	tp.minifier = minify.New()
 	tp.minifier.AddFunc("text/html", html.Minify)
 	tp.minifier.AddFunc("text/css", css.Minify)
-	tp.minifier.AddFunc("text/javascript", js.Minify)
+	tp.minifier.AddFunc("application/javascript", js.Minify)
 
 	// sets minify for parsed templates
 	for _, t := range tp.localList {
@@ -312,10 +310,9 @@ func (tp *Template) renderComponent(name string, args ...interface{}) template.H
 		panicf("wrong number of data args for component want 0-1 got %d", len(args))
 	}
 
-	buf := bytesPool.Get().(*bytes.Buffer)
-	defer bytesPool.Put(buf)
+	buf := getBytes()
+	defer putBytes(buf)
 
-	buf.Reset()
 	err := t.Execute(buf, d)
 	if err != nil {
 		panic(err)

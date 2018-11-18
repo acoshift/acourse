@@ -7,13 +7,13 @@ import (
 	"unicode/utf8"
 
 	"github.com/asaskevich/govalidator"
-	"github.com/moonrhythm/dispatcher"
 
 	"github.com/acoshift/acourse/internal/context/sqlctx"
 	"github.com/acoshift/acourse/internal/model/app"
 	"github.com/acoshift/acourse/internal/model/file"
 	"github.com/acoshift/acourse/internal/model/image"
 	"github.com/acoshift/acourse/internal/model/user"
+	"github.com/acoshift/acourse/internal/pkg/dispatcher"
 )
 
 func updateProfile(ctx context.Context, m *user.UpdateProfile) error {

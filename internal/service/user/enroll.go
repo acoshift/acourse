@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/moonrhythm/dispatcher"
-
 	"github.com/acoshift/acourse/internal/context/appctx"
 	"github.com/acoshift/acourse/internal/context/sqlctx"
 	"github.com/acoshift/acourse/internal/entity"
@@ -18,12 +16,13 @@ import (
 	"github.com/acoshift/acourse/internal/model/notify"
 	"github.com/acoshift/acourse/internal/model/payment"
 	"github.com/acoshift/acourse/internal/model/user"
+	"github.com/acoshift/acourse/internal/pkg/dispatcher"
 )
 
 func enroll(ctx context.Context, m *user.Enroll) error {
 	u := appctx.GetUser(ctx)
 
-	getCourse := course.Get{ID: m.ID}
+	getCourse := course.Get{ID: m.CourseID}
 	err := dispatcher.Dispatch(ctx, &getCourse)
 	if err == entity.ErrNotFound {
 		return entity.ErrNotFound
@@ -40,7 +39,7 @@ func enroll(ctx context.Context, m *user.Enroll) error {
 
 	// is enrolled
 	{
-		q := user.IsEnroll{ID: u.ID, CourseID: m.ID}
+		q := user.IsEnroll{ID: u.ID, CourseID: m.CourseID}
 		err = dispatcher.Dispatch(ctx, &q)
 		if err != nil {
 			return err
@@ -52,7 +51,7 @@ func enroll(ctx context.Context, m *user.Enroll) error {
 
 	// has pending enroll
 	{
-		q := payment.HasPending{UserID: u.ID, CourseID: m.ID}
+		q := payment.HasPending{UserID: u.ID, CourseID: m.CourseID}
 		err := dispatcher.Dispatch(ctx, &q)
 		if err != nil {
 			return err

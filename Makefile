@@ -3,7 +3,10 @@ default:
 	# `make style` builds style
 
 dev:
-	goreload --all -x vendor
+	goreload \
+		--all \
+		-x vendor \
+		-x node_modules
 
 .PHONY: style
 style:
@@ -14,9 +17,3 @@ clean:
 	rm -f acourse
 	rm -f static.yaml
 	rm -rf .build
-
-build:
-	env GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o acourse -ldflags '-w -s' main.go
-
-production:
-	git push origin HEAD:production

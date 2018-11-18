@@ -3,13 +3,13 @@ package editor
 import (
 	"net/http"
 
-	"github.com/moonrhythm/dispatcher"
 	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/internal/context/appctx"
 	"github.com/acoshift/acourse/internal/controller/share"
 	"github.com/acoshift/acourse/internal/entity"
 	"github.com/acoshift/acourse/internal/model/course"
+	"github.com/acoshift/acourse/internal/pkg/dispatcher"
 )
 
 func (c *ctrl) onlyInstructor(h http.Handler) http.Handler {

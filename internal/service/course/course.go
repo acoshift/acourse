@@ -7,7 +7,6 @@ import (
 	"io"
 
 	"github.com/acoshift/pgsql"
-	"github.com/moonrhythm/dispatcher"
 
 	"github.com/acoshift/acourse/internal/context/sqlctx"
 	"github.com/acoshift/acourse/internal/entity"
@@ -15,6 +14,7 @@ import (
 	"github.com/acoshift/acourse/internal/model/course"
 	"github.com/acoshift/acourse/internal/model/file"
 	"github.com/acoshift/acourse/internal/model/image"
+	"github.com/acoshift/acourse/internal/pkg/dispatcher"
 )
 
 // Init inits course service

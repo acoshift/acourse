@@ -4,9 +4,9 @@ import (
 	"context"
 
 	admin "github.com/acoshift/go-firebase-admin"
-	"github.com/moonrhythm/dispatcher"
 
 	"github.com/acoshift/acourse/internal/model/firebase"
+	"github.com/acoshift/acourse/internal/pkg/dispatcher"
 )
 
 // Init inits firebase

@@ -6,9 +6,9 @@ import (
 	"image/jpeg"
 
 	"github.com/disintegration/imaging"
-	"github.com/moonrhythm/dispatcher"
 
 	model "github.com/acoshift/acourse/internal/model/image"
+	"github.com/acoshift/acourse/internal/pkg/dispatcher"
 )
 
 // Init inits image service
