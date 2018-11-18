@@ -8,10 +8,10 @@ import (
 	"github.com/acoshift/pgsql"
 	"github.com/lib/pq"
 
-	"github.com/acoshift/acourse/internal/entity"
 	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
 	"github.com/acoshift/acourse/internal/pkg/dispatcher"
 	"github.com/acoshift/acourse/internal/pkg/markdown"
+	"github.com/acoshift/acourse/internal/pkg/model"
 	"github.com/acoshift/acourse/internal/pkg/model/admin"
 	"github.com/acoshift/acourse/internal/pkg/model/app"
 	"github.com/acoshift/acourse/internal/pkg/model/course"
@@ -129,7 +129,7 @@ func getPayment(ctx context.Context, m *admin.GetPayment) error {
 		&x.Course.ID, &x.Course.Title, &x.Course.Image, pgsql.NullString(&x.Course.URL),
 	)
 	if err == sql.ErrNoRows {
-		return entity.ErrNotFound
+		return model.ErrNotFound
 	}
 	return err
 }
@@ -183,7 +183,7 @@ func acceptPayment(ctx context.Context, m *admin.AcceptPayment) error {
 	err := sqlctx.RunInTx(ctx, func(ctx context.Context) error {
 		p := admin.GetPayment{PaymentID: m.ID}
 		err := dispatcher.Dispatch(ctx, &p)
-		if err == entity.ErrNotFound {
+		if err == model.ErrNotFound {
 			return app.NewUIError("payment not found")
 		}
 		if err != nil {
@@ -268,7 +268,7 @@ func rejectPayment(ctx context.Context, m *admin.RejectPayment) error {
 	err := sqlctx.RunInTx(ctx, func(ctx context.Context) error {
 		p := admin.GetPayment{PaymentID: m.ID}
 		err := dispatcher.Dispatch(ctx, &p)
-		if err == entity.ErrNotFound {
+		if err == model.ErrNotFound {
 			return app.NewUIError("payment not found")
 		}
 		if err != nil {

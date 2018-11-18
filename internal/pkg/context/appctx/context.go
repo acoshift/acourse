@@ -7,8 +7,8 @@ import (
 	"github.com/acoshift/middleware"
 	"github.com/moonrhythm/session"
 
-	"github.com/acoshift/acourse/internal/entity"
 	"github.com/acoshift/acourse/internal/pkg/dispatcher"
+	"github.com/acoshift/acourse/internal/pkg/model"
 	"github.com/acoshift/acourse/internal/pkg/model/user"
 )
 
@@ -56,7 +56,7 @@ func Middleware() middleware.Middleware {
 			if userID != "" {
 				q := user.Get{ID: userID}
 				err := dispatcher.Dispatch(ctx, &q)
-				if err == entity.ErrNotFound {
+				if err == model.ErrNotFound {
 					q.Result = &user.User{
 						ID:       userID,
 						Username: userID,

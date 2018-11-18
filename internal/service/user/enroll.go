@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/acoshift/acourse/internal/entity"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
 	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
 	"github.com/acoshift/acourse/internal/pkg/dispatcher"
+	"github.com/acoshift/acourse/internal/pkg/model"
 	"github.com/acoshift/acourse/internal/pkg/model/app"
 	"github.com/acoshift/acourse/internal/pkg/model/course"
 	"github.com/acoshift/acourse/internal/pkg/model/file"
@@ -24,8 +24,8 @@ func enroll(ctx context.Context, m *user.Enroll) error {
 
 	getCourse := course.Get{ID: m.CourseID}
 	err := dispatcher.Dispatch(ctx, &getCourse)
-	if err == entity.ErrNotFound {
-		return entity.ErrNotFound
+	if err == model.ErrNotFound {
+		return model.ErrNotFound
 	}
 	if err != nil {
 		return err

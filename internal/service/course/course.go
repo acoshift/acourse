@@ -8,9 +8,9 @@ import (
 
 	"github.com/acoshift/pgsql"
 
-	"github.com/acoshift/acourse/internal/entity"
 	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
 	"github.com/acoshift/acourse/internal/pkg/dispatcher"
+	"github.com/acoshift/acourse/internal/pkg/model"
 	"github.com/acoshift/acourse/internal/pkg/model/app"
 	"github.com/acoshift/acourse/internal/pkg/model/course"
 	"github.com/acoshift/acourse/internal/pkg/model/file"
@@ -65,7 +65,7 @@ func getURL(ctx context.Context, m *course.GetURL) error {
 func getUserID(ctx context.Context, m *course.GetUserID) error {
 	err := sqlctx.QueryRow(ctx, `select user_id from courses where id = $1`, m.ID).Scan(&m.Result)
 	if err == sql.ErrNoRows {
-		return entity.ErrNotFound
+		return model.ErrNotFound
 	}
 	return err
 }
@@ -86,7 +86,7 @@ func get(ctx context.Context, m *course.Get) error {
 		&x.Option.Public, &x.Option.Enroll, &x.Option.Attend, &x.Option.Assignment, &x.Option.Discount,
 	)
 	if err == sql.ErrNoRows {
-		return entity.ErrNotFound
+		return model.ErrNotFound
 	}
 	if err != nil {
 		return err
@@ -147,7 +147,7 @@ func getContent(ctx context.Context, m *course.GetContent) error {
 		&x.ID, &x.CourseID, &x.Title, &x.Desc, &x.VideoID, &x.VideoType, &x.DownloadURL,
 	)
 	if err == sql.ErrNoRows {
-		return entity.ErrNotFound
+		return model.ErrNotFound
 	}
 	if err != nil {
 		return err

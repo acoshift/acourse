@@ -7,9 +7,9 @@ import (
 	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/internal/app/view"
-	"github.com/acoshift/acourse/internal/entity"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
 	"github.com/acoshift/acourse/internal/pkg/dispatcher"
+	"github.com/acoshift/acourse/internal/pkg/model"
 	"github.com/acoshift/acourse/internal/pkg/model/course"
 )
 
@@ -64,7 +64,7 @@ func isCourseOwner(h http.Handler) http.Handler {
 
 		ownerID := course.GetUserID{ID: id}
 		err := dispatcher.Dispatch(ctx, &ownerID)
-		if err == entity.ErrNotFound {
+		if err == model.ErrNotFound {
 			return view.NotFound(ctx)
 		}
 		if err != nil {

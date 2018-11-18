@@ -6,9 +6,9 @@ import (
 
 	"github.com/acoshift/pgsql"
 
-	"github.com/acoshift/acourse/internal/entity"
 	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
 	"github.com/acoshift/acourse/internal/pkg/dispatcher"
+	"github.com/acoshift/acourse/internal/pkg/model"
 	"github.com/acoshift/acourse/internal/pkg/model/user"
 )
 
@@ -67,7 +67,7 @@ func get(ctx context.Context, m *user.Get) error {
 		&x.Role.Admin, &x.Role.Instructor,
 	)
 	if err == sql.ErrNoRows {
-		return entity.ErrNotFound
+		return model.ErrNotFound
 	}
 	if err != nil {
 		return err

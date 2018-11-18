@@ -12,9 +12,9 @@ import (
 	"github.com/satori/go.uuid"
 
 	"github.com/acoshift/acourse/internal/app/view"
-	"github.com/acoshift/acourse/internal/entity"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
 	"github.com/acoshift/acourse/internal/pkg/dispatcher"
+	"github.com/acoshift/acourse/internal/pkg/model"
 	"github.com/acoshift/acourse/internal/pkg/model/app"
 	"github.com/acoshift/acourse/internal/pkg/model/course"
 	"github.com/acoshift/acourse/internal/pkg/model/user"
@@ -53,7 +53,7 @@ func newCourseHandler(appCtrl *ctrl) http.Handler {
 		if err != nil {
 			// link can not parse to uuid get course id from url
 			courseID, err = getCourseIDByURL(ctx, link)
-			if err == entity.ErrNotFound {
+			if err == model.ErrNotFound {
 				return view.NotFound(ctx)
 			}
 			if err != nil {
@@ -62,7 +62,7 @@ func newCourseHandler(appCtrl *ctrl) http.Handler {
 		}
 
 		x, err := getCourse(ctx, courseID)
-		if err == entity.ErrNotFound {
+		if err == model.ErrNotFound {
 			return view.NotFound(ctx)
 		}
 		if err != nil {

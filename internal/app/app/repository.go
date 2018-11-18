@@ -9,7 +9,6 @@ import (
 
 	"github.com/acoshift/pgsql"
 
-	"github.com/acoshift/acourse/internal/entity"
 	"github.com/acoshift/acourse/internal/pkg/context/redisctx"
 	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
 	"github.com/acoshift/acourse/internal/pkg/model"
@@ -37,7 +36,7 @@ func getCourse(ctx context.Context, courseID string) (*Course, error) {
 		&x.Option.Public, &x.Option.Enroll, &x.Option.Attend, &x.Option.Assignment, &x.Option.Discount,
 	)
 	if err == sql.ErrNoRows {
-		return nil, entity.ErrNotFound
+		return nil, model.ErrNotFound
 	}
 	if err != nil {
 		return nil, err
@@ -52,7 +51,7 @@ func getCourseIDByURL(ctx context.Context, url string) (courseID string, err err
 		where url = $1
 	`, url).Scan(&courseID)
 	if err == sql.ErrNoRows {
-		err = entity.ErrNotFound
+		err = model.ErrNotFound
 	}
 	return
 }
@@ -119,7 +118,7 @@ func getUser(ctx context.Context, userID string) (*user.User, error) {
 		&x.Role.Admin, &x.Role.Instructor,
 	)
 	if err == sql.ErrNoRows {
-		return nil, entity.ErrNotFound
+		return nil, model.ErrNotFound
 	}
 	if err != nil {
 		return nil, err

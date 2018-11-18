@@ -9,8 +9,8 @@ import (
 	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/internal/app/view"
-	"github.com/acoshift/acourse/internal/entity"
 	"github.com/acoshift/acourse/internal/pkg/dispatcher"
+	"github.com/acoshift/acourse/internal/pkg/model"
 	"github.com/acoshift/acourse/internal/pkg/model/admin"
 	"github.com/acoshift/acourse/internal/pkg/model/app"
 	"github.com/acoshift/acourse/internal/pkg/model/payment"
@@ -21,7 +21,7 @@ func (c *ctrl) getRejectPayment(ctx *hime.Context) error {
 
 	q := admin.GetPayment{PaymentID: id}
 	err := dispatcher.Dispatch(ctx, &q)
-	if err == entity.ErrNotFound {
+	if err == model.ErrNotFound {
 		return ctx.RedirectTo("admin.payments.pending")
 	}
 	if err != nil {
