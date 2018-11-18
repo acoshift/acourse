@@ -16,7 +16,7 @@ var allowProvider = map[string]bool{
 	"github.com": true,
 }
 
-func (c *ctrl) openID(ctx *hime.Context) error {
+func getOpenID(ctx *hime.Context) error {
 	p := ctx.FormValue("p")
 
 	q := auth.GenerateOpenIDURI{Provider: p}
@@ -33,7 +33,7 @@ func (c *ctrl) openID(ctx *hime.Context) error {
 	return ctx.Redirect(q.Result.RedirectURI)
 }
 
-func (c *ctrl) openIDCallback(ctx *hime.Context) error {
+func getOpenIDCallback(ctx *hime.Context) error {
 	sessID := appctx.GetOpenIDState(ctx)
 	appctx.DelOpenIDState(ctx)
 

@@ -12,11 +12,11 @@ import (
 	"github.com/acoshift/acourse/internal/pkg/model/auth"
 )
 
-func (c *ctrl) signIn(ctx *hime.Context) error {
+func getSignIn(ctx *hime.Context) error {
 	return ctx.View("auth.signin", view.Page(ctx))
 }
 
-func (c *ctrl) postSignIn(ctx *hime.Context) error {
+func postSignIn(ctx *hime.Context) error {
 	f := appctx.GetFlash(ctx)
 
 	email := ctx.PostFormValue("email")

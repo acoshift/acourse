@@ -8,39 +8,30 @@ import (
 	"github.com/moonrhythm/hime"
 )
 
-// Config is the app config
-type Config struct {
-	BaseURL string
-}
+// Mount mounts app handlers
+func Mount(m *http.ServeMux, baseURL string) {
+	c := &ctrl{baseURL}
 
-// New creates new app
-func New(cfg Config) http.Handler {
-	c := &ctrl{cfg}
-
-	mux := http.NewServeMux()
-
-	mux.Handle("/", methodmux.Get(
+	m.Handle("/", methodmux.Get(
 		hime.Handler(c.index),
 	))
-	mux.Handle("/signout", methodmux.Post(
+	m.Handle("/signout", methodmux.Post(
 		hime.Handler(c.signOut),
 	))
 
 	// profile
-	mux.Handle("/profile", mustSignedIn(methodmux.Get(
+	m.Handle("/profile", mustSignedIn(methodmux.Get(
 		hime.Handler(c.profile),
 	)))
-	mux.Handle("/profile/edit", mustSignedIn(methodmux.GetPost(
+	m.Handle("/profile/edit", mustSignedIn(methodmux.GetPost(
 		hime.Handler(c.profileEdit),
 		hime.Handler(c.postProfileEdit),
 	)))
 
 	// course
-	mux.Handle("/course/", prefixhandler.New("/course", courseIDKey{}, newCourseHandler(c)))
-
-	return mux
+	m.Handle("/course/", prefixhandler.New("/course", courseIDKey{}, newCourseHandler(c)))
 }
 
 type ctrl struct {
-	Config
+	BaseURL string
 }

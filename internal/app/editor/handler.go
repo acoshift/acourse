@@ -7,37 +7,73 @@ import (
 	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/internal/app/view"
+	"github.com/acoshift/acourse/internal/entity"
+	"github.com/acoshift/acourse/internal/pkg/context/appctx"
+	"github.com/acoshift/acourse/internal/pkg/dispatcher"
+	"github.com/acoshift/acourse/internal/pkg/model/course"
 )
 
-// New creates new editor handler
-func New() http.Handler {
-	c := &ctrl{}
-
-	mux := http.NewServeMux()
-	mux.Handle("/", hime.Handler(view.NotFound))
-	mux.Handle("/course/create", c.onlyInstructor(methodmux.GetPost(
-		hime.Handler(c.courseCreate),
-		hime.Handler(c.postCourseCreate),
+// Mount mounts editor handlers
+func Mount(m *http.ServeMux) {
+	m.Handle("/editor/course/create", onlyInstructor(methodmux.GetPost(
+		hime.Handler(getCourseCreate),
+		hime.Handler(postCourseCreate),
 	)))
-	mux.Handle("/course/edit", c.isCourseOwner(methodmux.GetPost(
-		hime.Handler(c.courseEdit),
-		hime.Handler(c.postCourseEdit),
+	m.Handle("/editor/course/edit", isCourseOwner(methodmux.GetPost(
+		hime.Handler(getCourseEdit),
+		hime.Handler(postCourseEdit),
 	)))
-	mux.Handle("/content", c.isCourseOwner(methodmux.GetPost(
-		hime.Handler(c.contentList),
-		hime.Handler(c.postContentList),
+	m.Handle("/editor/content", isCourseOwner(methodmux.GetPost(
+		hime.Handler(getContentList),
+		hime.Handler(postContentList),
 	)))
-	mux.Handle("/content/create", c.isCourseOwner(methodmux.GetPost(
-		hime.Handler(c.contentCreate),
-		hime.Handler(c.postContentCreate),
+	m.Handle("/editor/content/create", isCourseOwner(methodmux.GetPost(
+		hime.Handler(getContentCreate),
+		hime.Handler(postContentCreate),
 	)))
 	// TODO: add middleware
-	mux.Handle("/content/edit", methodmux.GetPost(
-		hime.Handler(c.contentEdit),
-		hime.Handler(c.postContentEdit),
+	m.Handle("/editor/content/edit", methodmux.GetPost(
+		hime.Handler(getContentEdit),
+		hime.Handler(postContentEdit),
 	))
-
-	return mux
 }
 
-type ctrl struct{}
+func onlyInstructor(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		u := appctx.GetUser(r.Context())
+		if u == nil {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+		if !u.Role.Instructor {
+			http.Error(w, "Forbidden", http.StatusForbidden)
+			return
+		}
+		h.ServeHTTP(w, r)
+	})
+}
+
+func isCourseOwner(h http.Handler) http.Handler {
+	return hime.Handler(func(ctx *hime.Context) error {
+		u := appctx.GetUser(ctx)
+		if u == nil {
+			return ctx.RedirectTo("auth.signin")
+		}
+
+		id := ctx.FormValue("id")
+
+		ownerID := course.GetUserID{ID: id}
+		err := dispatcher.Dispatch(ctx, &ownerID)
+		if err == entity.ErrNotFound {
+			return view.NotFound(ctx)
+		}
+		if err != nil {
+			return err
+		}
+
+		if ownerID.Result != u.ID {
+			return ctx.Redirect("/")
+		}
+		return ctx.Handle(h)
+	})
+}

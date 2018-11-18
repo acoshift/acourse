@@ -12,11 +12,11 @@ import (
 	"github.com/acoshift/acourse/internal/pkg/model/course"
 )
 
-func (c *ctrl) courseCreate(ctx *hime.Context) error {
+func getCourseCreate(ctx *hime.Context) error {
 	return ctx.View("editor.course-create", view.Page(ctx))
 }
 
-func (c *ctrl) postCourseCreate(ctx *hime.Context) error {
+func postCourseCreate(ctx *hime.Context) error {
 	f := appctx.GetFlash(ctx)
 
 	var (
@@ -62,7 +62,7 @@ func (c *ctrl) postCourseCreate(ctx *hime.Context) error {
 	return ctx.RedirectTo("app.course", link.Result)
 }
 
-func (c *ctrl) courseEdit(ctx *hime.Context) error {
+func getCourseEdit(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 	getCourse := course.Get{ID: id}
 	err := dispatcher.Dispatch(ctx, &getCourse)
@@ -76,7 +76,7 @@ func (c *ctrl) courseEdit(ctx *hime.Context) error {
 	return ctx.View("editor.course-edit", p)
 }
 
-func (c *ctrl) postCourseEdit(ctx *hime.Context) error {
+func postCourseEdit(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 
 	f := appctx.GetFlash(ctx)

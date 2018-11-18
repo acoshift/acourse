@@ -6,36 +6,41 @@ import (
 	"github.com/acoshift/methodmux"
 	"github.com/moonrhythm/hime"
 
-	"github.com/acoshift/acourse/internal/app/view"
+	"github.com/acoshift/acourse/internal/pkg/context/appctx"
 )
 
-// New creates new auth handler
-func New() http.Handler {
-	c := &ctrl{}
-
+// Mount mounts auth handlers
+func Mount(m *http.ServeMux) {
 	mux := http.NewServeMux()
-	mux.Handle("/", hime.Handler(view.NotFound))
-
-	mux.Handle("/signin", methodmux.GetPost(
-		hime.Handler(c.signIn),
-		hime.Handler(c.postSignIn),
+	mux.Handle("/auth/signin", methodmux.GetPost(
+		hime.Handler(getSignIn),
+		hime.Handler(postSignIn),
 	))
-	mux.Handle("/reset/password", methodmux.GetPost(
-		hime.Handler(c.resetPassword),
-		hime.Handler(c.postResetPassword),
+	mux.Handle("/auth/reset/password", methodmux.GetPost(
+		hime.Handler(getResetPassword),
+		hime.Handler(postResetPassword),
 	))
-	mux.Handle("/openid", methodmux.Get(
-		hime.Handler(c.openID),
+	mux.Handle("/auth/openid", methodmux.Get(
+		hime.Handler(getOpenID),
 	))
-	mux.Handle("/openid/callback", methodmux.Get(
-		hime.Handler(c.openIDCallback),
+	mux.Handle("/auth/openid/callback", methodmux.Get(
+		hime.Handler(getOpenIDCallback),
 	))
-	mux.Handle("/signup", methodmux.GetPost(
-		hime.Handler(c.signUp),
-		hime.Handler(c.postSignUp),
+	mux.Handle("/auth/signup", methodmux.GetPost(
+		hime.Handler(getSignUp),
+		hime.Handler(postSignUp),
 	))
 
-	return mux
+	m.Handle("/auth/", notSignedIn(mux))
 }
 
-type ctrl struct{}
+func notSignedIn(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		id := appctx.GetUserID(r.Context())
+		if len(id) > 0 {
+			http.Redirect(w, r, "/", http.StatusFound)
+			return
+		}
+		h.ServeHTTP(w, r)
+	})
+}

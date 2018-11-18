@@ -16,7 +16,7 @@ import (
 	"github.com/acoshift/acourse/internal/pkg/model/payment"
 )
 
-func (c *ctrl) rejectPayment(ctx *hime.Context) error {
+func (c *ctrl) getRejectPayment(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 
 	q := admin.GetPayment{PaymentID: id}
@@ -104,7 +104,7 @@ func (c *ctrl) postPendingPayment(ctx *hime.Context) error {
 	return ctx.RedirectTo("admin.payments.pending")
 }
 
-func (c *ctrl) pendingPayments(ctx *hime.Context) error {
+func (c *ctrl) getPendingPayments(ctx *hime.Context) error {
 	cnt := admin.CountPayments{Status: []int{payment.Pending}}
 	err := dispatcher.Dispatch(ctx, &cnt)
 	if err != nil {
@@ -127,7 +127,7 @@ func (c *ctrl) pendingPayments(ctx *hime.Context) error {
 	return ctx.View("admin.payments", p)
 }
 
-func (c *ctrl) historyPayments(ctx *hime.Context) error {
+func (c *ctrl) getHistoryPayments(ctx *hime.Context) error {
 	cnt := admin.CountPayments{Status: []int{payment.Accepted, payment.Rejected}}
 	err := dispatcher.Dispatch(ctx, &cnt)
 	if err != nil {

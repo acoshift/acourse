@@ -7,42 +7,50 @@ import (
 	"github.com/acoshift/methodmux"
 	"github.com/moonrhythm/hime"
 
-	"github.com/acoshift/acourse/internal/app/view"
+	"github.com/acoshift/acourse/internal/pkg/context/appctx"
 )
 
-// Config is admin config
-type Config struct {
-	Location *time.Location
-}
-
-// New creates admin handler
-func New(cfg Config) http.Handler {
-	c := &ctrl{cfg}
+// Mount mounts admin handlers
+func Mount(m *http.ServeMux, loc *time.Location) {
+	c := &ctrl{loc}
 
 	mux := http.NewServeMux()
-	mux.Handle("/", hime.Handler(view.NotFound))
-
-	mux.Handle("/users", methodmux.Get(
-		hime.Handler(c.users),
+	mux.Handle("/admin/users", methodmux.Get(
+		hime.Handler(c.getUsers),
 	))
-	mux.Handle("/courses", methodmux.Get(
-		hime.Handler(c.courses),
+	mux.Handle("/admin/courses", methodmux.Get(
+		hime.Handler(c.getCourses),
 	))
-	mux.Handle("/payments/pending", methodmux.GetPost(
-		hime.Handler(c.pendingPayments),
+	mux.Handle("/admin/payments/pending", methodmux.GetPost(
+		hime.Handler(c.getPendingPayments),
 		hime.Handler(c.postPendingPayment),
 	))
-	mux.Handle("/payments/history", methodmux.Get(
-		hime.Handler(c.historyPayments),
+	mux.Handle("/admin/payments/history", methodmux.Get(
+		hime.Handler(c.getHistoryPayments),
 	))
-	mux.Handle("/payments/reject", methodmux.GetPost(
-		hime.Handler(c.rejectPayment),
+	mux.Handle("/admin/payments/reject", methodmux.GetPost(
+		hime.Handler(c.getRejectPayment),
 		hime.Handler(c.postRejectPayment),
 	))
 
-	return mux
+	m.Handle("/admin/", onlyAdmin(mux))
 }
 
 type ctrl struct {
-	Config
+	Location *time.Location
+}
+
+func onlyAdmin(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		u := appctx.GetUser(r.Context())
+		if u == nil {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+		if !u.Role.Admin {
+			http.Error(w, "Forbidden", http.StatusForbidden)
+			return
+		}
+		h.ServeHTTP(w, r)
+	})
 }

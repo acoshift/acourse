@@ -13,7 +13,7 @@ import (
 	"github.com/acoshift/acourse/internal/pkg/model/course"
 )
 
-func (c *ctrl) contentList(ctx *hime.Context) error {
+func getContentList(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 
 	getCourse := course.Get{ID: id}
@@ -40,7 +40,7 @@ func (c *ctrl) contentList(ctx *hime.Context) error {
 	return ctx.View("editor.content", p)
 }
 
-func (c *ctrl) postContentList(ctx *hime.Context) error {
+func postContentList(ctx *hime.Context) error {
 	if ctx.FormValue("action") == "delete" {
 		contentID := ctx.FormValue("contentId")
 
@@ -56,7 +56,7 @@ func (c *ctrl) postContentList(ctx *hime.Context) error {
 	return ctx.RedirectToGet()
 }
 
-func (c *ctrl) contentCreate(ctx *hime.Context) error {
+func getContentCreate(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 
 	getCourse := course.Get{ID: id}
@@ -71,7 +71,7 @@ func (c *ctrl) contentCreate(ctx *hime.Context) error {
 	return ctx.View("editor.content-create", p)
 }
 
-func (c *ctrl) postContentCreate(ctx *hime.Context) error {
+func postContentCreate(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 
 	var (
@@ -94,7 +94,7 @@ func (c *ctrl) postContentCreate(ctx *hime.Context) error {
 	return ctx.RedirectTo("editor.content", ctx.Param("id", ctx.FormValue("id")))
 }
 
-func (c *ctrl) contentEdit(ctx *hime.Context) error {
+func getContentEdit(ctx *hime.Context) error {
 	// course content id
 	id := ctx.FormValue("id")
 
@@ -127,7 +127,7 @@ func (c *ctrl) contentEdit(ctx *hime.Context) error {
 	return ctx.View("editor.content-edit", p)
 }
 
-func (c *ctrl) postContentEdit(ctx *hime.Context) error {
+func postContentEdit(ctx *hime.Context) error {
 	// course content id
 	id := ctx.FormValue("id")
 
