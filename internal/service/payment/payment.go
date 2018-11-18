@@ -5,8 +5,8 @@ import (
 
 	"github.com/acoshift/acourse/internal/context/sqlctx"
 	"github.com/acoshift/acourse/internal/entity"
-	"github.com/acoshift/acourse/internal/model/payment"
 	"github.com/acoshift/acourse/internal/pkg/dispatcher"
+	"github.com/acoshift/acourse/internal/pkg/model/payment"
 )
 
 // Init inits payment

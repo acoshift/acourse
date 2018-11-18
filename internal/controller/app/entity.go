@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/acoshift/acourse/internal/entity"
-	"github.com/acoshift/acourse/internal/model/course"
+	"github.com/acoshift/acourse/internal/pkg/model/course"
 )
 
 // PublicCourse type

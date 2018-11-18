@@ -10,11 +10,11 @@ import (
 
 	"github.com/acoshift/acourse/internal/context/sqlctx"
 	"github.com/acoshift/acourse/internal/entity"
-	"github.com/acoshift/acourse/internal/model/app"
-	"github.com/acoshift/acourse/internal/model/course"
-	"github.com/acoshift/acourse/internal/model/file"
-	"github.com/acoshift/acourse/internal/model/image"
 	"github.com/acoshift/acourse/internal/pkg/dispatcher"
+	"github.com/acoshift/acourse/internal/pkg/model/app"
+	"github.com/acoshift/acourse/internal/pkg/model/course"
+	"github.com/acoshift/acourse/internal/pkg/model/file"
+	"github.com/acoshift/acourse/internal/pkg/model/image"
 )
 
 // Init inits course service

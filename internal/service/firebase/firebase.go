@@ -5,8 +5,8 @@ import (
 
 	admin "github.com/acoshift/go-firebase-admin"
 
-	"github.com/acoshift/acourse/internal/model/firebase"
 	"github.com/acoshift/acourse/internal/pkg/dispatcher"
+	"github.com/acoshift/acourse/internal/pkg/model/firebase"
 )
 
 // Init inits firebase

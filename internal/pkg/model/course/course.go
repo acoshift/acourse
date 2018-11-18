@@ -6,7 +6,7 @@ import (
 
 	"github.com/lib/pq"
 
-	"github.com/acoshift/acourse/internal/model/user"
+	"github.com/acoshift/acourse/internal/pkg/model/user"
 )
 
 // Course model

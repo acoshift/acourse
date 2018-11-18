@@ -7,8 +7,8 @@ import (
 
 	"github.com/disintegration/imaging"
 
-	model "github.com/acoshift/acourse/internal/model/image"
 	"github.com/acoshift/acourse/internal/pkg/dispatcher"
+	model "github.com/acoshift/acourse/internal/pkg/model/image"
 )
 
 // Init inits image service

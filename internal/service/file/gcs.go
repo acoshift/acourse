@@ -7,8 +7,8 @@ import (
 
 	"cloud.google.com/go/storage"
 
-	"github.com/acoshift/acourse/internal/model/file"
 	"github.com/acoshift/acourse/internal/pkg/dispatcher"
+	"github.com/acoshift/acourse/internal/pkg/model/file"
 )
 
 // InitGCS registers file dispatcher with gcs strategy

@@ -3,7 +3,7 @@ package admin
 import (
 	"time"
 
-	"github.com/acoshift/acourse/internal/model/course"
+	"github.com/acoshift/acourse/internal/pkg/model/course"
 )
 
 // UserItem type

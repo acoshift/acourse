@@ -11,11 +11,11 @@ import (
 	admin "github.com/acoshift/go-firebase-admin"
 
 	"github.com/acoshift/acourse/internal/entity"
-	"github.com/acoshift/acourse/internal/model/app"
-	"github.com/acoshift/acourse/internal/model/auth"
-	"github.com/acoshift/acourse/internal/model/firebase"
-	"github.com/acoshift/acourse/internal/model/user"
 	"github.com/acoshift/acourse/internal/pkg/dispatcher"
+	"github.com/acoshift/acourse/internal/pkg/model/app"
+	"github.com/acoshift/acourse/internal/pkg/model/auth"
+	"github.com/acoshift/acourse/internal/pkg/model/firebase"
+	"github.com/acoshift/acourse/internal/pkg/model/user"
 
 	. "github.com/acoshift/acourse/internal/service/auth"
 )

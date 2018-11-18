@@ -7,9 +7,9 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/acoshift/acourse/internal/model/app"
+	"github.com/acoshift/acourse/internal/pkg/model/app"
 
-	. "github.com/acoshift/acourse/internal/model/image"
+	. "github.com/acoshift/acourse/internal/pkg/model/image"
 )
 
 var _ = Describe("Validate", func() {

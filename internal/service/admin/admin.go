@@ -10,13 +10,13 @@ import (
 
 	"github.com/acoshift/acourse/internal/context/sqlctx"
 	"github.com/acoshift/acourse/internal/entity"
-	"github.com/acoshift/acourse/internal/model/admin"
-	"github.com/acoshift/acourse/internal/model/app"
-	"github.com/acoshift/acourse/internal/model/course"
-	"github.com/acoshift/acourse/internal/model/email"
-	"github.com/acoshift/acourse/internal/model/payment"
 	"github.com/acoshift/acourse/internal/pkg/dispatcher"
 	"github.com/acoshift/acourse/internal/pkg/markdown"
+	"github.com/acoshift/acourse/internal/pkg/model/admin"
+	"github.com/acoshift/acourse/internal/pkg/model/app"
+	"github.com/acoshift/acourse/internal/pkg/model/course"
+	"github.com/acoshift/acourse/internal/pkg/model/email"
+	"github.com/acoshift/acourse/internal/pkg/model/payment"
 )
 
 // Init inits admin service

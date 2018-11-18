@@ -6,7 +6,7 @@ import (
 
 	"github.com/acoshift/header"
 
-	"github.com/acoshift/acourse/internal/model/app"
+	"github.com/acoshift/acourse/internal/pkg/model/app"
 )
 
 var allowImageType = map[string]bool{

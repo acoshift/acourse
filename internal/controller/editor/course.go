@@ -6,9 +6,9 @@ import (
 	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/internal/context/appctx"
-	"github.com/acoshift/acourse/internal/model/app"
-	"github.com/acoshift/acourse/internal/model/course"
 	"github.com/acoshift/acourse/internal/pkg/dispatcher"
+	"github.com/acoshift/acourse/internal/pkg/model/app"
+	"github.com/acoshift/acourse/internal/pkg/model/course"
 	"github.com/acoshift/acourse/internal/view"
 )
 

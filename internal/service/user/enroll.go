@@ -9,14 +9,14 @@ import (
 	"github.com/acoshift/acourse/internal/context/appctx"
 	"github.com/acoshift/acourse/internal/context/sqlctx"
 	"github.com/acoshift/acourse/internal/entity"
-	"github.com/acoshift/acourse/internal/model/app"
-	"github.com/acoshift/acourse/internal/model/course"
-	"github.com/acoshift/acourse/internal/model/file"
-	"github.com/acoshift/acourse/internal/model/image"
-	"github.com/acoshift/acourse/internal/model/notify"
-	"github.com/acoshift/acourse/internal/model/payment"
-	"github.com/acoshift/acourse/internal/model/user"
 	"github.com/acoshift/acourse/internal/pkg/dispatcher"
+	"github.com/acoshift/acourse/internal/pkg/model/app"
+	"github.com/acoshift/acourse/internal/pkg/model/course"
+	"github.com/acoshift/acourse/internal/pkg/model/file"
+	"github.com/acoshift/acourse/internal/pkg/model/image"
+	"github.com/acoshift/acourse/internal/pkg/model/notify"
+	"github.com/acoshift/acourse/internal/pkg/model/payment"
+	"github.com/acoshift/acourse/internal/pkg/model/user"
 )
 
 func enroll(ctx context.Context, m *user.Enroll) error {

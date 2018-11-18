@@ -6,8 +6,8 @@ import (
 
 	"gopkg.in/gomail.v2"
 
-	"github.com/acoshift/acourse/internal/model/email"
 	"github.com/acoshift/acourse/internal/pkg/dispatcher"
+	"github.com/acoshift/acourse/internal/pkg/model/email"
 )
 
 // SMTPConfig type

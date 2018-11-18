@@ -9,8 +9,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/acoshift/acourse/internal/model/notify"
 	"github.com/acoshift/acourse/internal/pkg/dispatcher"
+	"github.com/acoshift/acourse/internal/pkg/model/notify"
 )
 
 // Init registers notify service

@@ -6,8 +6,8 @@ import (
 	"github.com/acoshift/paginate"
 	"github.com/moonrhythm/hime"
 
-	"github.com/acoshift/acourse/internal/model/admin"
 	"github.com/acoshift/acourse/internal/pkg/dispatcher"
+	"github.com/acoshift/acourse/internal/pkg/model/admin"
 	"github.com/acoshift/acourse/internal/view"
 )
 
