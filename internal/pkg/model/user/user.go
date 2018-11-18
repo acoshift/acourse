@@ -1,6 +1,15 @@
 package user
 
-import "mime/multipart"
+import (
+	"errors"
+	"mime/multipart"
+)
+
+// Errors
+var (
+	ErrUsernameNotAvailable = errors.New("user: username not available")
+	ErrEmailNotAvailable    = errors.New("user: email not available")
+)
 
 // User type
 type User struct {

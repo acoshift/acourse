@@ -34,13 +34,3 @@ type Assignment struct {
 	Desc  string
 	Open  bool
 }
-
-// UserAssignment model
-type UserAssignment struct {
-	ID          string
-	UserID      string
-	CourseID    string
-	DownloadURL string
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-}

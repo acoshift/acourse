@@ -10,7 +10,6 @@ import (
 
 	admin "github.com/acoshift/go-firebase-admin"
 
-	"github.com/acoshift/acourse/internal/entity"
 	"github.com/acoshift/acourse/internal/pkg/dispatcher"
 	"github.com/acoshift/acourse/internal/pkg/model/app"
 	"github.com/acoshift/acourse/internal/pkg/model/auth"
@@ -118,7 +117,7 @@ var _ = Describe("Auth", func() {
 				Expect(m.ID).To(Equal("123"))
 				Expect(m.Username).To(Equal("123"))
 				Expect(m.Email).To(Equal("test@test.com"))
-				return entity.ErrEmailNotAvailable
+				return user.ErrEmailNotAvailable
 			})
 
 			q := auth.SignUp{
@@ -143,7 +142,7 @@ var _ = Describe("Auth", func() {
 				Expect(m.ID).To(Equal("123"))
 				Expect(m.Username).To(Equal("123"))
 				Expect(m.Email).To(Equal("test@test.com"))
-				return entity.ErrUsernameNotAvailable
+				return user.ErrUsernameNotAvailable
 			})
 
 			q := auth.SignUp{

@@ -32,10 +32,10 @@ func create(ctx context.Context, m *user.Create) error {
 			($1, $2, $3, $4, $5)
 	`, m.ID, m.Username, m.Name, pgsql.NullString(&m.Email), m.Image)
 	if pgsql.IsUniqueViolation(err, "users_email_key") {
-		return entity.ErrEmailNotAvailable
+		return user.ErrEmailNotAvailable
 	}
 	if pgsql.IsUniqueViolation(err, "users_username_key") {
-		return entity.ErrUsernameNotAvailable
+		return user.ErrUsernameNotAvailable
 	}
 	return err
 }

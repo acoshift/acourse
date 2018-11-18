@@ -10,7 +10,6 @@ import (
 	admin "github.com/acoshift/go-firebase-admin"
 	"github.com/asaskevich/govalidator"
 
-	"github.com/acoshift/acourse/internal/entity"
 	"github.com/acoshift/acourse/internal/pkg/dispatcher"
 	"github.com/acoshift/acourse/internal/pkg/model/app"
 	"github.com/acoshift/acourse/internal/pkg/model/auth"
@@ -71,10 +70,10 @@ func (s *svc) signUp(ctx context.Context, m *auth.SignUp) error {
 		Username: userID,
 		Email:    email,
 	})
-	if err == entity.ErrEmailNotAvailable {
+	if err == user.ErrEmailNotAvailable {
 		return app.NewUIError("อีเมลนี้ถูกสมัครแล้ว")
 	}
-	if err == entity.ErrUsernameNotAvailable {
+	if err == user.ErrUsernameNotAvailable {
 		return app.NewUIError("username นี้ถูกใช้งานแล้ว")
 	}
 	if err != nil {

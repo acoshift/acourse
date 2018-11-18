@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/acoshift/acourse/internal/entity"
 	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
 	"github.com/acoshift/acourse/internal/pkg/dispatcher"
 	"github.com/acoshift/acourse/internal/pkg/model/app"
@@ -81,10 +80,10 @@ func (s *svc) signInOpenIDCallback(ctx context.Context, m *auth.SignInOpenIDCall
 
 		return nil
 	})
-	if err == entity.ErrEmailNotAvailable {
+	if err == user.ErrEmailNotAvailable {
 		return app.NewUIError("อีเมลนี้ถูกสมัครแล้ว")
 	}
-	if err == entity.ErrUsernameNotAvailable {
+	if err == user.ErrUsernameNotAvailable {
 		return app.NewUIError("username นี้ถูกใช้งานแล้ว")
 	}
 	if err != nil {
