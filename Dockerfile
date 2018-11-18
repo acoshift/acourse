@@ -1,4 +1,4 @@
-FROM acoshift/go-scratch
+FROM gcr.io/moonrhythm-containers/go-scratch
 
 COPY acourse /
 COPY template /template
