@@ -1,14 +1,12 @@
 # cloud.google.com/go v0.33.1
 cloud.google.com/go/errorreporting
 cloud.google.com/go/storage
-cloud.google.com/go/trace
 cloud.google.com/go/errorreporting/apiv1beta1
 cloud.google.com/go/internal/version
 cloud.google.com/go/iam
 cloud.google.com/go/internal
 cloud.google.com/go/internal/optional
 cloud.google.com/go/internal/trace
-cloud.google.com/go/internal/tracecontext
 cloud.google.com/go/compute/metadata
 # github.com/acoshift/configfile v1.3.0
 github.com/acoshift/configfile
@@ -155,10 +153,10 @@ golang.org/x/net/html
 golang.org/x/net/context
 golang.org/x/net/trace
 golang.org/x/net/html/atom
+golang.org/x/net/context/ctxhttp
 golang.org/x/net/internal/timeseries
 golang.org/x/net/http2
 golang.org/x/net/http2/hpack
-golang.org/x/net/context/ctxhttp
 golang.org/x/net/html/charset
 golang.org/x/net/http/httpguts
 golang.org/x/net/idna
@@ -194,8 +192,6 @@ golang.org/x/text/runes
 golang.org/x/text/internal/language
 golang.org/x/text/internal/language/compact
 golang.org/x/text/internal/tag
-# golang.org/x/time v0.0.0-20181108054448-85acf8d2951c
-golang.org/x/time/rate
 # google.golang.org/api v0.0.0-20181114235557-83a9d304b1e6
 google.golang.org/api/option
 google.golang.org/api/support/bundler
@@ -203,12 +199,11 @@ google.golang.org/api/googleapi
 google.golang.org/api/iterator
 google.golang.org/api/storage/v1
 google.golang.org/api/transport/http
-google.golang.org/api/cloudtrace/v1
-google.golang.org/api/gensupport
 google.golang.org/api/identitytoolkit/v3
 google.golang.org/api/transport
 google.golang.org/api/internal
 google.golang.org/api/googleapi/internal/uritemplates
+google.golang.org/api/gensupport
 google.golang.org/api/googleapi/transport
 google.golang.org/api/transport/http/internal/propagation
 google.golang.org/api/transport/grpc
@@ -235,9 +230,10 @@ google.golang.org/genproto/googleapis/rpc/status
 google.golang.org/genproto/googleapis/api/label
 # google.golang.org/grpc v1.16.0
 google.golang.org/grpc
-google.golang.org/grpc/metadata
 google.golang.org/grpc/codes
+google.golang.org/grpc/metadata
 google.golang.org/grpc/status
+google.golang.org/grpc/naming
 google.golang.org/grpc/balancer
 google.golang.org/grpc/balancer/roundrobin
 google.golang.org/grpc/connectivity
@@ -252,15 +248,14 @@ google.golang.org/grpc/internal/envconfig
 google.golang.org/grpc/internal/grpcrand
 google.golang.org/grpc/internal/transport
 google.golang.org/grpc/keepalive
-google.golang.org/grpc/naming
 google.golang.org/grpc/peer
 google.golang.org/grpc/resolver
 google.golang.org/grpc/resolver/dns
 google.golang.org/grpc/resolver/passthrough
 google.golang.org/grpc/stats
 google.golang.org/grpc/tap
-google.golang.org/grpc/balancer/base
 google.golang.org/grpc/credentials/oauth
+google.golang.org/grpc/balancer/base
 # gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc
 gopkg.in/alexcesaro/quotedprintable.v3
 # gopkg.in/fsnotify.v1 v1.4.7

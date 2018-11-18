@@ -11,7 +11,6 @@ import (
 
 	"cloud.google.com/go/errorreporting"
 	"cloud.google.com/go/storage"
-	"cloud.google.com/go/trace"
 	"github.com/acoshift/configfile"
 	firadmin "github.com/acoshift/go-firebase-admin"
 	"github.com/acoshift/middleware"
@@ -68,9 +67,6 @@ func main() {
 			log.Printf("could not log error: %v", err)
 		},
 	}, googClientOpts...)
-
-	// init trace
-	traceClient, _ := trace.NewClient(ctx, projectID, googClientOpts...)
 
 	firApp, err := firadmin.InitializeApp(ctx, firadmin.AppOptions{
 		ProjectID: projectID,
@@ -162,7 +158,6 @@ func main() {
 	controller.Mount(m, baseURL, loc)
 
 	mux.Handle("/", middleware.Chain(
-		traceClient.HTTPHandler,
 		sqlctx.Middleware(db),
 		redisctx.Middleware(redisClient, config.String("redis_prefix")),
 		session.Middleware(session.Config{
