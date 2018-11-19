@@ -85,7 +85,6 @@ func main() {
 	db.SetMaxOpenConns(config.IntDefault("sql_max_open_conns", 5))
 
 	server := hime.New()
-	server.ParseConfigFile("settings/server.yaml")
 	server.ParseConfigFile("settings/routes.yaml")
 
 	static := configfile.NewYAMLReader("static.yaml")
@@ -167,10 +166,13 @@ func main() {
 	)(mux)
 
 	server.GracefulShutdown().
+		Wait(5 * time.Second).
+		Timeout(10 * time.Second).
 		Notify(probe.Fail)
 
 	err = server.
 		Handler(h).
+		Address(":8080").
 		ListenAndServe()
 	must(err)
 }
