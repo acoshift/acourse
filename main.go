@@ -94,9 +94,13 @@ func main() {
 	})
 
 	baseURL := config.String("base_url")
+	server.Globals(hime.Globals{
+		"baseURL":  baseURL,
+		"location": loc,
+	})
 
 	server.Template().
-		Funcs(internal.TemplateFunc(loc)).
+		Funcs(app.TemplateFunc(loc)).
 		ParseConfigFile("settings/template.yaml")
 
 	// init services
@@ -111,7 +115,7 @@ func main() {
 	image.Init()
 	firebase.Init(firAuth)
 	notify.Init(config.String("slack_url"))
-	auth.Init(baseURL, server.Route("auth.openid.callback"))
+	auth.Init()
 	user.Init()
 	course.Init()
 	payment.Init()
@@ -137,11 +141,9 @@ func main() {
 		CacheControl: "public, max-age=31536000, immutable",
 	})))
 
-	mux.Handle("/favicon.ico", internal.FileHandler("assets/favicon.ico"))
+	mux.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) { http.ServeFile(w, r, "assets/favicon.ico") })
 
 	mux.Handle("/", app.Handler(app.Config{
-		BaseURL:       baseURL,
-		Location:      loc,
 		DB:            db,
 		SessionSecret: config.Bytes("session_secret"),
 		SessionStore: redisstore.New(redisstore.Config{

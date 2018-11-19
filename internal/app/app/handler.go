@@ -9,29 +9,23 @@ import (
 )
 
 // Mount mounts app handlers
-func Mount(m *http.ServeMux, baseURL string) {
-	c := &ctrl{baseURL}
-
+func Mount(m *http.ServeMux) {
 	m.Handle("/", methodmux.Get(
-		hime.Handler(c.index),
+		hime.Handler(index),
 	))
 	m.Handle("/signout", methodmux.Post(
-		hime.Handler(c.signOut),
+		hime.Handler(signOut),
 	))
 
 	// profile
 	m.Handle("/profile", mustSignedIn(methodmux.Get(
-		hime.Handler(c.profile),
+		hime.Handler(profile),
 	)))
 	m.Handle("/profile/edit", mustSignedIn(methodmux.GetPost(
-		hime.Handler(c.profileEdit),
-		hime.Handler(c.postProfileEdit),
+		hime.Handler(profileEdit),
+		hime.Handler(postProfileEdit),
 	)))
 
 	// course
-	m.Handle("/course/", prefixhandler.New("/course", courseIDKey{}, newCourseHandler(c)))
-}
-
-type ctrl struct {
-	BaseURL string
+	m.Handle("/course/", prefixhandler.New("/course", courseIDKey{}, newCourseHandler()))
 }

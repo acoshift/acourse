@@ -25,10 +25,8 @@ type (
 	courseKey   struct{}
 )
 
-func newCourseHandler(appCtrl *ctrl) http.Handler {
-	c := courseCtrl{
-		ctrl: appCtrl,
-	}
+func newCourseHandler() http.Handler {
+	c := courseCtrl{}
 
 	mux := http.NewServeMux()
 	mux.Handle("/", methodmux.Get(
@@ -80,9 +78,7 @@ func newCourseHandler(appCtrl *ctrl) http.Handler {
 	})
 }
 
-type courseCtrl struct {
-	*ctrl
-}
+type courseCtrl struct{}
 
 func (c *courseCtrl) getCourse(ctx context.Context) *Course {
 	return ctx.Value(courseKey{}).(*Course)
@@ -122,7 +118,7 @@ func (c *courseCtrl) view(ctx *hime.Context) error {
 	p.Meta.Title = course.Title
 	p.Meta.Desc = course.ShortDesc
 	p.Meta.Image = course.Image
-	p.Meta.URL = c.BaseURL + ctx.Route("app.course", url.PathEscape(course.Link()))
+	p.Meta.URL = ctx.Global("baseURL").(string) + ctx.Route("app.course", url.PathEscape(course.Link()))
 	p.Data["Course"] = course
 	p.Data["Enrolled"] = enrolled
 	p.Data["Owned"] = owned
@@ -203,7 +199,7 @@ func (c *courseCtrl) enroll(ctx *hime.Context) error {
 	p.Meta.Title = course.Title
 	p.Meta.Desc = course.ShortDesc
 	p.Meta.Image = course.Image
-	p.Meta.URL = c.BaseURL + ctx.Route("app.course", url.PathEscape(course.Link()))
+	p.Meta.URL = ctx.Global("baseURL").(string) + ctx.Route("app.course", url.PathEscape(course.Link()))
 	p.Data["Course"] = course
 	return ctx.View("app.course-enroll", p)
 }
@@ -281,7 +277,7 @@ func (c *courseCtrl) assignment(ctx *hime.Context) error {
 	p.Meta.Title = course.Title
 	p.Meta.Desc = course.ShortDesc
 	p.Meta.Image = course.Image
-	p.Meta.URL = c.BaseURL + ctx.Route("app.course", url.PathEscape(course.Link()))
+	p.Meta.URL = ctx.Global("baseURL").(string) + ctx.Route("app.course", url.PathEscape(course.Link()))
 	p.Data["Course"] = course
 	p.Data["Assignments"] = assignments
 	return ctx.View("app.course-assignment", p)

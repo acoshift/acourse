@@ -2,7 +2,6 @@ package admin
 
 import (
 	"net/http"
-	"time"
 
 	"github.com/acoshift/methodmux"
 	"github.com/moonrhythm/hime"
@@ -11,33 +10,27 @@ import (
 )
 
 // Mount mounts admin handlers
-func Mount(m *http.ServeMux, loc *time.Location) {
-	c := &ctrl{loc}
-
+func Mount(m *http.ServeMux) {
 	mux := http.NewServeMux()
 	mux.Handle("/admin/users", methodmux.Get(
-		hime.Handler(c.getUsers),
+		hime.Handler(getUsers),
 	))
 	mux.Handle("/admin/courses", methodmux.Get(
-		hime.Handler(c.getCourses),
+		hime.Handler(getCourses),
 	))
 	mux.Handle("/admin/payments/pending", methodmux.GetPost(
-		hime.Handler(c.getPendingPayments),
-		hime.Handler(c.postPendingPayment),
+		hime.Handler(getPendingPayments),
+		hime.Handler(postPendingPayment),
 	))
 	mux.Handle("/admin/payments/history", methodmux.Get(
-		hime.Handler(c.getHistoryPayments),
+		hime.Handler(getHistoryPayments),
 	))
 	mux.Handle("/admin/payments/reject", methodmux.GetPost(
-		hime.Handler(c.getRejectPayment),
-		hime.Handler(c.postRejectPayment),
+		hime.Handler(getRejectPayment),
+		hime.Handler(postRejectPayment),
 	))
 
 	m.Handle("/admin/", onlyAdmin(mux))
-}
-
-type ctrl struct {
-	Location *time.Location
 }
 
 func onlyAdmin(h http.Handler) http.Handler {

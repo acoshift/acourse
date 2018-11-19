@@ -11,7 +11,7 @@ import (
 	"github.com/acoshift/acourse/internal/pkg/model/admin"
 )
 
-func (c *ctrl) getCourses(ctx *hime.Context) error {
+func getCourses(ctx *hime.Context) error {
 	cnt := admin.CountCourses{}
 	err := dispatcher.Dispatch(ctx, &cnt)
 	if err != nil {

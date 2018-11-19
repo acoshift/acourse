@@ -24,7 +24,7 @@ var _ = Describe("Auth", func() {
 
 	BeforeEach(func() {
 		ctx = context.Background()
-		Init("", "")
+		Init()
 	})
 
 	Describe("SignUp", func() {

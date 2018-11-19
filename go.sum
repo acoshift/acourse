@@ -76,8 +76,8 @@ github.com/microcosm-cc/bluemonday v1.0.1 h1:SIYunPjnlXcW+gVfvm0IlSeR5U3WZUOLfVm
 github.com/microcosm-cc/bluemonday v1.0.1/go.mod h1:hsXNsILzKxV+sX77C5b8FSuKF00vh2OMYv+xgHpAMF4=
 github.com/moonrhythm/dispatcher v1.2.0 h1:jvUKby+TWZrMrekMB7bsPI3rKpEH972ohQX2LA1gqLE=
 github.com/moonrhythm/dispatcher v1.2.0/go.mod h1:FQmTGd7va12hJOH68NyyypAEtDF1dGVIXUwqKoRKArg=
-github.com/moonrhythm/hime v0.13.0 h1:uriz4iEbZozFpGIOEPJFA5QDDQhbp2aUx8IZLvUuLsk=
-github.com/moonrhythm/hime v0.13.0/go.mod h1:ayoh5PJ5TjmEBguxKnazvxWqq7z5P09Nc6DAsjZOBfQ=
+github.com/moonrhythm/hime v0.13.1 h1:uNqjUkm5/4IwYopPw3rPrRfeh+M1zyqFjlTNvHxzHMQ=
+github.com/moonrhythm/hime v0.13.1/go.mod h1:ayoh5PJ5TjmEBguxKnazvxWqq7z5P09Nc6DAsjZOBfQ=
 github.com/moonrhythm/session v0.13.0 h1:sMmSG6dHn2ZGj4tBQcU1RszJKUsHEN9QIegXmutYmNM=
 github.com/moonrhythm/session v0.13.0/go.mod h1:DypZHH7pVctj5rpkPNEbSiCdVlUcrYDw6iNx9QBjFJs=
 github.com/onsi/ginkgo v1.6.0 h1:Ix8l273rp3QzYgXSR+c8d1fTG7UPgYkOSELPhiY/YGw=

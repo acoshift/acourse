@@ -18,11 +18,8 @@ import (
 )
 
 // Init inits auth service
-func Init(baseURL string, openIDCallback string) {
-	s := svc{
-		BaseURL:        baseURL,
-		OpenIDCallback: openIDCallback,
-	}
+func Init() {
+	s := svc{}
 
 	dispatcher.Register(s.signUp)
 	dispatcher.Register(s.sendPasswordResetEmail)
@@ -31,10 +28,7 @@ func Init(baseURL string, openIDCallback string) {
 	dispatcher.Register(s.signInOpenIDCallback)
 }
 
-type svc struct {
-	BaseURL        string
-	OpenIDCallback string
-}
+type svc struct{}
 
 func (s *svc) signUp(ctx context.Context, m *auth.SignUp) error {
 	if m.Email == "" {

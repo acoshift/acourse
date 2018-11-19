@@ -6,7 +6,7 @@ import (
 	"github.com/acoshift/acourse/internal/app/view"
 )
 
-func (c *ctrl) index(ctx *hime.Context) error {
+func index(ctx *hime.Context) error {
 	if ctx.URL.Path != "/" {
 		return view.NotFound(ctx)
 	}

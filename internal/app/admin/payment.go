@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/acoshift/paginate"
 	"github.com/moonrhythm/hime"
@@ -16,7 +17,7 @@ import (
 	"github.com/acoshift/acourse/internal/pkg/model/payment"
 )
 
-func (c *ctrl) getRejectPayment(ctx *hime.Context) error {
+func getRejectPayment(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 
 	q := admin.GetPayment{PaymentID: id}
@@ -62,7 +63,7 @@ func (c *ctrl) getRejectPayment(ctx *hime.Context) error {
 `,
 		name,
 		x.Course.Title,
-		x.CreatedAt.In(c.Location).Format("02/01/2006 15:04:05"),
+		x.CreatedAt.In(ctx.Global("location").(*time.Location)).Format("02/01/2006 15:04:05"),
 		x.CourseLink(),
 	)
 
@@ -72,7 +73,7 @@ func (c *ctrl) getRejectPayment(ctx *hime.Context) error {
 	return ctx.View("admin.payment-reject", p)
 }
 
-func (c *ctrl) postRejectPayment(ctx *hime.Context) error {
+func postRejectPayment(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 	message := ctx.PostFormValue("message")
 
@@ -87,12 +88,12 @@ func (c *ctrl) postRejectPayment(ctx *hime.Context) error {
 	return ctx.RedirectTo("admin.payments.pending")
 }
 
-func (c *ctrl) postPendingPayment(ctx *hime.Context) error {
+func postPendingPayment(ctx *hime.Context) error {
 	action := ctx.FormValue("action")
 
 	id := ctx.PostFormValue("id")
 	if action == "accept" {
-		err := dispatcher.Dispatch(ctx, &admin.AcceptPayment{ID: id, Location: c.Location})
+		err := dispatcher.Dispatch(ctx, &admin.AcceptPayment{ID: id, Location: ctx.Global("location").(*time.Location)})
 		if app.IsUIError(err) {
 			return ctx.Status(http.StatusBadRequest).String(err.Error())
 		}
@@ -104,7 +105,7 @@ func (c *ctrl) postPendingPayment(ctx *hime.Context) error {
 	return ctx.RedirectTo("admin.payments.pending")
 }
 
-func (c *ctrl) getPendingPayments(ctx *hime.Context) error {
+func getPendingPayments(ctx *hime.Context) error {
 	cnt := admin.CountPayments{Status: []int{payment.Pending}}
 	err := dispatcher.Dispatch(ctx, &cnt)
 	if err != nil {
@@ -127,7 +128,7 @@ func (c *ctrl) getPendingPayments(ctx *hime.Context) error {
 	return ctx.View("admin.payments", p)
 }
 
-func (c *ctrl) getHistoryPayments(ctx *hime.Context) error {
+func getHistoryPayments(ctx *hime.Context) error {
 	cnt := admin.CountPayments{Status: []int{payment.Accepted, payment.Rejected}}
 	err := dispatcher.Dispatch(ctx, &cnt)
 	if err != nil {

@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/moonrhythm/hime"
+
 	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
 	"github.com/acoshift/acourse/internal/pkg/dispatcher"
 	"github.com/acoshift/acourse/internal/pkg/model/app"
@@ -30,7 +32,7 @@ func (s *svc) generateOpenIDURI(ctx context.Context, m *auth.GenerateOpenIDURI) 
 
 	authURI := firebase.CreateAuthURI{
 		ProviderID:  m.Provider,
-		ContinueURI: s.BaseURL + s.OpenIDCallback,
+		ContinueURI: hime.Global(ctx, "baseURL").(string) + hime.Route(ctx, "auth.openid.callback"),
 		SessionID:   sessID,
 	}
 	err := dispatcher.Dispatch(ctx, &authURI)
@@ -46,7 +48,7 @@ func (s *svc) generateOpenIDURI(ctx context.Context, m *auth.GenerateOpenIDURI) 
 
 func (s *svc) signInOpenIDCallback(ctx context.Context, m *auth.SignInOpenIDCallback) error {
 	q := firebase.VerifyAuthCallbackURI{
-		CallbackURI: s.BaseURL + m.URI,
+		CallbackURI: hime.Global(ctx, "baseURL").(string) + m.URI,
 		SessionID:   m.State,
 	}
 	err := dispatcher.Dispatch(ctx, &q)

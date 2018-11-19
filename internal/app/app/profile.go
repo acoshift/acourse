@@ -13,12 +13,12 @@ import (
 	"github.com/acoshift/acourse/internal/pkg/model/user"
 )
 
-func (c *ctrl) signOut(ctx *hime.Context) error {
+func signOut(ctx *hime.Context) error {
 	appctx.DestroySession(ctx)
 	return ctx.Redirect("/")
 }
 
-func (c *ctrl) profile(ctx *hime.Context) error {
+func profile(ctx *hime.Context) error {
 	user := appctx.GetUser(ctx)
 
 	ownCourses, err := listOwnCourses(ctx, user.ID)
@@ -39,7 +39,7 @@ func (c *ctrl) profile(ctx *hime.Context) error {
 	return ctx.View("app.profile", p)
 }
 
-func (c *ctrl) profileEdit(ctx *hime.Context) error {
+func profileEdit(ctx *hime.Context) error {
 	user := appctx.GetUser(ctx)
 	f := appctx.GetFlash(ctx)
 	if !f.Has("Username") {
@@ -57,7 +57,7 @@ func (c *ctrl) profileEdit(ctx *hime.Context) error {
 	return ctx.View("app.profile-edit", p)
 }
 
-func (c *ctrl) postProfileEdit(ctx *hime.Context) error {
+func postProfileEdit(ctx *hime.Context) error {
 	f := appctx.GetFlash(ctx)
 
 	var (

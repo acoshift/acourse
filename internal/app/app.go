@@ -23,8 +23,6 @@ import (
 
 // Config is the app's config
 type Config struct {
-	BaseURL       string
-	Location      *time.Location
 	DB            *sql.DB
 	SessionSecret []byte
 	RedisClient   *redis.Client
@@ -37,10 +35,10 @@ func Handler(c Config) http.Handler {
 	methodmux.FallbackHandler = hime.Handler(view.NotFound)
 
 	m := http.NewServeMux()
-	app.Mount(m, c.BaseURL)
+	app.Mount(m)
 	auth.Mount(m)
 	editor.Mount(m)
-	admin.Mount(m, c.Location)
+	admin.Mount(m)
 
 	return middleware.Chain(
 		sqlctx.Middleware(c.DB),
