@@ -73,11 +73,11 @@ github.com/lib/pq/oid
 github.com/microcosm-cc/bluemonday
 # github.com/moonrhythm/dispatcher v1.2.0
 github.com/moonrhythm/dispatcher
-# github.com/moonrhythm/hime v0.12.1
+# github.com/moonrhythm/hime v0.13.0
 github.com/moonrhythm/hime
 # github.com/moonrhythm/session v0.13.0
-github.com/moonrhythm/session
 github.com/moonrhythm/session/store/goredis
+github.com/moonrhythm/session
 # github.com/onsi/ginkgo v1.6.0
 github.com/onsi/ginkgo
 github.com/onsi/ginkgo/config
