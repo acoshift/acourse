@@ -2,7 +2,7 @@ dir: template
 root: root
 minify: true
 preload:
-- main.tmpl
+- _layout.tmpl
 - component/global.script.tmpl
 - component/pagination.tmpl
 - component/error-message.tmpl
@@ -42,16 +42,16 @@ list:
   # auth
   auth.signin:
   - auth/signin.tmpl
-  - auth/layout.tmpl
+  - auth/_layout.tmpl
   auth.signup:
   - auth/signup.tmpl
-  - auth/layout.tmpl
+  - auth/_layout.tmpl
   auth.reset-password:
   - auth/reset-password.tmpl
-  - auth/layout.tmpl
+  - auth/_layout.tmpl
   auth.check-email:
   - auth/check-email.tmpl
-  - auth/layout.tmpl
+  - auth/_layout.tmpl
 
   # editor
   editor.course-create:
