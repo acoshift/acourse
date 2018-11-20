@@ -78,6 +78,8 @@ github.com/moonrhythm/dispatcher v1.2.0 h1:jvUKby+TWZrMrekMB7bsPI3rKpEH972ohQX2L
 github.com/moonrhythm/dispatcher v1.2.0/go.mod h1:FQmTGd7va12hJOH68NyyypAEtDF1dGVIXUwqKoRKArg=
 github.com/moonrhythm/hime v0.13.1 h1:uNqjUkm5/4IwYopPw3rPrRfeh+M1zyqFjlTNvHxzHMQ=
 github.com/moonrhythm/hime v0.13.1/go.mod h1:ayoh5PJ5TjmEBguxKnazvxWqq7z5P09Nc6DAsjZOBfQ=
+github.com/moonrhythm/httpmux v1.0.1 h1:WaD0jUVsXPcZ7ffS+9N4FZq2/ZZdHAViFTxBpUzgFZI=
+github.com/moonrhythm/httpmux v1.0.1/go.mod h1:efTwsHS/Gp3xnAhYjUEUeSyZeHfycf0rGW5v/Fl1r1Y=
 github.com/moonrhythm/session v0.13.0 h1:sMmSG6dHn2ZGj4tBQcU1RszJKUsHEN9QIegXmutYmNM=
 github.com/moonrhythm/session v0.13.0/go.mod h1:DypZHH7pVctj5rpkPNEbSiCdVlUcrYDw6iNx9QBjFJs=
 github.com/onsi/ginkgo v1.6.0 h1:Ix8l273rp3QzYgXSR+c8d1fTG7UPgYkOSELPhiY/YGw=

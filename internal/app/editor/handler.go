@@ -5,6 +5,7 @@ import (
 
 	"github.com/acoshift/methodmux"
 	"github.com/moonrhythm/hime"
+	"github.com/moonrhythm/httpmux"
 
 	"github.com/acoshift/acourse/internal/app/view"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
@@ -14,24 +15,27 @@ import (
 )
 
 // Mount mounts editor handlers
-func Mount(m *http.ServeMux) {
-	m.Handle("/editor/course/create", onlyInstructor(methodmux.GetPost(
+func Mount(m *httpmux.Mux) {
+	instructorMux := m.Group("/editor", onlyInstructor)
+	instructorMux.Handle("/course/create", methodmux.GetPost(
 		hime.Handler(getCourseCreate),
 		hime.Handler(postCourseCreate),
-	)))
-	m.Handle("/editor/course/edit", isCourseOwner(methodmux.GetPost(
+	))
+
+	courseOwnerMux := m.Group("/editor", onlyCourseOwner)
+	courseOwnerMux.Handle("/course/edit", methodmux.GetPost(
 		hime.Handler(getCourseEdit),
 		hime.Handler(postCourseEdit),
-	)))
-	m.Handle("/editor/content", isCourseOwner(methodmux.GetPost(
+	))
+	courseOwnerMux.Handle("/content", methodmux.GetPost(
 		hime.Handler(getContentList),
 		hime.Handler(postContentList),
-	)))
-	m.Handle("/editor/content/create", isCourseOwner(methodmux.GetPost(
+	))
+	courseOwnerMux.Handle("/content/create", methodmux.GetPost(
 		hime.Handler(getContentCreate),
 		hime.Handler(postContentCreate),
-	)))
-	// TODO: add middleware
+	))
+	// TODO: add middleware for course content owner
 	m.Handle("/editor/content/edit", methodmux.GetPost(
 		hime.Handler(getContentEdit),
 		hime.Handler(postContentEdit),
@@ -53,7 +57,7 @@ func onlyInstructor(h http.Handler) http.Handler {
 	})
 }
 
-func isCourseOwner(h http.Handler) http.Handler {
+func onlyCourseOwner(h http.Handler) http.Handler {
 	return hime.Handler(func(ctx *hime.Context) error {
 		u := appctx.GetUser(ctx)
 		if u == nil {

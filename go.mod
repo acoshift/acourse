@@ -24,6 +24,7 @@ require (
 	github.com/microcosm-cc/bluemonday v1.0.1
 	github.com/moonrhythm/dispatcher v1.2.0
 	github.com/moonrhythm/hime v0.13.1
+	github.com/moonrhythm/httpmux v1.0.1
 	github.com/moonrhythm/session v0.13.0
 	github.com/onsi/ginkgo v1.6.0
 	github.com/onsi/gomega v1.4.2

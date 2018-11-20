@@ -18,7 +18,7 @@ func signOut(ctx *hime.Context) error {
 	return ctx.Redirect("/")
 }
 
-func profile(ctx *hime.Context) error {
+func getProfile(ctx *hime.Context) error {
 	user := appctx.GetUser(ctx)
 
 	ownCourses, err := listOwnCourses(ctx, user.ID)
@@ -39,7 +39,7 @@ func profile(ctx *hime.Context) error {
 	return ctx.View("app.profile", p)
 }
 
-func profileEdit(ctx *hime.Context) error {
+func getProfileEdit(ctx *hime.Context) error {
 	user := appctx.GetUser(ctx)
 	f := appctx.GetFlash(ctx)
 	if !f.Has("Username") {

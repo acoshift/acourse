@@ -5,33 +5,32 @@ import (
 
 	"github.com/acoshift/methodmux"
 	"github.com/moonrhythm/hime"
+	"github.com/moonrhythm/httpmux"
 
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
 )
 
 // Mount mounts auth handlers
-func Mount(m *http.ServeMux) {
-	mux := http.NewServeMux()
-	mux.Handle("/auth/signin", methodmux.GetPost(
+func Mount(m *httpmux.Mux) {
+	mux := m.Group("/auth", notSignedIn)
+	mux.Handle("/signin", methodmux.GetPost(
 		hime.Handler(getSignIn),
 		hime.Handler(postSignIn),
 	))
-	mux.Handle("/auth/reset/password", methodmux.GetPost(
+	mux.Handle("/reset/password", methodmux.GetPost(
 		hime.Handler(getResetPassword),
 		hime.Handler(postResetPassword),
 	))
-	mux.Handle("/auth/openid", methodmux.Get(
+	mux.Handle("/openid", methodmux.Get(
 		hime.Handler(getOpenID),
 	))
-	mux.Handle("/auth/openid/callback", methodmux.Get(
+	mux.Handle("/openid/callback", methodmux.Get(
 		hime.Handler(getOpenIDCallback),
 	))
-	mux.Handle("/auth/signup", methodmux.GetPost(
+	mux.Handle("/signup", methodmux.GetPost(
 		hime.Handler(getSignUp),
 		hime.Handler(postSignUp),
 	))
-
-	m.Handle("/auth/", notSignedIn(mux))
 }
 
 func notSignedIn(h http.Handler) http.Handler {

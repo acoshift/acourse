@@ -9,6 +9,7 @@ import (
 	"github.com/acoshift/middleware"
 	"github.com/go-redis/redis"
 	"github.com/moonrhythm/hime"
+	"github.com/moonrhythm/httpmux"
 	"github.com/moonrhythm/session"
 
 	"github.com/acoshift/acourse/internal/app/admin"
@@ -34,7 +35,7 @@ type Config struct {
 func Handler(c Config) http.Handler {
 	methodmux.FallbackHandler = hime.Handler(view.NotFound)
 
-	m := http.NewServeMux()
+	m := httpmux.New()
 	app.Mount(m)
 	auth.Mount(m)
 	editor.Mount(m)

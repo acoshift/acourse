@@ -75,6 +75,8 @@ github.com/microcosm-cc/bluemonday
 github.com/moonrhythm/dispatcher
 # github.com/moonrhythm/hime v0.13.1
 github.com/moonrhythm/hime
+# github.com/moonrhythm/httpmux v1.0.1
+github.com/moonrhythm/httpmux
 # github.com/moonrhythm/session v0.13.0
 github.com/moonrhythm/session/store/goredis
 github.com/moonrhythm/session
