@@ -6,7 +6,7 @@ import (
 
 	"gopkg.in/gomail.v2"
 
-	"github.com/acoshift/acourse/internal/pkg/dispatcher"
+	"github.com/acoshift/acourse/internal/pkg/bus"
 	"github.com/acoshift/acourse/internal/pkg/model/email"
 )
 
@@ -26,7 +26,7 @@ func InitSMTP(c SMTPConfig) {
 		From:   c.From,
 	}
 
-	dispatcher.Register(s.Send)
+	bus.Register(s.Send)
 }
 
 type smtpSender struct {

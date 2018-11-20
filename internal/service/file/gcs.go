@@ -7,7 +7,7 @@ import (
 
 	"cloud.google.com/go/storage"
 
-	"github.com/acoshift/acourse/internal/pkg/dispatcher"
+	"github.com/acoshift/acourse/internal/pkg/bus"
 	"github.com/acoshift/acourse/internal/pkg/model/file"
 )
 
@@ -18,7 +18,7 @@ func InitGCS(client *storage.Client, bucket string) {
 		BucketName: bucket,
 	}
 
-	dispatcher.Register(s.store)
+	bus.Register(s.store)
 }
 
 type gcs struct {

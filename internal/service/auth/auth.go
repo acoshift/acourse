@@ -10,7 +10,7 @@ import (
 	admin "github.com/acoshift/go-firebase-admin"
 	"github.com/asaskevich/govalidator"
 
-	"github.com/acoshift/acourse/internal/pkg/dispatcher"
+	"github.com/acoshift/acourse/internal/pkg/bus"
 	"github.com/acoshift/acourse/internal/pkg/model/app"
 	"github.com/acoshift/acourse/internal/pkg/model/auth"
 	"github.com/acoshift/acourse/internal/pkg/model/firebase"
@@ -21,11 +21,11 @@ import (
 func Init() {
 	s := svc{}
 
-	dispatcher.Register(s.signUp)
-	dispatcher.Register(s.sendPasswordResetEmail)
-	dispatcher.Register(s.signInPassword)
-	dispatcher.Register(s.generateOpenIDURI)
-	dispatcher.Register(s.signInOpenIDCallback)
+	bus.Register(s.signUp)
+	bus.Register(s.sendPasswordResetEmail)
+	bus.Register(s.signInPassword)
+	bus.Register(s.generateOpenIDURI)
+	bus.Register(s.signInOpenIDCallback)
 }
 
 type svc struct{}
@@ -53,13 +53,13 @@ func (s *svc) signUp(ctx context.Context, m *auth.SignUp) error {
 			Password: m.Password,
 		},
 	}
-	err = dispatcher.Dispatch(ctx, &createUser)
+	err = bus.Dispatch(ctx, &createUser)
 	if err != nil {
 		return app.NewUIError(err.Error())
 	}
 	userID := createUser.Result
 
-	err = dispatcher.Dispatch(ctx, &user.Create{
+	err = bus.Dispatch(ctx, &user.Create{
 		ID:       userID,
 		Username: userID,
 		Email:    email,
@@ -85,13 +85,13 @@ func (s *svc) sendPasswordResetEmail(ctx context.Context, m *auth.SendPasswordRe
 	}
 
 	getUser := firebase.GetUserByEmail{Email: m.Email}
-	err := dispatcher.Dispatch(ctx, &getUser)
+	err := bus.Dispatch(ctx, &getUser)
 	if err != nil {
 		// don't send any error back to user
 		return nil
 	}
 
-	err = dispatcher.Dispatch(ctx, &firebase.SendPasswordResetEmail{Email: getUser.Email})
+	err = bus.Dispatch(ctx, &firebase.SendPasswordResetEmail{Email: getUser.Email})
 	if err != nil {
 		return app.NewUIError(err.Error())
 	}
@@ -108,7 +108,7 @@ func (s *svc) signInPassword(ctx context.Context, m *auth.SignInPassword) error 
 	}
 
 	q := firebase.VerifyPassword{Email: m.Email, Password: m.Password}
-	err := dispatcher.Dispatch(ctx, &q)
+	err := bus.Dispatch(ctx, &q)
 	if err != nil {
 		return app.NewUIError(err.Error())
 	}
@@ -118,14 +118,14 @@ func (s *svc) signInPassword(ctx context.Context, m *auth.SignInPassword) error 
 	// this happend when database out of sync with firebase authentication
 	{
 		exists := user.IsExists{ID: userID}
-		err = dispatcher.Dispatch(ctx, &exists)
+		err = bus.Dispatch(ctx, &exists)
 		if err != nil {
 			return err
 		}
 
 		if !exists.Result {
 			email, _ := govalidator.NormalizeEmail(m.Email)
-			err = dispatcher.Dispatch(ctx, &user.Create{
+			err = bus.Dispatch(ctx, &user.Create{
 				ID:       userID,
 				Username: userID,
 				Name:     userID,

@@ -5,7 +5,7 @@ import (
 
 	admin "github.com/acoshift/go-firebase-admin"
 
-	"github.com/acoshift/acourse/internal/pkg/dispatcher"
+	"github.com/acoshift/acourse/internal/pkg/bus"
 	"github.com/acoshift/acourse/internal/pkg/model/firebase"
 )
 
@@ -13,12 +13,12 @@ import (
 func Init(auth *admin.Auth) {
 	s := svc{auth}
 
-	dispatcher.Register(s.createAuthURI)
-	dispatcher.Register(s.verifyAuthCallbackURI)
-	dispatcher.Register(s.getUserByEmail)
-	dispatcher.Register(s.sendPasswordResetEmail)
-	dispatcher.Register(s.verifyPassword)
-	dispatcher.Register(s.createUser)
+	bus.Register(s.createAuthURI)
+	bus.Register(s.verifyAuthCallbackURI)
+	bus.Register(s.getUserByEmail)
+	bus.Register(s.sendPasswordResetEmail)
+	bus.Register(s.verifyPassword)
+	bus.Register(s.createUser)
 }
 
 type svc struct {

@@ -7,8 +7,8 @@ import (
 	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/internal/app/view"
+	"github.com/acoshift/acourse/internal/pkg/bus"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
-	"github.com/acoshift/acourse/internal/pkg/dispatcher"
 	"github.com/acoshift/acourse/internal/pkg/model/app"
 	"github.com/acoshift/acourse/internal/pkg/model/user"
 )
@@ -86,7 +86,7 @@ func postProfileEdit(ctx *hime.Context) error {
 	}
 
 	image, _ := ctx.FormFileHeaderNotEmpty("image")
-	err := dispatcher.Dispatch(ctx, &user.UpdateProfile{
+	err := bus.Dispatch(ctx, &user.UpdateProfile{
 		ID:       appctx.GetUserID(ctx),
 		Username: username,
 		Name:     name,

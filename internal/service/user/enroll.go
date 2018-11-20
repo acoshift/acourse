@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/acoshift/acourse/internal/pkg/bus"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
 	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
-	"github.com/acoshift/acourse/internal/pkg/dispatcher"
 	"github.com/acoshift/acourse/internal/pkg/model"
 	"github.com/acoshift/acourse/internal/pkg/model/app"
 	"github.com/acoshift/acourse/internal/pkg/model/course"
@@ -23,7 +23,7 @@ func enroll(ctx context.Context, m *user.Enroll) error {
 	u := appctx.GetUser(ctx)
 
 	getCourse := course.Get{ID: m.CourseID}
-	err := dispatcher.Dispatch(ctx, &getCourse)
+	err := bus.Dispatch(ctx, &getCourse)
 	if err == model.ErrNotFound {
 		return model.ErrNotFound
 	}
@@ -40,7 +40,7 @@ func enroll(ctx context.Context, m *user.Enroll) error {
 	// is enrolled
 	{
 		q := user.IsEnroll{ID: u.ID, CourseID: m.CourseID}
-		err = dispatcher.Dispatch(ctx, &q)
+		err = bus.Dispatch(ctx, &q)
 		if err != nil {
 			return err
 		}
@@ -52,7 +52,7 @@ func enroll(ctx context.Context, m *user.Enroll) error {
 	// has pending enroll
 	{
 		q := payment.HasPending{UserID: u.ID, CourseID: m.CourseID}
-		err := dispatcher.Dispatch(ctx, &q)
+		err := bus.Dispatch(ctx, &q)
 		if err != nil {
 			return err
 		}
@@ -98,7 +98,7 @@ func enroll(ctx context.Context, m *user.Enroll) error {
 
 	err = sqlctx.RunInTx(ctx, func(ctx context.Context) error {
 		if c.Price == 0 {
-			return dispatcher.Dispatch(ctx, &course.InsertEnroll{ID: c.ID, UserID: u.ID})
+			return bus.Dispatch(ctx, &course.InsertEnroll{ID: c.ID, UserID: u.ID})
 		}
 
 		newPayment = true
@@ -117,7 +117,7 @@ func enroll(ctx context.Context, m *user.Enroll) error {
 	}
 
 	if newPayment {
-		go dispatcher.Dispatch(ctx, &notify.Admin{Message: fmt.Sprintf("New payment for course %s, price %.2f", c.Title, m.Price)})
+		go bus.Dispatch(ctx, &notify.Admin{Message: fmt.Sprintf("New payment for course %s, price %.2f", c.Title, m.Price)})
 	}
 
 	return nil
@@ -126,7 +126,7 @@ func enroll(ctx context.Context, m *user.Enroll) error {
 func uploadPaymentImage(ctx context.Context, r io.Reader) (string, error) {
 	buf := &bytes.Buffer{}
 
-	if err := dispatcher.Dispatch(ctx, &image.JPEG{
+	if err := bus.Dispatch(ctx, &image.JPEG{
 		Writer:  buf,
 		Reader:  r,
 		Width:   700,
@@ -137,7 +137,7 @@ func uploadPaymentImage(ctx context.Context, r io.Reader) (string, error) {
 
 	filename := file.GenerateFilename() + ".jpg"
 	store := file.Store{Reader: buf, Filename: filename}
-	if err := dispatcher.Dispatch(ctx, &store); err != nil {
+	if err := bus.Dispatch(ctx, &store); err != nil {
 		return "", err
 	}
 	return store.Result, nil

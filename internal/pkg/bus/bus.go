@@ -1,4 +1,4 @@
-package dispatcher
+package bus
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"github.com/moonrhythm/dispatcher"
 )
 
-// Message alias
+// Message is the bus event message
 type Message dispatcher.Message
 
 var (
@@ -16,7 +16,7 @@ var (
 	logger = log.New(os.Stdout, "", log.LstdFlags)
 )
 
-// Dispatch func
+// Dispatch dispatchs event to event bus
 func Dispatch(ctx context.Context, msg ...Message) error {
 	for _, m := range msg {
 		logger.Printf(dispatcher.MessageName(m))
@@ -28,7 +28,7 @@ func Dispatch(ctx context.Context, msg ...Message) error {
 	return nil
 }
 
-// Register func
+// Register registers event handler
 func Register(h ...dispatcher.Handler) {
 	d.Register(h...)
 }

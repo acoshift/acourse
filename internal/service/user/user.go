@@ -6,22 +6,22 @@ import (
 
 	"github.com/acoshift/pgsql"
 
+	"github.com/acoshift/acourse/internal/pkg/bus"
 	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
-	"github.com/acoshift/acourse/internal/pkg/dispatcher"
 	"github.com/acoshift/acourse/internal/pkg/model"
 	"github.com/acoshift/acourse/internal/pkg/model/user"
 )
 
 // Init inits user service
 func Init() {
-	dispatcher.Register(create)
-	dispatcher.Register(update)
-	dispatcher.Register(get)
-	dispatcher.Register(isExists)
-	dispatcher.Register(setImage)
-	dispatcher.Register(updateProfile)
-	dispatcher.Register(isEnroll)
-	dispatcher.Register(enroll)
+	bus.Register(create)
+	bus.Register(update)
+	bus.Register(get)
+	bus.Register(isExists)
+	bus.Register(setImage)
+	bus.Register(updateProfile)
+	bus.Register(isEnroll)
+	bus.Register(enroll)
 }
 
 func create(ctx context.Context, m *user.Create) error {

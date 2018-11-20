@@ -8,8 +8,8 @@ import (
 
 	"github.com/moonrhythm/hime"
 
+	"github.com/acoshift/acourse/internal/pkg/bus"
 	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
-	"github.com/acoshift/acourse/internal/pkg/dispatcher"
 	"github.com/acoshift/acourse/internal/pkg/model/app"
 	"github.com/acoshift/acourse/internal/pkg/model/auth"
 	"github.com/acoshift/acourse/internal/pkg/model/file"
@@ -35,7 +35,7 @@ func (s *svc) generateOpenIDURI(ctx context.Context, m *auth.GenerateOpenIDURI) 
 		ContinueURI: hime.Global(ctx, "baseURL").(string) + hime.Route(ctx, "auth.openid.callback"),
 		SessionID:   sessID,
 	}
-	err := dispatcher.Dispatch(ctx, &authURI)
+	err := bus.Dispatch(ctx, &authURI)
 	if err != nil {
 		return err
 	}
@@ -51,7 +51,7 @@ func (s *svc) signInOpenIDCallback(ctx context.Context, m *auth.SignInOpenIDCall
 		CallbackURI: hime.Global(ctx, "baseURL").(string) + m.URI,
 		SessionID:   m.State,
 	}
-	err := dispatcher.Dispatch(ctx, &q)
+	err := bus.Dispatch(ctx, &q)
 	if err != nil {
 		return app.NewUIError(err.Error())
 	}
@@ -60,7 +60,7 @@ func (s *svc) signInOpenIDCallback(ctx context.Context, m *auth.SignInOpenIDCall
 	err = sqlctx.RunInTx(ctx, func(ctx context.Context) error {
 		// check is user sign up
 		exists := user.IsExists{ID: u.UserID}
-		err = dispatcher.Dispatch(ctx, &exists)
+		err = bus.Dispatch(ctx, &exists)
 		if err != nil {
 			return err
 		}
@@ -68,7 +68,7 @@ func (s *svc) signInOpenIDCallback(ctx context.Context, m *auth.SignInOpenIDCall
 		if !exists.Result {
 			// user not found, insert new user
 			imageURL := s.uploadProfileFromURLAsync(u.PhotoURL)
-			err = dispatcher.Dispatch(ctx, &user.Create{
+			err = bus.Dispatch(ctx, &user.Create{
 				ID:       u.UserID,
 				Name:     u.DisplayName,
 				Username: u.UserID,
@@ -124,7 +124,7 @@ func (s *svc) uploadProfileFromURLAsync(url string) string {
 	defer resp.Body.Close()
 
 	buf := &bytes.Buffer{}
-	if err := dispatcher.Dispatch(ctx, &image.JPEG{
+	if err := bus.Dispatch(ctx, &image.JPEG{
 		Writer:  buf,
 		Reader:  resp.Body,
 		Width:   500,
@@ -139,7 +139,7 @@ func (s *svc) uploadProfileFromURLAsync(url string) string {
 	defer cancel()
 
 	store := file.Store{Reader: buf, Filename: filename, Async: true}
-	err = dispatcher.Dispatch(ctx, &store)
+	err = bus.Dispatch(ctx, &store)
 	if err != nil {
 		return ""
 	}

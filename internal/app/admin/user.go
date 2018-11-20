@@ -7,13 +7,13 @@ import (
 	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/internal/app/view"
-	"github.com/acoshift/acourse/internal/pkg/dispatcher"
+	"github.com/acoshift/acourse/internal/pkg/bus"
 	"github.com/acoshift/acourse/internal/pkg/model/admin"
 )
 
 func getUsers(ctx *hime.Context) error {
 	cnt := admin.CountUsers{}
-	err := dispatcher.Dispatch(ctx, &cnt)
+	err := bus.Dispatch(ctx, &cnt)
 	if err != nil {
 		return err
 	}
@@ -22,7 +22,7 @@ func getUsers(ctx *hime.Context) error {
 	pn := paginate.New(pg, 30, cnt.Result)
 
 	list := admin.ListUsers{Limit: pn.Limit(), Offset: pn.Offset()}
-	err = dispatcher.Dispatch(ctx, &list)
+	err = bus.Dispatch(ctx, &list)
 	if err != nil {
 		return err
 	}

@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/acoshift/acourse/internal/pkg/dispatcher"
+	"github.com/acoshift/acourse/internal/pkg/bus"
 	"github.com/acoshift/acourse/internal/pkg/model/notify"
 )
 
@@ -22,7 +22,7 @@ func Init(webhookURL string) {
 		url: webhookURL,
 	}
 
-	dispatcher.Register(s.admin)
+	bus.Register(s.admin)
 }
 
 type outgoingWebhookNotifier struct {

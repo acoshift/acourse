@@ -8,8 +8,8 @@ import (
 
 	"github.com/acoshift/pgsql"
 
+	"github.com/acoshift/acourse/internal/pkg/bus"
 	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
-	"github.com/acoshift/acourse/internal/pkg/dispatcher"
 	"github.com/acoshift/acourse/internal/pkg/model"
 	"github.com/acoshift/acourse/internal/pkg/model/app"
 	"github.com/acoshift/acourse/internal/pkg/model/course"
@@ -19,19 +19,19 @@ import (
 
 // Init inits course service
 func Init() {
-	dispatcher.Register(setOption)
-	dispatcher.Register(setImage)
-	dispatcher.Register(getURL)
-	dispatcher.Register(getUserID)
-	dispatcher.Register(get)
-	dispatcher.Register(createContent)
-	dispatcher.Register(updateContent)
-	dispatcher.Register(getContent)
-	dispatcher.Register(deleteContent)
-	dispatcher.Register(listContents)
-	dispatcher.Register(insertEnroll)
-	dispatcher.Register(create)
-	dispatcher.Register(update)
+	bus.Register(setOption)
+	bus.Register(setImage)
+	bus.Register(getURL)
+	bus.Register(getUserID)
+	bus.Register(get)
+	bus.Register(createContent)
+	bus.Register(updateContent)
+	bus.Register(getContent)
+	bus.Register(deleteContent)
+	bus.Register(listContents)
+	bus.Register(insertEnroll)
+	bus.Register(create)
+	bus.Register(update)
 }
 
 func setOption(ctx context.Context, m *course.SetOption) error {
@@ -245,14 +245,14 @@ func create(ctx context.Context, m *course.Create) error {
 			return err
 		}
 
-		return dispatcher.Dispatch(ctx, &course.SetOption{ID: m.Result, Option: course.Option{}})
+		return bus.Dispatch(ctx, &course.SetOption{ID: m.Result, Option: course.Option{}})
 	})
 }
 
 func uploadCourseCoverImage(ctx context.Context, r io.Reader) (string, error) {
 	buf := &bytes.Buffer{}
 
-	if err := dispatcher.Dispatch(ctx, &image.JPEG{
+	if err := bus.Dispatch(ctx, &image.JPEG{
 		Writer:  buf,
 		Reader:  r,
 		Width:   1200,
@@ -264,7 +264,7 @@ func uploadCourseCoverImage(ctx context.Context, r io.Reader) (string, error) {
 	filename := file.GenerateFilename() + ".jpg"
 
 	store := file.Store{Reader: buf, Filename: filename}
-	if err := dispatcher.Dispatch(ctx, &store); err != nil {
+	if err := bus.Dispatch(ctx, &store); err != nil {
 		return "", err
 	}
 	return store.Result, nil
@@ -318,7 +318,7 @@ func update(ctx context.Context, m *course.Update) error {
 		}
 
 		if imageURL != "" {
-			err = dispatcher.Dispatch(ctx, &course.SetImage{ID: m.ID, Image: imageURL})
+			err = bus.Dispatch(ctx, &course.SetImage{ID: m.ID, Image: imageURL})
 			if err != nil {
 				return err
 			}

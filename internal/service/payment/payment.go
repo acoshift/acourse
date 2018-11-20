@@ -3,15 +3,15 @@ package payment
 import (
 	"context"
 
+	"github.com/acoshift/acourse/internal/pkg/bus"
 	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
-	"github.com/acoshift/acourse/internal/pkg/dispatcher"
 	"github.com/acoshift/acourse/internal/pkg/model/payment"
 )
 
 // Init inits payment
 func Init() {
-	dispatcher.Register(setStatus)
-	dispatcher.Register(hasPending)
+	bus.Register(setStatus)
+	bus.Register(hasPending)
 }
 
 func setStatus(ctx context.Context, m *payment.SetStatus) error {

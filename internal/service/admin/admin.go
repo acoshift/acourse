@@ -8,8 +8,8 @@ import (
 	"github.com/acoshift/pgsql"
 	"github.com/lib/pq"
 
+	"github.com/acoshift/acourse/internal/pkg/bus"
 	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
-	"github.com/acoshift/acourse/internal/pkg/dispatcher"
 	"github.com/acoshift/acourse/internal/pkg/markdown"
 	"github.com/acoshift/acourse/internal/pkg/model"
 	"github.com/acoshift/acourse/internal/pkg/model/admin"
@@ -21,15 +21,15 @@ import (
 
 // Init inits admin service
 func Init() {
-	dispatcher.Register(listUsers)
-	dispatcher.Register(countUsers)
-	dispatcher.Register(listCourses)
-	dispatcher.Register(countCourses)
-	dispatcher.Register(getPayment)
-	dispatcher.Register(listPayments)
-	dispatcher.Register(countPayments)
-	dispatcher.Register(acceptPayment)
-	dispatcher.Register(rejectPayment)
+	bus.Register(listUsers)
+	bus.Register(countUsers)
+	bus.Register(listCourses)
+	bus.Register(countCourses)
+	bus.Register(getPayment)
+	bus.Register(listPayments)
+	bus.Register(countPayments)
+	bus.Register(acceptPayment)
+	bus.Register(rejectPayment)
 }
 
 func listUsers(ctx context.Context, m *admin.ListUsers) error {
@@ -182,7 +182,7 @@ func countPayments(ctx context.Context, m *admin.CountPayments) error {
 func acceptPayment(ctx context.Context, m *admin.AcceptPayment) error {
 	err := sqlctx.RunInTx(ctx, func(ctx context.Context) error {
 		p := admin.GetPayment{PaymentID: m.ID}
-		err := dispatcher.Dispatch(ctx, &p)
+		err := bus.Dispatch(ctx, &p)
 		if err == model.ErrNotFound {
 			return app.NewUIError("payment not found")
 		}
@@ -190,12 +190,12 @@ func acceptPayment(ctx context.Context, m *admin.AcceptPayment) error {
 			return err
 		}
 
-		err = dispatcher.Dispatch(ctx, &payment.SetStatus{ID: p.Result.ID, Status: payment.Accepted})
+		err = bus.Dispatch(ctx, &payment.SetStatus{ID: p.Result.ID, Status: payment.Accepted})
 		if err != nil {
 			return err
 		}
 
-		return dispatcher.Dispatch(ctx, &course.InsertEnroll{ID: p.Result.Course.ID, UserID: p.Result.User.ID})
+		return bus.Dispatch(ctx, &course.InsertEnroll{ID: p.Result.Course.ID, UserID: p.Result.User.ID})
 	})
 	if err != nil {
 		return err
@@ -204,7 +204,7 @@ func acceptPayment(ctx context.Context, m *admin.AcceptPayment) error {
 	go func() {
 		// re-fetch payment to get latest timestamp
 		p := admin.GetPayment{PaymentID: m.ID}
-		err := dispatcher.Dispatch(ctx, &p)
+		err := bus.Dispatch(ctx, &p)
 		if err != nil {
 			return
 		}
@@ -254,7 +254,7 @@ https://acourse.io
 		))
 
 		title := fmt.Sprintf("ยืนยันการชำระเงิน หลักสูตร %s", p.Result.Course.Title)
-		dispatcher.Dispatch(context.Background(), &email.Send{
+		bus.Dispatch(context.Background(), &email.Send{
 			To:      p.Result.User.Email,
 			Subject: title,
 			Body:    body,
@@ -267,7 +267,7 @@ https://acourse.io
 func rejectPayment(ctx context.Context, m *admin.RejectPayment) error {
 	err := sqlctx.RunInTx(ctx, func(ctx context.Context) error {
 		p := admin.GetPayment{PaymentID: m.ID}
-		err := dispatcher.Dispatch(ctx, &p)
+		err := bus.Dispatch(ctx, &p)
 		if err == model.ErrNotFound {
 			return app.NewUIError("payment not found")
 		}
@@ -275,7 +275,7 @@ func rejectPayment(ctx context.Context, m *admin.RejectPayment) error {
 			return err
 		}
 
-		return dispatcher.Dispatch(ctx, &payment.SetStatus{ID: p.Result.ID, Status: payment.Rejected})
+		return bus.Dispatch(ctx, &payment.SetStatus{ID: p.Result.ID, Status: payment.Rejected})
 	})
 	if err != nil {
 		return err
@@ -283,13 +283,13 @@ func rejectPayment(ctx context.Context, m *admin.RejectPayment) error {
 
 	go func() {
 		p := admin.GetPayment{PaymentID: m.ID}
-		err := dispatcher.Dispatch(ctx, &p)
+		err := bus.Dispatch(ctx, &p)
 		if err != nil {
 			return
 		}
 		body := markdown.Email(m.Message)
 		title := fmt.Sprintf("คำขอเพื่อเรียนหลักสูตร %s ได้รับการปฏิเสธ", p.Result.Course.Title)
-		dispatcher.Dispatch(context.Background(), &email.Send{
+		bus.Dispatch(context.Background(), &email.Send{
 			To:      p.Result.User.Email,
 			Subject: title,
 			Body:    body,

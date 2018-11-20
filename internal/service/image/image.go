@@ -7,13 +7,13 @@ import (
 
 	"github.com/disintegration/imaging"
 
-	"github.com/acoshift/acourse/internal/pkg/dispatcher"
+	"github.com/acoshift/acourse/internal/pkg/bus"
 	model "github.com/acoshift/acourse/internal/pkg/model/image"
 )
 
 // Init inits image service
 func Init() {
-	dispatcher.Register(encodeJPEG)
+	bus.Register(encodeJPEG)
 }
 
 func encodeJPEG(_ context.Context, m *model.JPEG) error {

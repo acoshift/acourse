@@ -6,8 +6,8 @@ import (
 	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/internal/app/view"
+	"github.com/acoshift/acourse/internal/pkg/bus"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
-	"github.com/acoshift/acourse/internal/pkg/dispatcher"
 	"github.com/acoshift/acourse/internal/pkg/model/app"
 	"github.com/acoshift/acourse/internal/pkg/model/course"
 )
@@ -45,7 +45,7 @@ func postCourseCreate(ctx *hime.Context) error {
 		Image:     image,
 		Start:     start,
 	}
-	err := dispatcher.Dispatch(ctx, &q)
+	err := bus.Dispatch(ctx, &q)
 	if app.IsUIError(err) {
 		f.Add("Errors", err.Error())
 		return ctx.RedirectToGet()
@@ -55,7 +55,7 @@ func postCourseCreate(ctx *hime.Context) error {
 	}
 
 	link := course.GetURL{ID: q.Result}
-	dispatcher.Dispatch(ctx, &link)
+	bus.Dispatch(ctx, &link)
 	if link.Result == "" {
 		return ctx.RedirectTo("app.course", q.Result)
 	}
@@ -65,7 +65,7 @@ func postCourseCreate(ctx *hime.Context) error {
 func getCourseEdit(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 	getCourse := course.Get{ID: id}
-	err := dispatcher.Dispatch(ctx, &getCourse)
+	err := bus.Dispatch(ctx, &getCourse)
 	if err != nil {
 		return err
 	}
@@ -107,7 +107,7 @@ func postCourseEdit(ctx *hime.Context) error {
 		Image:     image,
 		Start:     start,
 	}
-	err := dispatcher.Dispatch(ctx, &q)
+	err := bus.Dispatch(ctx, &q)
 	if app.IsUIError(err) {
 		f.Add("Errors", err.Error())
 		return ctx.RedirectToGet()
@@ -117,7 +117,7 @@ func postCourseEdit(ctx *hime.Context) error {
 	}
 
 	link := course.GetURL{ID: id}
-	dispatcher.Dispatch(ctx, &link)
+	bus.Dispatch(ctx, &link)
 	if link.Result == "" {
 		return ctx.RedirectTo("app.course", id)
 	}

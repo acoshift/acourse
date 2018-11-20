@@ -12,8 +12,8 @@ import (
 	"github.com/satori/go.uuid"
 
 	"github.com/acoshift/acourse/internal/app/view"
+	"github.com/acoshift/acourse/internal/pkg/bus"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
-	"github.com/acoshift/acourse/internal/pkg/dispatcher"
 	"github.com/acoshift/acourse/internal/pkg/model"
 	"github.com/acoshift/acourse/internal/pkg/model/app"
 	"github.com/acoshift/acourse/internal/pkg/model/course"
@@ -96,7 +96,7 @@ func (c *courseCtrl) view(ctx *hime.Context) error {
 	pendingEnroll := false
 	if u != nil {
 		enrolled := user.IsEnroll{ID: u.ID, CourseID: course.ID}
-		err := dispatcher.Dispatch(ctx, &enrolled)
+		err := bus.Dispatch(ctx, &enrolled)
 		if err != nil {
 			return err
 		}
@@ -131,7 +131,7 @@ func (c *courseCtrl) content(ctx *hime.Context) error {
 	x := c.getCourse(ctx)
 
 	enrolled := user.IsEnroll{ID: u.ID, CourseID: x.ID}
-	err := dispatcher.Dispatch(ctx, &enrolled)
+	err := bus.Dispatch(ctx, &enrolled)
 	if err != nil {
 		return err
 	}
@@ -178,7 +178,7 @@ func (c *courseCtrl) enroll(ctx *hime.Context) error {
 
 	// redirect enrolled user to course content page
 	enrolled := user.IsEnroll{ID: u.ID, CourseID: course.ID}
-	err := dispatcher.Dispatch(ctx, &enrolled)
+	err := bus.Dispatch(ctx, &enrolled)
 	if err != nil {
 		return err
 	}
@@ -215,7 +215,7 @@ func (c *courseCtrl) postEnroll(ctx *hime.Context) error {
 
 	// redirect enrolled user to course content page
 	enrolled := user.IsEnroll{ID: u.ID, CourseID: x.ID}
-	err := dispatcher.Dispatch(ctx, &enrolled)
+	err := bus.Dispatch(ctx, &enrolled)
 	if err != nil {
 		return err
 	}
@@ -237,7 +237,7 @@ func (c *courseCtrl) postEnroll(ctx *hime.Context) error {
 	price, _ := strconv.ParseFloat(ctx.FormValue("price"), 64)
 	image, _ := ctx.FormFileHeaderNotEmpty("image")
 
-	err = dispatcher.Dispatch(ctx, &user.Enroll{
+	err = bus.Dispatch(ctx, &user.Enroll{
 		ID:           u.ID,
 		CourseID:     x.ID,
 		Price:        price,
@@ -259,7 +259,7 @@ func (c *courseCtrl) assignment(ctx *hime.Context) error {
 	course := c.getCourse(ctx)
 
 	enrolled := user.IsEnroll{ID: u.ID, CourseID: course.ID}
-	err := dispatcher.Dispatch(ctx, &enrolled)
+	err := bus.Dispatch(ctx, &enrolled)
 	if err != nil {
 		return err
 	}

@@ -6,8 +6,8 @@ import (
 	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/internal/app/view"
+	"github.com/acoshift/acourse/internal/pkg/bus"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
-	"github.com/acoshift/acourse/internal/pkg/dispatcher"
 	"github.com/acoshift/acourse/internal/pkg/model/app"
 	"github.com/acoshift/acourse/internal/pkg/model/auth"
 )
@@ -36,7 +36,7 @@ func postSignUp(ctx *hime.Context) error {
 		Email:    email,
 		Password: pass,
 	}
-	err := dispatcher.Dispatch(ctx, &q)
+	err := bus.Dispatch(ctx, &q)
 	if app.IsUIError(err) {
 		f.Set("Email", email)
 		f.Add("Errors", err.Error())

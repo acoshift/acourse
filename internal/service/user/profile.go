@@ -8,8 +8,8 @@ import (
 
 	"github.com/asaskevich/govalidator"
 
+	"github.com/acoshift/acourse/internal/pkg/bus"
 	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
-	"github.com/acoshift/acourse/internal/pkg/dispatcher"
 	"github.com/acoshift/acourse/internal/pkg/model/app"
 	"github.com/acoshift/acourse/internal/pkg/model/file"
 	"github.com/acoshift/acourse/internal/pkg/model/image"
@@ -51,13 +51,13 @@ func updateProfile(ctx context.Context, m *user.UpdateProfile) error {
 
 	err := sqlctx.RunInTx(ctx, func(ctx context.Context) error {
 		if imageURL != "" {
-			err := dispatcher.Dispatch(ctx, &user.SetImage{ID: m.ID, Image: imageURL})
+			err := bus.Dispatch(ctx, &user.SetImage{ID: m.ID, Image: imageURL})
 			if err != nil {
 				return err
 			}
 		}
 
-		return dispatcher.Dispatch(ctx, &user.Update{
+		return bus.Dispatch(ctx, &user.Update{
 			ID:       m.ID,
 			Username: m.Username,
 			Name:     m.Name,
@@ -72,7 +72,7 @@ func updateProfile(ctx context.Context, m *user.UpdateProfile) error {
 func uploadProfileImage(ctx context.Context, r io.Reader) (string, error) {
 	buf := &bytes.Buffer{}
 
-	if err := dispatcher.Dispatch(ctx, &image.JPEG{
+	if err := bus.Dispatch(ctx, &image.JPEG{
 		Writer:  buf,
 		Reader:  r,
 		Width:   500,
@@ -85,7 +85,7 @@ func uploadProfileImage(ctx context.Context, r io.Reader) (string, error) {
 
 	filename := file.GenerateFilename() + ".jpg"
 	store := file.Store{Reader: buf, Filename: filename}
-	if err := dispatcher.Dispatch(ctx, &store); err != nil {
+	if err := bus.Dispatch(ctx, &store); err != nil {
 		return "", err
 	}
 	return store.Result, nil

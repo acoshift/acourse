@@ -6,8 +6,8 @@ import (
 	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/internal/app/view"
+	"github.com/acoshift/acourse/internal/pkg/bus"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
-	"github.com/acoshift/acourse/internal/pkg/dispatcher"
 	"github.com/acoshift/acourse/internal/pkg/model"
 	"github.com/acoshift/acourse/internal/pkg/model/app"
 	"github.com/acoshift/acourse/internal/pkg/model/course"
@@ -17,7 +17,7 @@ func getContentList(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 
 	getCourse := course.Get{ID: id}
-	err := dispatcher.Dispatch(ctx, &getCourse)
+	err := bus.Dispatch(ctx, &getCourse)
 	if err == model.ErrNotFound {
 		return view.NotFound(ctx)
 	}
@@ -28,7 +28,7 @@ func getContentList(ctx *hime.Context) error {
 
 	{
 		q := course.ListContents{ID: id}
-		err := dispatcher.Dispatch(ctx, &q)
+		err := bus.Dispatch(ctx, &q)
 		if err != nil {
 			return err
 		}
@@ -44,7 +44,7 @@ func postContentList(ctx *hime.Context) error {
 	if ctx.FormValue("action") == "delete" {
 		contentID := ctx.FormValue("contentId")
 
-		err := dispatcher.Dispatch(ctx, &course.DeleteContent{ContentID: contentID})
+		err := bus.Dispatch(ctx, &course.DeleteContent{ContentID: contentID})
 		if app.IsUIError(err) {
 			// TODO: use flash
 			return ctx.Status(http.StatusBadRequest).Error(err.Error())
@@ -60,7 +60,7 @@ func getContentCreate(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 
 	getCourse := course.Get{ID: id}
-	err := dispatcher.Dispatch(ctx, &getCourse)
+	err := bus.Dispatch(ctx, &getCourse)
 	if err != nil {
 		return err
 	}
@@ -80,7 +80,7 @@ func postContentCreate(ctx *hime.Context) error {
 		videoID = ctx.FormValue("videoId")
 	)
 
-	err := dispatcher.Dispatch(ctx, &course.CreateContent{
+	err := bus.Dispatch(ctx, &course.CreateContent{
 		ID:        id,
 		Title:     title,
 		LongDesc:  desc,
@@ -99,7 +99,7 @@ func getContentEdit(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 
 	getContent := course.GetContent{ContentID: id}
-	err := dispatcher.Dispatch(ctx, &getContent)
+	err := bus.Dispatch(ctx, &getContent)
 	if err == model.ErrNotFound {
 		return view.NotFound(ctx)
 	}
@@ -109,7 +109,7 @@ func getContentEdit(ctx *hime.Context) error {
 	content := getContent.Result
 
 	getCourse := course.Get{ID: content.CourseID}
-	err = dispatcher.Dispatch(ctx, &getCourse)
+	err = bus.Dispatch(ctx, &getCourse)
 	if err != nil {
 		return err
 	}
@@ -132,7 +132,7 @@ func postContentEdit(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 
 	getContent := course.GetContent{ContentID: id}
-	err := dispatcher.Dispatch(ctx, &getContent)
+	err := bus.Dispatch(ctx, &getContent)
 	if err == model.ErrNotFound {
 		return view.NotFound(ctx)
 	}
@@ -149,7 +149,7 @@ func postContentEdit(ctx *hime.Context) error {
 
 	{
 		getCourse := course.Get{ID: content.CourseID}
-		err := dispatcher.Dispatch(ctx, &getCourse)
+		err := bus.Dispatch(ctx, &getCourse)
 		if err != nil {
 			return err
 		}
@@ -169,7 +169,7 @@ func postContentEdit(ctx *hime.Context) error {
 		videoID = ctx.FormValue("videoId")
 	)
 
-	err = dispatcher.Dispatch(ctx, &course.UpdateContent{
+	err = bus.Dispatch(ctx, &course.UpdateContent{
 		ContentID: id,
 		Title:     title,
 		Desc:      desc,
