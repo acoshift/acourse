@@ -42,7 +42,8 @@ func SetHeaders(h http.Handler) http.Handler {
 		w.Header().Set(header.XXSSProtection, "1; mode=block")
 		w.Header().Set(header.XFrameOptions, "deny")
 		// w.Header().Set(header.ContentSecurityPolicy, "img-src https: data:; font-src https: data:; media-src https:;")
-		w.Header().Set(header.CacheControl, "no-cache, no-store, must-revalidate")
+		w.Header().Set(header.CacheControl, "no-store")
+		w.Header().Set(header.ReferrerPolicy, "same-origin")
 		h.ServeHTTP(w, r)
 	})
 }
