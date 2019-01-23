@@ -9,7 +9,7 @@ import (
 	"github.com/acoshift/methodmux"
 	"github.com/acoshift/prefixhandler"
 	"github.com/moonrhythm/hime"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 
 	"github.com/acoshift/acourse/internal/app/view"
 	"github.com/acoshift/acourse/internal/pkg/bus"
@@ -95,13 +95,14 @@ func (c *courseCtrl) view(ctx *hime.Context) error {
 	enrolled := false
 	pendingEnroll := false
 	if u != nil {
-		enrolled := user.IsEnroll{ID: u.ID, CourseID: course.ID}
-		err := bus.Dispatch(ctx, &enrolled)
+		q := user.IsEnroll{ID: u.ID, CourseID: course.ID}
+		err := bus.Dispatch(ctx, &q)
 		if err != nil {
 			return err
 		}
+		enrolled = q.Result
 
-		if !enrolled.Result {
+		if !q.Result {
 			pendingEnroll, err = hasPendingPayment(ctx, u.ID, course.ID)
 			if err != nil {
 				return err
