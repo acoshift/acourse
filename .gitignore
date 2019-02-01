@@ -10,3 +10,4 @@ acourse
 *.swp
 .goreload
 .build/
+.idea/
