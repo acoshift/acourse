@@ -11,3 +11,4 @@ acourse
 .goreload
 .build/
 .idea/
+assets/atomic.css

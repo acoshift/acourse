@@ -198,6 +198,11 @@ beeper@^1.0.0:
   resolved "https://registry.yarnpkg.com/beeper/-/beeper-1.1.1.tgz#e6d5ea8c5dad001304a70b22638447f69cb2f809"
   integrity sha1-5tXqjF2tABMEpwsiY4RH9pyy+Ak=
 
+biomatic@^0.3.12:
+  version "0.3.12"
+  resolved "https://registry.yarnpkg.com/biomatic/-/biomatic-0.3.12.tgz#24be0f970890009487ff431d92efaf611d678789"
+  integrity sha512-bcfQ83YvAUXM0WnWiTa1v5qOyHCdxo7ZxCJWDK7/YYUV/cwqYRl/cuTbVEUI5JuGNmaW3s3PJsOQA1N77+uDGg==
+
 block-stream@*:
   version "0.0.9"
   resolved "https://registry.yarnpkg.com/block-stream/-/block-stream-0.0.9.tgz#13ebfe778a03205cfe03751481ebb4b3300c126a"

@@ -15,6 +15,7 @@
   },
   "homepage": "https://github.com/acoshift/acourse#readme",
   "dependencies": {
+    "biomatic": "^0.3.12",
     "fs-extra": "^7.0.0",
     "gulp": "^3.9.1",
     "gulp-concat": "^2.6.1",
