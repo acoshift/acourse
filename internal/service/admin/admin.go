@@ -16,7 +16,7 @@ import (
 	"github.com/acoshift/acourse/internal/pkg/model"
 	"github.com/acoshift/acourse/internal/pkg/model/admin"
 	"github.com/acoshift/acourse/internal/pkg/model/app"
-	"github.com/acoshift/acourse/internal/pkg/model/payment"
+	"github.com/acoshift/acourse/internal/pkg/payment"
 )
 
 // Init inits admin service
@@ -190,7 +190,7 @@ func acceptPayment(ctx context.Context, m *admin.AcceptPayment) error {
 			return err
 		}
 
-		err = bus.Dispatch(ctx, &payment.SetStatus{ID: p.Result.ID, Status: payment.Accepted})
+		err = payment.SetStatus(ctx, p.Result.ID, payment.Accepted)
 		if err != nil {
 			return err
 		}
@@ -271,7 +271,7 @@ func rejectPayment(ctx context.Context, m *admin.RejectPayment) error {
 			return err
 		}
 
-		return bus.Dispatch(ctx, &payment.SetStatus{ID: p.Result.ID, Status: payment.Rejected})
+		return payment.SetStatus(ctx, p.Result.ID, payment.Rejected)
 	})
 	if err != nil {
 		return err

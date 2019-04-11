@@ -14,9 +14,9 @@ import (
 	"github.com/acoshift/acourse/internal/pkg/image"
 	"github.com/acoshift/acourse/internal/pkg/model"
 	"github.com/acoshift/acourse/internal/pkg/model/app"
-	"github.com/acoshift/acourse/internal/pkg/model/payment"
 	"github.com/acoshift/acourse/internal/pkg/model/user"
 	"github.com/acoshift/acourse/internal/pkg/notify"
+	"github.com/acoshift/acourse/internal/pkg/payment"
 )
 
 func enroll(ctx context.Context, m *user.Enroll) error {
@@ -49,12 +49,11 @@ func enroll(ctx context.Context, m *user.Enroll) error {
 
 	// has pending enroll
 	{
-		q := payment.HasPending{UserID: u.ID, CourseID: m.CourseID}
-		err := bus.Dispatch(ctx, &q)
+		hasPending, err := payment.HasPending(ctx, u.ID, m.CourseID)
 		if err != nil {
 			return err
 		}
-		if q.Result {
+		if hasPending {
 			return nil
 		}
 	}

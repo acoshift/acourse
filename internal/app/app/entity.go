@@ -3,13 +3,13 @@ package app
 import (
 	"time"
 
-	course2 "github.com/acoshift/acourse/internal/pkg/course"
+	"github.com/acoshift/acourse/internal/pkg/course"
 )
 
 // PublicCourse type
 type PublicCourse struct {
 	ID       string
-	Option   course2.Option
+	Option   course.Option
 	Title    string
 	Desc     string
 	Image    string
@@ -30,7 +30,7 @@ func (x *PublicCourse) Link() string {
 
 // ShowStart returns true if course should show start date
 func (x *PublicCourse) ShowStart() bool {
-	return x.Type == course2.Live && !x.Start.IsZero()
+	return x.Type == course.Live && !x.Start.IsZero()
 }
 
 // EnrolledCourse type
@@ -54,7 +54,7 @@ func (x *EnrolledCourse) Link() string {
 
 // ShowStart returns true if course should show start date
 func (x *EnrolledCourse) ShowStart() bool {
-	return x.Type == course2.Live && !x.Start.IsZero()
+	return x.Type == course.Live && !x.Start.IsZero()
 }
 
 // OwnCourse type
@@ -79,13 +79,13 @@ func (x *OwnCourse) Link() string {
 
 // ShowStart returns true if course should show start date
 func (x *OwnCourse) ShowStart() bool {
-	return x.Type == course2.Live && !x.Start.IsZero()
+	return x.Type == course.Live && !x.Start.IsZero()
 }
 
 // Course type
 type Course struct {
 	ID           string
-	Option       course2.Option
+	Option       course.Option
 	Owner        CourseOwner
 	Title        string
 	ShortDesc    string

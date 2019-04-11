@@ -14,7 +14,7 @@ import (
 	"github.com/acoshift/acourse/internal/pkg/model"
 	"github.com/acoshift/acourse/internal/pkg/model/admin"
 	"github.com/acoshift/acourse/internal/pkg/model/app"
-	"github.com/acoshift/acourse/internal/pkg/model/payment"
+	"github.com/acoshift/acourse/internal/pkg/payment"
 )
 
 func getRejectPayment(ctx *hime.Context) error {
