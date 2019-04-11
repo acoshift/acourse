@@ -12,11 +12,10 @@ import (
 	uuid "github.com/satori/go.uuid"
 
 	"github.com/acoshift/acourse/internal/app/view"
-	app2 "github.com/acoshift/acourse/internal/pkg/app"
+	"github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/bus"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
 	"github.com/acoshift/acourse/internal/pkg/course"
-	"github.com/acoshift/acourse/internal/pkg/model"
 	"github.com/acoshift/acourse/internal/pkg/model/user"
 )
 
@@ -51,7 +50,7 @@ func newCourseHandler() http.Handler {
 		if err != nil {
 			// link can not parse to uuid get course id from url
 			courseID, err = getCourseIDByURL(ctx, link)
-			if err == model.ErrNotFound {
+			if err == app.ErrNotFound {
 				return view.NotFound(ctx)
 			}
 			if err != nil {
@@ -60,7 +59,7 @@ func newCourseHandler() http.Handler {
 		}
 
 		x, err := getCourse(ctx, courseID)
-		if err == model.ErrNotFound {
+		if err == app.ErrNotFound {
 			return view.NotFound(ctx)
 		}
 		if err != nil {
@@ -244,7 +243,7 @@ func (c *courseCtrl) postEnroll(ctx *hime.Context) error {
 		Price:        price,
 		PaymentImage: image,
 	})
-	if app2.IsUIError(err) {
+	if app.IsUIError(err) {
 		f.Add("Errors", "image required")
 		return ctx.RedirectToGet()
 	}

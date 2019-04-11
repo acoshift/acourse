@@ -8,7 +8,7 @@ import (
 
 	"github.com/asaskevich/govalidator"
 
-	app2 "github.com/acoshift/acourse/internal/pkg/app"
+	"github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/bus"
 	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
 	"github.com/acoshift/acourse/internal/pkg/file"
@@ -18,16 +18,16 @@ import (
 
 func updateProfile(ctx context.Context, m *user.UpdateProfile) error {
 	if !govalidator.IsAlphanumeric(m.Username) {
-		return app2.NewUIError("username allow only a-z, A-Z, and 0-9")
+		return app.NewUIError("username allow only a-z, A-Z, and 0-9")
 	}
 	if n := utf8.RuneCountInString(m.Username); n < 4 || n > 32 {
-		return app2.NewUIError("username must have 4 - 32 characters")
+		return app.NewUIError("username must have 4 - 32 characters")
 	}
 	if n := utf8.RuneCountInString(m.Name); n < 4 || n > 40 {
-		return app2.NewUIError("name must have 4 - 40 characters")
+		return app.NewUIError("name must have 4 - 40 characters")
 	}
 	if n := utf8.RuneCountInString(m.AboutMe); n > 256 {
-		return app2.NewUIError("about me must have lower than 256 characters")
+		return app.NewUIError("about me must have lower than 256 characters")
 	}
 
 	var imageURL string
@@ -45,7 +45,7 @@ func updateProfile(ctx context.Context, m *user.UpdateProfile) error {
 
 		imageURL, err = uploadProfileImage(ctx, img)
 		if err != nil {
-			return app2.NewUIError(err.Error())
+			return app.NewUIError(err.Error())
 		}
 	}
 

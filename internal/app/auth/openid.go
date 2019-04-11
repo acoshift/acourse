@@ -5,7 +5,7 @@ import (
 
 	"github.com/moonrhythm/hime"
 
-	app2 "github.com/acoshift/acourse/internal/pkg/app"
+	"github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/auth"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
 )
@@ -19,7 +19,7 @@ func getOpenID(ctx *hime.Context) error {
 	p := ctx.FormValue("p")
 
 	redirectURI, state, err := auth.GenerateOpenIDURI(ctx, p)
-	if app2.IsUIError(err) {
+	if app.IsUIError(err) {
 		// TODO: redirect to sign in page
 		return ctx.Status(http.StatusBadRequest).String(err.Error())
 	}
@@ -36,7 +36,7 @@ func getOpenIDCallback(ctx *hime.Context) error {
 	appctx.DelOpenIDState(ctx)
 
 	userID, err := auth.SignInOpenIDCallback(ctx, ctx.RequestURI, sessID)
-	if app2.IsUIError(err) {
+	if app.IsUIError(err) {
 		// TODO: redirect to sign in page
 		return ctx.Status(http.StatusBadRequest).String(err.Error())
 	}

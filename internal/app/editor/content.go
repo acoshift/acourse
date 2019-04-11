@@ -6,17 +6,16 @@ import (
 	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/internal/app/view"
-	app2 "github.com/acoshift/acourse/internal/pkg/app"
+	"github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
 	"github.com/acoshift/acourse/internal/pkg/course"
-	"github.com/acoshift/acourse/internal/pkg/model"
 )
 
 func getContentList(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 
 	c, err := course.Get(ctx, id)
-	if err == model.ErrNotFound {
+	if err == app.ErrNotFound {
 		return view.NotFound(ctx)
 	}
 	if err != nil {
@@ -39,7 +38,7 @@ func postContentList(ctx *hime.Context) error {
 		contentID := ctx.FormValue("contentId")
 
 		err := course.DeleteContent(ctx, contentID)
-		if app2.IsUIError(err) {
+		if app.IsUIError(err) {
 			// TODO: use flash
 			return ctx.Status(http.StatusBadRequest).Error(err.Error())
 		}
@@ -91,7 +90,7 @@ func getContentEdit(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 
 	content, err := course.GetContent(ctx, id)
-	if err == model.ErrNotFound {
+	if err == app.ErrNotFound {
 		return view.NotFound(ctx)
 	}
 	if err != nil {
@@ -120,7 +119,7 @@ func postContentEdit(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 
 	content, err := course.GetContent(ctx, id)
-	if err == model.ErrNotFound {
+	if err == app.ErrNotFound {
 		return view.NotFound(ctx)
 	}
 	if err != nil {

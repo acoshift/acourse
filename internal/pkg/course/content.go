@@ -6,10 +6,10 @@ import (
 	"database/sql"
 	"io"
 
+	"github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
 	"github.com/acoshift/acourse/internal/pkg/file"
 	"github.com/acoshift/acourse/internal/pkg/image"
-	"github.com/acoshift/acourse/internal/pkg/model"
 )
 
 // Content type
@@ -94,7 +94,7 @@ func GetContent(ctx context.Context, contentID string) (*Content, error) {
 		&x.ID, &x.CourseID, &x.Title, &x.Desc, &x.VideoID, &x.VideoType, &x.DownloadURL,
 	)
 	if err == sql.ErrNoRows {
-		return nil, model.ErrNotFound
+		return nil, app.ErrNotFound
 	}
 	if err != nil {
 		return nil, err

@@ -9,10 +9,9 @@ import (
 	"github.com/acoshift/pgsql"
 	"github.com/lib/pq"
 
-	app2 "github.com/acoshift/acourse/internal/pkg/app"
+	"github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
 	"github.com/acoshift/acourse/internal/pkg/image"
-	"github.com/acoshift/acourse/internal/pkg/model"
 	"github.com/acoshift/acourse/internal/pkg/model/user"
 )
 
@@ -84,7 +83,7 @@ func Create(ctx context.Context, m *CreateArgs) (string, error) {
 	// TODO: validate user role
 
 	if m.Title == "" {
-		return "", app2.NewUIError("title required")
+		return "", app.NewUIError("title required")
 	}
 
 	var imageURL string
@@ -103,7 +102,7 @@ func Create(ctx context.Context, m *CreateArgs) (string, error) {
 		imageURL, err = uploadCourseCoverImage(ctx, image)
 		image.Close()
 		if err != nil {
-			return "", app2.NewUIError(err.Error())
+			return "", app.NewUIError(err.Error())
 		}
 	}
 
@@ -140,10 +139,10 @@ func Update(ctx context.Context, m *UpdateArgs) error {
 	// user := appctx.GetUser(ctx)
 
 	if m.ID == "" {
-		return app2.NewUIError("course id required")
+		return app.NewUIError("course id required")
 	}
 	if m.Title == "" {
-		return app2.NewUIError("title required")
+		return app.NewUIError("title required")
 	}
 
 	var imageURL string
@@ -162,7 +161,7 @@ func Update(ctx context.Context, m *UpdateArgs) error {
 		imageURL, err = uploadCourseCoverImage(ctx, image)
 		image.Close()
 		if err != nil {
-			return app2.NewUIError(err.Error())
+			return app.NewUIError(err.Error())
 		}
 	}
 
@@ -235,7 +234,7 @@ func GetUserID(ctx context.Context, id string) (string, error) {
 	var r string
 	err := sqlctx.QueryRow(ctx, `select user_id from courses where id = $1`, id).Scan(&r)
 	if err == sql.ErrNoRows {
-		return "", model.ErrNotFound
+		return "", app.ErrNotFound
 	}
 	return r, err
 }
@@ -257,7 +256,7 @@ func Get(ctx context.Context, id string) (*Course, error) {
 		&x.Option.Public, &x.Option.Enroll, &x.Option.Attend, &x.Option.Assignment, &x.Option.Discount,
 	)
 	if err == sql.ErrNoRows {
-		return nil, model.ErrNotFound
+		return nil, app.ErrNotFound
 	}
 	if err != nil {
 		return nil, err

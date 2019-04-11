@@ -8,7 +8,7 @@ import (
 
 	"github.com/moonrhythm/hime"
 
-	app2 "github.com/acoshift/acourse/internal/pkg/app"
+	"github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/bus"
 	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
 	"github.com/acoshift/acourse/internal/pkg/file"
@@ -23,7 +23,7 @@ var allowProvider = map[string]bool{
 
 func GenerateOpenIDURI(ctx context.Context, provider string) (redirectURI, state string, err error) {
 	if !allowProvider[provider] {
-		return "", "", app2.NewUIError("provider not allowed")
+		return "", "", app.NewUIError("provider not allowed")
 	}
 
 	state = generateSessionID()
@@ -42,7 +42,7 @@ func SignInOpenIDCallback(ctx context.Context, uri, state string) (string, error
 		state,
 	)
 	if err != nil {
-		return "", app2.NewUIError(err.Error())
+		return "", app.NewUIError(err.Error())
 	}
 
 	err = sqlctx.RunInTx(ctx, func(ctx context.Context) error {
@@ -71,10 +71,10 @@ func SignInOpenIDCallback(ctx context.Context, uri, state string) (string, error
 		return nil
 	})
 	if err == user.ErrEmailNotAvailable {
-		return "", app2.NewUIError("อีเมลนี้ถูกสมัครแล้ว")
+		return "", app.NewUIError("อีเมลนี้ถูกสมัครแล้ว")
 	}
 	if err == user.ErrUsernameNotAvailable {
-		return "", app2.NewUIError("username นี้ถูกใช้งานแล้ว")
+		return "", app.NewUIError("username นี้ถูกใช้งานแล้ว")
 	}
 	if err != nil {
 		return "", err

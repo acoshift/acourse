@@ -6,7 +6,7 @@ import (
 	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/internal/app/view"
-	app2 "github.com/acoshift/acourse/internal/pkg/app"
+	"github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/auth"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
 )
@@ -32,7 +32,7 @@ func postSignIn(ctx *hime.Context) error {
 	}
 
 	userID, err := auth.SignInPassword(ctx, email, pass)
-	if app2.IsUIError(err) {
+	if app.IsUIError(err) {
 		f.Add("Errors", err.Error())
 		return ctx.RedirectToGet()
 	}

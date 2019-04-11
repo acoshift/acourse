@@ -7,7 +7,7 @@ import (
 	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/internal/app/view"
-	app2 "github.com/acoshift/acourse/internal/pkg/app"
+	"github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/bus"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
 	"github.com/acoshift/acourse/internal/pkg/model/user"
@@ -93,7 +93,7 @@ func postProfileEdit(ctx *hime.Context) error {
 		AboutMe:  aboutMe,
 		Image:    image,
 	})
-	if app2.IsUIError(err) {
+	if app.IsUIError(err) {
 		f.Add("Errors", err.Error())
 		return ctx.RedirectBackToGet()
 	}

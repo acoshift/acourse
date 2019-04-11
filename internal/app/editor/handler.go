@@ -8,9 +8,9 @@ import (
 	"github.com/moonrhythm/httpmux"
 
 	"github.com/acoshift/acourse/internal/app/view"
+	"github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
 	"github.com/acoshift/acourse/internal/pkg/course"
-	"github.com/acoshift/acourse/internal/pkg/model"
 )
 
 // Mount mounts editor handlers
@@ -66,7 +66,7 @@ func onlyCourseOwner(h http.Handler) http.Handler {
 		id := ctx.FormValue("id")
 
 		ownerID, err := course.GetUserID(ctx, id)
-		if err == model.ErrNotFound {
+		if err == app.ErrNotFound {
 			return view.NotFound(ctx)
 		}
 		if err != nil {

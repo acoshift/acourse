@@ -10,9 +10,8 @@ import (
 	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/internal/app/view"
-	app2 "github.com/acoshift/acourse/internal/pkg/app"
+	"github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/bus"
-	"github.com/acoshift/acourse/internal/pkg/model"
 	"github.com/acoshift/acourse/internal/pkg/model/admin"
 	"github.com/acoshift/acourse/internal/pkg/payment"
 )
@@ -22,7 +21,7 @@ func getRejectPayment(ctx *hime.Context) error {
 
 	q := admin.GetPayment{PaymentID: id}
 	err := bus.Dispatch(ctx, &q)
-	if err == model.ErrNotFound {
+	if err == app.ErrNotFound {
 		return ctx.RedirectTo("admin.payments.pending")
 	}
 	if err != nil {
@@ -78,7 +77,7 @@ func postRejectPayment(ctx *hime.Context) error {
 	message := ctx.PostFormValue("message")
 
 	err := bus.Dispatch(ctx, &admin.RejectPayment{ID: id, Message: message})
-	if app2.IsUIError(err) {
+	if app.IsUIError(err) {
 		return ctx.Status(http.StatusBadRequest).String(err.Error())
 	}
 	if err != nil {
@@ -94,7 +93,7 @@ func postPendingPayment(ctx *hime.Context) error {
 	id := ctx.PostFormValue("id")
 	if action == "accept" {
 		err := bus.Dispatch(ctx, &admin.AcceptPayment{ID: id, Location: ctx.Global("location").(*time.Location)})
-		if app2.IsUIError(err) {
+		if app.IsUIError(err) {
 			return ctx.Status(http.StatusBadRequest).String(err.Error())
 		}
 		if err != nil {

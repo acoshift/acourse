@@ -6,14 +6,13 @@ import (
 	"fmt"
 	"io"
 
-	app2 "github.com/acoshift/acourse/internal/pkg/app"
+	"github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/bus"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
 	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
 	"github.com/acoshift/acourse/internal/pkg/course"
 	"github.com/acoshift/acourse/internal/pkg/file"
 	"github.com/acoshift/acourse/internal/pkg/image"
-	"github.com/acoshift/acourse/internal/pkg/model"
 	"github.com/acoshift/acourse/internal/pkg/model/user"
 	"github.com/acoshift/acourse/internal/pkg/notify"
 	"github.com/acoshift/acourse/internal/pkg/payment"
@@ -23,8 +22,8 @@ func enroll(ctx context.Context, m *user.Enroll) error {
 	u := appctx.GetUser(ctx)
 
 	c, err := course.Get(ctx, m.CourseID)
-	if err == model.ErrNotFound {
-		return model.ErrNotFound
+	if err == app.ErrNotFound {
+		return app.ErrNotFound
 	}
 	if err != nil {
 		return err
@@ -64,13 +63,13 @@ func enroll(ctx context.Context, m *user.Enroll) error {
 	}
 
 	if m.Price < 0 {
-		return app2.NewUIError("จำนวนเงินติดลบไม่ได้")
+		return app.NewUIError("จำนวนเงินติดลบไม่ได้")
 	}
 
 	var imageURL string
 	if originalPrice != 0 {
 		if m.PaymentImage == nil {
-			return app2.NewUIError("กรุณาอัพโหลดรูปภาพ")
+			return app.NewUIError("กรุณาอัพโหลดรูปภาพ")
 		}
 
 		err := image.Validate(m.PaymentImage)
@@ -80,14 +79,14 @@ func enroll(ctx context.Context, m *user.Enroll) error {
 
 		img, err := m.PaymentImage.Open()
 		if err != nil {
-			return app2.NewUIError(err.Error())
+			return app.NewUIError(err.Error())
 		}
 		defer img.Close()
 
 		imageURL, err = uploadPaymentImage(ctx, img)
 		img.Close()
 		if err != nil {
-			return app2.NewUIError(err.Error())
+			return app.NewUIError(err.Error())
 		}
 	}
 
