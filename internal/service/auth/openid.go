@@ -10,10 +10,10 @@ import (
 
 	"github.com/acoshift/acourse/internal/pkg/bus"
 	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
+	"github.com/acoshift/acourse/internal/pkg/file"
 	"github.com/acoshift/acourse/internal/pkg/image"
 	"github.com/acoshift/acourse/internal/pkg/model/app"
 	"github.com/acoshift/acourse/internal/pkg/model/auth"
-	"github.com/acoshift/acourse/internal/pkg/model/file"
 	"github.com/acoshift/acourse/internal/pkg/model/firebase"
 	"github.com/acoshift/acourse/internal/pkg/model/user"
 )
@@ -132,10 +132,9 @@ func (s *svc) uploadProfileFromURLAsync(url string) string {
 	ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	store := file.Store{Reader: buf, Filename: filename, Async: true}
-	err = bus.Dispatch(ctx, &store)
+	downloadURL, err := file.Store(ctx, buf, filename, true)
 	if err != nil {
 		return ""
 	}
-	return store.Result
+	return downloadURL
 }

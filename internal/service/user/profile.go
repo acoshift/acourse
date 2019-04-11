@@ -10,9 +10,9 @@ import (
 
 	"github.com/acoshift/acourse/internal/pkg/bus"
 	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
+	"github.com/acoshift/acourse/internal/pkg/file"
 	"github.com/acoshift/acourse/internal/pkg/image"
 	"github.com/acoshift/acourse/internal/pkg/model/app"
-	"github.com/acoshift/acourse/internal/pkg/model/file"
 	"github.com/acoshift/acourse/internal/pkg/model/user"
 )
 
@@ -77,9 +77,9 @@ func uploadProfileImage(ctx context.Context, r io.Reader) (string, error) {
 	}
 
 	filename := file.GenerateFilename() + ".jpg"
-	store := file.Store{Reader: buf, Filename: filename}
-	if err := bus.Dispatch(ctx, &store); err != nil {
+	downloadURL, err := file.Store(ctx, buf, filename, false)
+	if err != nil {
 		return "", err
 	}
-	return store.Result, nil
+	return downloadURL, nil
 }

@@ -23,11 +23,11 @@ import (
 
 	"github.com/acoshift/acourse/internal/app"
 	"github.com/acoshift/acourse/internal/pkg/config"
+	"github.com/acoshift/acourse/internal/pkg/file"
 	"github.com/acoshift/acourse/internal/pkg/middleware"
 	"github.com/acoshift/acourse/internal/service/admin"
 	"github.com/acoshift/acourse/internal/service/auth"
 	"github.com/acoshift/acourse/internal/service/course"
-	"github.com/acoshift/acourse/internal/service/file"
 	"github.com/acoshift/acourse/internal/service/firebase"
 	"github.com/acoshift/acourse/internal/service/payment"
 	"github.com/acoshift/acourse/internal/service/user"
@@ -98,7 +98,7 @@ func main() {
 		ParseConfigFile("settings/template.yaml")
 
 	// init services
-	file.InitGCS(storageClient, config.String("bucket"))
+	file.SetClient(storageClient)
 	firebase.Init(firAuth)
 	auth.Init()
 	user.Init()
