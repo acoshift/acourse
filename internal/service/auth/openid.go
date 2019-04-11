@@ -14,7 +14,6 @@ import (
 	"github.com/acoshift/acourse/internal/pkg/image"
 	"github.com/acoshift/acourse/internal/pkg/model/app"
 	"github.com/acoshift/acourse/internal/pkg/model/auth"
-	"github.com/acoshift/acourse/internal/pkg/model/firebase"
 	"github.com/acoshift/acourse/internal/pkg/model/user"
 )
 
@@ -30,32 +29,29 @@ func (s *svc) generateOpenIDURI(ctx context.Context, m *auth.GenerateOpenIDURI) 
 
 	sessID := generateSessionID()
 
-	authURI := firebase.CreateAuthURI{
-		ProviderID:  m.Provider,
-		ContinueURI: hime.Global(ctx, "baseURL").(string) + hime.Route(ctx, "auth.openid.callback"),
-		SessionID:   sessID,
-	}
-	err := bus.Dispatch(ctx, &authURI)
+	redirectURI, err := firAuth.CreateAuthURI(ctx,
+		m.Provider,
+		hime.Global(ctx, "baseURL").(string)+hime.Route(ctx, "auth.openid.callback"),
+		sessID,
+	)
 	if err != nil {
 		return err
 	}
 
-	m.Result.RedirectURI = authURI.Result
+	m.Result.RedirectURI = redirectURI
 	m.Result.State = sessID
 
 	return nil
 }
 
 func (s *svc) signInOpenIDCallback(ctx context.Context, m *auth.SignInOpenIDCallback) error {
-	q := firebase.VerifyAuthCallbackURI{
-		CallbackURI: hime.Global(ctx, "baseURL").(string) + m.URI,
-		SessionID:   m.State,
-	}
-	err := bus.Dispatch(ctx, &q)
+	u, err := firAuth.VerifyAuthCallbackURI(ctx,
+		hime.Global(ctx, "baseURL").(string)+m.URI,
+		m.State,
+	)
 	if err != nil {
 		return app.NewUIError(err.Error())
 	}
-	u := q.Result
 
 	err = sqlctx.RunInTx(ctx, func(ctx context.Context) error {
 		// check is user sign up

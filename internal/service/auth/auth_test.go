@@ -8,12 +8,9 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	admin "github.com/acoshift/go-firebase-admin"
-
 	"github.com/acoshift/acourse/internal/pkg/bus"
 	"github.com/acoshift/acourse/internal/pkg/model/app"
 	"github.com/acoshift/acourse/internal/pkg/model/auth"
-	"github.com/acoshift/acourse/internal/pkg/model/firebase"
 	"github.com/acoshift/acourse/internal/pkg/model/user"
 
 	. "github.com/acoshift/acourse/internal/service/auth"
@@ -89,11 +86,7 @@ var _ = Describe("Auth", func() {
 		})
 
 		It("should propagate error when firebase error", func() {
-			bus.Register(func(_ context.Context, m *firebase.CreateUser) error {
-				Expect(m.User.Email).To(Equal("test@test.com"))
-				Expect(m.User.Password).To(Equal("12345678"))
-				return fmt.Errorf("error")
-			})
+			firAuth.error = fmt.Errorf("error")
 
 			q := auth.SignUp{
 				Email:    "test@test.com",
@@ -107,16 +100,9 @@ var _ = Describe("Auth", func() {
 		})
 
 		It("should error when email not available", func() {
-			bus.Register(func(_ context.Context, m *firebase.CreateUser) error {
-				Expect(m.User.Email).To(Equal("test@test.com"))
-				Expect(m.User.Password).To(Equal("12345678"))
-				m.Result = "123"
-				return nil
-			})
+			firAuth.error = nil
+
 			bus.Register(func(_ context.Context, m *user.Create) error {
-				Expect(m.ID).To(Equal("123"))
-				Expect(m.Username).To(Equal("123"))
-				Expect(m.Email).To(Equal("test@test.com"))
 				return user.ErrEmailNotAvailable
 			})
 
@@ -132,16 +118,9 @@ var _ = Describe("Auth", func() {
 		})
 
 		It("should error when username not available", func() {
-			bus.Register(func(_ context.Context, m *firebase.CreateUser) error {
-				Expect(m.User.Email).To(Equal("test@test.com"))
-				Expect(m.User.Password).To(Equal("12345678"))
-				m.Result = "123"
-				return nil
-			})
+			firAuth.error = nil
+
 			bus.Register(func(_ context.Context, m *user.Create) error {
-				Expect(m.ID).To(Equal("123"))
-				Expect(m.Username).To(Equal("123"))
-				Expect(m.Email).To(Equal("test@test.com"))
 				return user.ErrUsernameNotAvailable
 			})
 
@@ -157,16 +136,9 @@ var _ = Describe("Auth", func() {
 		})
 
 		It("should error when database return error", func() {
-			bus.Register(func(_ context.Context, m *firebase.CreateUser) error {
-				Expect(m.User.Email).To(Equal("test@test.com"))
-				Expect(m.User.Password).To(Equal("12345678"))
-				m.Result = "123"
-				return nil
-			})
+			firAuth.error = nil
+
 			bus.Register(func(_ context.Context, m *user.Create) error {
-				Expect(m.ID).To(Equal("123"))
-				Expect(m.Username).To(Equal("123"))
-				Expect(m.Email).To(Equal("test@test.com"))
 				return fmt.Errorf("db error")
 			})
 
@@ -181,16 +153,9 @@ var _ = Describe("Auth", func() {
 		})
 
 		It("should return user id when success", func() {
-			bus.Register(func(_ context.Context, m *firebase.CreateUser) error {
-				Expect(m.User.Email).To(Equal("test@test.com"))
-				Expect(m.User.Password).To(Equal("12345678"))
-				m.Result = "123"
-				return nil
-			})
+			firAuth.error = nil
+
 			bus.Register(func(_ context.Context, m *user.Create) error {
-				Expect(m.ID).To(Equal("123"))
-				Expect(m.Username).To(Equal("123"))
-				Expect(m.Email).To(Equal("test@test.com"))
 				return nil
 			})
 
@@ -238,11 +203,7 @@ var _ = Describe("Auth", func() {
 		})
 
 		It("should error when sign in with valid email but wrong password", func() {
-			bus.Register(func(_ context.Context, m *firebase.VerifyPassword) error {
-				Expect(m.Email).To(Equal("test@test.com"))
-				Expect(m.Password).To(Equal("fakepass"))
-				return fmt.Errorf("invalid")
-			})
+			firAuth.error = fmt.Errorf("invalid")
 
 			q := auth.SignInPassword{
 				Email:    "test@test.com",
@@ -255,14 +216,9 @@ var _ = Describe("Auth", func() {
 		})
 
 		It("should success when sign in with valid email and password", func() {
-			bus.Register(func(_ context.Context, m *firebase.VerifyPassword) error {
-				Expect(m.Email).To(Equal("test@test.com"))
-				Expect(m.Password).To(Equal("123456"))
-				m.Result = "aqswde"
-				return nil
-			})
+			firAuth.error = nil
+
 			bus.Register(func(_ context.Context, m *user.IsExists) error {
-				Expect(m.ID).To(Equal("aqswde"))
 				m.Result = true
 				return nil
 			})
@@ -274,7 +230,7 @@ var _ = Describe("Auth", func() {
 			err := bus.Dispatch(ctx, &q)
 
 			Expect(err).NotTo(HaveOccurred())
-			Expect(q.Result).To(Equal("aqswde"))
+			Expect(q.Result).NotTo(BeEmpty())
 		})
 	})
 
@@ -287,10 +243,7 @@ var _ = Describe("Auth", func() {
 		})
 
 		It("should success when email not found in firebase", func() {
-			bus.Register(func(_ context.Context, m *firebase.GetUserByEmail) error {
-				Expect(m.Email).To(Equal("notfound@test.com"))
-				return fmt.Errorf("not found")
-			})
+			firAuth.error = fmt.Errorf("not found")
 
 			err := bus.Dispatch(ctx, &auth.SendPasswordResetEmail{
 				Email: "notfound@test.com",
@@ -299,45 +252,8 @@ var _ = Describe("Auth", func() {
 			Expect(err).NotTo(HaveOccurred())
 		})
 
-		It("should propagate error when firebase send email error", func() {
-			bus.Register(func(_ context.Context, m *firebase.GetUserByEmail) error {
-				Expect(m.Email).To(Equal("test@test.com"))
-				m.Result = &admin.UserRecord{
-					DisplayName:   "tester",
-					Email:         "test@test.com",
-					EmailVerified: true,
-					UserID:        "12345",
-				}
-				return nil
-			})
-			bus.Register(func(_ context.Context, m *firebase.SendPasswordResetEmail) error {
-				Expect(m.Email).To(Equal("test@test.com"))
-				return fmt.Errorf("some error")
-			})
-
-			err := bus.Dispatch(ctx, &auth.SendPasswordResetEmail{
-				Email: "test@test.com",
-			})
-
-			Expect(err).To(HaveOccurred())
-			Expect(app.IsUIError(err)).To(BeTrue())
-		})
-
 		It("should success when email valid", func() {
-			bus.Register(func(_ context.Context, m *firebase.GetUserByEmail) error {
-				Expect(m.Email).To(Equal("test@test.com"))
-				m.Result = &admin.UserRecord{
-					DisplayName:   "tester",
-					Email:         "test@test.com",
-					EmailVerified: true,
-					UserID:        "12345",
-				}
-				return nil
-			})
-			bus.Register(func(_ context.Context, m *firebase.SendPasswordResetEmail) error {
-				Expect(m.Email).To(Equal("test@test.com"))
-				return nil
-			})
+			firAuth.error = nil
 
 			err := bus.Dispatch(ctx, &auth.SendPasswordResetEmail{
 				Email: "test@test.com",

@@ -28,7 +28,6 @@ import (
 	"github.com/acoshift/acourse/internal/service/admin"
 	"github.com/acoshift/acourse/internal/service/auth"
 	"github.com/acoshift/acourse/internal/service/course"
-	"github.com/acoshift/acourse/internal/service/firebase"
 	"github.com/acoshift/acourse/internal/service/payment"
 	"github.com/acoshift/acourse/internal/service/user"
 )
@@ -99,8 +98,8 @@ func main() {
 
 	// init services
 	file.SetClient(storageClient)
-	firebase.Init(firAuth)
 	auth.Init()
+	auth.SetFirebaseAuth(firAuth)
 	user.Init()
 	course.Init()
 	payment.Init()

@@ -13,7 +13,6 @@ import (
 	"github.com/acoshift/acourse/internal/pkg/bus"
 	"github.com/acoshift/acourse/internal/pkg/model/app"
 	"github.com/acoshift/acourse/internal/pkg/model/auth"
-	"github.com/acoshift/acourse/internal/pkg/model/firebase"
 	"github.com/acoshift/acourse/internal/pkg/model/user"
 )
 
@@ -47,17 +46,13 @@ func (s *svc) signUp(ctx context.Context, m *auth.SignUp) error {
 		return app.NewUIError("password must have 6 to 64 characters")
 	}
 
-	createUser := firebase.CreateUser{
-		User: &admin.User{
-			Email:    email,
-			Password: m.Password,
-		},
-	}
-	err = bus.Dispatch(ctx, &createUser)
+	userID, err := firAuth.CreateUser(ctx, &admin.User{
+		Email:    email,
+		Password: m.Password,
+	})
 	if err != nil {
 		return app.NewUIError(err.Error())
 	}
-	userID := createUser.Result
 
 	err = bus.Dispatch(ctx, &user.Create{
 		ID:       userID,
@@ -84,14 +79,13 @@ func (s *svc) sendPasswordResetEmail(ctx context.Context, m *auth.SendPasswordRe
 		return app.NewUIError("email required")
 	}
 
-	getUser := firebase.GetUserByEmail{Email: m.Email}
-	err := bus.Dispatch(ctx, &getUser)
+	u, err := firAuth.GetUserByEmail(ctx, m.Email)
 	if err != nil {
 		// don't send any error back to user
 		return nil
 	}
 
-	err = bus.Dispatch(ctx, &firebase.SendPasswordResetEmail{Email: getUser.Email})
+	err = firAuth.SendPasswordResetEmail(ctx, u.Email)
 	if err != nil {
 		return app.NewUIError(err.Error())
 	}
@@ -107,15 +101,13 @@ func (s *svc) signInPassword(ctx context.Context, m *auth.SignInPassword) error 
 		return app.NewUIError("password required")
 	}
 
-	q := firebase.VerifyPassword{Email: m.Email, Password: m.Password}
-	err := bus.Dispatch(ctx, &q)
+	userID, err := firAuth.VerifyPassword(ctx, m.Email, m.Password)
 	if err != nil {
 		return app.NewUIError(err.Error())
 	}
-	userID := q.Result
 
 	// if user not found in our database, insert new user
-	// this happend when database out of sync with firebase authentication
+	// this happened when database out of sync with firebase authentication
 	{
 		exists := user.IsExists{ID: userID}
 		err = bus.Dispatch(ctx, &exists)
