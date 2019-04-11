@@ -13,7 +13,6 @@ import (
 	"cloud.google.com/go/storage"
 	"github.com/acoshift/configfile"
 	firadmin "github.com/acoshift/go-firebase-admin"
-	"github.com/acoshift/middleware"
 	"github.com/acoshift/probehandler"
 	"github.com/acoshift/webstatic"
 	"github.com/go-redis/redis"
@@ -22,12 +21,12 @@ import (
 	redisstore "github.com/moonrhythm/session/store/goredis"
 	"google.golang.org/api/option"
 
-	"github.com/acoshift/acourse/internal"
 	"github.com/acoshift/acourse/internal/app"
+	"github.com/acoshift/acourse/internal/pkg/config"
+	"github.com/acoshift/acourse/internal/pkg/middleware"
 	"github.com/acoshift/acourse/internal/service/admin"
 	"github.com/acoshift/acourse/internal/service/auth"
 	"github.com/acoshift/acourse/internal/service/course"
-	"github.com/acoshift/acourse/internal/service/email"
 	"github.com/acoshift/acourse/internal/service/file"
 	"github.com/acoshift/acourse/internal/service/firebase"
 	"github.com/acoshift/acourse/internal/service/image"
@@ -38,8 +37,6 @@ import (
 
 func main() {
 	time.Local = time.UTC
-
-	config := configfile.NewReader("config")
 
 	loc, err := time.LoadLocation(config.StringDefault("location", "Asia/Bangkok"))
 	must(err)
@@ -103,13 +100,6 @@ func main() {
 		ParseConfigFile("settings/template.yaml")
 
 	// init services
-	email.InitSMTP(email.SMTPConfig{
-		Server:   config.String("email_server"),
-		Port:     config.Int("email_port"),
-		User:     config.String("email_user"),
-		Password: config.String("email_password"),
-		From:     config.String("email_from"),
-	})
 	file.InitGCS(storageClient, config.String("bucket"))
 	image.Init()
 	firebase.Init(firAuth)
@@ -154,8 +144,8 @@ func main() {
 	}))
 
 	h := middleware.Chain(
-		internal.ErrorLogger(errClient),
-		internal.SetHeaders,
+		middleware.ErrorLogger(errClient),
+		middleware.SetHeaders,
 		middleware.CSRF(middleware.CSRFConfig{
 			Origins:     []string{baseURL},
 			IgnoreProto: true,

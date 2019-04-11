@@ -10,12 +10,12 @@ import (
 
 	"github.com/acoshift/acourse/internal/pkg/bus"
 	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
+	"github.com/acoshift/acourse/internal/pkg/email"
 	"github.com/acoshift/acourse/internal/pkg/markdown"
 	"github.com/acoshift/acourse/internal/pkg/model"
 	"github.com/acoshift/acourse/internal/pkg/model/admin"
 	"github.com/acoshift/acourse/internal/pkg/model/app"
 	"github.com/acoshift/acourse/internal/pkg/model/course"
-	"github.com/acoshift/acourse/internal/pkg/model/email"
 	"github.com/acoshift/acourse/internal/pkg/model/payment"
 )
 
@@ -254,11 +254,7 @@ https://acourse.io
 		))
 
 		title := fmt.Sprintf("ยืนยันการชำระเงิน หลักสูตร %s", p.Result.Course.Title)
-		bus.Dispatch(context.Background(), &email.Send{
-			To:      p.Result.User.Email,
-			Subject: title,
-			Body:    body,
-		})
+		email.Send(p.Result.User.Email, title, body)
 	}()
 
 	return nil
@@ -289,11 +285,7 @@ func rejectPayment(ctx context.Context, m *admin.RejectPayment) error {
 		}
 		body := markdown.Email(m.Message)
 		title := fmt.Sprintf("คำขอเพื่อเรียนหลักสูตร %s ได้รับการปฏิเสธ", p.Result.Course.Title)
-		bus.Dispatch(context.Background(), &email.Send{
-			To:      p.Result.User.Email,
-			Subject: title,
-			Body:    body,
-		})
+		email.Send(p.Result.User.Email, title, body)
 	}()
 
 	return nil

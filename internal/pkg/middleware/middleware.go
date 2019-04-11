@@ -1,4 +1,4 @@
-package internal
+package middleware
 
 import (
 	"log"
@@ -8,6 +8,17 @@ import (
 	"cloud.google.com/go/errorreporting"
 	"github.com/acoshift/header"
 	"github.com/acoshift/middleware"
+)
+
+// Alias functions
+var (
+	Chain = middleware.Chain
+	CSRF = middleware.CSRF
+)
+
+// Alias types
+type (
+	CSRFConfig = middleware.CSRFConfig
 )
 
 // ErrorLogger logs error and send error page back to response
