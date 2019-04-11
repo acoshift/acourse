@@ -13,7 +13,6 @@ import (
 	"github.com/acoshift/acourse/internal/pkg/file"
 	"github.com/acoshift/acourse/internal/pkg/image"
 	"github.com/acoshift/acourse/internal/pkg/model/app"
-	"github.com/acoshift/acourse/internal/pkg/model/auth"
 	"github.com/acoshift/acourse/internal/pkg/model/user"
 )
 
@@ -22,35 +21,28 @@ var allowProvider = map[string]bool{
 	"github.com": true,
 }
 
-func (s *svc) generateOpenIDURI(ctx context.Context, m *auth.GenerateOpenIDURI) error {
-	if !allowProvider[m.Provider] {
-		return app.NewUIError("provider not allowed")
+func GenerateOpenIDURI(ctx context.Context, provider string) (redirectURI, state string, err error) {
+	if !allowProvider[provider] {
+		return "", "", app.NewUIError("provider not allowed")
 	}
 
-	sessID := generateSessionID()
+	state = generateSessionID()
 
-	redirectURI, err := firAuth.CreateAuthURI(ctx,
-		m.Provider,
+	redirectURI, err = firAuth.CreateAuthURI(ctx,
+		provider,
 		hime.Global(ctx, "baseURL").(string)+hime.Route(ctx, "auth.openid.callback"),
-		sessID,
+		state,
 	)
-	if err != nil {
-		return err
-	}
-
-	m.Result.RedirectURI = redirectURI
-	m.Result.State = sessID
-
-	return nil
+	return
 }
 
-func (s *svc) signInOpenIDCallback(ctx context.Context, m *auth.SignInOpenIDCallback) error {
+func SignInOpenIDCallback(ctx context.Context, uri, state string) (string, error) {
 	u, err := firAuth.VerifyAuthCallbackURI(ctx,
-		hime.Global(ctx, "baseURL").(string)+m.URI,
-		m.State,
+		hime.Global(ctx, "baseURL").(string)+uri,
+		state,
 	)
 	if err != nil {
-		return app.NewUIError(err.Error())
+		return "", app.NewUIError(err.Error())
 	}
 
 	err = sqlctx.RunInTx(ctx, func(ctx context.Context) error {
@@ -63,7 +55,7 @@ func (s *svc) signInOpenIDCallback(ctx context.Context, m *auth.SignInOpenIDCall
 
 		if !exists.Result {
 			// user not found, insert new user
-			imageURL := s.uploadProfileFromURLAsync(u.PhotoURL)
+			imageURL := uploadProfileFromURLAsync(u.PhotoURL)
 			err = bus.Dispatch(ctx, &user.Create{
 				ID:       u.UserID,
 				Name:     u.DisplayName,
@@ -79,18 +71,16 @@ func (s *svc) signInOpenIDCallback(ctx context.Context, m *auth.SignInOpenIDCall
 		return nil
 	})
 	if err == user.ErrEmailNotAvailable {
-		return app.NewUIError("อีเมลนี้ถูกสมัครแล้ว")
+		return "", app.NewUIError("อีเมลนี้ถูกสมัครแล้ว")
 	}
 	if err == user.ErrUsernameNotAvailable {
-		return app.NewUIError("username นี้ถูกใช้งานแล้ว")
+		return "", app.NewUIError("username นี้ถูกใช้งานแล้ว")
 	}
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	m.Result = u.UserID
-
-	return nil
+	return u.UserID, nil
 }
 
 func generateSessionID() string {
@@ -99,7 +89,7 @@ func generateSessionID() string {
 
 // uploadProfileFromURLAsync copies data from given url and upload profile in background,
 // returns url of destination file
-func (s *svc) uploadProfileFromURLAsync(url string) string {
+func uploadProfileFromURLAsync(url string) string {
 	if len(url) == 0 {
 		return ""
 	}

@@ -126,7 +126,7 @@ func getUser(ctx context.Context, userID string) (*user.User, error) {
 	return &x, nil
 }
 
-func findAssignmentsByCourseID(ctx context.Context, courseID string) ([]*model.Assignment, error) {
+func findAssignmentsByCourseID(ctx context.Context, courseID string) ([]*course.Assignment, error) {
 	rows, err := sqlctx.Query(ctx, `
 		select id, title, long_desc, open
 		from assignments
@@ -138,9 +138,9 @@ func findAssignmentsByCourseID(ctx context.Context, courseID string) ([]*model.A
 	}
 	defer rows.Close()
 
-	var xs []*model.Assignment
+	var xs []*course.Assignment
 	for rows.Next() {
-		var x model.Assignment
+		var x course.Assignment
 		err = rows.Scan(&x.ID, &x.Title, &x.Desc, &x.Open)
 		if err != nil {
 			return nil, err

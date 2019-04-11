@@ -22,11 +22,11 @@ import (
 	"google.golang.org/api/option"
 
 	"github.com/acoshift/acourse/internal/app"
+	"github.com/acoshift/acourse/internal/pkg/auth"
 	"github.com/acoshift/acourse/internal/pkg/config"
 	"github.com/acoshift/acourse/internal/pkg/file"
 	"github.com/acoshift/acourse/internal/pkg/middleware"
 	"github.com/acoshift/acourse/internal/service/admin"
-	"github.com/acoshift/acourse/internal/service/auth"
 	"github.com/acoshift/acourse/internal/service/user"
 )
 
@@ -96,7 +96,6 @@ func main() {
 
 	// init services
 	file.SetClient(storageClient)
-	auth.Init()
 	auth.SetFirebaseAuth(firAuth)
 	user.Init()
 	admin.Init()

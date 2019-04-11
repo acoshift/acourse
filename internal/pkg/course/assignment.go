@@ -1,4 +1,4 @@
-package model
+package course
 
 // Assignment model
 type Assignment struct {

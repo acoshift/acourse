@@ -5,7 +5,7 @@ import (
 
 	"github.com/acoshift/go-firebase-admin"
 
-	. "github.com/acoshift/acourse/internal/service/auth"
+	. "github.com/acoshift/acourse/internal/pkg/auth"
 )
 
 type fakeFirebaseAuth struct {
