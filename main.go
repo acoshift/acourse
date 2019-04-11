@@ -30,7 +30,6 @@ import (
 	"github.com/acoshift/acourse/internal/service/file"
 	"github.com/acoshift/acourse/internal/service/firebase"
 	"github.com/acoshift/acourse/internal/service/image"
-	"github.com/acoshift/acourse/internal/service/notify"
 	"github.com/acoshift/acourse/internal/service/payment"
 	"github.com/acoshift/acourse/internal/service/user"
 )
@@ -103,7 +102,6 @@ func main() {
 	file.InitGCS(storageClient, config.String("bucket"))
 	image.Init()
 	firebase.Init(firAuth)
-	notify.Init(config.String("slack_url"))
 	auth.Init()
 	user.Init()
 	course.Init()

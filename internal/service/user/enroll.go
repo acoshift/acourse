@@ -14,9 +14,9 @@ import (
 	"github.com/acoshift/acourse/internal/pkg/model/course"
 	"github.com/acoshift/acourse/internal/pkg/model/file"
 	"github.com/acoshift/acourse/internal/pkg/model/image"
-	"github.com/acoshift/acourse/internal/pkg/model/notify"
 	"github.com/acoshift/acourse/internal/pkg/model/payment"
 	"github.com/acoshift/acourse/internal/pkg/model/user"
+	"github.com/acoshift/acourse/internal/pkg/notify"
 )
 
 func enroll(ctx context.Context, m *user.Enroll) error {
@@ -117,7 +117,7 @@ func enroll(ctx context.Context, m *user.Enroll) error {
 	}
 
 	if newPayment {
-		go bus.Dispatch(ctx, &notify.Admin{Message: fmt.Sprintf("New payment for course %s, price %.2f", c.Title, m.Price)})
+		go notify.Admin(fmt.Sprintf("New payment for course %s, price %.2f", c.Title, m.Price))
 	}
 
 	return nil
