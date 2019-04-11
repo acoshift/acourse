@@ -10,11 +10,11 @@ import (
 
 	"github.com/acoshift/acourse/internal/pkg/bus"
 	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
+	"github.com/acoshift/acourse/internal/pkg/image"
 	"github.com/acoshift/acourse/internal/pkg/model/app"
 	"github.com/acoshift/acourse/internal/pkg/model/auth"
 	"github.com/acoshift/acourse/internal/pkg/model/file"
 	"github.com/acoshift/acourse/internal/pkg/model/firebase"
-	"github.com/acoshift/acourse/internal/pkg/model/image"
 	"github.com/acoshift/acourse/internal/pkg/model/user"
 )
 
@@ -124,14 +124,8 @@ func (s *svc) uploadProfileFromURLAsync(url string) string {
 	defer resp.Body.Close()
 
 	buf := &bytes.Buffer{}
-	if err := bus.Dispatch(ctx, &image.JPEG{
-		Writer:  buf,
-		Reader:  resp.Body,
-		Width:   500,
-		Height:  500,
-		Quality: 90,
-		Crop:    true,
-	}); err != nil {
+	err = image.JPEG(buf, resp.Body, 500, 500, 90, true)
+	if err != nil {
 		return ""
 	}
 	cancel()

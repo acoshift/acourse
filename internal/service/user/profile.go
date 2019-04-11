@@ -10,9 +10,9 @@ import (
 
 	"github.com/acoshift/acourse/internal/pkg/bus"
 	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
+	"github.com/acoshift/acourse/internal/pkg/image"
 	"github.com/acoshift/acourse/internal/pkg/model/app"
 	"github.com/acoshift/acourse/internal/pkg/model/file"
-	"github.com/acoshift/acourse/internal/pkg/model/image"
 	"github.com/acoshift/acourse/internal/pkg/model/user"
 )
 
@@ -37,13 +37,13 @@ func updateProfile(ctx context.Context, m *user.UpdateProfile) error {
 			return err
 		}
 
-		image, err := m.Image.Open()
+		img, err := m.Image.Open()
 		if err != nil {
 			return err
 		}
-		defer image.Close()
+		defer img.Close()
 
-		imageURL, err = uploadProfileImage(ctx, image)
+		imageURL, err = uploadProfileImage(ctx, img)
 		if err != nil {
 			return app.NewUIError(err.Error())
 		}
@@ -71,15 +71,8 @@ func updateProfile(ctx context.Context, m *user.UpdateProfile) error {
 // uploadProfileImage uploads profile image and return url
 func uploadProfileImage(ctx context.Context, r io.Reader) (string, error) {
 	buf := &bytes.Buffer{}
-
-	if err := bus.Dispatch(ctx, &image.JPEG{
-		Writer:  buf,
-		Reader:  r,
-		Width:   500,
-		Height:  500,
-		Quality: 90,
-		Crop:    true,
-	}); err != nil {
+	err := image.JPEG(buf, r, 500, 500, 90, true)
+	if err != nil {
 		return "", err
 	}
 

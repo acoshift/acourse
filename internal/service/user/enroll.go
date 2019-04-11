@@ -9,11 +9,11 @@ import (
 	"github.com/acoshift/acourse/internal/pkg/bus"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
 	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
+	"github.com/acoshift/acourse/internal/pkg/image"
 	"github.com/acoshift/acourse/internal/pkg/model"
 	"github.com/acoshift/acourse/internal/pkg/model/app"
 	"github.com/acoshift/acourse/internal/pkg/model/course"
 	"github.com/acoshift/acourse/internal/pkg/model/file"
-	"github.com/acoshift/acourse/internal/pkg/model/image"
 	"github.com/acoshift/acourse/internal/pkg/model/payment"
 	"github.com/acoshift/acourse/internal/pkg/model/user"
 	"github.com/acoshift/acourse/internal/pkg/notify"
@@ -81,14 +81,14 @@ func enroll(ctx context.Context, m *user.Enroll) error {
 			return err
 		}
 
-		image, err := m.PaymentImage.Open()
+		img, err := m.PaymentImage.Open()
 		if err != nil {
 			return app.NewUIError(err.Error())
 		}
-		defer image.Close()
+		defer img.Close()
 
-		imageURL, err = uploadPaymentImage(ctx, image)
-		image.Close()
+		imageURL, err = uploadPaymentImage(ctx, img)
+		img.Close()
 		if err != nil {
 			return app.NewUIError(err.Error())
 		}
@@ -126,12 +126,8 @@ func enroll(ctx context.Context, m *user.Enroll) error {
 func uploadPaymentImage(ctx context.Context, r io.Reader) (string, error) {
 	buf := &bytes.Buffer{}
 
-	if err := bus.Dispatch(ctx, &image.JPEG{
-		Writer:  buf,
-		Reader:  r,
-		Width:   700,
-		Quality: 60,
-	}); err != nil {
+	err := image.JPEG(buf, r, 700, 0, 60, false)
+	if err != nil {
 		return "", err
 	}
 

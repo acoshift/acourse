@@ -10,11 +10,11 @@ import (
 
 	"github.com/acoshift/acourse/internal/pkg/bus"
 	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
+	"github.com/acoshift/acourse/internal/pkg/image"
 	"github.com/acoshift/acourse/internal/pkg/model"
 	"github.com/acoshift/acourse/internal/pkg/model/app"
 	"github.com/acoshift/acourse/internal/pkg/model/course"
 	"github.com/acoshift/acourse/internal/pkg/model/file"
-	"github.com/acoshift/acourse/internal/pkg/model/image"
 )
 
 // Init inits course service
@@ -251,13 +251,8 @@ func create(ctx context.Context, m *course.Create) error {
 
 func uploadCourseCoverImage(ctx context.Context, r io.Reader) (string, error) {
 	buf := &bytes.Buffer{}
-
-	if err := bus.Dispatch(ctx, &image.JPEG{
-		Writer:  buf,
-		Reader:  r,
-		Width:   1200,
-		Quality: 90,
-	}); err != nil {
+	err := image.JPEG(buf, r, 1200, 0, 90, false)
+	if err != nil {
 		return "", err
 	}
 
