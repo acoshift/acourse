@@ -9,11 +9,11 @@ import (
 	"github.com/acoshift/acourse/internal/pkg/bus"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
 	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
+	"github.com/acoshift/acourse/internal/pkg/course"
 	"github.com/acoshift/acourse/internal/pkg/file"
 	"github.com/acoshift/acourse/internal/pkg/image"
 	"github.com/acoshift/acourse/internal/pkg/model"
 	"github.com/acoshift/acourse/internal/pkg/model/app"
-	"github.com/acoshift/acourse/internal/pkg/model/course"
 	"github.com/acoshift/acourse/internal/pkg/model/payment"
 	"github.com/acoshift/acourse/internal/pkg/model/user"
 	"github.com/acoshift/acourse/internal/pkg/notify"
@@ -22,15 +22,13 @@ import (
 func enroll(ctx context.Context, m *user.Enroll) error {
 	u := appctx.GetUser(ctx)
 
-	getCourse := course.Get{ID: m.CourseID}
-	err := bus.Dispatch(ctx, &getCourse)
+	c, err := course.Get(ctx, m.CourseID)
 	if err == model.ErrNotFound {
 		return model.ErrNotFound
 	}
 	if err != nil {
 		return err
 	}
-	c := getCourse.Result
 
 	// is owner
 	if u.ID == c.UserID {
@@ -98,7 +96,7 @@ func enroll(ctx context.Context, m *user.Enroll) error {
 
 	err = sqlctx.RunInTx(ctx, func(ctx context.Context) error {
 		if c.Price == 0 {
-			return bus.Dispatch(ctx, &course.InsertEnroll{ID: c.ID, UserID: u.ID})
+			return course.InsertEnroll(ctx, c.ID, u.ID)
 		}
 
 		newPayment = true

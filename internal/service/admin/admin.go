@@ -10,12 +10,12 @@ import (
 
 	"github.com/acoshift/acourse/internal/pkg/bus"
 	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
+	"github.com/acoshift/acourse/internal/pkg/course"
 	"github.com/acoshift/acourse/internal/pkg/email"
 	"github.com/acoshift/acourse/internal/pkg/markdown"
 	"github.com/acoshift/acourse/internal/pkg/model"
 	"github.com/acoshift/acourse/internal/pkg/model/admin"
 	"github.com/acoshift/acourse/internal/pkg/model/app"
-	"github.com/acoshift/acourse/internal/pkg/model/course"
 	"github.com/acoshift/acourse/internal/pkg/model/payment"
 )
 
@@ -195,7 +195,7 @@ func acceptPayment(ctx context.Context, m *admin.AcceptPayment) error {
 			return err
 		}
 
-		return bus.Dispatch(ctx, &course.InsertEnroll{ID: p.Result.Course.ID, UserID: p.Result.User.ID})
+		return course.InsertEnroll(ctx, p.Result.Course.ID, p.Result.User.ID)
 	})
 	if err != nil {
 		return err

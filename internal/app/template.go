@@ -6,8 +6,8 @@ import (
 
 	"github.com/dustin/go-humanize"
 
+	course2 "github.com/acoshift/acourse/internal/pkg/course"
 	"github.com/acoshift/acourse/internal/pkg/markdown"
-	"github.com/acoshift/acourse/internal/pkg/model/course"
 	"github.com/acoshift/acourse/internal/pkg/model/payment"
 )
 
@@ -19,11 +19,11 @@ func TemplateFunc(loc *time.Location) template.FuncMap {
 		},
 		"courseType": func(v int) string {
 			switch v {
-			case course.Live:
+			case course2.Live:
 				return "Live"
-			case course.Video:
+			case course2.Video:
 				return "Video"
-			case course.EBook:
+			case course2.EBook:
 				return "eBook"
 			default:
 				return ""
@@ -40,13 +40,13 @@ func TemplateFunc(loc *time.Location) template.FuncMap {
 		},
 		"markdown": markdown.HTML,
 		"live": func() int {
-			return course.Live
+			return course2.Live
 		},
 		"video": func() int {
-			return course.Video
+			return course2.Video
 		},
 		"eBook": func() int {
-			return course.EBook
+			return course2.EBook
 		},
 		"pending": func() int {
 			return payment.Pending

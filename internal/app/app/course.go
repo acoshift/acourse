@@ -14,9 +14,9 @@ import (
 	"github.com/acoshift/acourse/internal/app/view"
 	"github.com/acoshift/acourse/internal/pkg/bus"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
+	course2 "github.com/acoshift/acourse/internal/pkg/course"
 	"github.com/acoshift/acourse/internal/pkg/model"
 	"github.com/acoshift/acourse/internal/pkg/model/app"
-	"github.com/acoshift/acourse/internal/pkg/model/course"
 	"github.com/acoshift/acourse/internal/pkg/model/user"
 )
 
@@ -146,7 +146,7 @@ func (c *courseCtrl) content(ctx *hime.Context) error {
 		return err
 	}
 
-	var content *course.Content
+	var content *course2.Content
 	pg, _ := strconv.Atoi(ctx.FormValue("p"))
 	if pg < 0 {
 		pg = 0

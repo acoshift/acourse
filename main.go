@@ -27,7 +27,6 @@ import (
 	"github.com/acoshift/acourse/internal/pkg/middleware"
 	"github.com/acoshift/acourse/internal/service/admin"
 	"github.com/acoshift/acourse/internal/service/auth"
-	"github.com/acoshift/acourse/internal/service/course"
 	"github.com/acoshift/acourse/internal/service/payment"
 	"github.com/acoshift/acourse/internal/service/user"
 )
@@ -101,7 +100,6 @@ func main() {
 	auth.Init()
 	auth.SetFirebaseAuth(firAuth)
 	user.Init()
-	course.Init()
 	payment.Init()
 	admin.Init()
 

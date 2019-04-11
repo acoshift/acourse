@@ -11,8 +11,8 @@ import (
 
 	"github.com/acoshift/acourse/internal/pkg/context/redisctx"
 	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
+	course2 "github.com/acoshift/acourse/internal/pkg/course"
 	"github.com/acoshift/acourse/internal/pkg/model"
-	"github.com/acoshift/acourse/internal/pkg/model/course"
 	"github.com/acoshift/acourse/internal/pkg/model/payment"
 	"github.com/acoshift/acourse/internal/pkg/model/user"
 )
@@ -67,7 +67,7 @@ func hasPendingPayment(ctx context.Context, userID string, courseID string) (exi
 	return
 }
 
-func getCourseContents(ctx context.Context, courseID string) ([]*course.Content, error) {
+func getCourseContents(ctx context.Context, courseID string) ([]*course2.Content, error) {
 	rows, err := sqlctx.Query(ctx, `
 		select
 			id, course_id, title, long_desc, video_id, video_type, download_url
@@ -80,9 +80,9 @@ func getCourseContents(ctx context.Context, courseID string) ([]*course.Content,
 	}
 	defer rows.Close()
 
-	var xs []*course.Content
+	var xs []*course2.Content
 	for rows.Next() {
-		var x course.Content
+		var x course2.Content
 		err = rows.Scan(
 			&x.ID, &x.CourseID, &x.Title, &x.Desc, &x.VideoID, &x.VideoType, &x.DownloadURL,
 		)

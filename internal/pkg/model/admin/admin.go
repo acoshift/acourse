@@ -3,7 +3,7 @@ package admin
 import (
 	"time"
 
-	"github.com/acoshift/acourse/internal/pkg/model/course"
+	course2 "github.com/acoshift/acourse/internal/pkg/course"
 )
 
 // UserItem type
@@ -27,7 +27,7 @@ type CourseItem struct {
 	URL       string
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	Option    course.Option
+	Option    course2.Option
 	Owner     struct {
 		ID       string
 		Username string
