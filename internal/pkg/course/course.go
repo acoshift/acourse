@@ -9,10 +9,10 @@ import (
 	"github.com/acoshift/pgsql"
 	"github.com/lib/pq"
 
+	app2 "github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
 	"github.com/acoshift/acourse/internal/pkg/image"
 	"github.com/acoshift/acourse/internal/pkg/model"
-	"github.com/acoshift/acourse/internal/pkg/model/app"
 	"github.com/acoshift/acourse/internal/pkg/model/user"
 )
 
@@ -84,7 +84,7 @@ func Create(ctx context.Context, m *CreateArgs) (string, error) {
 	// TODO: validate user role
 
 	if m.Title == "" {
-		return "", app.NewUIError("title required")
+		return "", app2.NewUIError("title required")
 	}
 
 	var imageURL string
@@ -103,7 +103,7 @@ func Create(ctx context.Context, m *CreateArgs) (string, error) {
 		imageURL, err = uploadCourseCoverImage(ctx, image)
 		image.Close()
 		if err != nil {
-			return "", app.NewUIError(err.Error())
+			return "", app2.NewUIError(err.Error())
 		}
 	}
 
@@ -140,10 +140,10 @@ func Update(ctx context.Context, m *UpdateArgs) error {
 	// user := appctx.GetUser(ctx)
 
 	if m.ID == "" {
-		return app.NewUIError("course id required")
+		return app2.NewUIError("course id required")
 	}
 	if m.Title == "" {
-		return app.NewUIError("title required")
+		return app2.NewUIError("title required")
 	}
 
 	var imageURL string
@@ -162,7 +162,7 @@ func Update(ctx context.Context, m *UpdateArgs) error {
 		imageURL, err = uploadCourseCoverImage(ctx, image)
 		image.Close()
 		if err != nil {
-			return app.NewUIError(err.Error())
+			return app2.NewUIError(err.Error())
 		}
 	}
 

@@ -1,5 +1,7 @@
 package app
 
+// TODO: rename package
+
 // IsUIError returns true if given error is ui error
 func IsUIError(err error) bool {
 	_, ok := err.(*uiError)

@@ -10,27 +10,27 @@ import (
 	admin "github.com/acoshift/go-firebase-admin"
 	"github.com/asaskevich/govalidator"
 
+	app2 "github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/bus"
-	"github.com/acoshift/acourse/internal/pkg/model/app"
 	"github.com/acoshift/acourse/internal/pkg/model/user"
 )
 
 func SignUp(ctx context.Context, email, password string) (string, error) {
 	if email == "" {
-		return "", app.NewUIError("email required")
+		return "", app2.NewUIError("email required")
 	}
 
 	var err error
 	email, err = govalidator.NormalizeEmail(email)
 	if err != nil {
-		return "", app.NewUIError("invalid email")
+		return "", app2.NewUIError("invalid email")
 	}
 
 	if password == "" {
-		return "", app.NewUIError("password required")
+		return "", app2.NewUIError("password required")
 	}
 	if n := utf8.RuneCountInString(password); n < 6 || n > 64 {
-		return "", app.NewUIError("password must have 6 to 64 characters")
+		return "", app2.NewUIError("password must have 6 to 64 characters")
 	}
 
 	userID, err := firAuth.CreateUser(ctx, &admin.User{
@@ -38,7 +38,7 @@ func SignUp(ctx context.Context, email, password string) (string, error) {
 		Password: password,
 	})
 	if err != nil {
-		return "", app.NewUIError(err.Error())
+		return "", app2.NewUIError(err.Error())
 	}
 
 	err = bus.Dispatch(ctx, &user.Create{
@@ -47,10 +47,10 @@ func SignUp(ctx context.Context, email, password string) (string, error) {
 		Email:    email,
 	})
 	if err == user.ErrEmailNotAvailable {
-		return "", app.NewUIError("อีเมลนี้ถูกสมัครแล้ว")
+		return "", app2.NewUIError("อีเมลนี้ถูกสมัครแล้ว")
 	}
 	if err == user.ErrUsernameNotAvailable {
-		return "", app.NewUIError("username นี้ถูกใช้งานแล้ว")
+		return "", app2.NewUIError("username นี้ถูกใช้งานแล้ว")
 	}
 	if err != nil {
 		return "", err
@@ -61,7 +61,7 @@ func SignUp(ctx context.Context, email, password string) (string, error) {
 
 func SendPasswordResetEmail(ctx context.Context, email string) error {
 	if email == "" {
-		return app.NewUIError("email required")
+		return app2.NewUIError("email required")
 	}
 
 	u, err := firAuth.GetUserByEmail(ctx, email)
@@ -72,7 +72,7 @@ func SendPasswordResetEmail(ctx context.Context, email string) error {
 
 	err = firAuth.SendPasswordResetEmail(ctx, u.Email)
 	if err != nil {
-		return app.NewUIError(err.Error())
+		return app2.NewUIError(err.Error())
 	}
 
 	return nil
@@ -80,15 +80,15 @@ func SendPasswordResetEmail(ctx context.Context, email string) error {
 
 func SignInPassword(ctx context.Context, email, password string) (string, error) {
 	if email == "" {
-		return "", app.NewUIError("email required")
+		return "", app2.NewUIError("email required")
 	}
 	if password == "" {
-		return "", app.NewUIError("password required")
+		return "", app2.NewUIError("password required")
 	}
 
 	userID, err := firAuth.VerifyPassword(ctx, email, password)
 	if err != nil {
-		return "", app.NewUIError(err.Error())
+		return "", app2.NewUIError(err.Error())
 	}
 
 	// if user not found in our database, insert new user

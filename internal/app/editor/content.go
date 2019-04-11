@@ -6,10 +6,10 @@ import (
 	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/internal/app/view"
+	app2 "github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
 	"github.com/acoshift/acourse/internal/pkg/course"
 	"github.com/acoshift/acourse/internal/pkg/model"
-	"github.com/acoshift/acourse/internal/pkg/model/app"
 )
 
 func getContentList(ctx *hime.Context) error {
@@ -39,7 +39,7 @@ func postContentList(ctx *hime.Context) error {
 		contentID := ctx.FormValue("contentId")
 
 		err := course.DeleteContent(ctx, contentID)
-		if app.IsUIError(err) {
+		if app2.IsUIError(err) {
 			// TODO: use flash
 			return ctx.Status(http.StatusBadRequest).Error(err.Error())
 		}

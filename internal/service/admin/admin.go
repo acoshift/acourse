@@ -8,6 +8,7 @@ import (
 	"github.com/acoshift/pgsql"
 	"github.com/lib/pq"
 
+	app2 "github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/bus"
 	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
 	"github.com/acoshift/acourse/internal/pkg/course"
@@ -15,7 +16,6 @@ import (
 	"github.com/acoshift/acourse/internal/pkg/markdown"
 	"github.com/acoshift/acourse/internal/pkg/model"
 	"github.com/acoshift/acourse/internal/pkg/model/admin"
-	"github.com/acoshift/acourse/internal/pkg/model/app"
 	"github.com/acoshift/acourse/internal/pkg/payment"
 )
 
@@ -184,7 +184,7 @@ func acceptPayment(ctx context.Context, m *admin.AcceptPayment) error {
 		p := admin.GetPayment{PaymentID: m.ID}
 		err := bus.Dispatch(ctx, &p)
 		if err == model.ErrNotFound {
-			return app.NewUIError("payment not found")
+			return app2.NewUIError("payment not found")
 		}
 		if err != nil {
 			return err
@@ -265,7 +265,7 @@ func rejectPayment(ctx context.Context, m *admin.RejectPayment) error {
 		p := admin.GetPayment{PaymentID: m.ID}
 		err := bus.Dispatch(ctx, &p)
 		if err == model.ErrNotFound {
-			return app.NewUIError("payment not found")
+			return app2.NewUIError("payment not found")
 		}
 		if err != nil {
 			return err

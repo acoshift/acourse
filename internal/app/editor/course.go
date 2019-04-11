@@ -6,10 +6,10 @@ import (
 	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/internal/app/view"
+	app2 "github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/bus"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
 	"github.com/acoshift/acourse/internal/pkg/course"
-	"github.com/acoshift/acourse/internal/pkg/model/app"
 )
 
 func getCourseCreate(ctx *hime.Context) error {
@@ -45,7 +45,7 @@ func postCourseCreate(ctx *hime.Context) error {
 		Image:     image,
 		Start:     start,
 	})
-	if app.IsUIError(err) {
+	if app2.IsUIError(err) {
 		f.Add("Errors", err.Error())
 		return ctx.RedirectToGet()
 	}
@@ -104,7 +104,7 @@ func postCourseEdit(ctx *hime.Context) error {
 		Image:     image,
 		Start:     start,
 	})
-	if app.IsUIError(err) {
+	if app2.IsUIError(err) {
 		f.Add("Errors", err.Error())
 		return ctx.RedirectToGet()
 	}

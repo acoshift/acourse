@@ -12,11 +12,11 @@ import (
 	uuid "github.com/satori/go.uuid"
 
 	"github.com/acoshift/acourse/internal/app/view"
+	app2 "github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/bus"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
 	"github.com/acoshift/acourse/internal/pkg/course"
 	"github.com/acoshift/acourse/internal/pkg/model"
-	"github.com/acoshift/acourse/internal/pkg/model/app"
 	"github.com/acoshift/acourse/internal/pkg/model/user"
 )
 
@@ -244,7 +244,7 @@ func (c *courseCtrl) postEnroll(ctx *hime.Context) error {
 		Price:        price,
 		PaymentImage: image,
 	})
-	if app.IsUIError(err) {
+	if app2.IsUIError(err) {
 		f.Add("Errors", "image required")
 		return ctx.RedirectToGet()
 	}
