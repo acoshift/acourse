@@ -113,3 +113,10 @@ func RedisClient() *redis.Client {
 func DBClient() *sql.DB {
 	return dbClient
 }
+
+func Close() {
+	dbClient.Close()
+	redisClient.Close()
+	storageClient.Close()
+	errorClient.Close()
+}

@@ -12,8 +12,7 @@ import (
 )
 
 func main() {
-	defer config.DBClient().Close()
-	defer config.RedisClient().Close()
+	defer config.Close()
 
 	app := app.New()
 
