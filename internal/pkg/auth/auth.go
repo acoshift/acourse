@@ -11,8 +11,7 @@ import (
 	"github.com/asaskevich/govalidator"
 
 	"github.com/acoshift/acourse/internal/pkg/app"
-	"github.com/acoshift/acourse/internal/pkg/bus"
-	"github.com/acoshift/acourse/internal/pkg/model/user"
+	"github.com/acoshift/acourse/internal/pkg/user"
 )
 
 func SignUp(ctx context.Context, email, password string) (string, error) {
@@ -41,7 +40,7 @@ func SignUp(ctx context.Context, email, password string) (string, error) {
 		return "", app.NewUIError(err.Error())
 	}
 
-	err = bus.Dispatch(ctx, &user.Create{
+	err = userSvc.Create(ctx, &user.CreateArgs{
 		ID:       userID,
 		Username: userID,
 		Email:    email,
@@ -94,15 +93,14 @@ func SignInPassword(ctx context.Context, email, password string) (string, error)
 	// if user not found in our database, insert new user
 	// this happened when database out of sync with firebase authentication
 	{
-		exists := user.IsExists{ID: userID}
-		err = bus.Dispatch(ctx, &exists)
+		exists, err := userSvc.IsExists(ctx, userID)
 		if err != nil {
 			return "", err
 		}
 
-		if !exists.Result {
+		if !exists {
 			email, _ := govalidator.NormalizeEmail(email)
-			err = bus.Dispatch(ctx, &user.Create{
+			err = userSvc.Create(ctx, &user.CreateArgs{
 				ID:       userID,
 				Username: userID,
 				Name:     userID,

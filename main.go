@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"database/sql"
 	_ "image/jpeg"
 	_ "image/png"
@@ -9,25 +8,18 @@ import (
 	"net/http"
 	"time"
 
-	"cloud.google.com/go/errorreporting"
-	"cloud.google.com/go/storage"
 	"github.com/acoshift/configfile"
-	firadmin "github.com/acoshift/go-firebase-admin"
 	"github.com/acoshift/probehandler"
 	"github.com/acoshift/webstatic"
 	"github.com/go-redis/redis"
 	_ "github.com/lib/pq"
 	"github.com/moonrhythm/hime"
 	redisstore "github.com/moonrhythm/session/store/goredis"
-	"google.golang.org/api/option"
 
 	"github.com/acoshift/acourse/internal/app"
-	"github.com/acoshift/acourse/internal/pkg/auth"
 	"github.com/acoshift/acourse/internal/pkg/config"
-	"github.com/acoshift/acourse/internal/pkg/file"
 	"github.com/acoshift/acourse/internal/pkg/middleware"
 	"github.com/acoshift/acourse/internal/service/admin"
-	"github.com/acoshift/acourse/internal/service/user"
 )
 
 func main() {
@@ -36,30 +28,7 @@ func main() {
 	loc, err := time.LoadLocation(config.StringDefault("location", "Asia/Bangkok"))
 	must(err)
 
-	ctx := context.Background()
-
-	googClientOpts := []option.ClientOption{option.WithCredentialsFile("config/service_account")}
-
-	serviceName := config.StringDefault("service", "acourse")
-	projectID := config.String("project_id")
-
-	// init error reporting, ignore error
-	errClient, _ := errorreporting.NewClient(ctx, projectID, errorreporting.Config{
-		ServiceName: serviceName,
-		OnError: func(err error) {
-			log.Println(err)
-		},
-	}, googClientOpts...)
-
-	firApp, err := firadmin.InitializeApp(ctx, firadmin.AppOptions{
-		ProjectID: projectID,
-	}, googClientOpts...)
-	must(err)
-	firAuth := firApp.Auth()
-
-	// init google storage
-	storageClient, err := storage.NewClient(ctx, googClientOpts...)
-	must(err)
+	config.Setup()
 
 	// init redis pool
 	redisClient := redis.NewClient(&redis.Options{
@@ -94,10 +63,6 @@ func main() {
 		Funcs(app.TemplateFunc(loc)).
 		ParseConfigFile("settings/template.yaml")
 
-	// init services
-	file.SetClient(storageClient)
-	auth.SetFirebaseAuth(firAuth)
-	user.Init()
 	admin.Init()
 
 	mux := http.NewServeMux()
@@ -134,7 +99,7 @@ func main() {
 	}))
 
 	h := middleware.Chain(
-		middleware.ErrorLogger(errClient),
+		middleware.ErrorLogger(config.ErrorClient()),
 		middleware.SetHeaders,
 		middleware.CSRF(middleware.CSRFConfig{
 			Origins:     []string{baseURL},

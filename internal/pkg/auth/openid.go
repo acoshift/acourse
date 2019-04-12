@@ -9,11 +9,10 @@ import (
 	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/internal/pkg/app"
-	"github.com/acoshift/acourse/internal/pkg/bus"
 	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
 	"github.com/acoshift/acourse/internal/pkg/file"
 	"github.com/acoshift/acourse/internal/pkg/image"
-	"github.com/acoshift/acourse/internal/pkg/model/user"
+	"github.com/acoshift/acourse/internal/pkg/user"
 )
 
 var allowProvider = map[string]bool{
@@ -47,16 +46,15 @@ func SignInOpenIDCallback(ctx context.Context, uri, state string) (string, error
 
 	err = sqlctx.RunInTx(ctx, func(ctx context.Context) error {
 		// check is user sign up
-		exists := user.IsExists{ID: u.UserID}
-		err = bus.Dispatch(ctx, &exists)
+		exists, err := userSvc.IsExists(ctx, u.UserID)
 		if err != nil {
 			return err
 		}
 
-		if !exists.Result {
+		if !exists {
 			// user not found, insert new user
 			imageURL := uploadProfileFromURLAsync(u.PhotoURL)
-			err = bus.Dispatch(ctx, &user.Create{
+			err = userSvc.Create(ctx, &user.CreateArgs{
 				ID:       u.UserID,
 				Name:     u.DisplayName,
 				Username: u.UserID,

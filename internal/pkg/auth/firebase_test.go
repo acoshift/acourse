@@ -1,41 +1,38 @@
-package auth_test
+package auth
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/acoshift/go-firebase-admin"
-
-	. "github.com/acoshift/acourse/internal/pkg/auth"
 )
 
 type fakeFirebaseAuth struct {
 	error error
 }
 
-var firAuth = &fakeFirebaseAuth{}
+var _ = func() bool {
+	isInTest = true
+	return true
+}()
 
 func init() {
-	SetFirebaseAuth(firAuth)
+	firAuth = &fakeFirebaseAuth{}
 }
 
 func (auth *fakeFirebaseAuth) CreateAuthURI(ctx context.Context, providerID, continueURI, sessionID string) (string, error) {
-	if auth.error != nil {
-		return "", auth.error
-	}
 	return "http://localhost:9000", nil
 }
 
 func (auth *fakeFirebaseAuth) VerifyAuthCallbackURI(ctx context.Context, callbackURI, sessionID string) (*firebase.UserInfo, error) {
-	if auth.error != nil {
-		return nil, auth.error
-	}
 	return &firebase.UserInfo{}, nil
 }
 
 func (auth *fakeFirebaseAuth) GetUserByEmail(ctx context.Context, email string) (*firebase.UserRecord, error) {
-	if auth.error != nil {
-		return nil, auth.error
+	if email == "notfound@test.com" {
+		return nil, fmt.Errorf("not found")
 	}
+
 	return &firebase.UserRecord{
 		UserID: "123",
 		Email:  email,
@@ -43,22 +40,19 @@ func (auth *fakeFirebaseAuth) GetUserByEmail(ctx context.Context, email string) 
 }
 
 func (auth *fakeFirebaseAuth) SendPasswordResetEmail(ctx context.Context, email string) error {
-	if auth.error != nil {
-		return auth.error
+	if email == "notfound@test.com" {
+		return fmt.Errorf("not found")
 	}
 	return nil
 }
 
 func (auth *fakeFirebaseAuth) VerifyPassword(ctx context.Context, email, password string) (string, error) {
-	if auth.error != nil {
-		return "", auth.error
+	if password == "fakepass" {
+		return "", fmt.Errorf("invalid password")
 	}
 	return "123", nil
 }
 
 func (auth *fakeFirebaseAuth) CreateUser(ctx context.Context, user *firebase.User) (string, error) {
-	if auth.error != nil {
-		return "", auth.error
-	}
 	return "123", nil
 }

@@ -12,14 +12,12 @@ import (
 	"github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
 	"github.com/acoshift/acourse/internal/pkg/image"
-	"github.com/acoshift/acourse/internal/pkg/model/user"
 )
 
 // Course model
 type Course struct {
 	ID            string
 	Option        Option
-	Owner         *user.User
 	EnrollCount   int64
 	Title         string
 	ShortDesc     string

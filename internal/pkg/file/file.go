@@ -5,19 +5,14 @@ import (
 	"fmt"
 	"io"
 
-	"cloud.google.com/go/storage"
 	"github.com/satori/go.uuid"
 
 	"github.com/acoshift/acourse/internal/pkg/config"
 )
 
-func SetClient(client *storage.Client) {
-	bucket = client.Bucket(bucketName)
-}
-
 var (
-	bucket     *storage.BucketHandle
 	bucketName = config.String("bucket")
+	bucket     = config.StorageClient().Bucket(bucketName)
 )
 
 // GenerateFilename generates new filename

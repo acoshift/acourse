@@ -5,23 +5,35 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"mime/multipart"
 
 	"github.com/acoshift/acourse/internal/pkg/app"
-	"github.com/acoshift/acourse/internal/pkg/bus"
-	"github.com/acoshift/acourse/internal/pkg/context/appctx"
 	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
 	"github.com/acoshift/acourse/internal/pkg/course"
 	"github.com/acoshift/acourse/internal/pkg/file"
 	"github.com/acoshift/acourse/internal/pkg/image"
-	"github.com/acoshift/acourse/internal/pkg/model/user"
 	"github.com/acoshift/acourse/internal/pkg/notify"
 	"github.com/acoshift/acourse/internal/pkg/payment"
 )
 
-func enroll(ctx context.Context, m *user.Enroll) error {
-	u := appctx.GetUser(ctx)
+// IsEnroll checks is user enrolled a course
+func IsEnroll(ctx context.Context, userID, courseID string) (bool, error) {
+	var b bool
+	err := sqlctx.QueryRow(ctx, `
+		select exists (
+			select 1
+			from enrolls
+			where user_id = $1 and course_id = $2
+		)
+	`, userID, courseID).Scan(&b)
+	return b, err
+}
 
-	c, err := course.Get(ctx, m.CourseID)
+// TODO: move enroll to course
+
+// Enroll enrolls a course
+func Enroll(ctx context.Context, userID, courseID string, price float64, paymentImage *multipart.FileHeader) error {
+	c, err := course.Get(ctx, courseID)
 	if err == app.ErrNotFound {
 		return app.ErrNotFound
 	}
@@ -30,25 +42,24 @@ func enroll(ctx context.Context, m *user.Enroll) error {
 	}
 
 	// is owner
-	if u.ID == c.UserID {
+	if userID == c.UserID {
 		return nil
 	}
 
 	// is enrolled
 	{
-		q := user.IsEnroll{ID: u.ID, CourseID: m.CourseID}
-		err = bus.Dispatch(ctx, &q)
+		isEnrolled, err := IsEnroll(ctx, userID, courseID)
 		if err != nil {
 			return err
 		}
-		if q.Result {
+		if isEnrolled {
 			return nil
 		}
 	}
 
 	// has pending enroll
 	{
-		hasPending, err := payment.HasPending(ctx, u.ID, m.CourseID)
+		hasPending, err := payment.HasPending(ctx, userID, courseID)
 		if err != nil {
 			return err
 		}
@@ -62,22 +73,22 @@ func enroll(ctx context.Context, m *user.Enroll) error {
 		originalPrice = c.Discount
 	}
 
-	if m.Price < 0 {
+	if price < 0 {
 		return app.NewUIError("จำนวนเงินติดลบไม่ได้")
 	}
 
 	var imageURL string
 	if originalPrice != 0 {
-		if m.PaymentImage == nil {
+		if paymentImage == nil {
 			return app.NewUIError("กรุณาอัพโหลดรูปภาพ")
 		}
 
-		err := image.Validate(m.PaymentImage)
+		err := image.Validate(paymentImage)
 		if err != nil {
 			return err
 		}
 
-		img, err := m.PaymentImage.Open()
+		img, err := paymentImage.Open()
 		if err != nil {
 			return app.NewUIError(err.Error())
 		}
@@ -94,16 +105,16 @@ func enroll(ctx context.Context, m *user.Enroll) error {
 
 	err = sqlctx.RunInTx(ctx, func(ctx context.Context) error {
 		if c.Price == 0 {
-			return course.InsertEnroll(ctx, c.ID, u.ID)
+			return course.InsertEnroll(ctx, c.ID, userID)
 		}
 
 		newPayment = true
 
-		return registerPayment(ctx, &RegisterPayment{
+		return registerPayment(ctx, &registerPaymentArgs{
 			CourseID:      c.ID,
-			UserID:        u.ID,
+			UserID:        userID,
 			Image:         imageURL,
-			Price:         m.Price,
+			Price:         price,
 			OriginalPrice: originalPrice,
 			Status:        payment.Pending,
 		})
@@ -113,7 +124,7 @@ func enroll(ctx context.Context, m *user.Enroll) error {
 	}
 
 	if newPayment {
-		go notify.Admin(fmt.Sprintf("New payment for course %s, price %.2f", c.Title, m.Price))
+		go notify.Admin(fmt.Sprintf("New payment for course %s, price %.2f", c.Title, price))
 	}
 
 	return nil
@@ -135,8 +146,7 @@ func uploadPaymentImage(ctx context.Context, r io.Reader) (string, error) {
 	return downloadURL, nil
 }
 
-// RegisterPayment type
-type RegisterPayment struct {
+type registerPaymentArgs struct {
 	UserID        string
 	CourseID      string
 	Image         string
@@ -146,7 +156,7 @@ type RegisterPayment struct {
 	Status        int
 }
 
-func registerPayment(ctx context.Context, x *RegisterPayment) error {
+func registerPayment(ctx context.Context, x *registerPaymentArgs) error {
 	_, err := sqlctx.Exec(ctx, `
 		insert into payments
 			(user_id, course_id, image, price, original_price, code, status)

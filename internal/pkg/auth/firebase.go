@@ -4,9 +4,11 @@ import (
 	"context"
 
 	"github.com/acoshift/go-firebase-admin"
+
+	"github.com/acoshift/acourse/internal/pkg/config"
 )
 
-type FirebaseAuth interface {
+var firAuth interface {
 	CreateAuthURI(ctx context.Context, providerID, continueURI, sessionID string) (string, error)
 	VerifyAuthCallbackURI(ctx context.Context, callbackURI, sessionID string) (*firebase.UserInfo, error)
 	GetUserByEmail(ctx context.Context, email string) (*firebase.UserRecord, error)
@@ -15,10 +17,11 @@ type FirebaseAuth interface {
 	CreateUser(ctx context.Context, user *firebase.User) (string, error)
 }
 
-func SetFirebaseAuth(client FirebaseAuth) {
-	firAuth = client
-}
+var isInTest = false
 
-var (
-	firAuth FirebaseAuth
-)
+func init() {
+	if isInTest {
+		return
+	}
+	firAuth = config.FirebaseApp().Auth()
+}

@@ -13,8 +13,8 @@ import (
 	"github.com/acoshift/acourse/internal/pkg/context/redisctx"
 	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
 	"github.com/acoshift/acourse/internal/pkg/course"
-	"github.com/acoshift/acourse/internal/pkg/model/user"
 	"github.com/acoshift/acourse/internal/pkg/payment"
+	"github.com/acoshift/acourse/internal/pkg/user"
 )
 
 func getCourse(ctx context.Context, courseID string) (*Course, error) {

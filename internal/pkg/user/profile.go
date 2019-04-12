@@ -4,19 +4,26 @@ import (
 	"bytes"
 	"context"
 	"io"
+	"mime/multipart"
 	"unicode/utf8"
 
 	"github.com/asaskevich/govalidator"
 
 	"github.com/acoshift/acourse/internal/pkg/app"
-	"github.com/acoshift/acourse/internal/pkg/bus"
 	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
 	"github.com/acoshift/acourse/internal/pkg/file"
 	"github.com/acoshift/acourse/internal/pkg/image"
-	"github.com/acoshift/acourse/internal/pkg/model/user"
 )
 
-func updateProfile(ctx context.Context, m *user.UpdateProfile) error {
+type UpdateProfileArgs struct {
+	ID       string
+	Username string
+	Name     string
+	AboutMe  string
+	Image    *multipart.FileHeader
+}
+
+func UpdateProfile(ctx context.Context, m *UpdateProfileArgs) error {
 	if !govalidator.IsAlphanumeric(m.Username) {
 		return app.NewUIError("username allow only a-z, A-Z, and 0-9")
 	}
@@ -51,13 +58,13 @@ func updateProfile(ctx context.Context, m *user.UpdateProfile) error {
 
 	err := sqlctx.RunInTx(ctx, func(ctx context.Context) error {
 		if imageURL != "" {
-			err := bus.Dispatch(ctx, &user.SetImage{ID: m.ID, Image: imageURL})
+			err := SetImage(ctx, m.ID, imageURL)
 			if err != nil {
 				return err
 			}
 		}
 
-		return bus.Dispatch(ctx, &user.Update{
+		return Update(ctx, &UpdateArgs{
 			ID:       m.ID,
 			Username: m.Username,
 			Name:     m.Name,
