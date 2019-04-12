@@ -11,7 +11,6 @@ import (
 	"github.com/acoshift/configfile"
 	"github.com/acoshift/probehandler"
 	"github.com/acoshift/webstatic"
-	"github.com/go-redis/redis"
 	_ "github.com/lib/pq"
 	"github.com/moonrhythm/hime"
 	redisstore "github.com/moonrhythm/session/store/goredis"
@@ -22,15 +21,6 @@ import (
 )
 
 func main() {
-	// init redis pool
-	redisClient := redis.NewClient(&redis.Options{
-		MaxRetries:  config.IntDefault("redis_max_retries", 3),
-		PoolSize:    config.IntDefault("redis_pool_size", 5),
-		IdleTimeout: config.DurationDefault("redis_idle_timeout", 60*time.Minute),
-		Addr:        config.String("redis_addr"),
-		Password:    config.String("redis_pass"),
-	})
-
 	// init databases
 	db, err := sql.Open("postgres", config.String("sql_url"))
 	must(err)
@@ -81,9 +71,9 @@ func main() {
 		SessionSecret: config.Bytes("session_secret"),
 		SessionStore: redisstore.New(redisstore.Config{
 			Prefix: config.String("redis_prefix"),
-			Client: redisClient,
+			Client: config.RedisClient(),
 		}),
-		RedisClient: redisClient,
+		RedisClient: config.RedisClient(),
 		RedisPrefix: config.String("redis_prefix"),
 	}))
 

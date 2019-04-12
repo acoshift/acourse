@@ -9,6 +9,7 @@ import (
 	"cloud.google.com/go/storage"
 	"github.com/acoshift/configfile"
 	"github.com/acoshift/go-firebase-admin"
+	"github.com/go-redis/redis"
 	"google.golang.org/api/option"
 )
 
@@ -28,6 +29,7 @@ var (
 	storageClient *storage.Client
 	errorClient   *errorreporting.Client
 	location      *time.Location
+	redisClient   *redis.Client
 )
 
 func init() {
@@ -64,6 +66,15 @@ func init() {
 	// init google storage
 	storageClient, err = storage.NewClient(ctx, googleClientOpts...)
 	must(err)
+
+	// redis
+	redisClient = redis.NewClient(&redis.Options{
+		MaxRetries:  IntDefault("redis_max_retries", 3),
+		PoolSize:    IntDefault("redis_pool_size", 5),
+		IdleTimeout: DurationDefault("redis_idle_timeout", 60*time.Minute),
+		Addr:        String("redis_addr"),
+		Password:    String("redis_pass"),
+	})
 }
 
 func must(err error) {
@@ -86,4 +97,8 @@ func FirebaseApp() *firebase.App {
 
 func Location() *time.Location {
 	return location
+}
+
+func RedisClient() *redis.Client {
+	return redisClient
 }
