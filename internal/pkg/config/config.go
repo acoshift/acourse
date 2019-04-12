@@ -28,10 +28,14 @@ var (
 	errorClient   *errorreporting.Client
 )
 
-func Setup() {
+func init() {
 	var err error
 	ctx := context.Background()
-	googleClientOpts := []option.ClientOption{option.WithCredentialsFile("config/service_account")}
+	var googleClientOpts []option.ClientOption
+
+	if len(cfg.Bytes("service_account")) > 0 {
+		googleClientOpts = append(googleClientOpts, option.WithCredentialsFile("config/service_account"))
+	}
 
 	serviceName := StringDefault("service", "acourse")
 	projectID := String("project_id")

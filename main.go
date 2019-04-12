@@ -28,8 +28,6 @@ func main() {
 	loc, err := time.LoadLocation(config.StringDefault("location", "Asia/Bangkok"))
 	must(err)
 
-	config.Setup()
-
 	// init redis pool
 	redisClient := redis.NewClient(&redis.Options{
 		MaxRetries:  config.IntDefault("redis_max_retries", 3),
