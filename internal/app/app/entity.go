@@ -3,7 +3,7 @@ package app
 import (
 	"time"
 
-	"github.com/acoshift/acourse/internal/pkg/model/course"
+	"github.com/acoshift/acourse/internal/pkg/course"
 )
 
 // PublicCourse type

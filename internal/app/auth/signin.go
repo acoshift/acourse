@@ -6,10 +6,9 @@ import (
 	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/internal/app/view"
-	"github.com/acoshift/acourse/internal/pkg/bus"
+	"github.com/acoshift/acourse/internal/pkg/app"
+	"github.com/acoshift/acourse/internal/pkg/auth"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
-	"github.com/acoshift/acourse/internal/pkg/model/app"
-	"github.com/acoshift/acourse/internal/pkg/model/auth"
 )
 
 func getSignIn(ctx *hime.Context) error {
@@ -32,11 +31,7 @@ func postSignIn(ctx *hime.Context) error {
 		return ctx.RedirectToGet()
 	}
 
-	q := auth.SignInPassword{
-		Email:    email,
-		Password: pass,
-	}
-	err := bus.Dispatch(ctx, &q)
+	userID, err := auth.SignInPassword(ctx, email, pass)
 	if app.IsUIError(err) {
 		f.Add("Errors", err.Error())
 		return ctx.RedirectToGet()
@@ -46,7 +41,7 @@ func postSignIn(ctx *hime.Context) error {
 	}
 
 	appctx.RegenerateSessionID(ctx)
-	appctx.SetUserID(ctx, q.Result)
+	appctx.SetUserID(ctx, userID)
 
 	rd, _ := url.QueryUnescape(ctx.FormValue("r"))
 	return ctx.SafeRedirect(rd)

@@ -7,9 +7,8 @@ import (
 	"github.com/acoshift/middleware"
 	"github.com/moonrhythm/session"
 
-	"github.com/acoshift/acourse/internal/pkg/bus"
-	"github.com/acoshift/acourse/internal/pkg/model"
-	"github.com/acoshift/acourse/internal/pkg/model/user"
+	"github.com/acoshift/acourse/internal/pkg/app"
+	"github.com/acoshift/acourse/internal/pkg/user"
 )
 
 type (
@@ -54,10 +53,9 @@ func Middleware() middleware.Middleware {
 
 			userID := GetUserID(ctx)
 			if userID != "" {
-				q := user.Get{ID: userID}
-				err := bus.Dispatch(ctx, &q)
-				if err == model.ErrNotFound {
-					q.Result = &user.User{
+				u, err := user.Get(ctx, userID)
+				if err == app.ErrNotFound {
+					u = &user.User{
 						ID:       userID,
 						Username: userID,
 					}
@@ -65,7 +63,7 @@ func Middleware() middleware.Middleware {
 				if err != nil {
 					panic(err)
 				}
-				ctx = NewUserContext(ctx, q.Result)
+				ctx = NewUserContext(ctx, u)
 			}
 
 			r = r.WithContext(ctx)

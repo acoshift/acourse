@@ -21,7 +21,6 @@ require (
 	github.com/go-redis/redis v6.15.2+incompatible
 	github.com/lib/pq v1.0.0
 	github.com/microcosm-cc/bluemonday v1.0.2
-	github.com/moonrhythm/dispatcher v1.3.0
 	github.com/moonrhythm/hime v1.0.0
 	github.com/moonrhythm/httpmux v1.0.1
 	github.com/moonrhythm/session v0.13.0

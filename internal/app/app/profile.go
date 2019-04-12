@@ -7,10 +7,9 @@ import (
 	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/internal/app/view"
-	"github.com/acoshift/acourse/internal/pkg/bus"
+	"github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
-	"github.com/acoshift/acourse/internal/pkg/model/app"
-	"github.com/acoshift/acourse/internal/pkg/model/user"
+	"github.com/acoshift/acourse/internal/pkg/user"
 )
 
 func signOut(ctx *hime.Context) error {
@@ -86,7 +85,7 @@ func postProfileEdit(ctx *hime.Context) error {
 	}
 
 	image, _ := ctx.FormFileHeaderNotEmpty("image")
-	err := bus.Dispatch(ctx, &user.UpdateProfile{
+	err := user.UpdateProfile(ctx, &user.UpdateProfileArgs{
 		ID:       appctx.GetUserID(ctx),
 		Username: username,
 		Name:     name,

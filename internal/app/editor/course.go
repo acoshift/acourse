@@ -6,10 +6,9 @@ import (
 	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/internal/app/view"
-	"github.com/acoshift/acourse/internal/pkg/bus"
+	"github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
-	"github.com/acoshift/acourse/internal/pkg/model/app"
-	"github.com/acoshift/acourse/internal/pkg/model/course"
+	"github.com/acoshift/acourse/internal/pkg/course"
 )
 
 func getCourseCreate(ctx *hime.Context) error {
@@ -37,15 +36,14 @@ func postCourseCreate(ctx *hime.Context) error {
 
 	image, _ := ctx.FormFileHeaderNotEmpty("image")
 
-	q := course.Create{
+	courseID, err := course.Create(ctx, &course.CreateArgs{
 		UserID:    appctx.GetUserID(ctx),
 		Title:     title,
 		ShortDesc: shortDesc,
 		LongDesc:  desc,
 		Image:     image,
 		Start:     start,
-	}
-	err := bus.Dispatch(ctx, &q)
+	})
 	if app.IsUIError(err) {
 		f.Add("Errors", err.Error())
 		return ctx.RedirectToGet()
@@ -54,25 +52,22 @@ func postCourseCreate(ctx *hime.Context) error {
 		return err
 	}
 
-	link := course.GetURL{ID: q.Result}
-	bus.Dispatch(ctx, &link)
-	if link.Result == "" {
-		return ctx.RedirectTo("app.course", q.Result)
+	link, _ := course.GetURL(ctx, courseID)
+	if link == "" {
+		return ctx.RedirectTo("app.course", courseID)
 	}
-	return ctx.RedirectTo("app.course", link.Result)
+	return ctx.RedirectTo("app.course", link)
 }
 
 func getCourseEdit(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
-	getCourse := course.Get{ID: id}
-	err := bus.Dispatch(ctx, &getCourse)
+	c, err := course.Get(ctx, id)
 	if err != nil {
 		return err
 	}
-	x := getCourse.Result
 
 	p := view.Page(ctx)
-	p.Data["Course"] = x
+	p.Data["Course"] = c
 	return ctx.View("editor.course-edit", p)
 }
 
@@ -99,15 +94,14 @@ func postCourseEdit(ctx *hime.Context) error {
 
 	image, _ := ctx.FormFileHeaderNotEmpty("image")
 
-	q := course.Update{
+	err := course.Update(ctx, &course.UpdateArgs{
 		ID:        id,
 		Title:     title,
 		ShortDesc: shortDesc,
 		LongDesc:  desc,
 		Image:     image,
 		Start:     start,
-	}
-	err := bus.Dispatch(ctx, &q)
+	})
 	if app.IsUIError(err) {
 		f.Add("Errors", err.Error())
 		return ctx.RedirectToGet()
@@ -116,10 +110,9 @@ func postCourseEdit(ctx *hime.Context) error {
 		return err
 	}
 
-	link := course.GetURL{ID: id}
-	bus.Dispatch(ctx, &link)
-	if link.Result == "" {
+	link, _ := course.GetURL(ctx, id)
+	if link == "" {
 		return ctx.RedirectTo("app.course", id)
 	}
-	return ctx.RedirectTo("app.course", link.Result)
+	return ctx.RedirectTo("app.course", link)
 }

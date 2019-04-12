@@ -12,12 +12,10 @@ import (
 	uuid "github.com/satori/go.uuid"
 
 	"github.com/acoshift/acourse/internal/app/view"
-	"github.com/acoshift/acourse/internal/pkg/bus"
+	"github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
-	"github.com/acoshift/acourse/internal/pkg/model"
-	"github.com/acoshift/acourse/internal/pkg/model/app"
-	"github.com/acoshift/acourse/internal/pkg/model/course"
-	"github.com/acoshift/acourse/internal/pkg/model/user"
+	"github.com/acoshift/acourse/internal/pkg/course"
+	"github.com/acoshift/acourse/internal/pkg/user"
 )
 
 type (
@@ -51,7 +49,7 @@ func newCourseHandler() http.Handler {
 		if err != nil {
 			// link can not parse to uuid get course id from url
 			courseID, err = getCourseIDByURL(ctx, link)
-			if err == model.ErrNotFound {
+			if err == app.ErrNotFound {
 				return view.NotFound(ctx)
 			}
 			if err != nil {
@@ -60,7 +58,7 @@ func newCourseHandler() http.Handler {
 		}
 
 		x, err := getCourse(ctx, courseID)
-		if err == model.ErrNotFound {
+		if err == app.ErrNotFound {
 			return view.NotFound(ctx)
 		}
 		if err != nil {
@@ -94,15 +92,14 @@ func (c *courseCtrl) view(ctx *hime.Context) error {
 
 	enrolled := false
 	pendingEnroll := false
+	var err error
 	if u != nil {
-		q := user.IsEnroll{ID: u.ID, CourseID: course.ID}
-		err := bus.Dispatch(ctx, &q)
+		enrolled, err = user.IsEnroll(ctx, u.ID, course.ID)
 		if err != nil {
 			return err
 		}
-		enrolled = q.Result
 
-		if !q.Result {
+		if !enrolled {
 			pendingEnroll, err = hasPendingPayment(ctx, u.ID, course.ID)
 			if err != nil {
 				return err
@@ -131,13 +128,12 @@ func (c *courseCtrl) content(ctx *hime.Context) error {
 	u := appctx.GetUser(ctx)
 	x := c.getCourse(ctx)
 
-	enrolled := user.IsEnroll{ID: u.ID, CourseID: x.ID}
-	err := bus.Dispatch(ctx, &enrolled)
+	enrolled, err := user.IsEnroll(ctx, u.ID, x.ID)
 	if err != nil {
 		return err
 	}
 
-	if !enrolled.Result && u.ID != x.Owner.ID {
+	if !enrolled && u.ID != x.Owner.ID {
 		return ctx.Status(http.StatusForbidden).StatusText()
 	}
 
@@ -178,12 +174,11 @@ func (c *courseCtrl) enroll(ctx *hime.Context) error {
 	}
 
 	// redirect enrolled user to course content page
-	enrolled := user.IsEnroll{ID: u.ID, CourseID: course.ID}
-	err := bus.Dispatch(ctx, &enrolled)
+	enrolled, err := user.IsEnroll(ctx, u.ID, course.ID)
 	if err != nil {
 		return err
 	}
-	if enrolled.Result {
+	if enrolled {
 		return ctx.RedirectTo("app.course", course.Link(), "content")
 	}
 
@@ -215,12 +210,11 @@ func (c *courseCtrl) postEnroll(ctx *hime.Context) error {
 	}
 
 	// redirect enrolled user to course content page
-	enrolled := user.IsEnroll{ID: u.ID, CourseID: x.ID}
-	err := bus.Dispatch(ctx, &enrolled)
+	enrolled, err := user.IsEnroll(ctx, u.ID, x.ID)
 	if err != nil {
 		return err
 	}
-	if enrolled.Result {
+	if enrolled {
 		return ctx.RedirectTo("app.course", x.Link(), "content")
 	}
 
@@ -238,12 +232,7 @@ func (c *courseCtrl) postEnroll(ctx *hime.Context) error {
 	price, _ := strconv.ParseFloat(ctx.FormValue("price"), 64)
 	image, _ := ctx.FormFileHeaderNotEmpty("image")
 
-	err = bus.Dispatch(ctx, &user.Enroll{
-		ID:           u.ID,
-		CourseID:     x.ID,
-		Price:        price,
-		PaymentImage: image,
-	})
+	err = user.Enroll(ctx, u.ID, x.ID, price, image)
 	if app.IsUIError(err) {
 		f.Add("Errors", "image required")
 		return ctx.RedirectToGet()
@@ -259,13 +248,12 @@ func (c *courseCtrl) assignment(ctx *hime.Context) error {
 	u := appctx.GetUser(ctx)
 	course := c.getCourse(ctx)
 
-	enrolled := user.IsEnroll{ID: u.ID, CourseID: course.ID}
-	err := bus.Dispatch(ctx, &enrolled)
+	enrolled, err := user.IsEnroll(ctx, u.ID, course.ID)
 	if err != nil {
 		return err
 	}
 
-	if !enrolled.Result && u.ID != course.Owner.ID {
+	if !enrolled && u.ID != course.Owner.ID {
 		return ctx.Status(http.StatusForbidden).StatusText()
 	}
 
