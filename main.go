@@ -22,11 +22,6 @@ import (
 )
 
 func main() {
-	time.Local = time.UTC
-
-	loc, err := time.LoadLocation(config.StringDefault("location", "Asia/Bangkok"))
-	must(err)
-
 	// init redis pool
 	redisClient := redis.NewClient(&redis.Options{
 		MaxRetries:  config.IntDefault("redis_max_retries", 3),
@@ -52,12 +47,11 @@ func main() {
 
 	baseURL := config.String("base_url")
 	server.Globals(hime.Globals{
-		"baseURL":  baseURL,
-		"location": loc,
+		"baseURL": baseURL,
 	})
 
 	server.Template().
-		Funcs(app.TemplateFunc(loc)).
+		Funcs(app.TemplateFunc()).
 		ParseConfigFile("settings/template.yaml")
 
 	mux := http.NewServeMux()

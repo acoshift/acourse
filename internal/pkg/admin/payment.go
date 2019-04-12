@@ -10,6 +10,7 @@ import (
 	"github.com/lib/pq"
 
 	"github.com/acoshift/acourse/internal/pkg/app"
+	"github.com/acoshift/acourse/internal/pkg/config"
 	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
 	"github.com/acoshift/acourse/internal/pkg/course"
 	"github.com/acoshift/acourse/internal/pkg/email"
@@ -129,8 +130,7 @@ func CountPayments(ctx context.Context, status []int) (cnt int64, err error) {
 	return
 }
 
-// TODO: use config location instead of accept param
-func AcceptPayment(ctx context.Context, paymentID string, location *time.Location) error {
+func AcceptPayment(ctx context.Context, paymentID string) error {
 	err := sqlctx.RunInTx(ctx, func(ctx context.Context) error {
 		p, err := GetPayment(ctx, paymentID)
 		if err == app.ErrNotFound {
@@ -196,8 +196,8 @@ https://acourse.io
 			p.ID,
 			p.Course.Title,
 			p.Price,
-			p.CreatedAt.In(location).Format("02/01/2006 15:04:05"),
-			p.At.In(location).Format("02/01/2006 15:04:05"),
+			p.CreatedAt.In(config.Location()).Format("02/01/2006 15:04:05"),
+			p.At.In(config.Location()).Format("02/01/2006 15:04:05"),
 			name,
 			p.User.Email,
 		))

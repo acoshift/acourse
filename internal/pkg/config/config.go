@@ -3,6 +3,7 @@ package config
 import (
 	"context"
 	"log"
+	"time"
 
 	"cloud.google.com/go/errorreporting"
 	"cloud.google.com/go/storage"
@@ -26,10 +27,17 @@ var (
 	firebaseApp   *firebase.App
 	storageClient *storage.Client
 	errorClient   *errorreporting.Client
+	location      *time.Location
 )
 
 func init() {
+	time.Local = time.UTC
+
 	var err error
+
+	location, err = time.LoadLocation(StringDefault("location", "Asia/Bangkok"))
+	must(err)
+
 	ctx := context.Background()
 	var googleClientOpts []option.ClientOption
 
@@ -74,4 +82,8 @@ func StorageClient() *storage.Client {
 
 func FirebaseApp() *firebase.App {
 	return firebaseApp
+}
+
+func Location() *time.Location {
+	return location
 }

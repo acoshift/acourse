@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/acoshift/paginate"
 	"github.com/moonrhythm/hime"
@@ -12,6 +11,7 @@ import (
 	"github.com/acoshift/acourse/internal/app/view"
 	"github.com/acoshift/acourse/internal/pkg/admin"
 	"github.com/acoshift/acourse/internal/pkg/app"
+	"github.com/acoshift/acourse/internal/pkg/config"
 	"github.com/acoshift/acourse/internal/pkg/payment"
 )
 
@@ -59,7 +59,7 @@ func getRejectPayment(ctx *hime.Context) error {
 `,
 		name,
 		x.Course.Title,
-		x.CreatedAt.In(ctx.Global("location").(*time.Location)).Format("02/01/2006 15:04:05"),
+		x.CreatedAt.In(config.Location()).Format("02/01/2006 15:04:05"),
 		x.CourseLink(),
 	)
 
@@ -89,7 +89,7 @@ func postPendingPayment(ctx *hime.Context) error {
 
 	id := ctx.PostFormValue("id")
 	if action == "accept" {
-		err := admin.AcceptPayment(ctx, id, ctx.Global("location").(*time.Location))
+		err := admin.AcceptPayment(ctx, id)
 		if app.IsUIError(err) {
 			return ctx.Status(http.StatusBadRequest).String(err.Error())
 		}

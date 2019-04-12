@@ -6,13 +6,14 @@ import (
 
 	"github.com/dustin/go-humanize"
 
+	"github.com/acoshift/acourse/internal/pkg/config"
 	"github.com/acoshift/acourse/internal/pkg/course"
 	"github.com/acoshift/acourse/internal/pkg/markdown"
 	"github.com/acoshift/acourse/internal/pkg/payment"
 )
 
 // TemplateFunc returns template funcs
-func TemplateFunc(loc *time.Location) template.FuncMap {
+func TemplateFunc() template.FuncMap {
 	return template.FuncMap{
 		"currency": func(v float64) string {
 			return humanize.FormatFloat("#,###.##", v)
@@ -30,10 +31,10 @@ func TemplateFunc(loc *time.Location) template.FuncMap {
 			}
 		},
 		"date": func(v time.Time) string {
-			return v.In(loc).Format("02/01/2006")
+			return v.In(config.Location()).Format("02/01/2006")
 		},
 		"dateTime": func(v time.Time) string {
-			return v.In(loc).Format("02/01/2006 15:04:05")
+			return v.In(config.Location()).Format("02/01/2006 15:04:05")
 		},
 		"dateInput": func(v time.Time) string {
 			return v.Format("2006-01-02")
