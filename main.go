@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	_ "image/jpeg"
 	_ "image/png"
 	"log"
@@ -13,7 +12,6 @@ import (
 	"github.com/acoshift/webstatic"
 	_ "github.com/lib/pq"
 	"github.com/moonrhythm/hime"
-	redisstore "github.com/moonrhythm/session/store/goredis"
 
 	"github.com/acoshift/acourse/internal/app"
 	"github.com/acoshift/acourse/internal/pkg/config"
@@ -21,11 +19,8 @@ import (
 )
 
 func main() {
-	// init databases
-	db, err := sql.Open("postgres", config.String("sql_url"))
-	must(err)
-	defer db.Close()
-	db.SetMaxOpenConns(config.IntDefault("sql_max_open_conns", 5))
+	defer config.DBClient().Close()
+	defer config.RedisClient().Close()
 
 	server := hime.New()
 	server.ParseConfigFile("settings/routes.yaml")
@@ -66,16 +61,7 @@ func main() {
 
 	mux.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) { http.ServeFile(w, r, "assets/favicon.ico") })
 
-	mux.Handle("/", app.Handler(app.Config{
-		DB:            db,
-		SessionSecret: config.Bytes("session_secret"),
-		SessionStore: redisstore.New(redisstore.Config{
-			Prefix: config.String("redis_prefix"),
-			Client: config.RedisClient(),
-		}),
-		RedisClient: config.RedisClient(),
-		RedisPrefix: config.String("redis_prefix"),
-	}))
+	mux.Handle("/", app.Handler())
 
 	h := middleware.Chain(
 		middleware.ErrorLogger(config.ErrorClient()),
@@ -94,14 +80,10 @@ func main() {
 		Timeout(10 * time.Second).
 		Notify(probe.Fail)
 
-	err = server.
+	err := server.
 		Handler(h).
 		Address(":8080").
 		ListenAndServe()
-	must(err)
-}
-
-func must(err error) {
 	if err != nil {
 		log.Fatal(err)
 	}

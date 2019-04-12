@@ -2,6 +2,7 @@ package config
 
 import (
 	"context"
+	"database/sql"
 	"log"
 	"time"
 
@@ -30,6 +31,7 @@ var (
 	errorClient   *errorreporting.Client
 	location      *time.Location
 	redisClient   *redis.Client
+	dbClient      *sql.DB
 )
 
 func init() {
@@ -75,6 +77,11 @@ func init() {
 		Addr:        String("redis_addr"),
 		Password:    String("redis_pass"),
 	})
+
+	// db
+	dbClient, err = sql.Open("postgres", String("sql_url"))
+	must(err)
+	dbClient.SetMaxOpenConns(IntDefault("sql_max_open_conns", 5))
 }
 
 func must(err error) {
@@ -101,4 +108,8 @@ func Location() *time.Location {
 
 func RedisClient() *redis.Client {
 	return redisClient
+}
+
+func DBClient() *sql.DB {
+	return dbClient
 }
