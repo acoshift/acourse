@@ -19,7 +19,6 @@ import (
 	"github.com/acoshift/acourse/internal/app"
 	"github.com/acoshift/acourse/internal/pkg/config"
 	"github.com/acoshift/acourse/internal/pkg/middleware"
-	"github.com/acoshift/acourse/internal/service/admin"
 )
 
 func main() {
@@ -60,8 +59,6 @@ func main() {
 	server.Template().
 		Funcs(app.TemplateFunc(loc)).
 		ParseConfigFile("settings/template.yaml")
-
-	admin.Init()
 
 	mux := http.NewServeMux()
 

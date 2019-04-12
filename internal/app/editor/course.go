@@ -7,7 +7,6 @@ import (
 
 	"github.com/acoshift/acourse/internal/app/view"
 	"github.com/acoshift/acourse/internal/pkg/app"
-	"github.com/acoshift/acourse/internal/pkg/bus"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
 	"github.com/acoshift/acourse/internal/pkg/course"
 )
@@ -54,7 +53,6 @@ func postCourseCreate(ctx *hime.Context) error {
 	}
 
 	link, _ := course.GetURL(ctx, courseID)
-	bus.Dispatch(ctx, &link)
 	if link == "" {
 		return ctx.RedirectTo("app.course", courseID)
 	}

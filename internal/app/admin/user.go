@@ -7,29 +7,26 @@ import (
 	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/internal/app/view"
-	"github.com/acoshift/acourse/internal/pkg/bus"
-	"github.com/acoshift/acourse/internal/pkg/model/admin"
+	"github.com/acoshift/acourse/internal/pkg/admin"
 )
 
 func getUsers(ctx *hime.Context) error {
-	cnt := admin.CountUsers{}
-	err := bus.Dispatch(ctx, &cnt)
+	cnt, err := admin.CountUsers(ctx)
 	if err != nil {
 		return err
 	}
 
 	pg, _ := strconv.ParseInt(ctx.FormValue("page"), 10, 64)
-	pn := paginate.New(pg, 30, cnt.Result)
+	pn := paginate.New(pg, 30, cnt)
 
-	list := admin.ListUsers{Limit: pn.Limit(), Offset: pn.Offset()}
-	err = bus.Dispatch(ctx, &list)
+	list, err := admin.GetUsers(ctx, pn.Limit(), pn.Offset())
 	if err != nil {
 		return err
 	}
 
 	p := view.Page(ctx)
 	p.Data["Navbar"] = "admin.users"
-	p.Data["Users"] = list.Result
+	p.Data["Users"] = list
 	p.Data["Paginate"] = pn
 	return ctx.View("admin.users", p)
 }

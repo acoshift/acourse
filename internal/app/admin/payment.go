@@ -10,17 +10,15 @@ import (
 	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/internal/app/view"
+	"github.com/acoshift/acourse/internal/pkg/admin"
 	"github.com/acoshift/acourse/internal/pkg/app"
-	"github.com/acoshift/acourse/internal/pkg/bus"
-	"github.com/acoshift/acourse/internal/pkg/model/admin"
 	"github.com/acoshift/acourse/internal/pkg/payment"
 )
 
 func getRejectPayment(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 
-	q := admin.GetPayment{PaymentID: id}
-	err := bus.Dispatch(ctx, &q)
+	x, err := admin.GetPayment(ctx, id)
 	if err == app.ErrNotFound {
 		return ctx.RedirectTo("admin.payments.pending")
 	}
@@ -28,7 +26,6 @@ func getRejectPayment(ctx *hime.Context) error {
 		return err
 	}
 
-	x := &q.Result
 	name := x.User.Name
 	if len(name) == 0 {
 		name = x.User.Username
@@ -76,7 +73,7 @@ func postRejectPayment(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 	message := ctx.PostFormValue("message")
 
-	err := bus.Dispatch(ctx, &admin.RejectPayment{ID: id, Message: message})
+	err := admin.RejectPayment(ctx, id, message)
 	if app.IsUIError(err) {
 		return ctx.Status(http.StatusBadRequest).String(err.Error())
 	}
@@ -92,7 +89,7 @@ func postPendingPayment(ctx *hime.Context) error {
 
 	id := ctx.PostFormValue("id")
 	if action == "accept" {
-		err := bus.Dispatch(ctx, &admin.AcceptPayment{ID: id, Location: ctx.Global("location").(*time.Location)})
+		err := admin.AcceptPayment(ctx, id, ctx.Global("location").(*time.Location))
 		if app.IsUIError(err) {
 			return ctx.Status(http.StatusBadRequest).String(err.Error())
 		}
@@ -105,47 +102,43 @@ func postPendingPayment(ctx *hime.Context) error {
 }
 
 func getPendingPayments(ctx *hime.Context) error {
-	cnt := admin.CountPayments{Status: []int{payment.Pending}}
-	err := bus.Dispatch(ctx, &cnt)
+	cnt, err := admin.CountPayments(ctx, []int{payment.Pending})
 	if err != nil {
 		return err
 	}
 
 	pg, _ := strconv.ParseInt(ctx.FormValue("page"), 10, 64)
-	pn := paginate.New(pg, 30, cnt.Result)
+	pn := paginate.New(pg, 30, cnt)
 
-	list := admin.ListPayments{Status: []int{payment.Pending}, Limit: pn.Limit(), Offset: pn.Offset()}
-	err = bus.Dispatch(ctx, &list)
+	list, err := admin.GetPayments(ctx, []int{payment.Pending}, pn.Limit(), pn.Offset())
 	if err != nil {
 		return err
 	}
 
 	p := view.Page(ctx)
 	p.Data["Navbar"] = "admin.payment.pending"
-	p.Data["Payments"] = list.Result
+	p.Data["Payments"] = list
 	p.Data["Paginate"] = pn
 	return ctx.View("admin.payments", p)
 }
 
 func getHistoryPayments(ctx *hime.Context) error {
-	cnt := admin.CountPayments{Status: []int{payment.Accepted, payment.Rejected}}
-	err := bus.Dispatch(ctx, &cnt)
+	cnt, err := admin.CountPayments(ctx, []int{payment.Accepted, payment.Rejected})
 	if err != nil {
 		return err
 	}
 
 	pg, _ := strconv.ParseInt(ctx.FormValue("page"), 10, 64)
-	pn := paginate.New(pg, 30, cnt.Result)
+	pn := paginate.New(pg, 30, cnt)
 
-	list := admin.ListPayments{Status: []int{payment.Accepted, payment.Rejected, payment.Refunded}, Limit: pn.Limit(), Offset: pn.Offset()}
-	err = bus.Dispatch(ctx, &list)
+	list, err := admin.GetPayments(ctx, []int{payment.Accepted, payment.Rejected, payment.Refunded}, pn.Limit(), pn.Offset())
 	if err != nil {
 		return err
 	}
 
 	p := view.Page(ctx)
 	p.Data["Navbar"] = "admin.payment.history"
-	p.Data["Payments"] = list.Result
+	p.Data["Payments"] = list
 	p.Data["Paginate"] = pn
 	return ctx.View("admin.payments", p)
 }
