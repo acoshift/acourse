@@ -12,8 +12,7 @@ import (
 	"github.com/acoshift/acourse/internal/pkg/payment"
 )
 
-// TemplateFunc returns template funcs
-func TemplateFunc() template.FuncMap {
+func templateFunc() template.FuncMap {
 	return template.FuncMap{
 		"currency": func(v float64) string {
 			return humanize.FormatFloat("#,###.##", v)
