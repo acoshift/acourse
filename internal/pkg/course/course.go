@@ -7,10 +7,10 @@ import (
 	"time"
 
 	"github.com/acoshift/pgsql"
+	"github.com/acoshift/pgsql/pgctx"
 	"github.com/lib/pq"
 
 	"github.com/acoshift/acourse/internal/pkg/app"
-	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
 	"github.com/acoshift/acourse/internal/pkg/image"
 )
 
@@ -91,22 +91,22 @@ func Create(ctx context.Context, m *CreateArgs) (string, error) {
 			return "", err
 		}
 
-		image, err := m.Image.Open()
+		img, err := m.Image.Open()
 		if err != nil {
 			return "", err
 		}
-		defer image.Close()
+		defer img.Close()
 
-		imageURL, err = uploadCourseCoverImage(ctx, image)
-		image.Close()
+		imageURL, err = uploadCourseCoverImage(ctx, img)
+		img.Close()
 		if err != nil {
 			return "", app.NewUIError(err.Error())
 		}
 	}
 
 	var id string
-	err := sqlctx.RunInTx(ctx, func(ctx context.Context) error {
-		err := sqlctx.QueryRow(ctx, `
+	err := pgctx.RunInTx(ctx, func(ctx context.Context) error {
+		err := pgctx.QueryRow(ctx, `
 			insert into courses
 				(user_id, title, short_desc, long_desc, image, start)
 			values
@@ -150,21 +150,21 @@ func Update(ctx context.Context, m *UpdateArgs) error {
 			return err
 		}
 
-		image, err := m.Image.Open()
+		img, err := m.Image.Open()
 		if err != nil {
 			return err
 		}
-		defer image.Close()
+		defer img.Close()
 
-		imageURL, err = uploadCourseCoverImage(ctx, image)
-		image.Close()
+		imageURL, err = uploadCourseCoverImage(ctx, img)
+		img.Close()
 		if err != nil {
 			return app.NewUIError(err.Error())
 		}
 	}
 
-	err := sqlctx.RunInTx(ctx, func(ctx context.Context) error {
-		_, err := sqlctx.Exec(ctx, `
+	err := pgctx.RunInTx(ctx, func(ctx context.Context) error {
+		_, err := pgctx.Exec(ctx, `
 			update courses
 			set
 				title = $2,
@@ -193,7 +193,7 @@ func Update(ctx context.Context, m *UpdateArgs) error {
 
 // SetOption sets course option
 func SetOption(ctx context.Context, id string, opt Option) error {
-	_, err := sqlctx.Exec(ctx, `
+	_, err := pgctx.Exec(ctx, `
 		insert into course_options
 			(course_id, public, enroll, attend, assignment, discount)
 		values
@@ -213,14 +213,14 @@ func SetOption(ctx context.Context, id string, opt Option) error {
 
 // SetImage sets course image
 func SetImage(ctx context.Context, id string, img string) error {
-	_, err := sqlctx.Exec(ctx, `update courses set image = $2 where id = $1`, id, img)
+	_, err := pgctx.Exec(ctx, `update courses set image = $2 where id = $1`, id, img)
 	return err
 }
 
 // GetURL gets course url
 func GetURL(ctx context.Context, id string) (string, error) {
 	var r string
-	err := sqlctx.QueryRow(ctx,
+	err := pgctx.QueryRow(ctx,
 		`select url from courses where id = $1`,
 		id,
 	).Scan(pgsql.NullString(&r))
@@ -230,7 +230,7 @@ func GetURL(ctx context.Context, id string) (string, error) {
 // GetUserID gets course user id
 func GetUserID(ctx context.Context, id string) (string, error) {
 	var r string
-	err := sqlctx.QueryRow(ctx, `select user_id from courses where id = $1`, id).Scan(&r)
+	err := pgctx.QueryRow(ctx, `select user_id from courses where id = $1`, id).Scan(&r)
 	if err == sql.ErrNoRows {
 		return "", app.ErrNotFound
 	}
@@ -240,7 +240,7 @@ func GetUserID(ctx context.Context, id string) (string, error) {
 // Get gets course from id
 func Get(ctx context.Context, id string) (*Course, error) {
 	var x Course
-	err := sqlctx.QueryRow(ctx, `
+	err := pgctx.QueryRow(ctx, `
 		select
 			id, user_id, title, short_desc, long_desc, image,
 			start, url, type, price, courses.discount, enroll_detail,
@@ -261,15 +261,4 @@ func Get(ctx context.Context, id string) (*Course, error) {
 	}
 
 	return &x, nil
-}
-
-// InsertEnroll inserts enroll
-func InsertEnroll(ctx context.Context, id, userID string) error {
-	_, err := sqlctx.Exec(ctx, `
-		insert into enrolls
-			(user_id, course_id)
-		values
-			($1, $2)
-	`, userID, id)
-	return err
 }

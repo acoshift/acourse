@@ -6,8 +6,9 @@ import (
 	"database/sql"
 	"io"
 
+	"github.com/acoshift/pgsql/pgctx"
+
 	"github.com/acoshift/acourse/internal/pkg/app"
-	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
 	"github.com/acoshift/acourse/internal/pkg/file"
 	"github.com/acoshift/acourse/internal/pkg/image"
 )
@@ -36,7 +37,7 @@ func CreateContent(ctx context.Context, m *CreateContentArgs) (string, error) {
 	// TODO: validate instructor
 
 	var contentID string
-	err := sqlctx.QueryRow(ctx, `
+	err := pgctx.QueryRow(ctx, `
 		insert into course_contents
 			(
 				course_id,
@@ -68,7 +69,7 @@ type UpdateContentArgs struct {
 func UpdateContent(ctx context.Context, m *UpdateContentArgs) error {
 	// TODO: validate ownership
 
-	_, err := sqlctx.Exec(ctx, `
+	_, err := pgctx.Exec(ctx, `
 		update course_contents
 		set
 			title = $2,
@@ -85,7 +86,7 @@ func GetContent(ctx context.Context, contentID string) (*Content, error) {
 	// TODO: validate ownership
 
 	var x Content
-	err := sqlctx.QueryRow(ctx, `
+	err := pgctx.QueryRow(ctx, `
 		select
 			id, course_id, title, long_desc, video_id, video_type, download_url
 		from course_contents
@@ -106,7 +107,7 @@ func GetContent(ctx context.Context, contentID string) (*Content, error) {
 func DeleteContent(ctx context.Context, contentID string) error {
 	// TODO: validate ownership
 
-	_, err := sqlctx.Exec(ctx, `delete from course_contents where id = $1`, contentID)
+	_, err := pgctx.Exec(ctx, `delete from course_contents where id = $1`, contentID)
 	return err
 }
 
@@ -114,7 +115,7 @@ func DeleteContent(ctx context.Context, contentID string) error {
 func GetContents(ctx context.Context, id string) ([]*Content, error) {
 	// TODO: validate ownership
 
-	rows, err := sqlctx.Query(ctx, `
+	rows, err := pgctx.Query(ctx, `
 		select
 			id, course_id, title, long_desc, video_id, video_type, download_url
 		from course_contents

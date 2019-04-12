@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/acoshift/pgsql/pgctx"
 	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/internal/pkg/app"
-	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
 	"github.com/acoshift/acourse/internal/pkg/file"
 	"github.com/acoshift/acourse/internal/pkg/image"
 	"github.com/acoshift/acourse/internal/pkg/user"
@@ -44,7 +44,7 @@ func SignInOpenIDCallback(ctx context.Context, uri, state string) (string, error
 		return "", app.NewUIError(err.Error())
 	}
 
-	err = sqlctx.RunInTx(ctx, func(ctx context.Context) error {
+	err = pgctx.RunInTx(ctx, func(ctx context.Context) error {
 		// check is user sign up
 		exists, err := userSvc.IsExists(ctx, u.UserID)
 		if err != nil {

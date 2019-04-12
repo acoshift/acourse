@@ -7,29 +7,15 @@ import (
 	"io"
 	"mime/multipart"
 
+	"github.com/acoshift/pgsql/pgctx"
+
 	"github.com/acoshift/acourse/internal/pkg/app"
-	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
 	"github.com/acoshift/acourse/internal/pkg/course"
 	"github.com/acoshift/acourse/internal/pkg/file"
 	"github.com/acoshift/acourse/internal/pkg/image"
 	"github.com/acoshift/acourse/internal/pkg/notify"
 	"github.com/acoshift/acourse/internal/pkg/payment"
 )
-
-// IsEnroll checks is user enrolled a course
-func IsEnroll(ctx context.Context, userID, courseID string) (bool, error) {
-	var b bool
-	err := sqlctx.QueryRow(ctx, `
-		select exists (
-			select 1
-			from enrolls
-			where user_id = $1 and course_id = $2
-		)
-	`, userID, courseID).Scan(&b)
-	return b, err
-}
-
-// TODO: move enroll to course
 
 // Enroll enrolls a course
 func Enroll(ctx context.Context, userID, courseID string, price float64, paymentImage *multipart.FileHeader) error {
@@ -48,7 +34,7 @@ func Enroll(ctx context.Context, userID, courseID string, price float64, payment
 
 	// is enrolled
 	{
-		isEnrolled, err := IsEnroll(ctx, userID, courseID)
+		isEnrolled, err := course.IsEnroll(ctx, userID, courseID)
 		if err != nil {
 			return err
 		}
@@ -101,30 +87,31 @@ func Enroll(ctx context.Context, userID, courseID string, price float64, payment
 		}
 	}
 
-	newPayment := false
-
-	err = sqlctx.RunInTx(ctx, func(ctx context.Context) error {
+	err = pgctx.RunInTx(ctx, func(ctx context.Context) error {
 		if c.Price == 0 {
-			return course.InsertEnroll(ctx, c.ID, userID)
+			return InsertEnroll(ctx, c.ID, userID)
 		}
 
-		newPayment = true
+		// language=SQL
+		_, err := pgctx.Exec(ctx, `
+			insert into payments
+				(user_id, course_id, image, price, original_price, code, status)
+			values
+				($1, $2, $3, $4, $5, $6, $7)
+			returning id
+		`, userID, c.ID, imageURL, price, originalPrice, "", payment.Pending)
+		if err != nil {
+			return err
+		}
 
-		return registerPayment(ctx, &registerPaymentArgs{
-			CourseID:      c.ID,
-			UserID:        userID,
-			Image:         imageURL,
-			Price:         price,
-			OriginalPrice: originalPrice,
-			Status:        payment.Pending,
+		pgctx.Committed(ctx, func(ctx context.Context) {
+			go notify.Admin(fmt.Sprintf("New payment for course %s, price %.2f", c.Title, price))
 		})
+
+		return nil
 	})
 	if err != nil {
 		return err
-	}
-
-	if newPayment {
-		go notify.Admin(fmt.Sprintf("New payment for course %s, price %.2f", c.Title, price))
 	}
 
 	return nil
@@ -146,26 +133,13 @@ func uploadPaymentImage(ctx context.Context, r io.Reader) (string, error) {
 	return downloadURL, nil
 }
 
-type registerPaymentArgs struct {
-	UserID        string
-	CourseID      string
-	Image         string
-	Price         float64
-	OriginalPrice float64
-	Code          string
-	Status        int
-}
-
-func registerPayment(ctx context.Context, x *registerPaymentArgs) error {
-	_, err := sqlctx.Exec(ctx, `
-		insert into payments
-			(user_id, course_id, image, price, original_price, code, status)
+// InsertEnroll inserts enroll
+func InsertEnroll(ctx context.Context, id, userID string) error {
+	_, err := pgctx.Exec(ctx, `
+		insert into enrolls
+			(user_id, course_id)
 		values
-			($1, $2, $3, $4, $5, $6, $7)
-		returning id
-	`, x.UserID, x.CourseID, x.Image, x.Price, x.OriginalPrice, x.Code, x.Status)
-	if err != nil {
-		return err
-	}
-	return nil
+			($1, $2)
+	`, userID, id)
+	return err
 }

@@ -7,10 +7,10 @@ import (
 	"mime/multipart"
 	"unicode/utf8"
 
+	"github.com/acoshift/pgsql/pgctx"
 	"github.com/asaskevich/govalidator"
 
 	"github.com/acoshift/acourse/internal/pkg/app"
-	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
 	"github.com/acoshift/acourse/internal/pkg/file"
 	"github.com/acoshift/acourse/internal/pkg/image"
 )
@@ -56,7 +56,7 @@ func UpdateProfile(ctx context.Context, m *UpdateProfileArgs) error {
 		}
 	}
 
-	err := sqlctx.RunInTx(ctx, func(ctx context.Context) error {
+	err := pgctx.RunInTx(ctx, func(ctx context.Context) error {
 		if imageURL != "" {
 			err := SetImage(ctx, m.ID, imageURL)
 			if err != nil {

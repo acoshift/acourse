@@ -11,6 +11,7 @@ import (
 	"github.com/acoshift/header"
 	"github.com/acoshift/methodmux"
 	"github.com/acoshift/middleware"
+	"github.com/acoshift/pgsql/pgctx"
 	"github.com/acoshift/probehandler"
 	"github.com/acoshift/webstatic"
 	"github.com/moonrhythm/hime"
@@ -26,7 +27,6 @@ import (
 	"github.com/acoshift/acourse/internal/pkg/config"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
 	"github.com/acoshift/acourse/internal/pkg/context/redisctx"
-	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
 )
 
 // New creates new app
@@ -57,7 +57,7 @@ func New() *hime.App {
 	admin.Mount(m)
 
 	h := middleware.Chain(
-		sqlctx.Middleware(config.DBClient()),
+		pgctx.Middleware(config.DBClient()),
 		redisctx.Middleware(config.RedisClient(), config.String("redis_prefix")),
 		session.Middleware(session.Config{
 			Secret:   config.Bytes("session_secret"),

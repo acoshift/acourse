@@ -8,10 +8,10 @@ import (
 	"time"
 
 	"github.com/acoshift/pgsql"
+	"github.com/acoshift/pgsql/pgctx"
 
 	"github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/context/redisctx"
-	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
 	"github.com/acoshift/acourse/internal/pkg/course"
 	"github.com/acoshift/acourse/internal/pkg/payment"
 	"github.com/acoshift/acourse/internal/pkg/user"
@@ -19,7 +19,7 @@ import (
 
 func getCourse(ctx context.Context, courseID string) (*Course, error) {
 	var x Course
-	err := sqlctx.QueryRow(ctx, `
+	err := pgctx.QueryRow(ctx, `
 		select
 			c.id, c.title, c.short_desc, c.long_desc, c.image,
 			c.start, c.url, c.type, c.price, c.discount, c.enroll_detail,
@@ -45,7 +45,7 @@ func getCourse(ctx context.Context, courseID string) (*Course, error) {
 }
 
 func getCourseIDByURL(ctx context.Context, url string) (courseID string, err error) {
-	err = sqlctx.QueryRow(ctx, `
+	err = pgctx.QueryRow(ctx, `
 		select id
 		from courses
 		where url = $1
@@ -57,7 +57,7 @@ func getCourseIDByURL(ctx context.Context, url string) (courseID string, err err
 }
 
 func hasPendingPayment(ctx context.Context, userID string, courseID string) (exists bool, err error) {
-	err = sqlctx.QueryRow(ctx, `
+	err = pgctx.QueryRow(ctx, `
 		select exists (
 			select 1
 			from payments
@@ -68,7 +68,7 @@ func hasPendingPayment(ctx context.Context, userID string, courseID string) (exi
 }
 
 func getCourseContents(ctx context.Context, courseID string) ([]*course.Content, error) {
-	rows, err := sqlctx.Query(ctx, `
+	rows, err := pgctx.Query(ctx, `
 		select
 			id, course_id, title, long_desc, video_id, video_type, download_url
 		from course_contents
@@ -100,7 +100,7 @@ func getCourseContents(ctx context.Context, courseID string) ([]*course.Content,
 
 func getUser(ctx context.Context, userID string) (*user.User, error) {
 	var x user.User
-	err := sqlctx.QueryRow(ctx, `
+	err := pgctx.QueryRow(ctx, `
 		select
 			users.id,
 			users.name,
@@ -127,7 +127,7 @@ func getUser(ctx context.Context, userID string) (*user.User, error) {
 }
 
 func findAssignmentsByCourseID(ctx context.Context, courseID string) ([]*course.Assignment, error) {
-	rows, err := sqlctx.Query(ctx, `
+	rows, err := pgctx.Query(ctx, `
 		select id, title, long_desc, open
 		from assignments
 		where course_id = $1
@@ -169,7 +169,7 @@ func listPublicCourses(ctx context.Context) ([]*PublicCourse, error) {
 		}
 	}
 
-	rows, err := sqlctx.Query(ctx, `
+	rows, err := pgctx.Query(ctx, `
 			select
 				c.id,
 				c.title, c.short_desc, c.image, c.start, c.url,
@@ -222,7 +222,7 @@ func listPublicCourses(ctx context.Context) ([]*PublicCourse, error) {
 }
 
 func listOwnCourses(ctx context.Context, userID string) ([]*OwnCourse, error) {
-	rows, err := sqlctx.Query(ctx, `
+	rows, err := pgctx.Query(ctx, `
 		select
 			c.id,
 			c.title, c.short_desc, c.image,
@@ -262,7 +262,7 @@ func listOwnCourses(ctx context.Context, userID string) ([]*OwnCourse, error) {
 }
 
 func listEnrolledCourses(ctx context.Context, userID string) ([]*EnrolledCourse, error) {
-	rows, err := sqlctx.Query(ctx, `
+	rows, err := pgctx.Query(ctx, `
 		select
 			c.id,
 			c.title, c.short_desc, c.image,

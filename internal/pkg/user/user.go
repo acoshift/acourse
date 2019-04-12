@@ -6,9 +6,9 @@ import (
 	"errors"
 
 	"github.com/acoshift/pgsql"
+	"github.com/acoshift/pgsql/pgctx"
 
 	"github.com/acoshift/acourse/internal/pkg/app"
-	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
 )
 
 // Errors
@@ -44,7 +44,7 @@ type CreateArgs struct {
 
 // Create creates new user
 func Create(ctx context.Context, m *CreateArgs) error {
-	_, err := sqlctx.Exec(ctx, `
+	_, err := pgctx.Exec(ctx, `
 		insert into users
 			(id, username, name, email, image)
 		values
@@ -68,7 +68,7 @@ type UpdateArgs struct {
 
 // Update updates user
 func Update(ctx context.Context, m *UpdateArgs) error {
-	_, err := sqlctx.Exec(ctx, `
+	_, err := pgctx.Exec(ctx, `
 		update users
 		set
 			username = $2,
@@ -83,7 +83,7 @@ func Update(ctx context.Context, m *UpdateArgs) error {
 // IsExists checks is user exists
 func IsExists(ctx context.Context, id string) (bool, error) {
 	var b bool
-	err := sqlctx.QueryRow(ctx, `
+	err := pgctx.QueryRow(ctx, `
 		select exists (
 			select 1
 			from users
@@ -95,7 +95,7 @@ func IsExists(ctx context.Context, id string) (bool, error) {
 
 // SetImage sets user image
 func SetImage(ctx context.Context, id string, image string) error {
-	_, err := sqlctx.Exec(ctx, `
+	_, err := pgctx.Exec(ctx, `
 		update users
 		set image = $2
 		where id = $1
@@ -106,7 +106,7 @@ func SetImage(ctx context.Context, id string, image string) error {
 // Get gets user from id
 func Get(ctx context.Context, id string) (*User, error) {
 	var x User
-	err := sqlctx.QueryRow(ctx, `
+	err := pgctx.QueryRow(ctx, `
 		select
 			u.id, u.name, u.username, coalesce(u.email, ''), u.about_me, u.image,
 			coalesce(r.admin, false), coalesce(r.instructor, false)

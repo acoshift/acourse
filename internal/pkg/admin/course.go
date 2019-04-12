@@ -5,13 +5,12 @@ import (
 	"time"
 
 	"github.com/acoshift/pgsql"
+	"github.com/acoshift/pgsql/pgctx"
 
-	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
 	"github.com/acoshift/acourse/internal/pkg/course"
 )
 
-// CourseItem type
-type CourseItem struct {
+type Course struct {
 	ID        string
 	Title     string
 	Image     string
@@ -29,8 +28,9 @@ type CourseItem struct {
 	}
 }
 
-func GetCourses(ctx context.Context, limit, offset int64) ([]*CourseItem, error) {
-	rows, err := sqlctx.Query(ctx, `
+func GetCourses(ctx context.Context, limit, offset int64) ([]*Course, error) {
+	// language=SQL
+	rows, err := pgctx.Query(ctx, `
 		select
 			c.id, c.title, c.image,
 			c.url, c.type, c.price, c.discount,
@@ -48,9 +48,9 @@ func GetCourses(ctx context.Context, limit, offset int64) ([]*CourseItem, error)
 	}
 	defer rows.Close()
 
-	var xs []*CourseItem
+	var xs []*Course
 	for rows.Next() {
-		var x CourseItem
+		var x Course
 		err = rows.Scan(
 			&x.ID, &x.Title, &x.Image,
 			pgsql.NullString(&x.URL), &x.Type, &x.Price, &x.Discount,
@@ -71,8 +71,7 @@ func GetCourses(ctx context.Context, limit, offset int64) ([]*CourseItem, error)
 }
 
 func CountCourses(ctx context.Context) (cnt int64, err error) {
-	err = sqlctx.QueryRow(ctx,
-		`select count(*) from courses`,
-	).Scan(&cnt)
+	// language=SQL
+	err = pgctx.QueryRow(ctx, `select count(*) from courses`).Scan(&cnt)
 	return
 }

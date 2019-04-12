@@ -9,7 +9,7 @@ import (
 	"github.com/acoshift/methodmux"
 	"github.com/acoshift/prefixhandler"
 	"github.com/moonrhythm/hime"
-	uuid "github.com/satori/go.uuid"
+	"github.com/satori/go.uuid"
 
 	"github.com/acoshift/acourse/internal/app/view"
 	"github.com/acoshift/acourse/internal/pkg/app"
@@ -78,29 +78,29 @@ func newCourseHandler() http.Handler {
 
 type courseCtrl struct{}
 
-func (c *courseCtrl) getCourse(ctx context.Context) *Course {
+func (ctrl *courseCtrl) getCourse(ctx context.Context) *Course {
 	return ctx.Value(courseKey{}).(*Course)
 }
 
-func (c *courseCtrl) view(ctx *hime.Context) error {
+func (ctrl *courseCtrl) view(ctx *hime.Context) error {
 	if ctx.URL.Path != "/" {
 		return view.NotFound(ctx)
 	}
 
 	u := appctx.GetUser(ctx)
-	course := c.getCourse(ctx)
+	c := ctrl.getCourse(ctx)
 
 	enrolled := false
 	pendingEnroll := false
 	var err error
 	if u != nil {
-		enrolled, err = user.IsEnroll(ctx, u.ID, course.ID)
+		enrolled, err = course.IsEnroll(ctx, u.ID, c.ID)
 		if err != nil {
 			return err
 		}
 
 		if !enrolled {
-			pendingEnroll, err = hasPendingPayment(ctx, u.ID, course.ID)
+			pendingEnroll, err = hasPendingPayment(ctx, u.ID, c.ID)
 			if err != nil {
 				return err
 			}
@@ -109,26 +109,26 @@ func (c *courseCtrl) view(ctx *hime.Context) error {
 
 	var owned bool
 	if u != nil {
-		owned = u.ID == course.Owner.ID
+		owned = u.ID == c.Owner.ID
 	}
 
 	p := view.Page(ctx)
-	p.Meta.Title = course.Title
-	p.Meta.Desc = course.ShortDesc
-	p.Meta.Image = course.Image
-	p.Meta.URL = ctx.Global("baseURL").(string) + ctx.Route("app.course", url.PathEscape(course.Link()))
-	p.Data["Course"] = course
+	p.Meta.Title = c.Title
+	p.Meta.Desc = c.ShortDesc
+	p.Meta.Image = c.Image
+	p.Meta.URL = ctx.Global("baseURL").(string) + ctx.Route("app.course", url.PathEscape(c.Link()))
+	p.Data["Course"] = c
 	p.Data["Enrolled"] = enrolled
 	p.Data["Owned"] = owned
 	p.Data["PendingEnroll"] = pendingEnroll
 	return ctx.View("app.course", p)
 }
 
-func (c *courseCtrl) content(ctx *hime.Context) error {
+func (ctrl *courseCtrl) content(ctx *hime.Context) error {
 	u := appctx.GetUser(ctx)
-	x := c.getCourse(ctx)
+	x := ctrl.getCourse(ctx)
 
-	enrolled, err := user.IsEnroll(ctx, u.ID, x.ID)
+	enrolled, err := course.IsEnroll(ctx, u.ID, x.ID)
 	if err != nil {
 		return err
 	}
@@ -164,45 +164,45 @@ func (c *courseCtrl) content(ctx *hime.Context) error {
 	return ctx.View("app.course-content", p)
 }
 
-func (c *courseCtrl) enroll(ctx *hime.Context) error {
+func (ctrl *courseCtrl) enroll(ctx *hime.Context) error {
 	u := appctx.GetUser(ctx)
-	course := c.getCourse(ctx)
+	c := ctrl.getCourse(ctx)
 
-	// owner redirect to course content
-	if u != nil && u.ID == course.Owner.ID {
-		return ctx.RedirectTo("app.course", course.Link(), "content")
+	// owner redirect to c content
+	if u != nil && u.ID == c.Owner.ID {
+		return ctx.RedirectTo("app.c", c.Link(), "content")
 	}
 
-	// redirect enrolled user to course content page
-	enrolled, err := user.IsEnroll(ctx, u.ID, course.ID)
+	// redirect enrolled user to c content page
+	enrolled, err := course.IsEnroll(ctx, u.ID, c.ID)
 	if err != nil {
 		return err
 	}
 	if enrolled {
-		return ctx.RedirectTo("app.course", course.Link(), "content")
+		return ctx.RedirectTo("app.c", c.Link(), "content")
 	}
 
 	// check is user has pending enroll
-	pendingPayment, err := hasPendingPayment(ctx, u.ID, course.ID)
+	pendingPayment, err := hasPendingPayment(ctx, u.ID, c.ID)
 	if err != nil {
 		return err
 	}
 	if pendingPayment {
-		return ctx.RedirectTo("app.course", course.Link())
+		return ctx.RedirectTo("app.c", c.Link())
 	}
 
 	p := view.Page(ctx)
-	p.Meta.Title = course.Title
-	p.Meta.Desc = course.ShortDesc
-	p.Meta.Image = course.Image
-	p.Meta.URL = ctx.Global("baseURL").(string) + ctx.Route("app.course", url.PathEscape(course.Link()))
-	p.Data["Course"] = course
-	return ctx.View("app.course-enroll", p)
+	p.Meta.Title = c.Title
+	p.Meta.Desc = c.ShortDesc
+	p.Meta.Image = c.Image
+	p.Meta.URL = ctx.Global("baseURL").(string) + ctx.Route("app.c", url.PathEscape(c.Link()))
+	p.Data["Course"] = c
+	return ctx.View("app.c-enroll", p)
 }
 
-func (c *courseCtrl) postEnroll(ctx *hime.Context) error {
+func (ctrl *courseCtrl) postEnroll(ctx *hime.Context) error {
 	u := appctx.GetUser(ctx)
-	x := c.getCourse(ctx)
+	x := ctrl.getCourse(ctx)
 
 	// owner redirect to course content
 	if u != nil && u.ID == x.Owner.ID {
@@ -210,7 +210,7 @@ func (c *courseCtrl) postEnroll(ctx *hime.Context) error {
 	}
 
 	// redirect enrolled user to course content page
-	enrolled, err := user.IsEnroll(ctx, u.ID, x.ID)
+	enrolled, err := course.IsEnroll(ctx, u.ID, x.ID)
 	if err != nil {
 		return err
 	}
@@ -244,30 +244,30 @@ func (c *courseCtrl) postEnroll(ctx *hime.Context) error {
 	return ctx.RedirectTo("app.course", x.Link())
 }
 
-func (c *courseCtrl) assignment(ctx *hime.Context) error {
+func (ctrl *courseCtrl) assignment(ctx *hime.Context) error {
 	u := appctx.GetUser(ctx)
-	course := c.getCourse(ctx)
+	c := ctrl.getCourse(ctx)
 
-	enrolled, err := user.IsEnroll(ctx, u.ID, course.ID)
+	enrolled, err := course.IsEnroll(ctx, u.ID, c.ID)
 	if err != nil {
 		return err
 	}
 
-	if !enrolled && u.ID != course.Owner.ID {
+	if !enrolled && u.ID != c.Owner.ID {
 		return ctx.Status(http.StatusForbidden).StatusText()
 	}
 
-	assignments, err := findAssignmentsByCourseID(ctx, course.ID)
+	assignments, err := findAssignmentsByCourseID(ctx, c.ID)
 	if err != nil {
 		return err
 	}
 
 	p := view.Page(ctx)
-	p.Meta.Title = course.Title
-	p.Meta.Desc = course.ShortDesc
-	p.Meta.Image = course.Image
-	p.Meta.URL = ctx.Global("baseURL").(string) + ctx.Route("app.course", url.PathEscape(course.Link()))
-	p.Data["Course"] = course
+	p.Meta.Title = c.Title
+	p.Meta.Desc = c.ShortDesc
+	p.Meta.Image = c.Image
+	p.Meta.URL = ctx.Global("baseURL").(string) + ctx.Route("app.c", url.PathEscape(c.Link()))
+	p.Data["Course"] = c
 	p.Data["Assignments"] = assignments
-	return ctx.View("app.course-assignment", p)
+	return ctx.View("app.c-assignment", p)
 }
