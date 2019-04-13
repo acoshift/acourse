@@ -262,3 +262,16 @@ func Get(ctx context.Context, id string) (*Course, error) {
 
 	return &x, nil
 }
+
+func GetIDByURL(ctx context.Context, url string) (courseID string, err error) {
+	// language=SQL
+	err = pgctx.QueryRow(ctx, `
+		select id
+		from courses
+		where url = $1
+	`, url).Scan(&courseID)
+	if err == sql.ErrNoRows {
+		err = app.ErrNotFound
+	}
+	return
+}

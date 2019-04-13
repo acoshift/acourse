@@ -49,7 +49,7 @@ func newCourseHandler() http.Handler {
 		_, err := uuid.FromString(link)
 		if err != nil {
 			// link can not parse to uuid get course id from url
-			courseID, err = getCourseIDByURL(ctx, link)
+			courseID, err = course.GetIDByURL(ctx, link)
 			if err == app.ErrNotFound {
 				return view.NotFound(ctx)
 			}
@@ -138,7 +138,7 @@ func (ctrl *courseCtrl) content(ctx *hime.Context) error {
 		return ctx.Status(http.StatusForbidden).StatusText()
 	}
 
-	contents, err := getCourseContents(ctx, x.ID)
+	contents, err := course.GetContents(ctx, x.ID)
 	if err != nil {
 		return err
 	}
@@ -258,7 +258,7 @@ func (ctrl *courseCtrl) assignment(ctx *hime.Context) error {
 		return ctx.Status(http.StatusForbidden).StatusText()
 	}
 
-	assignments, err := findAssignmentsByCourseID(ctx, c.ID)
+	assignments, err := course.GetAssignments(ctx, c.ID)
 	if err != nil {
 		return err
 	}

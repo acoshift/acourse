@@ -12,8 +12,6 @@ import (
 
 	"github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/context/redisctx"
-	"github.com/acoshift/acourse/internal/pkg/course"
-	"github.com/acoshift/acourse/internal/pkg/user"
 )
 
 func getCourse(ctx context.Context, courseID string) (*Course, error) {
@@ -41,104 +39,6 @@ func getCourse(ctx context.Context, courseID string) (*Course, error) {
 		return nil, err
 	}
 	return &x, nil
-}
-
-func getCourseIDByURL(ctx context.Context, url string) (courseID string, err error) {
-	err = pgctx.QueryRow(ctx, `
-		select id
-		from courses
-		where url = $1
-	`, url).Scan(&courseID)
-	if err == sql.ErrNoRows {
-		err = app.ErrNotFound
-	}
-	return
-}
-
-func getCourseContents(ctx context.Context, courseID string) ([]*course.Content, error) {
-	rows, err := pgctx.Query(ctx, `
-		select
-			id, course_id, title, long_desc, video_id, video_type, download_url
-		from course_contents
-		where course_id = $1
-		order by i
-	`, courseID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var xs []*course.Content
-	for rows.Next() {
-		var x course.Content
-		err = rows.Scan(
-			&x.ID, &x.CourseID, &x.Title, &x.Desc, &x.VideoID, &x.VideoType, &x.DownloadURL,
-		)
-		if err != nil {
-			return nil, err
-		}
-		xs = append(xs, &x)
-	}
-
-	if err = rows.Err(); err != nil {
-		return nil, err
-	}
-	return xs, nil
-}
-
-func getUser(ctx context.Context, userID string) (*user.User, error) {
-	var x user.User
-	err := pgctx.QueryRow(ctx, `
-		select
-			users.id,
-			users.name,
-			users.username,
-			users.email,
-			users.about_me,
-			users.image,
-			coalesce(roles.admin, false),
-			coalesce(roles.instructor, false)
-		from users
-			left join roles on users.id = roles.user_id
-		where users.id = $1
-	`, userID).Scan(
-		&x.ID, &x.Name, &x.Username, pgsql.NullString(&x.Email), &x.AboutMe, &x.Image,
-		&x.Role.Admin, &x.Role.Instructor,
-	)
-	if err == sql.ErrNoRows {
-		return nil, app.ErrNotFound
-	}
-	if err != nil {
-		return nil, err
-	}
-	return &x, nil
-}
-
-func findAssignmentsByCourseID(ctx context.Context, courseID string) ([]*course.Assignment, error) {
-	rows, err := pgctx.Query(ctx, `
-		select id, title, long_desc, open
-		from assignments
-		where course_id = $1
-		order by i asc
-	`, courseID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var xs []*course.Assignment
-	for rows.Next() {
-		var x course.Assignment
-		err = rows.Scan(&x.ID, &x.Title, &x.Desc, &x.Open)
-		if err != nil {
-			return nil, err
-		}
-		xs = append(xs, &x)
-	}
-	if err = rows.Err(); err != nil {
-		return nil, err
-	}
-	return xs, nil
 }
 
 func listPublicCourses(ctx context.Context) ([]*PublicCourse, error) {

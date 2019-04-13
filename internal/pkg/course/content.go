@@ -113,8 +113,7 @@ func DeleteContent(ctx context.Context, contentID string) error {
 
 // GetContents gets course's contents
 func GetContents(ctx context.Context, id string) ([]*Content, error) {
-	// TODO: validate ownership
-
+	// language=SQL
 	rows, err := pgctx.Query(ctx, `
 		select
 			id, course_id, title, long_desc, video_id, video_type, download_url
