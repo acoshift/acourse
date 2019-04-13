@@ -28,16 +28,12 @@ type Course struct {
 		Name  string
 		Image string
 	}
-	Start         pq.NullTime
-	URL           string
-	Type          int
-	Price         float64
-	Discount      float64
-	Contents      []*Content
-	EnrollDetail  string
-	AssignmentIDs []string
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
+	Start        pq.NullTime
+	URL          string
+	Type         int
+	Price        float64
+	Discount     float64
+	EnrollDetail string
 }
 
 // Link returns id if url is invalid

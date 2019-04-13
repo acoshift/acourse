@@ -25,10 +25,10 @@ func getContentList(ctx *hime.Context) error {
 	if err != nil {
 		return err
 	}
-	c.Contents = contents
 
 	p := view.Page(ctx)
 	p.Data["Course"] = c
+	p.Data["Contents"] = contents
 	return ctx.View("editor.content", p)
 }
 
