@@ -1,17 +1,17 @@
 {{define "global.script"}}
-<script data-turbolinks-eval="false">
-	function bindFileInputImage (input, img) {
-		if (!input || !img) return
-		input.onchange = () => {
-			const fp = input.files && input.files[0]
-			if (fp) {
-				const reader = new window.FileReader()
-				reader.onload = (e) => {
-					img.src = e.target.result
+	<script data-turbolinks-eval="false">
+		function bindFileInputImage (input, img) {
+			if (!input || !img) return
+			input.onchange = () => {
+				const fp = input.files && input.files[0]
+				if (fp) {
+					const reader = new window.FileReader()
+					reader.onload = (e) => {
+						img.src = e.target.result
+					}
+					reader.readAsDataURL(fp)
 				}
-				reader.readAsDataURL(fp)
 			}
 		}
-	}
-</script>
+	</script>
 {{end}}
