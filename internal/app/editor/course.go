@@ -6,9 +6,9 @@ import (
 	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/internal/app/view"
-	"github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
 	"github.com/acoshift/acourse/internal/pkg/course"
+	"github.com/acoshift/acourse/internal/pkg/image"
 )
 
 func getCourseCreate(ctx *hime.Context) error {
@@ -34,22 +34,23 @@ func postCourseCreate(ctx *hime.Context) error {
 		start, _ = time.Parse("2006-01-02", v)
 	}
 
-	image, _ := ctx.FormFileHeaderNotEmpty("image")
+	img, _ := ctx.FormFileHeaderNotEmpty("image")
 
 	courseID, err := course.Create(ctx, &course.CreateArgs{
 		UserID:    appctx.GetUserID(ctx),
 		Title:     title,
 		ShortDesc: shortDesc,
 		LongDesc:  desc,
-		Image:     image,
+		Image:     img,
 		Start:     start,
 	})
-	if app.IsUIError(err) {
-		f.Add("Errors", err.Error())
+	if err == image.ErrInvalidType {
+		f.Add("Errors", "รองรับไฟล์ jpeg และ png เท่านั้น")
 		return ctx.RedirectToGet()
 	}
 	if err != nil {
-		return err
+		f.Add("Errors", err.Error())
+		return ctx.RedirectToGet()
 	}
 
 	link, _ := course.GetURL(ctx, courseID)
@@ -95,22 +96,23 @@ func postCourseEdit(ctx *hime.Context) error {
 		start, _ = time.Parse("2006-01-02", v)
 	}
 
-	image, _ := ctx.FormFileHeaderNotEmpty("image")
+	img, _ := ctx.FormFileHeaderNotEmpty("image")
 
 	err := course.Update(ctx, &course.UpdateArgs{
 		ID:        id,
 		Title:     title,
 		ShortDesc: shortDesc,
 		LongDesc:  desc,
-		Image:     image,
+		Image:     img,
 		Start:     start,
 	})
-	if app.IsUIError(err) {
-		f.Add("Errors", err.Error())
+	if err == image.ErrInvalidType {
+		f.Add("Errors", "รองรับไฟล์ jpeg และ png เท่านั้น")
 		return ctx.RedirectToGet()
 	}
 	if err != nil {
-		return err
+		f.Add("Errors", err.Error())
+		return ctx.RedirectToGet()
 	}
 
 	link, _ := course.GetURL(ctx, id)

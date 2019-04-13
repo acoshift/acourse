@@ -3,6 +3,7 @@ package course
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"mime/multipart"
 	"time"
 
@@ -10,7 +11,6 @@ import (
 	"github.com/acoshift/pgsql/pgctx"
 	"github.com/lib/pq"
 
-	"github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/image"
 )
 
@@ -82,10 +82,8 @@ type CreateArgs struct {
 
 // Create creates new course
 func Create(ctx context.Context, m *CreateArgs) (string, error) {
-	// TODO: validate user role
-
 	if m.Title == "" {
-		return "", app.NewUIError("title required")
+		return "", fmt.Errorf("title required")
 	}
 
 	var imageURL string
@@ -104,12 +102,13 @@ func Create(ctx context.Context, m *CreateArgs) (string, error) {
 		imageURL, err = uploadCourseCoverImage(ctx, img)
 		img.Close()
 		if err != nil {
-			return "", app.NewUIError(err.Error())
+			return "", err
 		}
 	}
 
 	var id string
 	err := pgctx.RunInTx(ctx, func(ctx context.Context) error {
+		// language=SQL
 		err := pgctx.QueryRow(ctx, `
 			insert into courses
 				(user_id, title, short_desc, long_desc, image, start)
@@ -137,14 +136,11 @@ type UpdateArgs struct {
 
 // Update updates course
 func Update(ctx context.Context, m *UpdateArgs) error {
-	// TODO: validate user role
-	// user := appctx.GetUser(ctx)
-
 	if m.ID == "" {
-		return app.NewUIError("course id required")
+		return fmt.Errorf("course id required")
 	}
 	if m.Title == "" {
-		return app.NewUIError("title required")
+		return fmt.Errorf("title required")
 	}
 
 	var imageURL string
@@ -163,7 +159,7 @@ func Update(ctx context.Context, m *UpdateArgs) error {
 		imageURL, err = uploadCourseCoverImage(ctx, img)
 		img.Close()
 		if err != nil {
-			return app.NewUIError(err.Error())
+			return err
 		}
 	}
 
@@ -197,6 +193,7 @@ func Update(ctx context.Context, m *UpdateArgs) error {
 
 // SetOption sets course option
 func SetOption(ctx context.Context, id string, opt Option) error {
+	// language=SQL
 	_, err := pgctx.Exec(ctx, `
 		insert into course_options
 			(course_id, public, enroll, attend, assignment, discount)

@@ -3,19 +3,23 @@ package me
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"mime/multipart"
 
 	"github.com/acoshift/pgsql/pgctx"
 
-	"github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
 	"github.com/acoshift/acourse/internal/pkg/course"
 	"github.com/acoshift/acourse/internal/pkg/file"
 	"github.com/acoshift/acourse/internal/pkg/image"
 	"github.com/acoshift/acourse/internal/pkg/notify"
 	"github.com/acoshift/acourse/internal/pkg/payment"
+)
+
+var (
+	ErrImageRequired = errors.New("me: image required")
 )
 
 // Enroll enrolls a course
@@ -60,13 +64,13 @@ func Enroll(ctx context.Context, courseID string, price float64, paymentImage *m
 	}
 
 	if price < 0 {
-		return app.NewUIError("จำนวนเงินติดลบไม่ได้")
+		return fmt.Errorf("invalid price")
 	}
 
 	var imageURL string
 	if originalPrice != 0 {
 		if paymentImage == nil {
-			return app.NewUIError("กรุณาอัพโหลดรูปภาพ")
+			return ErrImageRequired
 		}
 
 		err := image.Validate(paymentImage)
@@ -76,14 +80,14 @@ func Enroll(ctx context.Context, courseID string, price float64, paymentImage *m
 
 		img, err := paymentImage.Open()
 		if err != nil {
-			return app.NewUIError(err.Error())
+			return err
 		}
 		defer img.Close()
 
 		imageURL, err = uploadPaymentImage(ctx, img)
 		img.Close()
 		if err != nil {
-			return app.NewUIError(err.Error())
+			return err
 		}
 	}
 

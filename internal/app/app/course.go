@@ -12,7 +12,6 @@ import (
 	"github.com/satori/go.uuid"
 
 	"github.com/acoshift/acourse/internal/app/view"
-	"github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
 	"github.com/acoshift/acourse/internal/pkg/course"
 	"github.com/acoshift/acourse/internal/pkg/me"
@@ -233,13 +232,19 @@ func (ctrl *courseCtrl) postEnroll(ctx *hime.Context) error {
 	price, _ := strconv.ParseFloat(ctx.FormValue("price"), 64)
 	image, _ := ctx.FormFileHeaderNotEmpty("image")
 
+	if price < 0 {
+		f.Add("Errors", "จำนวนเงินติดลบไม่ได้")
+		return ctx.RedirectToGet()
+	}
+
 	err = me.Enroll(ctx, x.ID, price, image)
-	if app.IsUIError(err) {
-		f.Add("Errors", "image required")
+	if err == me.ErrImageRequired {
+		f.Add("Errors", "กรุณาอัพโหลดรูปภาพ")
 		return ctx.RedirectToGet()
 	}
 	if err != nil {
-		return err
+		f.Add("Errors", "image required")
+		return ctx.RedirectToGet()
 	}
 
 	return ctx.RedirectTo("app.course", x.Link())

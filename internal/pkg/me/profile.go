@@ -11,7 +11,6 @@ import (
 	"github.com/asaskevich/govalidator"
 	"github.com/moonrhythm/validator"
 
-	"github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
 	"github.com/acoshift/acourse/internal/pkg/file"
 	"github.com/acoshift/acourse/internal/pkg/image"
@@ -61,7 +60,7 @@ func UpdateProfile(ctx context.Context, m *UpdateProfileArgs) error {
 
 		imageURL, err = uploadProfileImage(ctx, img)
 		if err != nil {
-			return app.NewUIError(err.Error())
+			return err
 		}
 	}
 

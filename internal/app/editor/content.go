@@ -6,7 +6,6 @@ import (
 	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/internal/app/view"
-	"github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
 	"github.com/acoshift/acourse/internal/pkg/course"
 )
@@ -38,10 +37,6 @@ func postContentList(ctx *hime.Context) error {
 		contentID := ctx.FormValue("contentId")
 
 		err := course.DeleteContent(ctx, contentID)
-		if app.IsUIError(err) {
-			// TODO: use flash
-			return ctx.Status(http.StatusBadRequest).Error(err.Error())
-		}
 		if err != nil {
 			return err
 		}

@@ -7,8 +7,8 @@ import (
 	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/internal/app/view"
-	"github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
+	"github.com/acoshift/acourse/internal/pkg/image"
 	"github.com/acoshift/acourse/internal/pkg/me"
 )
 
@@ -84,16 +84,19 @@ func postProfileEdit(ctx *hime.Context) error {
 		return ctx.RedirectToGet()
 	}
 
-	image, _ := ctx.FormFileHeaderNotEmpty("image")
+	img, _ := ctx.FormFileHeaderNotEmpty("image")
 	err := me.UpdateProfile(ctx, &me.UpdateProfileArgs{
 		Username: username,
 		Name:     name,
 		AboutMe:  aboutMe,
-		Image:    image,
+		Image:    img,
 	})
-	if app.IsUIError(err) {
-		f.Add("Errors", err.Error())
-		return ctx.RedirectBackToGet()
+	if err == image.ErrInvalidType {
+		f.Add("Errors", "invalid image")
+		return ctx.RedirectToGet()
+	}
+	if err != nil {
+		return err
 	}
 
 	f.Clear()

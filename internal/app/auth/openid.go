@@ -5,7 +5,6 @@ import (
 
 	"github.com/moonrhythm/hime"
 
-	"github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/auth"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
 )
@@ -14,9 +13,9 @@ func getOpenID(ctx *hime.Context) error {
 	p := ctx.FormValue("p")
 
 	redirectURI, state, err := auth.GenerateOpenIDURI(ctx, p)
-	if app.IsUIError(err) {
+	if err == auth.ErrInvalidProvider {
 		// TODO: redirect to sign in page
-		return ctx.Status(http.StatusBadRequest).String(err.Error())
+		return ctx.Status(http.StatusBadRequest).String("Provider not allowed")
 	}
 	if err != nil {
 		return err
@@ -31,9 +30,17 @@ func getOpenIDCallback(ctx *hime.Context) error {
 	appctx.DelOpenIDState(ctx)
 
 	userID, err := auth.SignInOpenIDCallback(ctx, ctx.RequestURI, sessID)
-	if app.IsUIError(err) {
+	if err == auth.ErrInvalidCallbackURI {
 		// TODO: redirect to sign in page
-		return ctx.Status(http.StatusBadRequest).String(err.Error())
+		return ctx.Status(http.StatusBadRequest).String("Invalid callback uri")
+	}
+	if err == auth.ErrEmailNotAvailable {
+		// TODO: redirect to sign in page
+		return ctx.Status(http.StatusBadRequest).String("อีเมลนี้ถูกสมัครแล้ว")
+	}
+	if err == auth.ErrUsernameNotAvailable {
+		// TODO: redirect to sign in page
+		return ctx.Status(http.StatusBadRequest).String("username นี้ถูกใช้งานแล้ว")
 	}
 	if err != nil {
 		return err

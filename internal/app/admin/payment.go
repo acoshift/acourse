@@ -2,7 +2,6 @@ package admin
 
 import (
 	"fmt"
-	"net/http"
 	"strconv"
 
 	"github.com/acoshift/paginate"
@@ -10,7 +9,6 @@ import (
 
 	"github.com/acoshift/acourse/internal/app/view"
 	"github.com/acoshift/acourse/internal/pkg/admin"
-	"github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/config"
 	"github.com/acoshift/acourse/internal/pkg/payment"
 )
@@ -77,9 +75,6 @@ func postRejectPayment(ctx *hime.Context) error {
 	if err == admin.ErrNotFound {
 		return ctx.RedirectTo("admin.payments.pending")
 	}
-	if app.IsUIError(err) {
-		return ctx.Status(http.StatusBadRequest).String(err.Error())
-	}
 	if err != nil {
 		return err
 	}
@@ -95,9 +90,6 @@ func postPendingPayment(ctx *hime.Context) error {
 		err := admin.AcceptPayment(ctx, id)
 		if err == admin.ErrNotFound {
 			return ctx.RedirectTo("admin.payments.pending")
-		}
-		if app.IsUIError(err) {
-			return ctx.Status(http.StatusBadRequest).String(err.Error())
 		}
 		if err != nil {
 			return err

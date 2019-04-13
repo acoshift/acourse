@@ -7,7 +7,6 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/acoshift/acourse/internal/pkg/app"
 	. "github.com/acoshift/acourse/internal/pkg/auth"
 )
 
@@ -23,7 +22,6 @@ var _ = Describe("Auth", func() {
 			userID, err := SignUp(ctx, "", "123456")
 
 			Expect(err).To(HaveOccurred())
-			Expect(app.IsUIError(err)).To(BeTrue())
 			Expect(userID).To(BeZero())
 		})
 
@@ -31,7 +29,6 @@ var _ = Describe("Auth", func() {
 			userID, err := SignUp(ctx, "invalid email", "123456")
 
 			Expect(err).To(HaveOccurred())
-			Expect(app.IsUIError(err)).To(BeTrue())
 			Expect(userID).To(BeZero())
 		})
 
@@ -39,7 +36,6 @@ var _ = Describe("Auth", func() {
 			userID, err := SignUp(ctx, "test@test.com", "")
 
 			Expect(err).To(HaveOccurred())
-			Expect(app.IsUIError(err)).To(BeTrue())
 			Expect(userID).To(BeZero())
 		})
 
@@ -47,7 +43,6 @@ var _ = Describe("Auth", func() {
 			userID, err := SignUp(ctx, "test@test.com", "123")
 
 			Expect(err).To(HaveOccurred())
-			Expect(app.IsUIError(err)).To(BeTrue())
 			Expect(userID).To(BeZero())
 		})
 
@@ -55,7 +50,6 @@ var _ = Describe("Auth", func() {
 			userID, err := SignUp(ctx, "test@test.com", strings.Repeat("1", 100))
 
 			Expect(err).To(HaveOccurred())
-			Expect(app.IsUIError(err)).To(BeTrue())
 			Expect(userID).To(BeZero())
 		})
 
@@ -63,7 +57,6 @@ var _ = Describe("Auth", func() {
 			userID, err := SignUp(ctx, "notavailable@test.com", "12345678")
 
 			Expect(err).To(HaveOccurred())
-			Expect(app.IsUIError(err)).To(BeTrue())
 			Expect(userID).To(BeZero())
 		})
 
@@ -80,7 +73,6 @@ var _ = Describe("Auth", func() {
 			userID, err := SignInPassword(ctx, "", "")
 
 			Expect(err).To(HaveOccurred())
-			Expect(app.IsUIError(err)).To(BeTrue())
 			Expect(userID).To(BeZero())
 		})
 
@@ -88,7 +80,6 @@ var _ = Describe("Auth", func() {
 			userID, err := SignInPassword(ctx, "test@test.com", "")
 
 			Expect(err).To(HaveOccurred())
-			Expect(app.IsUIError(err)).To(BeTrue())
 			Expect(userID).To(BeZero())
 		})
 
@@ -96,7 +87,6 @@ var _ = Describe("Auth", func() {
 			userID, err := SignInPassword(ctx, "", "123456")
 
 			Expect(err).To(HaveOccurred())
-			Expect(app.IsUIError(err)).To(BeTrue())
 			Expect(userID).To(BeZero())
 		})
 
@@ -120,7 +110,6 @@ var _ = Describe("Auth", func() {
 			err := SendPasswordResetEmail(ctx, "")
 
 			Expect(err).To(HaveOccurred())
-			Expect(app.IsUIError(err)).To(BeTrue())
 		})
 
 		It("should success when email not found in firebase", func() {
