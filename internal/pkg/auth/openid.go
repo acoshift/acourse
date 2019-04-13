@@ -6,10 +6,9 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/acoshift/pgsql/pgctx"
 	"github.com/moonrhythm/hime"
 
-	"github.com/acoshift/acourse/internal/pkg/app"
-	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
 	"github.com/acoshift/acourse/internal/pkg/file"
 	"github.com/acoshift/acourse/internal/pkg/image"
 	"github.com/acoshift/acourse/internal/pkg/user"
@@ -22,7 +21,7 @@ var allowProvider = map[string]bool{
 
 func GenerateOpenIDURI(ctx context.Context, provider string) (redirectURI, state string, err error) {
 	if !allowProvider[provider] {
-		return "", "", app.NewUIError("provider not allowed")
+		return "", "", ErrInvalidProvider
 	}
 
 	state = generateSessionID()
@@ -41,10 +40,10 @@ func SignInOpenIDCallback(ctx context.Context, uri, state string) (string, error
 		state,
 	)
 	if err != nil {
-		return "", app.NewUIError(err.Error())
+		return "", ErrInvalidCallbackURI
 	}
 
-	err = sqlctx.RunInTx(ctx, func(ctx context.Context) error {
+	err = pgctx.RunInTx(ctx, func(ctx context.Context) error {
 		// check is user sign up
 		exists, err := userSvc.IsExists(ctx, u.UserID)
 		if err != nil {
@@ -69,10 +68,10 @@ func SignInOpenIDCallback(ctx context.Context, uri, state string) (string, error
 		return nil
 	})
 	if err == user.ErrEmailNotAvailable {
-		return "", app.NewUIError("อีเมลนี้ถูกสมัครแล้ว")
+		return "", ErrEmailNotAvailable
 	}
 	if err == user.ErrUsernameNotAvailable {
-		return "", app.NewUIError("username นี้ถูกใช้งานแล้ว")
+		return "", ErrUsernameNotAvailable
 	}
 	if err != nil {
 		return "", err

@@ -6,9 +6,7 @@ import (
 	"errors"
 
 	"github.com/acoshift/pgsql"
-
-	"github.com/acoshift/acourse/internal/pkg/app"
-	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
+	"github.com/acoshift/pgsql/pgctx"
 )
 
 // Errors
@@ -44,7 +42,8 @@ type CreateArgs struct {
 
 // Create creates new user
 func Create(ctx context.Context, m *CreateArgs) error {
-	_, err := sqlctx.Exec(ctx, `
+	// language=SQL
+	_, err := pgctx.Exec(ctx, `
 		insert into users
 			(id, username, name, email, image)
 		values
@@ -68,13 +67,13 @@ type UpdateArgs struct {
 
 // Update updates user
 func Update(ctx context.Context, m *UpdateArgs) error {
-	_, err := sqlctx.Exec(ctx, `
+	// language=SQL
+	_, err := pgctx.Exec(ctx, `
 		update users
-		set
-			username = $2,
-			name = $3,
-			about_me = $4,
-			updated_at = now()
+		set username = $2,
+		    name = $3,
+		    about_me = $4,
+		    updated_at = now()
 		where id = $1
 	`, m.ID, m.Username, m.Name, m.AboutMe)
 	return err
@@ -83,7 +82,9 @@ func Update(ctx context.Context, m *UpdateArgs) error {
 // IsExists checks is user exists
 func IsExists(ctx context.Context, id string) (bool, error) {
 	var b bool
-	err := sqlctx.QueryRow(ctx, `
+
+	// language=SQL
+	err := pgctx.QueryRow(ctx, `
 		select exists (
 			select 1
 			from users
@@ -95,7 +96,8 @@ func IsExists(ctx context.Context, id string) (bool, error) {
 
 // SetImage sets user image
 func SetImage(ctx context.Context, id string, image string) error {
-	_, err := sqlctx.Exec(ctx, `
+	// language=SQL
+	_, err := pgctx.Exec(ctx, `
 		update users
 		set image = $2
 		where id = $1
@@ -106,7 +108,9 @@ func SetImage(ctx context.Context, id string, image string) error {
 // Get gets user from id
 func Get(ctx context.Context, id string) (*User, error) {
 	var x User
-	err := sqlctx.QueryRow(ctx, `
+
+	// language=SQL
+	err := pgctx.QueryRow(ctx, `
 		select
 			u.id, u.name, u.username, coalesce(u.email, ''), u.about_me, u.image,
 			coalesce(r.admin, false), coalesce(r.instructor, false)
@@ -118,7 +122,7 @@ func Get(ctx context.Context, id string) (*User, error) {
 		&x.Role.Admin, &x.Role.Instructor,
 	)
 	if err == sql.ErrNoRows {
-		return nil, app.ErrNotFound
+		return nil, ErrNotFound
 	}
 	if err != nil {
 		return nil, err

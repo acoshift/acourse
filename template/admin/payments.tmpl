@@ -1,17 +1,15 @@
 {{define "app-body"}}
-<div id="payment">
-	<div class="grid-container _flex-column">
+	<div id="payment">
+		<div class="grid-container _flex-column">
+			<div class="acourse-header">
+				Payments
+			</div>
 
-		<div class="acourse-header">
-			Payments
-		</div>
+			{{template "pagination" .Paginate}}
 
-		{{template "pagination" .Paginate}}
-
-		<!-- Table -->
-		<div class="flex-row">
-			<table class="acourse-block-big">
-				<thead>
+			<div class="flex-row">
+				<table class="acourse-block-big">
+					<thead>
 					<tr>
 						<th>ID</th>
 						<th>Course</th>
@@ -23,49 +21,45 @@
 						<th>Created At</th>
 						<th>Actions</th>
 					</tr>
-				</thead>
-				<tbody>
+					</thead>
+					<tbody>
 					{{range .Payments}}
 						<tr>
 							<td data-column="ID">{{.ID}}</td>
 							<td data-column="Course">
 								<a href="{{route "app.course" .CourseLink}}" target="_blank">
-									<img
-										class="_img-cover"
-										src="{{.Course.Image}}"
-										onerror="this.src = '{{fallbackImage}}'"
-										width="200"
-										height="100">
+									<img class="_img-cover"
+										 src="{{.Course.Image}}"
+										 onerror="this.src = '{{fallbackImage}}'"
+										 width="200"
+										 height="100">
 								</a>
 							</td>
 							<td data-column="Slip">
 								{{if .Image}}
 									<a href="{{.Image}}" target="_blank">
-										<img
-											class="_img-cover"
-											src="{{.Image}}"
-											onerror="this.src = '{{fallbackImage}}'"
-											width="200"
-											height="100">
+										<img class="_img-cover"
+											 src="{{.Image}}"
+											 onerror="this.src = '{{fallbackImage}}'"
+											 width="200"
+											 height="100">
 									</a>
 								{{else}}
-									<img
-											class="_img-cover"
-											src="{{fallbackImage}}"
-											width="200"
-											height="100">
+									<img class="_img-cover"
+										 src="{{fallbackImage}}"
+										 width="200"
+										 height="100">
 								{{end}}
 							</td>
 							<td class="acourse-word-breakeable" style="min-width: 100px">
-								<img
-									src="{{.User.Image}}"
-									class="acourse-circle acourse-block _img-cover"
-									onerror="this.src = '{{fallbackImage}}'">
+								<img src="{{.User.Image}}"
+									 class="acourse-circle acourse-block _img-cover"
+									 onerror="this.src = '{{fallbackImage}}'">
 								<br>
 								<span>
-									<div class="_font-bold">{{.User.Username}}</div>
-									<div>{{.User.Email}}</div>
-								</span>
+								<div class="_font-bold">{{.User.Username}}</div>
+								<div>{{.User.Email}}</div>
+							</span>
 							</td>
 							<td>{{.Price | currency}}</td>
 							<td>{{.OriginalPrice | currency}}</td>
@@ -97,11 +91,11 @@
 							</td>
 						</tr>
 					{{end}}
-				</tbody>
-			</table>
+					</tbody>
+				</table>
+			</div>
+
+			{{template "pagination" .Paginate}}
 		</div>
-
-		{{template "pagination" .Paginate}}
-
-</div>
+	</div>
 {{end}}

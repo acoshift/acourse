@@ -7,9 +7,9 @@ import (
 	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/internal/app/view"
-	"github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
-	"github.com/acoshift/acourse/internal/pkg/user"
+	"github.com/acoshift/acourse/internal/pkg/image"
+	"github.com/acoshift/acourse/internal/pkg/me"
 )
 
 func signOut(ctx *hime.Context) error {
@@ -18,20 +18,20 @@ func signOut(ctx *hime.Context) error {
 }
 
 func getProfile(ctx *hime.Context) error {
-	user := appctx.GetUser(ctx)
+	u := appctx.GetUser(ctx)
 
-	ownCourses, err := listOwnCourses(ctx, user.ID)
+	ownCourses, err := me.GetOwnCourses(ctx, u.ID)
 	if err != nil {
 		return err
 	}
 
-	enrolledCourses, err := listEnrolledCourses(ctx, user.ID)
+	enrolledCourses, err := me.GetEnrolledCourses(ctx, u.ID)
 	if err != nil {
 		return err
 	}
 
 	p := view.Page(ctx)
-	p.Meta.Title = user.Username
+	p.Meta.Title = u.Username
 	p.Data["Navbar"] = "profile"
 	p.Data["OwnCourses"] = ownCourses
 	p.Data["EnrolledCourses"] = enrolledCourses
@@ -84,17 +84,19 @@ func postProfileEdit(ctx *hime.Context) error {
 		return ctx.RedirectToGet()
 	}
 
-	image, _ := ctx.FormFileHeaderNotEmpty("image")
-	err := user.UpdateProfile(ctx, &user.UpdateProfileArgs{
-		ID:       appctx.GetUserID(ctx),
+	img, _ := ctx.FormFileHeaderNotEmpty("image")
+	err := me.UpdateProfile(ctx, &me.UpdateProfileArgs{
 		Username: username,
 		Name:     name,
 		AboutMe:  aboutMe,
-		Image:    image,
+		Image:    img,
 	})
-	if app.IsUIError(err) {
-		f.Add("Errors", err.Error())
-		return ctx.RedirectBackToGet()
+	if err == image.ErrInvalidType {
+		f.Add("Errors", "invalid image")
+		return ctx.RedirectToGet()
+	}
+	if err != nil {
+		return err
 	}
 
 	f.Clear()

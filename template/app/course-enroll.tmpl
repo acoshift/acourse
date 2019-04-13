@@ -1,8 +1,8 @@
 {{define "app-body"}}
-<div id="course-enroll">
-	<div class="grid-container _flex-column">
+	<div id="course-enroll">
+		<div class="grid-container _flex-column">
 
-		<div class="acourse-header _color-sub">
+			<div class="acourse-header _color-sub">
 				สมัครเรียน<br>
 				<div class="_font-size-big">
 					<span class="_font-bold _color-dark">คอร์ส: </span>
@@ -10,52 +10,52 @@
 				</div>
 			</div>
 
-		<div class="acourse-card _flex-row row">
+			<div class="acourse-card _flex-row row">
 
-			<div class="acourse-segment col-xs-12 col-md-8">
-				<h3 class="acourse-block-big">รายละเอียด</h3>
-				<div>{{.Course.EnrollDetail | markdown}}</div>
-			</div>
+				<div class="acourse-segment col-xs-12 col-md-8">
+					<h3 class="acourse-block-big">รายละเอียด</h3>
+					<div>{{.Course.EnrollDetail | markdown}}</div>
+				</div>
 
-			<div class="acourse-segment col-xs-12 col-md-4 _bg-color-base-2">
-				<h3 class="acourse-block-big">
-					สมัครเรียน
-				</h3>
-				<form method="POST" enctype="multipart/form-data">
-					{{if ne .Course.Price 0.0}}
-						<div class="_flex-row">
-							<div class="input-field col-xs-6 _no-padding _flex-column">
-								<label>สลิปโอนเงิน</label>
-								<div class="_flex-row">
-									<label class="acourse-button -info _font-sub _full-width" for="image-input">อัพโหลดสลิปโอนเงิน</label>
-									<input id="image-input" class="_hide" type="file" name="image" accept="image/*">
+				<div class="acourse-segment col-xs-12 col-md-4 _bg-color-base-2">
+					<h3 class="acourse-block-big">
+						สมัครเรียน
+					</h3>
+					<form method="POST" enctype="multipart/form-data">
+						{{if ne .Course.Price 0.0}}
+							<div class="_flex-row">
+								<div class="input-field col-xs-6 _no-padding _flex-column">
+									<label>สลิปโอนเงิน</label>
+									<div class="_flex-row">
+										<label class="acourse-button -info _font-sub _full-width" for="image-input">อัพโหลดสลิปโอนเงิน</label>
+										<input id="image-input" class="_hide" type="file" name="image" accept="image/*">
+									</div>
+								</div>
+								<div class="acourse-block col-xs-6">
+									<img id="slip" class="_img-cover" src="">
 								</div>
 							</div>
-							<div class="acourse-block col-xs-6">
-								<img id="slip" class="_img-cover" src="">
+
+							<div class="input-field _flex-column">
+								<label>จำนวนเงินที่โอน</label>
+								<input class="acourse-input" type="number" step="0.01" name="price">
 							</div>
+						{{end}}
+
+						<div class="acourse-block-big _flex-row _main-center">
+							<button class="acourse-button -positive _font-sub _full-width">สมัครเรียน</button>
 						</div>
 
-						<div class="input-field _flex-column">
-							<label>จำนวนเงินที่โอน</label>
-							<input class="acourse-input" type="number" step="0.01" name="price">
-						</div>
-					{{end}}
-
-					<div class="acourse-block-big _flex-row _main-center">
-						<button class="acourse-button -positive _font-sub _full-width">สมัครเรียน</button>
-					</div>
-
-					{{template "error-message" .Flash}}
-				</form>
+						{{template "error-message" .Flash}}
+					</form>
+				</div>
 			</div>
 		</div>
 	</div>
-</div>
 {{end}}
 
 {{define "app.script"}}
-<script>
-	bindFileInputImage(document.querySelector('#image-input'), document.querySelector('#slip'))
-</script>
+	<script>
+		bindFileInputImage(document.querySelector('#image-input'), document.querySelector('#slip'))
+	</script>
 {{end}}

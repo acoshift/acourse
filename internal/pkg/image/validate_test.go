@@ -7,7 +7,6 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/acoshift/acourse/internal/pkg/app"
 	. "github.com/acoshift/acourse/internal/pkg/image"
 )
 
@@ -16,8 +15,7 @@ var _ = Describe("Validate", func() {
 		fh := &multipart.FileHeader{}
 		err := Validate(fh)
 
-		Expect(err).ToNot(BeNil())
-		Expect(app.IsUIError(err)).To(BeTrue())
+		Expect(err).To(Equal(ErrInvalidType))
 	})
 
 	It("should return error when file is html", func() {
@@ -26,8 +24,7 @@ var _ = Describe("Validate", func() {
 		fh.Header.Set("Content-Type", "text/html")
 		err := Validate(fh)
 
-		Expect(err).ToNot(BeNil())
-		Expect(app.IsUIError(err)).To(BeTrue())
+		Expect(err).To(Equal(ErrInvalidType))
 	})
 
 	It("should success when file is jpg", func() {
@@ -63,8 +60,7 @@ var _ = Describe("Validate", func() {
 		fh.Header.Set("Content-Type", "image/bmp")
 		err := Validate(fh)
 
-		Expect(err).ToNot(BeNil())
-		Expect(app.IsUIError(err)).To(BeTrue())
+		Expect(err).To(Equal(ErrInvalidType))
 	})
 
 	It("should return error when file is svg", func() {
@@ -73,7 +69,6 @@ var _ = Describe("Validate", func() {
 		fh.Header.Set("Content-Type", "image/svg+xml")
 		err := Validate(fh)
 
-		Expect(err).ToNot(BeNil())
-		Expect(app.IsUIError(err)).To(BeTrue())
+		Expect(err).To(Equal(ErrInvalidType))
 	})
 })

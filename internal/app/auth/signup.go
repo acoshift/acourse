@@ -6,7 +6,6 @@ import (
 	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/internal/app/view"
-	"github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/auth"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
 )
@@ -31,15 +30,22 @@ func postSignUp(ctx *hime.Context) error {
 		return ctx.RedirectToGet()
 	}
 
+	f.Set("Email", email)
 	userID, err := auth.SignUp(ctx, email, pass)
-	if app.IsUIError(err) {
-		f.Set("Email", email)
-		f.Add("Errors", err.Error())
+	if err == auth.ErrEmailNotAvailable {
+		f.Add("Errors", "อีเมลนี้ถูกสมัครแล้ว")
+		return ctx.RedirectToGet()
+	}
+	if err == auth.ErrUsernameNotAvailable {
+		f.Add("Errors", "username นี้ถูกใช้งานแล้ว")
 		return ctx.RedirectToGet()
 	}
 	if err != nil {
-		return err
+		f.Add("Errors", err.Error())
+		return ctx.RedirectToGet()
 	}
+
+	f.Del("Email")
 
 	appctx.RegenerateSessionID(ctx)
 	appctx.SetUserID(ctx, userID)

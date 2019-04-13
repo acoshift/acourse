@@ -1,51 +1,50 @@
 {{define "app-body"}}
-<div id="profile">
-	<div class="profile-container grid-container">
-		<div class="_full-width row _cross-start">
+	<div id="profile">
+		<div class="profile-container grid-container">
+			<div class="_full-width row _cross-start">
 
-			<div class="acourse-card acourse-segment acourse-block-bigger col-xs-12 col-md-3 _flex-column">
-				{{template "user-profile" .Me}}
-				<div class="user-id _font-size-small _align-center">
-					ID: {{.Me.ID}}
+				<div class="acourse-card acourse-segment acourse-block-bigger col-xs-12 col-md-3 _flex-column">
+					{{template "user-profile" .Me}}
+					<div class="user-id _font-size-small _align-center">
+						ID: {{.Me.ID}}
+					</div>
+					<a href="{{route "app.profile.edit"}}">
+						<div class="acourse-button-secondary">แก้ไขโปรไฟล์</div>
+					</a>
 				</div>
-				<a href="{{route "app.profile.edit"}}">
-					<div class="acourse-button-secondary">แก้ไขโปรไฟล์</div>
-				</a>
-			</div>
 
-			<div class="user-dashboard col-xs-12 col-md-9 _flex-column">
-				{{if .Me.Role.Instructor}}
+				<div class="user-dashboard col-xs-12 col-md-9 _flex-column">
+					{{if .Me.Role.Instructor}}
+						<div class="acourse-block-big col-xs-12 _flex-row _main-space-between _cross-center _clearflex">
+							<div class="acourse-header _no-margin _color-main">คอร์สที่คุณสอน</div>
+							<a href="{{route "editor.course.create"}}">
+								<div class="acourse-button -primary _font-sub">สร้างคอร์สใหม่</div>
+							</a>
+						</div>
+
+						<div class="acourse-block row">
+							{{range .OwnCourses}}
+								<div class="col-xs-12 col-md-6 col-lg-4 _flex-row">
+									{{template "own-course-card" .}}
+								</div>
+							{{end}}
+						</div>
+					{{end}}
+
 					<div class="acourse-block-big col-xs-12 _flex-row _main-space-between _cross-center _clearflex">
-						<div class="acourse-header _no-margin _color-main">คอร์สที่คุณสอน</div>
-						<a href="{{route "editor.course.create"}}">
-							<div class="acourse-button -primary _font-sub">สร้างคอร์สใหม่</div>
-						</a>
+						<div class="acourse-header _no-margin _color-main">คอร์สที่สมัครเรียน</div>
 					</div>
 
 					<div class="acourse-block row">
-						{{range .OwnCourses}}
+						{{range .EnrolledCourses}}
 							<div class="col-xs-12 col-md-6 col-lg-4 _flex-row">
-								{{template "own-course-card" .}}
+								{{template "enrolled-course-card" .}}
 							</div>
 						{{end}}
 					</div>
-				{{end}}
-
-				<div class="acourse-block-big col-xs-12 _flex-row _main-space-between _cross-center _clearflex">
-					<div class="acourse-header _no-margin _color-main">คอร์สที่สมัครเรียน</div>
 				</div>
 
-				<div class="acourse-block row">
-					{{range .EnrolledCourses}}
-						<div class="col-xs-12 col-md-6 col-lg-4 _flex-row">
-							{{template "enrolled-course-card" .}}
-						</div>
-					{{end}}
-				</div>
 			</div>
-
 		</div>
-
 	</div>
-</div>
 {{end}}

@@ -3,7 +3,7 @@
 		<div class="grid-container">
 			<div class="acourse-card _flex-column">
 
-				<div class="">
+				<div>
 					<img class="course-img" {{if .Course.Image}}src="{{.Course.Image}}"{{end}} width="100%">
 				</div>
 
@@ -17,31 +17,29 @@
 
 							<div class="acourse-block-big _flex-row _cross-center">
 								<p class="_no-margin">แชร์บน &nbsp;</p>
-								<a
-									href="https://www.facebook.com/sharer/sharer.php?u=http%3A//acourse.io/course/{{.Course.Link}}"
-									target="_blank"
-									class="_font-size-bigger acourse-side-space">
+								<a href="https://www.facebook.com/sharer/sharer.php?u=http%3A//acourse.io/course/{{.Course.Link}}"
+								   target="_blank"
+								   class="_font-size-bigger acourse-side-space">
 									<i class="fa fa-facebook-square" style="color: #3b5999"></i>
 								</a>
-								<a
-									href="https://twitter.com/home?status=http%3A//acourse.io/course/{{.Course.Link}}"
-									target="_blank"
-									class="_font-size-bigger acourse-side-space">
+								<a href="https://twitter.com/home?status=http%3A//acourse.io/course/{{.Course.Link}}"
+								   target="_blank"
+								   class="_font-size-bigger acourse-side-space">
 									<i class="fa fa-twitter-square" style="color: #55acee"></i>
 								</a>
-								<a
-									href="https://plus.google.com/share?url=http%3A//acourse.io/course/{{.Course.Link}}"
-									target="_blank"
-									class="_font-size-bigger acourse-side-space">
+								<a href="https://plus.google.com/share?url=http%3A//acourse.io/course/{{.Course.Link}}"
+								   target="_blank"
+								   class="_font-size-bigger acourse-side-space">
 									<i class="fa fa-google-plus-square" style="color: #dc4e41"></i>
 								</a>
 							</div>
 
 							{{if eq .Course.Type live}}
 								{{if not .Course.Start.IsZero}}
-								<div class="acourse-block-bigger">
-									<div class="acourse-label -red _font-bold">เริ่มสอน: {{.Course.Start | date}}</div>
-								</div>
+									<div class="acourse-block-bigger">
+										<div class="acourse-label -red _font-bold">
+											เริ่มสอน: {{.Course.Start | date}}</div>
+									</div>
 								{{end}}
 							{{end}}
 
@@ -76,58 +74,71 @@
 									{{end}}
 
 									{{if .Enrolled}}
-									<div class="acourse-block-big">
-										<a href="{{route "app.course" .Course.Link "content"}}">
-											<button class="acourse-button -positive _font-sub _full-width acourse-block">เริ่มเรียน</button>
-										</a>
-										<!--<a href="{{route "app.index"}}">
+										<div class="acourse-block-big">
+											<a href="{{route "app.course" .Course.Link "content"}}">
+												<button class="acourse-button -positive _font-sub _full-width acourse-block">
+													เริ่มเรียน
+												</button>
+											</a>
+											<!--<a href="{{route "app.index"}}">
 											<button class="acourse-button -primary _font-sub _full-width acourse-block">Attend</button>
 										</a>-->
-										{{if .Course.Option.Assignment}}
-											<a href="{{route "app.course" .Course.Link "assignment"}}">
-												<button class="acourse-button -primary _font-sub _full-width acourse-block">การบ้าน</button>
-											</a>
-										{{end}}
-									</div>
+											{{if .Course.Option.Assignment}}
+												<a href="{{route "app.course" .Course.Link "assignment"}}">
+													<button class="acourse-button -primary _font-sub _full-width acourse-block">
+														การบ้าน
+													</button>
+												</a>
+											{{end}}
+										</div>
 									{{end}}
 
 									{{if .PendingEnroll}}
-									<div class="acourse-block-big">
-										<button class="acourse-button -disable _font-sub _full-width acourse-block disabled">กำลังตรวจสอบ</button>
-									</div>
+										<div class="acourse-block-big">
+											<button class="acourse-button -disable _font-sub _full-width acourse-block disabled">
+												กำลังตรวจสอบ
+											</button>
+										</div>
 									{{else}}
 										{{if .Course.Option.Enroll}}
 											{{if and (not .Owned) (not .Enrolled)}}
-											<div class="acourse-block-big">
-												<a href="{{route "app.course" .Course.Link "enroll"}}">
-													<button class="acourse-button -positive _font-sub _full-width acourse-block">สมัครเรียน</button>
-												</a>
-											</div>
+												<div class="acourse-block-big">
+													<a href="{{route "app.course" .Course.Link "enroll"}}">
+														<button class="acourse-button -positive _font-sub _full-width acourse-block">
+															สมัครเรียน
+														</button>
+													</a>
+												</div>
 											{{end}}
 										{{end}}
 									{{end}}
 
 									{{if .Owned}}
-									<div class="acourse-block-big">
-										<a href="{{route "app.course" .Course.Link "content"}}">
-											<button class="acourse-button -positive _font-sub _full-width acourse-block">เริ่มเรียน</button>
-										</a>
-										<a href="{{route "editor.course.edit" (param "id" .Course.ID)}}">
-											<button class="acourse-button -primary _font-sub _full-width acourse-block">แก้ไขคอร์ส</button>
-										</a>
-										<a href="{{route "editor.content" (param "id" .Course.ID)}}">
-											<button class="acourse-button -primary _font-sub _full-width acourse-block">แก้ไขคอนเทนท์</button>
-										</a>
-									</div>
+										<div class="acourse-block-big">
+											<a href="{{route "app.course" .Course.Link "content"}}">
+												<button class="acourse-button -positive _font-sub _full-width acourse-block">
+													เริ่มเรียน
+												</button>
+											</a>
+											<a href="{{route "editor.course.edit" (param "id" .Course.ID)}}">
+												<button class="acourse-button -primary _font-sub _full-width acourse-block">
+													แก้ไขคอร์ส
+												</button>
+											</a>
+											<a href="{{route "editor.content" (param "id" .Course.ID)}}">
+												<button class="acourse-button -primary _font-sub _full-width acourse-block">
+													แก้ไขคอนเทนท์
+												</button>
+											</a>
+										</div>
 									{{end}}
 
 									<div>
 										<h3>รายละเอียดผู้สอน</h3>
 										<div class="_flex-column _cross-center _font-sub">
-											<img
-												class="acourse-block acourse-circle _img-cover"
-												src="{{.Course.Owner.Image}}"
-												onerror="this.src = '{{fallbackImage}}'">
+											<img class="acourse-block acourse-circle _img-cover"
+												 src="{{.Course.Owner.Image}}"
+												 onerror="this.src = '{{fallbackImage}}'">
 											<div class="_font-bold _font-size-big">{{.Course.Owner.Name}}</div>
 										</div>
 									</div>

@@ -1,20 +1,21 @@
 {{define "app-body"}}
-<div id="payment-reject">
-	<div class="acourse-card acourse-segment acourse-block-bigger col-xs-12 col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3">
-		<div class="acourse-header _color-main _align-center">
-			Reject: {{.Payment.ID}}
-		</div>
-		<form method="POST">
-			<input type="hidden" name="id" value="{{.Payment.ID}}">
-			<div class="input-field _flex-column">
-				<label>Message</label>
-				<textarea rows="30" class="acourse-input" name="message">{{.Message}}</textarea>
-				<div class="_flex-row _opa50">
-					<img src="/-/md.svg"><div class="_font-size-small">&nbsp;Styling with Markdown is supported</div>
-				</div>
+	<div id="payment-reject">
+		<div class="acourse-card acourse-segment acourse-block-bigger col-xs-12 col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3">
+			<div class="acourse-header _color-main _align-center">
+				Reject: {{.Payment.ID}}
 			</div>
-			<button class="acourse-button -negative _font-main _full-width">Reject and Send</button>
-		</form>
+			<form method="POST">
+				<input type="hidden" name="id" value="{{.Payment.ID}}">
+				<div class="input-field _flex-column">
+					<label>Message</label>
+					<textarea rows="30" class="acourse-input" name="message">{{.Message}}</textarea>
+					<div class="_flex-row _opa50">
+						<img src="/-/md.svg">
+						<div class="_font-size-small">&nbsp;Styling with Markdown is supported</div>
+					</div>
+				</div>
+				<button class="acourse-button -negative _font-main _full-width">Reject and Send</button>
+			</form>
+		</div>
 	</div>
-</div>
 {{end}}

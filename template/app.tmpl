@@ -1,46 +1,49 @@
 {{define "body"}}
 	<div id="navbar" class="navbar-color">
 		<div class="navbar-container grid-container _flex-row _main-space-between _cross-stretch">
-
 			<a href="{{route "app.index"}}" class="_flex-row _cross-center">
 				<img class="logo" src="/-/logo-2.png" height="45" alt="acourse logo">
 				<span class="logo-text">Acourse</span>
 			</a>
 			<div class="_flex-row _cross-center _main-end">
-			{{if .Me}}
-			<div class="dropdown _full-height">
-				<div class="dropbtn _full-height _flex-row _cross-center ">
-					<img
-						class="acourse-block-big acourse-circle _img-cover _no-margin"
-						src="{{.Me.Image}}"
-						onerror="this.src = '{{fallbackImage}}'">
-					<div class="username">&nbsp;&nbsp;{{.Me.Username}}</div>
-					&nbsp;&nbsp;<i class="fa fa-caret-down"></i>
-				</div>
-				<div class="dropdown-content-w">
-					<div class="dropdown-content">
-						<a class="_font-main _font-bold _font-size-big {{if eq .Navbar "profile"}} active{{end}}" href="{{route "app.profile"}}">โปรไฟล์</a>
-						{{if .Me.Role.Admin}}
-						<a class="_font-main _font-bold _font-size-big {{if eq .Navbar "admin.users"}} active{{end}}" href="{{route "admin.users"}}">รายชื่อผู้ใช้</a>
-						<a class="_font-main _font-bold _font-size-big {{if eq .Navbar "admin.courses"}} active{{end}}" href="{{route "admin.courses"}}">รายชื่อคอร์ส</a>
-						<a class="_font-main _font-bold _font-size-big {{if eq .Navbar "admin.payment.pending"}} active{{end}}" href="{{route "admin.payments.pending"}}">รอดำเนินการ</a>
-						<a class="_font-main _font-bold _font-size-big {{if eq .Navbar "admin.payment.history"}} active{{end}}" href="{{route "admin.payments.history"}}">ประวัติการชำระเงิน</a>
-						{{end}}
+				{{if .Me}}
+					<div class="dropdown _full-height">
+						<div class="dropbtn _full-height _flex-row _cross-center ">
+							<img class="acourse-block-big acourse-circle _img-cover _no-margin"
+								 src="{{.Me.Image}}"
+								 onerror="this.src = '{{fallbackImage}}'">
+							<div class="username">&nbsp;&nbsp;{{.Me.Username}}</div>
+							&nbsp;&nbsp;<i class="fa fa-caret-down"></i>
+						</div>
+						<div class="dropdown-content-w">
+							<div class="dropdown-content">
+								<a class="_font-main _font-bold _font-size-big {{if eq .Navbar "profile"}} active{{end}}"
+								   href="{{route "app.profile"}}">โปรไฟล์</a>
+								{{if .Me.Role.Admin}}
+									<a class="_font-main _font-bold _font-size-big {{if eq .Navbar "admin.users"}} active{{end}}"
+									   href="{{route "admin.users"}}">รายชื่อผู้ใช้</a>
+									<a class="_font-main _font-bold _font-size-big {{if eq .Navbar "admin.courses"}} active{{end}}"
+									   href="{{route "admin.courses"}}">รายชื่อคอร์ส</a>
+									<a class="_font-main _font-bold _font-size-big {{if eq .Navbar "admin.payment.pending"}} active{{end}}"
+									   href="{{route "admin.payments.pending"}}">รอดำเนินการ</a>
+									<a class="_font-main _font-bold _font-size-big {{if eq .Navbar "admin.payment.history"}} active{{end}}"
+									   href="{{route "admin.payments.history"}}">ประวัติการชำระเงิน</a>
+								{{end}}
 
-						<form method="POST" action="{{route "app.signout"}}">
-							<button class="_font-main _font-bold _font-size-big">ออกจากระบบ</button>
-						</form>
+								<form method="POST" action="{{route "app.signout"}}">
+									<button class="_font-main _font-bold _font-size-big">ออกจากระบบ</button>
+								</form>
+							</div>
+						</div>
 					</div>
-				</div>
-			</div>
-			{{else}}
-			<a class="link _flex-row _cross-center _font-sub" href="{{route "auth.signin"}}">
-				เข้าสู่ระบบ
-			</a>
-			<a href="{{route "auth.signup"}}">
-				<div class="acourse-button -primary _font-sub acourse-side-space">สมัครใช้งาน</div>
-			</a>
-			{{end}}
+				{{else}}
+					<a class="link _flex-row _cross-center _font-sub" href="{{route "auth.signin"}}">
+						เข้าสู่ระบบ
+					</a>
+					<a href="{{route "auth.signup"}}">
+						<div class="acourse-button -primary _font-sub acourse-side-space">สมัครใช้งาน</div>
+					</a>
+				{{end}}
 			</div>
 		</div>
 	</div>
@@ -63,12 +66,12 @@
 			<div class="col-xs-12 col-sm-6 _flex-column _cross-start">
 				<h2 class="acourse-block _font-regular">Follow Us</h2>
 				<a href="https://github.com/acoshift/acourse" class="_font-size-bigger" target="_blank" rel="noopener">
-					<div class="_font-size-big _color-sub acourse-block" >
+					<div class="_font-size-big _color-sub acourse-block">
 						<i class="fa fa-github _font-size-bigger _color-sub"></i> &nbsp; Github
 					</div>
 				</a>
 				<a href="https://www.facebook.com/acourse.io" class="_font-size-bigger" target="_blank" rel="noopener">
-					<div class="_font-size-big _color-sub acourse-block" >
+					<div class="_font-size-big _color-sub acourse-block">
 						<i class="fa fa-facebook _color-sub"></i> &nbsp; Facebook
 					</div>
 				</a>
@@ -89,42 +92,42 @@
 {{end}}
 
 {{define "script"}}
-<script>
-	document.addEventListener('turbolinks:load', () => {
-		const navbar = document.querySelector('#navbar')
-		const delta = 5
-		const navbarHeight = navbar.offsetHeight || navbar.clientHeight
-		let didScroll = false
-		let lastScrollTop = 0
+	<script>
+		document.addEventListener('turbolinks:load', () => {
+			const navbar = document.querySelector('#navbar')
+			const delta = 5
+			const navbarHeight = navbar.offsetHeight || navbar.clientHeight
+			let didScroll = false
+			let lastScrollTop = 0
 
-		window.onscroll = () => {
-			didScroll = true
-		}
+			window.onscroll = () => {
+				didScroll = true
+			}
 
-		const hasScrolled = () => {
-			const st = window.scrollY
+			const hasScrolled = () => {
+				const st = window.scrollY
 
-			if (Math.abs(lastScrollTop - st) <= delta) return
+				if (Math.abs(lastScrollTop - st) <= delta) return
 
-			if (st > lastScrollTop && st > navbarHeight) {
-				navbar.classList.remove('nav-down')
-				navbar.classList.add('nav-up')
-			} else {
-				if (st + window.innerHeight < document.documentElement.scrollHeight) {
-					navbar.classList.remove('nav-up')
-					navbar.classList.add('nav-down')
+				if (st > lastScrollTop && st > navbarHeight) {
+					navbar.classList.remove('nav-down')
+					navbar.classList.add('nav-up')
+				} else {
+					if (st + window.innerHeight < document.documentElement.scrollHeight) {
+						navbar.classList.remove('nav-up')
+						navbar.classList.add('nav-down')
+					}
 				}
+				lastScrollTop = st
 			}
-			lastScrollTop = st
-		}
 
-		setInterval(() => {
-			if (didScroll) {
-				hasScrolled()
-				didScroll = false
-			}
-		}, 500)
-	})
-</script>
-{{block "app.script" .}}{{end}}
+			setInterval(() => {
+				if (didScroll) {
+					hasScrolled()
+					didScroll = false
+				}
+			}, 500)
+		})
+	</script>
+	{{block "app.script" .}}{{end}}
 {{end}}

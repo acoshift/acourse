@@ -8,7 +8,6 @@ import (
 	"github.com/moonrhythm/httpmux"
 
 	"github.com/acoshift/acourse/internal/app/view"
-	"github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
 	"github.com/acoshift/acourse/internal/pkg/course"
 )
@@ -34,11 +33,11 @@ func Mount(m *httpmux.Mux) {
 		hime.Handler(getContentCreate),
 		hime.Handler(postContentCreate),
 	))
-	// TODO: add middleware for course content owner
-	m.Handle("/editor/content/edit", methodmux.GetPost(
+
+	m.Handle("/editor/content/edit", onlyCourseContentOwner(methodmux.GetPost(
 		hime.Handler(getContentEdit),
 		hime.Handler(postContentEdit),
-	))
+	)))
 }
 
 func onlyInstructor(h http.Handler) http.Handler {
@@ -66,7 +65,38 @@ func onlyCourseOwner(h http.Handler) http.Handler {
 		id := ctx.FormValue("id")
 
 		ownerID, err := course.GetUserID(ctx, id)
-		if err == app.ErrNotFound {
+		if err == course.ErrNotFound {
+			return view.NotFound(ctx)
+		}
+		if err != nil {
+			return err
+		}
+
+		if ownerID != u.ID {
+			return ctx.Redirect("/")
+		}
+		return ctx.Handle(h)
+	})
+}
+
+func onlyCourseContentOwner(h http.Handler) http.Handler {
+	return hime.Handler(func(ctx *hime.Context) error {
+		u := appctx.GetUser(ctx)
+		if u == nil {
+			return ctx.RedirectTo("auth.signin")
+		}
+
+		contentID := ctx.FormValue("id")
+		courseID, err := course.GetIDFromContent(ctx, contentID)
+		if err == course.ErrNotFound {
+			return view.NotFound(ctx)
+		}
+		if err != nil {
+			return err
+		}
+
+		ownerID, err := course.GetUserID(ctx, courseID)
+		if err == course.ErrNotFound {
 			return view.NotFound(ctx)
 		}
 		if err != nil {

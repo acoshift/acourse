@@ -1,13 +1,14 @@
 package image
 
 import (
+	"errors"
 	"mime"
 	"mime/multipart"
 
 	"github.com/acoshift/header"
-
-	"github.com/acoshift/acourse/internal/pkg/app"
 )
+
+var ErrInvalidType = errors.New("image: invalid type")
 
 var allowImageType = map[string]bool{
 	"image/jpg":  true,
@@ -16,17 +17,14 @@ var allowImageType = map[string]bool{
 }
 
 // Validate validates is file header an image
-func Validate(img *multipart.FileHeader) (err error) {
-	err = app.NewUIError("รองรับไฟล์ jpeg และ png เท่านั้น")
-
+func Validate(img *multipart.FileHeader) error {
 	if img == nil || img.Header == nil {
-		return
+		return ErrInvalidType
 	}
 
 	ct, _, _ := mime.ParseMediaType(img.Header.Get(header.ContentType))
-
 	if !allowImageType[ct] {
-		return
+		return ErrInvalidType
 	}
 
 	return nil

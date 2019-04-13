@@ -8,6 +8,7 @@ dmitri.shuralyov.com/service/change v0.0.0-20181023043359-a85b471d5412/go.mod h1
 dmitri.shuralyov.com/state v0.0.0-20180228185332-28bcc343414c/go.mod h1:0PRwlb0D6DFvNNtx+9ybjezNCa8XF0xaYcETyp6rHWU=
 git.apache.org/thrift.git v0.0.0-20180902110319-2566ecd5d999/go.mod h1:fPE2ZNJGynbRyZ4dJvy6G277gSllfV2HJqblrnkyeyg=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
+github.com/DATA-DOG/go-sqlmock v1.3.3 h1:CWUqKXe0s8A2z6qCgkP4Kru7wC11YoAnoupUKFDnH08=
 github.com/DATA-DOG/go-sqlmock v1.3.3/go.mod h1:f/Ixk793poVmq4qj/V1dPUg2JEAKC73Q5eFN3EC/SaM=
 github.com/acoshift/configfile v1.4.0 h1:1KekCdCosOtIm0WPhln6U1cd0OhhsA4DsN4ZjuHK7Uo=
 github.com/acoshift/configfile v1.4.0/go.mod h1:VbJabnshkRxPzC3ej0GHLQ8fxEqqKZdqE+PIpE6/RWA=
@@ -105,6 +106,8 @@ github.com/moonrhythm/httpmux v1.0.1 h1:WaD0jUVsXPcZ7ffS+9N4FZq2/ZZdHAViFTxBpUzg
 github.com/moonrhythm/httpmux v1.0.1/go.mod h1:efTwsHS/Gp3xnAhYjUEUeSyZeHfycf0rGW5v/Fl1r1Y=
 github.com/moonrhythm/session v0.13.0 h1:sMmSG6dHn2ZGj4tBQcU1RszJKUsHEN9QIegXmutYmNM=
 github.com/moonrhythm/session v0.13.0/go.mod h1:DypZHH7pVctj5rpkPNEbSiCdVlUcrYDw6iNx9QBjFJs=
+github.com/moonrhythm/validator v1.1.0 h1:F4Dl+nGdUziYjOy0erw9QXdBe0V1u3DQOQmQHIetQu8=
+github.com/moonrhythm/validator v1.1.0/go.mod h1:YS1VZquIiMNANOdaEqK93zib63aIJnxr87SjWULuZ+s=
 github.com/neelance/astrewrite v0.0.0-20160511093645-99348263ae86/go.mod h1:kHJEU3ofeGjhHklVoIGuVj85JJwZ6kWPaJwCIxgnFmo=
 github.com/neelance/sourcemap v0.0.0-20151028013722-8c68805598ab/go.mod h1:Qr6/a/Q4r9LP1IltGz7tA7iOK1WonHEYhu1HRBA7ZiM=
 github.com/onsi/ginkgo v1.6.0/go.mod h1:lLunBs/Ym6LB5Z9jYTR76FiuTmxDTDusOGeTQH+WWjE=

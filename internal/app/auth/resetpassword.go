@@ -4,7 +4,6 @@ import (
 	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/internal/app/view"
-	"github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/auth"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
 )
@@ -24,12 +23,9 @@ func postResetPassword(ctx *hime.Context) error {
 	}
 
 	err := auth.SendPasswordResetEmail(ctx, email)
-	if app.IsUIError(err) {
+	if err != nil {
 		f.Add("Errors", err.Error())
 		return ctx.RedirectToGet()
-	}
-	if err != nil {
-		return err
 	}
 
 	return ctx.RedirectToGet()

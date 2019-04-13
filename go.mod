@@ -24,6 +24,7 @@ require (
 	github.com/moonrhythm/hime v1.0.0
 	github.com/moonrhythm/httpmux v1.0.1
 	github.com/moonrhythm/session v0.13.0
+	github.com/moonrhythm/validator v1.1.0
 	github.com/onsi/ginkgo v1.8.0
 	github.com/onsi/gomega v1.4.3
 	github.com/russross/blackfriday v2.0.0+incompatible

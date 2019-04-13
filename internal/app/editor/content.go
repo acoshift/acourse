@@ -6,7 +6,6 @@ import (
 	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/internal/app/view"
-	"github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
 	"github.com/acoshift/acourse/internal/pkg/course"
 )
@@ -15,7 +14,7 @@ func getContentList(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 
 	c, err := course.Get(ctx, id)
-	if err == app.ErrNotFound {
+	if err == course.ErrNotFound {
 		return view.NotFound(ctx)
 	}
 	if err != nil {
@@ -26,10 +25,10 @@ func getContentList(ctx *hime.Context) error {
 	if err != nil {
 		return err
 	}
-	c.Contents = contents
 
 	p := view.Page(ctx)
 	p.Data["Course"] = c
+	p.Data["Contents"] = contents
 	return ctx.View("editor.content", p)
 }
 
@@ -38,10 +37,6 @@ func postContentList(ctx *hime.Context) error {
 		contentID := ctx.FormValue("contentId")
 
 		err := course.DeleteContent(ctx, contentID)
-		if app.IsUIError(err) {
-			// TODO: use flash
-			return ctx.Status(http.StatusBadRequest).Error(err.Error())
-		}
 		if err != nil {
 			return err
 		}
@@ -53,6 +48,9 @@ func getContentCreate(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 
 	c, err := course.Get(ctx, id)
+	if err == course.ErrNotFound {
+		return view.NotFound(ctx)
+	}
 	if err != nil {
 		return err
 	}
@@ -90,7 +88,7 @@ func getContentEdit(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 
 	content, err := course.GetContent(ctx, id)
-	if err == app.ErrNotFound {
+	if err == course.ErrNotFound {
 		return view.NotFound(ctx)
 	}
 	if err != nil {
@@ -104,7 +102,7 @@ func getContentEdit(ctx *hime.Context) error {
 
 	user := appctx.GetUser(ctx)
 	// user is not course owner
-	if user.ID != c.UserID {
+	if user.ID != c.Owner.ID {
 		return ctx.Status(http.StatusForbidden).StatusText()
 	}
 
@@ -119,7 +117,7 @@ func postContentEdit(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 
 	content, err := course.GetContent(ctx, id)
-	if err == app.ErrNotFound {
+	if err == course.ErrNotFound {
 		return view.NotFound(ctx)
 	}
 	if err != nil {
@@ -134,7 +132,7 @@ func postContentEdit(ctx *hime.Context) error {
 	user := appctx.GetUser(ctx)
 	// user is not course owner
 	// TODO: move to service
-	if user.ID != c.UserID {
+	if user.ID != c.Owner.ID {
 		return ctx.Status(http.StatusForbidden).StatusText()
 	}
 

@@ -1,47 +1,49 @@
 package course
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
+	"encoding/gob"
+	"fmt"
 	"mime/multipart"
 	"time"
 
 	"github.com/acoshift/pgsql"
+	"github.com/acoshift/pgsql/pgctx"
 	"github.com/lib/pq"
 
-	"github.com/acoshift/acourse/internal/pkg/app"
-	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
+	"github.com/acoshift/acourse/internal/pkg/context/redisctx"
 	"github.com/acoshift/acourse/internal/pkg/image"
 )
 
 // Course model
 type Course struct {
-	ID            string
-	Option        Option
-	EnrollCount   int64
-	Title         string
-	ShortDesc     string
-	Desc          string
-	Image         string
-	UserID        string
-	Start         pq.NullTime
-	URL           string
-	Type          int
-	Price         float64
-	Discount      float64
-	Contents      []*Content
-	EnrollDetail  string
-	AssignmentIDs []string
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
+	ID        string
+	Option    Option
+	Title     string
+	ShortDesc string
+	Desc      string
+	Image     string
+	Owner     struct {
+		ID    string
+		Name  string
+		Image string
+	}
+	Start        pq.NullTime
+	URL          string
+	Type         int
+	Price        float64
+	Discount     float64
+	EnrollDetail string
 }
 
 // Link returns id if url is invalid
 func (x *Course) Link() string {
-	if x.URL == "" {
-		return x.ID
+	if x.URL != "" {
+		return x.URL
 	}
-	return x.URL
+	return x.ID
 }
 
 // Option type
@@ -78,10 +80,8 @@ type CreateArgs struct {
 
 // Create creates new course
 func Create(ctx context.Context, m *CreateArgs) (string, error) {
-	// TODO: validate user role
-
 	if m.Title == "" {
-		return "", app.NewUIError("title required")
+		return "", fmt.Errorf("title required")
 	}
 
 	var imageURL string
@@ -91,22 +91,23 @@ func Create(ctx context.Context, m *CreateArgs) (string, error) {
 			return "", err
 		}
 
-		image, err := m.Image.Open()
+		img, err := m.Image.Open()
 		if err != nil {
 			return "", err
 		}
-		defer image.Close()
+		defer img.Close()
 
-		imageURL, err = uploadCourseCoverImage(ctx, image)
-		image.Close()
+		imageURL, err = uploadCourseCoverImage(ctx, img)
+		img.Close()
 		if err != nil {
-			return "", app.NewUIError(err.Error())
+			return "", err
 		}
 	}
 
 	var id string
-	err := sqlctx.RunInTx(ctx, func(ctx context.Context) error {
-		err := sqlctx.QueryRow(ctx, `
+	err := pgctx.RunInTx(ctx, func(ctx context.Context) error {
+		// language=SQL
+		err := pgctx.QueryRow(ctx, `
 			insert into courses
 				(user_id, title, short_desc, long_desc, image, start)
 			values
@@ -133,14 +134,11 @@ type UpdateArgs struct {
 
 // Update updates course
 func Update(ctx context.Context, m *UpdateArgs) error {
-	// TODO: validate user role
-	// user := appctx.GetUser(ctx)
-
 	if m.ID == "" {
-		return app.NewUIError("course id required")
+		return fmt.Errorf("course id required")
 	}
 	if m.Title == "" {
-		return app.NewUIError("title required")
+		return fmt.Errorf("title required")
 	}
 
 	var imageURL string
@@ -150,21 +148,21 @@ func Update(ctx context.Context, m *UpdateArgs) error {
 			return err
 		}
 
-		image, err := m.Image.Open()
+		img, err := m.Image.Open()
 		if err != nil {
 			return err
 		}
-		defer image.Close()
+		defer img.Close()
 
-		imageURL, err = uploadCourseCoverImage(ctx, image)
-		image.Close()
+		imageURL, err = uploadCourseCoverImage(ctx, img)
+		img.Close()
 		if err != nil {
-			return app.NewUIError(err.Error())
+			return err
 		}
 	}
 
-	err := sqlctx.RunInTx(ctx, func(ctx context.Context) error {
-		_, err := sqlctx.Exec(ctx, `
+	err := pgctx.RunInTx(ctx, func(ctx context.Context) error {
+		_, err := pgctx.Exec(ctx, `
 			update courses
 			set
 				title = $2,
@@ -193,7 +191,8 @@ func Update(ctx context.Context, m *UpdateArgs) error {
 
 // SetOption sets course option
 func SetOption(ctx context.Context, id string, opt Option) error {
-	_, err := sqlctx.Exec(ctx, `
+	// language=SQL
+	_, err := pgctx.Exec(ctx, `
 		insert into course_options
 			(course_id, public, enroll, attend, assignment, discount)
 		values
@@ -213,14 +212,14 @@ func SetOption(ctx context.Context, id string, opt Option) error {
 
 // SetImage sets course image
 func SetImage(ctx context.Context, id string, img string) error {
-	_, err := sqlctx.Exec(ctx, `update courses set image = $2 where id = $1`, id, img)
+	_, err := pgctx.Exec(ctx, `update courses set image = $2 where id = $1`, id, img)
 	return err
 }
 
 // GetURL gets course url
 func GetURL(ctx context.Context, id string) (string, error) {
 	var r string
-	err := sqlctx.QueryRow(ctx,
+	err := pgctx.QueryRow(ctx,
 		`select url from courses where id = $1`,
 		id,
 	).Scan(pgsql.NullString(&r))
@@ -230,9 +229,9 @@ func GetURL(ctx context.Context, id string) (string, error) {
 // GetUserID gets course user id
 func GetUserID(ctx context.Context, id string) (string, error) {
 	var r string
-	err := sqlctx.QueryRow(ctx, `select user_id from courses where id = $1`, id).Scan(&r)
+	err := pgctx.QueryRow(ctx, `select user_id from courses where id = $1`, id).Scan(&r)
 	if err == sql.ErrNoRows {
-		return "", app.ErrNotFound
+		return "", ErrNotFound
 	}
 	return r, err
 }
@@ -240,21 +239,24 @@ func GetUserID(ctx context.Context, id string) (string, error) {
 // Get gets course from id
 func Get(ctx context.Context, id string) (*Course, error) {
 	var x Course
-	err := sqlctx.QueryRow(ctx, `
-		select
-			id, user_id, title, short_desc, long_desc, image,
-			start, url, type, price, courses.discount, enroll_detail,
-			opt.public, opt.enroll, opt.attend, opt.assignment, opt.discount
-		from courses
-			left join course_options as opt on opt.course_id = courses.id
-		where id = $1
+	// language=SQL
+	err := pgctx.QueryRow(ctx, `
+		select c. id, c.title, c.short_desc, c.long_desc, c.image,
+		       c.start, c.url, c.type, c.price, c.discount, c.enroll_detail,
+		       u.id, u.name, u.image,
+		       opt.public, opt.enroll, opt.attend, opt.assignment, opt.discount
+		from courses as c
+			left join course_options as opt on opt.course_id = c.id
+			left join users as u on u.id = c.user_id
+		where c.id = $1
 	`, id).Scan(
-		&x.ID, &x.UserID, &x.Title, &x.ShortDesc, &x.Desc, &x.Image,
+		&x.ID, &x.Title, &x.ShortDesc, &x.Desc, &x.Image,
 		&x.Start, pgsql.NullString(&x.URL), &x.Type, &x.Price, &x.Discount, &x.EnrollDetail,
+		&x.Owner.ID, &x.Owner.Name, &x.Owner.Image,
 		&x.Option.Public, &x.Option.Enroll, &x.Option.Attend, &x.Option.Assignment, &x.Option.Discount,
 	)
 	if err == sql.ErrNoRows {
-		return nil, app.ErrNotFound
+		return nil, ErrNotFound
 	}
 	if err != nil {
 		return nil, err
@@ -263,13 +265,110 @@ func Get(ctx context.Context, id string) (*Course, error) {
 	return &x, nil
 }
 
-// InsertEnroll inserts enroll
-func InsertEnroll(ctx context.Context, id, userID string) error {
-	_, err := sqlctx.Exec(ctx, `
-		insert into enrolls
-			(user_id, course_id)
-		values
-			($1, $2)
-	`, userID, id)
-	return err
+func GetIDByURL(ctx context.Context, url string) (courseID string, err error) {
+	// language=SQL
+	err = pgctx.QueryRow(ctx, `
+		select id
+		from courses
+		where url = $1
+	`, url).Scan(&courseID)
+	if err == sql.ErrNoRows {
+		err = ErrNotFound
+	}
+	return
+}
+
+type PublicCard struct {
+	ID       string
+	Option   Option
+	Title    string
+	Desc     string
+	Image    string
+	Start    time.Time
+	URL      string
+	Type     int
+	Price    float64
+	Discount float64
+}
+
+// Link returns course link
+func (x *PublicCard) Link() string {
+	if x.URL != "" {
+		return x.URL
+	}
+	return x.ID
+}
+
+// ShowStart returns true if course should show start date
+func (x *PublicCard) ShowStart() bool {
+	return x.Type == Live && !x.Start.IsZero()
+}
+
+func GetPublicCards(ctx context.Context) ([]*PublicCard, error) {
+	c := redisctx.GetClient(ctx)
+	cachePrefix := redisctx.GetPrefix(ctx)
+
+	// look from cache
+	{
+		bs, err := c.Get(cachePrefix + "cache:list_public_course").Bytes()
+		if err == nil {
+			var xs []*PublicCard
+			err = gob.NewDecoder(bytes.NewReader(bs)).Decode(&xs)
+			if err == nil {
+				return xs, nil
+			}
+		}
+	}
+
+	// language=SQL
+	rows, err := pgctx.Query(ctx, `
+		select
+			c.id,
+			c.title, c.short_desc, c.image, c.start, c.url,
+			c.type, c.price, c.discount,
+			opt.public, opt.enroll, opt.attend, opt.assignment, opt.discount
+		from courses as c
+			left join course_options as opt on c.id = opt.course_id
+		where opt.public = true
+		order by
+			case
+				when c.type = 1 then 1
+				else null
+			end,
+			c.created_at desc
+	`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var xs []*PublicCard
+	for rows.Next() {
+		var x PublicCard
+		err = rows.Scan(
+			&x.ID,
+			&x.Title, &x.Desc, &x.Image, pgsql.NullTime(&x.Start), pgsql.NullString(&x.URL),
+			&x.Type, &x.Price, &x.Discount,
+			&x.Option.Public, &x.Option.Enroll, &x.Option.Attend, &x.Option.Assignment, &x.Option.Discount,
+		)
+		if err != nil {
+			return nil, err
+		}
+		xs = append(xs, &x)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	// save to cache
+	go func() {
+		buf := bytes.Buffer{}
+		err := gob.NewEncoder(&buf).Encode(xs)
+		if err == nil {
+			c.Set(cachePrefix+"cache:list_public_course", buf.Bytes(), time.Minute)
+		}
+	}()
+
+	return xs, nil
 }

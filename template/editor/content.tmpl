@@ -1,50 +1,50 @@
 {{define "app-body"}}
-<div id="content-list">
-	<div class="grid-container _flex-column">
+	<div id="content-list">
+		<div class="grid-container _flex-column">
 
-		<div class="acourse-block-big row">
-			<div class="col-xs-12 col-md-8 col-md-offset-2 _no-padding row">
-				<div class="acourse-header _color-sub col-xs-12 col-md-8">
-					รายการคอนเทนท์<br>
-					<div class="_font-size-big">
-						<span class="_font-bold _color-dark">คอร์ส: </span>
-						<a href="{{route "app.course" .Course.Link}}" class="acourse-link">{{.Course.Title}}</a>
+			<div class="acourse-block-big row">
+				<div class="col-xs-12 col-md-8 col-md-offset-2 _no-padding row">
+					<div class="acourse-header _color-sub col-xs-12 col-md-8">
+						รายการคอนเทนท์<br>
+						<div class="_font-size-big">
+							<span class="_font-bold _color-dark">คอร์ส: </span>
+							<a href="{{route "app.course" .Course.Link}}" class="acourse-link">{{.Course.Title}}</a>
+						</div>
+					</div>
+					<div class="col-xs-12 col-md-4 _full-width _align-right">
+						<a href="{{route "editor.content.create" (param "id" .Course.ID)}}">
+							<button class="acourse-button -positive _full-width _font-sub _color-sub">
+								<i class="fa fa-plus"></i>&nbsp;&nbsp; เพิ่มคอนเทนท์
+							</button>
+						</a>
 					</div>
 				</div>
-				<div class="col-xs-12 col-md-4 _full-width _align-right">
-					<a href="{{route "editor.content.create" (param "id" .Course.ID)}}">
-						<button class="acourse-button -positive _full-width _font-sub _color-sub">
-							<i class="fa fa-plus"></i>&nbsp;&nbsp; เพิ่มคอนเทนท์
-						</button>
-					</a>
-				</div>
 			</div>
-		</div>
 
-		{{range .Course.Contents}}
-		<div class="acourse-card acourse-block-big _flex-row row col-xs-12 col-md-8 col-md-offset-2 _no-padding _clearflex">
-			<div class="acourse-segment col-xs-12 col-md-9">
-				<h3 class="color-sub">{{.Title}}</h3>
-				<div class="_flex-column">
-					<p class="_pre-wrap acourse-word-breakeable _color-dark">
-						{{.Desc | markdown}}
-					</p>
+			{{range .Contents}}
+				<div class="acourse-card acourse-block-big _flex-row row col-xs-12 col-md-8 col-md-offset-2 _no-padding _clearflex">
+					<div class="acourse-segment col-xs-12 col-md-9">
+						<h3 class="color-sub">{{.Title}}</h3>
+						<div class="_flex-column">
+							<p class="_pre-wrap acourse-word-breakeable _color-dark">
+								{{.Desc | markdown}}
+							</p>
+						</div>
+						<div><span class="_font-bold">วิดีโอ ID:</span> {{.VideoID}}</div>
+					</div>
+					<div class="acourse-segment col-xs-12 col-md-3 _bg-color-base-2">
+						<a href="{{route "editor.content.edit" (param "id" .ID)}}">
+							<button class="acourse-button -primary acourse-block _font-sub _full-width">แก้ไข</button>
+						</a>
+						<form method="POST">
+							<input type="hidden" name="action" value="delete">
+							<input type="hidden" name="contentId" value="{{.ID}}">
+							<button class="acourse-button -negative _full-width _font-sub">ลบ</button>
+						</form>
+					</div>
 				</div>
-				<div><span class="_font-bold">วิดีโอ ID:</span> {{.VideoID}}</div>
-			</div>
-			<div class="acourse-segment col-xs-12 col-md-3 _bg-color-base-2">
-				<a href="{{route "editor.content.edit" (param "id" .ID)}}">
-					<button class="acourse-button -primary acourse-block _font-sub _full-width">แก้ไข</button>
-				</a>
-				<form method="POST">
-					<input type="hidden" name="action" value="delete">
-					<input type="hidden" name="contentId" value="{{.ID}}">
-					<button class="acourse-button -negative _full-width _font-sub">ลบ</button>
-				</form>
-			</div>
-		</div>
-		{{end}}
+			{{end}}
 
+		</div>
 	</div>
-</div>
 {{end}}

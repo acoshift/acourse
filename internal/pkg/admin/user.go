@@ -5,12 +5,10 @@ import (
 	"time"
 
 	"github.com/acoshift/pgsql"
-
-	"github.com/acoshift/acourse/internal/pkg/context/sqlctx"
+	"github.com/acoshift/pgsql/pgctx"
 )
 
-// UserItem type
-type UserItem struct {
+type User struct {
 	ID        string
 	Username  string
 	Name      string
@@ -19,8 +17,9 @@ type UserItem struct {
 	CreatedAt time.Time
 }
 
-func GetUsers(ctx context.Context, limit, offset int64) ([]*UserItem, error) {
-	rows, err := sqlctx.Query(ctx, `
+func GetUsers(ctx context.Context, limit, offset int64) ([]*User, error) {
+	// language=SQL
+	rows, err := pgctx.Query(ctx, `
 		select
 			id, name, username, email,
 			image, created_at
@@ -33,9 +32,9 @@ func GetUsers(ctx context.Context, limit, offset int64) ([]*UserItem, error) {
 	}
 	defer rows.Close()
 
-	var xs []*UserItem
+	var xs []*User
 	for rows.Next() {
-		var x UserItem
+		var x User
 		err = rows.Scan(
 			&x.ID, &x.Name, &x.Username, pgsql.NullString(&x.Email),
 			&x.Image, &x.CreatedAt,
@@ -53,8 +52,7 @@ func GetUsers(ctx context.Context, limit, offset int64) ([]*UserItem, error) {
 }
 
 func CountUsers(ctx context.Context) (cnt int64, err error) {
-	err = sqlctx.QueryRow(ctx,
-		`select count(*) from users`,
-	).Scan(&cnt)
+	// language=SQL
+	err = pgctx.QueryRow(ctx, `select count(*) from users`).Scan(&cnt)
 	return
 }

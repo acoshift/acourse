@@ -7,7 +7,6 @@ import (
 	"github.com/acoshift/middleware"
 	"github.com/moonrhythm/session"
 
-	"github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/user"
 )
 
@@ -54,7 +53,7 @@ func Middleware() middleware.Middleware {
 			userID := GetUserID(ctx)
 			if userID != "" {
 				u, err := user.Get(ctx, userID)
-				if err == app.ErrNotFound {
+				if err == user.ErrNotFound {
 					u = &user.User{
 						ID:       userID,
 						Username: userID,
