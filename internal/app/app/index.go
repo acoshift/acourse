@@ -4,6 +4,7 @@ import (
 	"github.com/moonrhythm/hime"
 
 	"github.com/acoshift/acourse/internal/app/view"
+	"github.com/acoshift/acourse/internal/pkg/course"
 )
 
 func index(ctx *hime.Context) error {
@@ -11,7 +12,7 @@ func index(ctx *hime.Context) error {
 		return view.NotFound(ctx)
 	}
 
-	courses, err := listPublicCourses(ctx)
+	courses, err := course.GetPublicCards(ctx)
 	if err != nil {
 		return err
 	}

@@ -1,8 +1,10 @@
 package course
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
+	"encoding/gob"
 	"fmt"
 	"mime/multipart"
 	"time"
@@ -11,19 +13,19 @@ import (
 	"github.com/acoshift/pgsql/pgctx"
 	"github.com/lib/pq"
 
+	"github.com/acoshift/acourse/internal/pkg/context/redisctx"
 	"github.com/acoshift/acourse/internal/pkg/image"
 )
 
 // Course model
 type Course struct {
-	ID          string
-	Option      Option
-	EnrollCount int64
-	Title       string
-	ShortDesc   string
-	Desc        string
-	Image       string
-	Owner       struct {
+	ID        string
+	Option    Option
+	Title     string
+	ShortDesc string
+	Desc      string
+	Image     string
+	Owner     struct {
 		ID    string
 		Name  string
 		Image string
@@ -274,4 +276,99 @@ func GetIDByURL(ctx context.Context, url string) (courseID string, err error) {
 		err = ErrNotFound
 	}
 	return
+}
+
+type PublicCard struct {
+	ID       string
+	Option   Option
+	Title    string
+	Desc     string
+	Image    string
+	Start    time.Time
+	URL      string
+	Type     int
+	Price    float64
+	Discount float64
+}
+
+// Link returns course link
+func (x *PublicCard) Link() string {
+	if x.URL != "" {
+		return x.URL
+	}
+	return x.ID
+}
+
+// ShowStart returns true if course should show start date
+func (x *PublicCard) ShowStart() bool {
+	return x.Type == Live && !x.Start.IsZero()
+}
+
+func GetPublicCards(ctx context.Context) ([]*PublicCard, error) {
+	c := redisctx.GetClient(ctx)
+	cachePrefix := redisctx.GetPrefix(ctx)
+
+	// look from cache
+	{
+		bs, err := c.Get(cachePrefix + "cache:list_public_course").Bytes()
+		if err == nil {
+			var xs []*PublicCard
+			err = gob.NewDecoder(bytes.NewReader(bs)).Decode(&xs)
+			if err == nil {
+				return xs, nil
+			}
+		}
+	}
+
+	// language=SQL
+	rows, err := pgctx.Query(ctx, `
+		select
+			c.id,
+			c.title, c.short_desc, c.image, c.start, c.url,
+			c.type, c.price, c.discount,
+			opt.public, opt.enroll, opt.attend, opt.assignment, opt.discount
+		from courses as c
+			left join course_options as opt on c.id = opt.course_id
+		where opt.public = true
+		order by
+			case
+				when c.type = 1 then 1
+				else null
+			end,
+			c.created_at desc
+	`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var xs []*PublicCard
+	for rows.Next() {
+		var x PublicCard
+		err = rows.Scan(
+			&x.ID,
+			&x.Title, &x.Desc, &x.Image, pgsql.NullTime(&x.Start), pgsql.NullString(&x.URL),
+			&x.Type, &x.Price, &x.Discount,
+			&x.Option.Public, &x.Option.Enroll, &x.Option.Attend, &x.Option.Assignment, &x.Option.Discount,
+		)
+		if err != nil {
+			return nil, err
+		}
+		xs = append(xs, &x)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	// save to cache
+	go func() {
+		buf := bytes.Buffer{}
+		err := gob.NewEncoder(&buf).Encode(xs)
+		if err == nil {
+			c.Set(cachePrefix+"cache:list_public_course", buf.Bytes(), time.Minute)
+		}
+	}()
+
+	return xs, nil
 }
