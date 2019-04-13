@@ -58,8 +58,8 @@ func newCourseHandler() http.Handler {
 			}
 		}
 
-		x, err := getCourse(ctx, courseID)
-		if err == app.ErrNotFound {
+		x, err := course.Get(ctx, courseID)
+		if err == course.ErrNotFound {
 			return view.NotFound(ctx)
 		}
 		if err != nil {
@@ -79,8 +79,8 @@ func newCourseHandler() http.Handler {
 
 type courseCtrl struct{}
 
-func (ctrl *courseCtrl) getCourse(ctx context.Context) *Course {
-	return ctx.Value(courseKey{}).(*Course)
+func (ctrl *courseCtrl) getCourse(ctx context.Context) *course.Course {
+	return ctx.Value(courseKey{}).(*course.Course)
 }
 
 func (ctrl *courseCtrl) view(ctx *hime.Context) error {

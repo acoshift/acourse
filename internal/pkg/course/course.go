@@ -16,14 +16,18 @@ import (
 
 // Course model
 type Course struct {
-	ID            string
-	Option        Option
-	EnrollCount   int64
-	Title         string
-	ShortDesc     string
-	Desc          string
-	Image         string
-	UserID        string
+	ID          string
+	Option      Option
+	EnrollCount int64
+	Title       string
+	ShortDesc   string
+	Desc        string
+	Image       string
+	Owner       struct {
+		ID    string
+		Name  string
+		Image string
+	}
 	Start         pq.NullTime
 	URL           string
 	Type          int
@@ -38,10 +42,10 @@ type Course struct {
 
 // Link returns id if url is invalid
 func (x *Course) Link() string {
-	if x.URL == "" {
-		return x.ID
+	if x.URL != "" {
+		return x.URL
 	}
-	return x.URL
+	return x.ID
 }
 
 // Option type
@@ -242,16 +246,18 @@ func Get(ctx context.Context, id string) (*Course, error) {
 	var x Course
 	// language=SQL
 	err := pgctx.QueryRow(ctx, `
-		select
-			id, user_id, title, short_desc, long_desc, image,
-			start, url, type, price, courses.discount, enroll_detail,
-			opt.public, opt.enroll, opt.attend, opt.assignment, opt.discount
-		from courses
-			left join course_options as opt on opt.course_id = courses.id
-		where id = $1
+		select c. id, c.title, c.short_desc, c.long_desc, c.image,
+		       c.start, c.url, c.type, c.price, c.discount, c.enroll_detail,
+		       u.id, u.name, u.image,
+		       opt.public, opt.enroll, opt.attend, opt.assignment, opt.discount
+		from courses as c
+			left join course_options as opt on opt.course_id = c.id
+			left join users as u on u.id = c.user_id
+		where c.id = $1
 	`, id).Scan(
-		&x.ID, &x.UserID, &x.Title, &x.ShortDesc, &x.Desc, &x.Image,
+		&x.ID, &x.Title, &x.ShortDesc, &x.Desc, &x.Image,
 		&x.Start, pgsql.NullString(&x.URL), &x.Type, &x.Price, &x.Discount, &x.EnrollDetail,
+		&x.Owner.ID, &x.Owner.Name, &x.Owner.Image,
 		&x.Option.Public, &x.Option.Enroll, &x.Option.Attend, &x.Option.Assignment, &x.Option.Discount,
 	)
 	if err == sql.ErrNoRows {

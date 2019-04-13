@@ -28,7 +28,7 @@ func Enroll(ctx context.Context, courseID string, price float64, paymentImage *m
 	}
 
 	// is owner
-	if userID == c.UserID {
+	if userID == c.Owner.ID {
 		return nil
 	}
 

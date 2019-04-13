@@ -15,7 +15,7 @@ func getContentList(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 
 	c, err := course.Get(ctx, id)
-	if err == app.ErrNotFound {
+	if err == course.ErrNotFound {
 		return view.NotFound(ctx)
 	}
 	if err != nil {
@@ -53,6 +53,9 @@ func getContentCreate(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 
 	c, err := course.Get(ctx, id)
+	if err == course.ErrNotFound {
+		return view.NotFound(ctx)
+	}
 	if err != nil {
 		return err
 	}
@@ -104,7 +107,7 @@ func getContentEdit(ctx *hime.Context) error {
 
 	user := appctx.GetUser(ctx)
 	// user is not course owner
-	if user.ID != c.UserID {
+	if user.ID != c.Owner.ID {
 		return ctx.Status(http.StatusForbidden).StatusText()
 	}
 
@@ -134,7 +137,7 @@ func postContentEdit(ctx *hime.Context) error {
 	user := appctx.GetUser(ctx)
 	// user is not course owner
 	// TODO: move to service
-	if user.ID != c.UserID {
+	if user.ID != c.Owner.ID {
 		return ctx.Status(http.StatusForbidden).StatusText()
 	}
 

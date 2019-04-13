@@ -32,35 +32,3 @@ func (x *PublicCourse) Link() string {
 func (x *PublicCourse) ShowStart() bool {
 	return x.Type == course.Live && !x.Start.IsZero()
 }
-
-// Course type
-type Course struct {
-	ID           string
-	Option       course.Option
-	Owner        CourseOwner
-	Title        string
-	ShortDesc    string
-	Desc         string
-	Image        string
-	Start        time.Time
-	URL          string
-	Type         int
-	Price        float64
-	Discount     float64
-	EnrollDetail string
-}
-
-// Link returns course link
-func (x *Course) Link() string {
-	if x.URL != "" {
-		return x.URL
-	}
-	return x.ID
-}
-
-// CourseOwner type
-type CourseOwner struct {
-	ID    string
-	Name  string
-	Image string
-}

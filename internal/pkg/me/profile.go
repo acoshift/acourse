@@ -9,6 +9,7 @@ import (
 
 	"github.com/acoshift/pgsql/pgctx"
 	"github.com/asaskevich/govalidator"
+	"github.com/moonrhythm/validator"
 
 	"github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
@@ -27,17 +28,22 @@ type UpdateProfileArgs struct {
 func UpdateProfile(ctx context.Context, m *UpdateProfileArgs) error {
 	userID := appctx.GetUserID(ctx)
 
-	if !govalidator.IsAlphanumeric(m.Username) {
-		return app.NewUIError("username allow only a-z, A-Z, and 0-9")
+	v := validator.New()
+	v.Must(govalidator.IsAlphanumeric(m.Username), "username allow only a-z, A-Z, and 0-9")
+	{
+		n := utf8.RuneCountInString(m.Username)
+		v.Must(n >= 4 && n <= 32, "username must have 4 - 32 characters")
 	}
-	if n := utf8.RuneCountInString(m.Username); n < 4 || n > 32 {
-		return app.NewUIError("username must have 4 - 32 characters")
+	{
+		n := utf8.RuneCountInString(m.Name)
+		v.Must(n >= 4 && n <= 40, "name must have 4 - 40 characters")
 	}
-	if n := utf8.RuneCountInString(m.Name); n < 4 || n > 40 {
-		return app.NewUIError("name must have 4 - 40 characters")
+	{
+		n := utf8.RuneCountInString(m.AboutMe)
+		v.Must(n <= 256, "about me must have lower than 256 characters")
 	}
-	if n := utf8.RuneCountInString(m.AboutMe); n > 256 {
-		return app.NewUIError("about me must have lower than 256 characters")
+	if !v.Valid() {
+		return v.Error()
 	}
 
 	var imageURL string

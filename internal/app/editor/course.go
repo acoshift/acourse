@@ -62,6 +62,9 @@ func postCourseCreate(ctx *hime.Context) error {
 func getCourseEdit(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 	c, err := course.Get(ctx, id)
+	if err == course.ErrNotFound {
+		return view.NotFound(ctx)
+	}
 	if err != nil {
 		return err
 	}
