@@ -155,3 +155,16 @@ func uploadCourseCoverImage(ctx context.Context, r io.Reader) (string, error) {
 	}
 	return downloadURL, nil
 }
+
+func GetIDFromContent(ctx context.Context, contentID string) (courseID string, err error) {
+	// language=SQL
+	err = pgctx.QueryRow(ctx, `
+		select course_id
+		from course_contents
+		where id = $1
+	`, contentID).Scan(&courseID)
+	if err == sql.ErrNoRows {
+		err = ErrNotFound
+	}
+	return
+}

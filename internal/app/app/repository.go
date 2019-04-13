@@ -28,22 +28,23 @@ func listPublicCourses(ctx context.Context) ([]*PublicCourse, error) {
 		}
 	}
 
+	// language=SQL
 	rows, err := pgctx.Query(ctx, `
-			select
-				c.id,
-				c.title, c.short_desc, c.image, c.start, c.url,
-				c.type, c.price, c.discount,
-				opt.public, opt.enroll, opt.attend, opt.assignment, opt.discount
-			from courses as c
-				left join course_options as opt on c.id = opt.course_id
-			where opt.public = true
-			order by
-				case
-					when c.type = 1 then 1
-					else null
-				end,
-				c.created_at desc
-		`)
+		select
+			c.id,
+			c.title, c.short_desc, c.image, c.start, c.url,
+			c.type, c.price, c.discount,
+			opt.public, opt.enroll, opt.attend, opt.assignment, opt.discount
+		from courses as c
+			left join course_options as opt on c.id = opt.course_id
+		where opt.public = true
+		order by
+			case
+				when c.type = 1 then 1
+				else null
+			end,
+			c.created_at desc
+	`)
 	if err != nil {
 		return nil, err
 	}
