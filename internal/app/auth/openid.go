@@ -10,11 +10,6 @@ import (
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
 )
 
-var allowProvider = map[string]bool{
-	"google.com": true,
-	"github.com": true,
-}
-
 func getOpenID(ctx *hime.Context) error {
 	p := ctx.FormValue("p")
 

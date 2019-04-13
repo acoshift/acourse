@@ -15,6 +15,7 @@ import (
 	"github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
 	"github.com/acoshift/acourse/internal/pkg/course"
+	"github.com/acoshift/acourse/internal/pkg/payment"
 	"github.com/acoshift/acourse/internal/pkg/user"
 )
 
@@ -100,7 +101,7 @@ func (ctrl *courseCtrl) view(ctx *hime.Context) error {
 		}
 
 		if !enrolled {
-			pendingEnroll, err = hasPendingPayment(ctx, u.ID, c.ID)
+			pendingEnroll, err = payment.HasPending(ctx, u.ID, c.ID)
 			if err != nil {
 				return err
 			}
@@ -183,7 +184,7 @@ func (ctrl *courseCtrl) enroll(ctx *hime.Context) error {
 	}
 
 	// check is user has pending enroll
-	pendingPayment, err := hasPendingPayment(ctx, u.ID, c.ID)
+	pendingPayment, err := payment.HasPending(ctx, u.ID, c.ID)
 	if err != nil {
 		return err
 	}
@@ -219,7 +220,7 @@ func (ctrl *courseCtrl) postEnroll(ctx *hime.Context) error {
 	}
 
 	// check is user has pending enroll
-	pendingPayment, err := hasPendingPayment(ctx, u.ID, x.ID)
+	pendingPayment, err := payment.HasPending(ctx, u.ID, x.ID)
 	if err != nil {
 		return err
 	}

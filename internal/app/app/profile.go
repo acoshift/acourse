@@ -9,6 +9,7 @@ import (
 	"github.com/acoshift/acourse/internal/app/view"
 	"github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
+	"github.com/acoshift/acourse/internal/pkg/course"
 	"github.com/acoshift/acourse/internal/pkg/user"
 )
 
@@ -18,20 +19,20 @@ func signOut(ctx *hime.Context) error {
 }
 
 func getProfile(ctx *hime.Context) error {
-	user := appctx.GetUser(ctx)
+	u := appctx.GetUser(ctx)
 
-	ownCourses, err := listOwnCourses(ctx, user.ID)
+	ownCourses, err := course.GetOwnCourses(ctx, u.ID)
 	if err != nil {
 		return err
 	}
 
-	enrolledCourses, err := listEnrolledCourses(ctx, user.ID)
+	enrolledCourses, err := course.GetEnrolledCourses(ctx, u.ID)
 	if err != nil {
 		return err
 	}
 
 	p := view.Page(ctx)
-	p.Meta.Title = user.Username
+	p.Meta.Title = u.Username
 	p.Data["Navbar"] = "profile"
 	p.Data["OwnCourses"] = ownCourses
 	p.Data["EnrolledCourses"] = enrolledCourses

@@ -13,7 +13,6 @@ import (
 	"github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/context/redisctx"
 	"github.com/acoshift/acourse/internal/pkg/course"
-	"github.com/acoshift/acourse/internal/pkg/payment"
 	"github.com/acoshift/acourse/internal/pkg/user"
 )
 
@@ -53,17 +52,6 @@ func getCourseIDByURL(ctx context.Context, url string) (courseID string, err err
 	if err == sql.ErrNoRows {
 		err = app.ErrNotFound
 	}
-	return
-}
-
-func hasPendingPayment(ctx context.Context, userID string, courseID string) (exists bool, err error) {
-	err = pgctx.QueryRow(ctx, `
-		select exists (
-			select 1
-			from payments
-			where user_id = $1 and course_id = $2 and status = $3
-		)
-	`, userID, courseID, payment.Pending).Scan(&exists)
 	return
 }
 
@@ -217,83 +205,6 @@ func listPublicCourses(ctx context.Context) ([]*PublicCourse, error) {
 			c.Set(cachePrefix+"cache:list_public_course", buf.Bytes(), time.Minute)
 		}
 	}()
-
-	return xs, nil
-}
-
-func listOwnCourses(ctx context.Context, userID string) ([]*OwnCourse, error) {
-	rows, err := pgctx.Query(ctx, `
-		select
-			c.id,
-			c.title, c.short_desc, c.image,
-			c.start, c.url, c.type,
-			count(e.user_id)
-		from courses as c
-			left join enrolls as e on e.course_id = c.id
-		where c.user_id = $1
-		group by c.id
-		order by c.created_at desc
-	`, userID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var xs []*OwnCourse
-	for rows.Next() {
-		var x OwnCourse
-		err = rows.Scan(
-			&x.ID,
-			&x.Title, &x.Desc, &x.Image,
-			pgsql.NullTime(&x.Start), pgsql.NullString(&x.URL), &x.Type,
-			&x.EnrollCount,
-		)
-		if err != nil {
-			return nil, err
-		}
-		xs = append(xs, &x)
-	}
-
-	if err = rows.Err(); err != nil {
-		return nil, err
-	}
-
-	return xs, nil
-}
-
-func listEnrolledCourses(ctx context.Context, userID string) ([]*EnrolledCourse, error) {
-	rows, err := pgctx.Query(ctx, `
-		select
-			c.id,
-			c.title, c.short_desc, c.image,
-			c.start, c.url, c.type
-		from courses as c
-			inner join enrolls as e on c.id = e.course_id
-		where e.user_id = $1
-		order by e.created_at desc
-	`, userID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var xs []*EnrolledCourse
-	for rows.Next() {
-		var x EnrolledCourse
-		err = rows.Scan(
-			&x.ID,
-			&x.Title, &x.Desc, &x.Image,
-			pgsql.NullTime(&x.Start), pgsql.NullString(&x.URL), &x.Type,
-		)
-		if err != nil {
-			return nil, err
-		}
-		xs = append(xs, &x)
-	}
-
-	if err = rows.Err(); err != nil {
-		return nil, err
-	}
 
 	return xs, nil
 }
