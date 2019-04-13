@@ -1,4 +1,4 @@
-package user
+package me
 
 import (
 	"bytes"
@@ -11,12 +11,13 @@ import (
 	"github.com/asaskevich/govalidator"
 
 	"github.com/acoshift/acourse/internal/pkg/app"
+	"github.com/acoshift/acourse/internal/pkg/context/appctx"
 	"github.com/acoshift/acourse/internal/pkg/file"
 	"github.com/acoshift/acourse/internal/pkg/image"
+	"github.com/acoshift/acourse/internal/pkg/user"
 )
 
 type UpdateProfileArgs struct {
-	ID       string
 	Username string
 	Name     string
 	AboutMe  string
@@ -24,6 +25,8 @@ type UpdateProfileArgs struct {
 }
 
 func UpdateProfile(ctx context.Context, m *UpdateProfileArgs) error {
+	userID := appctx.GetUserID(ctx)
+
 	if !govalidator.IsAlphanumeric(m.Username) {
 		return app.NewUIError("username allow only a-z, A-Z, and 0-9")
 	}
@@ -58,14 +61,14 @@ func UpdateProfile(ctx context.Context, m *UpdateProfileArgs) error {
 
 	err := pgctx.RunInTx(ctx, func(ctx context.Context) error {
 		if imageURL != "" {
-			err := SetImage(ctx, m.ID, imageURL)
+			err := user.SetImage(ctx, userID, imageURL)
 			if err != nil {
 				return err
 			}
 		}
 
-		return Update(ctx, &UpdateArgs{
-			ID:       m.ID,
+		return user.Update(ctx, &user.UpdateArgs{
+			ID:       userID,
 			Username: m.Username,
 			Name:     m.Name,
 			AboutMe:  m.AboutMe,

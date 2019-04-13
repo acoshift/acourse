@@ -10,12 +10,11 @@ import (
 	"github.com/acoshift/pgsql/pgctx"
 	"github.com/lib/pq"
 
-	"github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/config"
+	"github.com/acoshift/acourse/internal/pkg/course"
 	"github.com/acoshift/acourse/internal/pkg/email"
 	"github.com/acoshift/acourse/internal/pkg/markdown"
 	"github.com/acoshift/acourse/internal/pkg/payment"
-	"github.com/acoshift/acourse/internal/pkg/user"
 )
 
 // Payment type
@@ -53,6 +52,8 @@ func (x *Payment) CourseLink() string {
 
 func GetPayment(ctx context.Context, paymentID string) (*Payment, error) {
 	var x Payment
+
+	// language=SQL
 	err := pgctx.QueryRow(ctx, `
 		select
 			p.id,
@@ -72,7 +73,7 @@ func GetPayment(ctx context.Context, paymentID string) (*Payment, error) {
 		&x.Course.ID, &x.Course.Title, &x.Course.Image, pgsql.NullString(&x.Course.URL),
 	)
 	if err == sql.ErrNoRows {
-		return nil, app.ErrNotFound
+		return nil, ErrNotFound
 	}
 	if err != nil {
 		return nil, err
@@ -122,22 +123,9 @@ func GetPayments(ctx context.Context, status []int, limit, offset int64) ([]*Pay
 	return xs, nil
 }
 
-func CountPayments(ctx context.Context, status []int) (cnt int64, err error) {
-	// language=SQL
-	err = pgctx.QueryRow(ctx, `
-		select count(*)
-		from payments
-		where status = any($1)
-	`, pq.Array(status)).Scan(&cnt)
-	return
-}
-
 func AcceptPayment(ctx context.Context, paymentID string) error {
 	err := pgctx.RunInTx(ctx, func(ctx context.Context) error {
 		p, err := GetPayment(ctx, paymentID)
-		if err == app.ErrNotFound {
-			return app.NewUIError("payment not found")
-		}
 		if err != nil {
 			return err
 		}
@@ -147,7 +135,7 @@ func AcceptPayment(ctx context.Context, paymentID string) error {
 			return err
 		}
 
-		return user.InsertEnroll(ctx, p.Course.ID, p.User.ID)
+		return course.InsertEnroll(ctx, p.Course.ID, p.User.ID)
 	})
 	if err != nil {
 		return err
@@ -214,9 +202,6 @@ https://acourse.io
 func RejectPayment(ctx context.Context, paymentID string, message string) error {
 	err := pgctx.RunInTx(ctx, func(ctx context.Context) error {
 		p, err := GetPayment(ctx, paymentID)
-		if err == app.ErrNotFound {
-			return app.NewUIError("payment not found")
-		}
 		if err != nil {
 			return err
 		}
@@ -238,4 +223,14 @@ func RejectPayment(ctx context.Context, paymentID string, message string) error 
 	}()
 
 	return nil
+}
+
+func CountPayments(ctx context.Context, status []int) (cnt int64, err error) {
+	// language=SQL
+	err = pgctx.QueryRow(ctx, `
+		select count(*)
+		from payments
+		where status = any($1)
+	`, pq.Array(status)).Scan(&cnt)
+	return
 }

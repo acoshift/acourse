@@ -232,7 +232,7 @@ func GetUserID(ctx context.Context, id string) (string, error) {
 	var r string
 	err := pgctx.QueryRow(ctx, `select user_id from courses where id = $1`, id).Scan(&r)
 	if err == sql.ErrNoRows {
-		return "", app.ErrNotFound
+		return "", ErrNotFound
 	}
 	return r, err
 }
@@ -240,6 +240,7 @@ func GetUserID(ctx context.Context, id string) (string, error) {
 // Get gets course from id
 func Get(ctx context.Context, id string) (*Course, error) {
 	var x Course
+	// language=SQL
 	err := pgctx.QueryRow(ctx, `
 		select
 			id, user_id, title, short_desc, long_desc, image,
@@ -254,7 +255,7 @@ func Get(ctx context.Context, id string) (*Course, error) {
 		&x.Option.Public, &x.Option.Enroll, &x.Option.Attend, &x.Option.Assignment, &x.Option.Discount,
 	)
 	if err == sql.ErrNoRows {
-		return nil, app.ErrNotFound
+		return nil, ErrNotFound
 	}
 	if err != nil {
 		return nil, err
@@ -271,7 +272,7 @@ func GetIDByURL(ctx context.Context, url string) (courseID string, err error) {
 		where url = $1
 	`, url).Scan(&courseID)
 	if err == sql.ErrNoRows {
-		err = app.ErrNotFound
+		err = ErrNotFound
 	}
 	return
 }

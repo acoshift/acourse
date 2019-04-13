@@ -15,8 +15,8 @@ import (
 	"github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
 	"github.com/acoshift/acourse/internal/pkg/course"
+	"github.com/acoshift/acourse/internal/pkg/me"
 	"github.com/acoshift/acourse/internal/pkg/payment"
-	"github.com/acoshift/acourse/internal/pkg/user"
 )
 
 type (
@@ -50,7 +50,7 @@ func newCourseHandler() http.Handler {
 		if err != nil {
 			// link can not parse to uuid get course id from url
 			courseID, err = course.GetIDByURL(ctx, link)
-			if err == app.ErrNotFound {
+			if err == course.ErrNotFound {
 				return view.NotFound(ctx)
 			}
 			if err != nil {
@@ -233,7 +233,7 @@ func (ctrl *courseCtrl) postEnroll(ctx *hime.Context) error {
 	price, _ := strconv.ParseFloat(ctx.FormValue("price"), 64)
 	image, _ := ctx.FormFileHeaderNotEmpty("image")
 
-	err = user.Enroll(ctx, u.ID, x.ID, price, image)
+	err = me.Enroll(ctx, x.ID, price, image)
 	if app.IsUIError(err) {
 		f.Add("Errors", "image required")
 		return ctx.RedirectToGet()

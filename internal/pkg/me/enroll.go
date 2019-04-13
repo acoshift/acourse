@@ -1,4 +1,4 @@
-package user
+package me
 
 import (
 	"bytes"
@@ -10,6 +10,7 @@ import (
 	"github.com/acoshift/pgsql/pgctx"
 
 	"github.com/acoshift/acourse/internal/pkg/app"
+	"github.com/acoshift/acourse/internal/pkg/context/appctx"
 	"github.com/acoshift/acourse/internal/pkg/course"
 	"github.com/acoshift/acourse/internal/pkg/file"
 	"github.com/acoshift/acourse/internal/pkg/image"
@@ -18,11 +19,10 @@ import (
 )
 
 // Enroll enrolls a course
-func Enroll(ctx context.Context, userID, courseID string, price float64, paymentImage *multipart.FileHeader) error {
+func Enroll(ctx context.Context, courseID string, price float64, paymentImage *multipart.FileHeader) error {
+	userID := appctx.GetUserID(ctx)
+
 	c, err := course.Get(ctx, courseID)
-	if err == app.ErrNotFound {
-		return app.ErrNotFound
-	}
 	if err != nil {
 		return err
 	}
@@ -88,8 +88,12 @@ func Enroll(ctx context.Context, userID, courseID string, price float64, payment
 	}
 
 	err = pgctx.RunInTx(ctx, func(ctx context.Context) error {
+		pgctx.Committed(ctx, func(ctx context.Context) {
+			go notify.Admin(fmt.Sprintf("New payment for course %s, price %.2f", c.Title, price))
+		})
+
 		if c.Price == 0 {
-			return InsertEnroll(ctx, c.ID, userID)
+			return course.InsertEnroll(ctx, c.ID, userID)
 		}
 
 		// language=SQL
@@ -103,10 +107,6 @@ func Enroll(ctx context.Context, userID, courseID string, price float64, payment
 		if err != nil {
 			return err
 		}
-
-		pgctx.Committed(ctx, func(ctx context.Context) {
-			go notify.Admin(fmt.Sprintf("New payment for course %s, price %.2f", c.Title, price))
-		})
 
 		return nil
 	})
@@ -131,15 +131,4 @@ func uploadPaymentImage(ctx context.Context, r io.Reader) (string, error) {
 		return "", err
 	}
 	return downloadURL, nil
-}
-
-// InsertEnroll inserts enroll
-func InsertEnroll(ctx context.Context, id, userID string) error {
-	_, err := pgctx.Exec(ctx, `
-		insert into enrolls
-			(user_id, course_id)
-		values
-			($1, $2)
-	`, userID, id)
-	return err
 }

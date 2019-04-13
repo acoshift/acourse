@@ -8,7 +8,6 @@ import (
 
 	"github.com/acoshift/pgsql/pgctx"
 
-	"github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/file"
 	"github.com/acoshift/acourse/internal/pkg/image"
 )
@@ -83,8 +82,6 @@ func UpdateContent(ctx context.Context, m *UpdateContentArgs) error {
 
 // GetContent gets a course's content
 func GetContent(ctx context.Context, contentID string) (*Content, error) {
-	// TODO: validate ownership
-
 	var x Content
 	err := pgctx.QueryRow(ctx, `
 		select
@@ -95,7 +92,7 @@ func GetContent(ctx context.Context, contentID string) (*Content, error) {
 		&x.ID, &x.CourseID, &x.Title, &x.Desc, &x.VideoID, &x.VideoType, &x.DownloadURL,
 	)
 	if err == sql.ErrNoRows {
-		return nil, app.ErrNotFound
+		return nil, ErrNotFound
 	}
 	if err != nil {
 		return nil, err

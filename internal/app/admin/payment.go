@@ -19,7 +19,7 @@ func getRejectPayment(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 
 	x, err := admin.GetPayment(ctx, id)
-	if err == app.ErrNotFound {
+	if err == admin.ErrNotFound {
 		return ctx.RedirectTo("admin.payments.pending")
 	}
 	if err != nil {
@@ -74,6 +74,9 @@ func postRejectPayment(ctx *hime.Context) error {
 	message := ctx.PostFormValue("message")
 
 	err := admin.RejectPayment(ctx, id, message)
+	if err == admin.ErrNotFound {
+		return ctx.RedirectTo("admin.payments.pending")
+	}
 	if app.IsUIError(err) {
 		return ctx.Status(http.StatusBadRequest).String(err.Error())
 	}
@@ -90,6 +93,9 @@ func postPendingPayment(ctx *hime.Context) error {
 	id := ctx.PostFormValue("id")
 	if action == "accept" {
 		err := admin.AcceptPayment(ctx, id)
+		if err == admin.ErrNotFound {
+			return ctx.RedirectTo("admin.payments.pending")
+		}
 		if app.IsUIError(err) {
 			return ctx.Status(http.StatusBadRequest).String(err.Error())
 		}

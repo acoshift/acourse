@@ -19,10 +19,9 @@ func SetStatus(ctx context.Context, id string, status int) error {
 	// language=SQL
 	_, err := pgctx.Exec(ctx, `
 		update payments
-		set
-			status = $2,
-			updated_at = now(),
-			at = now()
+		set status = $2,
+		    updated_at = now(),
+		    at = now()
 		where id = $1
 	`, id, status)
 	return err

@@ -9,8 +9,7 @@ import (
 	"github.com/acoshift/acourse/internal/app/view"
 	"github.com/acoshift/acourse/internal/pkg/app"
 	"github.com/acoshift/acourse/internal/pkg/context/appctx"
-	"github.com/acoshift/acourse/internal/pkg/course"
-	"github.com/acoshift/acourse/internal/pkg/user"
+	"github.com/acoshift/acourse/internal/pkg/me"
 )
 
 func signOut(ctx *hime.Context) error {
@@ -21,12 +20,12 @@ func signOut(ctx *hime.Context) error {
 func getProfile(ctx *hime.Context) error {
 	u := appctx.GetUser(ctx)
 
-	ownCourses, err := course.GetOwnCourses(ctx, u.ID)
+	ownCourses, err := me.GetOwnCourses(ctx, u.ID)
 	if err != nil {
 		return err
 	}
 
-	enrolledCourses, err := course.GetEnrolledCourses(ctx, u.ID)
+	enrolledCourses, err := me.GetEnrolledCourses(ctx, u.ID)
 	if err != nil {
 		return err
 	}
@@ -86,8 +85,7 @@ func postProfileEdit(ctx *hime.Context) error {
 	}
 
 	image, _ := ctx.FormFileHeaderNotEmpty("image")
-	err := user.UpdateProfile(ctx, &user.UpdateProfileArgs{
-		ID:       appctx.GetUserID(ctx),
+	err := me.UpdateProfile(ctx, &me.UpdateProfileArgs{
 		Username: username,
 		Name:     name,
 		AboutMe:  aboutMe,

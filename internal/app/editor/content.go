@@ -90,7 +90,7 @@ func getContentEdit(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 
 	content, err := course.GetContent(ctx, id)
-	if err == app.ErrNotFound {
+	if err == course.ErrNotFound {
 		return view.NotFound(ctx)
 	}
 	if err != nil {
@@ -119,7 +119,7 @@ func postContentEdit(ctx *hime.Context) error {
 	id := ctx.FormValue("id")
 
 	content, err := course.GetContent(ctx, id)
-	if err == app.ErrNotFound {
+	if err == course.ErrNotFound {
 		return view.NotFound(ctx)
 	}
 	if err != nil {
