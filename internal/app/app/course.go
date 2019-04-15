@@ -170,7 +170,7 @@ func (ctrl *courseCtrl) enroll(ctx *hime.Context) error {
 
 	// owner redirect to c content
 	if u != nil && u.ID == c.Owner.ID {
-		return ctx.RedirectTo("app.c", c.Link(), "content")
+		return ctx.RedirectTo("app.course", c.Link(), "content")
 	}
 
 	// redirect enrolled user to c content page
@@ -179,7 +179,7 @@ func (ctrl *courseCtrl) enroll(ctx *hime.Context) error {
 		return err
 	}
 	if enrolled {
-		return ctx.RedirectTo("app.c", c.Link(), "content")
+		return ctx.RedirectTo("app.course", c.Link(), "content")
 	}
 
 	// check is user has pending enroll
@@ -188,14 +188,14 @@ func (ctrl *courseCtrl) enroll(ctx *hime.Context) error {
 		return err
 	}
 	if pendingPayment {
-		return ctx.RedirectTo("app.c", c.Link())
+		return ctx.RedirectTo("app.course", c.Link())
 	}
 
 	p := view.Page(ctx)
 	p.Meta.Title = c.Title
 	p.Meta.Desc = c.ShortDesc
 	p.Meta.Image = c.Image
-	p.Meta.URL = ctx.Global("baseURL").(string) + ctx.Route("app.c", url.PathEscape(c.Link()))
+	p.Meta.URL = ctx.Global("baseURL").(string) + ctx.Route("app.course", url.PathEscape(c.Link()))
 	p.Data["Course"] = c
 	return ctx.View("app.c-enroll", p)
 }
@@ -272,7 +272,7 @@ func (ctrl *courseCtrl) assignment(ctx *hime.Context) error {
 	p.Meta.Title = c.Title
 	p.Meta.Desc = c.ShortDesc
 	p.Meta.Image = c.Image
-	p.Meta.URL = ctx.Global("baseURL").(string) + ctx.Route("app.c", url.PathEscape(c.Link()))
+	p.Meta.URL = ctx.Global("baseURL").(string) + ctx.Route("app.course", url.PathEscape(c.Link()))
 	p.Data["Course"] = c
 	p.Data["Assignments"] = assignments
 	return ctx.View("app.c-assignment", p)
