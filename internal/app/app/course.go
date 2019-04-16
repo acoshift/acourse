@@ -197,7 +197,7 @@ func (ctrl *courseCtrl) enroll(ctx *hime.Context) error {
 	p.Meta.Image = c.Image
 	p.Meta.URL = ctx.Global("baseURL").(string) + ctx.Route("app.course", url.PathEscape(c.Link()))
 	p.Data["Course"] = c
-	return ctx.View("app.c-enroll", p)
+	return ctx.View("app.course-enroll", p)
 }
 
 func (ctrl *courseCtrl) postEnroll(ctx *hime.Context) error {
@@ -275,5 +275,5 @@ func (ctrl *courseCtrl) assignment(ctx *hime.Context) error {
 	p.Meta.URL = ctx.Global("baseURL").(string) + ctx.Route("app.course", url.PathEscape(c.Link()))
 	p.Data["Course"] = c
 	p.Data["Assignments"] = assignments
-	return ctx.View("app.c-assignment", p)
+	return ctx.View("app.course-assignment", p)
 }
