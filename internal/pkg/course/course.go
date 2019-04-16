@@ -11,7 +11,6 @@ import (
 
 	"github.com/acoshift/pgsql"
 	"github.com/acoshift/pgsql/pgctx"
-	"github.com/lib/pq"
 
 	"github.com/acoshift/acourse/internal/pkg/context/redisctx"
 	"github.com/acoshift/acourse/internal/pkg/image"
@@ -30,7 +29,7 @@ type Course struct {
 		Name  string
 		Image string
 	}
-	Start        pq.NullTime
+	Start        time.Time
 	URL          string
 	Type         int
 	Price        float64
@@ -251,7 +250,7 @@ func Get(ctx context.Context, id string) (*Course, error) {
 		where c.id = $1
 	`, id).Scan(
 		&x.ID, &x.Title, &x.ShortDesc, &x.Desc, &x.Image,
-		&x.Start, pgsql.NullString(&x.URL), &x.Type, &x.Price, &x.Discount, &x.EnrollDetail,
+		pgsql.NullTime(&x.Start), pgsql.NullString(&x.URL), &x.Type, &x.Price, &x.Discount, &x.EnrollDetail,
 		&x.Owner.ID, &x.Owner.Name, &x.Owner.Image,
 		&x.Option.Public, &x.Option.Enroll, &x.Option.Attend, &x.Option.Assignment, &x.Option.Discount,
 	)
