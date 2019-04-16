@@ -11,7 +11,6 @@ import (
 
 	"github.com/acoshift/pgsql"
 	"github.com/acoshift/pgsql/pgctx"
-	"github.com/lib/pq"
 
 	"github.com/acoshift/acourse/internal/pkg/context/redisctx"
 	"github.com/acoshift/acourse/internal/pkg/image"
