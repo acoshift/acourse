@@ -27,7 +27,19 @@
 
 			{{range .Courses}}
 				<div class="col-xs-12 col-sm-6 col-md-4 col-lg-3 _flex-row _main-strech">
-					{{template "public-course-card" .}}
+					<course-card title="{{.Title}}"
+								 link="{{route "app.course" .Link}}"
+								 image="{{.Image}}"
+								 type="{{.Type | courseType}}"
+								 desc="{{.Desc}}"
+								 price="{{.Price | currency}}"
+								 showDiscount="{{.Option.Discount}}"
+								 discount="{{.Discount | currency}}"
+							{{if .ShowStart}}
+								 start="{{.Start | date}}"
+							{{end}}
+					></course-card>
+{{/*					{{template "public-course-card" .}}*/}}
 				</div>
 			{{end}}
 

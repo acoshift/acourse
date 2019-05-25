@@ -12,6 +12,9 @@ dev:
 style:
 	gulp
 
+rollup:
+	yarn run autobuild
+
 clean:
 	rm -f static/style.*.css
 	rm -f acourse

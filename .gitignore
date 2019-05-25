@@ -5,6 +5,7 @@ config/email_password
 config/sql_url
 node_modules/
 assets/style.css
+assets/components.js
 private/
 acourse
 *.swp
