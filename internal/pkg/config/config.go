@@ -45,8 +45,8 @@ func init() {
 	ctx := context.Background()
 	var googleClientOpts []option.ClientOption
 
-	if len(cfg.Bytes("service_account")) > 0 {
-		googleClientOpts = append(googleClientOpts, option.WithCredentialsFile("config/service_account"))
+	if p := cfg.Bytes("service_account"); len(p) > 0 {
+		googleClientOpts = append(googleClientOpts, option.WithCredentialsJSON(p))
 	}
 
 	serviceName := StringDefault("service", "acourse")
