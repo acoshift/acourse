@@ -1,5 +1,5 @@
 steps:
-- name: golang:1.12.4
+- name: golang:1.12.5
   args: [go, build, -o, acourse, -ldflags, -w -s, main.go]
   env:
   - GOOS=linux
@@ -25,7 +25,7 @@ steps:
   args: [push, gcr.io/$PROJECT_ID/acourse:$COMMIT_SHA]
 
 - name: acoshift/kubectl
-  args: [set, image, $_RESOURCE, acourse=gcr.io/$PROJECT_ID/acourse:$COMMIT_SHA]
+  args: [set, image, $_RESOURCE, app=gcr.io/$PROJECT_ID/acourse:$COMMIT_SHA]
   env:
   - SERVER=$_SERVER
   - NAMESPACE=$_NAMESPACE
@@ -38,4 +38,4 @@ images:
 secrets:
 - kmsKeyName: projects/acourse-d9d0a/locations/global/keyRings/builder/cryptoKeys/key
   secretEnv:
-    TOKEN: CiQAKWs1nzr6FeNR6GQlTQ+cjv28BJRWiocGcV25ByajDojmuVUS8AYA2nfHuv+NwPv1L0ahbgRdvh6LhOrbM8u9/SAHXyDxHuXdgYYOVcFAId/GC4QvhgSba14/K9YEziX+i+9kuR7jsJsC/XNLiQAy45rPr//ccgr+EjPpvuNJS1iOKedEC1qdMzBwOo4zD6WW7u3mkKd3pCPcv0GgUFTCTAcO9Xy96NzURZ2hSvLMr1KQu9jpjZVgXhXYuRvpQNGbRm5mxClrULZTSRGOEuWYtESmrJ9rfS4euHvnurO/z6UvP4fX3eOGm6YqN9qNOatPUCYtjIra0UTouHSxC1Sakav8ih9htUdzev3N8U0AACu/2yIAqiZ+BbGMsQpHl5thQKXEH+Jpjj46vm5pQde19Zy1dhyQtXk72V18M0sljPp16UTrx0IT15Bhfqrvn9NYeW6iJ+Hj+UEAhiGCH3rGYl+58UJ3+wz5lk+6QeB5VBqd3PAiCZGHGL4h//YaWn07SAl/ghIKj9HKZ/2zkGRBzaLnyjBvEFU0j9Wtk2GMC4u4GnoggeAO+ff9AHpe1afe+osHmSc1RIP/1fCwNxLWerrGIUaia99d5MAKr2jww0JdlSoW2PR0AyM0tq6RbFvfxh4+TvusbPpdFviody+qn7FdftZLGhxYb+GM9yZKBgcopHA9YRbHWrMYVGGCQ3jyiWwl+DVx/UNPpMp0BBjoCjuurREGKRRc3nqaUbN4PlWS3e872FAOzJpwstgjVoTMKAXmnEbFDdmUifvcqNtInMYvQm08/34V/QpTHMEqqcM34URvh/Wi9nM5EgGWNjrvmXBv9EuzfuTQjahFTDdakjlhTBSKFArSuE4vAjrThsaLcSPA2mjSuS7C6Ozbzbc1oa7FO2Xd32481ensZLeqbBD+IHghw6k2i+EydOVT57Ubv++74CbmFLL7tMK3/IF/RRB6IwX/cMP9csLNoJ42o/ClPJ+mbQw/ELRc5XouaQBORZBa0OmMow+QCZNQJKexckVpcQ2XjwFlZgto7TNmGHO4V8iakxTfcdA22RrRO83JIVy6R9BXwmdYs6X6c3QlphmT3VeYVf8jloZyUKPSLIT3DSQX6NI1aNX9a/PfM0aZqxry7iay4UyMLbsUsyP7iNyTyDJdBkKPauslWEa8zdWilxps9x9N5P6z1c7ff8mrvtXnueSIsB1EwqqKCjZDALmCmvxH
+    TOKEN: CiQAKWs1nwxbV+SjoDy/bsArtqDa/k4WjshzvTqPQn7aUjQnYqsS/QYA2nfHurKLawagZdCOtoWQ8BTKzjZEsEKpDuwFIJJnOE2ejNQoB0Po/B+qS86E5k+P6pTE4EaQBzZCDTPzczk2wMcKRZsAFmZCSpO3JdGO1KP8XRiUhH/QKBRr2/TnkVz8NVK9ArhLcI162v8MN5//bXLMIz4YzkRe5vmkvqMhAehIAMaLEmhBoc7LTuDgHovO3L3hB+fsuYzLHbGmnDC3CbuibNVEWWAV5/M2i74VZXz2CtD+sgqGftyKRJgBXJ4AOElMLcuTfRg8eTZty2RZn9dYJlkURQrhOTxXdNeRof5nbhBbio/MjIcUNuB+ofy5rq/y3NovdcRB+BY7MNR2T4T7CLvPfiolUpBIIBd60/9lx9nMf6s5S6IPPp++I47kwItJxxJu6ZEokeZzAhB5JoezsHd/8uWF/LIwxGttsr9WIZHM0KIXFtEeo7Kw41PC8x6OY9zPOXqhGpfo+BcVrPDF+Ik0ksEpvAIUxy/EvT0lkHHl0h71KTVNbHa5gC4dzprzgy0RpHhcsdeUp+4UomKyKDTcKw9piIpUugd1Ikc+kpwTJzOl+zi5Dl49VZI1trJhqYVn4D/4yMiioFWSxT22jsByX+TkmVMagaI9R94iz0aRX/IPEwrcx9zz2VkkV91N+uG6wg6P13SJY0xA8391vSc00Q0q3KtNOWzhSGmDjR+nVkUHgbE1qvaVDKkmNGE21M1Lo3UCoz7+iq8cbzLHv9YtwSeqDzv0IwmWXHYsUHwBVG1toXYrMnyck6BM1k0+ay6wrMZREYN3iUCLlnZ9Qoj4444nTrEAuH9ia3218GfaQch/PJe9G26fVb+4bL0ugkaQuen8yEhC3V34CZDINlowExIQq85xzStsmCicn3lv21N2zRARdImcq52jgVTxWfut90XWn77+nyg4yqeG+MWUkHob8pyNFkIZnuvxwcHit3/iu4IHebFiAt8Y+ASRVlyjbaWiNZaGcuLKnSMZqeTzWaGgMvhGaG9oqIXx+Njy6sK9hyQOX//LjlwXg+gFqGSicvQMn9UAWcATmSB3k6ZlCbMbm9b5P4Hl+Tsg7bupl/r3AfKQSMVoubgOIhHRkCJBKqvhmUg2ib3LE9rxDGxlJCQtf5QWAjbl2OuZNR2gObJbG8cCOlcpNGbEQf1+PVBx8OEPP5uohnTAdxMaqu4prSitB2ONBw==

@@ -17,3 +17,12 @@ clean:
 	rm -f acourse
 	rm -f static.yaml
 	rm -rf .build
+
+encrypt-deploy-token:
+	gcloud kms encrypt \
+		--project acourse-d9d0a \
+		--location global \
+		--keyring builder \
+		--key key \
+		--plaintext-file deploy-token \
+		--ciphertext-file deploy-token.encrypted

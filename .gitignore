@@ -11,3 +11,5 @@ acourse
 .goreload
 .build/
 .idea/
+/deploy-token
+/deploy-token.encrypted
