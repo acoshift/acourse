@@ -30,18 +30,19 @@
 	  data-turbolinks-permanent>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600"
 	  data-turbolinks-permanent>
-<link rel="preload" as="style" href="/-/_/font-awesome@4.7.0/css/font-awesome.min.css" data-turbolinks-permanent>
+<link rel="preload" as="style" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css"
+	  data-turbolinks-permanent>
 
 <link rel="stylesheet" href="{{static "style.css"}}" data-turbolinks-track="reload">
 
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600">
-<link rel="stylesheet" href="/-/_/font-awesome@4.7.0/css/font-awesome.min.css">
-<script src="/-/_/turbolinks@5.1.1/turbolinks.js" defer></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
+<script src="https://cdn.jsdelivr.net/npm/turbolinks@5.2.0/dist/turbolinks.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/pvdbsmf@1.0.0/dist/pvdbsmf.min.js" defer></script>
 
 {{template "body" .Data}}
 
 {{template "global.script"}}
 {{block "script" .Data}}{{end}}
-<script src="https://unpkg.com/pvdbsmf@1.0.0/dist/pvdbsmf.min.js"></script>
 {{end}}
