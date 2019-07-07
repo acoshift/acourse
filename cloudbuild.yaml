@@ -7,12 +7,12 @@ steps:
   - CGO_ENABLED=0
   - GOPROXY=https://proxy.golang.org
 
-- name: node:10.15.3
+- name: node:10.16.0
   entrypoint: yarn
   args: [install]
   id: yarn-install
   waitFor: ['-']
-- name: node:10.15.3
+- name: node:10.16.0
   entrypoint: yarn
   args: [run, gulp]
   waitFor: [yarn-install]
@@ -29,13 +29,8 @@ steps:
   env:
   - SERVER=$_SERVER
   - NAMESPACE=$_NAMESPACE
-  secretEnv:
-  - TOKEN
+  - TOKEN=$_TOKEN
 
 images:
 - gcr.io/$PROJECT_ID/acourse:$COMMIT_SHA
 
-secrets:
-- kmsKeyName: projects/acourse-d9d0a/locations/global/keyRings/builder/cryptoKeys/key
-  secretEnv:
-    TOKEN: CiQAKWs1nwxbV+SjoDy/bsArtqDa/k4WjshzvTqPQn7aUjQnYqsS/QYA2nfHurKLawagZdCOtoWQ8BTKzjZEsEKpDuwFIJJnOE2ejNQoB0Po/B+qS86E5k+P6pTE4EaQBzZCDTPzczk2wMcKRZsAFmZCSpO3JdGO1KP8XRiUhH/QKBRr2/TnkVz8NVK9ArhLcI162v8MN5//bXLMIz4YzkRe5vmkvqMhAehIAMaLEmhBoc7LTuDgHovO3L3hB+fsuYzLHbGmnDC3CbuibNVEWWAV5/M2i74VZXz2CtD+sgqGftyKRJgBXJ4AOElMLcuTfRg8eTZty2RZn9dYJlkURQrhOTxXdNeRof5nbhBbio/MjIcUNuB+ofy5rq/y3NovdcRB+BY7MNR2T4T7CLvPfiolUpBIIBd60/9lx9nMf6s5S6IPPp++I47kwItJxxJu6ZEokeZzAhB5JoezsHd/8uWF/LIwxGttsr9WIZHM0KIXFtEeo7Kw41PC8x6OY9zPOXqhGpfo+BcVrPDF+Ik0ksEpvAIUxy/EvT0lkHHl0h71KTVNbHa5gC4dzprzgy0RpHhcsdeUp+4UomKyKDTcKw9piIpUugd1Ikc+kpwTJzOl+zi5Dl49VZI1trJhqYVn4D/4yMiioFWSxT22jsByX+TkmVMagaI9R94iz0aRX/IPEwrcx9zz2VkkV91N+uG6wg6P13SJY0xA8391vSc00Q0q3KtNOWzhSGmDjR+nVkUHgbE1qvaVDKkmNGE21M1Lo3UCoz7+iq8cbzLHv9YtwSeqDzv0IwmWXHYsUHwBVG1toXYrMnyck6BM1k0+ay6wrMZREYN3iUCLlnZ9Qoj4444nTrEAuH9ia3218GfaQch/PJe9G26fVb+4bL0ugkaQuen8yEhC3V34CZDINlowExIQq85xzStsmCicn3lv21N2zRARdImcq52jgVTxWfut90XWn77+nyg4yqeG+MWUkHob8pyNFkIZnuvxwcHit3/iu4IHebFiAt8Y+ASRVlyjbaWiNZaGcuLKnSMZqeTzWaGgMvhGaG9oqIXx+Njy6sK9hyQOX//LjlwXg+gFqGSicvQMn9UAWcATmSB3k6ZlCbMbm9b5P4Hl+Tsg7bupl/r3AfKQSMVoubgOIhHRkCJBKqvhmUg2ib3LE9rxDGxlJCQtf5QWAjbl2OuZNR2gObJbG8cCOlcpNGbEQf1+PVBx8OEPP5uohnTAdxMaqu4prSitB2ONBw==
