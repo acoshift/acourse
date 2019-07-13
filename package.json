@@ -15,7 +15,7 @@
   },
   "homepage": "https://github.com/acoshift/acourse#readme",
   "dependencies": {
-    "fs-extra": "^7.0.1",
+    "fs-extra": "^8.1.0",
     "gulp": "^4.0.1",
     "gulp-concat": "^2.6.1",
     "gulp-filenames": "^4.0.1",
