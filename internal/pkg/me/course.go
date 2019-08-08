@@ -46,7 +46,7 @@ func GetOwnCourses(ctx context.Context, userID string) ([]*OwnCourse, error) {
 		from courses as c
 			left join enrolls as e on e.course_id = c.id
 		where c.user_id = $1
-		group by c.*
+		group by c.id, c.*
 		order by c.created_at desc
 	`, userID)
 	if err != nil {
