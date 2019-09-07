@@ -75,7 +75,7 @@ func init() {
 		PoolSize:    IntDefault("redis_pool_size", 5),
 		IdleTimeout: DurationDefault("redis_idle_timeout", 60*time.Minute),
 		Addr:        String("redis_addr"),
-		Password:    String("redis_pass"),
+		Password:    String("redis_password"),
 	})
 
 	// db

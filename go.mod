@@ -1,10 +1,10 @@
 module github.com/acoshift/acourse
 
-go 1.12
+go 1.13
 
 require (
 	cloud.google.com/go v0.43.0
-	github.com/acoshift/configfile v1.4.0
+	github.com/acoshift/configfile v1.5.1
 	github.com/acoshift/go-firebase-admin v0.0.6
 	github.com/acoshift/header v0.0.0-20181002150212-5f10ae681f7e
 	github.com/acoshift/methodmux v1.1.1

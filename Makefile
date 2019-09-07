@@ -5,7 +5,6 @@ default:
 dev:
 	goreload \
 		--all \
-		-x vendor \
 		-x node_modules
 
 .PHONY: style

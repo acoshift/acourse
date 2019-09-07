@@ -14,9 +14,7 @@ import (
 func main() {
 	defer config.Close()
 
-	app := app.New()
-
-	err := app.
+	err := app.New().
 		Address(":8080").
 		ListenAndServe()
 	if err != nil {

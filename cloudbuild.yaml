@@ -1,11 +1,10 @@
 steps:
-- name: golang:1.12.7
+- name: golang:1.13.0
   args: [go, build, -o, acourse, -ldflags, -w -s, main.go]
   env:
   - GOOS=linux
   - GOARCH=amd64
   - CGO_ENABLED=0
-  - GOPROXY=https://proxy.golang.org
 
 - name: node:10.16.0
   entrypoint: yarn

@@ -8,8 +8,8 @@ github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/DATA-DOG/go-sqlmock v1.3.3 h1:CWUqKXe0s8A2z6qCgkP4Kru7wC11YoAnoupUKFDnH08=
 github.com/DATA-DOG/go-sqlmock v1.3.3/go.mod h1:f/Ixk793poVmq4qj/V1dPUg2JEAKC73Q5eFN3EC/SaM=
-github.com/acoshift/configfile v1.4.0 h1:1KekCdCosOtIm0WPhln6U1cd0OhhsA4DsN4ZjuHK7Uo=
-github.com/acoshift/configfile v1.4.0/go.mod h1:VbJabnshkRxPzC3ej0GHLQ8fxEqqKZdqE+PIpE6/RWA=
+github.com/acoshift/configfile v1.5.1 h1:O+ePDGufAcijkM0j6JWbu7E5m8MixY6x4veJtS29c+s=
+github.com/acoshift/configfile v1.5.1/go.mod h1:6cX5Qct6dOmQuFlv2SbYjlZH8aSQZCQlbWl9InCvz+0=
 github.com/acoshift/go-firebase-admin v0.0.6 h1:/S5rMRqUGl6eUwJA7A8Sk8ODLWbp+uMohZOjx9FE9ts=
 github.com/acoshift/go-firebase-admin v0.0.6/go.mod h1:qKr/GoixrYkkOgN0d9yLAt3ATZ1qwDViHUrG6YYoIz4=
 github.com/acoshift/header v0.0.0-20181002150212-5f10ae681f7e h1:6CANpHYSWBwbiwg9V+qJMFHEEm9BdBgch1m1d7hn+mY=
