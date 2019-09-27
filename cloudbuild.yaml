@@ -1,35 +1,36 @@
 steps:
-- name: golang:1.13.0
+- name: golang:1.13.1
   args: [go, build, -o, acourse, -ldflags, -w -s, main.go]
-  env:
-  - GOOS=linux
-  - GOARCH=amd64
-  - CGO_ENABLED=0
 
-- name: node:10.16.0
+- name: node:10.16.3
   entrypoint: yarn
   args: [install]
   id: yarn-install
   waitFor: ['-']
-- name: node:10.16.0
+- name: node:10.16.3
   entrypoint: yarn
   args: [run, gulp]
   waitFor: [yarn-install]
-  env:
-  - NODE_ENV=production
 
 - name: gcr.io/cloud-builders/docker
   args: [build, -t, gcr.io/$PROJECT_ID/acourse:$COMMIT_SHA, '.']
 - name: gcr.io/cloud-builders/docker
   args: [push, gcr.io/$PROJECT_ID/acourse:$COMMIT_SHA]
 
-- name: acoshift/kubectl
-  args: [set, image, $_RESOURCE, app=gcr.io/$PROJECT_ID/acourse:$COMMIT_SHA]
+- name: gcr.io/deploys-app/cli:0a6da369c400825e2ce34c3bb54cda138c1e2319
+  args: [deployment, set, image, acourse, -project=acourse, -image=gcr.io/$PROJECT_ID/acourse:$COMMIT_SHA]
+
+#- name: acoshift/kubectl
+#  args: [set, image, $_RESOURCE, app=gcr.io/$PROJECT_ID/acourse:$COMMIT_SHA]
+#  env:
+#  - SERVER=$_SERVER
+#  - NAMESPACE=$_NAMESPACE
+#  - TOKEN=$_TOKEN
+
+options:
   env:
-  - SERVER=$_SERVER
-  - NAMESPACE=$_NAMESPACE
-  - TOKEN=$_TOKEN
+  - CGO_ENABLED=0
+  - NODE_ENV=production
 
 images:
 - gcr.io/$PROJECT_ID/acourse:$COMMIT_SHA
-
