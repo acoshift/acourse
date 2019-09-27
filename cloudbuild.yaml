@@ -17,7 +17,7 @@ steps:
 - name: gcr.io/cloud-builders/docker
   args: [push, gcr.io/$PROJECT_ID/acourse:$COMMIT_SHA]
 
-- name: gcr.io/deploys-app/cli:8c791731173e6f91f39026162df9accf24277548
+- name: gcr.io/deploys-app/cli:50004f6627ba31f986c8e7600450a657c5463ae5
   args: [deployment, set, image, acourse, -project=acourse, -image=gcr.io/$PROJECT_ID/acourse:$COMMIT_SHA]
 
 #- name: acoshift/kubectl
