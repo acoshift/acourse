@@ -103,13 +103,6 @@ func New() *hime.App {
 	handler := middleware.Chain(
 		errorLogger,
 		defaultHeaders,
-		middleware.CSRF(middleware.CSRFConfig{
-			Origins:     []string{baseURL},
-			IgnoreProto: true,
-			ForbiddenHandler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				http.Error(w, "Cross-site origin detected!", http.StatusForbidden)
-			}),
-		}),
 	)(mux)
 
 	server.Handler(handler)
