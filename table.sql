@@ -1,5 +1,14 @@
 -- create extension if not exists pgcrypto;
 
+create table sessions (
+    id         varchar,
+    value      bytea       not null,
+    created_at timestamptz not null default now(),
+    expires_at timestamptz,
+    primary key (id)
+);
+create index on sessions (expires_at);
+
 create table users (
 	id varchar not null,
 	username varchar not null,

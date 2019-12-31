@@ -17,7 +17,7 @@ import (
 	"github.com/moonrhythm/hime"
 	"github.com/moonrhythm/httpmux"
 	"github.com/moonrhythm/session"
-	redisstore "github.com/moonrhythm/session/store/goredis"
+	"github.com/moonrhythm/session/store"
 
 	"github.com/acoshift/acourse/internal/app/admin"
 	"github.com/acoshift/acourse/internal/app/app"
@@ -60,18 +60,19 @@ func New() *hime.App {
 		pgctx.Middleware(config.DBClient()),
 		redisctx.Middleware(config.RedisClient(), config.String("redis_prefix")),
 		session.Middleware(session.Config{
-			Secret:   config.Bytes("session_secret"),
-			Path:     "/",
-			MaxAge:   7 * 24 * time.Hour,
-			HTTPOnly: true,
-			Secure:   session.PreferSecure,
-			SameSite: http.SameSiteLaxMode,
-			Rolling:  true,
-			Proxy:    true,
-			Store: redisstore.New(redisstore.Config{
-				Prefix: config.String("redis_prefix"),
-				Client: config.RedisClient(),
-			}),
+			Secret:      config.Bytes("session_secret"),
+			Path:        "/",
+			MaxAge:      7 * 24 * time.Hour,
+			HTTPOnly:    true,
+			Secure:      session.PreferSecure,
+			SameSite:    http.SameSiteLaxMode,
+			Rolling:     true,
+			Proxy:       true,
+			Resave:      true,
+			ResaveAfter: 24 * time.Hour,
+			Store: (&store.SQL{
+				DB: config.DBClient(),
+			}).GeneratePostgreSQLStatement("sessions", false).GCEvery(time.Hour),
 		}),
 		turbolinks,
 		appctx.Middleware(),

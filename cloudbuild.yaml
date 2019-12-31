@@ -1,5 +1,5 @@
 steps:
-- name: golang:1.13.4
+- name: golang:1.13.5
   args: [go, build, -o, acourse, -ldflags, -w -s, main.go]
 
 - name: node:10.16.3
@@ -19,13 +19,6 @@ steps:
 
 - name: gcr.io/deploys-app/cli
   args: [deployment, set, image, acourse, -project=acourse, -image=gcr.io/$PROJECT_ID/acourse:$COMMIT_SHA]
-
-#- name: acoshift/kubectl
-#  args: [set, image, $_RESOURCE, app=gcr.io/$PROJECT_ID/acourse:$COMMIT_SHA]
-#  env:
-#  - SERVER=$_SERVER
-#  - NAMESPACE=$_NAMESPACE
-#  - TOKEN=$_TOKEN
 
 options:
   env:
