@@ -17,8 +17,8 @@ Acourse Website [acourse.io](https://acourse.io)
 
 ### Software
 
-- [PostgreSQL](https://www.postgresql.org/)
-- [Redis](https://redis.io/)
+- [CockroachDB](https://www.cockroachlabs.com/)
+- [Redis](https://redis.io/) (optional)
 - [goreload](https://github.com/acoshift/goreload)
 - [Node.js LTS](https://nodejs.org/)
 
