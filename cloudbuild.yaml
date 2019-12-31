@@ -18,7 +18,7 @@ steps:
   args: [push, gcr.io/$PROJECT_ID/acourse:$COMMIT_SHA]
 
 - name: gcr.io/deploys-app/cli
-  args: [deployment, set, image, acourse, -project=acourse, -image=gcr.io/$PROJECT_ID/acourse:$COMMIT_SHA]
+  args: [deployment, set, image, acourse-th, -project=acourse, -image=gcr.io/$PROJECT_ID/acourse:$COMMIT_SHA]
 
 options:
   env:
