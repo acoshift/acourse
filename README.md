@@ -9,7 +9,7 @@ Acourse Website [acourse.io](https://acourse.io)
 
 ### Config
 
-- add config/sql_url to your postgres database
+- add config/sql_url to your cockroachdb database
 - add config/service_account to your gcloud service account (using for upload storage)
 - add gcloud project id to config/project_id
 - add gcloud bucket name to config/bucket
