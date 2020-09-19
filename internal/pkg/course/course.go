@@ -309,7 +309,7 @@ func GetPublicCards(ctx context.Context) ([]*PublicCard, error) {
 
 	// look from cache
 	{
-		bs, err := c.Get(cachePrefix + "cache:list_public_course").Bytes()
+		bs, err := c.Get(ctx, cachePrefix+"cache:list_public_course").Bytes()
 		if err == nil {
 			var xs []*PublicCard
 			err = gob.NewDecoder(bytes.NewReader(bs)).Decode(&xs)
@@ -365,7 +365,7 @@ func GetPublicCards(ctx context.Context) ([]*PublicCard, error) {
 		buf := bytes.Buffer{}
 		err := gob.NewEncoder(&buf).Encode(xs)
 		if err == nil {
-			c.Set(cachePrefix+"cache:list_public_course", buf.Bytes(), time.Minute)
+			c.Set(ctx, cachePrefix+"cache:list_public_course", buf.Bytes(), time.Minute)
 		}
 	}()
 

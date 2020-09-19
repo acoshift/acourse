@@ -10,7 +10,7 @@ import (
 	"cloud.google.com/go/storage"
 	"github.com/acoshift/configfile"
 	"github.com/acoshift/go-firebase-admin"
-	"github.com/go-redis/redis"
+	"github.com/go-redis/redis/v8"
 	"google.golang.org/api/option"
 )
 
@@ -75,6 +75,7 @@ func init() {
 		PoolSize:    IntDefault("redis_pool_size", 5),
 		IdleTimeout: DurationDefault("redis_idle_timeout", 60*time.Minute),
 		Addr:        String("redis_addr"),
+		Username:    String("redis_user"),
 		Password:    String("redis_password"),
 	})
 
