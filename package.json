@@ -23,7 +23,7 @@
     "gulp-noop": "^1.0.0",
     "gulp-purgecss": "^1.2.0",
     "gulp-sass": "^4.0.2",
-    "node-sass": "^4.12.0",
+    "node-sass": "^4.13.1",
     "normalize.css": "^8.0.1",
     "purgecss": "^1.3.0"
   },
