@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/base64"
-	"errors"
 	"fmt"
 	"io"
 	"unicode/utf8"
@@ -88,9 +87,8 @@ func SignInPassword(ctx context.Context, email, password string) (string, error)
 	}
 
 	userID, err := firAuth.VerifyPassword(ctx, email, password)
-	var googErr googleapi.Error
 	var retryNormalize bool
-	if errors.As(err, &googErr) {
+	if googErr, ok := err.(*googleapi.Error); ok {
 		switch googErr.Message {
 		default:
 			fallthrough
@@ -108,7 +106,7 @@ func SignInPassword(ctx context.Context, email, password string) (string, error)
 			return "", fmt.Errorf("invalid email or password")
 		}
 		userID, err = firAuth.VerifyPassword(ctx, normalizedEmail, password)
-		if errors.As(err, &googErr) {
+		if googErr, ok := err.(*googleapi.Error); ok {
 			switch googErr.Message {
 			case "EMAIL_NOT_FOUND", "INVALID_PASSWORD":
 				return "", fmt.Errorf("invalid email or password")
