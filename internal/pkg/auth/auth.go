@@ -4,12 +4,14 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"io"
 	"unicode/utf8"
 
 	admin "github.com/acoshift/go-firebase-admin"
 	"github.com/asaskevich/govalidator"
+	"google.golang.org/api/googleapi"
 
 	"github.com/acoshift/acourse/internal/pkg/user"
 )
@@ -86,8 +88,36 @@ func SignInPassword(ctx context.Context, email, password string) (string, error)
 	}
 
 	userID, err := firAuth.VerifyPassword(ctx, email, password)
-	if err != nil {
+	var googErr googleapi.Error
+	var retryNormalize bool
+	if errors.As(err, &googErr) {
+		switch googErr.Message {
+		default:
+			fallthrough
+		case "INVALID_PASSWORD":
+			return "", fmt.Errorf("invalid email or password")
+		case "EMAIL_NOT_FOUND":
+			retryNormalize = true
+		}
+	} else if err != nil {
 		return "", err
+	}
+	if retryNormalize {
+		normalizedEmail, err := govalidator.NormalizeEmail(email)
+		if err != nil {
+			return "", fmt.Errorf("invalid email or password")
+		}
+		userID, err = firAuth.VerifyPassword(ctx, normalizedEmail, password)
+		if errors.As(err, &googErr) {
+			switch googErr.Message {
+			case "EMAIL_NOT_FOUND", "INVALID_PASSWORD":
+				return "", fmt.Errorf("invalid email or password")
+			default:
+				return "", err
+			}
+		} else if err != nil {
+			return "", err
+		}
 	}
 
 	// if user not found in our database, insert new user
