@@ -1,5 +1,5 @@
 steps:
-- name: golang:1.15.2
+- name: golang:1.15.5
   args: [go, build, -o, acourse, -ldflags, -w -s, main.go]
 
 - name: node:10.16.3
