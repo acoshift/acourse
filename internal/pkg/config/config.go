@@ -64,7 +64,9 @@ func init() {
 
 	// init trace
 	sd, err := stackdriver.NewExporter(stackdriver.Options{
-		ProjectID: projectID,
+		ProjectID:               projectID,
+		TraceClientOptions:      googleClientOpts,
+		MonitoringClientOptions: googleClientOpts,
 	})
 	trace.RegisterExporter(sd)
 
