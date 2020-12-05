@@ -18,6 +18,9 @@ import (
 	"github.com/moonrhythm/httpmux"
 	"github.com/moonrhythm/session"
 	"github.com/moonrhythm/session/store"
+	sdpropagation "go.opencensus.io/exporter/stackdriver/propagation"
+	"go.opencensus.io/plugin/ochttp"
+	"go.opencensus.io/trace"
 
 	"github.com/acoshift/acourse/internal/app/admin"
 	"github.com/acoshift/acourse/internal/app/app"
@@ -58,6 +61,7 @@ func New() *hime.App {
 	admin.Mount(m)
 
 	h := middleware.Chain(
+		traceMiddleware,
 		pgctx.Middleware(config.DBClient()),
 		redisctx.Middleware(config.RedisClient(), config.String("redis_prefix")),
 		session.Middleware(session.Config{
@@ -158,4 +162,19 @@ func errorLogger(h http.Handler) http.Handler {
 		}()
 		h.ServeHTTP(w, r)
 	})
+}
+
+func traceMiddleware(h http.Handler) http.Handler {
+	return &ochttp.Handler{
+		Handler:     h,
+		Propagation: &sdpropagation.HTTPFormat{},
+		FormatSpanName: func(r *http.Request) string {
+			proto := r.Header.Get("X-Forwarded-Proto")
+			return proto + "://" + r.Host + r.RequestURI
+		},
+		StartOptions: trace.StartOptions{
+			Sampler:  trace.AlwaysSample(),
+			SpanKind: trace.SpanKindServer,
+		},
+	}
 }

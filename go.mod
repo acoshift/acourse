@@ -5,6 +5,7 @@ go 1.15
 require (
 	cloud.google.com/go v0.72.0
 	cloud.google.com/go/storage v1.12.0
+	contrib.go.opencensus.io/exporter/stackdriver v0.13.4
 	github.com/acoshift/configfile v1.7.0
 	github.com/acoshift/go-firebase-admin v0.0.6
 	github.com/acoshift/header v0.0.0-20181002150212-5f10ae681f7e
@@ -31,6 +32,7 @@ require (
 	github.com/russross/blackfriday v2.0.0+incompatible
 	github.com/satori/go.uuid v1.2.0
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
+	go.opencensus.io v0.22.5
 	golang.org/x/image v0.0.0-20200927104501-e162460cd6b5 // indirect
 	golang.org/x/net v0.0.0-20201110031124-69a78807bb2b // indirect
 	golang.org/x/oauth2 v0.0.0-20201109201403-9fd604954f58 // indirect

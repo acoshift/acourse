@@ -8,9 +8,11 @@ import (
 
 	"cloud.google.com/go/errorreporting"
 	"cloud.google.com/go/storage"
+	"contrib.go.opencensus.io/exporter/stackdriver"
 	"github.com/acoshift/configfile"
 	"github.com/acoshift/go-firebase-admin"
 	"github.com/go-redis/redis/v8"
+	"go.opencensus.io/trace"
 	"google.golang.org/api/option"
 )
 
@@ -59,6 +61,12 @@ func init() {
 			log.Println(err)
 		},
 	}, googleClientOpts...)
+
+	// init trace
+	sd, err := stackdriver.NewExporter(stackdriver.Options{
+		ProjectID: projectID,
+	})
+	trace.RegisterExporter(sd)
 
 	firebaseApp, err = firebase.InitializeApp(ctx, firebase.AppOptions{
 		ProjectID: projectID,
