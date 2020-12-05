@@ -63,7 +63,7 @@ func init() {
 	}, googleClientOpts...)
 
 	// init trace
-	sd, err := stackdriver.NewExporter(stackdriver.Options{
+	sd, _ := stackdriver.NewExporter(stackdriver.Options{
 		ProjectID:               projectID,
 		TraceClientOptions:      googleClientOpts,
 		MonitoringClientOptions: googleClientOpts,
