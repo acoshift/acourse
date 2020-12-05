@@ -18,7 +18,6 @@ import (
 	"github.com/moonrhythm/httpmux"
 	"github.com/moonrhythm/session"
 	"github.com/moonrhythm/session/store"
-	sdpropagation "go.opencensus.io/exporter/stackdriver/propagation"
 	"go.opencensus.io/plugin/ochttp"
 	"go.opencensus.io/trace"
 
@@ -166,8 +165,7 @@ func errorLogger(h http.Handler) http.Handler {
 
 func traceMiddleware(h http.Handler) http.Handler {
 	return &ochttp.Handler{
-		Handler:     h,
-		Propagation: &sdpropagation.HTTPFormat{},
+		Handler: h,
 		FormatSpanName: func(r *http.Request) string {
 			proto := r.Header.Get("X-Forwarded-Proto")
 			return proto + "://" + r.Host + r.RequestURI
