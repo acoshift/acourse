@@ -4,7 +4,7 @@ steps:
 - name: gcr.io/cloud-builders/docker
   args: [push, gcr.io/$PROJECT_ID/acourse:$COMMIT_SHA]
 
-- name: gcr.io/deploys-app/cli:1352545b63de63bea9aef24daa35932b32f22b65
+- name: gcr.io/deploys-app/cli
   args: [deployment, set, image, acourse, -project=acourse, -image=gcr.io/$PROJECT_ID/acourse:$COMMIT_SHA]
 
 images:
