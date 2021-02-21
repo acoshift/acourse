@@ -1,6 +1,6 @@
 module github.com/acoshift/acourse
 
-go 1.15
+go 1.16
 
 require (
 	cloud.google.com/go v0.72.0
@@ -23,7 +23,7 @@ require (
 	github.com/go-redis/redis/v8 v8.4.0
 	github.com/lib/pq v1.8.1-0.20201123164851-be2b75c2254d
 	github.com/microcosm-cc/bluemonday v1.0.4
-	github.com/moonrhythm/hime v1.0.1
+	github.com/moonrhythm/hime v1.1.1
 	github.com/moonrhythm/httpmux v1.0.1
 	github.com/moonrhythm/session v0.16.0
 	github.com/moonrhythm/validator v1.2.0
@@ -32,10 +32,12 @@ require (
 	github.com/russross/blackfriday v2.0.0+incompatible
 	github.com/satori/go.uuid v1.2.0
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
+	github.com/tdewolff/parse/v2 v2.5.11 // indirect
 	go.opencensus.io v0.22.5
 	golang.org/x/image v0.0.0-20200927104501-e162460cd6b5 // indirect
 	golang.org/x/net v0.0.0-20201110031124-69a78807bb2b // indirect
 	golang.org/x/oauth2 v0.0.0-20201109201403-9fd604954f58 // indirect
+	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	golang.org/x/sys v0.0.0-20201119102817-f84b799fce68 // indirect
 	golang.org/x/tools v0.0.0-20201124005743-911501bfb504 // indirect
 	google.golang.org/api v0.35.0

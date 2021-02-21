@@ -1,4 +1,4 @@
-FROM golang:1.15.6
+FROM golang:1.16.0
 
 ENV GOOS=linux
 ENV GOARCH=amd64
@@ -11,9 +11,7 @@ RUN go mod download
 ADD . .
 RUN go build -trimpath -o acourse -ldflags "-w -s" .
 
-# ---------------------------------------------------------------------------------
-
-FROM node:10.16.3
+FROM node:14.15.5
 
 ENV NODE_ENV=production
 
@@ -23,8 +21,6 @@ ADD package.json yarn.lock ./
 RUN yarn install
 ADD . .
 RUN yarn run gulp
-
-# ---------------------------------------------------------------------------------
 
 FROM gcr.io/moonrhythm-containers/go-scratch
 
