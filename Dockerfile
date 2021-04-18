@@ -9,7 +9,7 @@ RUN yarn install
 ADD . .
 RUN yarn run gulp
 
-FROM golang:1.16.0
+FROM golang:1.16.3
 
 ENV GOOS=linux
 ENV GOARCH=amd64
@@ -22,7 +22,7 @@ RUN go mod download
 COPY --from=0 /workspace/ ./
 RUN go build -trimpath -o .build/acourse -ldflags "-w -s" .
 
-FROM gcr.io/moonrhythm-containers/go-scratch
+FROM gcr.io/distroless/static
 
 COPY --from=1 /workspace/.build/* /
 
