@@ -20,7 +20,7 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         push: true
-        tags: ${{ github.repository }}:latest
+        tags: ghcr.io/${{ github.repository }}:latest
     - uses: actions/setup-go@v2
     - run: go install github.com/deploys-app/deploys
     - run: deploys set image ${{ secrets.DEPLOYS_NAME }} -project=${{ secrets.DEPLOYS_PROJECT }} -location=${{ secrets.DEPLOYS_LOCATION }} -image=ghcr.io/${{ github.repository }}:sha256@${{ steps.docker_build.outputs.digest }}
