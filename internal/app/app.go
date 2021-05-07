@@ -1,6 +1,11 @@
 package app
 
 import (
+	"bytes"
+	"context"
+	"database/sql/driver"
+	"errors"
+	"io/fs"
 	"log"
 	"net/http"
 	"runtime/debug"
@@ -11,13 +16,14 @@ import (
 	"github.com/acoshift/header"
 	"github.com/acoshift/methodmux"
 	"github.com/acoshift/middleware"
+	"github.com/acoshift/pgsql"
 	"github.com/acoshift/pgsql/pgctx"
 	"github.com/acoshift/probehandler"
-	"github.com/acoshift/webstatic"
 	"github.com/moonrhythm/hime"
 	"github.com/moonrhythm/httpmux"
 	"github.com/moonrhythm/session"
 	"github.com/moonrhythm/session/store"
+	"github.com/moonrhythm/webstatic/v4"
 	"go.opencensus.io/plugin/ochttp"
 	"go.opencensus.io/trace"
 
@@ -31,13 +37,22 @@ import (
 	"github.com/acoshift/acourse/internal/pkg/context/redisctx"
 )
 
+// Config is the App's config
+type Config struct {
+	Routes         []byte
+	Static         []byte
+	Template       fs.FS
+	TemplateConfig []byte
+	Assets         fs.FS
+}
+
 // New creates new app
-func New() *hime.App {
+func New(cfg Config) *hime.App {
 	server := hime.New()
 	server.ETag = true
-	server.ParseConfigFile("settings/routes.yaml")
+	server.ParseConfig(cfg.Routes)
 
-	static := configfile.NewYAMLReader("static.yaml")
+	static := configfile.NewYAMLReaderFromReader(bytes.NewReader(cfg.Static))
 	server.TemplateFunc("static", func(s string) string {
 		return "/-/" + static.StringDefault(s, s)
 	})
@@ -48,8 +63,9 @@ func New() *hime.App {
 	})
 
 	server.Template().
+		FS(cfg.Template).
 		Funcs(templateFunc()).
-		ParseConfigFile("settings/template.yaml")
+		ParseConfig(cfg.TemplateConfig)
 
 	methodmux.FallbackHandler = hime.Handler(view.NotFound)
 
@@ -96,10 +112,10 @@ func New() *hime.App {
 		w.WriteHeader(http.StatusOK)
 	})
 
-	mux.Handle("/-/", http.StripPrefix("/-", webstatic.New(webstatic.Config{
-		Dir:          "assets",
+	mux.Handle("/-/", http.StripPrefix("/-", &webstatic.Handler{
+		FileSystem:   http.FS(cfg.Assets),
 		CacheControl: "public, max-age=31536000, immutable",
-	})))
+	}))
 
 	mux.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) { http.ServeFile(w, r, "assets/favicon.ico") })
 
@@ -145,6 +161,18 @@ func errorLogger(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if err := recover(); err != nil {
+				if e, ok := err.(error); ok {
+					if errors.Is(e, context.Canceled) {
+						return
+					}
+					if errors.Is(e, driver.ErrBadConn) {
+						return
+					}
+					if pgsql.IsQueryCanceled(e) {
+						return
+					}
+				}
+
 				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 				log.Println(err)
 				debug.PrintStack()

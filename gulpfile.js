@@ -25,9 +25,9 @@ function style () {
 }
 
 async function static () {
-	await fs.mkdirp('.build')
-	await fs.remove('.build/static.yaml')
-	await fs.appendFile('.build/static.yaml', 'style.css: ' + filenames.get('style')[0] + '\n')
+	const fn = 'settings/static.yaml'
+	await fs.remove(fn)
+	await fs.appendFile(fn, 'style.css: ' + filenames.get('style')[0] + '\n')
 }
 
 exports.style = style

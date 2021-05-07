@@ -1,0 +1,31 @@
+name: Deploy
+on:
+  push:
+    branches:
+    - master
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v1
+      with:
+        registry: ghcr.io
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Build and push
+      id: docker_build
+      uses: docker/build-push-action@v2
+      with:
+        push: true
+        tags: ghcr.io/${{ github.repository }}:latest
+    - uses: actions/setup-go@v2
+      with:
+        go-version: "1.16"
+    - run: go get github.com/deploys-app/deploys@master
+    - run: deploys deployment set image acourse -project=acourse -location=cluster-lab -image=ghcr.io/${{ github.repository }}@${{ steps.docker_build.outputs.digest }}
+      env:
+        DEPLOYS_AUTH_USER: ${{ secrets.DEPLOYS_AUTH_USER }}
+        DEPLOYS_AUTH_PASS: ${{ secrets.DEPLOYS_AUTH_PASS }}
