@@ -25,7 +25,7 @@ jobs:
       with:
         go-version: "1.16"
     - run: go get github.com/deploys-app/deploys@master
-    - run: deploys deployment set image ${{ secrets.DEPLOYS_NAME }} -project=${{ secrets.DEPLOYS_PROJECT }} -location=${{ secrets.DEPLOYS_LOCATION }} -image=ghcr.io/${{ github.repository }}@${{ steps.docker_build.outputs.digest }}
+    - run: deploys deployment set image acourse -project=acourse -location=cluster-lab -image=ghcr.io/${{ github.repository }}@${{ steps.docker_build.outputs.digest }}
       env:
         DEPLOYS_AUTH_USER: ${{ secrets.DEPLOYS_AUTH_USER }}
         DEPLOYS_AUTH_PASS: ${{ secrets.DEPLOYS_AUTH_PASS }}
