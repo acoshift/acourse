@@ -25,6 +25,7 @@ jobs:
       with:
         project: acourse
         location: cluster-lab
+        name: acourse
         image: ghcr.io/${{ github.repository }}@${{ steps.docker_build.outputs.digest }}
       env:
         DEPLOYS_AUTH_USER: ${{ secrets.DEPLOYS_AUTH_USER }}
