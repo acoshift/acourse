@@ -21,11 +21,12 @@ jobs:
       with:
         push: true
         tags: ghcr.io/${{ github.repository }}:latest
-    - uses: actions/setup-go@v2
+    - uses: deploys-app/deploys-action@v1
       with:
-        go-version: "1.16"
-    - run: go get github.com/deploys-app/deploys@master
-    - run: deploys deployment set image acourse -project=acourse -location=cluster-lab -image=ghcr.io/${{ github.repository }}@${{ steps.docker_build.outputs.digest }}
+        project: acourse
+        location: cluster-lab
+        name: acourse
+        image: ghcr.io/${{ github.repository }}@${{ steps.docker_build.outputs.digest }}
       env:
         DEPLOYS_AUTH_USER: ${{ secrets.DEPLOYS_AUTH_USER }}
         DEPLOYS_AUTH_PASS: ${{ secrets.DEPLOYS_AUTH_PASS }}
