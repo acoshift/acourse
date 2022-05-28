@@ -24,7 +24,7 @@ jobs:
     - uses: deploys-app/deploys-action@v1
       with:
         project: acourse
-        location: cluster-lab
+        location: gke.cluster-rcf2
         name: acourse
         image: ghcr.io/${{ github.repository }}@${{ steps.docker_build.outputs.digest }}
       env:

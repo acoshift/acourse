@@ -10,7 +10,11 @@ import (
 	_ "github.com/lib/pq"
 
 	"github.com/acoshift/acourse/internal/app"
+	"github.com/acoshift/acourse/internal/pkg/auth"
 	"github.com/acoshift/acourse/internal/pkg/config"
+	"github.com/acoshift/acourse/internal/pkg/email"
+	"github.com/acoshift/acourse/internal/pkg/file"
+	"github.com/acoshift/acourse/internal/pkg/notify"
 )
 
 //go:embed template/* template/**/*
@@ -29,7 +33,13 @@ var static []byte
 var assetsFS embed.FS
 
 func main() {
+	config.Init()
 	defer config.Close()
+
+	auth.Init()
+	email.Init()
+	file.Init()
+	notify.Init()
 
 	assets, _ := fs.Sub(assetsFS, "assets")
 

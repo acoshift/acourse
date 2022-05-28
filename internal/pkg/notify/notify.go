@@ -15,8 +15,12 @@ var (
 	client = &http.Client{
 		Timeout: 10 * time.Second,
 	}
-	webhookURL = config.String("slack_url")
+	webhookURL string
 )
+
+func Init() {
+	webhookURL = config.String("slack_url")
+}
 
 // Admin sends notify to admin
 func Admin(message string) error {

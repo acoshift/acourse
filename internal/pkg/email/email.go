@@ -8,7 +8,7 @@ import (
 	"github.com/acoshift/acourse/internal/pkg/config"
 )
 
-func init() {
+func Init() {
 	dialer = gomail.NewDialer(
 		config.String("email_server"),
 		config.Int("email_port"),

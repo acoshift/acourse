@@ -19,9 +19,6 @@ var firAuth interface {
 
 var isInTest = false
 
-func init() {
-	if isInTest {
-		return
-	}
+func Init() {
 	firAuth = config.FirebaseApp().Auth()
 }
