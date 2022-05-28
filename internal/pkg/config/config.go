@@ -36,7 +36,7 @@ var (
 	dbClient      *sql.DB
 )
 
-func init() {
+func Init() {
 	time.Local = time.UTC
 
 	var err error

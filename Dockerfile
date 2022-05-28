@@ -1,4 +1,4 @@
-FROM node:14.15.5
+FROM node:16
 
 ENV NODE_ENV=production
 
@@ -9,7 +9,7 @@ RUN yarn install
 ADD . .
 RUN yarn run gulp
 
-FROM golang:1.16.3
+FROM golang:1.18
 
 ENV GOOS=linux
 ENV GOARCH=amd64
