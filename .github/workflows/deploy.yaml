@@ -27,6 +27,8 @@ jobs:
         location: gke.cluster-rcf2
         name: acourse
         image: ghcr.io/${{ github.repository }}@${{ steps.docker_build.outputs.digest }}
+        minReplicas: 2
+        maxReplicas: 2
       env:
         DEPLOYS_AUTH_USER: ${{ secrets.DEPLOYS_AUTH_USER }}
         DEPLOYS_AUTH_PASS: ${{ secrets.DEPLOYS_AUTH_PASS }}
