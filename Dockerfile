@@ -9,7 +9,7 @@ RUN yarn install
 ADD . .
 RUN yarn run gulp
 
-FROM golang:1.18
+FROM golang:1.18.3
 
 ENV GOOS=linux
 ENV GOARCH=amd64
