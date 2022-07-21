@@ -15,13 +15,13 @@ require (
 	github.com/acoshift/pgsql v0.8.5
 	github.com/acoshift/prefixhandler v1.0.0
 	github.com/acoshift/probehandler v0.0.0-20180407104626-3b189a71087b
-	github.com/asaskevich/govalidator v0.0.0-20200907205600-7a23bdc65eef
+	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d
 	github.com/disintegration/imaging v1.6.2
 	github.com/dustin/go-humanize v1.0.0
 	github.com/go-redis/redis/v8 v8.4.0
-	github.com/lib/pq v1.9.0
-	github.com/microcosm-cc/bluemonday v1.0.16
-	github.com/moonrhythm/hime v1.1.2-0.20210418103309-2281714970b9
+	github.com/lib/pq v1.10.6
+	github.com/microcosm-cc/bluemonday v1.0.19
+	github.com/moonrhythm/hime v1.1.3-0.20220721223656-cfa37c6497e6
 	github.com/moonrhythm/httpmux v1.0.1
 	github.com/moonrhythm/session v0.16.0
 	github.com/moonrhythm/validator v1.2.0
@@ -42,7 +42,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.1.1 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
-	github.com/fsnotify/fsnotify v1.4.9 // indirect
+	github.com/fsnotify/fsnotify v1.5.4 // indirect
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/golang/protobuf v1.4.3 // indirect
 	github.com/gomodule/redigo v2.0.0+incompatible // indirect
@@ -56,17 +56,17 @@ require (
 	github.com/kavu/go_reuseport v1.5.0 // indirect
 	github.com/nxadm/tail v1.4.4 // indirect
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
-	github.com/tdewolff/minify/v2 v2.9.16 // indirect
-	github.com/tdewolff/parse/v2 v2.5.15 // indirect
+	github.com/tdewolff/minify/v2 v2.12.0 // indirect
+	github.com/tdewolff/parse/v2 v2.6.1 // indirect
 	go.opentelemetry.io/otel v0.14.0 // indirect
 	golang.org/x/image v0.0.0-20200927104501-e162460cd6b5 // indirect
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
 	golang.org/x/mod v0.3.0 // indirect
-	golang.org/x/net v0.0.0-20210614182718-04defd469f4e // indirect
+	golang.org/x/net v0.0.0-20220708220712-1185a9018129 // indirect
 	golang.org/x/oauth2 v0.0.0-20201109201403-9fd604954f58 // indirect
-	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
-	golang.org/x/sys v0.0.0-20210423082822-04245dca01da // indirect
-	golang.org/x/text v0.3.6 // indirect
+	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f // indirect
+	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a // indirect
+	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/tools v0.0.0-20201124005743-911501bfb504 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
@@ -76,5 +76,5 @@ require (
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
 	gopkg.in/yaml.v2 v2.3.0 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
