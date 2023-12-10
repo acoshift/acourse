@@ -7,28 +7,27 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
-    - name: Login to GitHub Container Registry
-      uses: docker/login-action@v1
+    - uses: actions/checkout@v3
+    - uses: docker/login-action@v1
       with:
-        registry: ghcr.io
-        username: ${{ github.repository_owner }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-    - name: Build and push
-      id: docker_build
-      uses: docker/build-push-action@v2
+        registry: registry.deploys.app
+        username: ${{ secrets.DEPLOYS_AUTH_USER }}
+        password: ${{ secrets.DEPLOYS_AUTH_PASS }}
+    - uses: docker/setup-buildx-action@v2
+    - id: docker_build
+      uses: docker/build-push-action@v4
       with:
         push: true
-        tags: ghcr.io/${{ github.repository }}:latest
+        provenance: false
+        tags: registry.deploys.app/acourse/acourse
     - uses: deploys-app/deploys-action@v1
       with:
         project: acourse
         location: gke.cluster-rcf2
         name: acourse
-        image: ghcr.io/${{ github.repository }}@${{ steps.docker_build.outputs.digest }}
-        minReplicas: 2
-        maxReplicas: 2
+        image: registry.deploys.app/acourse/acourse@${{ steps.docker_build.outputs.digest }}
+        minReplicas: 1
+        maxReplicas: 1
       env:
         DEPLOYS_AUTH_USER: ${{ secrets.DEPLOYS_AUTH_USER }}
         DEPLOYS_AUTH_PASS: ${{ secrets.DEPLOYS_AUTH_PASS }}
