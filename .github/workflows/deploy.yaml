@@ -20,7 +20,7 @@ jobs:
         push: true
         provenance: false
         tags: registry.deploys.app/acourse/acourse
-    - uses: deploys-app/deploys-action@v1.0.4
+    - uses: deploys-app/deploys-action@v1.0.5
       with:
         project: acourse
         location: gke.cluster-rcf2
