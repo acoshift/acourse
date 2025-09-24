@@ -36,7 +36,7 @@ require (
 )
 
 require (
-	github.com/aws/aws-sdk-go v1.23.20 // indirect
+	github.com/aws/aws-sdk-go v1.34.0 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/census-instrumentation/opencensus-proto v0.2.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.1 // indirect
@@ -50,7 +50,7 @@ require (
 	github.com/google/go-cmp v0.5.3 // indirect
 	github.com/googleapis/gax-go/v2 v2.0.5 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
-	github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af // indirect
+	github.com/jmespath/go-jmespath v0.3.0 // indirect
 	github.com/joho/godotenv v1.3.0 // indirect
 	github.com/jstemmer/go-junit-report v0.9.1 // indirect
 	github.com/kavu/go_reuseport v1.5.0 // indirect
